@@ -23,11 +23,8 @@ script:
 after_success:
   # Upload archives only on master and develop branches
   - |
-    if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master" || "${TRAVIS_BRANCH}" == "develop") ]]
-    then
-      TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false uploadArchives
-      curl -L $JENKINS_URL
-    fi
+    TERM=dumb ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false uploadArchives
+    curl -L $JENKINS_URL
 #  - TERM=dumb ./gradlew sonarqube --info --stacktrace
 env:
   global:
