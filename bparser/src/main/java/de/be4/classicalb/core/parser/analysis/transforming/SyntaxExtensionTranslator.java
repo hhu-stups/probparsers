@@ -11,6 +11,7 @@ import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
+import de.hhu.stups.sablecc.patch.*; // for SourcePosition
 
 public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 
@@ -39,6 +40,13 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
 		node.replaceBy(stringNode);
+	}
+
+	@Override
+	public void caseAStringExpression(AStringExpression node) {
+	// fix the fact that String content does not contain the two quotes "..." as content
+	    SourcePosition newPos = new SourcePosition(node.getEndPos().getLine(),node.getEndPos().getPos()+2);
+		node.setEndPos(newPos);
 	}
 
 }
