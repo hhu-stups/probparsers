@@ -120,7 +120,7 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY FOR i IN {1} DO DEFINE x TYPE POW(INTEGER) VALUE {i} END END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("'A DEFINE substitution must be contained in a loop substitution.'"));
+		assertTrue(result.contains("'A DEFINE substitution must not be contained in a loop substitution.'"));
 	}
 
 	@Test

@@ -535,7 +535,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		// the DEFINE block should not appear within a loop substitution
 		if (!this.loopNodes.isEmpty()) {
 			this.errorList
-					.add(new CheckException("A DEFINE substitution must be contained in a loop substitution.", node));
+					.add(new CheckException("A DEFINE substitution must not be contained in a loop substitution.", node));
 		}
 	}
 
@@ -908,7 +908,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	public void outAWhileSubstitution(AWhileSubstitution node) {
-		loopNodes.add(node);
+		loopNodes.remove(node);
 	}
 
 	// nodes which introduces local identifiers
