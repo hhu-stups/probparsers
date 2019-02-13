@@ -162,10 +162,12 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testMainFileDoesNotExist() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/FileDoesNotExist.rmch");
-		String expected = "(No such file or directory)";
-		assertTrue(result.contains(expected));
+	public void testMainFileDoesNotExist() {
+		final String fileName = "src/test/resources/rules/project/FileDoesNotExist.rmch";
+		String result = getRulesMachineAsPrologTerm(fileName);
+
+		assertTrue(result.contains("exception"));
+		assertTrue(result.contains(fileName));
 	}
 
 	@Test
