@@ -45,8 +45,6 @@ tests:windows64:
   tags:
     - prob
     - win64
-  allow_failure: true
-  when: manual
 
 publish:
   stage: deploy
