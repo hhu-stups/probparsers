@@ -355,7 +355,7 @@ Tokens
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
   {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto
   {normal} integer_literal = digit+;
-  {normal} hex_literal = '0x' hexdigit+;
+  {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral 
 
   {normal} underscore = underscore;
 
@@ -902,6 +902,7 @@ expression_atomic {-> expression} =
   {successor} succ {-> New expression.successor()} |
   {predecessor} pred {-> New expression.predecessor()} |
   {integer} [literal]:integer_literal {-> New expression.integer(literal)} |
+  {hex_integer} [literal]:hex_literal {-> New expression.hex_integer(literal)} |
   {max_int} max_int {-> New expression.max_int()} |
   {min_int} min_int {-> New expression.min_int()} |
   {empty_set_symbol} empty_set {-> New expression.empty_set()} |
@@ -1267,6 +1268,7 @@ expression =
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
+  {hex_integer} [literal]:hex_literal |
   {max_int} |
   {min_int} |
   {empty_set} |

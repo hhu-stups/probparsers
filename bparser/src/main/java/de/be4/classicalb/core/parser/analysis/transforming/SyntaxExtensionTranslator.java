@@ -9,6 +9,10 @@ import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.THexLiteral;
+import de.be4.classicalb.core.parser.node.AIntegerExpression;
+import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import de.hhu.stups.sablecc.patch.*; // for SourcePosition
@@ -73,6 +77,21 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
 		node.replaceBy(stringNode);
+	}
+	
+	@Override
+	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
+	// transform hex_integer into integer case (so that Prolog AST does not have to deal with new node):
+		THexLiteral literal = node.getLiteral();
+		String text = literal.getText().substring(2);
+		int value = Integer.valueOf(text, 16);
+		// generate an integer literal:
+		TIntegerLiteral tIntLiteral =
+		    new TIntegerLiteral(Integer.toString(value), literal.getLine(), literal.getPos());
+		AIntegerExpression intNode = new AIntegerExpression(tIntLiteral);
+		intNode.setStartPos(node.getStartPos());
+		intNode.setEndPos(node.getEndPos());
+		node.replaceBy(intNode);
 	}
 	
 	

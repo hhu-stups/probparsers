@@ -133,13 +133,6 @@ public class BLexer extends Lexer {
 			throw new LexerException("#! only allowed in first line of the file");
 		}
 
-		if (token instanceof THexLiteral) {
-			final String literal = token.getText().substring(2);
-			int value = Integer.valueOf(literal, 16);
-			token = new TIntegerLiteral(Integer.toString(value),token.getLine(),token.getPos());
-			// TO DO: the length is different from the original token
-			// hence the endPos calculation will be wrong; it will not include the 0x start symbols for example
-		}
 		if (token != null) {
 			if (definitions != null) {
 				replaceDefTokens();
