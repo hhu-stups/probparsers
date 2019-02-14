@@ -173,7 +173,7 @@ public class RulesMachineFilesTest {
 		String result = getRulesMachineAsPrologTerm(fileName);
 
 		assertTrue(result.contains("exception"));
-		assertTrue(result.contains(fileName));
+		assertTrue(result.contains("FileDoesNotExist.rmch"));
 	}
 
 	@Test
