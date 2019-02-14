@@ -57,6 +57,7 @@ public class RulesMachineFilesTest {
 	public void testFunctionCalledAsExpression() throws Exception {
 		String result = getRulesMachineAsPrologTerm(dir + "FunctionCalledAsExpression.rmch");
 		System.out.println(result);
+		assertFalse(result.contains("exception"));
 	}
 	
 	@Test
