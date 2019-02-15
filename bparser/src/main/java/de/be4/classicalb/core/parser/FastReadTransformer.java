@@ -13,8 +13,8 @@ import de.prob.prolog.term.VariablePrologTerm;
 
 public class FastReadTransformer {
 
-	private static final String EMPTY_MSG = "Connot FastRead empty sentences.";
-	private static final String MULTI_MSG = "Connot FastRead multiple sentences.";
+	private static final String EMPTY_MSG = "Cannot FastRead empty sentences.";
+	private static final String MULTI_MSG = "Cannot FastRead multiple sentences.";
 	public final static char ZERO = (char) 0;
 	private final StringBuilder sb = new StringBuilder("D");
 	private final Map<String, String> varnums = new HashMap<String, String>();
