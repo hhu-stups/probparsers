@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class Definitions extends IDefinitions {
 
@@ -172,6 +174,22 @@ public class Definitions extends IDefinitions {
 		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
 			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
 		}
+	}
+
+	public  void addDefinitions(IDefinitions defs) throws PreParseException
+	{
+		for (String def: defs.getDefinitionNames()) {
+			if (containsDefinition(def)) {
+				if(getFile(def)!=defs.getFile(def)) {
+					SourcePosition posfile1= getDefinition(def).getStartPos();
+					SourcePosition posfile2= defs.getDefinition(def).getStartPos();
+					throw new PreParseException("Duplicate definition: " + def + ".\n"+
+					"(First appearance at " + "Line: " + posfile1.getLine() + ", Column: " + posfile1.getPos() + " in file: " + getFile(def) +
+					" And redefinition at " + "Line: " + posfile2.getLine() + ", Column: " + posfile2.getPos() + " in file: " + defs.getFile(def) +")");
+				}
+			}
+		}
+		referencedDefinitions.add(defs);
 	}
 
 	@Override
