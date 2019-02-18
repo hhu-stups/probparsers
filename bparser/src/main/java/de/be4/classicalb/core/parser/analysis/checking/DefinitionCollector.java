@@ -90,9 +90,10 @@ public class DefinitionCollector extends DepthFirstAdapter {
 			File file = definitions.getFile(name);
 			StringBuilder sb = new StringBuilder();
 			sb.append("Duplicate definition: " + name + ".\n");
-			sb.append("(First appearance: ").append(this.getPosition(existingDefinition.getStartPos()));
+		    SourcePosition firstPos = existingDefinition.getStartPos();
+			sb.append("(First appearance at ").append(this.getPosition(firstPos));
 			if (file != null) {
-				sb.append(" in ").append(file.getAbsolutePath());
+				sb.append(" in file: ").append(file.getAbsolutePath());
 			}
 			sb.append(")\n");
 			CheckException e = new CheckException(sb.toString(), def);
@@ -105,7 +106,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 	}
 
 	private String getPosition(SourcePosition pos) {
-		return "[" + pos.getLine() + "," + pos.getPos() + "]";
+		return "Line: " + pos.getLine() + ", Column: " + pos.getPos();
 	}
 
 	public IDefinitions getDefinitions() {
