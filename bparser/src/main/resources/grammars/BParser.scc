@@ -641,9 +641,8 @@ freetypecons {-> freetype_constructor} =
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
-  {implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-  {next_level} [pred]:predicate_x30 {-> pred.predicate} ;
-predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
+  {implication} [left]:predicate_p30 implies [right]:predicate_p40 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
+  {next_level} [pred]:predicate_p40 {-> pred.predicate} ;
 
 predicate_p40 {-> predicate} =
   {disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
