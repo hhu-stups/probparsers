@@ -2,6 +2,7 @@ image: openjdk:8-jdk-slim
 stages:
   - test
   - deploy
+  - trigger
 
 variables:
   GRADLE_ARGS: --no-daemon --stacktrace
@@ -58,4 +59,15 @@ publish:
     - ./gradlew ${GRADLE_ARGS} uploadArchives
   only: 
     - master 
+    - develop
+
+prob_snapshot_parser_tests:
+  stage: trigger
+  image: $CI_REGISTRY/stups/prob/prob-docker/internal/deployment:0.3
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - curl -X POST -F token=b46eb07a06a0a1518b40aa1fb91f14 -F "ref=develop" -F "variables[BUILD_TYPE]=snapshot-parser-build" https://gitlab.cs.uni-duesseldorf.de/api/v4/projects/897/trigger/pipeline
+  only:
     - develop
