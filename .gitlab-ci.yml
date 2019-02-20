@@ -68,6 +68,6 @@ prob_snapshot_parser_tests:
   variables:
     GIT_STRATEGY: none
   script:
-    - curl -X POST -F token=b46eb07a06a0a1518b40aa1fb91f14 -F "ref=develop" -F "variables[BUILD_TYPE]=snapshot-parser-build" https://gitlab.cs.uni-duesseldorf.de/api/v4/projects/897/trigger/pipeline
+    - curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=develop" -F "variables[BUILD_TYPE]=snapshot-parser-build" https://gitlab.cs.uni-duesseldorf.de/api/v4/projects/897/trigger/pipeline
   only:
     - develop
