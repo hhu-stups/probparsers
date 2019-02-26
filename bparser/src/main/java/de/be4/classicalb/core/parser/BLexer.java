@@ -47,11 +47,10 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
-		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TAssertions.class);
-		clauseTokenClasses.add(TVariables.class);
-		clauseTokenClasses.add(TInvariant.class);
+		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TInitialisation.class);
+		clauseTokenClasses.add(TInvariant.class);
 		clauseTokenClasses.add(TOperations.class);
 		clauseTokenClasses.add(TVariables.class);
 		// ...
