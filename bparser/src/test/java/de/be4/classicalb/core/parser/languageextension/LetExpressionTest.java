@@ -35,7 +35,7 @@ public class LetExpressionTest {
 		final String result = getTreeAsString(testMachine);
 
 		assertEquals(
-				"Start(AExpressionParseUnit(ALetExpressionExpression(AIdentifierExpression([x])AIdentifierExpression([y])AConjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5)),AEqualPredicate(AIdentifierExpression([y]),AIntegerExpression(7)))AAddExpression(AIdentifierExpression([x]),AIdentifierExpression([y])))))",
+				"Start(AExpressionParseUnit(ALetExpressionExpression(AIdentifierExpression([x])AIdentifierExpression([y])AConjdisjunctPredicate(AElementconjdisjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5)),&),AEqualPredicate(AIdentifierExpression([y]),AIntegerExpression(7)))AAddExpression(AIdentifierExpression([x]),AIdentifierExpression([y])))))",
 				result);
 	}
 

@@ -10,8 +10,9 @@ import java.util.Map.Entry;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
 import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
-import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.AConjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.ACoupleExpression;
+import de.be4.classicalb.core.parser.node.AElementconjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
@@ -30,6 +31,7 @@ import de.be4.classicalb.core.parser.node.ATotalFunctionExpression;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
+import de.be4.classicalb.core.parser.node.TConjunctionAndDisjunctionToken;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
@@ -58,10 +60,12 @@ public final class ASTBuilder {
 		} else if (predList.size() == 1) {
 			return predList.get(0);
 		} else {
-			PPredicate p = predList.get(0);
-			for (int i = 1; i < predList.size(); i++) {
-				p = new AConjunctPredicate(p, predList.get(i));
+			AConjdisjunctPredicate p = new AConjdisjunctPredicate();
+			p.setRight(predList.remove(predList.size()-1));
+			for (int i=0;i<predList.size();i++) {
+				predList.set(i,new AElementconjdisjunctPredicate(predList.get(i),new TConjunctionAndDisjunctionToken("&")));
 			}
+			p.setLeft(predList);
 			return p;
 		}
 	}

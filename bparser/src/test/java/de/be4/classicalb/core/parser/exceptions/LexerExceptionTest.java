@@ -13,6 +13,6 @@ public class LexerExceptionTest {
 		final String result = Helpers.fullParsing("exceptions/LexerStringError.mch");
 		System.out.println(result);
 		assertTrue(result.contains("LexerStringError.mch"));
-		assertTrue(result.contains("[3,12]"));
+		assertTrue(result.contains("parse_exception(pos(3,12,"));
 	}
 }

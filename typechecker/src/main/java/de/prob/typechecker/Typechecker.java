@@ -985,31 +985,37 @@ public class Typechecker extends DepthFirstAdapter implements ITypechecker {
 	 * Logical Operator
 	 */
 
+	
 	@Override
-	public void caseAConjunctPredicate(AConjunctPredicate node) {
+	public void caseAConjdisjunctPredicate(AConjdisjunctPredicate node) {
 		try {
 			BoolType.getInstance().unify(getType(node), this);
 		} catch (UnificationException e) {
-			throw new TypeErrorException(
-					"Excepted '" + getType(node) + "' , found 'BOOL' in ' & '." + node.getStartPos());
+			throw new TypeErrorException("Excepted '" + getType(node) + "' , found 'BOOL' in ' & ' and ' or '");
 		}
-		setType(node.getLeft(), BoolType.getInstance());
+		List<PPredicate> copy = new ArrayList<PPredicate>(node.getLeft());
+        for(PPredicate e : copy)
+        {
+        	setType(e, BoolType.getInstance());
+        }
 		setType(node.getRight(), BoolType.getInstance());
-		node.getLeft().apply(this);
+        for(PPredicate e : copy)
+        {
+            e.apply(this);
+        }
 		node.getRight().apply(this);
 	}
-
+	
 	@Override
-	public void caseADisjunctPredicate(ADisjunctPredicate node) {
+    public void caseAElementconjdisjunctPredicate(AElementconjdisjunctPredicate node)
+    {
 		try {
 			BoolType.getInstance().unify(getType(node), this);
 		} catch (UnificationException e) {
-			throw new TypeErrorException("Excepted '" + getType(node) + "' , found 'BOOL' in ' or '");
+			throw new TypeErrorException("Excepted '" + getType(node) + "' , found 'BOOL' in " + node.getName());
 		}
-		setType(node.getLeft(), BoolType.getInstance());
-		setType(node.getRight(), BoolType.getInstance());
-		node.getLeft().apply(this);
-		node.getRight().apply(this);
+		setType(node.getPredicate(), BoolType.getInstance());
+		node.getPredicate().apply(this);
 	}
 
 	@Override

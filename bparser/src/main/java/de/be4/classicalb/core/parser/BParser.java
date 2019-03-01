@@ -357,7 +357,10 @@ public class BParser {
 		final Reader reader = new StringReader(input);
 		try {
 			// PreParsing
+			final long startPRE = System.currentTimeMillis();
 			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
+			final long ENDPRE = System.currentTimeMillis();
+			System.out.println("time preparse:"+(ENDPRE-startPRE));
 
 			/*
 			 * The definition types are used in the lexer in order to replace an
@@ -376,7 +379,10 @@ public class BParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
+			final long startPar = System.currentTimeMillis();
 			final Start rootNode = parser.parse();
+			final long ENDPar = System.currentTimeMillis();
+			System.out.println("time parse:"+(ENDPar-startPar));
 
 			final List<BException> bExceptionList = new ArrayList<>();
 			/*
@@ -474,7 +480,7 @@ public class BParser {
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck(), new RefinedOperationCheck() };
 		// apply more checks?
-
+		
 		for (SemanticCheck check : checks) {
 			check.setOptions(parseOptions);
 			check.runChecks(rootNode);
@@ -532,7 +538,6 @@ public class BParser {
 			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
 				out.println("% Time for parsing: " + (end - start) + "ms");
 			}
-
 			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
@@ -557,6 +562,12 @@ public class BParser {
 
 			if (parsingBehaviour.isPrintTime()) {
 				out.println("% Time for Prolog output: " + (end2 - start2) + "ms");
+			}
+
+			if (parsingBehaviour.isFastPrologOutput()){// -fastprolog flag in CliBParser
+				// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
+					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
+					out.println(fp);
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput() ||

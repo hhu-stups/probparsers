@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 import util.Ast2String;
 
@@ -37,9 +38,7 @@ public class SubstitutionTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BCompoundException e) {
-			// final CheckException cause = (CheckException) e.getCause();
-			// assertEquals(1, cause.getNodes().length);
-			// assertNotNull(cause.getNodes()[0]);
+			assertEquals(e.getMessage(), "[1,21] expecting: identifier literal");
 		}
 
 	}
@@ -51,16 +50,18 @@ public class SubstitutionTest {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BCompoundException e) {
+			assertEquals(e.getMessage(), "[1,20] expecting: ',', 'WHERE'");
 		}
 	}
 
 	@Test
-	public void testInvalidIdentifierListInAnySubstitution() throws BCompoundException {
+	public void testInvalidIdentifierInAnySubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION ANY (x|->y) WHERE x = 1 & y = 1 THEN skip END ";
 		try {
 			getTreeAsString(testMachine);
 			fail("Expected exception");
 		} catch (final BCompoundException e) {
+			assertTrue(e.getMessage().contains("[1,19] expecting: identifier literal"));
 		}
 	}
 
@@ -117,7 +118,10 @@ public class SubstitutionTest {
 	@Test
 	public void testOperation2() throws Exception {
 		final String testMachine = "#SUBSTITUTION function(x)(y)";
-		getTreeAsString(testMachine);
+		final String result = getTreeAsString(testMachine);
+		assertEquals(
+				"Start(ASubstitutionParseUnit(AOpSubstitution(AFunctionExpression(AIdentifierExpression([function]),[AIdentifierExpression([x])]),[AIdentifierExpression([y])])))",
+				result);
 	}
 
 	@Test
@@ -128,7 +132,6 @@ public class SubstitutionTest {
 		assertEquals(
 				"Start(ASubstitutionParseUnit(AAssignSubstitution([AFunctionExpression(AIdentifierExpression([f]),[AIdentifierExpression([x])])],[AIdentifierExpression([y])])))",
 				result);
-
 	}
 
 	@Test

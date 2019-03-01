@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +16,9 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
+import de.be4.classicalb.core.parser.node.AConjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AConstructorFreetypeConstructor;
-import de.be4.classicalb.core.parser.node.ADisjunctPredicate;
+import de.be4.classicalb.core.parser.node.AElementconjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AEqualPredicate;
 import de.be4.classicalb.core.parser.node.AEvent;
 import de.be4.classicalb.core.parser.node.AEventBModelParseUnit;
@@ -41,6 +43,7 @@ import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.PWitness;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TConjunctionAndDisjunctionToken;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -169,7 +172,7 @@ public class ASTPrologTest {
 	public void testExpressions() throws BCompoundException {
 		checkExpression("SIGMA x,y.(x:NAT & y:INT | x+y)",
 				"general_sum($,[identifier($,x),identifier($,y)],"
-						+ "conjunct($,member($,identifier($,x),nat_set($)),member($,identifier($,y),int_set($))),"
+						+ "conjdisjunct($,elementconjdisjunct($,member($,identifier($,x),nat_set($)),'&'),member($,identifier($,y),int_set($))),"
 						+ "add($,identifier($,x),identifier($,y)))");
 	}
 
@@ -189,7 +192,7 @@ public class ASTPrologTest {
 				+ "expression_definition($,dbl,[identifier($,a)],mult_or_cart($,mult_or_cart($,integer($,2),identifier($,x)),identifier($,a))),"
 				+ "substitution_definition($,ax,[identifier($,a)],assign($,[identifier($,x)],[identifier($,a)]))]),"
 				+ "variables($,[identifier($,x)]),"
-				+ "invariant($,conjunct($,definition($,'INV',[]),definition($,lt,[integer($,7)]))),"
+				+ "invariant($,conjdisjunct($,elementconjdisjunct($,definition($,'INV',[]),'&'),definition($,lt,[integer($,7)]))),"
 				+ "initialisation($,assign($,[identifier($,x)],[definition($,dbl,[integer($,3)])])),"
 				+ "operations($,[operation($,identifier(%,op1),[],[],definition($,ax,[integer($,6)]))])])";
 		checkProlog(1, m, expected);
@@ -210,11 +213,13 @@ public class ASTPrologTest {
 		checkPredicate("TRUE : BOOL", "member($,boolean_true($),bool_set($))");
 		checkPredicate("FALSE : BOOL", "member($,boolean_false($),bool_set($))");
 
-		final ADisjunctPredicate disjunction = new ADisjunctPredicate();
-		disjunction.setLeft(new ATruthPredicate());
+		final AConjdisjunctPredicate disjunction = new AConjdisjunctPredicate();
+		LinkedList<PPredicate> _predicates_ = new LinkedList<PPredicate>();
+		_predicates_.add(new AElementconjdisjunctPredicate(new ATruthPredicate(),new TConjunctionAndDisjunctionToken( "or")));
 		disjunction.setRight(new AFalsityPredicate());
+		disjunction.setLeft(_predicates_);
 
-		checkAST(0, "disjunct($,truth($),falsity($))", disjunction);
+		checkAST(0, "conjdisjunct($,elementconjdisjunct($,truth($),or),falsity($))", disjunction);
 	}
 
 	@Test

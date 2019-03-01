@@ -1,22 +1,26 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
 import de.be4.classicalb.core.parser.node.AImplicationPredicate;
 import de.be4.classicalb.core.parser.node.AMultilineStringExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
+import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.node.TConjunctionAndDisjunctionToken;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
+import de.be4.classicalb.core.parser.node.AConjdisjunctPredicate;
+import de.be4.classicalb.core.parser.node.AElementconjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import de.hhu.stups.sablecc.patch.*; // for SourcePosition
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class SyntaxExtensionTranslator extends DepthFirstAdapter {
@@ -44,7 +48,9 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		AImplicationPredicate imp2 = new AImplicationPredicate(
 				new ANegationPredicate(cloneNode(node.getCondition())),
 				cloneNode(node.getElse()));
-		AConjunctPredicate con = new AConjunctPredicate(imp1, imp2);
+		LinkedList<PPredicate> predicates = new LinkedList<PPredicate>();
+		predicates.add(new AElementconjdisjunctPredicate(imp1,new TConjunctionAndDisjunctionToken( "&")));
+		AConjdisjunctPredicate con = new AConjdisjunctPredicate(predicates,imp2);
 		con.setStartPos(node.getStartPos());
 		con.setEndPos(node.getEndPos());
 		node.replaceBy(con);

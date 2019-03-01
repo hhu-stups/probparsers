@@ -32,6 +32,9 @@ Helpers
   line_break = [lf + cr];
   all_chars = [0 .. 0xffff];
   
+  conjunction = '&' | 0x2227;
+  logical_or = 'or' | 0x2228;
+  
  //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
   all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break ] - '\'];
   all_chars_without_newline = [all_chars - line_break ];
@@ -117,11 +120,11 @@ Tokens
   {multiline_string_state} multiline_string_content =  multiline_string_literal;
 
   {normal} string_literal = string_literal;
+  {normal} conjunction_and_disjunction_token= logical_or | conjunction;
   {normal} for_any = '!' | 0x2200;
   {normal} exists = '#' | 0x2203;
   {normal} dollar = '$';
   {normal} lambda = '%' | 0x03bb;
-  {normal} conjunction = '&' | 0x2227;
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '(';  // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
@@ -280,7 +283,6 @@ Tokens
   {normal} mirror = 'mirror';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
-  {normal} logical_or = 'or' | 0x2228;
   {normal} perm = 'perm';
   {normal} postfix = 'postfix';
   {normal} pred = 'pred';
@@ -316,6 +318,7 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9;
+
 
   // Extensions
   {normal} total_relation = lt lt minus gt | 0xe100;
@@ -652,14 +655,17 @@ freetypecons {-> freetype_constructor} =
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
-  {implication} [left]:predicate_p30 implies [right]:predicate_p40 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-  {next_level} [pred]:predicate_p40 {-> pred.predicate} ;
+  {implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
+  {next_level} [pred]:predicate_x30 {-> pred.predicate} ;
+predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
-  {disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
-  {conjunct} [left]:predicate_p40 conjunction [right]:predicate_x40 {-> New predicate.conjunct(left.predicate, right.predicate)} |
+  {conjdisjunct} [left]: predicate_p40_element* [right]: predicate_x40  {-> New predicate.conjdisjunct([left.predicate],right.predicate)} |
   {next_level} [pred]:predicate_x40 {-> pred.predicate};
 
+predicate_p40_element {-> predicate}=
+	{elementconjdisjunct} [predicate]: predicate_x40 [name]: conjunction_and_disjunction_token {->New predicate.elementconjdisjunct(predicate.predicate, name)};
+	
 predicate_x40 {-> predicate} =
     {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
     {next_level} [pred]:predicate_x41 {-> pred.predicate};
@@ -1225,9 +1231,9 @@ predicate =
   {description} [content]:pragma_free_text [predicate]:predicate |
   {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
-  {conjunct} [left]:predicate [right]:predicate |
+  {conjdisjunct} [left]:predicate* [right]: predicate |
   {negation} [predicate]:predicate |
-  {disjunct} [left]:predicate [right]:predicate |
+  {elementconjdisjunct} [predicate]:predicate [name]: conjunction_and_disjunction_token |
   {implication} [left]:predicate [right]:predicate |
   {equivalence} [left]:predicate [right]:predicate |
   {forall} [identifiers]:expression* [implication]:predicate |

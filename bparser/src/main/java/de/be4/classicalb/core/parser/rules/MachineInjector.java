@@ -11,9 +11,10 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
-import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.AConjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.AElementconjdisjunctPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
 import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
@@ -27,9 +28,11 @@ import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
+import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSet;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TConjunctionAndDisjunctionToken;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 
 public class MachineInjector extends DepthFirstAdapter {
@@ -191,7 +194,15 @@ public class MachineInjector extends DepthFirstAdapter {
 				propertiesClause = node;
 				clausesList.add(node);
 			} else {
-				AConjunctPredicate con = new AConjunctPredicate(propertiesClause.getPredicates(), node.getPredicates());
+				LinkedList<PPredicate> list= new LinkedList<PPredicate>();
+				list.add(propertiesClause.getPredicates());
+				list.add(node.getPredicates());
+				AConjdisjunctPredicate con = new AConjdisjunctPredicate();
+				con.setRight(list.remove(list.size()-1));
+				for (int i=0;i<list.size();i++) {
+					list.set(i,new AElementconjdisjunctPredicate(list.get(i),new TConjunctionAndDisjunctionToken("&")));
+				}
+				con.setLeft(list);
 				propertiesClause.setPredicates(con);
 			}
 		}
@@ -222,7 +233,15 @@ public class MachineInjector extends DepthFirstAdapter {
 				invariantClause = node;
 				clausesList.add(node);
 			} else {
-				AConjunctPredicate con = new AConjunctPredicate(invariantClause.getPredicates(), node.getPredicates());
+				LinkedList<PPredicate> list= new LinkedList<PPredicate>();
+				list.add(invariantClause.getPredicates());
+				list.add(node.getPredicates());
+				AConjdisjunctPredicate con = new AConjdisjunctPredicate();
+				con.setRight(list.remove(list.size()-1));
+				for (int i=0;i<list.size();i++) {
+					list.set(i,new AElementconjdisjunctPredicate(list.get(i),new TConjunctionAndDisjunctionToken("&")));
+				}
+				con.setLeft(list);
 				invariantClause.setPredicates(con);
 			}
 

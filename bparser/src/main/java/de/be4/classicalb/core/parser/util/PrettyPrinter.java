@@ -65,8 +65,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AReverseExpression.class, PRIORITY230);
 		prio.put(AImageExpression.class, PRIORITY231);
 		prio.put(AImplicationPredicate.class, PRIORITY30);
-		prio.put(ADisjunctPredicate.class, PRIORITY40);
-		prio.put(AConjunctPredicate.class, PRIORITY40);
+		prio.put(AConjdisjunctPredicate.class, PRIORITY40);
+		prio.put(AElementconjdisjunctPredicate.class, PRIORITY40);
 		prio.put(AEquivalencePredicate.class, PRIORITY60);
 	}
 
@@ -946,8 +946,31 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAConjunctPredicate(final AConjunctPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), " & ");
+	public void caseAConjdisjunctPredicate(final AConjdisjunctPredicate node) {
+		List<PPredicate> copy = new ArrayList<PPredicate>(node.getLeft());
+		for(PPredicate e : copy)
+		{
+			e.apply(this);
+		}
+
+		if(node.getRight() != null)
+		{
+			leftPar(node, node.getRight());
+			node.getRight().apply(this);
+			rightPar(node, node.getRight());
+		}
+	}
+
+	@Override
+	public void caseAElementconjdisjunctPredicate(final AElementconjdisjunctPredicate node) {
+		Node element= node.getPredicate();
+		if (element != null) {
+			leftPar(node, element);
+			element.apply(this);
+			rightPar(node, element);
+		}
+
+		sb.append(" "+ node.getName());
 	}
 
 	@Override
@@ -1405,10 +1428,6 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		applyLeftAssociative(node.getLeft(), node, node.getRight(), " => ");
 	}
 
-	@Override
-	public void caseADisjunctPredicate(final ADisjunctPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), " or ");
-	}
 
 	@Override
 	public void caseAEquivalencePredicate(final AEquivalencePredicate node) {

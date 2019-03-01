@@ -82,6 +82,7 @@ public class Helpers {
 		parsingBehaviour.setUseIndention(false);
 		parsingBehaviour.setAddLineNumbers(false);
 		parsingBehaviour.setVerbose(true);
+		parsingBehaviour.setPrintTime(true);
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}

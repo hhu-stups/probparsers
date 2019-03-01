@@ -893,7 +893,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final PPredicate where = cloneNode(wherePredicate);
 			if (expectPredicate != null) {
 				final PPredicate expect = cloneNode(expectPredicate);
-				condition = new AConjunctPredicate(where, new ANegationPredicate(expect));
+				LinkedList<PPredicate> Predicatelist= new LinkedList<PPredicate>();
+				Predicatelist.add(new AElementconjdisjunctPredicate(expect,new TConjunctionAndDisjunctionToken( "&")));
+				condition = new AConjdisjunctPredicate(Predicatelist,where);
 			} else {
 				condition = where;
 			}
@@ -941,7 +943,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 			}
 			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
 			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), message);
-			exists.setPredicate(new AConjunctPredicate(member, equal));
+			LinkedList<PPredicate> Predicatelist= new LinkedList<PPredicate>();
+			Predicatelist.add(new AElementconjdisjunctPredicate(member,new TConjunctionAndDisjunctionToken( "&")));
+			exists.setPredicate(new AConjdisjunctPredicate(Predicatelist,equal));
 			stringSet.setPredicates(exists);
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_STRINGS)));

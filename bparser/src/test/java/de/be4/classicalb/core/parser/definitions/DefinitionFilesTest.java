@@ -197,6 +197,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 				.startsWith("parse_exception(pos(2,23,"));
 		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
 	}
+	
+
 
 	@Test
 	public void testErrorInIncludedDefinitionFile() throws IOException,

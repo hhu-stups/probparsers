@@ -828,18 +828,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAOperation(node);
 	}
 
-	@Override
-	public void caseAConjunctPredicate(final AConjunctPredicate node) {
-		inAConjunctPredicate(node);
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-		betweenChildren(node);
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
-		outAConjunctPredicate(node);
-	}
+
 
 	@Override
 	public void caseANegationPredicate(final ANegationPredicate node) {
@@ -850,18 +839,7 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outANegationPredicate(node);
 	}
 
-	@Override
-	public void caseADisjunctPredicate(final ADisjunctPredicate node) {
-		inADisjunctPredicate(node);
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-		betweenChildren(node);
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
-		outADisjunctPredicate(node);
-	}
+
 
 	@Override
 	public void caseAImplicationPredicate(final AImplicationPredicate node) {
@@ -1332,6 +1310,41 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 		outAMultiplicationExpression(node);
 	}
 
+	@Override
+    public void caseAConjdisjunctPredicate(AConjdisjunctPredicate node)
+    {
+        inAConjdisjunctPredicate(node);
+        {
+            List<PPredicate> copy = new ArrayList<PPredicate>(node.getLeft());
+            for(PPredicate e : copy)
+            {
+                e.apply(this);
+                betweenChildren(node);
+            }
+        }
+        if(node.getRight() != null)
+        {
+            node.getRight().apply(this);
+        }
+        outAConjdisjunctPredicate(node);
+    }
+	
+	@Override
+    public void caseAElementconjdisjunctPredicate(AElementconjdisjunctPredicate node)
+    {
+        inAElementconjdisjunctPredicate(node);
+        if(node.getPredicate() != null)
+        {
+            node.getPredicate().apply(this);
+        }
+        betweenChildren(node);
+        if(node.getName() != null)
+        {
+            node.getName().apply(this);
+        }
+        outAElementconjdisjunctPredicate(node);
+    }
+	
 	@Override
 	public void caseACartesianProductExpression(final ACartesianProductExpression node) {
 		inACartesianProductExpression(node);

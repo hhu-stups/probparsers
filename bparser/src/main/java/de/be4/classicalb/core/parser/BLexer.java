@@ -64,8 +64,7 @@ public class BLexer extends Lexer {
 		}
 		
 	   // add some rules for the binary infix logical operators:
-		binOpTokenClasses.add(TConjunction.class);
-		binOpTokenClasses.add(TLogicalOr.class);
+		binOpTokenClasses.add(TConjunctionAndDisjunctionToken.class);
 		binOpTokenClasses.add(TImplies.class);
 		binOpTokenClasses.add(TEquivalence.class);
 
@@ -122,8 +121,6 @@ public class BLexer extends Lexer {
 		}
 		
 		// override rules above with a more specific error message
-		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
-		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one 'or' too many).");
 		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
 		
 		// Other rules:
