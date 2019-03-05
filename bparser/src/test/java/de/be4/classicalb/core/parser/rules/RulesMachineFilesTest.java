@@ -172,6 +172,8 @@ public class RulesMachineFilesTest {
 	public void testMainFileDoesNotExist() {
 		final String fileName = "src/test/resources/rules/project/FileDoesNotExist.rmch";
 		String result = getRulesMachineAsPrologTerm(fileName);
+
+		assertTrue(result.contains("FileDoesNotExist.rmch"));
 		assertTrue(result.contains("exception"));
 	}
 
