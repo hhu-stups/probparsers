@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -40,10 +41,8 @@ public abstract class IDefinitions {
 	public abstract void addDefinition(PDefinition defNode, Type type, String key);
 
 	public abstract void addDefinition(PDefinition defNode);
-	
-	public void addDefinitions(IDefinitions defs) {
-		referencedDefinitions.add(defs);
-	}
+
+	public abstract void addDefinitions(IDefinitions defs) throws PreParseException;
 
 	public abstract void replaceDefinition(final String key, final Type type, final PDefinition node);
 

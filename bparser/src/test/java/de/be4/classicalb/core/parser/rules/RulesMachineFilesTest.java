@@ -54,6 +54,13 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testFunctionCalledAsExpression() throws Exception {
+		String result = getRulesMachineAsPrologTerm(dir + "FunctionCalledAsExpression.rmch");
+		System.out.println(result);
+		assertFalse(result.contains("exception"));
+	}
+	
+	@Test
 	public void testFunctionUsesDefinitionOfCallingComputation() throws Exception {
 		String result = getRulesMachineAsPrologTerm(dir + "FunctionUsesDefinitionOfCallingComputation.rmch");
 		System.out.println(result);
@@ -205,7 +212,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testRuleDependsOnItSelf() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/RuleDependsOnItSelf.rmch");
-		String expected = "Cyclic dependencies between operations: rule1 -> rule1').\n";
+		String expected = "Cyclic dependencies between operations: rule1 -> rule1').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
@@ -315,7 +322,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testComputationDependsOnItSelf() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ComputationDependsOnItSelf.rmch");
-		String expected = "Cyclic dependencies between operations: compute_x -> compute_x').\n";
+		String expected = "Cyclic dependencies between operations: compute_x -> compute_x').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}
@@ -329,7 +336,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testConfuseRuleAndComputation() {
 		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ConfuseRuleAndComputation.rmch");
-		String expected = "Identifier \\'rule1\\' is not a COMPUTATION.').\n";
+		String expected = "Identifier \\'rule1\\' is not a COMPUTATION.').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
 	}

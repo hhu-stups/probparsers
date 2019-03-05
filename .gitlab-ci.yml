@@ -2,6 +2,7 @@ image: openjdk:8-jdk-slim
 stages:
   - test
   - deploy
+  - trigger
 
 variables:
   GRADLE_ARGS: --no-daemon --stacktrace
@@ -16,8 +17,7 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update &&  apt-get install -y patch
 
-
-tests:jdk-8:
+.tests:
   stage: test
   script: ./gradlew ${GRADLE_ARGS} clean deploy
   artifacts:
@@ -25,9 +25,27 @@ tests:jdk-8:
       - build/reports/tests/
     when: on_failure
 
+tests:jdk-8:
+  extends: .tests
+
 tests:jdk-11:
-  extends: tests:jdk-8
+  extends: .tests
   image: openjdk:11-jdk-slim
+
+tests:macos:
+  extends: .tests
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  tags:
+    - macos
+
+tests:windows64:
+  extends: .tests
+  before_script: []
+  script: gradlew.bat %GRADLE_ARGS% clean deploy
+  tags:
+    - prob
+    - win64
 
 publish:
   stage: deploy
@@ -41,4 +59,15 @@ publish:
     - ./gradlew ${GRADLE_ARGS} uploadArchives
   only: 
     - master 
+    - develop
+
+prob_snapshot_parser_tests:
+  stage: trigger
+  image: $CI_REGISTRY/stups/prob/prob-docker/internal/deployment:0.3
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=develop" -F "variables[BUILD_TYPE]=snapshot-parser-build" https://gitlab.cs.uni-duesseldorf.de/api/v4/projects/897/trigger/pipeline
+  only:
     - develop

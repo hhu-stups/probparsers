@@ -355,7 +355,7 @@ Tokens
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
   {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto
   {normal} integer_literal = digit+;
-  {normal} hex_literal = '0x' hexdigit+;
+  {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral 
 
   {normal} underscore = underscore;
 
@@ -600,9 +600,14 @@ operation_list {-> operation*} =
 
 operation {-> operation} =
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
-    {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)} |
+    {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)}
+    // Note: operation names can be composed identifiers within refinements, see section 7.23 in Atelier-B handbook
+    // TODO: allow also to use description pragmas here
+    |
   {refined_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? [ref]:identifier_literal [ab_op_name]:identifier_literal equal [operation_body]:substitution_l2
-    {-> New operation.refined([return_values.expression], [op_name.identifier_literal], [parameters.expression], ref, ab_op_name , operation_body.substitution)} |    
+    {-> New operation.refined([return_values.expression], [op_name.identifier_literal], [parameters.expression], ref, ab_op_name , operation_body.substitution)}
+    // this supports the ref keyword for Event-B style refinement
+     |    
   {rule_operation} kw_rule [rule_name]:identifier_literal [attributes]:operation_attribute_list? kw_body [operation_body]:substitution_l0 end
     {-> New operation.rule(rule_name, [attributes.operation_attribute], operation_body.substitution)} |
   {computation} kw_computation [name]:identifier_literal [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
@@ -641,9 +646,8 @@ freetypecons {-> freetype_constructor} =
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
-  {implication} [left]:predicate_p30 implies [right]:predicate_x30 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-  {next_level} [pred]:predicate_x30 {-> pred.predicate} ;
-predicate_x30 {-> predicate} = [pred]:predicate_p40 {-> pred.predicate};
+  {implication} [left]:predicate_p30 implies [right]:predicate_p40 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
+  {next_level} [pred]:predicate_p40 {-> pred.predicate} ;
 
 predicate_p40 {-> predicate} =
   {disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
@@ -902,6 +906,7 @@ expression_atomic {-> expression} =
   {successor} succ {-> New expression.successor()} |
   {predecessor} pred {-> New expression.predecessor()} |
   {integer} [literal]:integer_literal {-> New expression.integer(literal)} |
+  {hex_integer} [literal]:hex_literal {-> New expression.hex_integer(literal)} |
   {max_int} max_int {-> New expression.max_int()} |
   {min_int} min_int {-> New expression.min_int()} |
   {empty_set_symbol} empty_set {-> New expression.empty_set()} |
@@ -1267,6 +1272,7 @@ expression =
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
+  {hex_integer} [literal]:hex_literal |
   {max_int} |
   {min_int} |
   {empty_set} |

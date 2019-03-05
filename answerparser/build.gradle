@@ -40,12 +40,7 @@ jar {
  include '**/*.java'
 }
 
-compileJava {
- dependsOn = ['genParser',':prologlib:deploy']
- doLast {
-	 ant.patch(patchfile: 'warnings.patch', originalfile: 'build/temp/de/prob/core/sablecc/parser/Parser.java', failonerror:'true'  )
- }
-}
+compileJava.dependsOn('genParser',':prologlib:deploy')
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 

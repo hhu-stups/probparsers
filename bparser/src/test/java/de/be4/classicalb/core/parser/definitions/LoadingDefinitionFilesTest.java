@@ -86,7 +86,7 @@ public class LoadingDefinitionFilesTest {
 		String file = PATH + "MachineIncludesAAndA2.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
-		assertFalse(result.contains("exception"));
+		assertTrue(result.contains("exception"));
 	}
 	
 	@Test

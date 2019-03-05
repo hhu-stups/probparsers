@@ -1,6 +1,5 @@
 package util;
 
-import de.be4.classicalb.core.parser.analysis.ExtendedDFAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.Token;

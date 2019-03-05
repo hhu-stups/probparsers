@@ -19,7 +19,6 @@ public class BLexer extends Lexer {
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
-	private static Map<Character, Character> stringReplacements = new HashMap<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -48,11 +47,10 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
-		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TAssertions.class);
-		clauseTokenClasses.add(TVariables.class);
-		clauseTokenClasses.add(TInvariant.class);
+		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TInitialisation.class);
+		clauseTokenClasses.add(TInvariant.class);
 		clauseTokenClasses.add(TOperations.class);
 		clauseTokenClasses.add(TVariables.class);
 		// ...
@@ -62,14 +60,6 @@ public class BLexer extends Lexer {
 			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 		}
 
-		// replacements in strings '\' + ..
-		// e.g. '\' + 'n' is replaced by '\n'
-		stringReplacements.put('"', '"');
-		stringReplacements.put('\'', '\'');
-		stringReplacements.put('n', '\n');
-		stringReplacements.put('r', '\r');
-		stringReplacements.put('t', '\t');
-		stringReplacements.put('\\', '\\');
 	}
 
 	private ParseOptions parseOptions = null;
@@ -134,35 +124,14 @@ public class BLexer extends Lexer {
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
-		}
-
-		if (state.equals(State.COMMENT)) {
+		} else if (state.equals(State.COMMENT)) {
 			collectComment();
-		}
-
-		if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
+		} else if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
 			collectComment();
-		}
-
-		if (state.equals(State.SHEBANG) && token.getLine() != 1) {
+		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
 			throw new LexerException("#! only allowed in first line of the file");
 		}
 
-		if (token instanceof TStringLiteral) {
-			// for normal string literals we also get the surrounding quotes " as part of the token
-			// these need to be removed and the escaping codes dealt with
-			handleStringToken(token,true);
-		}
-		if (token instanceof TMultilineStringContent) {
-			// multiline strings do not have surrounding "
-				handleStringToken(token,false);
-		}
-
-		if (token instanceof THexLiteral) {
-			final String literal = token.getText().substring(2);
-			int value = Integer.valueOf(literal, 16);
-			token = new TIntegerLiteral(Integer.toString(value));
-		}
 		if (token != null) {
 			if (definitions != null) {
 				replaceDefTokens();
@@ -171,44 +140,6 @@ public class BLexer extends Lexer {
 			buildTokenList();
 
 		}
-	}
-
-	private void handleStringToken(Token token, Boolean surrounding_quotes) {
-		// google for howto-unescape-a-java-string-literal-in-java
-		// quickfix: we do nothing just strip off the " if surrounding_quotes is true,
-		// we now also convert escape codes using stringReplacements
-		/*
-		 * Note, the text of a TMultilineString token does not start with '''
-		 * because the ''' are contained in the TMultilineStringStartEnd token
-		 */
-		String literal = token.getText();
-		// System.out.println("string token literal = " + literal + " length = " + literal.length());
-		
-		if (surrounding_quotes && literal.startsWith("\"")) {
-			/// we assume literal also ends with \", if string contains less than two characters we get an exception !
-			/// "foo" gets translated to foo
-			literal = literal.substring(1, literal.length() - 1);
-		}
-		// System.out.println("string token literal after = " + literal + " length = " + literal.length());
-
-		boolean backslashFound = false;
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < literal.length(); i++) {
-			char c = literal.charAt(i);
-			if (backslashFound && stringReplacements.containsKey(c)) {
-				sb.setLength(sb.length() - 1); // remove backslash
-				sb.append(stringReplacements.get(c)); // and replace by this
-				backslashFound = false;
-				continue;
-			}
-			if (c == '\\') {
-				backslashFound = true;
-			} else {
-				backslashFound = false;
-			}
-			sb.append(c);
-		}
-		token.setText(sb.toString());
 	}
 
 	private void replaceDefTokens() {
