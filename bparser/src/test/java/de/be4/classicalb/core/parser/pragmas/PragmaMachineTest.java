@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.pragmas;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.net.URISyntaxException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,7 @@ import de.be4.classicalb.core.parser.node.Start;
 @RunWith(PolySuite.class)
 public class PragmaMachineTest extends AbstractParseMachineTest {
 
-	private static final String PATH = "src/test/resources/pragmas";
+	private static final String PATH = "pragmas";
 
 	private final File machine;
 
@@ -57,7 +58,12 @@ public class PragmaMachineTest extends AbstractParseMachineTest {
 
 	@Config
 	public static Configuration getConfig() {
-		final File[] machines = getMachines(PATH);
+		final File[] machines;
+		try {
+			machines = getMachines(PATH);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 		return new Configuration() {
 
 			public int size() {

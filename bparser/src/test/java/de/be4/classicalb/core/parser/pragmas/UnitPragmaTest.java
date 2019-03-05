@@ -92,7 +92,7 @@ public class UnitPragmaTest {
 
 	@Test
 	public void testConversion() {
-		String file = "src/test/resources/pragmas/unitPragma/MultiplicationConversion.mch";
+		String file = "pragmas/unitPragma/MultiplicationConversion.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result.contains("conversion("));

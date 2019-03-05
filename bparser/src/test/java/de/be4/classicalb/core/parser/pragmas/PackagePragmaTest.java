@@ -13,7 +13,7 @@ public class PackagePragmaTest {
 
 	@Test
 	public void testImportPackagePragma() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
+		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M1.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -24,7 +24,7 @@ public class PackagePragmaTest {
 
 	@Test
 	public void testImportPackageIdentifier() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
+		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M11.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -35,7 +35,7 @@ public class PackagePragmaTest {
 
 	@Test
 	public void testInvalidImport() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
+		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "InvalidImport.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -46,7 +46,7 @@ public class PackagePragmaTest {
 
 	@Test
 	public void testDuplicateImport() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
+		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "DuplicateImport.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -57,7 +57,7 @@ public class PackagePragmaTest {
 
 	@Test
 	public void testInvalidPackage() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/";
+		String PATH = "pragmas/importPackagePragma/";
 		String file = PATH + "InvalidPackage1.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -66,7 +66,7 @@ public class PackagePragmaTest {
 	
 	@Test
 	public void testPackageNotFound() throws IOException, BException {
-		String PATH = "src/test/resources/pragmas/importPackagePragma/foo/";
+		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "PackageNotFound.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -75,7 +75,7 @@ public class PackagePragmaTest {
 	
 	@Test
 	public void testDuplicateMachineClause() throws Exception {
-		final String result = Helpers.fullParsing("src/test/resources/pragmas/packagePragma/project1/Main.mch");
+		final String result = Helpers.fullParsing("pragmas/packagePragma/project1/Main.mch");
 		System.out.println(result);
 		//semantic checks (e.g. duplicate clauses) were previously disabled for APackageParseUnit nodes
 		assertTrue(result.contains("parse_exception"));
@@ -83,7 +83,7 @@ public class PackagePragmaTest {
 	
 	@Test
 	public void testDefinitionFileReferencesInDefinitionFilesClause() throws Exception {
-		final String result = Helpers.fullParsing("src/test/resources/pragmas/packagePragma/definitionFiles/Main.mch");
+		final String result = Helpers.fullParsing("pragmas/packagePragma/definitionFiles/Main.mch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}

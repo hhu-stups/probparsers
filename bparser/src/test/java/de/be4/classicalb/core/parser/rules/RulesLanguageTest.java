@@ -53,7 +53,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testForAllPredicate() {
-		String file = "src/test/resources/rules/ForAllPredicate.rmch";
+		String file = "rules/ForAllPredicate.rmch";
 		String result = getFileAsPrologTerm(file);
 		System.out.println(result);
 		assertFalse(result.contains("exception"));

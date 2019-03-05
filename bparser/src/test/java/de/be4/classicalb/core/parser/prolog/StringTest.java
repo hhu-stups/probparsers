@@ -11,7 +11,7 @@ public class StringTest {
 
 	@Test
 	public void testFile() {
-		String file = "src/test/resources/strings/StringIncludingQuotes.mch";
+		String file = "strings/StringIncludingQuotes.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result.contains("'a\"b'"));
