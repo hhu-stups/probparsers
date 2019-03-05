@@ -530,7 +530,7 @@ public class BParser {
 			final long end = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("Time for parsing: " + (end - start) + "ms");
+				out.println("% Time for parsing: " + (end - start) + "ms");
 			}
 
 			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
@@ -544,25 +544,27 @@ public class BParser {
 
 			final long start2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
-				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
-			}
-			final long end2 = System.currentTimeMillis();
-
-			if (parsingBehaviour.isPrintTime()) {
-				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
-			}
 
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
 				try {
 					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
 					out.println(fp);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
+			} else if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
+				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
+			}
+			
+			final long end2 = System.currentTimeMillis();
+
+			if (parsingBehaviour.isPrintTime()) {
+				out.println("% Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 		} catch (final IOException e) {
-			if (parsingBehaviour.isPrologOutput()) { // TO DO: also print error in FastProlog mode
+			if (parsingBehaviour.isPrologOutput() ||
+			    parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -570,7 +572,8 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.isPrologOutput()) { // TO DO: also print error in FastProlog mode
+			if (parsingBehaviour.isPrologOutput() ||
+			    parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
