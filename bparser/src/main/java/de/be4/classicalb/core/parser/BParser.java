@@ -529,22 +529,22 @@ public class BParser {
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
 			final long end = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime()) {
+			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
 				out.println("Time for parsing: " + (end - start) + "ms");
 			}
 
-			if (parsingBehaviour.isPrintAST()) {
+			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
 
-			if (parsingBehaviour.isDisplayGraphically()) {
+			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
 				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrologOutput()) {
+			if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
 			final long end2 = System.currentTimeMillis();
@@ -553,7 +553,7 @@ public class BParser {
 				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 
-			if (parsingBehaviour.isFastPrologOutput()) {
+			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 				try {
 					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
 					out.println(fp);
@@ -562,7 +562,7 @@ public class BParser {
 				}
 			}
 		} catch (final IOException e) {
-			if (parsingBehaviour.isPrologOutput()) {
+			if (parsingBehaviour.isPrologOutput()) { // TO DO: also print error in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -570,7 +570,7 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.isPrologOutput()) {
+			if (parsingBehaviour.isPrologOutput()) { // TO DO: also print error in FastProlog mode
 				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {

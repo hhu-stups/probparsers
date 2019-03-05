@@ -4,17 +4,19 @@ import java.io.File;
 import java.io.PrintStream;
 
 public class ParsingBehaviour {
-	private boolean prologOutput = false;
-	private boolean useIndention = false;
-	private boolean addLineNumbers = false;
-	private boolean displayGraphically = false;
-	private boolean verbose = false; //verbose mode includes debug prints
-	private boolean printTime = false;
+ // Flags are set, e.g., in CliBParser.java
+	private boolean prologOutput = false;       // -prolog flag in CliBParser
+	private boolean useIndention = false;       // -indent flag in CliBParser
+	private boolean addLineNumbers = false;     // -lineno flag in CliBParser
+	private boolean displayGraphically = false; // -ui flag in CliBParser
+	private boolean verbose = false; //verbose mode includes debug prints, -v flag in CliBParser
+	private boolean printTime = false;          // -time flag in CliBParser
 	private PrintStream out = System.out;
-	private boolean printAST = false;
-	private boolean fastPrologOutput = false;
+	private boolean printAST = false;           // -ast flag in CliBParser
+	private boolean fastPrologOutput = false;   // -fastprolog flag in CliBParser
 	private File outputFile;
-	private boolean machineNameMustMatchFileName = false;
+	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
+	
 
 	public boolean isPrologOutput() {
 		return prologOutput;
