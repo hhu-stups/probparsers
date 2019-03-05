@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,7 @@ import de.be4.classicalb.core.parser.node.Start;
 @RunWith(PolySuite.class)
 public class ParseableButProblematicOnWindowsUnixLF extends AbstractParseMachineTest {
 
-	private static final String PATH = "src/test/resources/problematicOnWindows";
+	private static final String PATH = "problematicOnWindows";
 
 	private final File machine;
 
@@ -56,7 +57,12 @@ public class ParseableButProblematicOnWindowsUnixLF extends AbstractParseMachine
 
 	@Config
 	public static Configuration getConfig() throws IOException {
-		final File[] machines = getMachines(PATH);
+		final File[] machines;
+		try {
+			machines = getMachines(PATH);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 		final File[] unixMachines = new File[machines.length];
 
 		for (int i = 0; i < machines.length; i++) {

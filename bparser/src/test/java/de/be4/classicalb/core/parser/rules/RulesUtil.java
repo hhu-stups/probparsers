@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -78,7 +79,13 @@ public class RulesUtil {
 		return getFileAsPrologTerm(file, false);
 	}
 
-	public static String getFileAsPrologTerm(final String file, boolean addLineNumbers) {
+	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) {
+		File file;
+		try {
+			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
+		} catch (URISyntaxException e) {
+		    throw new RuntimeException(e);
+		}
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(addLineNumbers);
 		OutputStream output = new OutputStream() {
@@ -93,7 +100,7 @@ public class RulesUtil {
 				return this.string.toString();
 			}
 		};
-		RulesProject.parseProject(new File(file), pb, new PrintStream(output), new PrintStream(output));
+		RulesProject.parseProject(file, pb, new PrintStream(output), new PrintStream(output));
 		return output.toString();
 	}
 

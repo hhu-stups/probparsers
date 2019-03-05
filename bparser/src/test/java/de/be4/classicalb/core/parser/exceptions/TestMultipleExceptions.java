@@ -8,7 +8,7 @@ public class TestMultipleExceptions {
 
 	@Test
 	public void testMultipleErrors() throws Exception {
-		final String testMachine = "./src/test/resources/exceptions/MultipleErrors.mch";
+		final String testMachine = "./exceptions/MultipleErrors.mch";
 		String result = Helpers.fullParsing(testMachine);
 		System.out.println(result);
 	}

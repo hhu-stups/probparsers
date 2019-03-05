@@ -135,7 +135,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
 		File machine = new File(
-				"src/test/resources/parsable/DefinitionFileTest.mch");
+				this.getClass().getClassLoader().getResource("parsable/DefinitionFileTest.mch").toURI());
 		parser.parseFile(machine, false);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -188,7 +188,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 
 	@Test
 	public void testErrorInDefinitions() throws IOException, BCompoundException {
-		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
+		String file = "./definitions/errors/DefinitionErrorPosition.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
@@ -198,7 +198,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	@Test
 	public void testErrorInIncludedDefinitionFile() throws IOException,
 			BCompoundException {
-		String file = "./src/test/resources/definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
+		String file = "./definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result

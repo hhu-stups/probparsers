@@ -26,7 +26,7 @@ public class SyntaxExtensionTest {
 
 	@Test
 	public void testFile() throws IOException, BException {
-		String file = "src/test/resources/strings/MultiLineString.mch";
+		String file = "strings/MultiLineString.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result.contains("'\\n\\'\\na\\n\\'\\'\\'\\n'"));

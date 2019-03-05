@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -200,9 +201,9 @@ public class CreateFreetypeTest {
 	}
 
 	@Test
-	public void testFreetypeSyntax() throws IOException, BCompoundException {
+	public void testFreetypeSyntax() throws IOException, BCompoundException, URISyntaxException {
 		final BParser parser = new BParser("FreetypeIntList");
-		final File file = new File("src/test/resources/FreetypeIntList.mch");
+		final File file = new File(this.getClass().getClassLoader().getResource("FreetypeIntList.mch").toURI());
 		parser.parseFile(file, false);
 	}
 }
