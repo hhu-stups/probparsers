@@ -50,9 +50,8 @@ public class StringLiteralNotClosedTest {
 		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
 		// System.out.println(string);
-		return string;
+		return ast2String.toString();
 	}
 
 	String randomString(final int length) {
