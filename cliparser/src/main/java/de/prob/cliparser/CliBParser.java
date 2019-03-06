@@ -25,7 +25,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
-import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
@@ -63,7 +62,9 @@ public class CliBParser {
 		final ConsoleOptions options = createConsoleOptions(args);
 
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
-			System.out.println(CliBParser.getBuildRevision());
+			System.out.println(String.format("Version:    %s", BParser.getVersion()));
+			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
+			System.out.println(String.format("Build Date: %s", BParser.getBuildRevision()));
 			System.exit(0);
 		}
 
@@ -159,7 +160,7 @@ public class CliBParser {
 
 			switch (command) {
 			case version:
-				print(CliBParser.getBuildRevision() + System.lineSeparator());
+				print(BParser.getBuildRevision() + System.lineSeparator());
 				break;
 			case definition:
 				String name = in.readLine();
@@ -397,7 +398,7 @@ public class CliBParser {
 
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
 		final ConsoleOptions options = new ConsoleOptions();
-		options.setIntro("BParser (rev. " + CliBParser.getBuildRevision()
+		options.setIntro("BParser (rev. " + BParser.getBuildRevision()
 				+ ")\nusage: BParser [options] <BMachine file>\n\nAvailable options are:");
 		options.addOption(CLI_SWITCH_VERBOSE, "Verbose output during lexing and parsing");
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");
@@ -421,9 +422,4 @@ public class CliBParser {
 		}
 		return options;
 	}
-
-	public static String getBuildRevision() {
-		return Utils.getRevisionFromManifest();
-	}
-
 }
