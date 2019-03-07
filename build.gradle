@@ -9,6 +9,8 @@ def global_version = '2.9.21-SNAPSHOT'
 project.version = global_version;
 project.group = 'de.hhu.stups'
 
+final SOURCE_ENCODING = "UTF-8"
+
 defaultTasks 'remind', 'clean', 'deploy'
 
 
@@ -41,6 +43,14 @@ allprojects {
             def bin_dir = file("bin")
             if (bin_dir.exists()) delClos(bin_dir)
         }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = SOURCE_ENCODING
+    }
+
+    tasks.withType(Javadoc) {
+        options.encoding = SOURCE_ENCODING
     }
 }
 
