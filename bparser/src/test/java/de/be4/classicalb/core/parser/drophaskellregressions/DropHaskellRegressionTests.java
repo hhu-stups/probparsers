@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser;
+package de.be4.classicalb.core.parser.drophaskellregressions;
 
 import static org.junit.Assert.*;
 
@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.Start;
