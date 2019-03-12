@@ -82,19 +82,22 @@ Tokens
   {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {section->pragma,normal->pragma} pragma_start = '/*@';
-  {pragma->normal,pragma_content->normal,pragma_ignore->normal} pragma_end = '*/';
+  {pragma->normal,pragma_content->normal,pragma_package_content->normal} pragma_end = '*/';
   {pragma} pragma_generated = 'generated'; // we could enforce nothing follows it
   {pragma} pragma_symbolic = 'symbolic'; // ditto
   {pragma->pragma_content} pragma_label = 'label';
   {pragma->pragma_content} pragma_file = 'file';
   {pragma->pragma_package_content} pragma_package = 'package';
   {pragma->description} pragma_description = 'desc' | 'description';
+  
+  // the state for contents of the package pragma; import-package can also stand as its own pragma
+  // in the grammar below, import-package always follows a pragma_package
+  {pragma_package_content,pragma->pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
+  
   {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal ;
   
+  // content of description pragma
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
-  
-  // the state for contents of the package pragma:
-  {pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
   
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
