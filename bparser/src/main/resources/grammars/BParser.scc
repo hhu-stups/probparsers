@@ -65,7 +65,7 @@ States
   shebang,
   pragma,
   description,
-  unit;
+  pragma_content;
 
 
 /*******************************************************************
@@ -80,28 +80,21 @@ Tokens
   {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {section->pragma,normal->pragma} pragma_start = '/*@';
-  {pragma->normal, unit->normal} pragma_end = '*/';
-  {pragma->unit} pragma_unit = 'unit';
-  {pragma->unit} new_pragma_unit = 'new_unit';
-  {pragma->unit} ipragma_unit = 'inferred_unit';
-  {pragma->unit} pragma_unit_alias = 'unit_alias';
+  {pragma->normal} pragma_end = '*/';
   {pragma} pragma_generated = 'generated';
   {pragma} pragma_symbolic = 'symbolic';
-  {pragma} pragma_label = 'label';
-  {pragma} pragma_file = 'file';
-  {pragma} pragma_package = 'package';
-  {pragma} pragma_import_package = 'import-package' | 'import_package';
+  {pragma->pragma_content} pragma_label = 'label';
+  {pragma->pragma_content} pragma_file = 'file';
+  {pragma->pragma_content} pragma_package = 'package';
+  {pragma->pragma_content} pragma_import_package = 'import-package' | 'import_package';
   {pragma->description} pragma_description = 'desc' | 'description';
-  {pragma} pragma_conversion = 'conversion';
-  {pragma} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
+  {pragma} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal ;
   //{pragma} pragma_label_string = pragma_label_chars; // not used yet, due to tests failing
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
-
-  {unit} unit_content = string_literal;
-  {unit} unit_id = identifier_literal;
+  {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
 
   {section->comment, normal -> comment} comment = comment_start ;
-  {comment,description} comment_end = comment_end; // return to state 'normal' is done in Lexer
+  {comment,description,pragma_content} comment_end = comment_end; // return to state 'normal' is done in Lexer
   {comment} comment_body = [all_chars - ['*' + '/']]*;
 
   {comment,description} star = '*';
@@ -394,7 +387,8 @@ Tokens
 Ignored Tokens
 shebang, shebang_char, shebang_end,
   white_space,
-  comment, comment_body, comment_end, pragma_start, pragma_end, line_comment;
+  comment, comment_body, comment_end, pragma_start, pragma_end, unrecognised_pragma,
+  line_comment;
 
 
 /*******************************************************************
@@ -421,8 +415,7 @@ machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
   {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
   {package} pragma_package [package]:pragma_id_or_string [imports]:import_package_list? [parse_unit]:P.machine
-    {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)} |
-  {unit_alias} pragma_unit_alias [name]:unit_id [content]:unit_content [lower]:P.machine {-> New parse_unit.unit_alias(name,content,lower.parse_unit)} ;
+    {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)};
 
 import_package_list {-> import_package*} =
   {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
@@ -502,7 +495,6 @@ expression_def {-> expression_definition} = [name]:identifier_literal [parameter
 predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)} ;
 
 definition {-> definition} =
-  {conversion} pragma_conversion definition_x {-> New definition.conversion(definition_x.definition)} |
   definition_x {-> definition_x.definition};
 
 definition_x {-> definition} =
@@ -1060,15 +1052,9 @@ quantified_variables_list {-> expression*} =
   {parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |
   {no_parentheses} [id]:identifier_list {-> [id.expression]};
 
-/*
-Avoid the following transformation rule which would yield to an AIdentifierNode without a position information. Include an indirection!
-{unit} pragma_unit [content]:unit_content [identifier]:identifier_literal {-> New expression.unit(content,New expression.identifier([identifier]))}
-*/
+
 identifier_declaration_expression {-> expression} =
   {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
-  {unit} pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.unit(content,identifier.expression)} |
-  {new_unit} new_pragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.new_unit(content,identifier.expression)} |
-  {inferred_unit} ipragma_unit [content]:unit_content [identifier]:identifier_expression {-> New expression.inferred_unit(content,identifier.expression)} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 
@@ -1102,7 +1088,6 @@ Abstract Syntax Tree
 parse_unit =
   {generated} parse_unit |
   {package} [package]:pragma_id_or_string [imports]:import_package* parse_unit  |
-  {unit_alias} [name]:unit_id [content]:unit_content parse_unit |
   {abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
   {refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
   {implementation_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
@@ -1184,7 +1169,6 @@ expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]
 predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate ;
 
 definition =
-  {conversion} definition |
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
   {substitution_definition} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
   {expression_definition} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
@@ -1262,9 +1246,6 @@ predicate =
 expression =
   {file} [identifier]:expression [content]:pragma_id_or_string | // file pragma
   {description} [content]:pragma_free_text [expression]:expression |
-  {unit} [content]:unit_content [identifier]:expression |
-  {new_unit} [content]:unit_content [identifier]:expression |
-  {inferred_unit} [content]:unit_content [identifier]:expression |
   {identifier} [identifier]:identifier_literal* |
   {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
   {string} [content]:string_literal |

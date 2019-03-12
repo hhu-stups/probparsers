@@ -9,7 +9,6 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -53,9 +52,7 @@ public class Definitions extends IDefinitions {
 			return ((ASubstitutionDefinitionDefinition) defNode).getParameters().size();
 		else if (defNode instanceof AExpressionDefinitionDefinition)
 			return ((AExpressionDefinitionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof AConversionDefinition) {
-			return getParameterCount(((AConversionDefinition) defNode).getDefinition());
-		} else
+		else
 			return -1;
 
 	}
