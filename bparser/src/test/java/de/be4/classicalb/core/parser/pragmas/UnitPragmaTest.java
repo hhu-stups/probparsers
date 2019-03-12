@@ -87,7 +87,8 @@ public class UnitPragmaTest {
 
 		final String result = Helpers.getMachineAsPrologTerm(machine);
 		System.out.println(result);
-		assertTrue(result.contains("inferred_unit(7,\"x**2\",identifier(8,yy))"));
+		// we currently no longer parse unit pragmas; they are ignored
+		//assertTrue(result.contains("inferred_unit(7,\"x**2\",identifier(8,yy))"));
 	}
 
 	@Test
@@ -95,7 +96,8 @@ public class UnitPragmaTest {
 		String file = "pragmas/unitPragma/MultiplicationConversion.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
-		assertTrue(result.contains("conversion("));
+		// we currently no longer parse unit pragmas; they are ignored
+		//assertTrue(result.contains("conversion("));
 	}
 
 	private String printAST(final Node node) {
