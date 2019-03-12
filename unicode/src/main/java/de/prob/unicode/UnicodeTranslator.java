@@ -37,7 +37,7 @@ public class UnicodeTranslator {
 			// If the operator begins with a letter, and the last character
 			// before is also a letter, there needs to be a space to separate
 			// them
-			return (Character.isLetter(ascii.charAt(0)) && needsSpace ? " " : "") + ascii;
+			return (isEventBIdentifierStart(ascii.charAt(0)) && needsSpace ? " " : "") + ascii;
 		}
 
 		public String getLatex() {
@@ -158,6 +158,14 @@ public class UnicodeTranslator {
 		return translate(s, Encoding.UNICODE);
 	}
 
+	private static boolean isEventBIdentifierStart(final char c) {
+		return Character.isUnicodeIdentifierStart(c) && c != 'λ';
+	}
+	
+	private static boolean isEventBIdentifierPart(final char c) {
+		return c == '\'' || (Character.isUnicodeIdentifierPart(c) && c != 'λ');
+	}
+
 	private static String translate(final String input, final Encoding target) {
 		if (input.isEmpty()) {
 			return "";
@@ -169,11 +177,10 @@ public class UnicodeTranslator {
 		Lexer l = new Lexer(r);
 
 		Token t;
-		Token last;
 		try {
-			last = null;
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
 				final String key = t.getClass().getSimpleName();
+				final boolean needsSpace = sb.length() > 0 && isEventBIdentifierPart(sb.charAt(sb.length() - 1));
 
 				if (t instanceof TSeparator) {
 					sb.append(t.getText());
@@ -199,8 +206,7 @@ public class UnicodeTranslator {
 						sb.append(t.getText());
 					}
 				} else if (t instanceof TIdentifierLiteral) {
-					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
-					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
+					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
 					if (target == Encoding.LATEX) {
@@ -211,8 +217,7 @@ public class UnicodeTranslator {
 						sb.append(t.getText());
 					}
 				} else if (t instanceof TAnyChar) {
-					boolean before = sb.length() > 0 && Character.isLetter(sb.charAt(sb.length() - 1));
-					if (before && (target == Encoding.ASCII || target == Encoding.LATEX)) {
+					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
 					if (target == Encoding.LATEX) {
@@ -228,15 +233,12 @@ public class UnicodeTranslator {
 					} else if (target == Encoding.LATEX) {
 						translated = translation.getLatex();
 					} else if (target == Encoding.ASCII) {
-						boolean before = (last != null && last instanceof TAnyChar)
-								|| sb.length() > 0 && (Character.isLetter(sb.charAt(sb.length() - 1)));
-						translated = translation.getAscii(before);
+						translated = translation.getAscii(needsSpace);
 					} else {
 						throw new AssertionError("Unhandled translation target: " + target);
 					}
 					sb.append(translated);
 				}
-				last = t;
 			}
 		} catch (LexerException | IOException e) {
 			throw new AssertionError(e);

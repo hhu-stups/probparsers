@@ -108,7 +108,7 @@ public class BParser {
 
 	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-			throws BCompoundException {
+					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
@@ -117,7 +117,7 @@ public class BParser {
 
 	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-			throws BCompoundException {
+					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
@@ -452,7 +452,7 @@ public class BParser {
 
 	private DefinitionTypes preParsing(final boolean debugOutput, final Reader reader,
 			final IFileContentProvider contentProvider, File directory)
-			throws IOException, PreParseException, BException, BCompoundException {
+					throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		preParser.setDebugOutput(debugOutput);
@@ -546,17 +546,13 @@ public class BParser {
 
 
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
-				try {
-					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
-					out.println(fp);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
+				String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
+				out.println(fp);
 			} else if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
-			
+
 			final long end2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) {
@@ -564,7 +560,7 @@ public class BParser {
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput() ||
-			    parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+					parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -573,7 +569,7 @@ public class BParser {
 			return -2;
 		} catch (final BCompoundException e) {
 			if (parsingBehaviour.isPrologOutput() ||
-			    parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
+					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {
