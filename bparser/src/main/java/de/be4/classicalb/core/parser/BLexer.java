@@ -95,7 +95,7 @@ public class BLexer extends Lexer {
 		Class<? extends Token> tokenClass = token.getClass();
 
 		checkForInvalidCombinations(lastTokenClass, tokenClass);
-
+        
 		lastToken = token;
 	}
 
@@ -121,12 +121,14 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+        //System.out.println("State = " + state + " token = " + token);
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
 		} else if (state.equals(State.COMMENT)) {
 			collectComment();
-		} else if (state.equals(State.DESCRIPTION) && !(token instanceof TPragmaDescription)) {
+		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
+		            !(token instanceof TPragmaDescription)) {
 			collectComment();
 		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
 			throw new LexerException("#! only allowed in first line of the file");
