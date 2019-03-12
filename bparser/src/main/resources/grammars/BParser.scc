@@ -66,6 +66,7 @@ States
   pragma,
   description,
   pragma_content,
+  pragma_package_content,
   pragma_ignore;
 
 
@@ -82,19 +83,21 @@ Tokens
 
   {section->pragma,normal->pragma} pragma_start = '/*@';
   {pragma->normal,pragma_content->normal,pragma_ignore->normal} pragma_end = '*/';
-  {pragma} pragma_generated = 'generated';
-  {pragma} pragma_symbolic = 'symbolic';
+  {pragma->pragma_ignore} pragma_generated = 'generated'; // instead of pragma_ignore we could enforce nothing follows it
+  {pragma->pragma_ignore} pragma_symbolic = 'symbolic'; // ditto
   {pragma->pragma_content} pragma_label = 'label';
   {pragma->pragma_content} pragma_file = 'file';
-  {pragma->pragma_content} pragma_package = 'package';
-  {pragma->pragma_content} pragma_import_package = 'import-package' | 'import_package';
+  {pragma->pragma_package_content} pragma_package = 'package';
   {pragma->description} pragma_description = 'desc' | 'description';
   {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal ;
   
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
   
-  // the pragma content state collects attributes for certain pragmas
-  {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
+  // the state for contents of the package pragma:
+  {pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
+  
+  // the pragma_content state collects attributes for label and file pragmas
+  {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
   
   // the pragma_ignore state is like description but all tokens are ignored
   {pragma_ignore} pragma_ignored_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
@@ -103,8 +106,8 @@ Tokens
   {comment,description,pragma_ignore} comment_end = comment_end; // return to state 'normal' is done in Lexer
   {comment} comment_body = [all_chars - ['*' + '/']]*;
 
-  {comment,description} star = '*';
-  {comment,description} slash = '/';
+  {comment,description,pragma_ignore} star = '*';
+  {comment,description,pragma_ignore} slash = '/';
 
   {section->multiline_string_state, normal->multiline_string_state} multiline_string_start = triple_quote;
   {multiline_string_state->normal} multiline_string_end = triple_quote;
