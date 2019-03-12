@@ -83,8 +83,8 @@ Tokens
 
   {section->pragma,normal->pragma} pragma_start = '/*@';
   {pragma->normal,pragma_content->normal,pragma_ignore->normal} pragma_end = '*/';
-  {pragma->pragma_ignore} pragma_generated = 'generated'; // instead of pragma_ignore we could enforce nothing follows it
-  {pragma->pragma_ignore} pragma_symbolic = 'symbolic'; // ditto
+  {pragma} pragma_generated = 'generated'; // we could enforce nothing follows it
+  {pragma} pragma_symbolic = 'symbolic'; // ditto
   {pragma->pragma_content} pragma_label = 'label';
   {pragma->pragma_content} pragma_file = 'file';
   {pragma->pragma_package_content} pragma_package = 'package';
