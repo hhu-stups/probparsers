@@ -221,8 +221,6 @@ public class BLexer extends Lexer {
 				replaceDefTokens();
 			}
 
-			buildTokenList();
-
 		}
 	}
 
@@ -259,12 +257,6 @@ public class BLexer extends Lexer {
 					break;
 				}
 			}
-		}
-	}
-
-	private void buildTokenList() {
-		if (token != null) {
-			// tokenList.add(token);
 		}
 	}
 
