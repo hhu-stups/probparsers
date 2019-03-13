@@ -107,10 +107,17 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				int l = token.getLine();
 				int c = token.getPos();
-				throw new BLexerException(token, "Invalid combination of symbols: " + string + "\n", string, l, c);
+				ThrowDefaultLexerException("Invalid combination of symbols: " + string + "\n", string);
 			}
 		}
 
+	}
+	
+	private void ThrowDefaultLexerException(String msg, String string) throws LexerException {
+		int l = token.getLine();
+		int c = token.getPos();
+		throw new BLexerException(token, msg, string, l, c);
+	
 	}
 
 	private void applyGrammarExtension() {
@@ -122,6 +129,10 @@ public class BLexer extends Lexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
         //System.out.println("State = " + state + " token = " + token);
+        if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
+            token instanceof TUnrecognisedPragma) {
+			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
+        }
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
@@ -131,7 +142,7 @@ public class BLexer extends Lexer {
 		            !(token instanceof TPragmaDescription)) {
 			collectComment();
 		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
-			throw new LexerException("#! only allowed in first line of the file");
+			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
 
 		if (token != null) {
