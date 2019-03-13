@@ -151,6 +151,7 @@ Tokens
   {normal} assign = ':' eq;
   {normal} semicolon = ';';
   {normal} less = lt;
+  {normal} less_greater = lt white_space* gt; // for empty sequence
   {normal} overwrite_relation = lt plus | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
   {normal} set_relation = lt minus gt | 0x2194;
   {normal} insert_end_sequence = '<-' | 0x21fd;
@@ -843,7 +844,7 @@ expression_keyword {-> expression} =
   {iseq1} iseq1 left_par [expression]:expression_in_par right_par {-> New expression.iseq1(expression.expression)} |
   {perm} perm left_par [expression]:expression_in_par right_par {-> New expression.perm(expression.expression)} |
   {empty_sequence1} left_bracket right_bracket {-> New expression.empty_sequence()} |
-  {empty_sequence2} less greater {-> New expression.empty_sequence()} | // not allowed by Atelier-B
+  {empty_sequence2} less_greater {-> New expression.empty_sequence()} | // not allowed by Atelier-B
   {size} size left_par [expression]:expression_in_par right_par {-> New expression.size(expression.expression)} |
   {first} first left_par [expression]:expression_in_par right_par {-> New expression.first(expression.expression)} |
   {last} last left_par [expression]:expression_in_par right_par {-> New expression.last(expression.expression)} |

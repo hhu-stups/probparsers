@@ -21,7 +21,10 @@ public class CommentsTest {
 	
 	@Test
 	public void testCommentInsideEmptySequence2() throws Exception {
-		final String testMachine = "MACHINE Comments CONSTANTS k PROPERTIES k : seq(INTEGER) & k = < /* comment */  > END";
+	// we no longer accept comments inside this empty sequence; <> is not supported by Atelier-B anyway
+	// this allows us to treat <> as a single token and improve error messages in other parts of the parser
+	//		final String testMachine = "MACHINE Comments CONSTANTS k PROPERTIES k : seq(INTEGER) & k = < /* comment */  > END";
+		final String testMachine = "MACHINE Comments CONSTANTS k PROPERTIES k : seq(INTEGER) & k = <  > END";
 		getTreeAsString(testMachine);
 	}
 }

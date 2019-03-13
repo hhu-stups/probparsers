@@ -82,8 +82,8 @@ public class BLexer extends Lexer {
 		binOpTokenClasses.add(TPowerOf.class);
 		binOpTokenClasses.add(TLessEqual.class);
 		binOpTokenClasses.add(TGreaterEqual.class);
-		// binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible
-		// binOpTokenClasses.add(TGreater.class);
+		binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible; but we now treat <> as a single token
+		binOpTokenClasses.add(TGreater.class);
 		
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
 			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
@@ -113,8 +113,8 @@ public class BLexer extends Lexer {
 		binOpTokenClasses.add(TDivision.class);
 		binOpTokenClasses.add(TProduct.class);
 		binOpTokenClasses.add(TPowerOf.class);
-		//binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence
-		//binOpTokenClasses.add(TGreater.class);
+		binOpTokenClasses.add(TLess.class);
+		binOpTokenClasses.add(TGreater.class);
 		binOpTokenClasses.add(TLessEqual.class);
 		binOpTokenClasses.add(TGreaterEqual.class);
 		
