@@ -91,7 +91,7 @@ Tokens
   {pragma->description} pragma_description = 'desc' | 'description';
   
   // the state for contents of the package pragma; import-package can also stand as its own pragma
-  // in the grammar below, import-package always follows a pragma_package
+  // in the grammwar below, import-package always follows a pragma_package
   {pragma_package_content,pragma->pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
   
   {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal ;
@@ -843,7 +843,7 @@ expression_keyword {-> expression} =
   {iseq1} iseq1 left_par [expression]:expression_in_par right_par {-> New expression.iseq1(expression.expression)} |
   {perm} perm left_par [expression]:expression_in_par right_par {-> New expression.perm(expression.expression)} |
   {empty_sequence1} left_bracket right_bracket {-> New expression.empty_sequence()} |
-  {empty_sequence2} less greater {-> New expression.empty_sequence()} |
+  {empty_sequence2} less greater {-> New expression.empty_sequence()} | // not allowed by Atelier-B
   {size} size left_par [expression]:expression_in_par right_par {-> New expression.size(expression.expression)} |
   {first} first left_par [expression]:expression_in_par right_par {-> New expression.first(expression.expression)} |
   {last} last left_par [expression]:expression_in_par right_par {-> New expression.last(expression.expression)} |

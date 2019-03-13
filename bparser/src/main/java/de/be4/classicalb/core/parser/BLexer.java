@@ -19,6 +19,7 @@ public class BLexer extends Lexer {
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
+	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -30,32 +31,12 @@ public class BLexer extends Lexer {
 
 	static {
 		addInvalid(TSemicolon.class, TSemicolon.class, "Two succeeding semicolons are not allowed.");
-		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
-		addInvalid(TConjunction.class, TLogicalOr.class, "& or is not allowed.");
-		addInvalid(TConjunction.class, TImplies.class, "& => is not allowed.");
-		addInvalid(TConjunction.class, TEquivalence.class, "& <=> is not allowed.");
-		addInvalid(TImplies.class, TConjunction.class, "=> & is not allowed.");
-		addInvalid(TImplies.class, TImplies.class, "=> => is not allowed.");
-		addInvalid(TEquivalence.class, TConjunction.class, "<=> & is not allowed.");
-		addInvalid(TEquivalence.class, TEquivalence.class, "<=> <=> is not allowed.");
-		addInvalid(TLogicalOr.class, TConjunction.class, "or & is not allowed.");
-		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one or too many).");
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
 				"|| || is not allowed (probably one || too many).");
 		addInvalid(TSetSubtraction.class, TEqual.class, "You need to use /= for inequality and not \\=.");
 		addInvalid(TSetSubtraction.class, TElementOf.class, "You need to use /: for not membership and not \\:.");
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
-		 // cover cases like: BINARY_LOGICAL_OPERATOR /*@desc txt */
-		addInvalid(TConjunction.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
-		addInvalid(TLogicalOr.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
-		addInvalid(TImplies.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
-		addInvalid(TEquivalence.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
-		 // cover cases like:  /*@label txt */ BINARY_LOGICAL_OPERATOR
-		addInvalid(TPragmaLabel.class, TConjunction.class,  "A label pragma must be put *before* a predicate, not *after* it.");
-		addInvalid(TPragmaLabel.class, TLogicalOr.class,  "A label pragma must be put *before* a predicate, not *after* it.");
-		addInvalid(TPragmaLabel.class, TImplies.class,  "A label pragma must be put *before* a predicate, not *after* it.");
-		addInvalid(TPragmaLabel.class, TEquivalence.class,  "A label pragma must be put *before* a predicate, not *after* it.");
 
 		clauseTokenClasses.add(TAssertions.class);
 		clauseTokenClasses.add(TConstants.class);
@@ -68,8 +49,84 @@ public class BLexer extends Lexer {
 		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
 			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
+			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
+			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
 		}
+		
+	   // add some rules for the binary logical operators:
+		binOpTokenClasses.add(TConjunction.class);
+		binOpTokenClasses.add(TLogicalOr.class);
+		binOpTokenClasses.add(TImplies.class);
+		binOpTokenClasses.add(TEquivalence.class);
 
+		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+		 // cover cases like: BINARY_LOGICAL_OPERATOR /*@desc txt */
+		    addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
+		 // cover cases like:  /*@label txt */ BINARY_LOGICAL_OPERATOR
+		    addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not *after* it.");
+		}
+		
+		// now treat rules that apply to binary logical and binary expression operators
+		binOpTokenClasses.add(TEqual.class);
+		binOpTokenClasses.add(TNotEqual.class);
+		binOpTokenClasses.add(TInclusion.class);
+		binOpTokenClasses.add(TNonInclusion.class);
+		binOpTokenClasses.add(TElementOf.class);
+		binOpTokenClasses.add(TNotBelonging.class);
+		binOpTokenClasses.add(TIntersection.class);
+		binOpTokenClasses.add(TUnion.class);
+		binOpTokenClasses.add(TSetSubtraction.class);
+		binOpTokenClasses.add(TPlus.class); // Note: TMinus is also unary !  x = -1  or x : -1..10 is possible
+		binOpTokenClasses.add(TDivision.class);
+		binOpTokenClasses.add(TProduct.class);
+		binOpTokenClasses.add(TPowerOf.class);
+		binOpTokenClasses.add(TLessEqual.class);
+		binOpTokenClasses.add(TGreaterEqual.class);
+		// binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible
+		// binOpTokenClasses.add(TGreater.class);
+		
+		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
+			// Note: opName is something like CONJUNCTION and not &,...
+			
+			for (Class<? extends Token> binOpTokenClass2 : binOpTokenClasses) {
+				String opName2 = binOpTokenClass2.getSimpleName().substring(1).toUpperCase();
+				addInvalid(binOpTokenClass, binOpTokenClass2, opName + " " + opName2 + " is not allowed.");
+			}
+			
+		    // cover cases like:  /*@symbolic */ BINARY_OPERATOR
+		    addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
+		}
+		
+		// now treat rules for only binary expression operators
+		binOpTokenClasses = new HashSet<>();
+		binOpTokenClasses.add(TEqual.class);
+		binOpTokenClasses.add(TNotEqual.class);
+		binOpTokenClasses.add(TInclusion.class);
+		binOpTokenClasses.add(TNonInclusion.class);
+		binOpTokenClasses.add(TElementOf.class);
+		binOpTokenClasses.add(TNotBelonging.class);
+		binOpTokenClasses.add(TIntersection.class);
+		binOpTokenClasses.add(TUnion.class);
+		binOpTokenClasses.add(TSetSubtraction.class);
+		binOpTokenClasses.add(TPlus.class);
+		binOpTokenClasses.add(TDivision.class);
+		binOpTokenClasses.add(TProduct.class);
+		binOpTokenClasses.add(TPowerOf.class);
+		//binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence
+		//binOpTokenClasses.add(TGreater.class);
+		binOpTokenClasses.add(TLessEqual.class);
+		binOpTokenClasses.add(TGreaterEqual.class);
+		
+		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+		    addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not inside it.");
+		     addInvalid(binOpTokenClass, TPragmaLabel.class,  "A label pragma must be put before a *predicate*, it cannot be put before expressions.");
+		     addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
+		}
+		
+		// override rules above with a more specific error message
+		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
+		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one 'or' too many).");
 	}
 
 	private ParseOptions parseOptions = null;
