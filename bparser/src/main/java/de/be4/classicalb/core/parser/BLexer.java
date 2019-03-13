@@ -46,6 +46,16 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TElementOf.class, "You need to use /: for not membership and not \\:.");
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
+		 // cover cases like: BINARY_LOGICAL_OPERATOR /*@desc txt */
+		addInvalid(TConjunction.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
+		addInvalid(TLogicalOr.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
+		addInvalid(TImplies.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
+		addInvalid(TEquivalence.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
+		 // cover cases like:  /*@label txt */ BINARY_LOGICAL_OPERATOR
+		addInvalid(TPragmaLabel.class, TConjunction.class,  "A label pragma must be put *before* a predicate, not *after* it.");
+		addInvalid(TPragmaLabel.class, TLogicalOr.class,  "A label pragma must be put *before* a predicate, not *after* it.");
+		addInvalid(TPragmaLabel.class, TImplies.class,  "A label pragma must be put *before* a predicate, not *after* it.");
+		addInvalid(TPragmaLabel.class, TEquivalence.class,  "A label pragma must be put *before* a predicate, not *after* it.");
 
 		clauseTokenClasses.add(TAssertions.class);
 		clauseTokenClasses.add(TConstants.class);
@@ -85,8 +95,9 @@ public class BLexer extends Lexer {
 	private Token lastToken;
 
 	private void findSyntaxError() throws LexerException {
-		if (token instanceof TWhiteSpace || token instanceof TLineComment) {
-			return;
+		if (token instanceof TWhiteSpace || token instanceof TLineComment ||
+		    token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
+			return; // we ignore these tokens for checking for invalid combinations
 		} else if (lastToken == null) {
 			lastToken = token;
 			return;
@@ -95,6 +106,7 @@ public class BLexer extends Lexer {
 		Class<? extends Token> tokenClass = token.getClass();
 
 		checkForInvalidCombinations(lastTokenClass, tokenClass);
+		// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
         
 		lastToken = token;
 	}
@@ -128,7 +140,7 @@ public class BLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-        //System.out.println("State = " + state + " token = " + token);
+        // System.out.println("State = " + state + " token = " + token);
         if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
             token instanceof TUnrecognisedPragma) {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
@@ -141,6 +153,8 @@ public class BLexer extends Lexer {
 		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
 		            !(token instanceof TPragmaDescription)) {
 			collectComment();
+		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
+			findSyntaxError();
 		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
 			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
