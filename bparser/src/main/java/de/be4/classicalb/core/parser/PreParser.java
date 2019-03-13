@@ -434,7 +434,9 @@ public class PreParser {
 		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
 		}
-		return "[" + line + "," + pos + "]" + message;
+		errorToken.setLine(line);
+		errorToken.setPos(pos);
+		return "[" + line + "," + pos + "] " + message;
 	}
 
 	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,

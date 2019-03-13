@@ -193,8 +193,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
-			//	.startsWith("preparse_exception([],'[2,23] "));
-						.startsWith("parse_exception"));
+				//.startsWith("preparse_exception([],'[2,23] "));
+				.startsWith("parse_exception(pos(2,23,"));
 		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
 		// The position information is still wrong; something in the PreParser does not work correctly
 	}
