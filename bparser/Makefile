@@ -1,3 +1,4 @@
+# this is just a simple reminder on what kind of gradle tasks that can be run
 parseable:
 	gradle test --tests de.be4.classicalb.core.parser.ParsableMachineTest --info
 test2:
