@@ -127,6 +127,10 @@ public class BLexer extends Lexer {
 		// override rules above with a more specific error message
 		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
 		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one 'or' too many).");
+		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence.");
+		
+		// Other rules:
+		addInvalid(TLeftPar.class, TRightPar.class, "( ) is not allowed, it must contain arguments.");
 	}
 
 	private ParseOptions parseOptions = null;
