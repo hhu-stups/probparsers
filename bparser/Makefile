@@ -13,3 +13,7 @@ expr:
 	gradle test --tests de.be4.classicalb.core.parser.ExpressionTest --info
 comments:
 	gradle test --tests de.be4.classicalb.core.parser.CommentsTest --info
+test3:
+	gradle test --tests de.be4.classicalb.core.parser.SyntaxErrorsDetectedOnTokenStreamTest --info
+ext:
+	gradle test --tests de.be4.classicalb.core.parser.languageextension.SyntaxExtensionTest--info

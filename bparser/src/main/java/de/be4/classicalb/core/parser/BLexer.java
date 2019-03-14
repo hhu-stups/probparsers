@@ -41,10 +41,17 @@ public class BLexer extends Lexer {
         // Beginning or end of a section:
 		clauseTokenClasses.add(TAssertions.class);
 		clauseTokenClasses.add(TConstants.class);
-		clauseTokenClasses.add(TInitialisation.class);
-		clauseTokenClasses.add(TInvariant.class);
-		clauseTokenClasses.add(TOperations.class);
+		clauseTokenClasses.add(TAbstractConstants.class);
+		clauseTokenClasses.add(TConcreteConstants.class);
+		clauseTokenClasses.add(TProperties.class);
+		clauseTokenClasses.add(TConstraints.class);
 		clauseTokenClasses.add(TVariables.class);
+		clauseTokenClasses.add(TAbstractVariables.class);
+		clauseTokenClasses.add(TConcreteVariables.class);
+		clauseTokenClasses.add(TInvariant.class);
+		clauseTokenClasses.add(TInitialisation.class);
+		clauseTokenClasses.add(TLocalOperations.class);
+		clauseTokenClasses.add(TOperations.class);
 		//clauseTokenClasses.add(TEnd.class); // can be end of expression or predicate with IF-THEN-ELSE
 		clauseTokenClasses.add(EOF.class);
 		// ...
@@ -71,23 +78,8 @@ public class BLexer extends Lexer {
 		}
 		
 		// now treat rules that apply to binary infix logical and binary expression operators
-		binOpTokenClasses.add(TEqual.class);
-		binOpTokenClasses.add(TNotEqual.class);
-		binOpTokenClasses.add(TInclusion.class);
-		binOpTokenClasses.add(TNonInclusion.class);
-		binOpTokenClasses.add(TElementOf.class);
-		binOpTokenClasses.add(TNotBelonging.class);
-		binOpTokenClasses.add(TIntersection.class);
-		binOpTokenClasses.add(TUnion.class);
-		binOpTokenClasses.add(TSetSubtraction.class);
-		binOpTokenClasses.add(TPlus.class); // Note: TMinus is also unary !  x = -1  or x : -1..10 is possible
-		binOpTokenClasses.add(TDivision.class);
-		binOpTokenClasses.add(TProduct.class);
-		binOpTokenClasses.add(TPowerOf.class);
-		binOpTokenClasses.add(TLessEqual.class);
-		binOpTokenClasses.add(TGreaterEqual.class);
-		binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible; but we now treat <> as a single token
-		binOpTokenClasses.add(TGreater.class);
+		AddBinExprOperators();
+		
 		
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
 			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
@@ -118,23 +110,7 @@ public class BLexer extends Lexer {
 		
 		// now treat rules for only binary infix expression operators
 		binOpTokenClasses = new HashSet<>();
-		binOpTokenClasses.add(TEqual.class);
-		binOpTokenClasses.add(TNotEqual.class);
-		binOpTokenClasses.add(TInclusion.class);
-		binOpTokenClasses.add(TNonInclusion.class);
-		binOpTokenClasses.add(TElementOf.class);
-		binOpTokenClasses.add(TNotBelonging.class);
-		binOpTokenClasses.add(TIntersection.class);
-		binOpTokenClasses.add(TUnion.class);
-		binOpTokenClasses.add(TSetSubtraction.class);
-		binOpTokenClasses.add(TPlus.class);
-		binOpTokenClasses.add(TDivision.class);
-		binOpTokenClasses.add(TProduct.class);
-		binOpTokenClasses.add(TPowerOf.class);
-		binOpTokenClasses.add(TLess.class);
-		binOpTokenClasses.add(TGreater.class);
-		binOpTokenClasses.add(TLessEqual.class);
-		binOpTokenClasses.add(TGreaterEqual.class);
+		AddBinExprOperators();
 		
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
 		    addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not inside it.");
@@ -152,6 +128,35 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "( ) is not allowed, it must contain arguments.");
+	}
+	
+	private static void AddBinExprOperators() {
+	    binOpTokenClasses.add(TEqual.class);
+		binOpTokenClasses.add(TNotEqual.class);
+		binOpTokenClasses.add(TInclusion.class);
+		binOpTokenClasses.add(TNonInclusion.class);
+		binOpTokenClasses.add(TElementOf.class);
+		binOpTokenClasses.add(TNotBelonging.class);
+		binOpTokenClasses.add(TIntersection.class);
+		binOpTokenClasses.add(TUnion.class);
+		binOpTokenClasses.add(TSetSubtraction.class);
+		binOpTokenClasses.add(TPlus.class); // Note: TMinus is also unary !  x = -1  or x : -1..10 is possible
+		binOpTokenClasses.add(TDivision.class);
+		binOpTokenClasses.add(TMod.class);
+		binOpTokenClasses.add(TProduct.class);
+		binOpTokenClasses.add(TPowerOf.class);
+		binOpTokenClasses.add(TLessEqual.class);
+		binOpTokenClasses.add(TGreaterEqual.class);
+		binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible; but we now treat <> as a single token
+		binOpTokenClasses.add(TGreater.class);
+		binOpTokenClasses.add(TOverwriteRelation.class);
+		binOpTokenClasses.add(TInterval.class);
+		binOpTokenClasses.add(TConcatSequence.class);
+		binOpTokenClasses.add(TMaplet.class);
+		binOpTokenClasses.add(TRangeRestriction.class);
+		binOpTokenClasses.add(TRangeSubtraction.class);
+		binOpTokenClasses.add(TDomainRestriction.class);
+		binOpTokenClasses.add(TDomainSubtraction.class);
 	}
 
 	private ParseOptions parseOptions = null;
