@@ -196,7 +196,6 @@ public class DefinitionFilesTest implements IFileContentProvider {
 				//.startsWith("preparse_exception([],'[2,23] "));
 				.startsWith("parse_exception(pos(2,23,"));
 		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
-		// The position information is still wrong; something in the PreParser does not work correctly
 	}
 
 	@Test
@@ -206,7 +205,9 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
-				.startsWith("preparse_exception([],'[3,1]"));
+				//.startsWith("preparse_exception([],'[3,1]"));
+				.startsWith("parse_exception(pos(3,1,"));
+		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {

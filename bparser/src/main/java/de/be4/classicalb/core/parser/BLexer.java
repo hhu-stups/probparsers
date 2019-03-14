@@ -38,35 +38,39 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
+        // Beginning or end of a section:
 		clauseTokenClasses.add(TAssertions.class);
 		clauseTokenClasses.add(TConstants.class);
 		clauseTokenClasses.add(TInitialisation.class);
 		clauseTokenClasses.add(TInvariant.class);
 		clauseTokenClasses.add(TOperations.class);
 		clauseTokenClasses.add(TVariables.class);
+		//clauseTokenClasses.add(TEnd.class); // can be end of expression or predicate with IF-THEN-ELSE
+		clauseTokenClasses.add(EOF.class);
 		// ...
 
 		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
 			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
-			addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
+			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
 			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
 		}
 		
-	   // add some rules for the binary logical operators:
+	   // add some rules for the binary infix logical operators:
 		binOpTokenClasses.add(TConjunction.class);
 		binOpTokenClasses.add(TLogicalOr.class);
 		binOpTokenClasses.add(TImplies.class);
 		binOpTokenClasses.add(TEquivalence.class);
 
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
 		 // cover cases like: BINARY_LOGICAL_OPERATOR /*@desc txt */
 		    addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
 		 // cover cases like:  /*@label txt */ BINARY_LOGICAL_OPERATOR
-		    addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not *after* it.");
+		     addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not *after* it.");
 		}
 		
-		// now treat rules that apply to binary logical and binary expression operators
+		// now treat rules that apply to binary infix logical and binary expression operators
 		binOpTokenClasses.add(TEqual.class);
 		binOpTokenClasses.add(TNotEqual.class);
 		binOpTokenClasses.add(TInclusion.class);
@@ -89,16 +93,30 @@ public class BLexer extends Lexer {
 			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
 			// Note: opName is something like CONJUNCTION and not &,...
 			
+			// rules for two binary operators following each other:
 			for (Class<? extends Token> binOpTokenClass2 : binOpTokenClasses) {
 				String opName2 = binOpTokenClass2.getSimpleName().substring(1).toUpperCase();
 				addInvalid(binOpTokenClass, binOpTokenClass2, opName + " " + opName2 + " is not allowed.");
 			}
 			
+			// now rules for beginning/end of sections:
+			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+				String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
+				addInvalid(binOpTokenClass, clauseTokenClass, opName + " " + clauseName + " is not allowed, argument to binary operator is missing.");
+				addInvalid(clauseTokenClass,binOpTokenClass, clauseName + " " + opName + " is not allowed, argument to binary operator is missing.");
+			}
+			addInvalid(binOpTokenClass, TEnd.class, opName + " END is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElse.class, opName + " ELSE is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElsif.class, opName + " ELSIF is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TThen.class, opName + " THEN is not allowed, argument to binary operator is missing.");
+		    addInvalid(binOpTokenClass, TRightPar.class, opName + " ) is not allowed, argument to binary operator is missing.");
+		    addInvalid(TLeftPar.class, binOpTokenClass, "( " + opName + " is not allowed, argument to binary operator is missing.");
+			
 		    // cover cases like:  /*@symbolic */ BINARY_OPERATOR
 		    addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
 		}
 		
-		// now treat rules for only binary expression operators
+		// now treat rules for only binary infix expression operators
 		binOpTokenClasses = new HashSet<>();
 		binOpTokenClasses.add(TEqual.class);
 		binOpTokenClasses.add(TNotEqual.class);
@@ -122,12 +140,15 @@ public class BLexer extends Lexer {
 		    addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not inside it.");
 		     addInvalid(binOpTokenClass, TPragmaLabel.class,  "A label pragma must be put before a *predicate*, it cannot be put before expressions.");
 		     addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
+		     
+			 String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
+		     addInvalid(binOpTokenClass, TEnd.class, "Missing argument for binary operator " + opName + ".");
 		}
 		
 		// override rules above with a more specific error message
 		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
 		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one 'or' too many).");
-		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence.");
+		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "( ) is not allowed, it must contain arguments.");

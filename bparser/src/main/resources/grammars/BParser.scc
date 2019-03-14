@@ -123,8 +123,8 @@ Tokens
   {normal} lambda = '%' | 0x03bb;
   {normal} conjunction = '&' | 0x2227;
   {normal} single_quotation = 39; // single quote: '
-  {normal} left_par = '(';
-  {normal} right_par = ')';
+  {normal} left_par = '(';  // opening/left parenthesis
+  {normal} right_par = ')'; // closing/right parenthesis
   {normal} product = '*' | 0x00d7;
   {normal} power_of = '**';
   {normal} plus = plus;
