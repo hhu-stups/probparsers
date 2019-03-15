@@ -368,7 +368,8 @@ public class PreParser {
 			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
 			expressionParseUnit.apply(visitor);
 
-			if (visitor.isKaboom()) {
+			if (visitor.isUntypedDefinitionUsed()) {
+		       // the parseunit uses another definition which is not yet typed
 				return new DefinitionType();
 			}
 

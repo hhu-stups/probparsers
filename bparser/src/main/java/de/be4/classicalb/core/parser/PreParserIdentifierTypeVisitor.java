@@ -7,26 +7,23 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 
 public class PreParserIdentifierTypeVisitor extends DepthFirstAdapter {
 
-	private final Set<String> definitions;
-	private boolean kaboom = false;
+	private final Set<String> untypedDefinitions;
+	private boolean untypedDefinitionUsed = false;
 
-	public PreParserIdentifierTypeVisitor(Set<String> definitions) {
-		this.definitions = definitions;
+	public PreParserIdentifierTypeVisitor(Set<String> untypedDefinitions) {
+		this.untypedDefinitions = untypedDefinitions;
 	}
 
 	@Override
 	public void inAIdentifierExpression(AIdentifierExpression node) {
 		super.inAIdentifierExpression(node);
-		if (definitions.contains(node.getIdentifier().get(0).getText()))
-			kaboom();
+		if (untypedDefinitions.contains(node.getIdentifier().get(0).getText()))
+		// the definition uses another definition which is not yet typed
+			untypedDefinitionUsed = true;
 	}
 
-	private void kaboom() {
-		kaboom = true;
-	}
-
-	public boolean isKaboom() {
-		return kaboom;
+	public boolean isUntypedDefinitionUsed() {
+		return untypedDefinitionUsed;
 	}
 
 }
