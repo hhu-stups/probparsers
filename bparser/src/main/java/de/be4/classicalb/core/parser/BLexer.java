@@ -32,7 +32,7 @@ public class BLexer extends Lexer {
 	static {
 		addInvalid(TSemicolon.class, TSemicolon.class, "Two succeeding semicolons are not allowed.");
 		addInvalid(TDoubleVerticalBar.class, TDoubleVerticalBar.class,
-				"|| || is not allowed (probably one || too many).");
+				"is not allowed (probably one || too many).");
 		addInvalid(TSetSubtraction.class, TEqual.class, "You need to use /= for inequality and not \\=.");
 		addInvalid(TSetSubtraction.class, TElementOf.class, "You need to use /: for not membership and not \\:.");
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
@@ -88,21 +88,21 @@ public class BLexer extends Lexer {
 			// rules for two binary operators following each other:
 			for (Class<? extends Token> binOpTokenClass2 : binOpTokenClasses) {
 				String opName2 = binOpTokenClass2.getSimpleName().substring(1).toUpperCase();
-				addInvalid(binOpTokenClass, binOpTokenClass2, opName + " " + opName2 + " is not allowed.");
+				addInvalid(binOpTokenClass, binOpTokenClass2,"is not allowed.");
 			}
 			
 			// now rules for beginning/end of sections:
 			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
 				String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
-				addInvalid(binOpTokenClass, clauseTokenClass, opName + " " + clauseName + " is not allowed, argument to binary operator is missing.");
-				addInvalid(clauseTokenClass,binOpTokenClass, clauseName + " " + opName + " is not allowed, argument to binary operator is missing.");
+				addInvalid(binOpTokenClass, clauseTokenClass,"is not allowed, argument to binary operator is missing.");
+				addInvalid(clauseTokenClass,binOpTokenClass,"is not allowed, argument to binary operator is missing.");
 			}
-			addInvalid(binOpTokenClass, TEnd.class, opName + " END is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TElse.class, opName + " ELSE is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TElsif.class, opName + " ELSIF is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TThen.class, opName + " THEN is not allowed, argument to binary operator is missing.");
-		    addInvalid(binOpTokenClass, TRightPar.class, opName + " ) is not allowed, argument to binary operator is missing.");
-		    addInvalid(TLeftPar.class, binOpTokenClass, "( " + opName + " is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TEnd.class, "is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElse.class, "is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElsif.class,"is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TThen.class,"is not allowed, argument to binary operator is missing.");
+		    addInvalid(binOpTokenClass, TRightPar.class,"is not allowed, argument to binary operator is missing.");
+		    addInvalid(TLeftPar.class, binOpTokenClass, "is not allowed, argument to binary operator is missing.");
 			
 		    // cover cases like:  /*@symbolic */ BINARY_OPERATOR
 		    addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
@@ -122,12 +122,12 @@ public class BLexer extends Lexer {
 		}
 		
 		// override rules above with a more specific error message
-		addInvalid(TConjunction.class, TConjunction.class, "& & is not allowed (probably one & too many).");
-		addInvalid(TLogicalOr.class, TLogicalOr.class, "or or is not allowed (probably one 'or' too many).");
-		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
+		addInvalid(TConjunction.class, TConjunction.class, "is not allowed (probably one & too many).");
+		addInvalid(TLogicalOr.class, TLogicalOr.class, "is not allowed (probably one 'or' too many).");
+		addInvalid(TLess.class, TGreater.class, "is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
 		
 		// Other rules:
-		addInvalid(TLeftPar.class, TRightPar.class, "( ) is not allowed, it must contain arguments.");
+		addInvalid(TLeftPar.class, TRightPar.class, "is not allowed, it must contain arguments.");
 	}
 	
 	private static void AddBinExprOperators() {
@@ -204,9 +204,10 @@ public class BLexer extends Lexer {
 		if (map != null) {
 			String string = map.get(tokenClass);
 			if (string != null) {
-				int l = token.getLine();
-				int c = token.getPos();
-				ThrowDefaultLexerException("Invalid combination of symbols: " + string + "\n", string);
+				if (token instanceof EOF )
+					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastTokenClass + token + string + "\n", string);
+				else
+					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + token + string + "\n", string);
 			}
 		}
 
@@ -293,9 +294,6 @@ public class BLexer extends Lexer {
 	private void collectComment() throws LexerException, IOException {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
-			// tokenList.add(token);
-			// final int line = token.getLine() - 1;
-			// final int pos = token.getPos() - 1;
 			final String text = token.getText();
 			throw new BLexerException(comment, "Comment not closed.", text, comment.getLine(), comment.getPos());
 		}

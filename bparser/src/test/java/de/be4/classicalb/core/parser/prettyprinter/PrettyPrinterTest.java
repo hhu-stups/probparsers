@@ -177,13 +177,6 @@ public class PrettyPrinterTest {
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());
 	}
 
-	/*
-	 * @Test public void testCoupleSecondRepresentation() throws Exception {
-	 * String toParse = "#EXPRESSION 1|->2"; Start parse =
-	 * BParser.parse(toParse); PrettyPrinter prettyprinter = new
-	 * PrettyPrinter(); parse.apply(prettyprinter); assertEquals(toParse,
-	 * prettyprinter.getPrettyPrint()); }
-	 */
 
 	@Config
 	public static Configuration getConfig() {

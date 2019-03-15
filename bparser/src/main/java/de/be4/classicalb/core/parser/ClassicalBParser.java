@@ -40,7 +40,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
 			throws ProBParseException {
 		try {
-			Start ast = new BParser().parseTranstion(trans);
+			Start ast = new BParser().parseTransition(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);

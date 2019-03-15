@@ -215,7 +215,7 @@ public class BParser {
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
-	public Start parseTranstion(final String input) throws BCompoundException {
+	public Start parseTransition(final String input) throws BCompoundException {
 		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
