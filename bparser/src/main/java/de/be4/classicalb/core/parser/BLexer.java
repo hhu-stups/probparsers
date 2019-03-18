@@ -79,6 +79,7 @@ public class BLexer extends Lexer {
 		
 		// now treat rules that apply to binary infix logical and binary expression operators
 		AddBinExprOperators();
+	    binOpTokenClasses.add(TComma.class); // this has multiple uses: tuples, definition arguments, separating ids
 		
 		
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
@@ -102,7 +103,9 @@ public class BLexer extends Lexer {
 			addInvalid(binOpTokenClass, TElsif.class,"is not allowed, argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TThen.class,"is not allowed, argument to binary operator is missing.");
 		    addInvalid(binOpTokenClass, TRightPar.class,"is not allowed, argument to binary operator is missing.");
+		    addInvalid(binOpTokenClass, TSemicolon.class,"is not allowed, argument to binary operator is missing.");
 		    addInvalid(TLeftPar.class, binOpTokenClass, "is not allowed, argument to binary operator is missing.");
+		    addInvalid(TSemicolon.class, binOpTokenClass, "is not allowed, argument to binary operator is missing.");
 			
 		    // cover cases like:  /*@symbolic */ BINARY_OPERATOR
 		    addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
@@ -128,6 +131,10 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "is not allowed, it must contain arguments.");
+		addInvalid(TComma.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
+		addInvalid(TSemicolon.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
+		addInvalid(TPragmaLabel.class, TComma.class,  "A label pragma must be put *before* a predicate.");
+		addInvalid(TPragmaLabel.class, TSemicolon.class,  "A label pragma must be put *before* a predicate.");
 	}
 	
 	private static void AddBinExprOperators() {
