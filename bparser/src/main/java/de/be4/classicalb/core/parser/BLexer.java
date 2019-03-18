@@ -10,16 +10,23 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.lexer.Lexer.State;
 import de.be4.classicalb.core.parser.node.*;
 
 public class BLexer extends Lexer {
 
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
+	
+	private boolean parse_definition=false;
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
+	
+	public void setLexerPreparse(){
+		parse_definition = true; 
+	}
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -211,9 +218,13 @@ public class BLexer extends Lexer {
 		if (map != null) {
 			String string = map.get(tokenClass);
 			if (string != null) {
-				if (token instanceof EOF )
-					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastTokenClass + token + string + "\n", string);
-				else
+				if (token instanceof EOF ) {
+					if(parse_definition) {
+						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of definition " + string + "\n", string);
+					} else {
+						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of file " + string + "\n", string);
+					}	
+				} else
 					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + token + string + "\n", string);
 			}
 		}
