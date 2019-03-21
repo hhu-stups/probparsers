@@ -96,23 +96,23 @@ public class BLexer extends Lexer {
 			// rules for two binary operators following each other:
 			for (Class<? extends Token> binOpTokenClass2 : binOpTokenClasses) {
 				String opName2 = binOpTokenClass2.getSimpleName().substring(1).toUpperCase();
-				addInvalid(binOpTokenClass, binOpTokenClass2,"is not allowed.");
+				addInvalid(binOpTokenClass, binOpTokenClass2,"Invalid combination of binary operators.");
 			}
 			
 			// now rules for beginning/end of sections:
 			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
 				String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
-				addInvalid(binOpTokenClass, clauseTokenClass,"is not allowed, argument to binary operator is missing.");
-				addInvalid(clauseTokenClass,binOpTokenClass,"is not allowed, argument to binary operator is missing.");
+				addInvalid(binOpTokenClass,clauseTokenClass,"Argument to binary operator is missing.");
+				addInvalid(clauseTokenClass,binOpTokenClass,"Argument to binary operator is missing.");
 			}
-			addInvalid(binOpTokenClass, TEnd.class, "is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TElse.class, "is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TElsif.class,"is not allowed, argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TThen.class,"is not allowed, argument to binary operator is missing.");
-		    addInvalid(binOpTokenClass, TRightPar.class,"is not allowed, argument to binary operator is missing.");
-		    addInvalid(binOpTokenClass, TSemicolon.class,"is not allowed, argument to binary operator is missing.");
-		    addInvalid(TLeftPar.class, binOpTokenClass, "is not allowed, argument to binary operator is missing.");
-		    addInvalid(TSemicolon.class, binOpTokenClass, "is not allowed, argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TEnd.class,   "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElse.class,  "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElsif.class, "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TThen.class,  "Argument to binary operator is missing.");
+		    addInvalid(binOpTokenClass, TRightPar.class, "Argument to binary operator is missing.");
+		    addInvalid(binOpTokenClass, TSemicolon.class,"Argument to binary operator is missing.");
+		    addInvalid(TLeftPar.class, binOpTokenClass,  "Argument to binary operator is missing.");
+		    addInvalid(TSemicolon.class, binOpTokenClass,"Argument to binary operator is missing.");
 			
 		    // cover cases like:  /*@symbolic */ BINARY_OPERATOR
 		    addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
@@ -132,12 +132,12 @@ public class BLexer extends Lexer {
 		}
 		
 		// override rules above with a more specific error message
-		addInvalid(TConjunction.class, TConjunction.class, "is not allowed (probably one & too many).");
-		addInvalid(TLogicalOr.class, TLogicalOr.class, "is not allowed (probably one 'or' too many).");
-		addInvalid(TLess.class, TGreater.class, "is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
+		addInvalid(TConjunction.class, TConjunction.class, "Probably one & too many.");
+		addInvalid(TLogicalOr.class, TLogicalOr.class, "Probably one 'or' too many.");
+		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
 		
 		// Other rules:
-		addInvalid(TLeftPar.class, TRightPar.class, "is not allowed, it must contain arguments.");
+		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
 		addInvalid(TComma.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TSemicolon.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TPragmaLabel.class, TComma.class,  "A label pragma must be put *before* a predicate.");
@@ -220,12 +220,12 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				if (token instanceof EOF ) {
 					if(parse_definition) {
-						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of definition " + string + "\n", string);
+						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of definition. " + string + "\n", string);
 					} else {
-						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of file " + string + "\n", string);
+						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of file. " + string + "\n", string);
 					}	
 				} else
-					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + token + string + "\n", string);
+					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + token + ". " + string + "\n", string);
 			}
 		}
 

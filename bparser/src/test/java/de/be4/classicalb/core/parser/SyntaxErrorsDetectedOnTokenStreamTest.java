@@ -35,8 +35,9 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("Invalid combination of symbols"));
-			assertTrue(e.getMessage().contains(" VARIABLES is not allowed"));
-			// message now is: Invalid combination of symbols: CONJUNCTION VARIABLES is not allowed, argument to binary operator is missing.
+			assertTrue(e.getMessage().contains("&"));
+			assertTrue(e.getMessage().contains("VARIABLES"));
+			// message now is: Invalid combination of symbols: & VARIABLES . Argument to binary operator is missing.
 		}
 	}
 
