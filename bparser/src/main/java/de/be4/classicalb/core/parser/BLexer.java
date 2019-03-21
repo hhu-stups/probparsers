@@ -220,12 +220,12 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				if (token instanceof EOF ) {
 					if(parse_definition) {
-						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of definition. " + string + "\n", string);
+						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string + "\n", string);
 					} else {
-						ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + "before the end of file. " + string + "\n", string);
+						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string + "\n", string);
 					}	
 				} else
-					ThrowDefaultLexerException("Invalid combination of symbols: "+ lastToken + token + ". " + string + "\n", string);
+					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string + "\n", string);
 			}
 		}
 
