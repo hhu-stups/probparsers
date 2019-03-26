@@ -63,7 +63,9 @@ publish:
 
 prob_snapshot_parser_tests:
   stage: trigger
-  image: $CI_REGISTRY/stups/prob/prob-docker/internal/deployment:0.3
+  image: alpine:3.9
+  before_script:
+    - apk add --update curl
   dependencies: []
   variables:
     GIT_STRATEGY: none
