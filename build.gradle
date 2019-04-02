@@ -20,6 +20,11 @@ task remind {
     }
 }
 
+wrapper {
+    gradleVersion = "5.3.1"
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 // // The real configuration
 allprojects {
     apply plugin: 'java'
