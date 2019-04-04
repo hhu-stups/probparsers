@@ -51,7 +51,7 @@ jar {
 }
 
 compileJava { 
- dependsOn = ['genParser','genCtlParser',':prologlib:deploy',':parserbase:deploy'] 
+ dependsOn = ['genParser','genCtlParser'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

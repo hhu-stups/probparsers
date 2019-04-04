@@ -40,7 +40,7 @@ jar {
  include '**/*.java'
 }
 
-compileJava.dependsOn('genParser',':prologlib:deploy')
+compileJava.dependsOn('genParser')
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 

@@ -17,8 +17,4 @@ dependencies {
  compile project(path: ":unicode", configuration: "archives")
 }
 
-compileJava {
- dependsOn=[':bparser:deploy',':prologlib:deploy',':parserbase:deploy',':ltlparser:deploy',':answerparser:deploy',':unicode:deploy']
-}
-
 
