@@ -5,7 +5,7 @@ apply plugin: 'jacoco'
 dependencies {
     compile project(":prologlib")
     compile project(":bparser")
-    testCompile 'org.codehaus.groovy:groovy:2.4.7'
+    testCompile 'org.codehaus.groovy:groovy:2.5.6'
 }
 
 
