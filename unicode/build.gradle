@@ -12,11 +12,6 @@ configurations {
 	sablecc
 }
 
-dependencies {
-    //compile 'com.google.code.findbugs:jsr305:1.3.9'
-    testCompile 'junit:junit:4.8.2'
-}
-
 task genParser(type:JavaExec) {
 	doFirst{ file('build/temp').mkdirs() }
 	inputs.dir new File('src/main/resources/grammars')
