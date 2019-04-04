@@ -9,12 +9,12 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 dependencies {
- compile project(path: ":bparser", configuration: "archives") 
- compile project(path: ":prologlib", configuration: "archives") 
- compile project(path: ":parserbase", configuration: "archives") 
- compile project(path: ":ltlparser", configuration: "archives") 
- compile project(path: ":answerparser", configuration: "archives") 
- compile project(path: ":unicode", configuration: "archives")
+    compile project(":bparser") 
+    compile project(":prologlib") 
+    compile project(":parserbase") 
+    compile project(":ltlparser") 
+    compile project(":answerparser") 
+    compile project(":unicode")
 }
 
 

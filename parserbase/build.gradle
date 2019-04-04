@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 dependencies {
- compile project(path: ":prologlib", configuration: "archives")
+    compile project(":prologlib")
 }
 
 // type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis

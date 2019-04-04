@@ -5,8 +5,7 @@ apply plugin: 'jacoco'
 
 
 dependencies {
-
-    compile project(path: ":prologlib", configuration: "archives")
+    compile project(":prologlib")
 }
 
 sourceSets {
