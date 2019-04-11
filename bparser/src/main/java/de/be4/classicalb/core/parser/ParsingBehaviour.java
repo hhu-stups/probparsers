@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 public class ParsingBehaviour {
- // Flags are set, e.g., in CliBParser.java
+	// Flags are set, e.g., in CliBParser.java
 	private boolean prologOutput = false;       // -prolog flag in CliBParser
 	private boolean useIndention = false;       // -indent flag in CliBParser
 	private boolean addLineNumbers = false;     // -lineno flag in CliBParser

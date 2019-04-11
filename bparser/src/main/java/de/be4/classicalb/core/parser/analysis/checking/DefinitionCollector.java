@@ -76,7 +76,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 			File file = definitions.getFile(name);
 			StringBuilder sb = new StringBuilder();
 			sb.append("Duplicate definition: " + name + ".\n");
-		    SourcePosition firstPos = existingDefinition.getStartPos();
+			SourcePosition firstPos = existingDefinition.getStartPos();
 			sb.append("(First appearance at ").append(this.getPosition(firstPos));
 			if (file != null) {
 				sb.append(" in file: ").append(file.getAbsolutePath());

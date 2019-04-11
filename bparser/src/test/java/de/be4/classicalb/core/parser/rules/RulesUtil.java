@@ -84,7 +84,7 @@ public class RulesUtil {
 		try {
 			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
 		} catch (URISyntaxException e) {
-		    throw new RuntimeException(e);
+			throw new RuntimeException(e);
 		}
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(addLineNumbers);

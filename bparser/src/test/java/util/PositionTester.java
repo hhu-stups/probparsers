@@ -11,12 +11,12 @@ import static junit.framework.Assert.assertNotNull;
  * @author bendisposto
  */
 public class PositionTester extends DepthFirstAdapter {
-    @Override
-    public void defaultIn(final Node node) {
-        if (node instanceof Start) return; // start does not have position infos
-        assertNotNull(node.getClass().getSimpleName() + " start was null",
-                node.getStartPos());
-        assertNotNull(node.getClass().getSimpleName() + " end was null",
-                node.getEndPos());
-    }
+	@Override
+	public void defaultIn(final Node node) {
+		if (node instanceof Start) return; // start does not have position infos
+		assertNotNull(node.getClass().getSimpleName() + " start was null",
+				node.getStartPos());
+		assertNotNull(node.getClass().getSimpleName() + " end was null",
+				node.getEndPos());
+	}
 }

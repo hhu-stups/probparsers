@@ -35,7 +35,7 @@ public class UnparsableMachineTest extends AbstractParseMachineTest {
 
 	@Config
 	public static Configuration getConfig() {
-	    return buildConfig(PATH);
+		return buildConfig(PATH);
 	}
 
 }

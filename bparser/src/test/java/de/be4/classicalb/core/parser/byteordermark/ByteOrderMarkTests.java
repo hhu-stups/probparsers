@@ -44,7 +44,7 @@ public class ByteOrderMarkTests extends AbstractParseMachineTest {
 
 	@Config
 	public static Configuration getConfig() {
-	    return buildConfig(PATH);
+		return buildConfig(PATH);
 	}
 
 }

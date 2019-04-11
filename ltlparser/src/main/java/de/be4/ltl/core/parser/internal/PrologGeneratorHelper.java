@@ -139,7 +139,7 @@ final class PrologGeneratorHelper {
 
 	public void existsTerm(AExistsLtl node, PrologGenerator gen) {
 		
-        pto.openTerm("exists");
+		pto.openTerm("exists");
 		String identifier = node.getExistsIdentifier().getText();
 		pto.printAtom(identifier);
 		
@@ -148,13 +148,13 @@ final class PrologGeneratorHelper {
 
 		node.getLtl().apply(gen);
 
-        pto.closeTerm();
+		pto.closeTerm();
 		
 	}
 
 	public void forallTerm(AForallLtl node, PrologGenerator gen) {
 		
-        pto.openTerm("forall");
+		pto.openTerm("forall");
 		String identifier = node.getForallIdentifier().getText();
 		pto.printAtom(identifier);
 		
@@ -163,7 +163,7 @@ final class PrologGeneratorHelper {
 
 		node.getLtl().apply(gen);
 
-        pto.closeTerm();
+		pto.closeTerm();
 		
 	}
 

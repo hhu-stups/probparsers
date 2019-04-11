@@ -13,15 +13,15 @@ import static org.junit.Assert.assertTrue;
 
 public class ExploreSourcePositionTest {
 
-    @Test
-    public void test() throws BCompoundException, IOException, URISyntaxException {
+	@Test
+	public void test() throws BCompoundException, IOException, URISyntaxException {
 
-        final BParser parser = new BParser("m");
-        Start parse = parser.parseFile(new File(this.getClass().getClassLoader().getResource("LabelTest.mch").toURI()), false);
+		final BParser parser = new BParser("m");
+		Start parse = parser.parseFile(new File(this.getClass().getClassLoader().getResource("LabelTest.mch").toURI()), false);
 
-        parse.apply(new ASTPrinter());
+		parse.apply(new ASTPrinter());
 
-        assertTrue(true);
-    }
+		assertTrue(true);
+	}
 
 }

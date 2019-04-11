@@ -370,7 +370,7 @@ public class PreParser {
 			expressionParseUnit.apply(visitor);
 
 			if (visitor.isUntypedDefinitionUsed()) {
-		       // the parseunit uses another definition which is not yet typed
+				// the parseunit uses another definition which is not yet typed
 				return new DefinitionType();
 			}
 
