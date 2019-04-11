@@ -19,29 +19,30 @@ sourceSets {
     }
 }
 
-def getCheckedOutGitCommitHash() {
-    def gitFolder = "$projectDir/../.git/"
-    def takeFromHash = 40
-    try {
-        def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
-        def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
-        if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
-        def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-        refHead.text.trim().take takeFromHash
-    } catch (Exception e) { "unknown" }
+def readCurrentGitCommit() {
+    def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+    def exitCode = proc.waitFor()
+    if (exitCode != 0) {
+        throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+    }
+    return proc.in.readLines()[0]
 }
 
-task createBuildConstants  {
+final BUILD_PROPERTIES = file("src/main/resources/bparser-build.properties")
+
+task createBuildConstants {
     doFirst {
-        def buildconstants_class = """
-version=${project.version}
-git=${getCheckedOutGitCommitHash()}"""
-        File f = file("src/main/resources/bparser-build.properties")
-        f.delete()
-        f.getParentFile().mkdirs()
-        f <<  buildconstants_class
+        BUILD_PROPERTIES.delete()
+        BUILD_PROPERTIES << "version=${project.version}\n"
+        BUILD_PROPERTIES << "git=${readCurrentGitCommit()}\n"
     }
 }
+processResources.dependsOn(createBuildConstants)
+
+task cleanBuildConstants(type: Delete) {
+    delete(BUILD_PROPERTIES)
+}
+clean.dependsOn(cleanBuildConstants)
 
 task genPreparser(type:JavaExec) {
     inputs.dir new File('src/main/resources/grammars')
@@ -78,7 +79,7 @@ jar {
 }
 
 compileJava {
-    dependsOn = ['createBuildConstants','genPreparser','genBParser']
+    dependsOn = ['genPreparser','genBParser']
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
