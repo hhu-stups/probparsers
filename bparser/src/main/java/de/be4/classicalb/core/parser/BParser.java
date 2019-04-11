@@ -492,10 +492,6 @@ public class BParser {
 		this.definitions = definitions;
 	}
 
-	public static String getBuildRevision() {
-		return Utils.getRevisionFromManifest();
-	}
-
 	public List<String> getDoneDefFiles() {
 		return doneDefFiles;
 	}

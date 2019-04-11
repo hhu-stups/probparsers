@@ -60,16 +60,6 @@ public final class Utils {
 				|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
-	public static String getRevisionFromManifest() {
-		try (InputStream stream = Utils.class.getClassLoader().getResourceAsStream("revision.properties")) {
-			Properties properties = new Properties();
-			properties.load(stream);
-			return properties.getProperty("CompileDate");
-		} catch (IOException e) {
-			return String.valueOf(System.currentTimeMillis());
-		}
-	}
-
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
 		return "[" + sourcePos.getLine() + "," + sourcePos.getPos() + "]";
 	}

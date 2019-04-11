@@ -102,7 +102,7 @@ public class RecursiveMachineLoader {
 
 		// parser version
 		pout.openTerm("parser_version");
-		pout.printAtom(BParser.getBuildRevision());
+		pout.printAtom(BParser.getGitSha());
 		pout.closeTerm();
 		pout.fullstop();
 

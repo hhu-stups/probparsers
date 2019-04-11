@@ -64,7 +64,6 @@ public class CliBParser {
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
 			System.out.println(String.format("Version:    %s", BParser.getVersion()));
 			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
-			System.out.println(String.format("Build Date: %s", BParser.getBuildRevision()));
 			System.exit(0);
 		}
 
@@ -160,7 +159,7 @@ public class CliBParser {
 
 			switch (command) {
 			case version:
-				print(BParser.getBuildRevision() + System.lineSeparator());
+				print(BParser.getGitSha() + System.lineSeparator());
 				break;
 			case definition:
 				String name = in.readLine();
@@ -398,7 +397,7 @@ public class CliBParser {
 
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
 		final ConsoleOptions options = new ConsoleOptions();
-		options.setIntro("BParser (rev. " + BParser.getBuildRevision()
+		options.setIntro("BParser (version " + BParser.getVersion() + ", commit " + BParser.getGitSha()
 				+ ")\nusage: BParser [options] <BMachine file>\n\nAvailable options are:");
 		options.addOption(CLI_SWITCH_VERBOSE, "Verbose output during lexing and parsing");
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");

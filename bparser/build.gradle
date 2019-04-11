@@ -79,12 +79,6 @@ jar {
 
 compileJava {
     dependsOn = ['createBuildConstants','genPreparser','genBParser']
-    doFirst {
-        def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
-        File f = file("src/main/resources/revision.properties")
-        f.delete()
-        f <<  buildconstants_class
-    }
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
