@@ -3,12 +3,10 @@
 sourceSets {
     main {
         java {
-          	srcDirs = ['build/temp','src/main/java']
+            srcDirs = ['build/temp','src/main/java']
         }
     }
 }
-
-
 
 task genParser(type:JavaExec) {
     doFirst{ file('build/temp').mkdirs() }
@@ -20,18 +18,17 @@ task genParser(type:JavaExec) {
     args = ['-d','build/temp','src/main/resources/theorymapping.scc']
 }
 
-
-jar {	
- include '**/*.class'
- exclude '**.*.scc' 
- from 'build/temp'
- include '**/*.dat'
- from sourceSets.main.toString()
- include '**/*.java'
+jar {
+    include '**/*.class'
+    exclude '**.*.scc' 
+    from 'build/temp'
+    include '**/*.dat'
+    from sourceSets.main.toString()
+    include '**/*.java'
 }
 
 compileJava { 
- dependsOn = ['genParser'] 
+    dependsOn = ['genParser'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)

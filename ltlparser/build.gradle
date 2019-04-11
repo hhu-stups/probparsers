@@ -3,9 +3,6 @@
 //dependsOn(':prologlib')
 //dependsOn(':parserbase')
 
-
-
-
 dependencies {
     compile project(":prologlib") 
     compile project(":parserbase") 
@@ -14,46 +11,44 @@ dependencies {
 sourceSets {
     main {
         java {
-          	srcDirs = ['build/temp','src/main/java']
+            srcDirs = ['build/temp','src/main/java']
         }
     }
 }
 
 task genParser(type:JavaExec) {
-	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
-	outputs.dir new File('build/temp')
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/LtlParser.scc']
+    doFirst{ file('build/temp').mkdirs() }
+    inputs.dir new File('src/main/resources/')
+    outputs.dir new File('build/temp')
+    // doFirst{ file('build/temp').mkdirs() }
+    main = 'org.sablecc.sablecc.SableCC'
+    // classpath =  sourceSets.main.compileClasspath
+    classpath = configurations.sablecc
+    maxHeapSize = '1024m'
+    args = ['-d','build/temp','src/main/resources/LtlParser.scc']
 }
 
 task genCtlParser(type:JavaExec) {
-	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
-	outputs.dir new File('build/temp')
-	 main = 'org.sablecc.sablecc.SableCC'
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/CtlParser.scc']
+    doFirst{ file('build/temp').mkdirs() }
+    inputs.dir new File('src/main/resources/')
+    outputs.dir new File('build/temp')
+    main = 'org.sablecc.sablecc.SableCC'
+    classpath = configurations.sablecc
+    maxHeapSize = '1024m'
+    args = ['-d','build/temp','src/main/resources/CtlParser.scc']
 }
 
 jar {
- include '**/*.class'
- exclude '**.*.scc' 
- from 'build/temp'
- include '**/*.dat'
- from sourceSets.main.toString()
- include '**/*.java'
+    include '**/*.class'
+    exclude '**.*.scc' 
+    from 'build/temp'
+    include '**/*.dat'
+    from sourceSets.main.toString()
+    include '**/*.java'
 }
 
 compileJava { 
- dependsOn = ['genParser','genCtlParser'] 
+    dependsOn = ['genParser','genCtlParser'] 
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-

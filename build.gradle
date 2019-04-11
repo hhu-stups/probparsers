@@ -13,7 +13,6 @@ final SOURCE_ENCODING = "UTF-8"
 
 defaultTasks 'remind', 'clean', 'deploy'
 
-
 task remind {
     doLast {
         println "You did not specify a task. Assuming you mean gradle clean deploy."
@@ -173,7 +172,6 @@ subprojects {
 
 }
 
-
 task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     baseName = 'probcliparser'
     subprojects.each { subproject ->
@@ -204,23 +202,21 @@ task copyCoverage() {
         from fileTree(dir: 'prologlib/build/jacocoHtml')
         into "build/parser_coverage/prologlib"
     }
-
 }
 
-//sonarqube {
-//  properties {
-//    //property("sonar.organization", "prob2")
-//    property("sonar.projectKey", "probparsers")
-//    property("sonar.projectName", "probparsers")
-//    property("sonar.projectVersion", global_version)
-//    property("sonar.java.binaries", "bparser/build/classes")
-//    property("sonar.inclusions", "**/classicalb/core/parser/**")
-//    property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
-//    property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
-//    property("sonar.junit.reportsPath", "bparser/build/test-results/test")
-//    property("sonar.login", System.getenv("SONAR_TOKEN"))
-//  }
-// } 
-
+// sonarqube {
+//     properties {
+//         // property("sonar.organization", "prob2")
+//         property("sonar.projectKey", "probparsers")
+//         property("sonar.projectName", "probparsers")
+//         property("sonar.projectVersion", global_version)
+//         property("sonar.java.binaries", "bparser/build/classes")
+//         property("sonar.inclusions", "**/classicalb/core/parser/**")
+//         property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
+//         property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
+//         property("sonar.junit.reportsPath", "bparser/build/test-results/test")
+//         property("sonar.login", System.getenv("SONAR_TOKEN"))
+//     }
+// }
 
 task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])

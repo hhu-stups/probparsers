@@ -2,7 +2,6 @@ apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-
 dependencies {
     compile project(":prologlib")
     compile project(":bparser")
