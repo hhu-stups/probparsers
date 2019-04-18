@@ -11,14 +11,6 @@ dependencies {
     compile project(":parserbase")
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['build/temp','src/main/java']
-        }
-    }
-}
-
 def readCurrentGitCommit() {
     def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
     def exitCode = proc.waitFor()
@@ -43,46 +35,6 @@ task cleanBuildConstants(type: Delete) {
     delete(BUILD_PROPERTIES)
 }
 clean.dependsOn(cleanBuildConstants)
-
-task genPreparser(type:JavaExec) {
-    inputs.dir new File('src/main/resources/grammars')
-    outputs.dir new File('build/temp/de/be4/classicalb/core/preparser') // prevent rebuild because the second parser replaces patchfiles
-    // doFirst{ file('build/temp').mkdirs() }
-    main = 'org.sablecc.sablecc.SableCC'
-    // classpath =  sourceSets.main.compileClasspath
-    classpath = configurations.sablecc
-    maxHeapSize = '1024m'
-    args = ['-d','build/temp','src/main/resources/grammars/PreParser.scc']
-}
-
-task genBParser(type:JavaExec) {
-    dependsOn = ['genPreparser']
-    inputs.dir new File('src/main/resources/grammars')
-    outputs.dir new File('build/temp')
-    // doFirst{ file('build/temp').mkdirs() }
-    main = 'org.sablecc.sablecc.SableCC'
-    // classpath =  sourceSets.main.compileClasspath
-    classpath = configurations.sablecc
-    maxHeapSize = '1024m'
-    args = ['-d','build/temp','src/main/resources/grammars/BParser.scc']
-}
-
-jar {
-    include '**/*.class'
-    include '**/*.java'
-    exclude '**.*.scc'
-    from 'build/temp'
-    include '**/*.dat'
-    include '**/*.properties'
-    from sourceSets.main.toString()
-    include '**/*.java'
-}
-
-compileJava {
-    dependsOn = ['genPreparser','genBParser']
-}
-
-sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
 
 // type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
