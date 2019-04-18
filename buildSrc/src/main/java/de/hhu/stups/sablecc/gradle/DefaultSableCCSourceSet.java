@@ -17,6 +17,7 @@ final class DefaultSableCCSourceSet implements SableCCSourceSet, HasPublicType {
 		
 		this.sableCC = objectFactory.sourceDirectorySet(NAME, displayName + " SableCC source");
 		this.sableCC.getFilter().include("**/*.scc");
+		this.sableCC.getFilter().include("**/*.sablecc");
 	}
 	
 	@Override
