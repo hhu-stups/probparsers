@@ -54,10 +54,6 @@ subprojects {
         }
     }
 
-    configurations {
-        sablecc
-    }
-
     jar {
         from sourceSets.main.allJava
     }
