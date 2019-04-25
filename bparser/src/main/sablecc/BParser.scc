@@ -104,7 +104,11 @@ Helpers
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' 39)*;
 
-  layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  layout_char = [[[[9 .. 32] - line_break] + 160] + [8232 .. 8233]];
+  // TO DO: remove more characters from 9..32
+  // 160: non-breaking space
+  // 8206: Left-To_Right_Mark, 8207: Right-To-Left Mark, [now no longer accepted by the parser]
+  // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
   identifier_literal = unicode_letter (unicode_letter | digit | underscore)*;
