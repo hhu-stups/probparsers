@@ -1,4 +1,5 @@
 apply plugin: 'jacoco'
+apply plugin: 'java'
 
 jacocoTestReport {
     reports {

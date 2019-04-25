@@ -43,7 +43,6 @@ allprojects {
 
 subprojects {
     apply plugin: 'eclipse'
-    apply plugin: 'de.hhu.stups.sablecc'
     group = 'de.hhu.stups'
     version = global_version;
     repositories {
@@ -63,7 +62,6 @@ subprojects {
     }
 
     dependencies {
-        sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
         //compile 'com.google.code.findbugs:jsr305:1.3.9'
         testCompile 'junit:junit:4.8.2'
     }

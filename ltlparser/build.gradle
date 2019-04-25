@@ -1,4 +1,8 @@
+apply plugin: 'java'
+apply plugin: 'de.hhu.stups.sablecc'
+
 dependencies {
-    compile project(":prologlib") 
-    compile project(":parserbase") 
+    sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
+    compile project(":prologlib")
+    compile project(":parserbase")
 }
