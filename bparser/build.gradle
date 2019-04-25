@@ -1,8 +1,3 @@
-// BParser
-
-//dependsOn(':prologlib')
-//dependsOn(':parserbase')
-
 apply plugin: 'jacoco'
 apply plugin: 'java'
 
@@ -37,7 +32,6 @@ task cleanBuildConstants(type: Delete) {
 }
 clean.dependsOn(cleanBuildConstants)
 
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
     reports {
         xml.enabled false

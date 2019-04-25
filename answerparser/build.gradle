@@ -1,13 +1,9 @@
-// ProB Answer Parser
-
-//dependsOn(':prologlib')
 apply plugin: 'jacoco'
 
 dependencies {
     compile project(":prologlib")
 }
 
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
     reports {
         xml.enabled false

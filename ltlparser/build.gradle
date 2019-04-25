@@ -1,8 +1,3 @@
-// LTL Parser 
-
-//dependsOn(':prologlib')
-//dependsOn(':parserbase')
-
 dependencies {
     compile project(":prologlib") 
     compile project(":parserbase") 

@@ -1,6 +1,5 @@
 apply plugin: 'jacoco'
 
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
     reports {
         xml.enabled false
