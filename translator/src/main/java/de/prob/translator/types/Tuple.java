@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+@Deprecated
 public class Tuple implements BObject, List<BObject> {
 	private final List<BObject> elements;
 

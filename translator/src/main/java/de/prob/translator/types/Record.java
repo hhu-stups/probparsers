@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Deprecated
 public class Record implements BObject, Map<java.lang.String, BObject> {
 	private final Map<java.lang.String, BObject> map;
 

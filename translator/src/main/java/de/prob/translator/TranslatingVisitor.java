@@ -29,6 +29,7 @@ import de.prob.translator.types.Sequence;
 import de.prob.translator.types.String;
 import de.prob.translator.types.Tuple;
 
+@Deprecated
 public class TranslatingVisitor extends DepthFirstAdapter {
 	private BObject result;
 	private boolean inUnaryMinus;

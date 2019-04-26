@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
+@Deprecated
 public class Set implements BObject, java.util.Set<BObject> {
 	private final java.util.Set<BObject> set;
 

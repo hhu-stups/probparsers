@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public abstract class Number extends java.lang.Number implements Comparable<Number>, BObject {
 
 	private static final long serialVersionUID = 7702079048348822936L;
