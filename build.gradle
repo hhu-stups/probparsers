@@ -38,6 +38,7 @@ allprojects {
 
     tasks.withType(Javadoc) {
         options.encoding = SOURCE_ENCODING
+        options.addStringOption("sourcepath", "")
     }
 }
 
