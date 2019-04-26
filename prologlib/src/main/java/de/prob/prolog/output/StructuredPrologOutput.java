@@ -105,7 +105,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public IPrologTermOutput printString(final String content) {
-		throw new UnsupportedOperationException();
+		return printAtom(content);
 	}
 
 	public IPrologTermOutput printVariable(final String var) {

@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.pragmas;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.net.URISyntaxException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +13,8 @@ import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
+import util.PositionTester;
 
 /**
  * @author bendisposto
@@ -23,7 +23,7 @@ import de.be4.classicalb.core.parser.node.Start;
 @RunWith(PolySuite.class)
 public class PragmaMachineTest extends AbstractParseMachineTest {
 
-	private static final String PATH = "src/test/resources/pragmas";
+	private static final String PATH = "pragmas";
 
 	private final File machine;
 
@@ -39,25 +39,14 @@ public class PragmaMachineTest extends AbstractParseMachineTest {
 		assertNotNull(start);
 	}
 
-	
-	/**
-	 * Visitor that checks if all AST nodes contain the position information.
-	 * @author bendisposto
-	 */
-	private static class PositionTester extends DepthFirstAdapter {
-		@Override
-		public void defaultIn(Node node) {
-			if (node instanceof Start) return; // start does not have position infos
-			assertNotNull(node.getClass().getSimpleName() + " start was null",
-					node.getStartPos());
-			assertNotNull(node.getClass().getSimpleName() + " end was null",
-					node.getEndPos());
-		}
-	}
-
 	@Config
 	public static Configuration getConfig() {
-		final File[] machines = getMachines(PATH);
+		final File[] machines;
+		try {
+			machines = getMachines(PATH);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 		return new Configuration() {
 
 			public int size() {

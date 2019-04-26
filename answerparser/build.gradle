@@ -1,66 +1,27 @@
-// ProB Answer Parser
-
-//dependsOn(':prologlib')
 apply plugin: 'jacoco'
-
+apply plugin: 'java'
+apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-
-    compile project(path: ":prologlib", configuration: "archives")
+    sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
+    compile project(":prologlib")
 }
 
-sourceSets {
-    main {
-        java {
-          	srcDirs = ['build/temp','src/main/java']
-        }
-    }
-}
-
-
-
-task genParser(type:JavaExec) {
-	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
-	outputs.dir new File('build/temp')
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/prob.scc']
-}
-
-jar {
- include '**/*.class'
- exclude '**.*.scc'
- from 'build/temp'
- include '**/*.dat'
- from sourceSets.main.toString()
- include '**/*.java'
-}
-
-compileJava.dependsOn('genParser',':prologlib:deploy')
-
-sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
-  reports {
-      xml.enabled false
-      csv.enabled false
-      html.destination file("${buildDir}/jacocoHtml")
-  }
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
 
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it,
-                    exclude: ['**/parser/node/**'
-                      , '**/parser/analysis/**'
-                      , '**/preparser/**'
-                      , '**/lexer/**'
-                    ])
+            fileTree(dir: it, exclude: [
+                '**/parser/node/**',
+                '**/parser/analysis/**',
+                '**/preparser/**',
+                '**/lexer/**',
+            ])
         })
     }
 }

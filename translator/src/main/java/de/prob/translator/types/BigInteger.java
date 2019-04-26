@@ -143,6 +143,11 @@ public class BigInteger extends Number {
 	}
 
 	@Override
+	public Number bitwiseNegate() {
+		return new BigInteger(this.value.not());
+	}
+
+	@Override
 	public boolean isCase(Number o) {
 		return this.equals(o);
 	}

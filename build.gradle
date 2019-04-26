@@ -4,18 +4,24 @@ plugins {
 }
 */
 
-def global_version = '2.9.20'
+def global_version = '2.9.21'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
 
-defaultTasks 'remind', 'clean', 'deploy'
+final SOURCE_ENCODING = "UTF-8"
 
+defaultTasks 'remind', 'clean', 'deploy'
 
 task remind {
     doLast {
         println "You did not specify a task. Assuming you mean gradle clean deploy."
     }
+}
+
+wrapper {
+    gradleVersion = "5.4"
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 // // The real configuration
@@ -26,21 +32,13 @@ allprojects {
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
 
-    clean {
-        doLast {
-            def delClos
-            delClos = {
-                it.eachDir(delClos);
-                it.eachFile { it.delete() }
-                it.delete()
-            }
-            def build_dir = file("build")
-            if (build_dir.exists()) delClos(build_dir)
-//      def gradle_cache = file(".gradle")
-//      if (gradle_cache.exists()) delClos(gradle_cache)
-            def bin_dir = file("bin")
-            if (bin_dir.exists()) delClos(bin_dir)
-        }
+    tasks.withType(JavaCompile) {
+        options.encoding = SOURCE_ENCODING
+    }
+
+    tasks.withType(Javadoc) {
+        options.encoding = SOURCE_ENCODING
+        options.addStringOption("sourcepath", "")
     }
 }
 
@@ -56,10 +54,6 @@ subprojects {
         }
     }
 
-    configurations {
-        sablecc
-    }
-
     jar {
         from sourceSets.main.allJava
     }
@@ -69,7 +63,6 @@ subprojects {
     }
 
     dependencies {
-        sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
         //compile 'com.google.code.findbugs:jsr305:1.3.9'
         testCompile 'junit:junit:4.8.2'
     }
@@ -175,7 +168,6 @@ subprojects {
 
 }
 
-
 task uberjar(type: Jar, dependsOn: subprojects.deploy) {
     baseName = 'probcliparser'
     subprojects.each { subproject ->
@@ -206,23 +198,21 @@ task copyCoverage() {
         from fileTree(dir: 'prologlib/build/jacocoHtml')
         into "build/parser_coverage/prologlib"
     }
-
 }
 
-//sonarqube {
-//  properties {
-//    //property("sonar.organization", "prob2")
-//    property("sonar.projectKey", "probparsers")
-//    property("sonar.projectName", "probparsers")
-//    property("sonar.projectVersion", global_version)
-//    property("sonar.java.binaries", "bparser/build/classes")
-//    property("sonar.inclusions", "**/classicalb/core/parser/**")
-//    property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
-//    property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
-//    property("sonar.junit.reportsPath", "bparser/build/test-results/test")
-//    property("sonar.login", System.getenv("SONAR_TOKEN"))
-//  }
-// } 
-
+// sonarqube {
+//     properties {
+//         // property("sonar.organization", "prob2")
+//         property("sonar.projectKey", "probparsers")
+//         property("sonar.projectName", "probparsers")
+//         property("sonar.projectVersion", global_version)
+//         property("sonar.java.binaries", "bparser/build/classes")
+//         property("sonar.inclusions", "**/classicalb/core/parser/**")
+//         property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
+//         property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
+//         property("sonar.junit.reportsPath", "bparser/build/test-results/test")
+//         property("sonar.login", System.getenv("SONAR_TOKEN"))
+//     }
+// }
 
 task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])

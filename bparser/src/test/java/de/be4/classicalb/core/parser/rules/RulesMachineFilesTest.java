@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +18,7 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
 
 public class RulesMachineFilesTest {
-	public static final String dir = "src/test/resources/rules/";
+	public static final String dir = "rules/";
 
 	@Test
 	public void testSyntax() throws Exception {
@@ -92,7 +93,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testRulesMachineConfiguration() throws Exception {
-		File file = new File("src/test/resources/rules/project/RulesMachineConfigurationTest.rmch");
+		File file = new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineConfigurationTest.rmch").toURI());
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
@@ -119,7 +120,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testRulesMachineNameDoesNotMatchFileName() throws Exception {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/RulesMachineNameDoesNotMatchFileName.rmch");
+				"rules/project/RulesMachineNameDoesNotMatchFileName.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception(pos(1,15"));
 		assertTrue(result.contains("RULES_MACHINE name must match the file name"));
@@ -134,14 +135,14 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testPackage() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/folder/M1.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/references/folder/M1.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testForAll() throws Exception {
-		String f = "src/test/resources/rules/ForAllPredicate.rmch";
+		String f = "rules/ForAllPredicate.rmch";
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		RulesProject.parseProject(new File(f), parsingBehaviour, System.out, System.err);
@@ -149,35 +150,38 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testTransitiveDependency() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/TransitiveDependency.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/TransitiveDependency.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testDisabled() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/Disabled.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/Disabled.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testTransitiveDependencyRule() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/TransitiveDependencyRule.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/TransitiveDependencyRule.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testMainFileDoesNotExist() {
-		final String fileName = "src/test/resources/rules/project/FileDoesNotExist.rmch";
+		final String fileName = "rules/project/FileDoesNotExist.rmch";
 		String result = getRulesMachineAsPrologTerm(fileName);
+		System.out.println(result);
+
+		assertTrue(result.contains("FileDoesNotExist.rmch"));
 		assertTrue(result.contains("exception"));
 	}
 
 	@Test
 	public void testUnknownRule() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnknownRule.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/UnknownRule.rmch");
 		String expected = "Unknown operation: ";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -185,7 +189,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testUnknownIdentifier() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/UnknownIdentifier.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/UnknownIdentifier.rmch");
 		String expected = "Unknown identifier ";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -193,7 +197,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testParseError() throws Exception {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ParseError.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/ParseError.rmch");
 		String expected = "[4,1] expecting: ";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -201,7 +205,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testFileNameDoesNotMatchMachineName() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/DifferentFileName.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/DifferentFileName.rmch");
 		String expected = "RULES_MACHINE name must match the file name";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -209,7 +213,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testRuleDependsOnItSelf() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/RuleDependsOnItSelf.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/RuleDependsOnItSelf.rmch");
 		String expected = "Cyclic dependencies between operations: rule1 -> rule1').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -217,7 +221,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testFilePragma() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/FilePragma.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/references/FilePragma.rmch");
 		System.out.println(result);
 		assertTrue(!result.contains("exception"));
 	}
@@ -225,7 +229,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testInvalidFilePragma() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/DirectoryInFilePragma.rmch");
+				"rules/project/references/DirectoryInFilePragma.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("is a directory"));
 	}
@@ -233,7 +237,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testFileDoesNotExistInFilePragma() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/FileDoesNotExistInFilePragma.rmch");
+				"rules/project/references/FileDoesNotExistInFilePragma.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception"));
 		assertTrue(result.contains("does not exist"));
@@ -249,7 +253,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testReferencedMachineNotFound() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/ReferencedMachineNotFound.rmch");
+				"rules/project/references/ReferencedMachineNotFound.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception"));
 		assertTrue(result.contains("Machine not found"));
@@ -257,14 +261,14 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testPackagePragma() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/PackagePragma.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/references/PackagePragma.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testReplacement() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/references/Replacement.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/references/Replacement.rmch");
 		System.out.println(result);
 		assertFalse(result.contains("exception"));
 		// the result should not contain name of the replacement operation
@@ -274,7 +278,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testImportedPackageDoesNotExist() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");
+				"rules/project/references/packagePragma/ImportedPackageDoesNotExist.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 		assertTrue(result.contains("Imported package does not exist"));
@@ -284,7 +288,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testImportedPackageDoesNotExist2() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/packagePragma/ImportedPackageDoesNotExist2.rmch");
+				"rules/project/references/packagePragma/ImportedPackageDoesNotExist2.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("parse_exception(pos(3,19,"));
 		assertTrue(result.contains("Imported package does not exist"));
@@ -294,7 +298,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testDuplicatePackageImport() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/packagePragma/DuplicatePackageImport.rmch");
+				"rules/project/references/packagePragma/DuplicatePackageImport.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("exception"));
 		assertTrue(result.contains("Duplicate package import"));
@@ -304,7 +308,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testInvalidPackagePragma() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/InvalidPackagePragma.rmch");
+				"rules/project/references/InvalidPackagePragma.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("does not match the folder structure"));
 	}
@@ -312,14 +316,14 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testInvalidPackagePragma2() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/InvalidPackagePragma2.rmch");
+				"rules/project/references/InvalidPackagePragma2.rmch");
 		System.out.println(result);
 		assertTrue(result.contains("Invalid folder name"));
 	}
 
 	@Test
 	public void testComputationDependsOnItSelf() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ComputationDependsOnItSelf.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/ComputationDependsOnItSelf.rmch");
 		String expected = "Cyclic dependencies between operations: compute_x -> compute_x').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -327,13 +331,13 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testImplicitDependencyToComputation() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/ImplicitDependencyToComputation.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/ImplicitDependencyToComputation.rmch");
 		assertFalse(result.contains("exception"));
 	}
 
 	@Test
 	public void testConfuseRuleAndComputation() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/ConfuseRuleAndComputation.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/ConfuseRuleAndComputation.rmch");
 		String expected = "Identifier \\'rule1\\' is not a COMPUTATION.').";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -341,7 +345,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testCyclicRules() {
-		String result = getRulesMachineAsPrologTerm("src/test/resources/rules/project/CyclicRules.rmch");
+		String result = getRulesMachineAsPrologTerm("rules/project/CyclicRules.rmch");
 		String expected = "Cyclic dependencies between operations";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -350,7 +354,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testInvisibleComputation() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/MissingReference/M1.rmch");
+				"rules/project/references/MissingReference/M1.rmch");
 		String expected = "Operation \\'compute_xx\\' is not visible in RULES_MACHINE \\'M2\\'.";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -359,7 +363,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testUnknwonComputation() {
 		String result = getRulesMachineAsPrologTerm(
-				"src/test/resources/rules/project/references/MissingReference/M2.rmch");
+				"rules/project/references/MissingReference/M2.rmch");
 		String expected = "Unknown operation: \\'compute_xx\\'.')";
 		System.out.println(result);
 		assertTrue(result.contains(expected));
@@ -396,7 +400,14 @@ public class RulesMachineFilesTest {
 	}
 
 	private String getRulesMachineAsPrologTerm(String fileName) {
-		File file = new File(fileName);
+		File file;
+		try {
+			file = new File(this.getClass().getClassLoader().getResource(fileName).toURI());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		} catch (NullPointerException e) {
+			file = new File(fileName);
+		}
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);

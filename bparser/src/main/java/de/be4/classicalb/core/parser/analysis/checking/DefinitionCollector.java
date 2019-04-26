@@ -10,7 +10,6 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AConversionDefinition;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -70,19 +69,6 @@ public class DefinitionCollector extends DepthFirstAdapter {
 		addDefinition(node, type, defName);
 	}
 
-	@Override
-	public void caseAConversionDefinition(AConversionDefinition node) {
-		PDefinition def = node.getDefinition();
-		if (def instanceof AExpressionDefinitionDefinition) {
-			AExpressionDefinitionDefinition exprDef = (AExpressionDefinitionDefinition) def;
-			final String defName = exprDef.getName().getText();
-			final Type type = defTypes.getType(defName);
-			addDefinition(node, type, defName);
-		} else {
-			this.exceptions.add(new CheckException(
-					"Only an expression is allowed on the right hand side of a conversion definition.", node));
-		}
-	}
 
 	private void addDefinition(PDefinition def, Type type, String name) {
 		if (definitions.containsDefinition(name)) {
@@ -90,7 +76,7 @@ public class DefinitionCollector extends DepthFirstAdapter {
 			File file = definitions.getFile(name);
 			StringBuilder sb = new StringBuilder();
 			sb.append("Duplicate definition: " + name + ".\n");
-		    SourcePosition firstPos = existingDefinition.getStartPos();
+			SourcePosition firstPos = existingDefinition.getStartPos();
 			sb.append("(First appearance at ").append(this.getPosition(firstPos));
 			if (file != null) {
 				sb.append(" in file: ").append(file.getAbsolutePath());

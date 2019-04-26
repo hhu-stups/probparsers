@@ -1,120 +1,60 @@
-// BParser
-
-//dependsOn(':prologlib')
-//dependsOn(':parserbase')
-
 apply plugin: 'jacoco'
 apply plugin: 'java'
-
+apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-    compile project(path: ":prologlib", configuration: "archives")
-    compile project(path: ":parserbase", configuration: "archives")
+    sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
+    compile project(":prologlib")
+    compile project(":parserbase")
 }
 
-sourceSets {
-    main {
-        java {
-          	srcDirs = ['build/temp','src/main/java']
-        }
+def readCurrentGitCommit() {
+    def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+    def exitCode = proc.waitFor()
+    if (exitCode != 0) {
+        throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+    }
+    return proc.in.readLines()[0]
+}
+
+final BUILD_PROPERTIES = file("src/main/resources/bparser-build.properties")
+
+task createBuildConstants {
+    doFirst {
+        BUILD_PROPERTIES.parentFile.mkdirs()
+        BUILD_PROPERTIES.delete()
+        BUILD_PROPERTIES << "version=${project.version}\n"
+        BUILD_PROPERTIES << "git=${readCurrentGitCommit()}\n"
     }
 }
+processResources.dependsOn(createBuildConstants)
 
-def getCheckedOutGitCommitHash() {
-    def gitFolder = "$projectDir/../.git/"
-    def takeFromHash = 40
-    try{
-     def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
-     def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
-     if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
-     def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-     refHead.text.trim().take takeFromHash
-    } catch (Exception e) { "unknown" }
+task cleanBuildConstants(type: Delete) {
+    delete(BUILD_PROPERTIES)
 }
+clean.dependsOn(cleanBuildConstants)
 
-task createBuildConstants  {
-  doFirst {
-    def buildconstants_class = """
-version=${project.version}
-git=${getCheckedOutGitCommitHash()}"""
-    File f = file("src/main/resources/bparser-build.properties")
-    f.delete()
-    f.getParentFile().mkdirs()
-    f <<  buildconstants_class
-  }
-}
-
-
-task genPreparser(type:JavaExec) {
-	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp/de/be4/classicalb/core/preparser') // prevent rebuild because the second parser replaces patchfiles
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/grammars/PreParser.scc']
-}
-
-task genBParser(type:JavaExec) {
-	dependsOn = ['genPreparser']
-	inputs.dir new File('src/main/resources/grammars')
-	outputs.dir new File('build/temp')
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/grammars/BParser.scc']
-}
-
-jar {
- include '**/*.class'
- include '**/*.java'
- exclude '**.*.scc'
- from 'build/temp'
- include '**/*.dat'
- include '**/*.properties'
- from sourceSets.main.toString()
- include '**/*.java'
-}
-
-compileJava {
- dependsOn = ['createBuildConstants','genPreparser','genBParser',':prologlib:deploy',':parserbase:deploy']
- doFirst {
-	def buildconstants_class = """CompileDate=${new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString()}"""
-	File f = file("src/main/resources/revision.properties")
-    f.delete()
-    f <<  buildconstants_class
-  }
-}
-
-sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
-  reports {
-      xml.enabled false
-      csv.enabled false
-      html.destination file("${buildDir}/jacocoHtml")
-  }
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
 
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it,
-                    exclude: [
-                        '**/parser/node/**'
-                      , '**/parser/parser/**'
-                      , '**/parser/lexer/**'
-                      , '**/preparser/**'
-                      , '**/parser/analysis/Analysis.class'
-                      , '**/parser/analysis/AnalysisAdapter.class'
-                      , '**/parser/analysis/DepthFirstAdapter.class'
-                      , '**/parser/analysis/ReversedDepthFirstAdapter.class'
-                      , '**/parser/analysis/ExtendedDFAdapter.class'
-                      , '**/parser/analysis/PreParserASTPrinter.class'
-                    ])
+            fileTree(dir: it, exclude: [
+                '**/parser/node/**',
+                '**/parser/parser/**',
+                '**/parser/lexer/**',
+                '**/preparser/**',
+                '**/parser/analysis/Analysis.class',
+                '**/parser/analysis/AnalysisAdapter.class',
+                '**/parser/analysis/DepthFirstAdapter.class',
+                '**/parser/analysis/ReversedDepthFirstAdapter.class',
+                '**/parser/analysis/ExtendedDFAdapter.class',
+                '**/parser/analysis/PreParserASTPrinter.class',
+            ])
         })
     }
 }

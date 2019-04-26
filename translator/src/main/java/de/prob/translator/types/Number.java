@@ -46,6 +46,8 @@ public abstract class Number extends java.lang.Number implements Comparable<Numb
 
 	public abstract Number rightShift(Number o);
 
+	public abstract Number bitwiseNegate();
+
 	public abstract boolean isCase(Number o);
 
 	public abstract Number negative();

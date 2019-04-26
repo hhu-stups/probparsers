@@ -17,6 +17,12 @@ public class ParseOptions {
 	 * to false in order to parse PO files of AtelierB.
 	 */
 	private boolean restrictPrimedIdentifiers = true;
+	
+	/*
+	 * if true the parser will throw a LexerException when unrecognised pragmas appear
+	*/
+	private boolean strictPragmaChecking = false;
+	
 	private IGrammar grammar = new DefaultGrammar();
 
 	public boolean isRestrictProverExpressions() {
@@ -41,6 +47,14 @@ public class ParseOptions {
 
 	public void setGrammar(IGrammar grammar) {
 		this.grammar = grammar;
+	}
+	
+	public boolean isStrictPragmaChecking() {
+		return strictPragmaChecking;
+	}
+
+	public void setStrictPragmaChecking(boolean newVal) {
+		this.strictPragmaChecking = newVal;
 	}
 
 }

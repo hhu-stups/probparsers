@@ -11,9 +11,8 @@ import util.AbstractParseMachineTest;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
+import util.PositionTester;
 
 /**
  * @author bendisposto
@@ -22,7 +21,7 @@ import de.be4.classicalb.core.parser.node.Start;
 @RunWith(PolySuite.class)
 public class ParsableMachineTest extends AbstractParseMachineTest {
 
-	private static final String PATH = "src/test/resources/parsable";
+	private static final String PATH = "parsable";
 
 	private final File machine;
 
@@ -38,39 +37,8 @@ public class ParsableMachineTest extends AbstractParseMachineTest {
 		assertNotNull(start);
 	}
 
-	
-	/**
-	 * Visitor that checks if all AST nodes contain the position information.
-	 * @author bendisposto
-	 */
-	private static class PositionTester extends DepthFirstAdapter {
-		@Override
-		public void defaultIn(Node node) {
-			if (node instanceof Start) return; // start does not have position infos
-			assertNotNull(node.getClass().getSimpleName() + " start was null",
-					node.getStartPos());
-			assertNotNull(node.getClass().getSimpleName() + " end was null",
-					node.getEndPos());
-		}
-	}
-
 	@Config
 	public static Configuration getConfig() {
-		final File[] machines = getMachines(PATH);
-		return new Configuration() {
-
-			public int size() {
-				return machines.length;
-			}
-
-			public File getTestValue(int index) {
-				return machines[index];
-			}
-
-			public String getTestName(int index) {
-				return machines[index].getName();
-			}
-		};
+		return buildConfig(PATH);
 	}
-
 }

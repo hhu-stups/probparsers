@@ -132,16 +132,16 @@ public class PrologGenerator extends DepthFirstAdapter {
 	}
 
 	@Override
-    public void caseAExistsLtl(AExistsLtl node)
-    {
+	public void caseAExistsLtl(AExistsLtl node)
+	{
 		helper.existsTerm(node, this);
-    }
+	}
 
 	@Override
-    public void caseAForallLtl(AForallLtl node)
-    {
-    	helper.forallTerm(node, this);
-    }
+	public void caseAForallLtl(AForallLtl node)
+	{
+		helper.forallTerm(node, this);
+	}
 
 
 	@Override

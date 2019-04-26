@@ -15,7 +15,7 @@ cache:
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apt-get update &&  apt-get install -y patch
+  - apt-get update &&  apt-get install -y git patch
 
 .tests:
   stage: test
@@ -51,7 +51,7 @@ publish:
   stage: deploy
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - apt-get update &&  apt-get install -y patch
+    - apt-get update &&  apt-get install -y git patch
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in secring.gpg.enc       -out secring.gpg 
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in pubring.gpg.enc       -out pubring.gpg
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in gradle.properties.enc -out gradle.properties
@@ -63,7 +63,9 @@ publish:
 
 prob_snapshot_parser_tests:
   stage: trigger
-  image: $CI_REGISTRY/stups/prob/prob-docker/internal/deployment:0.3
+  image: alpine:3.9
+  before_script:
+    - apk add --update curl
   dependencies: []
   variables:
     GIT_STRATEGY: none

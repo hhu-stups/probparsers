@@ -56,7 +56,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
 		TStringLiteral tStringLiteral = new TStringLiteral(escapeString(text,false), 
-		       content.getLine(), content.getPos());
+				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
@@ -72,7 +72,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		TStringLiteral tStringLiteral =
 			// for normal string literals we also get the surrounding quotes " as part of the token
 			// these need to be removed and the escaping codes dealt with
-		    new TStringLiteral(escapeString(text,true), content.getLine(), content.getPos());
+			new TStringLiteral(escapeString(text,true), content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
@@ -87,7 +87,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		int value = Integer.valueOf(text, 16);
 		// generate an integer literal:
 		TIntegerLiteral tIntLiteral =
-		    new TIntegerLiteral(Integer.toString(value), literal.getLine(), literal.getPos());
+			new TIntegerLiteral(Integer.toString(value), literal.getLine(), literal.getPos());
 		AIntegerExpression intNode = new AIntegerExpression(tIntLiteral);
 		intNode.setStartPos(node.getStartPos());
 		intNode.setEndPos(node.getEndPos());

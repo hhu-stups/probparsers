@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -86,7 +87,12 @@ public class Helpers {
 	}
 
 	public static String fullParsing(String filename, ParsingBehaviour parsingBehaviour) {
-		final File machineFile = new File(filename);
+		final File machineFile;
+		try {
+			machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 
 		OutputStream output = new OutputStream() {
@@ -174,11 +180,11 @@ public class Helpers {
 		pout.flush();
 	}
 
-	public static void parseFile(final String filename) throws IOException, BCompoundException {
+	public static void parseFile(final String filename) throws IOException, BCompoundException, URISyntaxException {
 		final int dot = filename.lastIndexOf('.');
 		if (dot >= 0) {
-			final File machineFile = new File(filename);
-			final String probfilename = filename.substring(0, dot) + ".prob";
+			final File machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
+			File probFile = File.createTempFile(filename.substring(0, dot), ".prob");
 
 			BParser parser = new BParser(filename);
 			Start tree = parser.parseFile(machineFile, false);
@@ -186,7 +192,7 @@ public class Helpers {
 			final ParsingBehaviour behaviour = new ParsingBehaviour();
 			behaviour.setVerbose(true);
 
-			PrintStream output = new PrintStream(probfilename);
+			PrintStream output = new PrintStream(probFile);
 			BParser.printASTasProlog(output, parser, machineFile, tree, behaviour, parser.getContentProvider());
 			output.close();
 		} else

@@ -10,7 +10,7 @@ public class LexerExceptionTest {
 
 	@Test
 	public void testLexerException() throws Exception {
-		final String result = Helpers.fullParsing("src/test/resources/exceptions/LexerStringError.mch");
+		final String result = Helpers.fullParsing("exceptions/LexerStringError.mch");
 		System.out.println(result);
 		assertTrue(result.contains("LexerStringError.mch"));
 		assertTrue(result.contains("[3,12]"));

@@ -1,59 +1,8 @@
-// LTL Parser 
-
-//dependsOn(':prologlib')
-//dependsOn(':parserbase')
-
-
-
+apply plugin: 'java'
+apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
- compile project(path: ":prologlib", configuration: "archives") 
- compile project(path: ":parserbase", configuration: "archives") 
+    sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
+    compile project(":prologlib")
+    compile project(":parserbase")
 }
-
-sourceSets {
-    main {
-        java {
-          	srcDirs = ['build/temp','src/main/java']
-        }
-    }
-}
-
-task genParser(type:JavaExec) {
-	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
-	outputs.dir new File('build/temp')
-//	doFirst{ file('build/temp').mkdirs() }
-	 main = 'org.sablecc.sablecc.SableCC'
-	// classpath =  sourceSets.main.compileClasspath
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/LtlParser.scc']
-}
-
-task genCtlParser(type:JavaExec) {
-	doFirst{ file('build/temp').mkdirs() }
-	inputs.dir new File('src/main/resources/')
-	outputs.dir new File('build/temp')
-	 main = 'org.sablecc.sablecc.SableCC'
-	 classpath = configurations.sablecc
-	 maxHeapSize = '1024m'
-	 args = ['-d','build/temp','src/main/resources/CtlParser.scc']
-}
-
-jar {
- include '**/*.class'
- exclude '**.*.scc' 
- from 'build/temp'
- include '**/*.dat'
- from sourceSets.main.toString()
- include '**/*.java'
-}
-
-compileJava { 
- dependsOn = ['genParser','genCtlParser',':prologlib:deploy',':parserbase:deploy'] 
-}
-
-sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
-
-

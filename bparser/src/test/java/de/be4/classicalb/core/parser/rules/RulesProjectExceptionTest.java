@@ -74,8 +74,8 @@ public class RulesProjectExceptionTest {
 		PrintStream pStream = new PrintStream(output);
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setPrologOutput(true);
-		BParser bParser = new BParser("RulesMachineInOrdinaryMachineFile.mch");
-		bParser.fullParsing(new File("src/test/resources/rules/project/RulesMachineInOrdinaryMachineFile.mch"),
+		BParser bParser = new BParser("");
+		bParser.fullParsing(new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineInOrdinaryMachineFile.mch").toURI()),
 				parsingBehaviour, pStream, pStream);
 		System.out.println(output.toString());
 		assertTrue(output.toString().contains("parse_exception"));

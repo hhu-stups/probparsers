@@ -1,33 +1,26 @@
-//dependsOn(':prologlib')
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 dependencies {
- compile project(path: ":prologlib", configuration: "archives")
+    compile project(":prologlib")
 }
 
-compileJava {
- dependsOn ':prologlib:deploy'
-}
-
-// type 'gradle test jacocoTestReport' in order to run the jacoco code coverage analysis
 jacocoTestReport {
-  reports {
-      xml.enabled false
-      csv.enabled false
-      html.destination file("${buildDir}/jacocoHtml")
-  }
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
 
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it,
-                    exclude: ['**/parser/node/**'
-                      , '**/parser/analysis/**'
-                      , '**/preparser/**'
-                      , '**/lexer/**'
-                    ])
+            fileTree(dir: it, exclude: [
+                '**/parser/node/**',
+                '**/parser/analysis/**',
+                '**/preparser/**',
+                '**/lexer/**',
+            ])
         })
     }
 }

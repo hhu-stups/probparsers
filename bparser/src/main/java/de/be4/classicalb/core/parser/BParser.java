@@ -108,7 +108,7 @@ public class BParser {
 
 	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-			throws BCompoundException {
+					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
@@ -117,7 +117,7 @@ public class BParser {
 
 	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-			throws BCompoundException {
+					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
@@ -215,7 +215,7 @@ public class BParser {
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
 
-	public Start parseTranstion(final String input) throws BCompoundException {
+	public Start parseTransition(final String input) throws BCompoundException {
 		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
 	}
@@ -452,7 +452,7 @@ public class BParser {
 
 	private DefinitionTypes preParsing(final boolean debugOutput, final Reader reader,
 			final IFileContentProvider contentProvider, File directory)
-			throws IOException, PreParseException, BException, BCompoundException {
+					throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		preParser.setDebugOutput(debugOutput);
@@ -492,10 +492,6 @@ public class BParser {
 		this.definitions = definitions;
 	}
 
-	public static String getBuildRevision() {
-		return Utils.getRevisionFromManifest();
-	}
-
 	public List<String> getDoneDefFiles() {
 		return doneDefFiles;
 	}
@@ -529,40 +525,38 @@ public class BParser {
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
 			final long end = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime()) {
-				out.println("Time for parsing: " + (end - start) + "ms");
+			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
+				out.println("% Time for parsing: " + (end - start) + "ms");
 			}
 
-			if (parsingBehaviour.isPrintAST()) {
+			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
 
-			if (parsingBehaviour.isDisplayGraphically()) {
+			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
 				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrologOutput()) {
+
+			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+				// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
+				String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
+				out.println(fp);
+			} else if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
+
 			final long end2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) {
-				out.println("Time for Prolog output: " + (end2 - start2) + "ms");
-			}
-
-			if (parsingBehaviour.isFastPrologOutput()) {
-				try {
-					String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
-					out.println(fp);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				out.println("% Time for Prolog output: " + (end2 - start2) + "ms");
 			}
 		} catch (final IOException e) {
-			if (parsingBehaviour.isPrologOutput()) {
+			if (parsingBehaviour.isPrologOutput() ||
+					parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -570,7 +564,8 @@ public class BParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.isPrologOutput()) {
+			if (parsingBehaviour.isPrologOutput() ||
+					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
 				// PrologExceptionPrinter.printException(err, e);
 			} else {

@@ -262,6 +262,7 @@ public class PreParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
+			lexer.setLexerPreparse();
 			Set<String> set = new HashSet<>();
 			de.be4.classicalb.core.parser.node.Token next = null;
 			try {
@@ -368,7 +369,8 @@ public class PreParser {
 			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
 			expressionParseUnit.apply(visitor);
 
-			if (visitor.isKaboom()) {
+			if (visitor.isUntypedDefinitionUsed()) {
+				// the parseunit uses another definition which is not yet typed
 				return new DefinitionType();
 			}
 
@@ -434,7 +436,9 @@ public class PreParser {
 		if (oldMessage.contains("expecting: EOF")) {
 			message = "expecting end of definition";
 		}
-		return "[" + line + "," + pos + "]" + message;
+		errorToken.setLine(line);
+		errorToken.setPos(pos);
+		return "[" + line + "," + pos + "] " + message;
 	}
 
 	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,

@@ -99,7 +99,7 @@ public class EventBParser {
 	public Start parseFile(final File machine, final boolean verbose)
 			throws IOException, BException {
 		final InputStreamReader inputStreamReader
-            = new InputStreamReader(new FileInputStream(machine), Charset.forName("UTF-8"));
+			= new InputStreamReader(new FileInputStream(machine), Charset.forName("UTF-8"));
 
 		final StringBuilder builder = new StringBuilder();
 		final char[] buffer = new char[1024];
