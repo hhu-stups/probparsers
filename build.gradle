@@ -4,7 +4,7 @@ plugins {
 }
 */
 
-def global_version = '2.9.21'
+def global_version = '2.9.22-SNAPSHOT'
 
 project.version = global_version;
 project.group = 'de.hhu.stups'
