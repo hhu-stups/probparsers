@@ -64,7 +64,7 @@ subprojects {
 
     dependencies {
         //compile 'com.google.code.findbugs:jsr305:1.3.9'
-        testCompile 'junit:junit:4.8.2'
+        testCompile 'junit:junit:4.12'
     }
 
     task deploy(dependsOn: [build])
