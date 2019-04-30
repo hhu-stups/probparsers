@@ -11,14 +11,6 @@ project.group = 'de.hhu.stups'
 
 final SOURCE_ENCODING = "UTF-8"
 
-defaultTasks 'remind', 'clean', 'deploy'
-
-task remind {
-    doLast {
-        println "You did not specify a task. Assuming you mean gradle clean deploy."
-    }
-}
-
 wrapper {
     gradleVersion = "5.4"
     distributionType = Wrapper.DistributionType.ALL
