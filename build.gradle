@@ -4,10 +4,9 @@ plugins {
 }
 */
 
-def global_version = '2.9.22-SNAPSHOT'
-
-project.version = global_version;
+// group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
+project.version = '2.9.22-SNAPSHOT'
 
 final SOURCE_ENCODING = "UTF-8"
 
@@ -36,8 +35,8 @@ allprojects {
 
 subprojects {
     apply plugin: 'eclipse'
-    group = 'de.hhu.stups'
-    version = global_version;
+    group = rootProject.group
+    version = rootProject.version
     repositories {
         mavenCentral()
         maven {
@@ -197,7 +196,7 @@ task copyCoverage() {
 //         // property("sonar.organization", "prob2")
 //         property("sonar.projectKey", "probparsers")
 //         property("sonar.projectName", "probparsers")
-//         property("sonar.projectVersion", global_version)
+//         property("sonar.projectVersion", project.version)
 //         property("sonar.java.binaries", "bparser/build/classes")
 //         property("sonar.inclusions", "**/classicalb/core/parser/**")
 //         property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
