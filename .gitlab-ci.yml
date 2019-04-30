@@ -19,7 +19,7 @@ before_script:
 
 .tests:
   stage: test
-  script: ./gradlew ${GRADLE_ARGS} clean deploy
+  script: ./gradlew ${GRADLE_ARGS} copyCoverage
   artifacts:
     paths:
       - build/reports/tests/
@@ -42,7 +42,7 @@ tests:macos:
 tests:windows64:
   extends: .tests
   before_script: []
-  script: gradlew.bat %GRADLE_ARGS% clean deploy
+  script: gradlew.bat %GRADLE_ARGS% copyCoverage
   tags:
     - prob
     - win64
