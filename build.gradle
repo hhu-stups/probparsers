@@ -4,6 +4,8 @@ plugins {
 }
 */
 
+apply plugin: 'eclipse'
+
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
 project.version = '2.9.22-SNAPSHOT'
@@ -15,34 +17,32 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-// // The real configuration
-allprojects {
+subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'eclipse'
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
-
-    tasks.withType(JavaCompile) {
-        options.encoding = SOURCE_ENCODING
-    }
-
-    tasks.withType(Javadoc) {
-        options.encoding = SOURCE_ENCODING
-        options.addStringOption("sourcepath", "")
-    }
-}
-
-subprojects {
-    apply plugin: 'eclipse'
+    
     group = rootProject.group
     version = rootProject.version
+    
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+    
     repositories {
         mavenCentral()
         maven {
             name "snapshots"
             url "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+    }
+    
+    tasks.withType(JavaCompile) {
+        options.encoding = SOURCE_ENCODING
+    }
+    
+    tasks.withType(Javadoc) {
+        options.encoding = SOURCE_ENCODING
+        options.addStringOption("sourcepath", "")
     }
 
     jar {
