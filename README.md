@@ -31,7 +31,7 @@ The repository contains some additional parsers:
 * unicode - Conversion of EventB Unicode Strings to ASCII and vice versa
 
 ## Building
-Run the 'deploy' target with gradle.
+Run the 'assemble' target with gradle.
 
 On windows you need to install the program 'patch.exe'.
 

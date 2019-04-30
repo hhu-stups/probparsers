@@ -58,4 +58,3 @@ jacocoTestReport {
         })
     }
 }
-deploy.dependsOn jacocoTestReport

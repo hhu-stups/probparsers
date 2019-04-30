@@ -62,9 +62,6 @@ subprojects {
         testCompile 'junit:junit:4.12'
     }
 
-    task deploy(dependsOn: [build])
-
-
     cleanEclipseJdt {
         doLast {
             file(".settings/org.eclipse.jdt.ui.prefs").delete()
@@ -203,4 +200,16 @@ task copyCoverage() {
 //     }
 // }
 
-task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])
+task deploy {
+    doLast {
+        throw new GradleException(
+            """\
+            The deploy task has been removed. Please use one of the following tasks instead, depending on what you want to do:
+            To build the parser jar files: ./gradlew assemble
+            To run the tests: ./gradlew check
+            To build and test the parser: ./gradlew build
+            To generate test coverage reports: ./gradlew check copyCoverage
+            """.stripIndent()
+        )
+    }
+}

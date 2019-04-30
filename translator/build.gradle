@@ -26,4 +26,3 @@ jacocoTestReport {
         })
     }
 }
-deploy.dependsOn jacocoTestReport
