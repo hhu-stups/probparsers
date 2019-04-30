@@ -17,6 +17,10 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+ext {
+    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13']
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
