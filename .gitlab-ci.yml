@@ -5,7 +5,7 @@ stages:
   - trigger
 
 variables:
-  GRADLE_ARGS: --no-daemon --stacktrace
+  GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
   DEBIAN_FRONTEND: noninteractive
 
 cache:
