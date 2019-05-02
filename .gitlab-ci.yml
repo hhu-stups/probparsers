@@ -22,8 +22,10 @@ before_script:
   script: ./gradlew ${GRADLE_ARGS} test copyCoverage
   artifacts:
     paths:
-      - build/reports/tests/
-    when: on_failure
+      - "*/build/jacoco"
+      - "*/build/jacocoHtml"
+      - "*/build/reports"
+      - "*/build/test-results"
 
 tests:jdk-8:
   extends: .tests
