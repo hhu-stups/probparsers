@@ -1,3 +1,4 @@
+apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'de.hhu.stups.sablecc'
 
@@ -6,3 +7,5 @@ dependencies {
     compile project(":prologlib")
     compile project(":parserbase")
 }
+
+rootProject.setupTestReport(project, ["de.be4.ltl.core.ctlparser", "de.be4.ltl.core.parser"])

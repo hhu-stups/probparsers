@@ -34,27 +34,4 @@ task cleanBuildConstants(type: Delete) {
 }
 clean.dependsOn(cleanBuildConstants)
 
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination file("${buildDir}/jacocoHtml")
-    }
-
-    afterEvaluate {
-        classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/parser/node/**',
-                '**/parser/parser/**',
-                '**/parser/lexer/**',
-                '**/preparser/**',
-                '**/parser/analysis/Analysis.class',
-                '**/parser/analysis/AnalysisAdapter.class',
-                '**/parser/analysis/DepthFirstAdapter.class',
-                '**/parser/analysis/ReversedDepthFirstAdapter.class',
-                '**/parser/analysis/ExtendedDFAdapter.class',
-                '**/parser/analysis/PreParserASTPrinter.class',
-            ])
-        })
-    }
-}
+rootProject.setupTestReport(project, ["de.be4.classicalb.core.parser", "de.be4.classicalb.core.preparser"])

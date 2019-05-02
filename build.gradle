@@ -169,18 +169,49 @@ task uberjar(type: Jar, dependsOn: subprojects.assemble) {
 }
 
 task copyCoverage() {
-    final subprojectsWithCoverage = [
-        project(":answerparser"),
-        project(":bparser"),
-        project(":parserbase"),
-        project(":prologlib"),
-        project(":translator"),
-    ]
-    subprojectsWithCoverage.each {subproject ->
-        dependsOn << "${subproject.name}:jacocoTestReport"
-        copy {
-            from fileTree(dir: "${subproject.name}/build/jacocoHtml")
-            into "build/parser_coverage/${subproject.name}"
+    // Does nothing initially; actions are added by setupTestReport calls (see below).
+}
+
+ext {
+    // This closure is called in each subproject that wants test reports generated.
+    setupTestReport = {Project subproject, List<String> sableCCPackageNames -> void
+        final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
+        jacocoTestReportTask.configure {JacocoReport task ->
+            task.reports {
+                xml.enabled = false
+                csv.enabled = false
+                html.destination = new File(subproject.buildDir, "jacocoHtml")
+            }
+            
+            task.classDirectories.from = task.classDirectories.from.collect {
+                final exclusions = ["**/de/hhu/stups/sablecc/patch/**"]
+                sableCCPackageNames.each {packageName ->
+                    final packagePath = packageName.replace(".", "/")
+                    exclusions.addAll([
+                        "**/${packagePath}/analysis/**",
+                        "**/${packagePath}/lexer/**",
+                        "**/${packagePath}/node/**",
+                        "**/${packagePath}/parser/**",
+                    ])
+                }
+                it.asFileTree.matching {
+                    exclude(exclusions)
+                }
+            }
+        }
+        
+        tasks.named("copyCoverage").configure {Task task ->
+            task.dependsOn(jacocoTestReportTask)
+            final copyFrom = fileTree(dir: new File(subproject.buildDir, "jacocoHtml"))
+            final copyInto = new File(project.buildDir, "parser_coverage/${subproject.name}")
+            task.doLast {
+                copy {
+                    from copyFrom
+                    into copyInto
+                }
+            }
+            task.inputs.files(copyFrom)
+            task.outputs.dir(copyInto)
         }
     }
 }
