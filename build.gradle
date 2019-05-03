@@ -160,7 +160,7 @@ subprojects {
 }
 
 task uberjar(type: Jar, dependsOn: subprojects.assemble) {
-    baseName = 'probcliparser'
+    archiveBaseName.set('probcliparser')
     subprojects.each { subproject ->
         from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) }
     }
