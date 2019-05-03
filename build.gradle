@@ -167,10 +167,6 @@ task uberjar(type: Jar, dependsOn: subprojects.assemble) {
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
-task copyCoverage() {
-    // Does nothing initially; actions are added by setupTestReport calls (see below).
-}
-
 ext {
     // This closure is called in each subproject that wants test reports generated.
     setupTestReport = {Project subproject, List<String> sableCCPackageNames -> void
@@ -198,20 +194,6 @@ ext {
                 }
             }
         }
-        
-        tasks.named("copyCoverage").configure {Task task ->
-            task.dependsOn(jacocoTestReportTask)
-            final copyFrom = fileTree(dir: new File(subproject.buildDir, "jacocoHtml"))
-            final copyInto = new File(project.buildDir, "parser_coverage/${subproject.name}")
-            task.doLast {
-                copy {
-                    from copyFrom
-                    into copyInto
-                }
-            }
-            task.inputs.files(copyFrom)
-            task.outputs.dir(copyInto)
-        }
     }
 }
 
@@ -238,7 +220,7 @@ task deploy {
             To build the parser jar files: ./gradlew assemble
             To run the tests: ./gradlew check
             To build and test the parser: ./gradlew build
-            To generate test coverage reports: ./gradlew check copyCoverage
+            To generate test coverage reports: ./gradlew check jacocoTestReport
             """.stripIndent()
         )
     }
