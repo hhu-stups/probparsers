@@ -9,10 +9,6 @@ package de.be4.ltl.core.parser;
 import java.io.PushbackReader;
 import java.io.StringReader;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
-
 import de.be4.ltl.core.ctlparser.lexer.Lexer;
 import de.be4.ltl.core.ctlparser.parser.Parser;
 import de.be4.ltl.core.ctlparser.parser.ParserException;
@@ -22,6 +18,9 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class PrologGeneratorTest {
 	private static final PrologTerm TERM_TRUE = new CompoundPrologTerm("true");
