@@ -202,7 +202,7 @@ Tokens
   {normal} total_function = minus minus gt | 0x2192;
   {normal} total_surjection = minus minus gt gt | 0x21a0;
   {normal} insert_start_sequence = minus gt | 0x21fe;
-  {normal} dot = '.' | '·';
+  {normal} dot = '.' | '·' | 0x22c5;
   {normal} interval = '..' | 0x2025;
   //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
