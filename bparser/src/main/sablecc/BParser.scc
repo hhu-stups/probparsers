@@ -89,6 +89,8 @@ Helpers
   //  [[[0x0be7..0x0bef] + [0x0c66..0x0c6f]] + [[0x0ce6..0x0cef] + [0x0d66..0x0d6f]]] |
   //  [[[0x0e50..0x0e59] + [0x0ed0..0x0ed9]] + [[0x0f20..0x0f29] + [0xff10..0xff19]]];
 
+  unicode_superscripts = [0x2070..0x2079]; // TODO: add 185,178,179
+  unicode_subscripts = [0x2080..0x2089];
 
   digit = ['0' .. '9'] ;
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;
@@ -110,7 +112,7 @@ Helpers
   // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
-  identifier_literal = unicode_letter (unicode_letter | digit | underscore)*;
+  identifier_literal = unicode_letter (unicode_letter | digit | underscore)* (unicode_subscripts)* ;
   //pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$'| '|'| ':'| '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer

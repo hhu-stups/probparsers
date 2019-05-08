@@ -84,6 +84,7 @@ Helpers
     [[[0xfe76..0xfefc] + [0xff21..0xff3a]] + [[0xff41..0xff5a] + [0xff66..0xffbe]]] |
     [[[0xffc2..0xffc7] + [0xffca..0xffcf]] + [[0xffd2..0xffd7] + [0xffda..0xffdc]]];
 
+  unicode_subscripts = [0x2080..0x2089];
 
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
@@ -172,7 +173,7 @@ Tokens
   {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ;
   {no_definitions} no_def_something = all_chars*;
 
-  {definitions} identifier_literal = unicode_letter (unicode_letter | digit | underscore)*;
+  {definitions} identifier_literal = unicode_letter (unicode_letter | digit | underscore)* (unicode_subscripts)*;
   {definitions, definitions_rhs} left_par = '(';
   {definitions, definitions_rhs} right_par = ')';
   {definitions, definitions_rhs} slash = slash;
