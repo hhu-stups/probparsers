@@ -29,12 +29,14 @@ Helpers
   digit = ['0' .. '9'] ;
   
     // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
+ // but removed unicode lambda 0x03bb from [0x03a3..0x03ce]
   unicode_letter =
     [[[0x0041..0x005a] + [0x0061..0x007a]] + [[0x00aa..0x00aa] + [0x00b5..0x00b5]]] |
     [[[0x00ba..0x00ba] + [0x00c0..0x00d6]] + [[0x00d8..0x00f6] + [0x00f8..0x01f5]]] |
     [[[0x01fa..0x0217] + [0x0250..0x02a8]] + [[0x02b0..0x02b8] + [0x02bb..0x02c1]]] |
     [[[0x02d0..0x02d1] + [0x02e0..0x02e4]] + [[0x037a..0x037a] + [0x0386..0x0386]]] |
-    [[[0x0388..0x038a] + [0x038c..0x038c]] + [[0x038e..0x03a1] + [0x03a3..0x03ce]]] |
+    [[[0x0388..0x038a] + [0x038c..0x038c]] + [[[0x038e..0x03a1] + [0x03a3..0x03ba]] + [0x03bc..0x03ce]]] |
+//    [[[0x0388..0x038a] + [0x038c..0x038c]] + [[0x038e..0x03a1] + [0x03a3..0x03ce]]] | // removed unicode_lambda 0x03bb
     [[[0x03d0..0x03d6] + [0x03da..0x03da]] + [[0x03dc..0x03dc] + [0x03de..0x03de]]] |
     [[[0x03e0..0x03e0] + [0x03e2..0x03f3]] + [[0x0401..0x040c] + [0x040e..0x044f]]] |
     [[[0x0451..0x045c] + [0x045e..0x0481]] + [[0x0490..0x04c4] + [0x04c7..0x04c8]]] |
@@ -84,6 +86,7 @@ Helpers
     [[[0xfe76..0xfefc] + [0xff21..0xff3a]] + [[0xff41..0xff5a] + [0xff66..0xffbe]]] |
     [[[0xffc2..0xffc7] + [0xffca..0xffcf]] + [[0xffd2..0xffd7] + [0xffda..0xffdc]]];
 
+  unicode_lambda = 0x03bb;
   unicode_subscripts = [0x2080..0x2089];
   unicode_prime = [0x2032 + [8216..8217]]; // ' primes; we could also add 8219
 
@@ -174,7 +177,7 @@ Tokens
   {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ;
   {no_definitions} no_def_something = all_chars*;
 
-  {definitions} identifier_literal = unicode_letter (unicode_letter | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
+  {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
   {definitions, definitions_rhs} left_par = '(';
   {definitions, definitions_rhs} right_par = ')';
   {definitions, definitions_rhs} slash = slash;
