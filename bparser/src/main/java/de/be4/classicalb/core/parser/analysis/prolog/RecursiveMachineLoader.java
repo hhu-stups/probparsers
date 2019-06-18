@@ -203,8 +203,14 @@ public class RecursiveMachineLoader {
 
 		injectDefinitions(currentAst, definitions);
 
-		getParsedMachines().put(name, currentAst);
-		parsedFiles.put(name, machineFile);
+		if(parsedFiles.containsKey(name)) {
+			throw new BCompoundException(new BException(machineFile.getName(),
+					"Multiple files define the MACHINE '" + name + "\' :" 
+					 + parsedFiles.get(name) + " and " + machineFile.getName(), null));
+        } else {
+		   getParsedMachines().put(name, currentAst);
+		   parsedFiles.put(name, machineFile);
+        }
 
 		if (name != null) {
 			newAncestors.add(name);
