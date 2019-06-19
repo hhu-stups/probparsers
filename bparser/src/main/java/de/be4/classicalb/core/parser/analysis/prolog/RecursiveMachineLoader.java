@@ -220,11 +220,7 @@ public class RecursiveMachineLoader {
 		}
 
 		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
-		try {
-			checkForCycles(newAncestors, referencesSet);
-		} catch (BException e) {
-			throw new BCompoundException(e);
-		}
+		checkForCycles(newAncestors, referencesSet);
 
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
@@ -270,9 +266,9 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(final List<String> ancestors, final Set<String> references) throws BException {
+	private void checkForCycles(final List<String> ancestors, final Set<String> references) throws BCompoundException {
 		final Set<String> cycles = new TreeSet<>(ancestors);
-		intersect(cycles, references);
+		cycles.retainAll(references); // compute intersection between ancestors and references
 		if (!cycles.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			for (String string : ancestors) {
@@ -280,16 +276,7 @@ public class RecursiveMachineLoader {
 			}
 			String next = cycles.iterator().next();
 			sb.append(next);
-			throw new BException(next, "Cycle detected: " + sb.toString(), null);
-		}
-	}
-
-	private void intersect(final Set<String> a, final Set<String> b) {
-		for (final Iterator<String> it = a.iterator(); it.hasNext();) {
-			final String elem = it.next();
-			if (elem != null && !b.contains(elem)) {
-				it.remove();
-			}
+			throw new BCompoundException(new BException(next, "Cycle detected: " + sb.toString(), null));
 		}
 	}
 
