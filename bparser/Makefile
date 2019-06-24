@@ -7,8 +7,10 @@ rules:
 	gradle test --tests de.be4.classicalb.core.parser.rules.RulesMachineFilesTest --info
 tokens:
 	gradle test --tests de.be4.classicalb.core.parser.SyntaxErrorsDetectedOnTokenStreamTest --info
-defs:
+defsf:
 	gradle test --tests de.be4.classicalb.core.parser.definitions.DefinitionFilesTest --info
+defs:
+	gradle test --tests de.be4.classicalb.core.parser.definitions.DefinitionsTest --info
 expr:
 	gradle test --tests de.be4.classicalb.core.parser.ExpressionTest --info
 comments:
