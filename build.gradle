@@ -9,7 +9,7 @@ apply plugin: 'eclipse'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.22-SNAPSHOT'
+project.version = '2.9.22'
 
 final SOURCE_ENCODING = "UTF-8"
 
