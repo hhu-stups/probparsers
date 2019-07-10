@@ -7,3 +7,5 @@ dependencies {
     compile project(":bparser")
     compile project(":ltlparser")
 }
+
+rootProject.setupTestReport(project, [])

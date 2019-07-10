@@ -28,21 +28,7 @@ public class PragmaTest {
 
 	@Test
 	public void testLexer() throws Exception {
-		// String input = "/*@ generated */ MACHINE foo(x) \n"
-		// + "/* look at me. */ \n"
-		// + "DEFINITIONS \n"
-		// + " /*@ conversion */ foo(m) == m \n"
-		// + "PROPERTIES \n"
-		// + "/*@ label foo */ \n"
-		// + "/*@ label bar */ \n"
-		// + "x = /*@ symbolic */ {y|->z| y < z } \n"
-		// + "/*@ desc prop */ \n"
-		// + "SETS A;B={a,b} /*@ desc trololo !!! */;C END";
-
-		// String input =
-		// "MACHINE foo PROPERTIES /*@ label foo */ x = /*@ symbolic */ {y|->z|
-		// y < z } END";
-
+		
 		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
 
 		BLexer lex = new BLexer(
@@ -63,8 +49,11 @@ public class PragmaTest {
 		ASTPrinter pr = new ASTPrinter();
 		ast.apply(pr);
 
+		final String result =printAST(ast);
+		
 		System.out.println(printAST(ast));
-
+		
+		assertEquals("abstract_machine(1,machine(2),machine_header(3,foo,[]),[constants(4,[description(5,'konstante nummero uno',identifier(6,c))]),properties(7,equal(8,identifier(9,c),integer(10,5))),variables(11,[description(12,'Hallo du variable',identifier(13,x))]),invariant(14,equal(15,identifier(16,x),integer(17,1))),initialisation(18,assign(19,[identifier(20,x)],[integer(21,1)]))])",result);
 	}
 
 	@Test

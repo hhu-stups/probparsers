@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class Boolean implements BObject {
 	private final java.lang.Boolean value;
 

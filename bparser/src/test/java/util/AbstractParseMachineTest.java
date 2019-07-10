@@ -1,14 +1,8 @@
 package util;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.Start;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URISyntaxException;
-
-import static junit.framework.Assert.assertNotNull;
 
 public abstract class AbstractParseMachineTest {
 	

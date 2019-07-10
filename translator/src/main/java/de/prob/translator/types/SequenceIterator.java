@@ -3,6 +3,7 @@ package de.prob.translator.types;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+@Deprecated
 class SequenceIterator implements ListIterator<BObject> {
 
 	private int i;

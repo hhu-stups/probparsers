@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class BigInteger extends Number {
 
 	@Override

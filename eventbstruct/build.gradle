@@ -1,6 +1,9 @@
+apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-    sableCC(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
+    sableCC(rootProject.sableCCDependency)
 }
+
+rootProject.setupTestReport(project, ["de.be4.eventb.core.parser"])

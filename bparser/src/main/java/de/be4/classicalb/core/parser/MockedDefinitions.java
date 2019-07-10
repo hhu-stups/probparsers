@@ -26,7 +26,7 @@ public class MockedDefinitions extends IDefinitions {
 		} else {
 			throw new IllegalStateException("Unkown definition type: " + type);
 		}
-		arity.put(name, new Integer(parameterCount));
+		arity.put(name, Integer.parseInt(parameterCount));
 	}
 
 	public void addMockedDefinition(String name, Type type, int parameterCount) {

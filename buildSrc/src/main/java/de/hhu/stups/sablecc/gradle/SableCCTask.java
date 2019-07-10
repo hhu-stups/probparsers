@@ -10,6 +10,7 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
@@ -29,6 +30,7 @@ public class SableCCTask extends SourceTask {
 		this.destinationResourcesDir = this.getProject().getObjects().directoryProperty();
 	}
 	
+	@Classpath
 	public FileCollection getSableCCClasspath() {
 		return this.sableCCClasspath;
 	}
@@ -67,6 +69,8 @@ public class SableCCTask extends SourceTask {
 	void execute() {
 		// Delete any previously generated source files, so that no longer existing token and node classes aren't kept around.
 		this.getProject().delete(this.getDestinationJavaDir(), this.getDestinationResourcesDir());
+		this.getProject().mkdir(this.getDestinationJavaDir());
+		this.getProject().mkdir(this.getDestinationResourcesDir());
 		
 		// Call SableCC to generate the source files.
 		this.getProject().javaexec(new Action<JavaExecSpec>() {

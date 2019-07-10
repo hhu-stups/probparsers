@@ -8,22 +8,4 @@ dependencies {
     testCompile 'org.codehaus.groovy:groovy:2.5.6'
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination file("${buildDir}/jacocoHtml")
-    }
-
-    afterEvaluate {
-        classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/parser/node/**',
-                '**/parser/analysis/**',
-                '**/preparser/**',
-                '**/lexer/**',
-            ])
-        })
-    }
-}
-deploy.dependsOn jacocoTestReport
+rootProject.setupTestReport(project, [])

@@ -19,7 +19,6 @@ import de.be4.classicalb.core.parser.util.Utils;
 public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticCheck {
 
 	private final IDefinitions definitions;
-	private final Set<Node> erroneousNodes = new HashSet<>();
 	private final List<CheckException> exceptions = new ArrayList<>();
 
 	public DefinitionUsageCheck(final IDefinitions definitions) {
@@ -32,13 +31,7 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticC
 			return;
 		}
 
-		erroneousNodes.clear();
 		rootNode.apply(this);
-
-		if (!erroneousNodes.isEmpty()) {
-			exceptions.add(new CheckException("Number of parameters doesn't match declaration of definition",
-					erroneousNodes.toArray(new Node[erroneousNodes.size()])));
-		}
 	}
 
 	@Override
@@ -60,7 +53,8 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticC
 		final int expected = definitions.getParameterCount(literal);
 
 		if (paramCount != expected) {
-			erroneousNodes.add(node);
+			exceptions.add(new CheckException("Number of parameters (" + paramCount + 
+			               ") doesn't match declaration of definition " + literal + " (" + expected + ")", node));
 		}
 	}
 

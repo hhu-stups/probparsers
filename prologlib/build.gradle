@@ -1,22 +1,4 @@
 apply plugin: 'jacoco'
 apply plugin: 'java'
 
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination file("${buildDir}/jacocoHtml")
-    }
-
-    afterEvaluate {
-        classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/parser/node/**',
-                '**/parser/analysis/**',
-                '**/preparser/**',
-                '**/lexer/**',
-            ])
-        })
-    }
-}
-deploy.dependsOn jacocoTestReport
+rootProject.setupTestReport(project, [])

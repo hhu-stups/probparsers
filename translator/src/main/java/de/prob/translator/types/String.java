@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class String implements BObject {
 	public java.lang.String getValue() {
 		return value;

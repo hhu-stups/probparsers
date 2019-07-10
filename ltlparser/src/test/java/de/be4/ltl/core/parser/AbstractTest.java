@@ -1,7 +1,8 @@
 package de.be4.ltl.core.parser;
 
-import junit.framework.Assert;
 import de.prob.prolog.term.PrologTerm;
+
+import org.junit.Assert;
 
 public class AbstractTest {
 	protected void check(final String input, final PrologTerm expectedTerm)
