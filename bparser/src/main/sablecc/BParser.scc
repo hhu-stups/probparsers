@@ -198,7 +198,7 @@ Tokens
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '(';  // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
-  {normal} product = '*' | 0x00d7;
+  {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
   {normal} power_of = '**';
   {normal} plus = plus;
   {normal} partial_function = plus minus gt | 0x21f8;
@@ -221,7 +221,7 @@ Tokens
   {normal} restrict_head_sequence = '/|\' | 0x2191;
   {normal} element_of = ':' | 0x2208;
   {normal} double_colon = '::' | ':' 0x2208;  /* becomes_element_of */
-  {normal} assign = ':' eq;
+  {normal} assign = ':' eq | 0x2254; //8788 decimal, used in Rodin
   {normal} semicolon = ';';
   {normal} less = lt;
   {normal} less_greater = lt white_space* gt; // for empty sequence
