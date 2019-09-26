@@ -216,7 +216,7 @@ Tokens
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
   {normal} not_equal = '/=' | 0x2260;
-  {normal} set_subtraction = '\';
+  {normal} set_subtraction = '\' | 0x2216; // decimal 8726, used in Rodin
   {normal} intersection = '/\' | 0x2229;
   {normal} restrict_head_sequence = '/|\' | 0x2191;
   {normal} element_of = ':' | 0x2208;
