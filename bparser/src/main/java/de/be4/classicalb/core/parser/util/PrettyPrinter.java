@@ -1531,7 +1531,12 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAStringExpression(final AStringExpression node) {
 		sb.append("\"");
 		if (node.getContent() != null) {
-			sb.append(node.getContent().getText());
+			// Escape backslashes, quotes and newlines in the generated string literal.
+			final String escaped = node.getContent().getText()
+				.replace("\\", "\\\\")
+				.replace("\"", "\\\"")
+				.replace("\n", "\\n");
+			sb.append(escaped);
 		}
 		sb.append("\"");
 
