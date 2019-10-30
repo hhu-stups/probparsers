@@ -19,3 +19,13 @@ test3:
 	gradle test --tests de.be4.classicalb.core.parser.SyntaxErrorsDetectedOnTokenStreamTest --info
 ext:
 	gradle test --tests de.be4.classicalb.core.parser.languageextension.SyntaxExtensionTest--info
+
+count:
+	@echo "Line count for Java files:"
+	cd src; find . -name '*.java' | xargs wc -l
+	@echo "Line count for SableCC files:"
+	cd src; find . -name '*.scc' | xargs wc -l
+	@echo "Number of Java files:"
+	cd src; find . -name '*.java' | wc -l
+	@echo "Number of SableCC files:"
+	cd src; find . -name '*.scc' | wc -l
