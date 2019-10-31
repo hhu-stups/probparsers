@@ -55,7 +55,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
-		TStringLiteral tStringLiteral = new TStringLiteral(escapeString(text,false), 
+		TStringLiteral tStringLiteral = new TStringLiteral(escapeString(text), 
 				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
@@ -72,7 +72,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		TStringLiteral tStringLiteral =
 			// for normal string literals we also get the surrounding quotes " as part of the token
 			// these need to be removed and the escaping codes dealt with
-			new TStringLiteral(escapeString(text,true), content.getLine(), content.getPos());
+			new TStringLiteral(escapeString(removeSurroundingQuotes(text)), content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
@@ -94,19 +94,22 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		node.replaceBy(intNode);
 	}
 	
-	
-	private static String escapeString(String literal, boolean removeSurroundingQuotes) {
-		/*
-		 * Note, the text of a TMultilineString token does not start with '''
-		 * because the ''' are contained in the TMultilineStringStartEnd token
-		 */
-		
-		if (removeSurroundingQuotes && literal.startsWith("\"")) {
-			/// we assume literal also ends with \", if string contains less than two characters we get an exception !
-			/// "foo" gets translated to foo
-			literal = literal.substring(1, literal.length() - 1);
+	/**
+	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #escapeString(String)} afterwards to do this.
+	 * 
+	 * @param literal the string from which to remove the quotes
+	 * @return the string without quotes
+	 * @throws IllegalArgumentException if the literal is not a double-quoted string
+	 */
+	private static String removeSurroundingQuotes(final String literal) {
+		/// "foo" gets translated to foo
+		if (literal.length() < 2 || literal.charAt(0) != '"' || literal.charAt(literal.length()-1) != '"') {
+			throw new IllegalArgumentException("removeSurroundingQuotes argument must be a double-quoted string");
 		}
+		return literal.substring(1, literal.length() - 1);
+	}
 
+	private static String escapeString(String literal) {
 		boolean backslashFound = false;
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < literal.length(); i++) {
