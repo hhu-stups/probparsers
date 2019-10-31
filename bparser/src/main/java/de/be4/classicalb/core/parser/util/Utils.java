@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,17 +24,19 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
-	private static Map<Character, Character> stringReplacements = new HashMap<>();
+	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
 
 	static {
 		// replacements in strings '\' + ..
 		// e.g. '\' + 'n' is replaced by '\n'
-		stringReplacements.put('"', '"');
-		stringReplacements.put('\'', '\'');
-		stringReplacements.put('n', '\n');
-		stringReplacements.put('r', '\r');
-		stringReplacements.put('t', '\t');
-		stringReplacements.put('\\', '\\');
+		final Map<Character, Character> stringEscapeReplacements = new HashMap<>();
+		stringEscapeReplacements.put('"', '"');
+		stringEscapeReplacements.put('\'', '\'');
+		stringEscapeReplacements.put('n', '\n');
+		stringEscapeReplacements.put('r', '\r');
+		stringEscapeReplacements.put('t', '\t');
+		stringEscapeReplacements.put('\\', '\\');
+		STRING_ESCAPE_REPLACEMENTS = Collections.unmodifiableMap(stringEscapeReplacements);
 	}
 
 	private Utils() {
@@ -182,8 +185,8 @@ public final class Utils {
 					throw new IllegalArgumentException("Unescaped backslash at end of string not allowed");
 				}
 				final char escapedChar = contents.charAt(i + 1);
-				if (stringReplacements.containsKey(escapedChar)) {
-					sb.append(stringReplacements.get(escapedChar));
+				if (STRING_ESCAPE_REPLACEMENTS.containsKey(escapedChar)) {
+					sb.append(STRING_ESCAPE_REPLACEMENTS.get(escapedChar));
 				} else {
 					// If the escaped character is not recognized, both the backslash and the character are treated literally.
 					sb.append('\\');
