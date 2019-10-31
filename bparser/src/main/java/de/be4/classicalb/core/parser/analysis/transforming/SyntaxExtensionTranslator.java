@@ -110,22 +110,29 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	}
 
 	private static String unescapeStringContents(String contents) {
-		boolean backslashFound = false;
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < contents.length(); i++) {
-			char c = contents.charAt(i);
-			if (backslashFound && stringReplacements.containsKey(c)) {
-				sb.setLength(sb.length() - 1); // remove backslash
-				sb.append(stringReplacements.get(c)); // and replace by this
-				backslashFound = false;
-				continue;
-			}
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < contents.length();) {
+			final char c = contents.charAt(i);
 			if (c == '\\') {
-				backslashFound = true;
+				// Start of escape sequence.
+				if (i + 1 >= contents.length()) {
+					throw new IllegalArgumentException("Unescaped backslash at end of string not allowed");
+				}
+				final char escapedChar = contents.charAt(i + 1);
+				if (stringReplacements.containsKey(escapedChar)) {
+					sb.append(stringReplacements.get(escapedChar));
+				} else {
+					// If the escaped character is not recognized, both the backslash and the character are treated literally.
+					sb.append('\\');
+					sb.append(escapedChar);
+				}
+				// Skip over backslash and the following character.
+				i += 2;
 			} else {
-				backslashFound = false;
+				// Simple unescaped character.
+				sb.append(c);
+				i++;
 			}
-			sb.append(c);
 		}
 		return sb.toString();
 	}
