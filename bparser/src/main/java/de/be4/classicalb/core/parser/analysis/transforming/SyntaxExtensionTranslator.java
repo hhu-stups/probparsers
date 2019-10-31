@@ -55,7 +55,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
-		TStringLiteral tStringLiteral = new TStringLiteral(escapeString(text), 
+		TStringLiteral tStringLiteral = new TStringLiteral(unescapeStringContents(text), 
 				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
@@ -72,7 +72,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		TStringLiteral tStringLiteral =
 			// for normal string literals we also get the surrounding quotes " as part of the token
 			// these need to be removed and the escaping codes dealt with
-			new TStringLiteral(escapeString(removeSurroundingQuotes(text)), content.getLine(), content.getPos());
+			new TStringLiteral(unescapeStringContents(removeSurroundingQuotes(text)), content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
@@ -95,7 +95,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	}
 	
 	/**
-	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #escapeString(String)} afterwards to do this.
+	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
 	 * 
 	 * @param literal the string from which to remove the quotes
 	 * @return the string without quotes
@@ -109,11 +109,11 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		return literal.substring(1, literal.length() - 1);
 	}
 
-	private static String escapeString(String literal) {
+	private static String unescapeStringContents(String contents) {
 		boolean backslashFound = false;
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < literal.length(); i++) {
-			char c = literal.charAt(i);
+		for (int i = 0; i < contents.length(); i++) {
+			char c = contents.charAt(i);
 			if (backslashFound && stringReplacements.containsKey(c)) {
 				sb.setLength(sb.length() - 1); // remove backslash
 				sb.append(stringReplacements.get(c)); // and replace by this
