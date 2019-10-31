@@ -1,23 +1,23 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
 import de.be4.classicalb.core.parser.node.AImplicationPredicate;
+import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.AMultilineStringExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
+import de.be4.classicalb.core.parser.node.THexLiteral;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.node.THexLiteral;
-import de.be4.classicalb.core.parser.node.AIntegerExpression;
-import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
-import de.hhu.stups.sablecc.patch.*; // for SourcePosition
-import java.util.HashMap;
-import java.util.Map;
 
 public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 
@@ -96,21 +96,16 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	
 	
 	private static String escapeString(String literal, Boolean remove_surrounding_quotes) {
-		// google for howto-unescape-a-java-string-literal-in-java
-		// quickfix: we do nothing just strip off the " if surrounding_quotes is true,
-		// we now also convert escape codes using stringReplacements
 		/*
 		 * Note, the text of a TMultilineString token does not start with '''
 		 * because the ''' are contained in the TMultilineStringStartEnd token
 		 */
-		// System.out.println("string token literal = " + literal + " length = " + literal.length());
 		
 		if (remove_surrounding_quotes && literal.startsWith("\"")) {
 			/// we assume literal also ends with \", if string contains less than two characters we get an exception !
 			/// "foo" gets translated to foo
 			literal = literal.substring(1, literal.length() - 1);
 		}
-		// System.out.println("string token literal after = " + literal + " length = " + literal.length());
 
 		boolean backslashFound = false;
 		StringBuilder sb = new StringBuilder();
