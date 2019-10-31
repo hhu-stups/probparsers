@@ -1,8 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
@@ -16,24 +13,11 @@ import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.util.Utils;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
 public class SyntaxExtensionTranslator extends DepthFirstAdapter {
-
-	private static Map<Character, Character> stringReplacements = new HashMap<>();
-	
-	static {
-		// replacements in strings '\' + ..
-		// e.g. '\' + 'n' is replaced by '\n'
-		stringReplacements.put('"', '"');
-		stringReplacements.put('\'', '\'');
-		stringReplacements.put('n', '\n');
-		stringReplacements.put('r', '\r');
-		stringReplacements.put('t', '\t');
-		stringReplacements.put('\\', '\\');
-	}
-	
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
 		// IF P THE P2 ELSE P3 END
@@ -55,7 +39,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
-		TStringLiteral tStringLiteral = new TStringLiteral(unescapeStringContents(text), 
+		TStringLiteral tStringLiteral = new TStringLiteral(Utils.unescapeStringContents(text), 
 				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
@@ -72,7 +56,7 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		TStringLiteral tStringLiteral =
 			// for normal string literals we also get the surrounding quotes " as part of the token
 			// these need to be removed and the escaping codes dealt with
-			new TStringLiteral(unescapeStringContents(removeSurroundingQuotes(text)), content.getLine(), content.getPos());
+			new TStringLiteral(Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text)), content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());
 		stringNode.setEndPos(node.getEndPos());
@@ -93,49 +77,4 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 		intNode.setEndPos(node.getEndPos());
 		node.replaceBy(intNode);
 	}
-	
-	/**
-	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
-	 * 
-	 * @param literal the string from which to remove the quotes
-	 * @return the string without quotes
-	 * @throws IllegalArgumentException if the literal is not a double-quoted string
-	 */
-	private static String removeSurroundingQuotes(final String literal) {
-		/// "foo" gets translated to foo
-		if (literal.length() < 2 || literal.charAt(0) != '"' || literal.charAt(literal.length()-1) != '"') {
-			throw new IllegalArgumentException("removeSurroundingQuotes argument must be a double-quoted string");
-		}
-		return literal.substring(1, literal.length() - 1);
-	}
-
-	private static String unescapeStringContents(String contents) {
-		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < contents.length();) {
-			final char c = contents.charAt(i);
-			if (c == '\\') {
-				// Start of escape sequence.
-				if (i + 1 >= contents.length()) {
-					throw new IllegalArgumentException("Unescaped backslash at end of string not allowed");
-				}
-				final char escapedChar = contents.charAt(i + 1);
-				if (stringReplacements.containsKey(escapedChar)) {
-					sb.append(stringReplacements.get(escapedChar));
-				} else {
-					// If the escaped character is not recognized, both the backslash and the character are treated literally.
-					sb.append('\\');
-					sb.append(escapedChar);
-				}
-				// Skip over backslash and the following character.
-				i += 2;
-			} else {
-				// Simple unescaped character.
-				sb.append(c);
-				i++;
-			}
-		}
-		return sb.toString();
-	}
-	
-	
 }
