@@ -95,13 +95,13 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	}
 	
 	
-	private static String escapeString(String literal, Boolean remove_surrounding_quotes) {
+	private static String escapeString(String literal, Boolean removeSurroundingQuotes) {
 		/*
 		 * Note, the text of a TMultilineString token does not start with '''
 		 * because the ''' are contained in the TMultilineStringStartEnd token
 		 */
 		
-		if (remove_surrounding_quotes && literal.startsWith("\"")) {
+		if (removeSurroundingQuotes && literal.startsWith("\"")) {
 			/// we assume literal also ends with \", if string contains less than two characters we get an exception !
 			/// "foo" gets translated to foo
 			literal = literal.substring(1, literal.length() - 1);
