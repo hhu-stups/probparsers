@@ -25,6 +25,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
+	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS_REVERSE;
 
 	static {
 		// replacements in strings '\' + ..
@@ -37,6 +38,12 @@ public final class Utils {
 		stringEscapeReplacements.put('t', '\t');
 		stringEscapeReplacements.put('\\', '\\');
 		STRING_ESCAPE_REPLACEMENTS = Collections.unmodifiableMap(stringEscapeReplacements);
+		
+		final Map<Character, Character> stringEscapeReplacementsReverse = new HashMap<>();
+		for (final Map.Entry<Character, Character> entry : stringEscapeReplacements.entrySet()) {
+			stringEscapeReplacementsReverse.put(entry.getValue(), entry.getKey());
+		}
+		STRING_ESCAPE_REPLACEMENTS_REVERSE = Collections.unmodifiableMap(stringEscapeReplacementsReverse);
 	}
 
 	private Utils() {
@@ -198,6 +205,20 @@ public final class Utils {
 				// Simple unescaped character.
 				sb.append(c);
 				i++;
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String escapeStringContents(final String contents) {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < contents.length(); i++) {
+			final char c = contents.charAt(i);
+			if (STRING_ESCAPE_REPLACEMENTS_REVERSE.containsKey(c)) {
+				sb.append('\\');
+				sb.append(STRING_ESCAPE_REPLACEMENTS_REVERSE.get(c));
+			} else {
+				sb.append(c);
 			}
 		}
 		return sb.toString();
