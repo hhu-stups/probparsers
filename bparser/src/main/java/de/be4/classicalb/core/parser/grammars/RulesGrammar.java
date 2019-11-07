@@ -111,8 +111,8 @@ public class RulesGrammar implements IGrammar {
 
 	private static void add(Class<? extends Token> clazz) {
 		try {
-			map.put(clazz.newInstance().getText(), clazz);
-		} catch (InstantiationException | IllegalAccessException e) {
+			map.put(clazz.getConstructor().newInstance().getText(), clazz);
+		} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
 			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}
@@ -131,11 +131,11 @@ public class RulesGrammar implements IGrammar {
 		Class<? extends Token> clazz = map.get(token.getText());
 		try {
 			// default constructor
-			Token newToken = clazz.newInstance();
+			Token newToken = clazz.getConstructor().newInstance();
 			newToken.setLine(token.getLine());
 			newToken.setPos(token.getPos());
 			return newToken;
-		} catch (InstantiationException e) {
+		} catch (NoSuchMethodException e) {
 			// if the class has not default constructor we call the
 			// construct with a text string as the single argument
 			// e.g. TKwPredicateOperator(token.getText)
@@ -149,7 +149,7 @@ public class RulesGrammar implements IGrammar {
 					| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
 				throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e1);
 			}
-		} catch (IllegalAccessException e) {
+		} catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
 			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
 	}

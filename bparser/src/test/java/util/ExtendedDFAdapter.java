@@ -1,9 +1,10 @@
-package de.be4.classicalb.core.parser.analysis;
+package util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
 
 /**

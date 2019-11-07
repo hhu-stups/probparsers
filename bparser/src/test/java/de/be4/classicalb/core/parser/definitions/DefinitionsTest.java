@@ -310,7 +310,10 @@ public class DefinitionsTest {
 			final CheckException cause = (CheckException) e.getCause();
 			assertEquals(1, cause.getNodes().length);
 			assertNotNull(cause.getNodes()[0]);
-			assertEquals("Number of parameters doesn't match declaration of definition", cause.getLocalizedMessage());
+			String result = cause.getLocalizedMessage();
+		    assertTrue(result.contains("Number of parameters"));
+		    assertTrue(result.contains("doesn't match declaration of definition"));
+		    assertTrue(result.contains("defExpr"));
 			// IGNORE, is expected
 		}
 	}

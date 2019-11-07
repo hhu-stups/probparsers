@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class Boolean implements BObject {
 	private final java.lang.Boolean value;
 
@@ -46,8 +47,15 @@ public class Boolean implements BObject {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return value.equals(obj);
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		final Boolean aBoolean = (Boolean)o;
+		return value.equals(aBoolean.value);
 	}
 
 	public Boolean(boolean value) {

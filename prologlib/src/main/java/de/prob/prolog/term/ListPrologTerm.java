@@ -16,7 +16,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog list.
- * 
+ *
  * @author plagge
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
@@ -38,8 +38,6 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
 		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
 		super(elements.length == 0 ? "[]" : ".", elements);
-		if (elements == null)
-			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
@@ -53,8 +51,6 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		super(org.getFunctor());
 		this.start = start;
 		this.end = end;
-		if (org == null)
-			throw new IllegalStateException("elements of Prolog list must not be null");
 		this.elements = org.elements;
 	}
 

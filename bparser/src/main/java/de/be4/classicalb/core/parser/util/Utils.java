@@ -3,14 +3,14 @@ package de.be4.classicalb.core.parser.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -24,6 +24,27 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
+	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
+	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS_REVERSE;
+
+	static {
+		// replacements in strings '\' + ..
+		// e.g. '\' + 'n' is replaced by '\n'
+		final Map<Character, Character> stringEscapeReplacements = new HashMap<>();
+		stringEscapeReplacements.put('"', '"');
+		stringEscapeReplacements.put('\'', '\'');
+		stringEscapeReplacements.put('n', '\n');
+		stringEscapeReplacements.put('r', '\r');
+		stringEscapeReplacements.put('t', '\t');
+		stringEscapeReplacements.put('\\', '\\');
+		STRING_ESCAPE_REPLACEMENTS = Collections.unmodifiableMap(stringEscapeReplacements);
+		
+		final Map<Character, Character> stringEscapeReplacementsReverse = new HashMap<>();
+		for (final Map.Entry<Character, Character> entry : stringEscapeReplacements.entrySet()) {
+			stringEscapeReplacementsReverse.put(entry.getValue(), entry.getKey());
+		}
+		STRING_ESCAPE_REPLACEMENTS_REVERSE = Collections.unmodifiableMap(stringEscapeReplacementsReverse);
+	}
 
 	private Utils() {
 	}
@@ -58,16 +79,6 @@ public final class Utils {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
 				|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
-	}
-
-	public static String getRevisionFromManifest() {
-		try (InputStream stream = Utils.class.getClassLoader().getResourceAsStream("revision.properties")) {
-			Properties properties = new Properties();
-			properties.load(stream);
-			return properties.getProperty("CompileDate");
-		} catch (IOException e) {
-			return String.valueOf(System.currentTimeMillis());
-		}
 	}
 
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
@@ -155,5 +166,61 @@ public final class Utils {
 
 		return content.replaceAll("\r\n", "\n");
 	}
-
+	
+	/**
+	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
+	 * 
+	 * @param literal the string from which to remove the quotes
+	 * @return the string without quotes
+	 * @throws IllegalArgumentException if the literal is not a double-quoted string
+	 */
+	public static String removeSurroundingQuotes(final String literal) {
+		/// "foo" gets translated to foo
+		if (literal.length() < 2 || literal.charAt(0) != '"' || literal.charAt(literal.length()-1) != '"') {
+			throw new IllegalArgumentException("removeSurroundingQuotes argument must be a double-quoted string");
+		}
+		return literal.substring(1, literal.length() - 1);
+	}
+	
+	public static String unescapeStringContents(String contents) {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < contents.length();) {
+			final char c = contents.charAt(i);
+			if (c == '\\') {
+				// Start of escape sequence.
+				if (i + 1 >= contents.length()) {
+					throw new IllegalArgumentException("Unescaped backslash at end of string not allowed");
+				}
+				final char escapedChar = contents.charAt(i + 1);
+				if (STRING_ESCAPE_REPLACEMENTS.containsKey(escapedChar)) {
+					sb.append(STRING_ESCAPE_REPLACEMENTS.get(escapedChar));
+				} else {
+					// If the escaped character is not recognized, both the backslash and the character are treated literally.
+					sb.append('\\');
+					sb.append(escapedChar);
+				}
+				// Skip over backslash and the following character.
+				i += 2;
+			} else {
+				// Simple unescaped character.
+				sb.append(c);
+				i++;
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String escapeStringContents(final String contents) {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < contents.length(); i++) {
+			final char c = contents.charAt(i);
+			if (STRING_ESCAPE_REPLACEMENTS_REVERSE.containsKey(c)) {
+				sb.append('\\');
+				sb.append(STRING_ESCAPE_REPLACEMENTS_REVERSE.get(c));
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
 }

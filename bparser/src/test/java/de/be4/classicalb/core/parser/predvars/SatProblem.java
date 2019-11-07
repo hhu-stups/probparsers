@@ -19,8 +19,8 @@ import util.Ast2String;
 public class SatProblem {
 	@Test
 	public void compareSatPredAndPredVars() throws Exception {
-		final File f1 = new File("src/test/resources/predvars/sat_predvars");
-		final File f2 = new File("src/test/resources/predvars/sat_pred");
+		final File f1 = new File(this.getClass().getClassLoader().getResource("predvars/sat_predvars").toURI());
+		final File f2 = new File(this.getClass().getClassLoader().getResource("predvars/sat_pred").toURI());
 
 		final Scanner s1 = new Scanner(f1);
 		final Scanner s2 = new Scanner(f2);

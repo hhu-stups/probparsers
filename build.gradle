@@ -4,225 +4,225 @@ plugins {
 }
 */
 
-def global_version = '2.9.16'
+apply plugin: 'java'
+apply plugin: 'eclipse'
 
-project.version = global_version;
+// group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
+project.version = '2.9.23'
 
-defaultTasks 'remind', 'clean', 'deploy'
+final SOURCE_ENCODING = "UTF-8"
 
-
-task remind {
-    doLast {
-        println "You did not specify a task. Assuming you mean gradle clean deploy."
-    }
+wrapper {
+    gradleVersion = "5.4"
+    distributionType = Wrapper.DistributionType.ALL
 }
 
-// // The real configuration
-allprojects {
-  apply plugin: 'java'
-  apply plugin: 'maven'
-  apply plugin: 'eclipse'
-  sourceCompatibility = 1.7
-  targetCompatibility = 1.7
-
-  clean {
-	doLast {
-      def delClos
-      delClos = {
-        it.eachDir( delClos );
-        it.eachFile { it.delete() }
-	    it.delete()
-      }
-	  def build_dir = file("build")
-      if (build_dir.exists()) delClos(build_dir)
-//      def gradle_cache = file(".gradle")
-//      if (gradle_cache.exists()) delClos(gradle_cache)
-      def bin_dir = file("bin")
-      if (bin_dir.exists()) delClos(bin_dir)
-    }
-  }
+ext {
+    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13']
 }
 
 subprojects {
- apply plugin: 'eclipse'
- group = 'de.hhu.stups'
- version = global_version;
- repositories {
-	  mavenCentral()
-    maven {
-      name "snapshots"
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'eclipse'
+    
+    group = rootProject.group
+    version = rootProject.version
+    
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+    
+    repositories {
+        mavenCentral()
+        maven {
+            name "snapshots"
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
-}
-
-configurations {
-	sablecc
-}
-
-jar {
-	from sourceSets.main.allJava
-}
-
-configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
-dependencies {
-    sablecc(group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13')
-    //compile 'com.google.code.findbugs:jsr305:1.3.9'
-    testCompile 'junit:junit:4.8.2'
- }
-
- task deploy(dependsOn: [build])
-
-
- cleanEclipseJdt  {
-   doLast {
-	   file(".settings/org.eclipse.jdt.ui.prefs").delete()
-   }
- }
-
- eclipseJdt {
-	inputFile = file("scripts/org.eclipse.jdt.core.prefs")
- }
-
- eclipseJdt  {
-    doLast {
-    	copy {
-        from 'scripts'
-	  	  into '.settings'
-		    include 'org.eclipse.jdt.ui.prefs'
-      }
+    
+    tasks.withType(JavaCompile) {
+        options.encoding = SOURCE_ENCODING
     }
- }
+    
+    tasks.withType(Javadoc) {
+        options.encoding = SOURCE_ENCODING
+        options.addStringOption("sourcepath", "")
+    }
 
- if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+    jar {
+        from sourceSets.main.allJava
+    }
 
- println "Configuring deployment for ${ project.name }"
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
 
- apply plugin: 'signing'
+    dependencies {
+        testCompile 'junit:junit:4.12'
+    }
 
- javadoc {
-	failOnError = false
- }
+    cleanEclipseJdt {
+        doLast {
+            file(".settings/org.eclipse.jdt.ui.prefs").delete()
+        }
+    }
 
- task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
+    eclipseJdt {
+        inputFile = file("scripts/org.eclipse.jdt.core.prefs")
+    }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+    eclipseJdt {
+        doLast {
+            copy {
+                from 'scripts'
+                into '.settings'
+                include 'org.eclipse.jdt.ui.prefs'
+            }
+        }
+    }
 
- artifacts {
-    archives javadocJar, sourcesJar
-}
+    if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 
+        println "Configuring deployment for ${project.name}"
 
-signing {
-    sign configurations.archives
-}
+        apply plugin: 'signing'
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name project.getName()
-        packaging 'jar'
-        // optionally artifactId can be defined here
-        description 'Part of the ProB Parser library'
-        url 'https://github.com/bendisposto/probparsers'
-
-        licenses {
-          license {
-            name 'Eclipse Public License, Version 1.0'
-            url 'http://www.eclipse.org/org/documents/epl-v10.html'
-          }
+        javadoc {
+            failOnError = false
         }
 
-        scm {
-          connection 'scm:git:git://github.com/bendisposto/probparsers.git'
-          developerConnection 'scm:git:git@github.com:bendisposto/probparsers.git'
-          url 'https://github.com/bendisposto/probparsers'
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives javadocJar, sourcesJar
         }
 
 
-        developers {
-          developer {
-            id 'bendisposto'
-            name 'Jens Bendisposto'
-            email 'jens@bendisposto.de'
-          }
+        signing {
+            sign configurations.archives
         }
-      }
+
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    pom.project {
+                        name project.getName()
+                        packaging 'jar'
+                        // optionally artifactId can be defined here
+                        description 'Part of the ProB Parser library'
+                        url 'https://github.com/bendisposto/probparsers'
+
+                        licenses {
+                            license {
+                                name 'Eclipse Public License, Version 1.0'
+                                url 'http://www.eclipse.org/org/documents/epl-v10.html'
+                            }
+                        }
+
+                        scm {
+                            connection 'scm:git:git://github.com/bendisposto/probparsers.git'
+                            developerConnection 'scm:git:git@github.com:bendisposto/probparsers.git'
+                            url 'https://github.com/bendisposto/probparsers'
+                        }
+
+
+                        developers {
+                            developer {
+                                id 'bendisposto'
+                                name 'Jens Bendisposto'
+                                email 'jens@bendisposto.de'
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-  }
-}
-}
 
 }
 
-
-task uberjar(type: Jar, dependsOn: subprojects.deploy) {
-    baseName = 'probcliparser'
+task uberjar(type: Jar, dependsOn: subprojects.assemble) {
+    archiveBaseName.set('probcliparser')
     subprojects.each { subproject ->
         from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) }
     }
     manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
-task copyCoverage(){
-  dependsOn = [subprojects.deploy]
-  copy {
-    from fileTree(dir: 'bparser/build/jacocoHtml')
-    into "build/parser_coverage/bparser"
-  }
-  copy{
-    from fileTree(dir: 'answerparser/build/jacocoHtml')
-    into "build/parser_coverage/answerparser"
-  }
-  copy{
-    from fileTree(dir: 'parserbase/build/jacocoHtml')
-    into "build/parser_coverage/parserbase"
-  }
-  copy{
-    from fileTree(dir: 'translator/build/jacocoHtml')
-    into "build/parser_coverage/translator"
-  }
-  copy{
-    from fileTree(dir: 'prologlib/build/jacocoHtml')
-    into "build/parser_coverage/prologlib"
-  }
-
+ext {
+    // This closure is called in each subproject that wants test reports generated.
+    setupTestReport = {Project subproject, List<String> sableCCPackageNames -> void
+        final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
+        jacocoTestReportTask.configure {JacocoReport task ->
+            task.reports {
+                xml.enabled = false
+                csv.enabled = false
+                html.destination = new File(subproject.buildDir, "jacocoHtml")
+            }
+            
+            task.classDirectories.from = task.classDirectories.from.collect {
+                final exclusions = ["**/de/hhu/stups/sablecc/patch/**"]
+                sableCCPackageNames.each {packageName ->
+                    final packagePath = packageName.replace(".", "/")
+                    exclusions.addAll([
+                        "**/${packagePath}/analysis/**",
+                        "**/${packagePath}/lexer/**",
+                        "**/${packagePath}/node/**",
+                        "**/${packagePath}/parser/**",
+                    ])
+                }
+                it.asFileTree.matching {
+                    exclude(exclusions)
+                }
+            }
+        }
+    }
 }
 
-//sonarqube {
-//  properties {
-//    //property("sonar.organization", "prob2")
-//    property("sonar.projectKey", "probparsers")
-//    property("sonar.projectName", "probparsers")
-//    property("sonar.projectVersion", global_version)
-//    property("sonar.java.binaries", "bparser/build/classes")
-//    property("sonar.inclusions", "**/classicalb/core/parser/**")
-//    property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
-//    property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
-//    property("sonar.junit.reportsPath", "bparser/build/test-results/test")
-//    property("sonar.login", System.getenv("SONAR_TOKEN"))
-//  }
-// } 
+// sonarqube {
+//     properties {
+//         // property("sonar.organization", "prob2")
+//         property("sonar.projectKey", "probparsers")
+//         property("sonar.projectName", "probparsers")
+//         property("sonar.projectVersion", project.version)
+//         property("sonar.java.binaries", "bparser/build/classes")
+//         property("sonar.inclusions", "**/classicalb/core/parser/**")
+//         property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
+//         property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
+//         property("sonar.junit.reportsPath", "bparser/build/test-results/test")
+//         property("sonar.login", System.getenv("SONAR_TOKEN"))
+//     }
+// }
 
-
-task deploy(dependsOn: [subprojects.deploy, 'copyCoverage'])
+task deploy {
+    doLast {
+        throw new GradleException(
+            """\
+            The deploy task has been removed. Please use one of the following tasks instead, depending on what you want to do:
+            To build the parser jar files: ./gradlew assemble
+            To run the tests: ./gradlew check
+            To build and test the parser: ./gradlew build
+            To generate test coverage reports: ./gradlew check jacocoTestReport
+            """.stripIndent()
+        )
+    }
+}

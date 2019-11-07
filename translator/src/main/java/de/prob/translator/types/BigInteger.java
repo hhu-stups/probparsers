@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class BigInteger extends Number {
 
 	@Override
@@ -140,6 +141,11 @@ public class BigInteger extends Number {
 	@Override
 	public Number rightShift(Number o) {
 		return new BigInteger(this.value.shiftRight(o.intValue()));
+	}
+
+	@Override
+	public Number bitwiseNegate() {
+		return new BigInteger(this.value.not());
 	}
 
 	@Override

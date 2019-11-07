@@ -2,6 +2,7 @@ package util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URISyntaxException;
 
 public abstract class AbstractParseMachineTest {
 	
@@ -19,10 +20,33 @@ public abstract class AbstractParseMachineTest {
 		}
 	}
 
-	protected static File[] getMachines(String path) {
-		final File dir = new File(path);
+	protected static File[] getMachines(String path) throws URISyntaxException {
+		final File dir = new File(AbstractParseMachineTest.class.getClassLoader().getResource(path).toURI());
 		return dir.listFiles(new MachineFilenameFilter());
 	}
 
-	
+	protected static PolySuite.Configuration buildConfig(String path) {
+		final File[] machines;
+		try {
+			machines = getMachines(path);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		return new PolySuite.Configuration() {
+
+			public int size() {
+				return machines.length;
+			}
+
+			public File getTestValue(int index) {
+				return machines[index];
+			}
+
+			public String getTestName(int index) {
+				return machines[index].getName();
+			}
+		};
+	}
+
+
 }

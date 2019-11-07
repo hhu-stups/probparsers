@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Deprecated
 public class Record implements BObject, Map<java.lang.String, BObject> {
 	private final Map<java.lang.String, BObject> map;
 
@@ -64,8 +65,16 @@ public class Record implements BObject, Map<java.lang.String, BObject> {
 		return map.entrySet();
 	}
 
-	public boolean equals(Object o) {
-		return map.equals(o);
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		final Record record = (Record)o;
+		return map.equals(record.map);
 	}
 
 	public int hashCode() {

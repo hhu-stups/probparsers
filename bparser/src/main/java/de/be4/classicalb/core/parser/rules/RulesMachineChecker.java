@@ -178,12 +178,21 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.functionMap.get(funcOp);
 	}
 
+	public Set<String> getFunctionOperationNames() {
+		Set<String> set = new HashSet<>();
+		for (FunctionOperation func : this.functionMap.values()) {
+			set.add(func.getName());
+		}
+		return set;
+	}
+
 	public Map<String, HashSet<Node>> getUnknownIdentifier() {
 		HashMap<String, HashSet<Node>> result = new HashMap<>();
 		for (Entry<String, HashSet<Node>> entry : readIdentifier.entrySet()) {
 			String name = entry.getKey();
 			HashSet<Node> nodes = entry.getValue();
-			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)) {
+			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)
+					&& !this.getFunctionOperationNames().contains(name)) {
 				result.put(name, nodes);
 			}
 		}
@@ -526,7 +535,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		// the DEFINE block should not appear within a loop substitution
 		if (!this.loopNodes.isEmpty()) {
 			this.errorList
-					.add(new CheckException("A DEFINE substitution must be contained in a loop substitution.", node));
+					.add(new CheckException("A DEFINE substitution must not be contained in a loop substitution.", node));
 		}
 	}
 
@@ -899,7 +908,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	public void outAWhileSubstitution(AWhileSubstitution node) {
-		loopNodes.add(node);
+		loopNodes.remove(node);
 	}
 
 	// nodes which introduces local identifiers

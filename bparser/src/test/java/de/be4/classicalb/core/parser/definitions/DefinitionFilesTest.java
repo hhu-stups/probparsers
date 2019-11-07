@@ -135,7 +135,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
 		File machine = new File(
-				"src/test/resources/parsable/DefinitionFileTest.mch");
+				this.getClass().getClassLoader().getResource("parsable/DefinitionFileTest.mch").toURI());
 		parser.parseFile(machine, false);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -188,21 +188,26 @@ public class DefinitionFilesTest implements IFileContentProvider {
 
 	@Test
 	public void testErrorInDefinitions() throws IOException, BCompoundException {
-		String file = "./src/test/resources/definitions/errors/DefinitionErrorPosition.mch";
+		String file = "./definitions/errors/DefinitionErrorPosition.mch";
+		// file contains DEFINITIONS aa == 1 + + END
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
-				.startsWith("preparse_exception([],'[2,23] "));
+				//.startsWith("preparse_exception([],'[2,23] "));
+				.startsWith("parse_exception(pos(2,23,"));
+		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
 	}
 
 	@Test
 	public void testErrorInIncludedDefinitionFile() throws IOException,
 			BCompoundException {
-		String file = "./src/test/resources/definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
+		String file = "./definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result
-				.startsWith("preparse_exception([],'[3,1]"));
+				//.startsWith("preparse_exception([],'[3,1]"));
+				.startsWith("parse_exception(pos(3,1,"));
+		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 
 	class CountingDefinitionFileProvider implements IDefinitionFileProvider {

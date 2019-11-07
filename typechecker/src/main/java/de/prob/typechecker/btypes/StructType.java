@@ -50,7 +50,7 @@ public class StructType extends AbstractHasFollowers {
 			res.append("...");
 		while (iterator.hasNext()) {
 			Entry<String, BType> next = iterator.next();
-			String fieldName = (String) next.getKey();
+			String fieldName = next.getKey();
 			res.append(fieldName).append(":").append(next.getValue());
 			if (iterator.hasNext())
 				res.append(",");

@@ -7,7 +7,7 @@
 Releases are on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cde.hhu.stups), Snapshots on https://oss.sonatype.org/content/repositories/snapshots/. You can include the B parser in a gradle build script like this:
 
 <pre>
-def parser_version = '2.9.16' // development version: 2.9.17-SNAPSHOT
+def parser_version = '2.9.23' // development version: 2.9.24-SNAPSHOT
 dependencies {
 	compile group: "de.hhu.stups", name: "bparser", version: parser_version
 	compile group: "de.hhu.stups", name: "ltlparser", version: parser_version// optional
@@ -31,7 +31,7 @@ The repository contains some additional parsers:
 * unicode - Conversion of EventB Unicode Strings to ASCII and vice versa
 
 ## Building
-Run the 'deploy' target with gradle.
+Run the 'assemble' target with gradle.
 
 On windows you need to install the program 'patch.exe'.
 

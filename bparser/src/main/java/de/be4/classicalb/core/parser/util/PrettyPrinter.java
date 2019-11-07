@@ -1531,7 +1531,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAStringExpression(final AStringExpression node) {
 		sb.append("\"");
 		if (node.getContent() != null) {
-			sb.append(node.getContent().getText());
+			sb.append(Utils.escapeStringContents(node.getContent().getText()));
 		}
 		sb.append("\"");
 

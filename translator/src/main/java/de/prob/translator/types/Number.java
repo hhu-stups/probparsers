@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public abstract class Number extends java.lang.Number implements Comparable<Number>, BObject {
 
 	private static final long serialVersionUID = 7702079048348822936L;
@@ -45,6 +46,8 @@ public abstract class Number extends java.lang.Number implements Comparable<Numb
 	public abstract Number leftShift(Number o);
 
 	public abstract Number rightShift(Number o);
+
+	public abstract Number bitwiseNegate();
 
 	public abstract boolean isCase(Number o);
 

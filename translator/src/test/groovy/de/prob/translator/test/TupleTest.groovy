@@ -21,7 +21,7 @@ class TupleTest {
 	}
 
 	@Test
-	public void tesṭSize() {
+	public void testSize() {
 		assert t1.size() == 2
 	}
 

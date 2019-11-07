@@ -1,17 +1,19 @@
 package de.be4.classicalb.core.parser.prolog;
 
-import static org.junit.Assert.*;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import util.Helpers;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class StringTest {
 
 	@Test
 	public void testFile() {
-		String file = "src/test/resources/strings/StringIncludingQuotes.mch";
+		String file = "strings/StringIncludingQuotes.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
 		assertTrue(result.contains("'a\"b'"));
@@ -78,7 +80,7 @@ public class StringTest {
 
 	@Test
 	public void testSignleQuote() {
-		final String testMachine = "MACHINE Test PROPERTIES ''' \' ''' = ''' ' ''' END";
+		final String testMachine = "MACHINE Test PROPERTIES ''' \\' ''' = ''' ' ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(result);

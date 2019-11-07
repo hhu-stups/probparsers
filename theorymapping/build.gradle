@@ -1,37 +1,9 @@
-// ProB Theory Mapping Parser 
+apply plugin: 'jacoco'
+apply plugin: 'java'
+apply plugin: 'de.hhu.stups.sablecc'
 
-sourceSets {
-    main {
-        java {
-          	srcDirs = ['build/temp','src/main/java']
-        }
-    }
+dependencies {
+    sableCC(rootProject.sableCCDependency)
 }
 
-
-
-task genParser(type:JavaExec) {
-    doFirst{ file('build/temp').mkdirs() }
-    inputs.dir new File('src/main/resources/')
-    outputs.dir new File('build/temp')
-    main = 'org.sablecc.sablecc.SableCC'
-    classpath = configurations.sablecc
-    maxHeapSize = '1024m'
-    args = ['-d','build/temp','src/main/resources/theorymapping.scc']
-}
-
-
-jar {	
- include '**/*.class'
- exclude '**.*.scc' 
- from 'build/temp'
- include '**/*.dat'
- from sourceSets.main.toString()
- include '**/*.java'
-}
-
-compileJava { 
- dependsOn = ['genParser'] 
-}
-
-sourceSets.test.runtimeClasspath += files(sourceSets.main.java.srcDirs)
+rootProject.setupTestReport(project, ["de.prob.core.theorymapping"])

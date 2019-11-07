@@ -13,7 +13,7 @@ public class ErrorsTest {
 
 	@Test
 	public void testMachineNotFound() throws IOException, BException {
-		String PATH = "src/test/resources/composition/errors/";
+		String PATH = "composition/errors/";
 		String file = PATH + "MachineNotFound.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);
@@ -23,7 +23,7 @@ public class ErrorsTest {
 	
 	@Test
 	public void testMachineNameDoesNotMachtFileName() throws IOException, BException {
-		String PATH = "src/test/resources/composition/errors/";
+		String PATH = "composition/errors/";
 		String file = PATH + "MachineNameDoesNotMatchFileName.mch";
 		String result = Helpers.fullParsing(file);
 		System.out.println(result);

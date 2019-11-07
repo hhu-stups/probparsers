@@ -1,5 +1,6 @@
 package de.prob.translator.types;
 
+@Deprecated
 public class Atom implements BObject {
 	private final java.lang.String value;
 

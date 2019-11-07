@@ -34,7 +34,10 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			fail("& VARIABLES was not detected");
 		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
-			assertTrue(e.getMessage().contains("& VARIABLES"));
+			assertTrue(e.getMessage().contains("Invalid combination of symbols"));
+			assertTrue(e.getMessage().contains("&"));
+			assertTrue(e.getMessage().contains("VARIABLES"));
+			// message now is: Invalid combination of symbols: & VARIABLES . Argument to binary operator is missing.
 		}
 	}
 
@@ -61,7 +64,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
-			assertTrue(e.getMessage().contains("& &"));
+			assertTrue(e.getMessage().contains("'&' and '&'"));
 			final BLexerException ex = (BLexerException) e.getCause();
 			// checking the position of the second &
 			assertEquals(3, ex.getLastLine());
@@ -77,7 +80,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
 			System.out.println(e.getMessage());
-			assertTrue(e.getMessage().contains("& &"));
+			assertTrue(e.getMessage().contains("'&' and '&'"));
 		}
 	}
 	
@@ -91,7 +94,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,14]"));
-			assertTrue(e.getMessage().contains("& &"));
+			assertTrue(e.getMessage().contains("'&' and '&'"));
 		}
 	}
 	
@@ -105,7 +108,7 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[6,6]"));
-			assertTrue(e.getMessage().contains("& &"));
+			assertTrue(e.getMessage().contains("'&' and '&'"));
 		}
 	}
 	
