@@ -212,6 +212,7 @@ Tokens
   {normal} interval = '..' | 0x2025;
   //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
+  {normal} finite = 0x2a0d;  // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
   {normal} not_belonging = '/:' | 0x2209;
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
@@ -898,6 +899,7 @@ expression_keyword {-> expression} =
   {pow1_subset} pow1 left_par [expression]:expression_in_par right_par {-> New expression.pow1_subset(expression.expression)} |
   {fin_subset} fin left_par [expression]:expression_in_par right_par {-> New expression.fin_subset(expression.expression)} |
   {fin1_subset} fin1 left_par [expression]:expression_in_par right_par {-> New expression.fin1_subset(expression.expression)} |
+  {finite} finite left_par [expression]:expression_in_par right_par {-> New expression.finite(expression.expression)} |
   {general_union} generalized_union left_par [expression]:expression_in_par right_par {-> New expression.general_union(expression.expression)} |
   {general_intersection} generalized_inter left_par [expression]:expression_in_par right_par {-> New expression.general_intersection(expression.expression)} |
   {identity} id left_par [expression]:expression_in_par right_par {-> New expression.identity(expression.expression)} |
@@ -1383,6 +1385,7 @@ expression =
   {pow1_subset} [expression]:expression |
   {fin_subset} [expression]:expression |
   {fin1_subset} [expression]:expression |
+  {finite} [expression]:expression |
   {set_extension} [expressions]:expression* |
   {interval} [left_border]:expression [right_border]:expression |
   {union} [left]:expression [right]:expression |
