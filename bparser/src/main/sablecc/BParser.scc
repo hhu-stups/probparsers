@@ -389,7 +389,7 @@ Tokens
   {normal} maplet = '|->' | 0x21a6;
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
-  {normal} tilde = '~' | 0x223c | 0x207b 0xb9;
+  {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
 
   // Extensions
   {normal} total_relation = lt lt minus gt | 0xe100;
