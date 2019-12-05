@@ -526,7 +526,7 @@ public class BParser {
 			final long end = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("% Time for parsing: " + (end - start) + "ms");
+				out.println("% Time for parsing: " + (end - start) + " ms");
 			}
 
 			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
@@ -552,7 +552,10 @@ public class BParser {
 			final long end2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) {
-				out.println("% Time for Prolog output: " + (end2 - start2) + "ms");
+				out.println("% Time for Prolog output: " + (end2 - start2) + " ms");
+				out.println("% Used memory : " + 
+				           (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
+				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput() ||
