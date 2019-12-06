@@ -14,3 +14,8 @@ deploy:
 clean:
 	echo "Cleaning; useful if you encounter weird syntax errors during building"
 	gradle clean
+
+rebuild:
+	echo "Building Uberjar without re-generating SableCC sources"
+	echo "(allows to experiment with changes in SableCC source)"
+	./gradlew --exclude-task :bparser:generateSableCCSource uberjar
