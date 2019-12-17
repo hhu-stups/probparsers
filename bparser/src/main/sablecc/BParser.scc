@@ -804,6 +804,7 @@ predicate_atomic {-> predicate} =
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
+  {symbolic_composition}  [left]:expression_in_par pragma_symbolic semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
   {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
   {next_level} [expr]:expression_top {-> expr.expression};
 
@@ -1407,6 +1408,7 @@ expression =
   {event_b_second_projection}  [expression]:expression | // EventB only
   {event_b_second_projection_v2} | // EventB v 2.0 language only
   {composition} [left]:expression [right]:expression |
+  {symbolic_composition} [left]:expression [right]:expression |
   {ring} [left]:expression [right]:expression | // EventB only
   {direct_product} [left]:expression [right]:expression |
   {parallel_product} [left]:expression [right]:expression |
