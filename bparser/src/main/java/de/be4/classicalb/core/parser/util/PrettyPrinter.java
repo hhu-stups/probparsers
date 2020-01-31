@@ -769,6 +769,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
 			final TIdentifierLiteral e = iterator.next();
 			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(".");
+			}
 		}
 	}
 
