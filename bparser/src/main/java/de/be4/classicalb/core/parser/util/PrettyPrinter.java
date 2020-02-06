@@ -97,6 +97,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAMachineMachineVariant(AMachineMachineVariant node) {
 		sb.append("MACHINE");
 	}
+	@Override
+	public void caseAModelMachineVariant(AModelMachineVariant node) {
+		sb.append("MODEL");
+	}
+	@Override
+	public void caseASystemMachineVariant(ASystemMachineVariant node) {
+		sb.append("SYSTEM");
+	}
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
@@ -806,6 +814,19 @@ public class PrettyPrinter extends DepthFirstAdapter {
 				sb.append(".");
 			}
 		}
+	}
+	@Override
+	public void caseAMachineReference(final AMachineReference node) {
+		final List<TIdentifierLiteral> copy = new ArrayList<>(node.getMachineName());
+		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
+			final TIdentifierLiteral e = iterator.next();
+			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(".");
+			}
+		}
+		// TO DO: Parameters are missing  List<PExpression>  using node.getParameters()
 	}
 
 	@Override
