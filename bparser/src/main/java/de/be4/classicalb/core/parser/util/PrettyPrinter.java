@@ -219,6 +219,34 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("\n");
 	}
 	
+	@Override
+	public void caseAIncludesMachineClause(AIncludesMachineClause node) {
+		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
+		sb.append("INCLUDES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseASeesMachineClause(ASeesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
+		sb.append("SEES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseAUsesMachineClause(AUsesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
+		sb.append("USES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseAPromotesMachineClause(APromotesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getOperationNames());
+		sb.append("PROMOTES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
 
 	@Override
 	public void caseAAssertionsMachineClause(AAssertionsMachineClause node) {
