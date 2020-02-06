@@ -37,6 +37,7 @@ import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.prob.prolog.output.StructuredPrologOutput;
@@ -533,6 +534,17 @@ public class BParser {
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
+			
+			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser	
+			    if (parsingBehaviour.isVerbose()) {
+				    System.out.println("Pretty printing " + bfile + " in B format:");
+				}
+				PrettyPrinter pp = new PrettyPrinter();
+				tree.apply(pp);
+				System.out.println(pp.getPrettyPrint());
+			}
+			
+			
 
 			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
 				tree.apply(new ASTDisplay());
