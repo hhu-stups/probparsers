@@ -249,6 +249,13 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("\n");
 	}
 	@Override
+	public void caseAImportsMachineClause(AImportsMachineClause node) {
+		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
+		sb.append("IMPORTS ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
 	public void caseAPromotesMachineClause(APromotesMachineClause node) {
 		List<PExpression> copy = new ArrayList<>(node.getOperationNames());
 		sb.append("PROMOTES ");
