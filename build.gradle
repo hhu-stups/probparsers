@@ -133,9 +133,9 @@ subprojects {
                         }
 
                         scm {
-                            connection 'scm:git:git://github.com/bendisposto/probparsers.git'
-                            developerConnection 'scm:git:git@github.com:bendisposto/probparsers.git'
-                            url 'https://github.com/bendisposto/probparsers'
+                            connection 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
+                            developerConnection 'scm:git:git@github.com:hhu-stups/probparsers.git'
+                            url 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
                         }
 
 
@@ -144,6 +144,11 @@ subprojects {
                                 id 'bendisposto'
                                 name 'Jens Bendisposto'
                                 email 'jens@bendisposto.de'
+                            }
+                            developer {
+                                id 'leuschel'
+                                name 'Michael Leuschel'
+                                email 'leuschel@hhu.de'
                             }
                         }
                     }
