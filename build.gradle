@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 
 // group and version are also copied to all subprojects (see below)
@@ -53,7 +53,7 @@ subprojects {
     }
 
     dependencies {
-        testCompile 'junit:junit:4.12'
+        testImplementation group: "junit", name: "junit", version: "4.12"
     }
 
     cleanEclipseJdt {

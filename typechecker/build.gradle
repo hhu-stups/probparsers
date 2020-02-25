@@ -1,11 +1,11 @@
 apply plugin: 'jacoco'
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 
 dependencies {
-    compile project(":prologlib")
-    compile project(":bparser")
-    compile project(":ltlparser")
+    api project(":prologlib")
+    api project(":bparser")
+    api project(":ltlparser")
 }
 
 rootProject.setupTestReport(project, [])

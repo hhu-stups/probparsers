@@ -1,4 +1,4 @@
 apply plugin: 'jacoco'
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 rootProject.setupTestReport(project, [])

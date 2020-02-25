@@ -1,5 +1,5 @@
 apply plugin: 'jacoco'
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {

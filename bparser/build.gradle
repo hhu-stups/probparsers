@@ -1,11 +1,11 @@
 apply plugin: 'jacoco'
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
     sableCC(rootProject.sableCCDependency)
-    compile project(":prologlib")
-    compile project(":parserbase")
+    api project(":prologlib")
+    api project(":parserbase")
 }
 
 def readCurrentGitCommit() {
