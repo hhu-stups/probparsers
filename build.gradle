@@ -54,7 +54,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation group: "junit", name: "junit", version: "4.12"
+        testImplementation group: "junit", name: "junit", version: "4.13"
     }
 
     if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
