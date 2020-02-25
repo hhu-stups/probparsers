@@ -5,6 +5,8 @@ apply plugin: 'eclipse'
 project.group = 'de.hhu.stups'
 project.version = '2.9.24-SNAPSHOT'
 
+final isSnapshot = project.version.endsWith("-SNAPSHOT")
+
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
@@ -18,7 +20,8 @@ ext {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
     
     group = rootProject.group
     version = rootProject.version
@@ -67,68 +70,65 @@ subprojects {
         archives javadocJar, sourcesJar
     }
 
-    if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
 
-        println "Configuring deployment for ${project.name}"
+                pom {
+                    name = project.name
+                    description = 'Part of the ProB Parser library'
+                    url = 'https://github.com/bendisposto/probparsers'
 
-        apply plugin: 'signing'
+                    licenses {
+                        license {
+                            name = 'Eclipse Public License, Version 1.0'
+                            url = 'http://www.eclipse.org/org/documents/epl-v10.html'
+                        }
+                    }
 
-        signing {
-            sign configurations.archives
+                    scm {
+                        connection = 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
+                        developerConnection = 'scm:git:git@github.com:hhu-stups/probparsers.git'
+                        url = 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
+                    }
+
+                    developers {
+                        developer {
+                            id = 'bendisposto'
+                            name = 'Jens Bendisposto'
+                            email = 'jens@bendisposto.de'
+                        }
+                        developer {
+                            id = 'leuschel'
+                            name = 'Michael Leuschel'
+                            email = 'leuschel@hhu.de'
+                        }
+                    }
+                }
+            }
         }
 
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-
-                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-
-                    pom.project {
-                        name project.getName()
-                        packaging 'jar'
-                        // optionally artifactId can be defined here
-                        description 'Part of the ProB Parser library'
-                        url 'https://github.com/bendisposto/probparsers'
-
-                        licenses {
-                            license {
-                                name 'Eclipse Public License, Version 1.0'
-                                url 'http://www.eclipse.org/org/documents/epl-v10.html'
-                            }
-                        }
-
-                        scm {
-                            connection 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
-                            developerConnection 'scm:git:git@github.com:hhu-stups/probparsers.git'
-                            url 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
-                        }
-
-
-                        developers {
-                            developer {
-                                id 'bendisposto'
-                                name 'Jens Bendisposto'
-                                email 'jens@bendisposto.de'
-                            }
-                            developer {
-                                id 'leuschel'
-                                name 'Michael Leuschel'
-                                email 'leuschel@hhu.de'
-                            }
-                        }
+        repositories {
+            maven {
+                final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+                if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+                    credentials {
+                        username project.ossrhUsername
+                        password project.ossrhPassword
                     }
                 }
             }
         }
     }
 
+    signing {
+        sign publishing.publications.mavenJava
+    }
 }
 
 task uberjar(type: Jar, dependsOn: subprojects.assemble) {
