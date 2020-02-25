@@ -177,7 +177,7 @@ public class LtlConsoleParser {
 		return sb.toString();
 	}
 
-	public static ProBParserBase getExtensionParser(final String pattern) {
+	static ProBParserBase getExtensionParser(final String pattern) {
 		final ProBParserBase result;
 		if (pattern == null) {
 			result = UNPARSED_PARSER_BASE;
