@@ -131,14 +131,6 @@ subprojects {
     }
 }
 
-task uberjar(type: Jar, dependsOn: subprojects.assemble) {
-    archiveBaseName.set('probcliparser')
-    subprojects.each { subproject ->
-        from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) }
-    }
-    manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
-}
-
 ext {
     // This closure is called in each subproject that wants test reports generated.
     setupTestReport = {Project subproject, List<String> sableCCPackageNames -> void
