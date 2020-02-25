@@ -53,26 +53,25 @@ subprojects {
         testImplementation group: "junit", name: "junit", version: "4.13"
     }
 
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
     if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 
         println "Configuring deployment for ${project.name}"
 
         apply plugin: 'signing'
-
-        task javadocJar(type: Jar) {
-            classifier = 'javadoc'
-            from javadoc
-        }
-
-        task sourcesJar(type: Jar) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
-        }
-
-        artifacts {
-            archives javadocJar, sourcesJar
-        }
-
 
         signing {
             sign configurations.archives
