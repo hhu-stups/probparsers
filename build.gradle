@@ -45,10 +45,6 @@ subprojects {
         options.addStringOption("sourcepath", "")
     }
 
-    jar {
-        from sourceSets.main.allJava
-    }
-
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
