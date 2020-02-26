@@ -11,8 +11,5 @@ build/
 *.iml
 .idea/
 
-# Generated files
-bparser-build.properties
-
 # Junk from tests
 *.prob
