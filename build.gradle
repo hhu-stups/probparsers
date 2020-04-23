@@ -56,26 +56,15 @@ subprojects {
         testImplementation group: "junit", name: "junit", version: "4.13"
     }
 
-    task javadocJar(type: Jar) {
-        archiveClassifier = 'javadoc'
-        from javadoc
-    }
-
-    task sourcesJar(type: Jar) {
-        archiveClassifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives javadocJar, sourcesJar
+    java {
+        withSourcesJar()
+        withJavadocJar()
     }
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
-                artifact sourcesJar
-                artifact javadocJar
 
                 pom {
                     name = project.name
