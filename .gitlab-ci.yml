@@ -35,6 +35,10 @@ tests:jdk-11:
   extends: .tests
   image: openjdk:11-jdk-slim
 
+tests:jdk-14:
+  extends: .tests
+  image: openjdk:14-jdk-slim
+
 tests:macos:
   extends: .tests
   before_script:
