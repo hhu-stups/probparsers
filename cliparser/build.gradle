@@ -3,10 +3,10 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 dependencies {
-    implementation project(":bparser") 
-    implementation project(":prologlib") 
-    implementation project(":parserbase") 
-    implementation project(":ltlparser") 
+    implementation project(":bparser")
+    implementation project(":prologlib")
+    implementation project(":parserbase")
+    implementation project(":ltlparser")
 }
 
 rootProject.setupTestReport(project, [])
