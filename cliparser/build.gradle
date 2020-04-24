@@ -7,8 +7,6 @@ dependencies {
     implementation project(":prologlib") 
     implementation project(":parserbase") 
     implementation project(":ltlparser") 
-    implementation project(":answerparser") 
-    implementation project(":unicode")
 }
 
 rootProject.setupTestReport(project, [])
