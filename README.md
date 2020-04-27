@@ -53,7 +53,7 @@ $ ./gradlew publishToMavenLocal
 
 ### For probcli
 
-If you are building probcli from source and want to include a local version of the parser, you can pass `GRADLE="./gradlew --include-build /path/to/probparsers"` to the `make` call. This makes probcli's internal Gradle build use your local version of the parser instead of downloading a pre-built version.
+If you are building probcli from source and want to include a local version of the parser, you can pass `SNAPSHOT=1 GRADLE="./gradlew --include-build /path/to/probparsers"` to the `make` call. This makes probcli's internal Gradle build use your local version of the parser instead of downloading a pre-built version.
 
 ## Testing
 
