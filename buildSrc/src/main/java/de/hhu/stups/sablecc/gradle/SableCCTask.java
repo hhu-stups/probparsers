@@ -11,6 +11,8 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
@@ -39,6 +41,8 @@ public class SableCCTask extends SourceTask {
 		this.sableCCClasspath = sableCCClasspath;
 	}
 	
+	@Input
+	@Optional
 	public String getMaxHeapSize() {
 		return this.maxHeapSize;
 	}
