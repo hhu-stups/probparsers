@@ -15,7 +15,9 @@ wrapper {
 }
 
 ext {
-    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: '3.2.14']
+    sableCCVersion = '3.3.0-SNAPSHOT'
+    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
+    sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
 
 subprojects {
