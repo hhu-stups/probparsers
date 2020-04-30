@@ -233,8 +233,8 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		private void checkList(final List<PExpression> list) {
 			for (final Iterator<PExpression> iterator = list.iterator(); iterator.hasNext();) {
 				final PExpression expression = iterator.next();
-
-				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression)) {
+				System.out.println(expression);
+				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression || expression instanceof ARecordFieldExpression)) {
 					nonIdentifiers.add(expression);
 				}
 			}

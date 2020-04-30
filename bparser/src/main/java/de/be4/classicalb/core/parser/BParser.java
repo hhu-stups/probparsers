@@ -1,12 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.PushbackReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +16,7 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.analysis.prolog.*;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.*;
@@ -40,6 +33,8 @@ import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -378,8 +373,9 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
-
 			final List<BException> bExceptionList = new ArrayList<>();
+			System.out.println(rootNode);
+
 			/*
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
@@ -405,6 +401,7 @@ public class BParser {
 			}
 			if (!bExceptionList.isEmpty()) {
 				throw new BCompoundException(bExceptionList);
+
 			}
 			return rootNode;
 		} catch (final LexerException e) {
