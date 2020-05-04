@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import org.junit.Assert;
 import org.junit.Test;
 import util.Helpers;
@@ -36,23 +37,5 @@ public class MultipleRecordsAssignment {
 	}
 
 
-	@Test
-	public void fail_wrong_record_function_assignment() {
-		Exception wasThrown = null;
-		final String testMachine = "#SUBSTITUTION xx'aa'bb(a) := 4 ";
-		try{
-			Helpers.getMachineAsPrologTerm(testMachine);
-		}catch (Exception e){
-			wasThrown = e;
-		}finally {
-			if(wasThrown != null){
-				Assert.assertTrue(true);
-			}
-			else{
-				Assert.fail();
-			}
-		}
-
-	}
 
 }
