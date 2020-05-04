@@ -1131,20 +1131,19 @@ identifier_list {-> expression*} =
 
 /* a,b,f(1),g(1)(2) := ... */
 assign_list {-> expression*} =
-  {single} [name]:identifier_or_function_or_record {-> [name.expression]} |
-  {multi} [rest]:assign_list comma [name]:identifier_or_function_or_record {-> [rest.expression, name.expression]} ;
+  {single} [name]:record_or_else {-> [name.expression]} |
+  {multi} [rest]:assign_list comma [name]:record_or_else {-> [rest.expression, name.expression]} ;
 
 
+record_or_else {-> expression} =
+    {record} [record]:record_or_else single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
+    {else} [else]:identifier_or_function {-> else.expression};
 
-identifier_or_function_or_record {-> expression} =
-   {single} [name]:composed_identifier_expression {-> name.expression} |
-   {record} [record]:identifier_or_function_or_record single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
-   {function} [name]:identifier_or_function_or_record [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
-/*
+
 identifier_or_function {-> expression} =
    {single} [name]:composed_identifier_expression {-> name.expression} |
    {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
-*/
+
 
 normal_identifier_expression {-> expression} =
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;

@@ -28,7 +28,6 @@ public class IfThenElseExpressionTest {
 	public void testElseIf() throws Exception {
 		final String testMachine = "#EXPRESSION IF x < 1 THEN 2 ELSIF x= 3 THEN 4 ELSE 5 END";
 		final String result = Helpers.parseMachineAndGetPrologOutput(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains(
 				"machine(if_then_else(2,less(3,identifier(4,x),integer(5,1)),integer(6,2),if_then_else(7,equal(8,identifier(9,x),integer(10,3)),integer(11,4),integer(12,5))))."));
 	}

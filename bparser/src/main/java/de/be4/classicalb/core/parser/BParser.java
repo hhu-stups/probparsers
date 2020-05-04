@@ -374,7 +374,6 @@ public class BParser {
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
 			final List<BException> bExceptionList = new ArrayList<>();
-			System.out.println(rootNode);
 
 			/*
 			 * Collect available definition declarations. Needs to be done now
@@ -531,8 +530,7 @@ public class BParser {
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
-			
-			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser	
+			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
 			    if (parsingBehaviour.isVerbose()) {
 				    System.out.println("Pretty printing " + bfile + " in B format:");
 				}

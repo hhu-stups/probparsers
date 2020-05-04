@@ -1,52 +1,58 @@
 package de.be4.classicalb.core.parser;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.visualisation.PreParserASTPrinter;
-import de.be4.classicalb.core.preparser.lexer.LexerException;
-import de.be4.classicalb.core.preparser.parser.Parser;
-import de.be4.classicalb.core.preparser.parser.ParserException;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 import util.Helpers;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PushbackReader;
+import static org.junit.Assert.assertTrue;
 
 public class MultipleRecordsAssignment {
 
-	BParser parser ;
 
-	@Before
-	public void setUp() throws Exception {
-		parser = new BParser("testcase");
-	}
 
-	private de.be4.classicalb.core.parser.node.Start getAst(final String testMachine) throws BCompoundException {
-		// System.out.println("Testing \"" + testMachine + "\"");
-		final Start startNode = parser.parse(testMachine, false);
-
-		// startNode.apply(new ASTPrinter());
-		return startNode;
+	@Test
+	public void testTipple() {
+		final String testMachine = "#SUBSTITUTION xx'aa'bb := 4 ";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("machine(assign(2,[record_field(3,record_field(4,identifier(5,xx),identifier(6,aa)),identifier(7,bb))],[integer(8,4)]))"));
 	}
 
 
 	@Test
-	public void testSimple1() throws Exception {
-		//final String testMachine =  "#SUBSTITUTION IF x < 3 THEN skip ELSIF 1=1 THEN skip ELSE skip END";
-		final String testMachine1 = "#SUBSTITUTION a := xx'aa'bb  ";
-	//	final String testMachine1 = "#SUBSTITUTION xx(5) := 4 ";
-	//	final String testMachine = "#SUBSTITUTION xx'aa := 4 ";
+	public void testDouble() {
+		final String testMachine = "#SUBSTITUTION xx'aa := 4 ";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("machine(assign(2,[record_field(3,identifier(4,xx),identifier(5,aa))],[integer(6,4)]))"));
+	}
 
-		final String testMachine = "#SUBSTITUTION xx'aa'bb := 4 ";
-		final Start result = getAst(testMachine);
-		final String result2 = Helpers.getMachineAsPrologTerm(testMachine1);
 
-		final String result1 = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result1);
-		System.out.println(result2);
+	@Test
+	public void moreContext() {
+		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||\n" +
+				"\tout := xx'aa'bb";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("machine(parallel(2,[assign(3,[record_field(4,record_field(5,identifier(6,xx),identifier(7,aa)),identifier(8,bb))],[integer(9,5)]),assign(10,[identifier(11,out)],[record_field(12,record_field(13,identifier(14,xx),identifier(15,aa)),identifier(16,bb))])])).\n"));
+
+	}
+
+
+	@Test
+	public void fail_wrong_record_function_assignment() {
+		Exception wasThrown = null;
+		final String testMachine = "#SUBSTITUTION xx'aa'bb(a) := 4 ";
+		try{
+			Helpers.getMachineAsPrologTerm(testMachine);
+		}catch (Exception e){
+			wasThrown = e;
+		}finally {
+			if(wasThrown != null){
+				Assert.assertTrue(true);
+			}
+			else{
+				Assert.fail();
+			}
+		}
+
 	}
 
 }
