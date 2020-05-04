@@ -30,7 +30,9 @@ public class MultipleRecordsAssignment {
 	public void moreContext() {
 		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() +  " out := xx'aa'bb";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(parallel(2,[assign(3,[record_field(4,record_field(5,identifier(6,xx),identifier(7,aa)),identifier(8,bb))],[integer(9,5)]),assign(10,[identifier(11,out)],[record_field(12,record_field(13,identifier(14,xx),identifier(15,aa)),identifier(16,bb))])])).\n"));
+		assertTrue(result.contains("machine(parallel(2,[assign(3,[record_field(4,record_field(5,identifier(6,xx)," +
+				"identifier(7,aa)),identifier(8,bb))],[integer(9,5)]),assign(10,[identifier(11,out)],[" +
+				"record_field(12,record_field(13,identifier(14,xx),identifier(15,aa)),identifier(16,bb))])]))."));
 
 	}
 
