@@ -117,6 +117,8 @@ subprojects {
         }
     }
 
+    ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+
     signing {
         sign publishing.publications.mavenJava
     }
