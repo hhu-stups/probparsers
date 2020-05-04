@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import org.junit.Assert;
+
 import org.junit.Test;
 import util.Helpers;
 
