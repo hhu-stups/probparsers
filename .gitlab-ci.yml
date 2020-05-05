@@ -15,7 +15,8 @@ cache:
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - apt-get update &&  apt-get install -y git patch
+  - apt-get update
+  - apt-get install -y git
 
 .tests:
   stage: test
@@ -33,6 +34,10 @@ tests:jdk-8:
 tests:jdk-11:
   extends: .tests
   image: openjdk:11-jdk-slim
+
+tests:jdk-14:
+  extends: .tests
+  image: openjdk:14-jdk-slim
 
 tests:macos:
   extends: .tests
@@ -53,12 +58,13 @@ publish:
   stage: deploy
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - apt-get update &&  apt-get install -y git patch
+    - apt-get update
+    - apt-get install -y git
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in secring.gpg.enc       -out secring.gpg 
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in pubring.gpg.enc       -out pubring.gpg
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in gradle.properties.enc -out gradle.properties
   script:
-    - ./gradlew ${GRADLE_ARGS} uploadArchives
+    - ./gradlew ${GRADLE_ARGS} publish
   only: 
     - master 
     - develop

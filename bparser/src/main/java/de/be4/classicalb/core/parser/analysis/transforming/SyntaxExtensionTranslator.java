@@ -14,6 +14,7 @@ import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
+import java.math.BigInteger;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
@@ -68,10 +69,11 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 	// transform hex_integer into integer case (so that Prolog AST does not have to deal with new node):
 		THexLiteral literal = node.getLiteral();
 		String text = literal.getText().substring(2);
-		int value = Integer.valueOf(text, 16);
+		//int value = Integer.valueOf(text, 16);
+		BigInteger value = new BigInteger(text,16);
 		// generate an integer literal:
 		TIntegerLiteral tIntLiteral =
-			new TIntegerLiteral(Integer.toString(value), literal.getLine(), literal.getPos());
+			new TIntegerLiteral(value.toString(), literal.getLine(), literal.getPos());
 		AIntegerExpression intNode = new AIntegerExpression(tIntLiteral);
 		intNode.setStartPos(node.getStartPos());
 		intNode.setEndPos(node.getEndPos());

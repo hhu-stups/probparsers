@@ -1,12 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.PushbackReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +16,7 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.analysis.prolog.*;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.*;
@@ -37,8 +30,11 @@ import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -377,8 +373,8 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			SabbleCCBParser parser = new SabbleCCBParser(lexer);
 			final Start rootNode = parser.parse();
-
 			final List<BException> bExceptionList = new ArrayList<>();
+
 			/*
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
@@ -404,6 +400,7 @@ public class BParser {
 			}
 			if (!bExceptionList.isEmpty()) {
 				throw new BCompoundException(bExceptionList);
+
 			}
 			return rootNode;
 		} catch (final LexerException e) {
@@ -526,13 +523,23 @@ public class BParser {
 			final long end = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("% Time for parsing: " + (end - start) + "ms");
+				out.println("% Time for parsing: " + (end - start) + " ms");
 			}
 
 			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
 				ASTPrinter sw = new ASTPrinter(out);
 				tree.apply(sw);
 			}
+			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
+			    if (parsingBehaviour.isVerbose()) {
+				    System.out.println("Pretty printing " + bfile + " in B format:");
+				}
+				PrettyPrinter pp = new PrettyPrinter();
+				tree.apply(pp);
+				System.out.println(pp.getPrettyPrint());
+			}
+			
+			
 
 			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
 				tree.apply(new ASTDisplay());
@@ -552,7 +559,10 @@ public class BParser {
 			final long end2 = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) {
-				out.println("% Time for Prolog output: " + (end2 - start2) + "ms");
+				out.println("% Time for Prolog output: " + (end2 - start2) + " ms");
+				out.println("% Used memory : " + 
+				           (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
+				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
 			}
 		} catch (final IOException e) {
 			if (parsingBehaviour.isPrologOutput() ||

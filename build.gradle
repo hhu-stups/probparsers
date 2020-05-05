@@ -1,31 +1,29 @@
-/*
-plugins {
-	id "org.sonarqube" version "2.5"
-}
-*/
-
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.23'
+project.version = '2.9.24'
+
+final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "5.4"
+    gradleVersion = "6.3"
     distributionType = Wrapper.DistributionType.ALL
 }
 
 ext {
-    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: '3.2.13']
+    sableCCVersion = '3.3.0-SNAPSHOT'
+    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
+    sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'eclipse'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
     
     group = rootProject.group
     version = rootProject.version
@@ -47,11 +45,9 @@ subprojects {
     
     tasks.withType(Javadoc) {
         options.encoding = SOURCE_ENCODING
+        // Workaround for https://github.com/gradle/gradle/issues/5630
+        // See https://stackoverflow.com/a/52797107
         options.addStringOption("sourcepath", "")
-    }
-
-    jar {
-        from sourceSets.main.allJava
     }
 
     configurations.all {
@@ -59,113 +55,73 @@ subprojects {
     }
 
     dependencies {
-        testCompile 'junit:junit:4.12'
+        testImplementation group: "junit", name: "junit", version: "4.13"
     }
 
-    cleanEclipseJdt {
-        doLast {
-            file(".settings/org.eclipse.jdt.ui.prefs").delete()
-        }
+    java {
+        withSourcesJar()
+        withJavadocJar()
     }
 
-    eclipseJdt {
-        inputFile = file("scripts/org.eclipse.jdt.core.prefs")
-    }
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
 
-    eclipseJdt {
-        doLast {
-            copy {
-                from 'scripts'
-                into '.settings'
-                include 'org.eclipse.jdt.ui.prefs'
+                pom {
+                    name = project.name
+                    description = 'Part of the ProB Parser library'
+                    url = 'https://github.com/bendisposto/probparsers'
+
+                    licenses {
+                        license {
+                            name = 'Eclipse Public License, Version 1.0'
+                            url = 'http://www.eclipse.org/org/documents/epl-v10.html'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
+                        developerConnection = 'scm:git:git@github.com:hhu-stups/probparsers.git'
+                        url = 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
+                    }
+
+                    developers {
+                        developer {
+                            id = 'bendisposto'
+                            name = 'Jens Bendisposto'
+                            email = 'jens@bendisposto.de'
+                        }
+                        developer {
+                            id = 'leuschel'
+                            name = 'Michael Leuschel'
+                            email = 'leuschel@hhu.de'
+                        }
+                    }
+                }
             }
         }
-    }
 
-    if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-
-        println "Configuring deployment for ${project.name}"
-
-        apply plugin: 'signing'
-
-        javadoc {
-            failOnError = false
-        }
-
-        task javadocJar(type: Jar) {
-            classifier = 'javadoc'
-            from javadoc
-        }
-
-        task sourcesJar(type: Jar) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
-        }
-
-        artifacts {
-            archives javadocJar, sourcesJar
-        }
-
-
-        signing {
-            sign configurations.archives
-        }
-
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-
-                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-
-                    pom.project {
-                        name project.getName()
-                        packaging 'jar'
-                        // optionally artifactId can be defined here
-                        description 'Part of the ProB Parser library'
-                        url 'https://github.com/bendisposto/probparsers'
-
-                        licenses {
-                            license {
-                                name 'Eclipse Public License, Version 1.0'
-                                url 'http://www.eclipse.org/org/documents/epl-v10.html'
-                            }
-                        }
-
-                        scm {
-                            connection 'scm:git:git://github.com/bendisposto/probparsers.git'
-                            developerConnection 'scm:git:git@github.com:bendisposto/probparsers.git'
-                            url 'https://github.com/bendisposto/probparsers'
-                        }
-
-
-                        developers {
-                            developer {
-                                id 'bendisposto'
-                                name 'Jens Bendisposto'
-                                email 'jens@bendisposto.de'
-                            }
-                        }
+        repositories {
+            maven {
+                final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+                if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+                    credentials {
+                        username project.ossrhUsername
+                        password project.ossrhPassword
                     }
                 }
             }
         }
     }
 
-}
+    ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
 
-task uberjar(type: Jar, dependsOn: subprojects.assemble) {
-    archiveBaseName.set('probcliparser')
-    subprojects.each { subproject ->
-        from subproject.configurations.archives.allArtifacts.getFiles().collect { zipTree(it) }
+    signing {
+        sign publishing.publications.mavenJava
     }
-    manifest { attributes 'Main-Class': 'de.prob.cliparser.CliBParser' }
 }
 
 ext {
@@ -197,21 +153,6 @@ ext {
         }
     }
 }
-
-// sonarqube {
-//     properties {
-//         // property("sonar.organization", "prob2")
-//         property("sonar.projectKey", "probparsers")
-//         property("sonar.projectName", "probparsers")
-//         property("sonar.projectVersion", project.version)
-//         property("sonar.java.binaries", "bparser/build/classes")
-//         property("sonar.inclusions", "**/classicalb/core/parser/**")
-//         property("sonar.exclusions", "**/gradle/wrapper/*,**/build/**/*,**/*Test.*,**/test/**/*,**/visualisation/*,**/ExtendedDFAdapter.java")
-//         property("sonar.jacoco.reportPath", "bparser/build/jacoco/test.exec")
-//         property("sonar.junit.reportsPath", "bparser/build/test-results/test")
-//         property("sonar.login", System.getenv("SONAR_TOKEN"))
-//     }
-// }
 
 task deploy {
     doLast {

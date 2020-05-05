@@ -1,11 +1,12 @@
 apply plugin: 'jacoco'
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
     sableCC(rootProject.sableCCDependency)
-    compile project(":prologlib")
-    compile project(":parserbase")
+    api(rootProject.sableCCRuntimeDependency)
+    api project(":prologlib")
+    api project(":parserbase")
 }
 
 def readCurrentGitCommit() {
@@ -17,21 +18,10 @@ def readCurrentGitCommit() {
     return proc.in.readLines()[0]
 }
 
-final BUILD_PROPERTIES = file("src/main/resources/bparser-build.properties")
-
-task createBuildConstants {
-    doFirst {
-        BUILD_PROPERTIES.parentFile.mkdirs()
-        BUILD_PROPERTIES.delete()
-        BUILD_PROPERTIES << "version=${project.version}\n"
-        BUILD_PROPERTIES << "git=${readCurrentGitCommit()}\n"
+processResources {
+    filesMatching("de/be4/classicalb/core/parser/build.properties") {
+        expand(version: project.version, git: readCurrentGitCommit())
     }
 }
-processResources.dependsOn(createBuildConstants)
-
-task cleanBuildConstants(type: Delete) {
-    delete(BUILD_PROPERTIES)
-}
-clean.dependsOn(cleanBuildConstants)
 
 rootProject.setupTestReport(project, ["de.be4.classicalb.core.parser", "de.be4.classicalb.core.preparser"])

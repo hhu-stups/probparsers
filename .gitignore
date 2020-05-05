@@ -1,45 +1,15 @@
+# Gradle
+.gradle/
 build/
-ParserAspects/
-bin/
+
+# Eclipse
 .classpath
 .project
-**/.settings/org.eclipse.jdt.core.prefs
-.gradle/
-logs/
-*.swp
-*.log
-*~
-! .gitkeep
-.DS_Store
-tmp/
-PROB_LOGFILE_IS_UNDEFINED
-**/.settings/org.eclipse.jdt.ui.prefs
-src/main/resources/build.properties
-config.groovy
+.settings/
+
+# IntelliJ
 *.iml
-*.idea
-local.*
-answerparser/.gitignore
-eventbalg/.gitignore
-eventbstruct/.gitignore
-ltlparser/.gitignore
-parserbase/.gitignore
-prologlib/.gitignore
-theorymapping/.gitignore
-unicode/.gitignore
-.gitignore
+.idea/
+
+# Junk from tests
 *.prob
-.settings
-build.xml
-bparser/src/test/java/Testing.java
-build.properties
-bparser-build.properties
-bparser/doc
-typechecker/doc
-translator/doc
-.rules-tags
-.rules-tags1
-.tags1
-.tags
-Tester.java
-*/out/*

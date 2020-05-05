@@ -97,6 +97,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAMachineMachineVariant(AMachineMachineVariant node) {
 		sb.append("MACHINE");
 	}
+	@Override
+	public void caseAModelMachineVariant(AModelMachineVariant node) {
+		sb.append("MODEL");
+	}
+	@Override
+	public void caseASystemMachineVariant(ASystemMachineVariant node) {
+		sb.append("SYSTEM");
+	}
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
@@ -205,14 +213,53 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAVariablesMachineClause(AVariablesMachineClause node) {
-		sb.append("VARIABLES ");
 		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		for (int i = 0; i < copy.size(); i++) {
-			copy.get(i).apply(this);
-			if (i < copy.size() - 1) {
-				sb.append(", ");
-			}
-		}
+		sb.append("VARIABLES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	
+	@Override
+	public void caseAConcreteVariablesMachineClause(AConcreteVariablesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
+		sb.append("CONCRETE_VARIABLES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	
+	@Override
+	public void caseAIncludesMachineClause(AIncludesMachineClause node) {
+		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
+		sb.append("INCLUDES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseASeesMachineClause(ASeesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
+		sb.append("SEES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseAUsesMachineClause(AUsesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
+		sb.append("USES ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseAImportsMachineClause(AImportsMachineClause node) {
+		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
+		sb.append("IMPORTS ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+	@Override
+	public void caseAPromotesMachineClause(APromotesMachineClause node) {
+		List<PExpression> copy = new ArrayList<>(node.getOperationNames());
+		sb.append("PROMOTES ");
+		printCommaSeparatedlist(copy);
 		sb.append("\n");
 	}
 
@@ -769,7 +816,24 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
 			final TIdentifierLiteral e = iterator.next();
 			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(".");
+			}
 		}
+	}
+	@Override
+	public void caseAMachineReference(final AMachineReference node) {
+		final List<TIdentifierLiteral> copy = new ArrayList<>(node.getMachineName());
+		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
+			final TIdentifierLiteral e = iterator.next();
+			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(".");
+			}
+		}
+		// TO DO: Parameters are missing  List<PExpression>  using node.getParameters()
 	}
 
 	@Override

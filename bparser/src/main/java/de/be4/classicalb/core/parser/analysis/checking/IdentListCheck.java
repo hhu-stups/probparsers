@@ -92,7 +92,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 
 		final Set<Node> assignErrorNodes = assignCheck.nonIdentifiers;
 		if (!assignErrorNodes.isEmpty()) {
-			exceptions.add(new CheckException("Identifier or function expected",
+			exceptions.add(new CheckException("Identifier or function or record field expected",
 					assignErrorNodes.toArray(new Node[assignErrorNodes.size()])));
 		}
 
@@ -233,8 +233,8 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		private void checkList(final List<PExpression> list) {
 			for (final Iterator<PExpression> iterator = list.iterator(); iterator.hasNext();) {
 				final PExpression expression = iterator.next();
-
-				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression)) {
+				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression
+						|| expression instanceof ARecordFieldExpression)) {
 					nonIdentifiers.add(expression);
 				}
 			}
