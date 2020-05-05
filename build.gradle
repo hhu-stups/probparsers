@@ -33,9 +33,11 @@ subprojects {
     
     repositories {
         mavenCentral()
-        maven {
-            name "snapshots"
-            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        if (isSnapshot) {
+            maven {
+                name "snapshots"
+                url "https://oss.sonatype.org/content/repositories/snapshots/"
+            }
         }
     }
     
