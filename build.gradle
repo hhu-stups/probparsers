@@ -3,7 +3,7 @@ apply plugin: 'eclipse'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.25-SNAPSHOT'
+project.version = '2.9.25'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
