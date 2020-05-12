@@ -185,13 +185,16 @@ public class RecursiveMachineLoader {
 			throw new BCompoundException(e);
 		}
 
-		final String name = refMachines.getName();
+		String name = refMachines.getName();
 		if (name == null) {
 			/*
 			 * the parsed file is a definition file, hence the name of the
 			 * machine is null
 			 */
-			throw new BCompoundException(new BException(machineFile.getName(),
+			if (isMain)
+			    name = "DEFINITION_FILE";
+			else
+			    throw new BCompoundException(new BException(machineFile.getName(),
 					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null));
 		}
 
