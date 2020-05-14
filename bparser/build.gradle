@@ -18,9 +18,12 @@ def readCurrentGitCommit() {
     return proc.in.readLines()[0]
 }
 
+final currentGitCommit = readCurrentGitCommit()
 processResources {
+    inputs.property("project.version", project.version)
+    inputs.property("currentGitCommit", currentGitCommit)
     filesMatching("de/be4/classicalb/core/parser/build.properties") {
-        expand(version: project.version, git: readCurrentGitCommit())
+        expand(version: project.version, git: currentGitCommit)
     }
 }
 
