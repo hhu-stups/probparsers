@@ -2,12 +2,15 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,6 +59,21 @@ public class BParser {
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
 
+	private static final Properties buildProperties;
+	static {
+		buildProperties = new Properties();
+		final InputStream is = BParser.class.getResourceAsStream("build.properties");
+		if (is == null) {
+			throw new IllegalStateException("Build properties not found, this should never happen!");
+		} else {
+			try (final Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+				buildProperties.load(r);
+			} catch (final IOException e) {
+				throw new IllegalStateException("IOException while loading build properties, this should never happen!", e);
+			}
+		}
+	}
+
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
@@ -67,31 +85,11 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 
 	public static String getVersion() {
-		Properties p = loadProperties();
-		if (p != null) {
-			return p.getProperty("version");
-		} else {
-			return "UNKNOWN";
-		}
+		return buildProperties.getProperty("version");
 	}
 
 	public static String getGitSha() {
-		Properties p = loadProperties();
-		if (p != null) {
-			return p.getProperty("git");
-		} else {
-			return "UNKNOWN";
-		}
-	}
-
-	private static Properties loadProperties() {
-		Properties p = new Properties();
-		try {
-			p.load(BParser.class.getResourceAsStream("build.properties"));
-		} catch (Exception e) {
-			return null;
-		}
-		return p;
+		return buildProperties.getProperty("git");
 	}
 
 	public BParser() {
