@@ -257,8 +257,7 @@ public class BParser {
 		try {
 			ast = p.parse();
 			ok = true;
-		} catch (Exception e) {
-			handleException(e);
+		} catch (ParserException ignored) {
 			ok = false;
 		}
 
@@ -271,17 +270,12 @@ public class BParser {
 			try {
 				ast = p.parse();
 				ok = true;
-			} catch (ParserException e) {
+			} catch (ParserException ignored) {
 				b = b.subtract(BigInteger.ONE);
-				handleException(e);
 			}
 		}
 
 		return ast;
-	}
-
-	private void handleException(Exception e) {
-		// do nothing
 	}
 
 	/**
