@@ -326,10 +326,7 @@ public class BLexer extends Lexer {
 
 			// end of comment reached?
 			if (token instanceof TCommentEnd) {
-				String text = commentBuffer.toString();
-				if (state.equals(State.DESCRIPTION))
-					text = text.substring(0, text.length() - 2);
-				comment.setText(text.trim());
+				comment.setText(commentBuffer.toString());
 				token = comment;
 				comment = null;
 				commentBuffer = null;

@@ -27,6 +27,7 @@ import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.analysis.transforming.DescriptionCleaningTranslator;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -470,6 +471,7 @@ public class BParser {
 		// default transformations
 		OpSubstitutions.transform(rootNode, getDefinitions());
 		rootNode.apply(new SyntaxExtensionTranslator());
+		rootNode.apply(new DescriptionCleaningTranslator());
 		// more AST transformations?
 
 	}
