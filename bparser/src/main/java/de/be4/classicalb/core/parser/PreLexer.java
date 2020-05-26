@@ -31,6 +31,26 @@ public class PreLexer extends Lexer {
 	public PreLexer(final PushbackReader in) {
 		super(in);
 	}
+	
+	
+    protected Token getToken() throws IOException, LexerException {
+		try {
+			return super.getToken();
+		} catch (LexerException e) {
+			//System.out.println("Exception: " + e.toString());
+			// printState();
+			String msg = e.getMessage();
+			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
+			   String last = msg.substring(msg.length() - 3); // string has at least 3 chars
+			   if(last.equals(" = "))
+				  throw new LexerException(msg + "in DEFINITIONS clause (you should use == instead of =)");
+			   else
+				  throw new LexerException(msg + "in DEFINITIONS clause");
+			} else {
+			   throw e;
+			}
+		}
+    }
 
 	@Override
 	protected void filter() throws LexerException, IOException {
@@ -40,7 +60,19 @@ public class PreLexer extends Lexer {
 		if (token != null) {
 			collectRhs();
 		}
-
+	}
+	
+	// small debugging utility:
+	private void printState() {
+	    if (state.equals(State.DEFINITIONS_RHS)) System.out.println("DEFINITIONS_RHS");
+	    if (state.equals(State.COMMENT)) System.out.println("State.COMMENT");
+	    if (state.equals(State.DEFINITIONS)) System.out.println("DEFINITIONS");
+	    if (state.equals(State.NO_DEFINITIONS)) System.out.println("NO_DEFINITIONS");
+	    if (state.equals(State.MULTILINE_STRING_STATE)) System.out.println("MULTILINE_STRING_STATE");
+	    if (state.equals(State.NORMAL)) System.out.println("NORMAL");
+	    if (token != null) {
+	      System.out.println("Token = " + token + " at line = " + token.getLine() + ", col = " + token.getPos());
+	    }
 	}
 
 	private void collectRhs() throws LexerException, IOException {
