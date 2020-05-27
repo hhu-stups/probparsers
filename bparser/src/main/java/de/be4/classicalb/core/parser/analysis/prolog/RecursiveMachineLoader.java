@@ -279,7 +279,8 @@ public class RecursiveMachineLoader {
 			}
 			String next = cycles.iterator().next();
 			sb.append(next);
-			throw new BCompoundException(new BException(next, "Cycle detected: " + sb.toString(), null));
+			throw new BCompoundException(new BException(next, "Cycle in machine inclusion/refinement detected: " + sb.toString(), null));
+			// TO DO: it would be nice to have position information and details about the inclusions
 		}
 	}
 
