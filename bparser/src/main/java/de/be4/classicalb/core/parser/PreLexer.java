@@ -41,11 +41,11 @@ public class PreLexer extends Lexer {
 			// printState();
 			String msg = e.getMessage();
 			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
-			   String last = msg.substring(msg.length() - 3); // string has at least 3 chars
-			   if(last.equals(" = "))
-				  throw new LexerException(msg + "in DEFINITIONS clause (you should use == instead of =)");
+			   String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
+			   if(last.equals("="))
+				  throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
 			   else
-				  throw new LexerException(msg + "in DEFINITIONS clause");
+				  throw new LexerException(msg + " in DEFINITIONS clause");
 			} else {
 			   throw e;
 			}
