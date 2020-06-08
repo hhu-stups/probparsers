@@ -1,11 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +51,6 @@ public class RecursiveMachineLoader {
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
 	private final Map<String, File> parsedFiles = new TreeMap<>();
 	private final List<File> machineFilesLoaded = new ArrayList<>();
-	private final List<File> definitionFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
 	private final ParsingBehaviour parsingBehaviour;
 
@@ -111,10 +108,7 @@ public class RecursiveMachineLoader {
 		pout.printAtom(main);
 		pout.openList();
 
-		List<File> allFiles = new ArrayList<>();
-		allFiles.addAll(machineFilesLoaded);
-		allFiles.addAll(definitionFilesLoaded);
-		for (final File file : allFiles) {
+		for (final File file : machineFilesLoaded) {
 			try {
 				pout.printAtom(file.getCanonicalPath());
 			} catch (IOException e) {
