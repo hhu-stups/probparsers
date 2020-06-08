@@ -291,6 +291,14 @@ public class RecursiveMachineLoader {
 		return parsedMachines;
 	}
 
+	public Map<String, File> getParsedFiles() {
+		return parsedFiles;
+	}
+
+	public List<File> getMachineFilesLoaded() {
+		return machineFilesLoaded;
+	}
+
 	private static class DefInjector extends DepthFirstAdapter {
 		private final IDefinitions definitions;
 
