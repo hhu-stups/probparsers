@@ -33,7 +33,7 @@ public class Ancestor {
 
 	@Override
 	public String toString() {
-		return  "---" + resolveType() + "--->" + name ;
+		return  "---" + resolveType() + "--->" + machineReference.getName() ;
 	}
 
 	private String resolveType(){
@@ -49,7 +49,7 @@ public class Ancestor {
 		if(machineReference.getNode() instanceof  ARefinementMachineParseUnit){
 			return "refines";
 		}
-		if(machineReference.getNode() instanceof  AReferencesMachineClause){
+		if(machineReference.getNode() instanceof  AMachineReference){
 			return "extends/includes/imports";
 		}
 		return "";

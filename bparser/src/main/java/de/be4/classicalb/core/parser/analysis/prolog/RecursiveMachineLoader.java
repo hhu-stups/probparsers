@@ -193,13 +193,7 @@ public class RecursiveMachineLoader {
 			main = name;
 		}
 
-		final List<MachineReference> siblingList = refMachines.getSiblings();
-		for (MachineReference sibling : siblingList) {
-			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(name, sibling));
-			checkForCycles(tempAncestors, new Ancestor(name, sibling));
-
-		}
+		checkForCycles(ancestors, name, refMachines);
 
 
 		final HashMap<String, MachineReference> siblingTable = refMachines.getSiblingsTable();
@@ -250,11 +244,20 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
-		for (Ancestor ancestor : ancestors) {
-			System.out.println(ancestor.toString());
-			checkSiblings(ancestor, ancestors, sibling);
+	private void checkForCycles(List<Ancestor> ancestors, String currentFileName, ReferencedMachines refMachines ) throws BCompoundException {
+		final List<MachineReference> siblingList = refMachines.getSiblings();
+		for (MachineReference sibling : siblingList) {
+
+			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
+			tempAncestors.add(new Ancestor(currentFileName, sibling));
+
+			for (Ancestor ancestor : tempAncestors) {
+				checkSiblings(ancestor, tempAncestors, new Ancestor(currentFileName, sibling));
+			}
+
+
 		}
+
 	}
 
 	private void checkSiblings(Ancestor current, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
@@ -268,15 +271,16 @@ public class RecursiveMachineLoader {
 			// In case the cycle starts some where in the middle of the list
 			// There is definitely such an ancestor so we can access with get(0)
 			int pos = ancestors.indexOf(ancestors.stream().filter(ancestor -> ancestor.getName().equals(closeTheCycle)).collect(Collectors.toList()).get(0));
-			System.out.println(pos);
 			final List<Ancestor> shortenedList =
-					ancestors.stream().filter(ancestor -> ancestors.indexOf(ancestor) >= pos).collect(Collectors.toList());
+					ancestors.stream()
+							.filter(ancestor -> ancestors.indexOf(ancestor) >= pos)
+							.collect(Collectors.toList());
 
 			String dependency = shortenedList.stream()
 					.map(Ancestor::toString)
-					.reduce("", (state, ancestor) -> state + ancestor) + sibling.toString();
+					.reduce(ancestors.get(0).getName(), (state, ancestor) -> state + ancestor) ;
 
-			System.out.println(dependency);
+			System.out.println("Dependency: " + dependency);
 
 			String path = sibling.getMachineReference().getPath();
 

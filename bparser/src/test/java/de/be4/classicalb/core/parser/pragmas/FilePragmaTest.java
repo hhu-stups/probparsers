@@ -126,6 +126,13 @@ public class FilePragmaTest {
 
 
 	@Test(expected = BCompoundException.class)
+	public void testFileCircle_notAllInvolved () throws IOException, BCompoundException, URISyntaxException {
+		String file = "pragmas/filePragma/circle/notAllInvolved/Mch2.mch";
+		Helpers.parseFile(file);
+	}
+
+
+	@Test(expected = BCompoundException.class)
 	public void testInvalidPragmaFile() throws IOException, BCompoundException, URISyntaxException {
 		String PATH = "pragmas/filePragma/";
 		String file = PATH + "InvalidPragmaFile.mch";
