@@ -35,6 +35,7 @@ public class RecursiveMachineLoader {
 	private final List<File> machineFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
 	private final ParsingBehaviour parsingBehaviour;
+	private String main;
 
 
 	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider,
@@ -190,7 +191,7 @@ public class RecursiveMachineLoader {
 		}
 
 		if (isMain) {
-			main = name;
+			this.main = name;
 		}
 
 		checkForCycles(ancestors, name, refMachines);
