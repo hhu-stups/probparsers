@@ -50,6 +50,9 @@ public class BException extends Exception {
 
 	public BException(final String filename, final CheckException e) {
 		this(filename, e.getMessage(), e);
+		//super(e.getMessage());
+		//this.filename = filename;
+		//this.cause = e.getCause();
 		for (Node node : e.getNodes()) {
 			locations.add(new Location(filename, node.getStartPos().getLine(), node.getStartPos().getPos(),
 					node.getEndPos().getLine(), node.getEndPos().getPos()));

@@ -55,6 +55,8 @@ public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticC
 		if (paramCount != expected) {
 			exceptions.add(new CheckException("Number of parameters (" + paramCount + 
 			               ") doesn't match declaration of definition " + literal + " (" + expected + ")", node));
+
+
 		}
 	}
 

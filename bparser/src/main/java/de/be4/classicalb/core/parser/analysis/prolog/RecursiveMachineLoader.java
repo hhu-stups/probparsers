@@ -1,61 +1,44 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.FileSearchPathProvider;
-import de.be4.classicalb.core.parser.IDefinitionFileProvider;
-import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.IFileContentProvider;
-import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.*;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
-import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
-import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
-import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
-import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
-import de.be4.classicalb.core.parser.node.PDefinition;
-import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.*;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
 /**
+ * TODO check for multiple Definition files
+ * <p>
  * This class implements the functionality to load and parse all machines that
  * are referenced in any other loaded machine.
- * 
+ * <p>
  * Cyclic references are detected. If an error occurs in an external machine,
  * the error message is mapped to the uses/includes/etc. statement in the main
  * machine.
- * 
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys", ".imp" };
+	private static final String[] SUFFICES = new String[]{".ref", ".mch", ".sys", ".imp"};
 	private final File rootDirectory;
 	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
-	private String main;
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
 	private final Map<String, File> parsedFiles = new TreeMap<>();
 	private final List<File> machineFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
 	private final ParsingBehaviour parsingBehaviour;
 
+
 	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider,
-			ParsingBehaviour parsingBehaviour) throws BCompoundException {
+								  ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		this.parsingBehaviour = parsingBehaviour;
 		this.rootDirectory = directory == null ? new File(".") : new File(directory);
 
@@ -71,12 +54,13 @@ public class RecursiveMachineLoader {
 	}
 
 	public void loadAllMachines(final File startFile, final Start start,
-			final IDefinitions definitions) throws BCompoundException {
-		recursivlyLoadMachine(startFile, start, new ArrayList<String>(), true, rootDirectory, definitions);
+								final IDefinitions definitions) throws BCompoundException {
+		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
 	}
 
-	private void loadMachine(final List<String> ancestors, final File machineFile)
+	private void loadMachine(final List<Ancestor> ancestors, final File machineFile)
 			throws BCompoundException, IOException {
+
 		if (machineFilesLoaded.contains(machineFile)) {
 			return;
 		}
@@ -130,20 +114,17 @@ public class RecursiveMachineLoader {
 
 	/**
 	 * Tries to find a file containing the machine with the given file name.
-	 * 
+	 *
 	 * @return reference to a file containing the machine, may be non-existent
-	 *         but never <code>null</code>.
-	 * @throws CheckException
-	 *             if the file cannot be found
+	 * but never <code>null</code>.
+	 * @throws CheckException if the file cannot be found
 	 */
 	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef,
-			List<String> ancestors, List<String> paths) throws CheckException {
+							List<Ancestor> ancestors, List<String> paths) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath()
-						: parentMachineDirectory.getAbsolutePath();
-				return new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths)
-						.resolve();
+				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath() : parentMachineDirectory.getAbsolutePath();
+				return new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths).resolve();
 			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -153,26 +134,25 @@ public class RecursiveMachineLoader {
 		sb.append("Machine not found: '");
 		sb.append(machineRef.getName());
 		sb.append("'");
-		String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1)).getName();
+		String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1).getName()).getName();
 		sb.append(" in '").append(fileNameOfErrorMachine).append("'");
-
 		for (int i = ancestors.size() - 2; i >= 0; i--) {
-			String name = ancestors.get(i);
+			String name = ancestors.get(i).getName();
 			String fileName = parsedFiles.get(name).getName();
 			sb.append(" loaded by ").append("'").append(fileName).append("'");
 		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
-	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<String> ancestors,
-			final boolean isMain, File directory, final IDefinitions definitions)
+	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
+									   final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 
-		// make a copy of the referencing machines
-		List<String> newAncestors = new ArrayList<>(ancestors);
 
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
 				parsingBehaviour.isMachineNameMustMatchFileName());
+
+
 		try {
 			refMachines.findReferencedMachines();
 		} catch (BException e) {
@@ -186,10 +166,10 @@ public class RecursiveMachineLoader {
 			 * machine is null
 			 */
 			if (isMain)
-			    name = "DEFINITION_FILE";
+				name = "DEFINITION_FILE";
 			else
-			    throw new BCompoundException(new BException(machineFile.getName(),
-					"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "\'", null));
+				throw new BCompoundException(new BException(machineFile.getName(),
+						"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'", null));
 		}
 
 		machineFilesLoaded.add(machineFile);
@@ -200,30 +180,39 @@ public class RecursiveMachineLoader {
 
 		injectDefinitions(currentAst, definitions);
 
-		if(parsedFiles.containsKey(name)) {
+		if (parsedFiles.containsKey(name)) {
 			throw new BCompoundException(new BException(machineFile.getName(),
-					"Multiple files define the MACHINE '" + name + "\' :" 
-					 + parsedFiles.get(name) + " and " + machineFile.getName(), null));
+					"Multiple files define the MACHINE '" + name + "' :"
+							+ parsedFiles.get(name) + " and " + machineFile.getName(), null));
 		} else {
 			getParsedMachines().put(name, currentAst);
 			parsedFiles.put(name, machineFile);
 		}
 
-		if (name != null) {
-			newAncestors.add(name);
-		}
 		if (isMain) {
 			main = name;
 		}
 
-		final Set<String> referencesSet = refMachines.getSetOfReferencedMachines();
-		checkForCycles(newAncestors, referencesSet);
+		final List<MachineReference> siblingList = refMachines.getSiblings();
+		for (MachineReference sibling : siblingList) {
+			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
+			tempAncestors.add(new Ancestor(name, sibling));
+			checkForCycles(tempAncestors, new Ancestor(name, sibling));
+
+		}
+
+
+		final HashMap<String, MachineReference> siblingTable = refMachines.getSiblingsTable();
+
 
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
+
 			try {
+				final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
+				newAncestors.add(new Ancestor(name, siblingTable.get(refMachine.getName())));
 				final String filePragma = refMachine.getPath();
-				File file = null;
+				File file;
 				if (filePragma == null) {
 					file = lookupFile(directory, refMachine, newAncestors, refMachines.getPathList());
 				} else {
@@ -252,31 +241,69 @@ public class RecursiveMachineLoader {
 
 				}
 			} catch (final BException e) {
-				// throw new BException(machineFile.getName(), e);
-				// we do not longer wrap a B Exception in a B Exception
 				throw new BCompoundException(e);
 			} catch (final IOException e) {
-					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
-			} catch(final CheckException e) {
+				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+			} catch (final CheckException e) {
 				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 			}
 		}
 	}
 
-	private void checkForCycles(final List<String> ancestors, final Set<String> references) throws BCompoundException {
-		final Set<String> cycles = new TreeSet<>(ancestors);
-		cycles.retainAll(references); // compute intersection between ancestors and references
-		if (!cycles.isEmpty()) {
-			StringBuilder sb = new StringBuilder();
-			for (String string : ancestors) {
-				sb.append(string).append(" -> ");
-			}
-			String next = cycles.iterator().next();
-			sb.append(next);
-			throw new BCompoundException(new BException(next, "Cycle in machine inclusion/refinement detected: " + sb.toString(), null));
-			// TO DO: it would be nice to have position information and details about the inclusions
+	private void checkForCycles(List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
+		for (Ancestor ancestor : ancestors) {
+			System.out.println(ancestor.toString());
+			checkSiblings(ancestor, ancestors, sibling);
 		}
 	}
+
+	private void checkSiblings(Ancestor current, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
+		final String name = current.getName();
+		final String closeTheCycle = sibling.getMachineReference().getName();
+		if (name.equals(closeTheCycle)) {
+
+			final Node node = current.getMachineReference().getNode();
+			BException resultException = null;
+
+			// In case the cycle starts some where in the middle of the list
+			// There is definitely such an ancestor so we can access with get(0)
+			int pos = ancestors.indexOf(ancestors.stream().filter(ancestor -> ancestor.getName().equals(closeTheCycle)).collect(Collectors.toList()).get(0));
+			System.out.println(pos);
+			final List<Ancestor> shortenedList =
+					ancestors.stream().filter(ancestor -> ancestors.indexOf(ancestor) >= pos).collect(Collectors.toList());
+
+			String dependency = shortenedList.stream()
+					.map(Ancestor::toString)
+					.reduce("", (state, ancestor) -> state + ancestor) + sibling.toString();
+
+			System.out.println(dependency);
+
+			String path = sibling.getMachineReference().getPath();
+
+			if (node instanceof AMachineReference) {
+				resultException = new BException(path,
+						new CheckException("Cycle in imports/includes/extends statement: " + dependency, node));
+			}
+			if (node instanceof ASeesMachineClause) {
+				resultException = new BException(path,
+						new CheckException("Cycle in sees machine clause statement: " + dependency, node));
+			}
+			if (node instanceof AUsesMachineClause) {
+				resultException = new BException(path,
+						new CheckException("Cycle in uses machine clause statement: " + dependency, node));
+			}
+			if (node instanceof AImplementationMachineParseUnit) {
+				resultException = new BException(path,
+						new CheckException("Cycle in implementation: " + dependency, node));
+			}
+			if (node instanceof ARefinementMachineParseUnit) {
+				resultException = new BException(path,
+						new CheckException("Cycle in refinement: " + dependency, node));
+			}
+			throw new BCompoundException(resultException);
+		}
+	}
+
 
 	private void injectDefinitions(final Start tree, final IDefinitions definitions) {
 		final DefInjector defInjector = new DefInjector(definitions);

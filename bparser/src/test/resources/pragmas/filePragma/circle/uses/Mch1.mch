@@ -1,0 +1,4 @@
+MACHINE Mch1
+USES Mch2
+END
+
