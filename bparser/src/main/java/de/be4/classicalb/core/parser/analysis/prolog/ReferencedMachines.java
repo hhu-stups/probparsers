@@ -253,6 +253,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
+
 		} else {
 
 			MachineReference machineReference;
@@ -309,15 +310,17 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		String name = node.getRefMachine().getText();
 		MachineReference ref = new MachineReference(name, node.getRefMachine());
 		MachineReference sibling = new MachineReference(name, node);
-
+		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
+		siblingNode.setStartPos(node.getRefMachine().getStartPos());
+		siblingNode.setEndPos(node.getRefMachine().getEndPos());
 		try {
 			File path = findPath(name);
-			siblings.put(name, new MachineReference(name, node, path.getPath()));
+			siblings.put(name, new MachineReference(name, siblingNode, path.getPath()));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path.getPath()));
 			filePathTable.put(name, path.getPath());
 
 		} catch (CheckException | BCompoundException e) {
-			siblings.put(name, new MachineReference(name, node));
+			siblings.put(name, new MachineReference(name, siblingNode));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 
 		}
@@ -337,14 +340,17 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
 
+		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
+		siblingNode.setStartPos(node.getRefMachine().getStartPos());
+		siblingNode.setEndPos(node.getRefMachine().getEndPos());
 
 		try {
 			String path = findPath(name).getPath();
-			siblings.put(name, new MachineReference(name, node, path));
+			siblings.put(name, new MachineReference(name, siblingNode, path));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path));
 
 		} catch (CheckException | BCompoundException e) {
-			siblings.put(name, new MachineReference(name, node));
+			siblings.put(name, new MachineReference(name, siblingNode));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 
 		}

@@ -264,6 +264,7 @@ public class RecursiveMachineLoader {
 	private void checkSiblings(Ancestor current, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
 		final String name = current.getName();
 		final String closeTheCycle = sibling.getMachineReference().getName();
+
 		if (name.equals(closeTheCycle)) {
 
 			final Node node = current.getMachineReference().getNode();
@@ -281,7 +282,6 @@ public class RecursiveMachineLoader {
 					.map(Ancestor::toString)
 					.reduce(ancestors.get(0).getName(), (state, ancestor) -> state + ancestor) ;
 
-			System.out.println("Dependency: " + dependency);
 
 			String path = sibling.getMachineReference().getPath();
 
