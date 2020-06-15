@@ -253,7 +253,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
-
+ 	
 		} else {
 
 			MachineReference machineReference;
@@ -306,6 +306,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	// REFINES
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
+		System.out.println("Refines");
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
 		MachineReference ref = new MachineReference(name, node.getRefMachine());
@@ -339,8 +340,8 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-
-		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
+		System.out.println("here");
+		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
 
