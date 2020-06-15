@@ -340,7 +340,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		System.out.println("here");
 		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
