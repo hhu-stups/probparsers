@@ -306,7 +306,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	// REFINES
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
-		System.out.println("Refines");
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
 		MachineReference ref = new MachineReference(name, node.getRefMachine());
@@ -376,7 +375,6 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 				try {
 					File path = findPath(name);
-					System.out.println("reference is: "+ path);
 					MachineReference test = new MachineReference(name, identifier, path.getPath());
 					referncesTable.put(name, test);
 					siblings.put(name, new MachineReference(name, machineExpression.parent(), path.getPath()));
