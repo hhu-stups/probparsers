@@ -76,14 +76,14 @@ public class FilePragmaTest {
 	@Test(expected = BCompoundException.class)
 	public void testFileCircle() throws IOException, BCompoundException, URISyntaxException {
 		String PATH = "pragmas/filePragma/circle/";
-		String file = PATH + "Mch1.imp";
+		String file = PATH + "Mch1.mch";
 		Helpers.parseFile(file);
 	}
 
 	@Test(expected = BCompoundException.class)
 	public void testFileCircle_complex() throws IOException, BCompoundException, URISyntaxException {
 		String PATH = "pragmas/filePragma/circle/complex/";
-		String file = PATH + "Mch1.imp";
+		String file = PATH + "Mch1.mch";
 		Helpers.parseFile(file);
 	}
 
@@ -91,14 +91,14 @@ public class FilePragmaTest {
 	@Test(expected = BCompoundException.class)
 	public void testFileCircle_uses() throws IOException, BCompoundException, URISyntaxException {
 		String PATH = "pragmas/filePragma/circle/uses/";
-		String file = PATH + "Mch1.imp";
+		String file = PATH + "Mch1.mch";
 		Helpers.parseFile(file);
 	}
 
 	@Test(expected = BCompoundException.class)
 	public void testFileCircle_includes() throws IOException, BCompoundException, URISyntaxException {
 		String PATH = "pragmas/filePragma/circle/includesExtendsImports/";
-		String file = PATH + "Mch1.imp";
+		String file = PATH + "Mch1.mch";
 		Helpers.parseFile(file);
 	}
 
