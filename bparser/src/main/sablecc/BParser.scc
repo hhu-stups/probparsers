@@ -93,7 +93,7 @@ Helpers
 
   unicode_superscripts = [0x2070..0x2079]; // TODO: add 185,178,179
   unicode_subscripts = [0x2080..0x2089];
-  unicode_prime = [0x2032 + [8216..8217]]; // ' primes   TODO: add hats
+  unicode_prime = [0x2032 + [8216..8217]]; // ' primes / quotes  TODO: add hats
 
   digit = ['0' .. '9'] ;
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;

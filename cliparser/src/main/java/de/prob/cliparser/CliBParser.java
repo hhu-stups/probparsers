@@ -107,7 +107,8 @@ public class CliBParser {
 		behaviour.setPrintAST(options.isOptionSet(CLI_SWITCH_AST)); // -ast flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
 		// flags above treated in bparser in main/java/de/be4/classicalb/core/parser/BParser.java
-		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE));
+		//behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
+		behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
 
