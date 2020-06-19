@@ -146,6 +146,11 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
+		if (node.getName().isEmpty()) {
+			throw new VisitorException(new CheckException("Machine name cannot be empty", node));
+		} else if (node.getName().size() > 1) {
+			throw new VisitorException(new CheckException("Machine name cannot contain dots", node.getName().get(1)));
+		}
 		machineName = Utils.getTIdentifierListAsString(node.getName());
 		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
 		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
