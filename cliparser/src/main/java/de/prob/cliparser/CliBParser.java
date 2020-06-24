@@ -166,10 +166,15 @@ public class CliBParser {
 				print(BParser.getGitSha() + System.lineSeparator());
 				break;
 			case definition:
+			    // sending a new DEFINITION to the parser
 				String name = in.readLine();
 				String type = in.readLine();
 				String parameterCount = in.readLine();
 				context.addMockedDefinition(name, type, parameterCount);
+				break;
+			case resetdefinitions:
+			    // remove all DEFINITIONS 
+				context = new MockedDefinitions();
 				break;
 			case machine:
 				String filename = in.readLine();
