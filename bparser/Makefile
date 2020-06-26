@@ -11,6 +11,8 @@ defsf:
 	gradle test --tests de.be4.classicalb.core.parser.definitions.DefinitionFilesTest --info
 defs:
 	gradle test --tests de.be4.classicalb.core.parser.definitions.DefinitionsTest --info
+deferrss:
+	gradle test --tests de.be4.classicalb.core.parser.definitions.DefinitionsErrorsTest --info
 expr:
 	gradle test --tests de.be4.classicalb.core.parser.ExpressionTest --info
 comments:
@@ -19,6 +21,8 @@ test3:
 	gradle test --tests de.be4.classicalb.core.parser.SyntaxErrorsDetectedOnTokenStreamTest --info
 ext:
 	gradle test --tests de.be4.classicalb.core.parser.languageextension.SyntaxExtensionTest--info
+extref:
+	gradle test --tests de.be4.classicalb.core.parser.languageextension.RefinedOperationTest --info
 
 count:
 	@echo "Line count for Java files:"
