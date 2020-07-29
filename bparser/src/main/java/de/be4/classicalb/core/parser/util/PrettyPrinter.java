@@ -1,13 +1,13 @@
 package de.be4.classicalb.core.parser.util;
 
+import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.node.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.*;
 
 public class PrettyPrinter extends DepthFirstAdapter {
 
@@ -800,6 +800,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		applyLeftAssociative(node.getLeft(), node, node.getRight(), "\\|/");
 	}
 
+
+
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
 		final List<PExpression> copy = new ArrayList<>(node.getList());
@@ -941,6 +943,77 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			}
 		}
 		sb.append("}");
+	}
+
+	@Override
+	public void caseASymbolicCompositionExpression(ASymbolicCompositionExpression node) {
+		node.getLeft().apply(this);
+		sb.append(" /*@symbolic*/ ");
+		sb.append(";");
+		node.getRight().apply(this);
+	}
+
+	@Override
+	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
+		sb.append("/*@symbolic*/ ");
+		sb.append("{");
+		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
+		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
+			final PExpression e = iterator.next();
+			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(", ");
+			}
+		}
+
+		sb.append("|");
+		node.getPredicates().apply(this);
+		sb.append("}");
+	}
+
+	@Override
+	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
+		sb.append("/*@symbolic*/ ");
+		sb.append("%");
+		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
+		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
+			final PExpression e = iterator.next();
+			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(", ");
+			}
+		}
+
+		sb.append(".");
+		sb.append("(");
+		node.getPredicate().apply(this);
+		sb.append("|");
+		node.getExpression().apply(this);
+		sb.append(")");
+	}
+
+	@Override
+	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
+		sb.append("/*@symbolic*/ ");
+		sb.append("UNION");
+		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
+		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
+			final PExpression e = iterator.next();
+			e.apply(this);
+
+			if (iterator.hasNext()) {
+				sb.append(", ");
+			}
+		}
+
+		sb.append(".");
+		sb.append("(");
+		node.getPredicates().apply(this);
+		sb.append("|");
+		node.getExpression().apply(this);
+		sb.append(")");
 	}
 
 	@Override
