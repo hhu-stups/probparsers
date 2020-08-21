@@ -1,23 +1,17 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
+import de.be4.classicalb.core.parser.exceptions.*;
 import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileExpression;
@@ -59,6 +53,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	private String packageName;
 	private File rootDirectory;
 	private final LinkedHashMap<String, MachineReference> referncesTable;
+	private final LinkedHashMap<String, MachineReference> siblings;
 
 	/**
 	 * Searches the syntax tree of a machine for references to external
@@ -79,6 +74,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		this.mainFile = machineFile;
 		this.start = node;
 		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
+		this.siblings = new LinkedHashMap<>();
 	}
 
 	public void findReferencedMachines() throws BException {
@@ -110,6 +106,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return this.pathList;
 	}
 
+
 	/**
 	 * 
 	 * @return the name of the machine, <code>null</code> if no name was found
@@ -126,6 +123,10 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return new HashMap<>(referncesTable);
 	}
 
+	public HashMap<String, MachineReference> getSiblingsTable(){
+		return new HashMap<>(siblings);
+	}
+
 	public List<MachineReference> getReferences() {
 		ArrayList<MachineReference> list = new ArrayList<>();
 		for (Entry<String, MachineReference> entry : referncesTable.entrySet()) {
@@ -134,8 +135,22 @@ public class ReferencedMachines extends DepthFirstAdapter {
 		return list;
 	}
 
+	public List<MachineReference> getSiblings() {
+		ArrayList<MachineReference> list = new ArrayList<>();
+
+		for (Entry<String, MachineReference> entry : siblings.entrySet()) {
+			list.add(entry.getValue());
+		}
+		return list;
+	}
+
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
+		if (node.getName().isEmpty()) {
+			throw new VisitorException(new CheckException("Machine name cannot be empty", node));
+		} else if (node.getName().size() > 1) {
+			throw new VisitorException(new CheckException("Machine name cannot contain dots", node.getName().get(1)));
+		}
 		machineName = Utils.getTIdentifierListAsString(node.getName());
 		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
 		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
@@ -239,15 +254,31 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			try {
 				ref = new MachineReference(name, node, file);
 				referncesTable.put(name, ref);
+				siblings.put(name, ref);
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
+ 	
 		} else {
-			MachineReference machineReference = new MachineReference(name, node);
+
+			MachineReference machineReference;
+			try {
+				String file = findPath(name).getAbsolutePath();
+				machineReference = new MachineReference(name, node, file);
+
+			} catch (BCompoundException | CheckException e) {
+				machineReference = new MachineReference(name, node);
+
+			}
+
 			if (this.filePathTable.containsKey(name)) {
 				machineReference.setDirectoryPath(filePathTable.get(name));
 			}
 			referncesTable.put(name, machineReference);
+			siblings.put(name, machineReference);
+
+
+
 		}
 	}
 
@@ -267,11 +298,13 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	@Override
 	public void caseASeesMachineClause(ASeesMachineClause node) {
+
 		registerMachineNames(node.getMachineNames());
 	}
 
 	@Override
 	public void caseAUsesMachineClause(AUsesMachineClause node) {
+
 		registerMachineNames(node.getMachineNames());
 	}
 
@@ -280,9 +313,29 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+		MachineReference ref = new MachineReference(name, node.getRefMachine());
+		MachineReference sibling = new MachineReference(name, node);
+		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
+		siblingNode.setStartPos(node.getRefMachine().getStartPos());
+		siblingNode.setEndPos(node.getRefMachine().getEndPos());
+		try {
+			File path = findPath(name);
+			siblings.put(name, new MachineReference(name, siblingNode, path.getPath()));
+			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path.getPath()));
+			filePathTable.put(name, path.getPath());
+
+		} catch (CheckException | BCompoundException e) {
+			siblings.put(name, new MachineReference(name, siblingNode));
+			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+
+		}
+
+
+
+
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
+
 		}
 	}
 
@@ -291,7 +344,21 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
+		siblingNode.setStartPos(node.getRefMachine().getStartPos());
+		siblingNode.setEndPos(node.getRefMachine().getEndPos());
+
+		try {
+			String path = findPath(name).getPath();
+			siblings.put(name, new MachineReference(name, siblingNode, path));
+			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path));
+
+		} catch (CheckException | BCompoundException e) {
+			siblings.put(name, new MachineReference(name, siblingNode));
+			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+
+		}
+
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
 		}
@@ -299,14 +366,31 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 	private void registerMachineNames(List<PExpression> referencedMachineList) {
 		for (PExpression machineExpression : referencedMachineList) {
+
 			if (machineExpression instanceof AIdentifierExpression) {
+
 				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 				String name = getIdentifier(identifier.getIdentifier());
 				final MachineReference machineReference = new MachineReference(name, identifier);
+
 				if (this.filePathTable.containsKey(name)) {
 					machineReference.setDirectoryPath(filePathTable.get(name));
 				}
-				referncesTable.put(name, machineReference);
+
+
+				try {
+					File path = findPath(name);
+					MachineReference test = new MachineReference(name, identifier, path.getPath());
+					referncesTable.put(name, test);
+					siblings.put(name, new MachineReference(name, machineExpression.parent(), path.getPath()));
+
+				} catch (CheckException | BCompoundException e) {
+					referncesTable.put(name, new MachineReference(name, identifier));
+					siblings.put(name, new MachineReference(name, machineExpression.parent()));
+
+				}
+
+
 			} else if (machineExpression instanceof AFileExpression) {
 				final AFileExpression fileNode = (AFileExpression) machineExpression;
 				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
@@ -316,6 +400,9 @@ public class ReferencedMachines extends DepthFirstAdapter {
 				try {
 					machineReference = new MachineReference(name, identifier, file);
 					referncesTable.put(name, machineReference);
+					siblings.put(name, new MachineReference(name, machineExpression.parent(), file));
+
+
 				} catch (CheckException e) {
 					throw new VisitorException(e);
 				}
@@ -325,6 +412,42 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			}
 		}
 	}
+
+	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys", ".imp" };
+
+	private File findPath(String name) throws BCompoundException {
+		final List<String> suffixs = Arrays.asList(SUFFICES);
+
+		final List <FileSearchPathProvider> preapedProvider = suffixs.stream()
+				.map(suffix ->
+						new FileSearchPathProvider(mainFile.getParent(), name + suffix, new ArrayList<>()))
+				.collect(Collectors.toList());
+
+		int i = 0;
+		File sideResult = null;
+		File result = null;
+		while(i < preapedProvider.size() && sideResult == null ){
+			try{
+				sideResult = preapedProvider.get(i).resolve();
+			} catch (IOException e) {
+				// Result was empty
+			}
+			if(sideResult!=null){
+				result = sideResult;
+			}
+			i++;
+		}
+
+
+
+		if(result == null){
+			throw new BCompoundException(new BException(name, "File " + "name was not found", null));
+		}
+
+
+		return result;
+	}
+
 
 	/***************************************************************************
 	 * exclude large sections of a machine without machine references by doing

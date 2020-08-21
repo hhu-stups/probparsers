@@ -39,9 +39,10 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 		int returnValue = parser.fullParsing(machine, behaviour, out, out);
 
 		System.out.println(baos.toString());
-
-		assertEquals(returnValue, -3);
-		assertEquals("exception('Expecting a B machine but was a definition file in file: \\'LibraryIO.def\\'').",
-				baos.toString().trim());
+        
+        // We now permit to load .def files at the top-level; ProB converts them to a virtual abstract_machine
+		assertEquals(returnValue, 0); // was -3
+		//assertEquals("exception('Expecting a B machine but was a definition file in file: \\'LibraryIO.def\\'').",
+		//		baos.toString().trim());
 	}
 }

@@ -1,9 +1,10 @@
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.25'
+project.version = '2.9.26'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
@@ -28,8 +29,8 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
     
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
     
     repositories {
         mavenCentral()

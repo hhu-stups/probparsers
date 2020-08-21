@@ -597,6 +597,7 @@ public class RulesProject {
 				sb.append(opName);
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Cyclic dependencies between operations: " + sb.toString(), id)));
+
 				return true;
 			}
 		}

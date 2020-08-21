@@ -23,6 +23,7 @@ public class MachineReference implements IModelReference {
 		this.node = node;
 		this.filePath = path;
 
+
 		File file = new File(path);
 		if (file.isDirectory()) {
 			throw new CheckException("Declared path in file pragma is an directory and not a file: " + path, node);

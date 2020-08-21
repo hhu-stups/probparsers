@@ -1,7 +1,16 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.PushbackReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,10 +25,17 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.prolog.*;
+import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.analysis.transforming.DescriptionCleaningTranslator;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
-import de.be4.classicalb.core.parser.exceptions.*;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -29,12 +45,10 @@ import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
-import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
+import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
-import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -45,6 +59,21 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
+
+	private static final Properties buildProperties;
+	static {
+		buildProperties = new Properties();
+		final InputStream is = BParser.class.getResourceAsStream("build.properties");
+		if (is == null) {
+			throw new IllegalStateException("Build properties not found, this should never happen!");
+		} else {
+			try (final Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+				buildProperties.load(r);
+			} catch (final IOException e) {
+				throw new IllegalStateException("IOException while loading build properties, this should never happen!", e);
+			}
+		}
+	}
 
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
@@ -57,31 +86,11 @@ public class BParser {
 	private IDefinitionFileProvider contentProvider;
 
 	public static String getVersion() {
-		Properties p = loadProperties();
-		if (p != null) {
-			return p.getProperty("version");
-		} else {
-			return "UNKNOWN";
-		}
+		return buildProperties.getProperty("version");
 	}
 
 	public static String getGitSha() {
-		Properties p = loadProperties();
-		if (p != null) {
-			return p.getProperty("git");
-		} else {
-			return "UNKNOWN";
-		}
-	}
-
-	private static Properties loadProperties() {
-		Properties p = new Properties();
-		try {
-			p.load(BParser.class.getResourceAsStream("/bparser-build.properties"));
-		} catch (Exception e) {
-			return null;
-		}
-		return p;
+		return buildProperties.getProperty("git");
 	}
 
 	public BParser() {
@@ -248,8 +257,7 @@ public class BParser {
 		try {
 			ast = p.parse();
 			ok = true;
-		} catch (Exception e) {
-			handleException(e);
+		} catch (ParserException ignored) {
 			ok = false;
 		}
 
@@ -262,17 +270,12 @@ public class BParser {
 			try {
 				ast = p.parse();
 				ok = true;
-			} catch (ParserException e) {
+			} catch (ParserException ignored) {
 				b = b.subtract(BigInteger.ONE);
-				handleException(e);
 			}
 		}
 
 		return ast;
-	}
-
-	private void handleException(Exception e) {
-		// do nothing
 	}
 
 	/**
@@ -462,6 +465,7 @@ public class BParser {
 		// default transformations
 		OpSubstitutions.transform(rootNode, getDefinitions());
 		rootNode.apply(new SyntaxExtensionTranslator());
+		rootNode.apply(new DescriptionCleaningTranslator());
 		// more AST transformations?
 
 	}
