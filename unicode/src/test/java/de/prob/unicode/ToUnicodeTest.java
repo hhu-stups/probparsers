@@ -228,9 +228,16 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("\u207b\u00b9"), "\u223c");
 		assertEquals(UnicodeTranslator.toUnicode("f \u207b\u00b9"), "f \u223c");
 	}
+	
+	@Test
+	public void TConv4() {
+		assertEquals(UnicodeTranslator.toUnicode("f\u207b\u00b9"), "f\u223c");
+	}
+
 	@Test
 	public void TTrel() {
 		assertEquals(UnicodeTranslator.toUnicode("<<->"), "\ue100");
+		assertEquals(UnicodeTranslator.toUnicode("f<<->g"), "f\ue100g");
 	}
 
 	@Test
@@ -308,6 +315,8 @@ public class ToUnicodeTest {
 	@Test
 	public void TOvl() {
 		assertEquals(UnicodeTranslator.toUnicode("<+"), "\ue103");
+		System.out.println("f<+g  -----> "+ UnicodeTranslator.toUnicode("f<+g"));
+		assertEquals(UnicodeTranslator.toUnicode("f<+g"), "f\ue103g");
 	}
 
 	@Test
@@ -318,21 +327,25 @@ public class ToUnicodeTest {
 	@Test
 	public void TGeq() {
 		assertEquals(UnicodeTranslator.toUnicode(">="), "\u2265");
+		assertEquals(UnicodeTranslator.toUnicode("f>=g"), "f\u2265g");
 	}
 
 	@Test
 	public void TDiv() {
 		assertEquals(UnicodeTranslator.toUnicode("/"), "\u00f7");
+		assertEquals(UnicodeTranslator.toUnicode("f/g"), "f\u00f7g");
 	}
 
 	@Test
 	public void TMult() {
 		assertEquals(UnicodeTranslator.toUnicode("*"), "\u2217");
+		assertEquals(UnicodeTranslator.toUnicode("f*g"), "f\u2217g");
 	}
 
 	@Test
 	public void TMinus() {
 		assertEquals(UnicodeTranslator.toUnicode("-"), "\u2212");
+		assertEquals(UnicodeTranslator.toUnicode("f-g"), "f\u2212g");
 	}
 
 	@Test
@@ -355,11 +368,13 @@ public class ToUnicodeTest {
 	@Test
 	public void Implication() {
 		assertEquals(UnicodeTranslator.toUnicode("P => Q"), "P \u21d2 Q");
+		assertEquals(UnicodeTranslator.toUnicode("P =>Q"), "P \u21d2Q");
 	}
 
 	@Test
 	public void Equivalence() {
 		assertEquals(UnicodeTranslator.toUnicode("P <=> Q"), "P \u21d4 Q");
+		assertEquals(UnicodeTranslator.toUnicode("P<=>Q"), "P\u21d4Q");
 	}
 
 	@Test
@@ -400,6 +415,7 @@ public class ToUnicodeTest {
 	@Test
 	public void Inequality() {
 		assertEquals(UnicodeTranslator.toUnicode("E /= F"), "E \u2260 F");
+		assertEquals(UnicodeTranslator.toUnicode("E/=F"), "E\u2260F");
 	}
 
 	@Test
@@ -462,6 +478,7 @@ public class ToUnicodeTest {
 	@Test
 	public void OrderedPair() {
 		assertEquals(UnicodeTranslator.toUnicode("E |-> F"), "E \u21a6 F");
+		assertEquals(UnicodeTranslator.toUnicode("E|->F"), "E\u21a6F");
 	}
 
 	@Test
@@ -811,6 +828,7 @@ public class ToUnicodeTest {
 	@Test
 	public void TotalSurjections() {
 		assertEquals(UnicodeTranslator.toUnicode("S ->> T"), "S \u21a0 T");
+		assertEquals(UnicodeTranslator.toUnicode("S->>T"), "S\u21a0T");
 	}
 
 	@Test
