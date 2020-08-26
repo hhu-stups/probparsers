@@ -13,6 +13,7 @@ import de.prob.unicode.node.TAnyChar;
 import de.prob.unicode.node.TIdentifierLiteral;
 import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.TString;
+import de.prob.unicode.node.TNumber;
 import de.prob.unicode.node.TTruncatedSetSize;
 import de.prob.unicode.node.Token;
 
@@ -216,7 +217,7 @@ public class UnicodeTranslator {
 					} else {
 						sb.append(t.getText());
 					}
-				} else if (t instanceof TAnyChar) {
+				} else if (t instanceof TAnyChar  || t instanceof TNumber ) {
 					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
@@ -228,7 +229,11 @@ public class UnicodeTranslator {
 				} else {
 					String translated;
 					Translation translation = m.get(key);
-					if (target == Encoding.UNICODE) {
+					if(translation == null) { 
+					   // a Token which is not covered
+					   // translated = t.getText();
+						throw new AssertionError("Unhandled Lexer token: " + key);
+					} else if (target == Encoding.UNICODE) {
 						translated = translation.getUnicode();
 					} else if (target == Encoding.LATEX) {
 						translated = translation.getLatex();

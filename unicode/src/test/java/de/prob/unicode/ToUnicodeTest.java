@@ -219,6 +219,16 @@ public class ToUnicodeTest {
 	}
 
 	@Test
+	public void TConv2() {
+		assertEquals(UnicodeTranslator.toUnicode("\u223c"), "\u223c");
+	}
+	
+	@Test
+	public void TConv3() {
+		assertEquals(UnicodeTranslator.toUnicode("\u207b\u00b9"), "\u223c");
+		assertEquals(UnicodeTranslator.toUnicode("f \u207b\u00b9"), "f \u223c");
+	}
+	@Test
 	public void TTrel() {
 		assertEquals(UnicodeTranslator.toUnicode("<<->"), "\ue100");
 	}
