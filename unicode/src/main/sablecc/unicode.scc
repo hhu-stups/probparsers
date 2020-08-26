@@ -53,7 +53,9 @@ Tokens
 	leqv = '<=>' | '\leqv'| 0x21d4;
 	lnot = 'not' | '\lnot'| 0x00ac;
 	qdot = '.' | '\qdot'| 0x00b7;
-	conv = '~' | '\conv'| 0x223c;
+	conv = '~' | '\conv'
+	           | 0x223c // Unicode tilde
+	           | 0x207b 0xb9; // superscript 1 is ASCII 185
 	trel = '<<->' | '\trel'| 0xe100;
 	srel = '<->>' | '\srel'| 0xe101;
 	pfun = '+->' | '\pfun'| 0x21f8;
