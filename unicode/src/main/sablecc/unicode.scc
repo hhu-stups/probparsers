@@ -18,7 +18,7 @@ Tokens
 	setminus = '\' | '\setminus' | 0x2216;
 	dotdot = '..' | '\upto' | 0x2025;
 	dotdotdot = '...' | '\ldots' | 0x2026; 
-	nat1 = 'NAT1' | '\nat1'| 0x2115 0x0031;
+	nat1 = 'NAT1' | '\nat1'| 0x2115 0x0031 | 0x2115 0x2081;
 	nat = 'NAT' | '\nat'| 0x2115;
 	emptyset = '{}' | '\emptyset'| 0x2205;
 	bcmsuch = ':|' | '\bcmsuch'| ':'0x2223;
@@ -32,8 +32,8 @@ Tokens
 	binter = '/\'| '\binter'| 0x2229;
 	domres = '<|' | '\domres'| 0x25c1;
 	ranres = '|>' | '\ranres'| 0x25b7;
-	domsub = '<<|' | '\domsub'| 0x2a64;
-	ransub = '|>>' | '\ransub'| 0x2a65;
+	domsub = '<<|' | '\domsub'| 0x2a64 | 0x25c0;
+	ransub = '|>>' | '\ransub'| 0x2a65 | 0x25b6;
 	lambda = '%' | '\lambda'| 0x03bb;
 	oftype = 'oftype' |'\oftype'| 0x2982;
 	notin = '/:' |  '\notin'| 0x2209;
@@ -67,12 +67,12 @@ Tokens
 	tbij = '>->>' | '\tbij'| 0x2916;
 	expn = '\expn'| 0x005e;
 	lor = 'or' | '\lor'| 0x2228;
-	pow1 = 'POW1' | '\pow1'| 0x2119 0x0031;
+	pow1 = 'POW1' | '\pow1'| 0x2119 0x0031 | 0x2119 0x2081;
 	pow = 'POW' | '\pow'| 0x2119;
 	mid = '\mid' | '|' | 0x2223;
 	neq = '/=' | '\neq'| 0x2260;
 	rel = '<->' |'\rel'| 0x2194;
-	ovl = '<+' | '\ovl'| 0xe103;
+	ovl = '<+' | '\ovl'| 0xe103 | 0x22d6;
 	leq = '<=' | '\leq'| 0x2264;
 	geq = '>=' | '\geq'| 0x2265;
 	div = '/' | '\div'| 0x00f7;
