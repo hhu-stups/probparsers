@@ -38,18 +38,8 @@ public class FileSearchPathProvider implements Iterable<File> {
 		ArrayList<String> result = new ArrayList<>();
 		// User provided stdlib search path
 		final String stdlib = System.getProperty("prob.stdlib");
-		// prob.home is set by prob 2.0 to the directory of the prob binary
-		String home = System.getProperty("prob.home");
-
 		if (stdlib != null) {
 			Collections.addAll(result, stdlib.split(File.pathSeparator));
-		}
-		if (home != null) {
-			home = home + File.separator + "stdlib";
-			// Simple attempt to avoid adding home twice to the search path
-			if (!result.contains(home)) {
-				result.add(home);
-			}
 		}
 
 		if (result.isEmpty()) {
