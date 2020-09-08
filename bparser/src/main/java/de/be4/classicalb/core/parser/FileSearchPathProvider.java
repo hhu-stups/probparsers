@@ -47,7 +47,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	@Override
 	public SearchPathIterator iterator() {
-		return new SearchPathIterator(this);
+		return new SearchPathIterator();
 	}
 
 	public int size() {
@@ -69,18 +69,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 	}
 
 	private class SearchPathIterator implements Iterator<File> {
-
-		private final FileSearchPathProvider provider;
 		private int idx;
 
-		public SearchPathIterator(FileSearchPathProvider provider) {
+		public SearchPathIterator() {
 			this.idx = 0;
-			this.provider = provider;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return this.idx < this.provider.size();
+			return this.idx < FileSearchPathProvider.this.size();
 		}
 
 		@Override
@@ -91,7 +88,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 			String base = get(this.idx);
 			this.idx += 1;
-			Path path = FileSystems.getDefault().getPath(base, this.provider.getFilename());
+			Path path = FileSystems.getDefault().getPath(base, FileSearchPathProvider.this.getFilename());
 			return new java.io.File(path.toString());
 		}
 
