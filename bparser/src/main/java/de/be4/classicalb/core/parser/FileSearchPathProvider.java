@@ -19,10 +19,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 	}
 
 	public FileSearchPathProvider(String prefix, String fileName) {
-		this.fileName = fileName;
-
-		searchPath.add(prefix);
-		searchPath.addAll(getLibraryPath());
+		this(prefix, fileName, Collections.emptyList());
 	}
 
 	public FileSearchPathProvider(String prefix, String fileName, List<String> paths) {
