@@ -46,7 +46,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 	}
 
 	@Override
-	public SearchPathIterator iterator() {
+	public Iterator<File> iterator() {
 		return new SearchPathIterator();
 	}
 
