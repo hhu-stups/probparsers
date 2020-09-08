@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
@@ -42,7 +41,9 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	@Override
 	public Iterator<File> iterator() {
-		return new SearchPathIterator();
+		return this.searchPath.stream()
+			.map(base -> new File(base, this.getFilename()))
+			.iterator();
 	}
 
 	public int size() {
@@ -61,38 +62,5 @@ public class FileSearchPathProvider implements Iterable<File> {
 			}
 		}
 		throw new FileNotFoundException("did not found: " + fileName );
-	}
-
-	private class SearchPathIterator implements Iterator<File> {
-		private int idx;
-
-		public SearchPathIterator() {
-			this.idx = 0;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return this.idx < FileSearchPathProvider.this.size();
-		}
-
-		@Override
-		public File next() {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-
-			String base = get(this.idx);
-			this.idx += 1;
-			return new File(base, FileSearchPathProvider.this.getFilename());
-		}
-
-		private String get(int idx) {
-			return FileSearchPathProvider.this.searchPath.get(idx);
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 }
