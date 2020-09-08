@@ -3,8 +3,6 @@ package de.be4.classicalb.core.parser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,8 +86,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 			String base = get(this.idx);
 			this.idx += 1;
-			Path path = FileSystems.getDefault().getPath(base, FileSearchPathProvider.this.getFilename());
-			return new java.io.File(path.toString());
+			return new File(base, FileSearchPathProvider.this.getFilename());
 		}
 
 		private String get(int idx) {
