@@ -152,7 +152,7 @@ public final class Utils {
 		}
 
 		// remove utf-8 byte order mark
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 65279) {
+		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
 			content = content.substring(1);
 		}
 
