@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -34,18 +35,14 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.addAll(getLibraryPath());
 	}
 
-	private ArrayList<String> getLibraryPath() {
-		ArrayList<String> result = new ArrayList<>();
+	private List<String> getLibraryPath() {
 		// User provided stdlib search path
 		final String stdlib = System.getProperty("prob.stdlib");
 		if (stdlib != null) {
-			Collections.addAll(result, stdlib.split(File.pathSeparator));
+			return Arrays.asList(stdlib.split(File.pathSeparator));
+		} else {
+			return Collections.singletonList("." + File.separator + "stdlib");
 		}
-
-		if (result.isEmpty()) {
-			result.add("." + File.separator + "stdlib");
-		}
-		return result;
 	}
 
 	@Override
