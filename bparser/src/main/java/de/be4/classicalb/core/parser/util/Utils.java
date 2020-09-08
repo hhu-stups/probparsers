@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -140,7 +140,7 @@ public final class Utils {
 	public static final String readFile(final File filePath) throws IOException {
 		String content = null;
 		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, Charset.forName("UTF-8"));
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
 			final StringBuilder builder = new StringBuilder();
 			final char[] buffer = new char[1024];
 			int read;
