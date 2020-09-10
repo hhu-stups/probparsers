@@ -110,6 +110,7 @@ public class BLexer extends Lexer {
 			addInvalid(binOpTokenClass, TElsif.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TThen.class,  "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TRightPar.class, "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TRightBrace.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TSemicolon.class,"Argument to binary operator is missing.");
 			addInvalid(TLeftPar.class, binOpTokenClass,  "Argument to binary operator is missing.");
 			addInvalid(TSemicolon.class, binOpTokenClass,"Argument to binary operator is missing.");
@@ -138,6 +139,12 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
+		
+		addInvalid(TComma.class, TRightPar.class, "Missing expression after comma");
+		addInvalid(TComma.class, TRightBrace.class, "Missing expression after comma");
+		addInvalid(TSemicolon.class, TRightPar.class, "Missing expression after semicolon");
+		addInvalid(TSemicolon.class, TRightBrace.class, "Missing expression after semicolon");
+		
 		addInvalid(TComma.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TSemicolon.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TPragmaLabel.class, TComma.class,  "A label pragma must be put *before* a predicate.");
