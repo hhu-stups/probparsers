@@ -1,7 +1,6 @@
 apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'application'
 
 dependencies {
     implementation project(":bparser")
@@ -11,7 +10,3 @@ dependencies {
 }
 
 rootProject.setupTestReport(project, [])
-
-application{
-	mainClassName = 'de.prob.cliparser.CliBParser'
-}
