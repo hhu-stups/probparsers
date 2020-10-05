@@ -281,6 +281,7 @@ Tokens
   {normal} initialisation = 'INITIALISATION' | 'INITIALIZATION'; /* amerikanische Version scheinbar auch erlaubt */
   {normal} int = 'INT';
   {normal} integer = 'INTEGER' | 0x2124;
+  {normal} real = 'REAL' | 0x211D;
   {normal} quantified_inter = 'INTER' | 0x22c2;
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
@@ -435,6 +436,7 @@ Tokens
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
   {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto
   {normal} integer_literal = digit+;
+  {normal} real_literal = digit+ '.' digit+;
   {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral 
 
   {normal} underscore = underscore;
@@ -989,12 +991,14 @@ expression_atomic {-> expression} =
   {successor} succ {-> New expression.successor()} |
   {predecessor} pred {-> New expression.predecessor()} |
   {integer} [literal]:integer_literal {-> New expression.integer(literal)} |
+  {real} [literal]:real_literal {-> New expression.real(literal)} |
   {hex_integer} [literal]:hex_literal {-> New expression.hex_integer(literal)} |
   {max_int} max_int {-> New expression.max_int()} |
   {min_int} min_int {-> New expression.min_int()} |
   {empty_set_symbol} empty_set {-> New expression.empty_set()} |
   {empty_set} left_brace right_brace {-> New expression.empty_set()} |
   {integer_set} integer {-> New expression.integer_set()} |
+  {real_set} real {-> New expression.real_set()} |
   {natural_set} natural {-> New expression.natural_set()} |
   {natural1_set} natural1 {-> New expression.natural1_set()} |
   {nat_set} nat {-> New expression.nat_set()} |
@@ -1354,11 +1358,13 @@ expression =
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
+  {real} [literal]:real_literal |
   {hex_integer} [literal]:hex_literal |
   {max_int} |
   {min_int} |
   {empty_set} |
   {integer_set} |
+  {real_set} |
   {natural_set} |
   {natural1_set} |
   {nat_set} |
