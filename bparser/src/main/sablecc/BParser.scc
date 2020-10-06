@@ -333,6 +333,9 @@ Tokens
   {normal} bool_cast = 'bool';
   {normal} btree = 'btree';
   {normal} card = 'card';
+  {normal} convert_int_floor = 'floor';
+  {normal} convert_int_ceiling = 'ceiling';
+  {normal} convert_real = 'real';
   {normal} closure = 'closure';
   {normal} closure1 = 'closure1'; // add  'closure' 0x8321 ?
   {normal} conc = 'conc';
@@ -897,6 +900,9 @@ expression_keyword {-> expression} =
   {max} max left_par [expression]:expression_in_par right_par {-> New expression.max(expression.expression)} |
   {min} min left_par [expression]:expression_in_par right_par {-> New expression.min(expression.expression)} |
   {card} card left_par [expression]:expression_in_par right_par {-> New expression.card(expression.expression)} |
+  {convert_int_floor} convert_int_floor left_par [expression]:expression_in_par right_par {-> New expression.convert_int_floor(expression.expression)} |
+  {convert_int_ceiling} convert_int_ceiling left_par [expression]:expression_in_par right_par {-> New expression.convert_int_ceiling(expression.expression)} |
+  {convert_real} convert_real left_par [expression]:expression_in_par right_par {-> New expression.convert_real(expression.expression)} |
   {general_sum} sigma [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_sum([identifiers.expression], predicates.predicate, expression.expression)} |
   {general_product} pi [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_product([identifiers.expression], predicates.predicate, expression.expression)} |
   {pow_subset} pow left_par [expression]:expression_in_par right_par {-> New expression.pow_subset(expression.expression)} |
@@ -1392,6 +1398,9 @@ expression =
   {max} [expression]:expression |
   {min} [expression]:expression |
   {card} [expression]:expression |
+  {convert_int_floor} [expression]:expression |
+  {convert_int_ceiling} [expression]:expression |
+  {convert_real} [expression]:expression |
   {general_sum} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {general_product} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {couple} [list]:expression* |
