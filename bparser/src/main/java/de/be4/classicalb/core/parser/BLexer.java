@@ -193,19 +193,24 @@ public class BLexer extends Lexer {
 		funOpKeywordTokenClasses.add(TInfix.class);
 		
 		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
+			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
-			addInvalid(funOpClass, TPragmaDescription.class, Errmsg);
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
 			addInvalid(funOpClass, TRightBrace.class, Errmsg);
 			addInvalid(funOpClass, TRightBracket.class, Errmsg);
 			addInvalid(funOpClass, TSemicolon.class, Errmsg);
-			addInvalid(funOpClass, TComma.class, Errmsg);
-			addInvalid(funOpClass, TComma.class, Errmsg);
 			addInvalid(funOpClass, TWhere.class, Errmsg);
 			addInvalid(funOpClass, TThen.class, Errmsg);
 			addInvalid(funOpClass, TElse.class, Errmsg);
 			addInvalid(funOpClass, TEnd.class, Errmsg);
+			for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+			     addInvalid(funOpClass, binOpTokenClass, Errmsg);
+			}
+			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+				addInvalid(funOpClass,clauseTokenClass, Errmsg);
+			}
+			
 		    String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
 			addInvalid(TAny.class,funOpClass, Errmsg2);
 			addInvalid(TConstants.class,funOpClass, Errmsg2);
