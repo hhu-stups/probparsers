@@ -141,10 +141,11 @@ public class BLexer extends Lexer {
 		
 		
 		// a few rules for keywords which are unary functions and require an opening parenthesis afterwards
-		// e.g., floor(.), bool(.), ceiling(.), real(.)
+		// real operators floor(.), ceiling(.), real(.)
 		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
 		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
 		funOpKeywordTokenClasses.add(TConvertReal.class);
+		// regular operators
 		funOpKeywordTokenClasses.add(TBoolCast.class);
 		funOpKeywordTokenClasses.add(TCard.class);
 		funOpKeywordTokenClasses.add(TIterate.class);
@@ -195,6 +196,15 @@ public class BLexer extends Lexer {
 		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
+			if (funOpClass == TConvertIntFloor.class) {
+			   opName = new String("floor");
+			} else if( funOpClass == TConvertIntCeiling.class) {
+			   opName = new String("ceiling");
+			} else if( funOpClass == TConvertReal.class) {
+			   opName = new String("real");
+			} else if( funOpClass == TBoolCast.class) {
+			   opName = new String("bool");
+			} 
 		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
 			addInvalid(funOpClass, TRightBrace.class, Errmsg);
