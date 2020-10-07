@@ -23,6 +23,7 @@ public class BLexer extends Lexer {
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
+	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
 	
 	public void setLexerPreparse(){
 		parse_definition = true; 
@@ -137,6 +138,38 @@ public class BLexer extends Lexer {
 		addInvalid(TConjunction.class, TConjunction.class, "Probably one & too many.");
 		addInvalid(TLogicalOr.class, TLogicalOr.class, "Probably one 'or' too many.");
 		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
+		
+		
+		// a few rules for keywords which are unary functions and require an opening parenthesis afterwards
+		// e.g., floor(.), bool(.), ceiling(.), real(.)
+		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
+		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
+		funOpKeywordTokenClasses.add(TConvertReal.class);
+		
+		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
+			String opName = funOpClass.getSimpleName().substring(1).toUpperCase(); // TO DO: get real keyword name
+		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
+			addInvalid(funOpClass, TPragmaDescription.class, Errmsg);
+			addInvalid(funOpClass, TRightPar.class, Errmsg);
+			addInvalid(funOpClass, TRightBrace.class, Errmsg);
+			addInvalid(funOpClass, TRightBracket.class, Errmsg);
+			addInvalid(funOpClass, TSemicolon.class, Errmsg);
+			addInvalid(funOpClass, TComma.class, Errmsg);
+			addInvalid(funOpClass, TComma.class, Errmsg);
+			addInvalid(funOpClass, TWhere.class, Errmsg);
+			addInvalid(funOpClass, TThen.class, Errmsg);
+			addInvalid(funOpClass, TElse.class, Errmsg);
+			addInvalid(funOpClass, TEnd.class, Errmsg);
+		    String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
+			addInvalid(TAny.class,funOpClass, Errmsg2);
+			addInvalid(TConstants.class,funOpClass, Errmsg2);
+			addInvalid(TAbstractConstants.class,funOpClass, Errmsg2);
+			addInvalid(TConcreteConstants.class,funOpClass, Errmsg2);
+			addInvalid(TVariables.class,funOpClass, Errmsg2);
+			addInvalid(TAbstractVariables.class,funOpClass, Errmsg2);
+			addInvalid(TConcreteVariables.class,funOpClass, Errmsg2);
+			addInvalid(TOperations.class,funOpClass, Errmsg2);
+		}
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
