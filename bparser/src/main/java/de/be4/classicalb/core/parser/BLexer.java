@@ -145,9 +145,55 @@ public class BLexer extends Lexer {
 		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
 		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
 		funOpKeywordTokenClasses.add(TConvertReal.class);
+		funOpKeywordTokenClasses.add(TBoolCast.class);
+		funOpKeywordTokenClasses.add(TCard.class);
+		funOpKeywordTokenClasses.add(TIterate.class);
+		funOpKeywordTokenClasses.add(TClosure.class);
+		funOpKeywordTokenClasses.add(TClosure1.class);
+		funOpKeywordTokenClasses.add(TRel.class);
+		funOpKeywordTokenClasses.add(TFnc.class);
+		funOpKeywordTokenClasses.add(TPerm.class);
+		funOpKeywordTokenClasses.add(TMin.class);
+		funOpKeywordTokenClasses.add(TMax.class);
+		funOpKeywordTokenClasses.add(TDom.class);
+		funOpKeywordTokenClasses.add(TRan.class);
+		funOpKeywordTokenClasses.add(TId.class); // ( {2} ; id) not allowed
+		// TO DO:  prj1, prj2
+		// Record operators:
+		funOpKeywordTokenClasses.add(TStruct.class);
+		funOpKeywordTokenClasses.add(TRec.class);
+		// sequence operators:
+		funOpKeywordTokenClasses.add(TSize.class);
+		funOpKeywordTokenClasses.add(TFront.class);
+		funOpKeywordTokenClasses.add(TFirst.class); //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
+		funOpKeywordTokenClasses.add(TTail.class);
+		funOpKeywordTokenClasses.add(TLast.class);
+		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
+		funOpKeywordTokenClasses.add(TConc.class);
+		// tree operators:
+		funOpKeywordTokenClasses.add(TTree.class);
+		funOpKeywordTokenClasses.add(TConst.class);
+		funOpKeywordTokenClasses.add(TTop.class);
+		funOpKeywordTokenClasses.add(TSons.class);
+		funOpKeywordTokenClasses.add(TPrefix.class);
+		funOpKeywordTokenClasses.add(TPostfix.class);
+		funOpKeywordTokenClasses.add(TSizet.class);
+		funOpKeywordTokenClasses.add(TMirror.class);
+		// tree node operators:
+		funOpKeywordTokenClasses.add(TRank.class);
+		funOpKeywordTokenClasses.add(TFather.class);
+		funOpKeywordTokenClasses.add(TSon.class);
+		funOpKeywordTokenClasses.add(TSubtree.class);
+		funOpKeywordTokenClasses.add(TArity.class);
+		// binary tree operators:
+		funOpKeywordTokenClasses.add(TBtree.class);
+		funOpKeywordTokenClasses.add(TBin.class);
+		funOpKeywordTokenClasses.add(TLeft.class);
+		funOpKeywordTokenClasses.add(TRight.class);
+		funOpKeywordTokenClasses.add(TInfix.class);
 		
 		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
-			String opName = funOpClass.getSimpleName().substring(1).toUpperCase(); // TO DO: get real keyword name
+			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
 			addInvalid(funOpClass, TPragmaDescription.class, Errmsg);
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
