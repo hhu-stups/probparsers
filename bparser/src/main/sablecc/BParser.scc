@@ -282,6 +282,7 @@ Tokens
   {normal} int = 'INT';
   {normal} integer = 'INTEGER' | 0x2124;
   {normal} real = 'REAL' | 0x211D;
+  {normal} float = 'FLOAT';
   {normal} quantified_inter = 'INTER' | 0x22c2;
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
