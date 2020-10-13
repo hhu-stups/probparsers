@@ -24,6 +24,7 @@ public class BLexer extends Lexer {
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
+	private static Set<Class<? extends Token>> literalTokenClasses = new HashSet<>();
 	
 	public void setLexerPreparse(){
 		parse_definition = true; 
@@ -248,27 +249,25 @@ public class BLexer extends Lexer {
 		addInvalid(TPragmaLabel.class, TSemicolon.class,  "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-		addInvalid(TIdentifierLiteral.class, THexLiteral.class,  "Missing operator or separator between identifier and hexadecimal.");
+		
+		literalTokenClasses = new HashSet<>();
+		literalTokenClasses.add(TIntegerLiteral.class);
+		literalTokenClasses.add(TStringLiteral.class);
+		literalTokenClasses.add(TRealLiteral.class);
+		literalTokenClasses.add(THexLiteral.class);
+		for (Class<? extends Token> litClass : literalTokenClasses) {
+		    addInvalid(TIdentifierLiteral.class, litClass,
+		         "Missing operator or separator between identifier and literal.");
+		    addInvalid(litClass,TIdentifierLiteral.class,
+		         "Missing operator or separator between literal and identifier.");
+			for (Class<? extends Token> litClass2 : literalTokenClasses) {
+					 addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
+			}
+		}
 		// addInvalid(TIdentifierLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between identifier and identifier.");
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
-		addInvalid(TIdentifierLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between identifier and integer.");
-		addInvalid(TIdentifierLiteral.class, TStringLiteral.class,  "Missing operator or separator between identifier and string.");
 		
-		addInvalid(TIntegerLiteral.class, THexLiteral.class,  "Missing operator or separator between integer and hexadecimal.");
-		addInvalid(TIntegerLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between integer and identifier.");
-		addInvalid(TIntegerLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between integer and integer.");
-		addInvalid(TIntegerLiteral.class, TStringLiteral.class,  "Missing operator or separator between integer and string.");
-		
-		addInvalid(TStringLiteral.class, THexLiteral.class,  "Missing operator or separator between string and hexadecimal.");
-		addInvalid(TStringLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between string and identifier.");
-		addInvalid(TStringLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between string and integer.");
-		addInvalid(TStringLiteral.class, TStringLiteral.class,  "Missing operator or separator between string and string.");
-		
-		addInvalid(THexLiteral.class, THexLiteral.class,  "Missing operator or separator between hexadecimal and hexadecimal.");
-		addInvalid(THexLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between hexadecimal and identifier.");
-		addInvalid(THexLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between hexadecimal and integer.");
-		addInvalid(THexLiteral.class, TStringLiteral.class,  "Missing operator or separator between hexadecimal and string.");
 	}
 	
 	private static void AddBinExprOperators() {
