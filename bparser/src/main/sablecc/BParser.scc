@@ -439,7 +439,7 @@ Tokens
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
   {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto
   {normal} integer_literal = digit+;
-  {normal} real_literal = digit+ '.' digit+;
+  {normal} real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
   {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral 
 
   {normal} underscore = underscore;
