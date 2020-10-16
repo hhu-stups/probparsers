@@ -1006,6 +1006,7 @@ expression_atomic {-> expression} =
   {empty_set} left_brace right_brace {-> New expression.empty_set()} |
   {integer_set} integer {-> New expression.integer_set()} |
   {real_set} real {-> New expression.real_set()} |
+  {float_set} float {-> New expression.float_set()} |
   {natural_set} natural {-> New expression.natural_set()} |
   {natural1_set} natural1 {-> New expression.natural1_set()} |
   {nat_set} nat {-> New expression.nat_set()} |
@@ -1372,6 +1373,7 @@ expression =
   {empty_set} |
   {integer_set} |
   {real_set} |
+  {float_set} |
   {natural_set} |
   {natural1_set} |
   {nat_set} |
