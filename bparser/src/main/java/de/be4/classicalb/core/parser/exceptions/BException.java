@@ -28,6 +28,12 @@ public class BException extends Exception {
 		this(fileName, e.getMessage(), e);
 	}
 
+
+	public BException(String fileName, BLexerException e) {
+		this(fileName, e.getMessage(), e);
+		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos()));
+	}
+
 	public BException(String fileName, BParseException e) {
 		this(fileName, e.getMessage(), e);
 		if (e.getToken() != null) {

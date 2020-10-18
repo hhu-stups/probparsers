@@ -366,7 +366,7 @@ public class BParser {
 			 * would yield to a parse error. The lexer will replace the
 			 * identifier token "def" by a TDefLiteralPredicate which will be
 			 * excepted by the parser
-			 * 
+			 *
 			 */
 			defTypes.addAll(definitions.getTypes());
 			/*
@@ -406,7 +406,8 @@ public class BParser {
 
 			}
 			return rootNode;
-		} catch (final LexerException e) {
+
+		} catch (final BLexerException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final BParseException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
@@ -424,6 +425,8 @@ public class BParser {
 			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
 		} catch (BException e) {
 			throw new BCompoundException(e);
+		} catch (LexerException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
 		}
 	}
 
