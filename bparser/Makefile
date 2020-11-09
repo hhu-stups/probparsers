@@ -23,6 +23,8 @@ ext:
 	gradle test --tests de.be4.classicalb.core.parser.languageextension.SyntaxExtensionTest--info
 extref:
 	gradle test --tests de.be4.classicalb.core.parser.languageextension.RefinedOperationTest --info
+msgs:
+	gradle test --tests de.be4.classicalb.core.parser.ErrorMessagesTest  --info
 
 count:
 	@echo "Line count for Java files:"
