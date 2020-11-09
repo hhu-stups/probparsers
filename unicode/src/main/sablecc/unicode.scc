@@ -10,6 +10,7 @@ Helpers
 	capital_letter = ['A' .. 'Z'];
 	letter = small_letter | capital_letter;
 	digit = ['0' .. '9'];
+    hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;
     underscore = '_';
     
 	 // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
@@ -154,6 +155,9 @@ Tokens
 	drop = '\|/';
     
     number = digit (digit)*; // is now somewhat redundant; since identifier_literal allowed to start with number
+    
+    hex_literal = '0x' hexdigit+;
+    real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
     
     identifier_literal = (unicode_letter | underscore | digit) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)* ;
     // note: we deliberately extend the notion of identifier here to start with underscore and digits
