@@ -16,6 +16,8 @@ import de.prob.unicode.node.TString;
 import de.prob.unicode.node.TNumber;
 import de.prob.unicode.node.TTruncatedSetSize;
 import de.prob.unicode.node.Token;
+import de.prob.unicode.node.TRealLiteral;
+import de.prob.unicode.node.THexLiteral;
 
 public class UnicodeTranslator {
 	enum Encoding {
@@ -217,7 +219,8 @@ public class UnicodeTranslator {
 					} else {
 						sb.append(t.getText());
 					}
-				} else if (t instanceof TAnyChar  || t instanceof TNumber ) {
+				} else if (t instanceof TAnyChar  || t instanceof TNumber
+				           || t instanceof TRealLiteral || t instanceof THexLiteral ) {
 					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
