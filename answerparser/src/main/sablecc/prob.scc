@@ -14,7 +14,7 @@ Helpers
 
 /* layout-char
    These are character codes 0..32, 127..160, 8206..8207, and 8232..8233. This includes ASCII characters
-   such as <TAB>, <LFD>, and <SPC>, as well as all characters with Unicode property �Pattern_Whitespace� 
+   such as <TAB>, <LFD>, and <SPC>, as well as all characters with Unicode property Pattern_Whitespace 
    including the Unicode-specific <LINE SEPARATOR> (8232). 
 */
    // layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
