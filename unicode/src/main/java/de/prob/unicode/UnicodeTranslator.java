@@ -180,48 +180,36 @@ public class UnicodeTranslator {
 		try {
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
 				final String key = t.getClass().getSimpleName();
-				final boolean needsSpace = sb.length() > 0 && isEventBIdentifierPart(sb.charAt(sb.length() - 1));
 
+				final String translated;
 				if (t instanceof TSeparator) {
-					sb.append(t.getText());
+					translated = t.getText();
 				} else if (t instanceof TString) {
 					if (target == Encoding.LATEX) {
-						sb.append("\\text{");
-						sb.append(t.getText());
-						sb.append('}');
+						translated = "\\text{" + t.getText() + "}";
 					} else {
-						sb.append(t.getText());
+						translated = t.getText();
 					}
 				} else if (t instanceof TTruncatedSetSize) {
 					if (target == Encoding.LATEX) {
-						sb.append('\\');
-						sb.append(t.getText());
+						translated = "\\" + t.getText();
 					} else {
-						sb.append(t.getText());
+						translated = t.getText();
 					}
 				} else if (t instanceof TIdentifierLiteral) {
-					if (needsSpace) {
-						sb.append(' ');
-					}
 					if (target == Encoding.LATEX) {
-						sb.append("\\mathit{");
-						sb.append(t.getText().replace("_", "\\_"));
-						sb.append('}');
+						translated = "\\mathit{" + t.getText().replace("_", "\\_") + "}";
 					} else {
-						sb.append(t.getText());
+						translated = t.getText();
 					}
 				} else if (t instanceof TAnyChar || t instanceof TNumber
 						|| t instanceof TRealLiteral || t instanceof THexLiteral) {
-					if (needsSpace) {
-						sb.append(' ');
-					}
 					if (target == Encoding.LATEX) {
-						sb.append(t.getText().replace("_", "\\_"));
+						translated = t.getText().replace("_", "\\_");
 					} else {
-						sb.append(t.getText());
+						translated = t.getText();
 					}
 				} else {
-					String translated;
 					Translation translation = m.get(key);
 					if(translation == null) { 
 						// a Token which is not covered
@@ -236,11 +224,19 @@ public class UnicodeTranslator {
 					} else {
 						throw new AssertionError("Unhandled translation target: " + target);
 					}
-					if (needsSpace && isEventBIdentifierStart(translated.charAt(0))) {
-						sb.append(' ');
-					}
-					sb.append(translated);
 				}
+
+				// Add a space if necessary to prevent two identifier-like tokens from being joined,
+				// e. g. "a∨b" should translate to "a or b" and not "aorb",
+				// but "a∧b" should still translate to "a&b" and not "a & b".
+				if (
+					sb.length() > 0 && isEventBIdentifierPart(sb.charAt(sb.length() - 1))
+					&& !translated.isEmpty() && isEventBIdentifierPart(translated.charAt(0))
+				) {
+					sb.append(' ');
+				}
+
+				sb.append(translated);
 			}
 		} catch (LexerException | IOException e) {
 			throw new AssertionError(e);
