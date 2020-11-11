@@ -10,11 +10,83 @@ import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
 import de.prob.unicode.node.TAnyChar;
+import de.prob.unicode.node.TBcmeq;
+import de.prob.unicode.node.TBcmin;
+import de.prob.unicode.node.TBcmsuch;
+import de.prob.unicode.node.TBcomp;
+import de.prob.unicode.node.TBfalse;
+import de.prob.unicode.node.TBinter;
+import de.prob.unicode.node.TBtrue;
+import de.prob.unicode.node.TBunion;
+import de.prob.unicode.node.TConv;
+import de.prob.unicode.node.TCprod;
+import de.prob.unicode.node.TDiv;
+import de.prob.unicode.node.TDomres;
+import de.prob.unicode.node.TDomsub;
+import de.prob.unicode.node.TDotdot;
+import de.prob.unicode.node.TDotdotdot;
+import de.prob.unicode.node.TDprod;
+import de.prob.unicode.node.TDrop;
+import de.prob.unicode.node.TEmptyset;
+import de.prob.unicode.node.TExists;
+import de.prob.unicode.node.TExpn;
+import de.prob.unicode.node.TFcomp;
+import de.prob.unicode.node.TForall;
+import de.prob.unicode.node.TGeq;
 import de.prob.unicode.node.TIdentifierLiteral;
+import de.prob.unicode.node.TIn;
+import de.prob.unicode.node.TInter;
+import de.prob.unicode.node.TIntg;
+import de.prob.unicode.node.TLambda;
+import de.prob.unicode.node.TLand;
+import de.prob.unicode.node.TLbrace;
+import de.prob.unicode.node.TLeq;
+import de.prob.unicode.node.TLeqv;
+import de.prob.unicode.node.TLimp;
+import de.prob.unicode.node.TLnot;
+import de.prob.unicode.node.TLor;
+import de.prob.unicode.node.TMapsto;
+import de.prob.unicode.node.TMid;
+import de.prob.unicode.node.TMinus;
+import de.prob.unicode.node.TMult;
+import de.prob.unicode.node.TNat;
+import de.prob.unicode.node.TNat1;
+import de.prob.unicode.node.TNeq;
+import de.prob.unicode.node.TNotin;
+import de.prob.unicode.node.TNotsubset;
+import de.prob.unicode.node.TNotsubseteq;
+import de.prob.unicode.node.TOftype;
+import de.prob.unicode.node.TOvl;
+import de.prob.unicode.node.TPfun;
+import de.prob.unicode.node.TPinj;
+import de.prob.unicode.node.TPow;
+import de.prob.unicode.node.TPow1;
+import de.prob.unicode.node.TPprod;
+import de.prob.unicode.node.TPsur;
+import de.prob.unicode.node.TQdot;
+import de.prob.unicode.node.TRanres;
+import de.prob.unicode.node.TRansub;
+import de.prob.unicode.node.TRbrace;
+import de.prob.unicode.node.TRel;
 import de.prob.unicode.node.TSeparator;
+import de.prob.unicode.node.TSetminus;
+import de.prob.unicode.node.TSrel;
+import de.prob.unicode.node.TStrel;
 import de.prob.unicode.node.TString;
 import de.prob.unicode.node.TNumber;
+import de.prob.unicode.node.TSubset;
+import de.prob.unicode.node.TSubseteq;
+import de.prob.unicode.node.TTake;
+import de.prob.unicode.node.TTbij;
+import de.prob.unicode.node.TTfun;
+import de.prob.unicode.node.TTinj;
+import de.prob.unicode.node.TTrel;
 import de.prob.unicode.node.TTruncatedSetSize;
+import de.prob.unicode.node.TTsur;
+import de.prob.unicode.node.TTypeofClose;
+import de.prob.unicode.node.TTypeofOpen;
+import de.prob.unicode.node.TUnion;
+import de.prob.unicode.node.TWhitespace;
 import de.prob.unicode.node.Token;
 import de.prob.unicode.node.TRealLiteral;
 import de.prob.unicode.node.THexLiteral;
@@ -50,83 +122,83 @@ public class UnicodeTranslator {
 
 	}
 
-	private static final Map<String, Translation> m = new HashMap<>();
+	private static final Map<Class<? extends Token>, Translation> m = new HashMap<>();
 
 	static {
-		m.put("TIn", new Translation(":", "\\in", "\u2208"));
-		m.put("TNotsubseteq", new Translation("/<:", "\\notsubseteq", "\u2288"));
-		m.put("TNotsubset", new Translation("/<<:", "\\notsubset", "\u2284"));
-		m.put("TSubseteq", new Translation("<:", "\\subseteq", "\u2286"));
-		m.put("TSetminus", new Translation("\\", "\\setminus", "\u2216"));
-		m.put("TDotdot", new Translation("..", "\\upto", "\u2025"));
-		m.put("TDotdotdot", new Translation("...", "\\ldots", "\u2026")); // ellipsis, used in shortened set values #Nr.{a,b,...,c,d}
-		m.put("TNat1", new Translation("NAT1", "\\nat1", "\u21151"));
-		m.put("TNat", new Translation("NAT", "\\nat", "\u2115"));
-		m.put("TEmptyset", new Translation("{}", "\\emptyset", "\u2205"));
-		m.put("TBcmsuch", new Translation(":|", "\\bcmsuch", ":\u2223"));
-		m.put("TBfalse", new Translation("false", "\\bfalse", "\u22a5"));
-		m.put("TForall", new Translation("!", "\\forall", "\u2200"));
-		m.put("TExists", new Translation("#", "\\exists", "\u2203"));
-		m.put("TMapsto", new Translation("|->", "\\mapsto", "\u21a6"));
-		m.put("TBtrue", new Translation("true", "\\btrue", "\u22a4"));
-		m.put("TSubset", new Translation("<<:", "\\subset", "\u2282"));
-		m.put("TBunion", new Translation("\\/", "\\bunion", "\u222a"));
-		m.put("TBinter", new Translation("/\\", "\\binter", "\u2229"));
-		m.put("TDomres", new Translation("<|", "\\domres", "\u25c1"));
-		m.put("TRanres", new Translation("|>", "\\ranres", "\u25b7"));
-		m.put("TDomsub", new Translation("<<|", "\\domsub", "\u2a64"));
-		m.put("TRansub", new Translation("|>>", "\\ransub", "\u2a65"));
-		m.put("TLambda", new Translation("%", "\\lambda", "\u03bb"));
-		m.put("TOftype", new Translation("oftype", "\\oftype", "\u2982"));
-		m.put("TNotin", new Translation("/:", "\\notin", "\u2209"));
-		m.put("TCprod", new Translation("**", "\\cprod", "\u00d7"));
-		m.put("TUnion", new Translation("UNION", "\\Union", "\u22c3"));
-		m.put("TInter", new Translation("INTER", "\\Inter", "\u22c2"));
-		m.put("TFcomp", new Translation(";", "\\fcomp", "\u003b"));
-		m.put("TBcomp", new Translation("circ", "\\bcomp", "\u2218"));
-		m.put("TStrel", new Translation("<<->>", "\\strel", "\ue102"));
-		m.put("TDprod", new Translation("><", "\\dprod", "\u2297"));
-		m.put("TPprod", new Translation("||", "\\pprod", "\u2225"));
-		m.put("TBcmeq", new Translation(":=", "\\bcmeq", "\u2254"));
-		m.put("TBcmin", new Translation("::", "\\bcmin", ":\u2208"));
-		m.put("TIntg", new Translation("INT", "\\intg", "\u2124"));
-		m.put("TLand", new Translation("&", "\\land", "\u2227"));
-		m.put("TLimp", new Translation("=>", "\\limp", "\u21d2"));
-		m.put("TLeqv", new Translation("<=>", "\\leqv", "\u21d4"));
-		m.put("TLnot", new Translation("not", "\\lnot", "\u00ac"));
-		m.put("TQdot", new Translation(".", "\\qdot", "\u00b7"));
-		m.put("TConv", new Translation("~", "\\conv", "\u223c"));
-		m.put("TTrel", new Translation("<<->", "\\trel", "\ue100"));
-		m.put("TSrel", new Translation("<->>", "\\srel", "\ue101"));
-		m.put("TPfun", new Translation("+->", "\\pfun", "\u21f8"));
-		m.put("TTfun", new Translation("-->", "\\tfun", "\u2192"));
-		m.put("TPinj", new Translation(">+>", "\\pinj", "\u2914"));
-		m.put("TTinj", new Translation(">->", "\\tinj", "\u21a3"));
-		m.put("TPsur", new Translation("+>>", "\\psur", "\u2900"));
-		m.put("TTsur", new Translation("->>", "\\tsur", "\u21a0"));
-		m.put("TTbij", new Translation(">->>", "\\tbij", "\u2916"));
-		m.put("TExpn", new Translation("^", "\\expn", "\u005e"));
-		m.put("TLor", new Translation("or", "\\lor", "\u2228"));
-		m.put("TPow1", new Translation("POW1", "\\pow1", "\u21191"));
-		m.put("TPow", new Translation("POW", "\\pow", "\u2119"));
-		m.put("TMid", new Translation("|", "\\mid", "\u2223")); // is the divides symbol, also generated by Rodin
-		m.put("TNeq", new Translation("/=", "\\neq", "\u2260"));
-		m.put("TRel", new Translation("<->", "\\rel", "\u2194"));
-		m.put("TOvl", new Translation("<+", "\\ovl", "\ue103"));
-		m.put("TLeq", new Translation("<=", "\\leq", "\u2264"));
-		m.put("TGeq", new Translation(">=", "\\geq", "\u2265"));
-		m.put("TDiv", new Translation("/", "\\div", "\u00f7"));
-		m.put("TMult", new Translation("*", "*", "\u2217"));
-		m.put("TMinus", new Translation("-", "-", "\u2212"));
-		m.put("TLbrace", new Translation("{", "\\{", "{"));
-		m.put("TRbrace", new Translation("}", "\\}", "}"));
+		m.put(TIn.class, new Translation(":", "\\in", "\u2208"));
+		m.put(TNotsubseteq.class, new Translation("/<:", "\\notsubseteq", "\u2288"));
+		m.put(TNotsubset.class, new Translation("/<<:", "\\notsubset", "\u2284"));
+		m.put(TSubseteq.class, new Translation("<:", "\\subseteq", "\u2286"));
+		m.put(TSetminus.class, new Translation("\\", "\\setminus", "\u2216"));
+		m.put(TDotdot.class, new Translation("..", "\\upto", "\u2025"));
+		m.put(TDotdotdot.class, new Translation("...", "\\ldots", "\u2026")); // ellipsis, used in shortened set values #Nr.{a,b,...,c,d}
+		m.put(TNat1.class, new Translation("NAT1", "\\nat1", "\u21151"));
+		m.put(TNat.class, new Translation("NAT", "\\nat", "\u2115"));
+		m.put(TEmptyset.class, new Translation("{}", "\\emptyset", "\u2205"));
+		m.put(TBcmsuch.class, new Translation(":|", "\\bcmsuch", ":\u2223"));
+		m.put(TBfalse.class, new Translation("false", "\\bfalse", "\u22a5"));
+		m.put(TForall.class, new Translation("!", "\\forall", "\u2200"));
+		m.put(TExists.class, new Translation("#", "\\exists", "\u2203"));
+		m.put(TMapsto.class, new Translation("|->", "\\mapsto", "\u21a6"));
+		m.put(TBtrue.class, new Translation("true", "\\btrue", "\u22a4"));
+		m.put(TSubset.class, new Translation("<<:", "\\subset", "\u2282"));
+		m.put(TBunion.class, new Translation("\\/", "\\bunion", "\u222a"));
+		m.put(TBinter.class, new Translation("/\\", "\\binter", "\u2229"));
+		m.put(TDomres.class, new Translation("<|", "\\domres", "\u25c1"));
+		m.put(TRanres.class, new Translation("|>", "\\ranres", "\u25b7"));
+		m.put(TDomsub.class, new Translation("<<|", "\\domsub", "\u2a64"));
+		m.put(TRansub.class, new Translation("|>>", "\\ransub", "\u2a65"));
+		m.put(TLambda.class, new Translation("%", "\\lambda", "\u03bb"));
+		m.put(TOftype.class, new Translation("oftype", "\\oftype", "\u2982"));
+		m.put(TNotin.class, new Translation("/:", "\\notin", "\u2209"));
+		m.put(TCprod.class, new Translation("**", "\\cprod", "\u00d7"));
+		m.put(TUnion.class, new Translation("UNION", "\\Union", "\u22c3"));
+		m.put(TInter.class, new Translation("INTER", "\\Inter", "\u22c2"));
+		m.put(TFcomp.class, new Translation(";", "\\fcomp", "\u003b"));
+		m.put(TBcomp.class, new Translation("circ", "\\bcomp", "\u2218"));
+		m.put(TStrel.class, new Translation("<<->>", "\\strel", "\ue102"));
+		m.put(TDprod.class, new Translation("><", "\\dprod", "\u2297"));
+		m.put(TPprod.class, new Translation("||", "\\pprod", "\u2225"));
+		m.put(TBcmeq.class, new Translation(":=", "\\bcmeq", "\u2254"));
+		m.put(TBcmin.class, new Translation("::", "\\bcmin", ":\u2208"));
+		m.put(TIntg.class, new Translation("INT", "\\intg", "\u2124"));
+		m.put(TLand.class, new Translation("&", "\\land", "\u2227"));
+		m.put(TLimp.class, new Translation("=>", "\\limp", "\u21d2"));
+		m.put(TLeqv.class, new Translation("<=>", "\\leqv", "\u21d4"));
+		m.put(TLnot.class, new Translation("not", "\\lnot", "\u00ac"));
+		m.put(TQdot.class, new Translation(".", "\\qdot", "\u00b7"));
+		m.put(TConv.class, new Translation("~", "\\conv", "\u223c"));
+		m.put(TTrel.class, new Translation("<<->", "\\trel", "\ue100"));
+		m.put(TSrel.class, new Translation("<->>", "\\srel", "\ue101"));
+		m.put(TPfun.class, new Translation("+->", "\\pfun", "\u21f8"));
+		m.put(TTfun.class, new Translation("-->", "\\tfun", "\u2192"));
+		m.put(TPinj.class, new Translation(">+>", "\\pinj", "\u2914"));
+		m.put(TTinj.class, new Translation(">->", "\\tinj", "\u21a3"));
+		m.put(TPsur.class, new Translation("+>>", "\\psur", "\u2900"));
+		m.put(TTsur.class, new Translation("->>", "\\tsur", "\u21a0"));
+		m.put(TTbij.class, new Translation(">->>", "\\tbij", "\u2916"));
+		m.put(TExpn.class, new Translation("^", "\\expn", "\u005e"));
+		m.put(TLor.class, new Translation("or", "\\lor", "\u2228"));
+		m.put(TPow1.class, new Translation("POW1", "\\pow1", "\u21191"));
+		m.put(TPow.class, new Translation("POW", "\\pow", "\u2119"));
+		m.put(TMid.class, new Translation("|", "\\mid", "\u2223")); // is the divides symbol, also generated by Rodin
+		m.put(TNeq.class, new Translation("/=", "\\neq", "\u2260"));
+		m.put(TRel.class, new Translation("<->", "\\rel", "\u2194"));
+		m.put(TOvl.class, new Translation("<+", "\\ovl", "\ue103"));
+		m.put(TLeq.class, new Translation("<=", "\\leq", "\u2264"));
+		m.put(TGeq.class, new Translation(">=", "\\geq", "\u2265"));
+		m.put(TDiv.class, new Translation("/", "\\div", "\u00f7"));
+		m.put(TMult.class, new Translation("*", "*", "\u2217"));
+		m.put(TMinus.class, new Translation("-", "-", "\u2212"));
+		m.put(TLbrace.class, new Translation("{", "\\{", "{"));
+		m.put(TRbrace.class, new Translation("}", "\\}", "}"));
 
-		m.put("TTake", new Translation("/|\\", "/\\mid\\textbackslash", "/|\\"));
-		m.put("TDrop", new Translation("\\|/", "\\textbackslash\\mid/", "\\|/"));
-		m.put("TWhitespace", new Translation(" ", " ", " "));
+		m.put(TTake.class, new Translation("/|\\", "/\\mid\\textbackslash", "/|\\"));
+		m.put(TDrop.class, new Translation("\\|/", "\\textbackslash\\mid/", "\\|/"));
+		m.put(TWhitespace.class, new Translation(" ", " ", " "));
 
-		m.put("TTypeofOpen", new Translation("/*","/*", "/*"));
-		m.put("TTypeofClose", new Translation("*/", "*/", "*/"));
+		m.put(TTypeofOpen.class, new Translation("/*","/*", "/*"));
+		m.put(TTypeofClose.class, new Translation("*/", "*/", "*/"));
 	}
 
 	public static void main(final String[] args) throws LexerException, IOException {
@@ -178,8 +250,6 @@ public class UnicodeTranslator {
 		Token t;
 		try {
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
-				final String key = t.getClass().getSimpleName();
-
 				final String translated;
 				if (t instanceof TSeparator) {
 					translated = t.getText();
@@ -209,11 +279,11 @@ public class UnicodeTranslator {
 						translated = t.getText();
 					}
 				} else {
-					Translation translation = m.get(key);
+					Translation translation = m.get(t.getClass());
 					if(translation == null) { 
 						// a Token which is not covered
 						// translated = t.getText();
-						throw new AssertionError("Unhandled Lexer token: " + key);
+						throw new AssertionError("Unhandled Lexer token: " + t.getClass());
 					} else if (target == Encoding.UNICODE) {
 						translated = translation.getUnicode();
 					} else if (target == Encoding.LATEX) {
