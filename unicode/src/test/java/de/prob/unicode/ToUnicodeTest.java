@@ -315,7 +315,6 @@ public class ToUnicodeTest {
 	@Test
 	public void TOvl() {
 		assertEquals(UnicodeTranslator.toUnicode("<+"), "\ue103");
-		System.out.println("f<+g  -----> "+ UnicodeTranslator.toUnicode("f<+g"));
 		assertEquals(UnicodeTranslator.toUnicode("f<+g"), "f\ue103g");
 	}
 
