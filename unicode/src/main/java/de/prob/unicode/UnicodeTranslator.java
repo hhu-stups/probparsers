@@ -209,7 +209,7 @@ public class UnicodeTranslator {
 						sb.append(t.getText());
 					}
 				} else if (t instanceof TIdentifierLiteral) {
-					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
+					if (needsSpace) {
 						sb.append(' ');
 					}
 					if (target == Encoding.LATEX) {
@@ -221,7 +221,7 @@ public class UnicodeTranslator {
 					}
 				} else if (t instanceof TAnyChar || t instanceof TNumber
 						|| t instanceof TRealLiteral || t instanceof THexLiteral) {
-					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
+					if (needsSpace) {
 						sb.append(' ');
 					}
 					if (target == Encoding.LATEX) {
