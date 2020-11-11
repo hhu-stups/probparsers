@@ -93,7 +93,7 @@ import de.prob.unicode.node.THexLiteral;
 
 public class UnicodeTranslator {
 	enum Encoding {
-		ASCII, LATEX, UNICODE
+		ASCII, LATEX, UNICODE, RODIN_UNICODE
 	}
 
 	private static final class Translation {
@@ -215,6 +215,7 @@ public class UnicodeTranslator {
 		System.out.println(UnicodeTranslator.toAscii(input));
 		System.out.println(UnicodeTranslator.toLatex(input));
 		System.out.println(UnicodeTranslator.toUnicode(input));
+		System.out.println(UnicodeTranslator.toRodinUnicode(input));
 	}
 
 	public static String toAscii(final String s) {
@@ -227,6 +228,19 @@ public class UnicodeTranslator {
 
 	public static String toUnicode(final String s) {
 		return translate(s, Encoding.UNICODE);
+	}
+	
+	/**
+	 * Translate the given code to the Unicode-based syntax understood by the Rodin parser.
+	 * This translation is mostly identical to {@link #toUnicode(String)},
+	 * but performs some extra transformations,
+	 * such as removing type comments (which the Rodin parser doesn't understand).
+	 * 
+	 * @param s the code to translate
+	 * @return the code, translated to Rodin's Unicode syntax
+	 */
+	public static String toRodinUnicode(final String s) {
+		return translate(s, Encoding.RODIN_UNICODE);
 	}
 
 	private static boolean isEventBIdentifierStart(final char c) {
@@ -248,8 +262,23 @@ public class UnicodeTranslator {
 		Lexer l = new Lexer(r);
 
 		Token t;
+		boolean inTypeComment = false;
 		try {
 			while ((t = l.next()) != null && !(t instanceof EOF)) {
+				// Drop type comments when translating to Unicode for Rodin
+				// (the Rodin parser doesn't understand them).
+				if (target == Encoding.RODIN_UNICODE) {
+					if (inTypeComment) {
+						if (t instanceof TTypeofClose) {
+							inTypeComment = false;
+						}
+						continue;
+					} else if (t instanceof TTypeofOpen) {
+						inTypeComment = true;
+						continue;
+					}
+				}
+
 				final String translated;
 				if (t instanceof TSeparator) {
 					translated = t.getText();
@@ -284,7 +313,7 @@ public class UnicodeTranslator {
 						// a Token which is not covered
 						// translated = t.getText();
 						throw new AssertionError("Unhandled Lexer token: " + t.getClass());
-					} else if (target == Encoding.UNICODE) {
+					} else if (target == Encoding.UNICODE || target == Encoding.RODIN_UNICODE) {
 						translated = translation.getUnicode();
 					} else if (target == Encoding.LATEX) {
 						translated = translation.getLatex();
