@@ -219,8 +219,8 @@ public class UnicodeTranslator {
 					} else {
 						sb.append(t.getText());
 					}
-				} else if (t instanceof TAnyChar  || t instanceof TNumber
-				           || t instanceof TRealLiteral || t instanceof THexLiteral ) {
+				} else if (t instanceof TAnyChar || t instanceof TNumber
+						|| t instanceof TRealLiteral || t instanceof THexLiteral) {
 					if (needsSpace && (target == Encoding.ASCII || target == Encoding.LATEX)) {
 						sb.append(' ');
 					}
@@ -233,8 +233,8 @@ public class UnicodeTranslator {
 					String translated;
 					Translation translation = m.get(key);
 					if(translation == null) { 
-					   // a Token which is not covered
-					   // translated = t.getText();
+						// a Token which is not covered
+						// translated = t.getText();
 						throw new AssertionError("Unhandled Lexer token: " + key);
 					} else if (target == Encoding.UNICODE) {
 						translated = translation.getUnicode();
