@@ -166,7 +166,7 @@ public class UnicodeTranslator {
 	}
 	
 	private static boolean isEventBIdentifierPart(final char c) {
-		return c == '\'' || (Character.isUnicodeIdentifierPart(c) && c != 'λ');
+		return c == '\'' || (Character.isUnicodeIdentifierPart(c) && c != 'λ' && c != '·');
 	}
 
 	private static String translate(final String input, final Encoding target) {
