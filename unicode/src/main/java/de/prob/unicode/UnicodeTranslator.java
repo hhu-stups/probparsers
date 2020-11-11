@@ -120,7 +120,6 @@ public class UnicodeTranslator {
 		m.put("TMinus", new Translation("-", "-", "\u2212"));
 		m.put("TLbrace", new Translation("{", "\\{", "{"));
 		m.put("TRbrace", new Translation("}", "\\}", "}"));
-		m.put("TComma", new Translation(",", ",", ","));
 
 		m.put("TTake", new Translation("/|\\", "/\\mid\\textbackslash", "/|\\"));
 		m.put("TDrop", new Translation("\\|/", "\\textbackslash\\mid/", "\\|/"));
