@@ -193,13 +193,7 @@ public class UnicodeTranslator {
 						sb.append(t.getText());
 					}
 				} else if (t instanceof TTruncatedSetSize) {
-					if (t.getText().startsWith("\\")) {
-						if (target == Encoding.LATEX) {
-							sb.append(t.getText());
-						} else {
-							sb.append(t.getText().substring(1));
-						}
-					} else if (target == Encoding.LATEX) {
+					if (target == Encoding.LATEX) {
 						sb.append('\\');
 						sb.append(t.getText());
 					} else {
