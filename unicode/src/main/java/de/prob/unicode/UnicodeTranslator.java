@@ -36,11 +36,8 @@ public class UnicodeTranslator {
 			this.unicode = unicode;
 		}
 
-		public String getAscii(final boolean needsSpace) {
-			// If the operator begins with a letter, and the last character
-			// before is also a letter, there needs to be a space to separate
-			// them
-			return (isEventBIdentifierStart(ascii.charAt(0)) && needsSpace ? " " : "") + ascii;
+		public String getAscii() {
+			return ascii;
 		}
 
 		public String getLatex() {
@@ -241,9 +238,12 @@ public class UnicodeTranslator {
 					} else if (target == Encoding.LATEX) {
 						translated = translation.getLatex();
 					} else if (target == Encoding.ASCII) {
-						translated = translation.getAscii(needsSpace);
+						translated = translation.getAscii();
 					} else {
 						throw new AssertionError("Unhandled translation target: " + target);
+					}
+					if (needsSpace && isEventBIdentifierStart(translated.charAt(0))) {
+						sb.append(' ');
 					}
 					sb.append(translated);
 				}
