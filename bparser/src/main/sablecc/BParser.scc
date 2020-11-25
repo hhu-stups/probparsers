@@ -3,9 +3,7 @@ Package de.be4.classicalb.core.parser;
 /*******************************************************************
  * Helpers                                                         *
  *******************************************************************/
-
 Helpers
-
   underscore = '_';
   double_quotation = '"';
   lf = 10;
@@ -13,8 +11,8 @@ Helpers
   comment_start = '/*';
   comment_end = '*/';
 
-  triple_quote = 39 39 39 ;
-  single_quote = 39 ;
+  triple_quote = 39 39 39;
+  single_quote = 39;
 
   minus = '-' | 0x2212;
   plus = '+' | 0x002b;
@@ -22,10 +20,10 @@ Helpers
   lt = '<' | 0x003c;
   eq = '=' | 0x003d;
 
-  small_letter =  ['a'..'z'];
+  small_letter = ['a'..'z'];
   capital_letter = ['A' .. 'Z'];
   letter = small_letter | capital_letter;
-  
+
   // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
   // but removed unicode lambda 0x03bb from [0x03a3..0x03ce]
   unicode_letter =
@@ -34,7 +32,7 @@ Helpers
     [[[0x01fa..0x0217] + [0x0250..0x02a8]] + [[0x02b0..0x02b8] + [0x02bb..0x02c1]]] |
     [[[0x02d0..0x02d1] + [0x02e0..0x02e4]] + [[0x037a..0x037a] + [0x0386..0x0386]]] |
     [[[0x0388..0x038a] + [0x038c..0x038c]] + [[[0x038e..0x03a1] + [0x03a3..0x03ba]] + [0x03bc..0x03ce]]] |
-//    [[[0x0388..0x038a] + [0x038c..0x038c]] + [[0x038e..0x03a1] + [0x03a3..0x03ce]]] | // removed unicode_lambda 0x03bb
+    //[[[0x0388..0x038a] + [0x038c..0x038c]] + [[0x038e..0x03a1] + [0x03a3..0x03ce]]] | // removed unicode_lambda 0x03bb
     [[[0x03d0..0x03d6] + [0x03da..0x03da]] + [[0x03dc..0x03dc] + [0x03de..0x03de]]] |
     [[[0x03e0..0x03e0] + [0x03e2..0x03f3]] + [[0x0401..0x040c] + [0x040e..0x044f]]] |
     [[[0x0451..0x045c] + [0x045e..0x0481]] + [[0x0490..0x04c4] + [0x04c7..0x04c8]]] |
@@ -84,7 +82,7 @@ Helpers
     [[[0xfe76..0xfefc] + [0xff21..0xff3a]] + [[0xff41..0xff5a] + [0xff66..0xffbe]]] |
     [[[0xffc2..0xffc7] + [0xffca..0xffcf]] + [[0xffd2..0xffd7] + [0xffda..0xffdc]]];
 
- // not used yet:
+  // not used yet:
   //unicode_digit =
   //  [[[0x0030..0x0039] + [0x0660..0x0669]] + [[0x06f0..0x06f9] + [0x0966..0x096f]]] |
   //  [[[0x09e6..0x09ef] + [0x0a66..0x0a6f]] + [[0x0ae6..0x0aef] + [0x0b66..0x0b6f]]] |
@@ -93,31 +91,31 @@ Helpers
 
   unicode_superscripts = [0x2070..0x2079]; // TODO: add 185,178,179
   unicode_subscripts = [0x2080..0x2089];
-  unicode_prime = [0x2032 + [8216..8217]]; // ' primes / quotes  TODO: add hats
+  unicode_prime = [0x2032 + [8216..8217]]; // ' primes / quotes // TODO: add hats
 
-  digit = ['0' .. '9'] ;
-  hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']] ;
+  digit = ['0' .. '9'];
+  hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
   line_break = [lf + cr];
   all_chars = [0 .. 0xffff];
-  
- //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
-  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break ] - '\'];
-  all_chars_without_newline = [all_chars - line_break ];
-  string_literal = double_quotation  (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
+
+  //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break];
+  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break] - '\'];
+  all_chars_without_newline = [all_chars - line_break];
+  string_literal = double_quotation (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
 
   all_chars_without_single_quote = [all_chars - 39];
-  multiline_string_literal = (all_chars_without_single_quote| 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote  | '\' 39)*;
+  multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
 
-  layout_char = [[[9 + 32]  + 160] + [8232 .. 8233]];
+  layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   // 160: non-breaking space
   // 8206: Left-To_Right_Mark, 8207: Right-To-Left Mark, [now no longer accepted by the parser]
   // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
   unicode_lambda = 0x03bb;
-  identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)* ;
-  //pragma_identifier_literal = (letter | digit | underscore | minus | '.'| '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$'| '|'| ':'| '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
+  identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
+  //pragma_identifier_literal = (letter | digit | underscore | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
@@ -128,9 +126,7 @@ Helpers
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
-
 States
-
   section,
   normal,
   comment,
@@ -142,11 +138,9 @@ States
   pragma_package_content,
   pragma_ignore;
 
-
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
-
 Tokens
   {section->shebang, normal -> shebang, shebang} shebang = '#!';
   {shebang -> normal} shebang_end = line_break;
@@ -162,23 +156,23 @@ Tokens
   {pragma->pragma_content} pragma_file = 'file';
   {pragma->pragma_package_content} pragma_package = 'package';
   {pragma->description} pragma_description = 'desc' | 'description' | 'pragma';
-  
+
   // the state for contents of the package pragma; import-package can also stand as its own pragma
   // in the grammwar below, import-package always follows a pragma_package
   {pragma_package_content,pragma->pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
-  
-  {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal ;
-  
+
+  {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal;
+
   // content of description pragma
   {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
-  
+
   // the pragma_content state collects attributes for label and file pragmas
-  {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal ;
-  
+  {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+
   // the pragma_ignore state is like description but all tokens are ignored
   {pragma_ignore} pragma_ignored_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
 
-  {section->comment, normal -> comment} comment = comment_start ;
+  {section->comment, normal -> comment} comment = comment_start;
   {comment,description,pragma_ignore} comment_end = comment_end; // return to state 'normal' is done in Lexer
   {comment} comment_body = [all_chars - ['*' + '/']]*;
 
@@ -187,7 +181,7 @@ Tokens
 
   {section->multiline_string_state, normal->multiline_string_state} multiline_string_start = triple_quote;
   {multiline_string_state->normal} multiline_string_end = triple_quote;
-  {multiline_string_state} multiline_string_content =  multiline_string_literal;
+  {multiline_string_state} multiline_string_content = multiline_string_literal;
 
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
@@ -196,10 +190,10 @@ Tokens
   {normal} lambda = '%' | unicode_lambda;
   {normal} conjunction = '&' | 0x2227;
   {normal} single_quotation = 39; // single quote: '
-  {normal} left_par = '(';  // opening/left parenthesis
+  {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
   {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
-  {normal} power_of = '**';
+  {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = plus;
   {normal} partial_function = plus minus gt | 0x21f8;
   {normal} partial_surjection = plus minus gt gt | 0x2900;
@@ -212,16 +206,16 @@ Tokens
   {normal} interval = '..' | 0x2025;
   //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
-  {normal} finite = 0x2a0d;  // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
+  {normal} finite = 0x2a0d; // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
   {normal} not_belonging = '/:' | 0x2209;
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
   {normal} not_equal = '/=' | 0x2260;
   {normal} set_subtraction = '\' | 0x2216; // decimal 8726, used in Rodin
   {normal} intersection = '/\' | 0x2229;
-  {normal} restrict_head_sequence = '/|\' | 0x2191;
+  {normal} restrict_head_sequence = '/|\' | 0x2191;    // unicode uparrow for restrict_front operator
   {normal} element_of = ':' | 0x2208;
-  {normal} double_colon = '::' | ':' 0x2208;  /* becomes_element_of */
+  {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
   {normal} assign = ':' eq | 0x2254; //8788 decimal, used in Rodin
   {normal} semicolon = ';';
   {normal} less = lt;
@@ -272,7 +266,7 @@ Tokens
   {normal} extends = 'EXTENDS';
   {normal} false = 'FALSE'; // now reserved for falsity | 0x22a5;
   {normal} fin = 'FIN';
-  {normal} fin1 = 'FIN1';  // add 'FIN'0x8321 ?
+  {normal} fin1 = 'FIN1'; // add 'FIN'0x8321 ?
   {normal} if = 'IF';
   {section->normal,normal} implementation = 'IMPLEMENTATION';
   {normal} imports = 'IMPORTS';
@@ -281,13 +275,15 @@ Tokens
   {normal} initialisation = 'INITIALISATION' | 'INITIALIZATION'; /* amerikanische Version scheinbar auch erlaubt */
   {normal} int = 'INT';
   {normal} integer = 'INTEGER' | 0x2124;
+  {normal} real = 'REAL' | 0x211D;
+  {normal} float = 'FLOAT';
   {normal} quantified_inter = 'INTER' | 0x22c2;
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
   {normal} local_operations = 'LOCAL_OPERATIONS';
   {section->normal,normal} machine = 'MACHINE';
   {section->normal,normal} model = 'MODEL';
-  {section->normal,normal} system = 'SYSTEM';/* SYSTEM fuer Event-B */
+  {section->normal,normal} system = 'SYSTEM'; /* SYSTEM fuer Event-B */
   {normal} max_int = 'MAXINT';
   {normal} min_int = 'MININT';
   {normal} nat = 'NAT';
@@ -332,8 +328,11 @@ Tokens
   {normal} bool_cast = 'bool';
   {normal} btree = 'btree';
   {normal} card = 'card';
+  {normal} convert_int_floor = 'floor';
+  {normal} convert_int_ceiling = 'ceiling';
+  {normal} convert_real = 'real';
   {normal} closure = 'closure';
-  {normal} closure1 = 'closure1'; // add  'closure' 0x8321 ?
+  {normal} closure1 = 'closure1'; // add 'closure' 0x8321 ?
   {normal} conc = 'conc';
   {normal} const = 'const';
   {normal} dom = 'dom';
@@ -435,7 +434,8 @@ Tokens
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
   {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto
   {normal} integer_literal = digit+;
-  {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral 
+  {normal} real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
+  {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral
 
   {normal} underscore = underscore;
 
@@ -466,25 +466,21 @@ Tokens
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
 
-
-
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-shebang, shebang_char, shebang_end,
+  shebang, shebang_char, shebang_end,
   white_space,
   comment, comment_body, comment_end, pragma_start, pragma_end,
   unrecognised_pragma, pragma_ignored_text,
   line_comment;
-
 
 /*******************************************************************
  * Productions                                                     *
  *******************************************************************/
 //[0,0] Production ... doesn't exist in section AST
 // Such an error message indicates that a vertical bar '|' is followed by a semicolon ';'.
-
 Productions
 
 parse_unit {-> parse_unit} =
@@ -507,33 +503,33 @@ machine {-> parse_unit} =
 
 import_package_list {-> import_package*} =
   {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package, New import_package(package_or_machine)]} ;
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package, New import_package(package_or_machine)]};
 
 
 machine_x {-> parse_unit} =
   {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
   {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
-  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} ;
+  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
 
-machine_variant {-> machine_variant}
-        = {machine} T.machine {-> New machine_variant.machine()}
-        | {model} T.model   {-> New machine_variant.model()}
-        | {system} T.system  {-> New machine_variant.system()};
+machine_variant {-> machine_variant} =
+  {machine} T.machine {-> New machine_variant.machine()} |
+  {model} T.model {-> New machine_variant.model()} |
+  {system} T.system {-> New machine_variant.system()};
 
 machine_header {-> machine_header} =
-  [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal],[parameters.expression])} ;
+  [name]:composed_identifier [parameters]:machine_params? {-> New machine_header([name.identifier_literal], [parameters.expression])};
 
 machine_params {-> expression*} = left_par [param_list]:machine_param_list right_par {-> [param_list.expression]};
 
 machine_param_list {-> expression*} =
   {single} [param]:machine_param {-> [param.expression]} |
-  {multi} [rest]:machine_param_list comma [first]:machine_param {-> [rest.expression, first.expression]} ;
+  {multi} [rest]:machine_param_list comma [first]:machine_param {-> [rest.expression, first.expression]};
 
-machine_param {-> expression} = [parameter]:expression_in_par {-> parameter.expression} ;
+machine_param {-> expression} = [parameter]:expression_in_par {-> parameter.expression};
 
 machine_clause_list {-> machine_clause*} =
   {single} [clause]:machine_clause {-> [clause.machine_clause]} |
-  {multiple} [rest]:machine_clause_list [clause]:machine_clause {-> [rest.machine_clause, clause.machine_clause]} ;
+  {multiple} [rest]:machine_clause_list [clause]:machine_clause {-> [rest.machine_clause, clause.machine_clause]};
 
 machine_clause {-> machine_clause} =
   {definitions} [clause]:definitions_clause {-> clause.machine_clause} |
@@ -559,28 +555,27 @@ machine_clause {-> machine_clause} =
   {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} |
   {references} [clause]:references_clause {-> clause.machine_clause} |
   {expressions} [clause]:expressions_clause {-> clause.machine_clause} |
-  {predicate} [clause]:predicates_clause {-> clause.machine_clause} 
-  ;
+  {predicate} [clause]:predicates_clause {-> clause.machine_clause};
 
-expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon? {-> New machine_clause.expressions([expression_def_list.expression_definition])} ;
-predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon? {-> New machine_clause.predicates([predicate_def_list.predicate_definition])} ;
+expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon? {-> New machine_clause.expressions([expression_def_list.expression_definition])};
+predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon? {-> New machine_clause.predicates([predicate_def_list.predicate_definition])};
 
-definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])} ;
+definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])};
 
-expression_def_list {-> expression_definition*} = 
+expression_def_list {-> expression_definition*} =
   {single} [def]:expression_def {-> [def.expression_definition]} |
-  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.expression_definition, def.expression_definition]} ;
+  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.expression_definition, def.expression_definition]};
 
-predicate_def_list {-> predicate_definition*} = 
+predicate_def_list {-> predicate_definition*} =
   {single} [def]:predicate_def {-> [def.predicate_definition]} |
-  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.predicate_definition, def.predicate_definition]} ;
-  
+  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.predicate_definition, def.predicate_definition]};
+
 definition_list {-> definition*} =
   {single} [def]:definition {-> [def.definition]} |
-  {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]} ;
+  {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
 
-expression_def {-> expression_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New expression_definition(name, [parameters.expression], rhs.expression)} ;
-predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)} ;
+expression_def {-> expression_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New expression_definition(name, [parameters.expression], rhs.expression)};
+predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
   definition_x {-> definition_x.definition};
@@ -589,61 +584,62 @@ definition_x {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
- // attempt to allow identifier lists in DEFINITIONs, but leads to conflicts: 
-//  {couplewopar} [name]:identifier_literal double_equal [first]:expression_in_par comma [rest]:expression_list {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))} |
-//  {couplewopar} [name]:identifier_literal double_equal [rest]:identifier_list {-> New definition.expression_definition(name, [], New expression.couple([rest.expression]))} |
+  // attempt to allow identifier lists in DEFINITIONs, but leads to conflicts:
+  //{couplewopar} [name]:identifier_literal double_equal [first]:expression_in_par comma [rest]:expression_list {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))} |
+  //{couplewopar} [name]:identifier_literal double_equal [rest]:identifier_list {-> New definition.expression_definition(name, [], New expression.couple([rest.expression]))} |
   {file} [filename]:string_literal {-> New definition.file_definition(filename)};
 
-def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]} ;
+def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]};
 
-sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])} ;
+sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])};
 
-references_clause {-> machine_clause} = kw_references [machine_references]:machine_ref_list {-> New machine_clause.references([machine_references.machine_reference])} ;
+references_clause {-> machine_clause} = kw_references [machine_references]:machine_ref_list {-> New machine_clause.references([machine_references.machine_reference])};
 
-promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])} ;
+promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])};
 
-uses_clause {-> machine_clause} = uses [machine_names]:composed_identifier_list {-> New machine_clause.uses([machine_names.expression])} ;
+uses_clause {-> machine_clause} = uses [machine_names]:composed_identifier_list {-> New machine_clause.uses([machine_names.expression])};
 
-includes_clause {-> machine_clause} = includes [machine_references]:machine_ref_list {-> New machine_clause.includes([machine_references.machine_reference])} ;
+includes_clause {-> machine_clause} = includes [machine_references]:machine_ref_list {-> New machine_clause.includes([machine_references.machine_reference])};
 
-extends_clause {-> machine_clause} = extends [machine_references]:machine_ref_list {-> New machine_clause.extends([machine_references.machine_reference])} ;
+extends_clause {-> machine_clause} = extends [machine_references]:machine_ref_list {-> New machine_clause.extends([machine_references.machine_reference])};
 
-imports_clause {-> machine_clause} = imports [machine_references]:machine_ref_list {-> New machine_clause.imports([machine_references.machine_reference])} ;
+imports_clause {-> machine_clause} = imports [machine_references]:machine_ref_list {-> New machine_clause.imports([machine_references.machine_reference])};
 
 machine_ref_list {-> machine_reference*} =
   {single} [ref]:machine_reference {-> [ref.machine_reference]} |
-  {multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]} ;
+  {multi} [rest]:machine_ref_list comma [first]:machine_reference {-> [rest.machine_reference, first.machine_reference]};
 
 machine_reference {-> machine_reference} =
   {simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
   {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
-    {-> New machine_reference.file(machine_reference.machine_reference, file)} ;
+    {-> New machine_reference.file(machine_reference.machine_reference, file)};
 
 machine_reference2 {-> machine_reference} =
-  {simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])} ;
+  {simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])};
 
 variables_clause {-> machine_clause} =
   {abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
-  variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} ;
+  variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])};
 
 constants_clause {-> machine_clause} =
   {concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
-  constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} ;
+  constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])};
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])} ;
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])};
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])} ;
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])};
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
 set_def_list {-> set*} =
   {single} [set]:set {-> [set.set]} |
-  {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]} ;
+  {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]};
 
 set {-> set} =
   {description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
-  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:expression_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} ;
+  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])};
+  // TO DO: allow description pragmas for enumerated set elements
 
 properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-> New machine_clause.properties(predicates.predicate)};
 
@@ -657,21 +653,21 @@ assertions_clause {-> machine_clause} = assertions [predicates]:assertions_pred_
 
 assertions_pred_list {-> predicate*} =
   {single} [predicate]:predicate_top {-> [predicate.predicate]} |
-  {multi} [rest]:assertions_pred_list semicolon [predicate]:predicate_top {-> [rest.predicate, predicate.predicate]} ;
+  {multi} [rest]:assertions_pred_list semicolon [predicate]:predicate_top {-> [rest.predicate, predicate.predicate]};
 
-values_clause {-> machine_clause} = value [entries]:values_entries_list {-> New machine_clause.values([entries.values_entry])} ;
+values_clause {-> machine_clause} = value [entries]:values_entries_list {-> New machine_clause.values([entries.values_entry])};
 
 values_entries_list {-> values_entry*} =
   {single} [entry]:values_entry {-> [entry.values_entry]} |
-  {multi} [rest]:values_entries_list semicolon [entry]:values_entry {-> [rest.values_entry, entry.values_entry]} ;
+  {multi} [rest]:values_entries_list semicolon [entry]:values_entry {-> [rest.values_entry, entry.values_entry]};
 
-values_entry = [identifier]:composed_identifier equal [value]:expression_top {-> New values_entry([identifier.identifier_literal], value.expression)} ;
+values_entry = [identifier]:composed_identifier equal [value]:expression_top {-> New values_entry([identifier.identifier_literal], value.expression)};
 
-local_operations_clause {-> machine_clause} = local_operations [operation_list]:operation_list {-> New machine_clause.local_operations([operation_list.operation])} ;
+local_operations_clause {-> machine_clause} = local_operations [operation_list]:operation_list {-> New machine_clause.local_operations([operation_list.operation])};
 
 operations_clause {-> machine_clause} =
   operations [operation_list]:operation_list {-> New machine_clause.operations([operation_list.operation])} |
-  {invalid_semicolon} operations [operation_list]:operation_list semicolon {-> New machine_clause.invalid_operations_clause(semicolon)} ;
+  {invalid_semicolon} operations [operation_list]:operation_list semicolon {-> New machine_clause.invalid_operations_clause(semicolon)};
 
 operation_list {-> operation*} =
   {single} [operation]:operation {-> [operation.operation]} |
@@ -687,26 +683,24 @@ operation {-> operation} =
   {refined_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? [ref]:identifier_literal [ab_op_name]:identifier_literal equal [operation_body]:substitution_l2
     {-> New operation.refined([return_values.expression], [op_name.identifier_literal], [parameters.expression], ref, ab_op_name , operation_body.substitution)}
     // this supports the ref keyword for Event-B style refinement
-     |    
+    |
   {rule_operation} kw_rule [rule_name]:identifier_literal [attributes]:operation_attribute_list? kw_body [operation_body]:substitution_l0 end
     {-> New operation.rule(rule_name, [attributes.operation_attribute], operation_body.substitution)} |
   {computation} kw_computation [name]:identifier_literal [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
     {-> New operation.computation(name, [attributes.operation_attribute], body.substitution)} |
   {function} kw_function [return_values]:operation_return_values [name]:identifier_literal [parameters]:op_params? [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
-    {-> New	 operation.function([return_values.expression], name, [parameters.expression], [attributes.operation_attribute], body.substitution)}
-  ;
+    {-> New operation.function([return_values.expression], name, [parameters.expression], [attributes.operation_attribute], body.substitution)};
 
 operation_attribute_list {-> operation_attribute*} =
   {single} [attr]:operation_attribute {-> [attr.operation_attribute]} |
-  {multi} [rest]:operation_attribute_list [attr]:operation_attribute {-> [rest.operation_attribute, attr]} ;
+  {multi} [rest]:operation_attribute_list [attr]:operation_attribute {-> [rest.operation_attribute, attr]};
 
 operation_attribute {-> operation_attribute} =
   {attribute} [name]:kw_attribute_identifier [arguments]:expression_list {-> New operation_attribute(name, [arguments.expression])} |
-  {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate_top {-> New operation_attribute.predicate_attribute(name, predicate.predicate)}
-  ;
+  {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate_top {-> New operation_attribute.predicate_attribute(name, predicate.predicate)};
 
 operation_return_values {-> expression*} =
-  [return_values]:identifier_list output_parameters {-> [return_values.expression]} ;
+  [return_values]:identifier_list output_parameters {-> [return_values.expression]};
 
 freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_list {-> New machine_clause.freetypes([freetype_list.freetype])};
 freetype_list {-> freetype*} =
@@ -716,18 +710,18 @@ freetype {-> freetype} = [name]:identifier_literal equal [cons_list]:freetypecon
   {-> New freetype(name, [cons_list.freetype_constructor])};
 freetypecons_list {-> freetype_constructor*} =
   {single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
-  {multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]} ;
+  {multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]};
 
 freetypecons {-> freetype_constructor} =
   {element} [name]:identifier_literal {-> New freetype_constructor.element(name)} |
-  {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name,argument.expression)};
+  {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name, argument.expression)};
 
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
 
 predicate_p30 {-> predicate} =
   {implication} [left]:predicate_p30 implies [right]:predicate_p40 {-> New predicate.implication(left.predicate, right.predicate)} | // rechtsassoziativ?
-  {next_level} [pred]:predicate_p40 {-> pred.predicate} ;
+  {next_level} [pred]:predicate_p40 {-> pred.predicate};
 
 predicate_p40 {-> predicate} =
   {disjunct} [left]:predicate_p40 logical_or [right]:predicate_x40 {-> New predicate.disjunct(left.predicate, right.predicate)} |
@@ -735,12 +729,12 @@ predicate_p40 {-> predicate} =
   {next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-    {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
-    {next_level} [pred]:predicate_x41 {-> pred.predicate};
+  {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
+  {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
-    {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
-    {next_level} [pred]:predicate_x42 {-> pred.predicate};
+  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
+  {next_level} [pred]:predicate_x42 {-> pred.predicate};
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
@@ -790,13 +784,12 @@ predicate_atomic {-> predicate} =
   {exists} exists [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
   {identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
-  {function} [literal]:predicate_identifier  left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
+  {function} [literal]:predicate_identifier left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
   {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
     {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
-  {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}  // extension
-  ;
+  {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
 
 /* Expressions */
 
@@ -804,7 +797,7 @@ predicate_atomic {-> predicate} =
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
-  {symbolic_composition}  [left]:expression_in_par pragma_symbolic semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
+  {symbolic_composition} [left]:expression_in_par pragma_symbolic semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
   {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
   {next_level} [expr]:expression_top {-> expr.expression};
 
@@ -812,7 +805,7 @@ expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
 
 /*expression_p20 {-> expression} =
   {parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschraenkt?!?
-  {next_level} [expr]:expression_x20 {-> expr.expression} ;
+  {next_level} [expr]:expression_x20 {-> expr.expression};
 expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */
 
 expression_p125 {-> expression} =
@@ -828,7 +821,7 @@ expression_p125 {-> expression} =
   {total_relation} [left]:expression_p125 total_relation [right]:expression_x125 {-> New expression.total_relation(left.expression, right.expression)} |
   {surjection_relation} [left]:expression_p125 surjection_relation [right]:expression_x125 {-> New expression.surjection_relation(left.expression, right.expression)} |
   {total_surjection_relation} [left]:expression_p125 total_surjection_relation [right]:expression_x125 {-> New expression.total_surjection_relation(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x125 {-> expr.expression} ;
+  {next_level} [expr]:expression_x125 {-> expr.expression};
 expression_x125 {-> expression} = [expr]:expression_p160 {-> expr.expression};
 
 expression_p160 {-> expression} =
@@ -846,47 +839,47 @@ expression_p160 {-> expression} =
   {restrict_front} [left]:expression_p160 restrict_head_sequence [right]:expression_x160 {-> New expression.restrict_front(left.expression, right.expression)} |
   {restrict_tail} [left]:expression_p160 restrict_tail_sequence [right]:expression_x160 {-> New expression.restrict_tail(left.expression, right.expression)} |
   {couple1} [left]:expression_p160 maplet [right]:expression_x160 {-> New expression.couple([left.expression, right.expression])} |
-  {next_level} [expr]:expression_x160 {-> expr.expression} ;
+  {next_level} [expr]:expression_x160 {-> expr.expression};
 expression_x160 {-> expression} = [expr]:expression_p170 {-> expr.expression};
 
 expression_p170 {-> expression} =
   {interval} [left_border]:expression_p170 interval [right_border]:expression_x170 {-> New expression.interval(left_border.expression, right_border.expression)} |
-  {next_level} [expr]:expression_x170 {-> expr.expression} ;
+  {next_level} [expr]:expression_x170 {-> expr.expression};
 expression_x170 {-> expression} = [expr]:expression_p180 {-> expr.expression};
 
 expression_p180 {-> expression} =
   {minus_or_set_subtract} [left]:expression_p180 minus [right]:expression_x180 {-> New expression.minus_or_set_subtract(left.expression, right.expression)} |
   {add} [left]:expression_p180 plus [right]:expression_x180 {-> New expression.add(left.expression, right.expression)} |
   {set_subtraction} [left]:expression_p180 set_subtraction [right]:expression_x180 {-> New expression.set_subtraction(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x180 {-> expr.expression} ;
+  {next_level} [expr]:expression_x180 {-> expr.expression};
 expression_x180 {-> expression} = [expr]:expression_p190 {-> expr.expression};
 
 expression_p190 {-> expression} =
   {mul} [left]:expression_p190 product [right]:expression_x190 {-> New expression.mult_or_cart(left.expression, right.expression)} |
   {div} [left]:expression_p190 division [right]:expression_x190 {-> New expression.div(left.expression, right.expression)} |
   {modulo} [left]:expression_p190 mod [right]:expression_x190 {-> New expression.modulo(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x190 {-> expr.expression} ;
+  {next_level} [expr]:expression_x190 {-> expr.expression};
 expression_x190 {-> expression} = [expr]:expression_p200 {-> expr.expression};
 
 /* Attention: power_of is right-assoziative! */
 expression_p200 {-> expression} =
-  {power_of} [left]:expression_x200 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} |  // right associative!
-  {next_level} [expr]:expression_x200 {-> expr.expression} ;
+  {power_of} [left]:expression_x200 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
+  {next_level} [expr]:expression_x200 {-> expr.expression};
 expression_x200 {-> expression} = [expr]:expression_p210 {-> expr.expression};
 
 expression_p210 {-> expression} =
   {unary_minus} minus [expression]:expression_x210 {-> New expression.unary_minus(expression.expression)} |
-  {next_level} [expr]:expression_x210 {-> expr.expression} ;
+  {next_level} [expr]:expression_x210 {-> expr.expression};
 expression_x210 {-> expression} = [expr]:expression_p230 {-> expr.expression};
 
 expression_p230 {-> expression} =
   {reverse} [expression]:expression_x230 tilde {-> New expression.reverse(expression.expression)} |
-  {next_level} [expr]:expression_x230 {-> expr.expression} ;
+  {next_level} [expr]:expression_x230 {-> expr.expression};
 expression_x230 {-> expression} = [expr]:expression_p231 {-> expr.expression};
 
 expression_p231 {-> expression} =
   {image} [left]:expression_p230 left_bracket [right]:expression_in_par right_bracket {-> New expression.image(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x231 {-> expr.expression} ;
+  {next_level} [expr]:expression_x231 {-> expr.expression};
 expression_x231 {-> expression} = [expr]:expression_keyword {-> expr.expression};
 
 expression_keyword {-> expression} =
@@ -894,6 +887,9 @@ expression_keyword {-> expression} =
   {max} max left_par [expression]:expression_in_par right_par {-> New expression.max(expression.expression)} |
   {min} min left_par [expression]:expression_in_par right_par {-> New expression.min(expression.expression)} |
   {card} card left_par [expression]:expression_in_par right_par {-> New expression.card(expression.expression)} |
+  {convert_int_floor} convert_int_floor left_par [expression]:expression_in_par right_par {-> New expression.convert_int_floor(expression.expression)} |
+  {convert_int_ceiling} convert_int_ceiling left_par [expression]:expression_in_par right_par {-> New expression.convert_int_ceiling(expression.expression)} |
+  {convert_real} convert_real left_par [expression]:expression_in_par right_par {-> New expression.convert_real(expression.expression)} |
   {general_sum} sigma [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_sum([identifiers.expression], predicates.predicate, expression.expression)} |
   {general_product} pi [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.general_product([identifiers.expression], predicates.predicate, expression.expression)} |
   {pow_subset} pow left_par [expression]:expression_in_par right_par {-> New expression.pow_subset(expression.expression)} |
@@ -930,12 +926,12 @@ expression_keyword {-> expression} =
   {first_projection} prj1 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.first_projection(exp1.expression, exp2.expression)} |
   {second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
   {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)} |
-  {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}  |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}  |
+  {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)} |
+  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)} |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
-  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}  |
+  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)} |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
@@ -963,7 +959,7 @@ expression_keyword {-> expression} =
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
   {record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
   {expression_operator} [name]:kw_expression_operator [parameters]:op_params {-> New expression.operator(name, [parameters.expression])} | // extension
-  {next_level} [expr]:expression_func {-> expr.expression} ;
+  {next_level} [expr]:expression_func {-> expr.expression};
 
 rec_entry {-> rec_entry} =
   {in_pars} left_par [identifier]:expression_top element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
@@ -975,7 +971,7 @@ rec_entry_list {-> rec_entry*} =
 
 expression_func {-> expression} =
   {function} [function]:expression_p230 left_par [parameters]:expression_list right_par {-> New expression.function(function.expression, [parameters.expression])} |
-  {next_level} expression_atomic {-> expression_atomic.expression} ;
+  {next_level} expression_atomic {-> expression_atomic.expression};
 
 expression_atomic {-> expression} =
   {paren} left_par [expression]:expression_in_par right_par {-> expression.expression} |
@@ -988,12 +984,15 @@ expression_atomic {-> expression} =
   {successor} succ {-> New expression.successor()} |
   {predecessor} pred {-> New expression.predecessor()} |
   {integer} [literal]:integer_literal {-> New expression.integer(literal)} |
+  {real} [literal]:real_literal {-> New expression.real(literal)} |
   {hex_integer} [literal]:hex_literal {-> New expression.hex_integer(literal)} |
   {max_int} max_int {-> New expression.max_int()} |
   {min_int} min_int {-> New expression.min_int()} |
   {empty_set_symbol} empty_set {-> New expression.empty_set()} |
   {empty_set} left_brace right_brace {-> New expression.empty_set()} |
   {integer_set} integer {-> New expression.integer_set()} |
+  {real_set} real {-> New expression.real_set()} |
+  {float_set} float {-> New expression.float_set()} |
   {natural_set} natural {-> New expression.natural_set()} |
   {natural1_set} natural1 {-> New expression.natural1_set()} |
   {nat_set} nat {-> New expression.nat_set()} |
@@ -1004,18 +1003,18 @@ expression_atomic {-> expression} =
     {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
   {let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
-  {string_set} string {-> New expression.string_set()} ;
+  {string_set} string {-> New expression.string_set()};
 
-if_elseif_expression  {-> expression} =
-	elsif [condition]:predicate_top then [expr]:expression_top {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
+if_elseif_expression {-> expression} =
+  elsif [condition]:predicate_top then [expr]:expression_top {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
 
 expression_list {-> expression*} =
   {single} [expression]:expression_top {-> [expression.expression]} |
-  {multiple} [rest]:expression_list comma [last]:expression_top {-> [rest.expression, last.expression]} ;
+  {multiple} [rest]:expression_list comma [last]:expression_top {-> [rest.expression, last.expression]};
 
 /*expression_list_in_par {-> expression*} =
   {single} [expression]:expression_in_par {-> [expression.expression]} |
-  {multiple} [rest]:expression_list_in_par comma [last]:expression_in_par {-> [rest.expression, last.expression]} ;
+  {multiple} [rest]:expression_list_in_par comma [last]:expression_in_par {-> [rest.expression, last.expression]};
 */
 
 
@@ -1023,24 +1022,24 @@ expression_list {-> expression*} =
 
 substitution_l0 {-> substitution} =
   {invalid} substitution_l2 semicolon {-> New substitution.invalid(semicolon)} |
-  {next_level} substitution_l1 {-> substitution_l1.substitution} ;
+  {next_level} substitution_l1 {-> substitution_l1.substitution};
 
 substitution_l1 {-> substitution} =
   {sequence} [first]:substitution_l2 semicolon [second]:substitution_l2 [rest]:sequence_subst_tail? {-> New substitution.sequence([first.substitution, second.substitution, rest.substitution])} |
-  {next_level} [sub]:substitution_l2 {-> sub.substitution} ;
+  {next_level} [sub]:substitution_l2 {-> sub.substitution};
 
 sequence_subst_tail {-> substitution*} =
   {single} semicolon [substitution]:substitution_l2 {-> [substitution.substitution]} |
   {multi} semicolon [substitution]:substitution_l2 [rest]:sequence_subst_tail {-> [substitution.substitution, rest.substitution]} |
-  {invalid} semicolon {-> [New substitution.invalid(semicolon)]} ;
+  {invalid} semicolon {-> [New substitution.invalid(semicolon)]};
 
 substitution_l2 {-> substitution} =
   {parallel} [first]:substitution_l3 double_vertical_bar [second]:substitution_l3 [rest]:parallel_subst_tail? {-> New substitution.parallel([first.substitution, second.substitution, rest.substitution])} |
-  {next_level} [sub]:substitution_l3 {-> sub.substitution} ;
+  {next_level} [sub]:substitution_l3 {-> sub.substitution};
 
 parallel_subst_tail {-> substitution*} =
   {single} double_vertical_bar [substitution]:substitution_l3 {-> [substitution.substitution]} |
-  {multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]} ;
+  {multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]};
 
 substitution_l3 {-> substitution} =
   {block} begin [substitution]:substitution_l0 end {-> New substitution.block(substitution.substitution)} |
@@ -1051,7 +1050,7 @@ substitution_l3 {-> substitution} =
   {choice} choice [first]:substitution_l0 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
   {if} if [condition]:predicate_top then [then_subst]:substitution_l0 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
   {select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
-  {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression],  either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
+  {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
   {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
   {becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
   {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
@@ -1063,7 +1062,7 @@ substitution_l3 {-> substitution} =
   {let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l0 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
   {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
 
-    // extensions for rules
+  // extensions for rules
   {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
     {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
@@ -1072,16 +1071,15 @@ substitution_l3 {-> substitution} =
     {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
   {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
-  	{-> New substitution.define(name, type.expression, dummy.expression, value.expression)}
-  ;
-  
-when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate };
+    {-> New substitution.define(name, type.expression, dummy.expression, value.expression)};
+
+when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate};
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
-error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id };
+error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id};
 
 choice_or {-> substitution} =
-  or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)} ;
+  or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)};
 
 if_elsif {-> substitution} =
   elsif [condition]:predicate_top then [subst]:substitution_l0 {-> New substitution.if_elsif(condition.predicate, subst.substitution)};
@@ -1102,48 +1100,41 @@ case_else {-> substitution} =
   else [subst]:substitution_l0 {-> subst.substitution};
 
 op_params {-> expression*} =
-  left_par [parameters]:expression_list right_par {-> [parameters.expression]} ;
-
+  left_par [parameters]:expression_list right_par {-> [parameters.expression]};
 
 /* Basics */
 composed_identifier {-> identifier_literal*} =
   {single} [name]:identifier_literal {-> [name]} |
-  {multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]} ;
+  {multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]};
   // To do: maybe the only place where we do not want to also admit the second kind of dot '·' (generated by Rodin for quantifiers)
-
 
 composed_identifier_list {-> expression*} =
   {single} [identifier]:composed_identifier_file_pragma_expression {-> [identifier.expression]} |
-  {multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]} ;
+  {multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]};
 
 composed_identifier_file_pragma_expression {-> expression} =
   {normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
-  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)} ;
+  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)};
 
 composed_identifier_expression {-> expression} =
   {normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
 
-
-
 identifier_list {-> expression*} =
   {single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
-  {multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]} ;
+  {multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]};
 
 /* a,b,f(1),g(1)(2) := ... */
 assign_list {-> expression*} =
   {single} [name]:record_or_else {-> [name.expression]} |
-  {multi} [rest]:assign_list comma [name]:record_or_else {-> [rest.expression, name.expression]} ;
-
+  {multi} [rest]:assign_list comma [name]:record_or_else {-> [rest.expression, name.expression]};
 
 record_or_else {-> expression} =
-    {record} [record]:record_or_else single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
-    {else} [else]:identifier_or_function {-> else.expression};
-
+  {record} [record]:record_or_else single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
+  {else} [else]:identifier_or_function {-> else.expression};
 
 identifier_or_function {-> expression} =
-   {single} [name]:composed_identifier_expression {-> name.expression} |
-   {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
-
+  {single} [name]:composed_identifier_expression {-> name.expression} |
+  {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
 
 normal_identifier_expression {-> expression} =
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
@@ -1152,33 +1143,27 @@ quantified_variables_list {-> expression*} =
   {parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |
   {no_parentheses} [id]:identifier_list {-> [id.expression]};
 
-
 identifier_declaration_expression {-> expression} =
   {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
-  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
-
+  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
 identifier_expression {-> expression} =
-  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
+  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
-def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]} ;
-
+def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]};
 
 /* Patterns for opertions */
 operation_pattern {-> parse_unit }=
-  [op_name]:composed_identifier [parameters]:op_pattern_params? {-> New parse_unit.oppattern([op_name.identifier_literal], [parameters.argpattern])} ;
+  [op_name]:composed_identifier [parameters]:op_pattern_params? {-> New parse_unit.oppattern([op_name.identifier_literal], [parameters.argpattern])};
 
 op_pattern_params {-> argpattern*} =
   left_par [parameters]:oppattern_list right_par {-> [parameters.argpattern]} ;
 oppattern_list {-> argpattern*} =
   {single} [arg]:op_pattern_param {-> [arg.argpattern]} |
-  {multiple} [rest]:oppattern_list comma [last]:op_pattern_param {-> [rest.argpattern, last.argpattern]} ;
+  {multiple} [rest]:oppattern_list comma [last]:op_pattern_param {-> [rest.argpattern, last.argpattern]};
 op_pattern_param {-> argpattern} =
-    {def}   [expression]:expression_in_par {-> New argpattern.def(expression.expression)} |
-    {undef} underscore {-> New argpattern.undef()};
-
-
-
+  {def} [expression]:expression_in_par {-> New argpattern.def(expression.expression)} |
+  {undef} underscore {-> New argpattern.undef()};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
@@ -1187,7 +1172,7 @@ Abstract Syntax Tree
 
 parse_unit =
   {generated} parse_unit |
-  {package} [package]:pragma_id_or_string [imports]:import_package* parse_unit  |
+  {package} [package]:pragma_id_or_string [imports]:import_package* parse_unit |
   {abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
   {refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
   {implementation_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
@@ -1210,7 +1195,7 @@ argpattern = {undef} | {def} expression;
 machine_variant = {machine} | {model} | {system};
 
 machine_header =
-  [name]:identifier_literal* [parameters]:expression* ;
+  [name]:identifier_literal* [parameters]:expression*;
 
 context_clause =
   {extends} [extends]:identifier_literal* |
@@ -1218,8 +1203,7 @@ context_clause =
   {constants} [identifiers]:expression* |
   {abstract_constants} [identifiers]:expression* |
   {axioms} [predicates]:predicate* |
-  {theorems} [predicates]:predicate* ;
-
+  {theorems} [predicates]:predicate*;
 
 model_clause =
   {refines} [refines]:identifier_literal |
@@ -1229,8 +1213,6 @@ model_clause =
   {theorems} [predicates]:predicate* |
   {variant} [variant]:expression |
   {events} event*;
-
-
 
 machine_clause =
   {definitions} [definitions]:definition* |
@@ -1257,48 +1239,44 @@ machine_clause =
   {references} [machine_references]:machine_reference* |
   {invalid_operations_clause} semicolon |
   {expressions} [expressions]:expression_definition* |
-  {predicates} [predicates]:predicate_definition*  
-  ;
+  {predicates} [predicates]:predicate_definition*;
 
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |
-  {file} [reference]:machine_reference [file]:pragma_id_or_string ;
+  {file} [reference]:machine_reference [file]:pragma_id_or_string;
 
-
-expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression ;
-predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate ;
+expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
+predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate;
 
 definition =
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
   {substitution_definition} [name]:def_literal_substitution [parameters]:expression* [rhs]:substitution |
   {expression_definition} [name]:identifier_literal [parameters]:expression* [rhs]:expression |
-  {file_definition} [filename]:string_literal ;
+  {file_definition} [filename]:string_literal;
 
 set =
   {description} T.pragma_free_text set |
   {deferred_set} [identifier]:identifier_literal* |
-  {enumerated_set} [identifier]:identifier_literal* [elements]:expression* ;
+  {enumerated_set} [identifier]:identifier_literal* [elements]:expression*;
 
-freetype = [name]:identifier_literal [constructors]:freetype_constructor+ ;
+freetype = [name]:identifier_literal [constructors]:freetype_constructor+;
 freetype_constructor =
   {constructor} [name]:identifier_literal [argument]:expression |
   {element} [name]:identifier_literal;
 
-values_entry = [identifier]:identifier_literal* [value]:expression ;
+values_entry = [identifier]:identifier_literal* [value]:expression;
 
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
-  {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |  
+  {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |
   {rule} [rule_name]:identifier_literal [attributes]:operation_attribute* [rule_body]:substitution |
   {computation} [name]:identifier_literal [attributes]:operation_attribute* [body]:substitution |
-  {function} [return_values]:expression* [name]:identifier_literal [parameters]:expression* [attributes]:operation_attribute* [body]:substitution
-  ;
+  {function} [return_values]:expression* [name]:identifier_literal [parameters]:expression* [attributes]:operation_attribute* [body]:substitution;
 
 operation_attribute =
   [name]: kw_attribute_identifier [arguments]:expression* |
-  {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate
-  ;
+  {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate;
 
 event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
 witness = [name]:identifier_literal [predicate]:predicate;
@@ -1333,14 +1311,14 @@ predicate =
   {truth} |
   {falsity} |
   {finite} [set]:expression |
-  {partition} [set]:expression [elements]:expression* |    /* Event-B only predicate */
+  {partition} [set]:expression [elements]:expression* | /* Event-B only predicate */
   {definition} [def_literal]:def_literal_predicate [parameters]:expression* |
   {predicate_identifier} [identifier]:predicate_identifier |
   {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
   {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
   {if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
   {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only predicate - theory plugin */
-  {operator} [name]:kw_predicate_operator [identifiers]:expression* ; // extension for rules
+  {operator} [name]:kw_predicate_operator [identifiers]:expression*; // extension for rules
 
 /* Expressions */
 expression =
@@ -1353,11 +1331,14 @@ expression =
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
+  {real} [literal]:real_literal |
   {hex_integer} [literal]:hex_literal |
   {max_int} |
   {min_int} |
   {empty_set} |
   {integer_set} |
+  {real_set} |
+  {float_set} |
   {natural_set} |
   {natural1_set} |
   {nat_set} |
@@ -1375,7 +1356,7 @@ expression =
   {mult_or_cart} [left]:expression [right]:expression | // used by this parser 'cause we cannot decide which one it is
   {div} [left]:expression [right]:expression |
   {floored_div} [left]:expression [right]:expression | /* has no concrete syntax, generated for example by TLA translation */
-  {if_elsif_expr}  [condition]:predicate [then]:expression |
+  {if_elsif_expr} [condition]:predicate [then]:expression |
   {if_then_else} [condition]:predicate [then]:expression [elsifs]:expression* [else]:expression |
   {let_expression} [identifiers]:expression* [assignment]:predicate [expr]:expression |
   {modulo} [left]:expression [right]:expression |
@@ -1385,6 +1366,9 @@ expression =
   {max} [expression]:expression |
   {min} [expression]:expression |
   {card} [expression]:expression |
+  {convert_int_floor} [expression]:expression |
+  {convert_int_ceiling} [expression]:expression |
+  {convert_real} [expression]:expression |
   {general_sum} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {general_product} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {couple} [list]:expression* |
@@ -1409,13 +1393,13 @@ expression =
   {quantified_intersection} [identifiers]:expression* [predicates]:predicate [expression]:expression |
   {relations} [left]:expression [right]:expression |
   {identity} [expression]:expression |
-  {event_b_identity}  | // EventB v 2.0 language only
+  {event_b_identity} | // EventB v 2.0 language only
   {reverse} [expression]:expression |
   {first_projection} [exp1]:expression [exp2]:expression |
   {event_b_first_projection} [expression]:expression | // EventB only
   {event_b_first_projection_v2} | // EventB v 2.0 language only
   {second_projection} [exp1]:expression [exp2]:expression |
-  {event_b_second_projection}  [expression]:expression | // EventB only
+  {event_b_second_projection} [expression]:expression | // EventB only
   {event_b_second_projection_v2} | // EventB v 2.0 language only
   {composition} [left]:expression [right]:expression |
   {symbolic_composition} [left]:expression [right]:expression |
@@ -1493,8 +1477,7 @@ expression =
   {extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
   {typeof} [expression]:expression [type]:expression | /* Has no concrete syntax, is only generated by the translation process */
   {operation_call} [operation]:identifier_literal* [parameters]:expression* |
-  {operator} [name]:kw_expression_operator [identifiers]:expression* // extension for rules
-  ;
+  {operator} [name]:kw_expression_operator [identifiers]:expression*; // extension for rules
 
 rec_entry = [identifier]:expression [value]:expression;
 
@@ -1526,8 +1509,8 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
-  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | //extension for rules
-  {rule_fail_sub}  [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | //extension for rules
-  {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | //extension for rules
-  {operator} [name]:kw_substitution_operator [arguments]:expression* | //extension for rules
-  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression ; //extension for rules
+  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | // extension for rules
+  {rule_fail_sub} [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | // extension for rules
+  {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | // extension for rules
+  {operator} [name]:kw_substitution_operator [arguments]:expression* | // extension for rules
+  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression; // extension for rules

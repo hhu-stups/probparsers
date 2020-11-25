@@ -151,7 +151,7 @@ public class RecursiveMachineLoader {
 
 
 		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
-				parsingBehaviour.isMachineNameMustMatchFileName());
+				!isMain || parsingBehaviour.isMachineNameMustMatchFileName());
 
 
 		try {

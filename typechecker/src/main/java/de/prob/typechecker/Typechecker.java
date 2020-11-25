@@ -18,6 +18,7 @@ import de.prob.typechecker.btypes.ITypechecker;
 import de.prob.typechecker.btypes.IntegerOrSetOfPairType;
 import de.prob.typechecker.btypes.IntegerOrSetType;
 import de.prob.typechecker.btypes.IntegerType;
+import de.prob.typechecker.btypes.RealType;
 import de.prob.typechecker.btypes.PairType;
 import de.prob.typechecker.btypes.SetType;
 import de.prob.typechecker.btypes.StringType;
@@ -670,9 +671,19 @@ public class Typechecker extends DepthFirstAdapter implements ITypechecker {
 
 	@Override
 	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
+		boolean isInteger = true;
+		boolean isReal = true;
 		try {
 			IntegerType.getInstance().unify(getType(node), this);
 		} catch (UnificationException e) {
+			isInteger = false;
+		}
+		try {
+			IntegerType.getInstance().unify(getType(node), this);
+		} catch (UnificationException e) {
+			isReal = false;
+		}
+		if(! (isInteger || isReal)){
 			throw new TypeErrorException("Excepted '" + getType(node) + "' , found 'INTEGER' in '-'");
 		}
 	}

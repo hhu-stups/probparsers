@@ -163,6 +163,12 @@ public class CliBParser {
 
 			switch (command) {
 			case version:
+				print(BParser.getVersion() + "-" + BParser.getGitSha() + System.lineSeparator());
+				break;
+			case shortversion:
+				print(BParser.getVersion() + System.lineSeparator());
+				break;
+			case gitsha:
 				print(BParser.getGitSha() + System.lineSeparator());
 				break;
 			case definition:

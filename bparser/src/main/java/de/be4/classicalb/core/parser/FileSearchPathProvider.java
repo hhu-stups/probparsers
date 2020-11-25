@@ -3,13 +3,11 @@ package de.be4.classicalb.core.parser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
@@ -20,10 +18,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 	}
 
 	public FileSearchPathProvider(String prefix, String fileName) {
-		this.fileName = fileName;
-
-		searchPath.add(prefix);
-		searchPath.addAll(getLibraryPath());
+		this(prefix, fileName, Collections.emptyList());
 	}
 
 	public FileSearchPathProvider(String prefix, String fileName, List<String> paths) {
@@ -34,33 +29,21 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.addAll(getLibraryPath());
 	}
 
-	private ArrayList<String> getLibraryPath() {
-		ArrayList<String> result = new ArrayList<>();
+	private List<String> getLibraryPath() {
 		// User provided stdlib search path
 		final String stdlib = System.getProperty("prob.stdlib");
-		// prob.home is set by prob 2.0 to the directory of the prob binary
-		String home = System.getProperty("prob.home");
-
 		if (stdlib != null) {
-			Collections.addAll(result, stdlib.split(File.pathSeparator));
+			return Arrays.asList(stdlib.split(File.pathSeparator));
+		} else {
+			return Collections.singletonList("." + File.separator + "stdlib");
 		}
-		if (home != null) {
-			home = home + File.separator + "stdlib";
-			// Simple attempt to avoid adding home twice to the search path
-			if (!result.contains(home)) {
-				result.add(home);
-			}
-		}
-
-		if (result.isEmpty()) {
-			result.add("." + File.separator + "stdlib");
-		}
-		return result;
 	}
 
 	@Override
-	public SearchPathIterator iterator() {
-		return new SearchPathIterator(this);
+	public Iterator<File> iterator() {
+		return this.searchPath.stream()
+			.map(base -> new File(base, this.getFilename()))
+			.iterator();
 	}
 
 	public int size() {
@@ -79,42 +62,5 @@ public class FileSearchPathProvider implements Iterable<File> {
 			}
 		}
 		throw new FileNotFoundException("did not found: " + fileName );
-	}
-
-	private class SearchPathIterator implements Iterator<File> {
-
-		private final FileSearchPathProvider provider;
-		private int idx;
-
-		public SearchPathIterator(FileSearchPathProvider provider) {
-			this.idx = 0;
-			this.provider = provider;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return this.idx < this.provider.size();
-		}
-
-		@Override
-		public File next() {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-
-			String base = get(this.idx);
-			this.idx += 1;
-			Path path = FileSystems.getDefault().getPath(base, this.provider.getFilename());
-			return new java.io.File(path.toString());
-		}
-
-		private String get(int idx) {
-			return FileSearchPathProvider.this.searchPath.get(idx);
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
 	}
 }

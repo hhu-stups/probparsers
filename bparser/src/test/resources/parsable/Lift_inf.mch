@@ -1,16 +1,16 @@
 MACHINE Lift
 
-ABSTRACT_VARIABLES  floor
+ABSTRACT_VARIABLES  current_level
 
-INVARIANT  floor : 0..99 
+INVARIANT  current_level : 0..99 
 
-INITIALISATION floor := 4
+INITIALISATION current_level := 4
 
 OPERATIONS
 
-	inc = PRE floor<99 THEN floor := floor + 1 END ;
+	inc = PRE current_level<99 THEN current_level := current_level + 1 END ;
 	
-	dec = PRE floor /= 1 THEN floor := floor - 1 END 
+	dec = PRE current_level /= 1 THEN current_level := current_level - 1 END 
 	
 END
 

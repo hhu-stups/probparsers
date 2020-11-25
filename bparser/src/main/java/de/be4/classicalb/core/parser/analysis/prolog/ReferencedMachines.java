@@ -258,7 +258,7 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
- 	
+
 		} else {
 
 			MachineReference machineReference;

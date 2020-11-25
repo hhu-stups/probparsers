@@ -5,5 +5,7 @@ public enum EPreplCommands {
 	extendedexpression, extendedpredicate, extendedsubstitution,
 	halt, 
 	definition, resetdefinitions,
-	ltl, ctl, version, extendedformula;
+	ltl, ctl,
+	version, gitsha, shortversion,
+	extendedformula;
 }

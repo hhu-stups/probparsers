@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -140,7 +140,7 @@ public final class Utils {
 	public static final String readFile(final File filePath) throws IOException {
 		String content = null;
 		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, Charset.forName("UTF-8"));
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
 			final StringBuilder builder = new StringBuilder();
 			final char[] buffer = new char[1024];
 			int read;
@@ -152,16 +152,8 @@ public final class Utils {
 		}
 
 		// remove utf-8 byte order mark
-		// replaceAll \uFEFF did not work for some reason
-		// apparently, unix like systems report a single character with the code
-		// below
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 65279) {
+		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
 			content = content.substring(1);
-		}
-		// while windows splits it up into three characters with the codes below
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 239 && Character.codePointAt(content, 1) == 187
-				&& Character.codePointAt(content, 2) == 191) {
-			content = content.substring(3);
 		}
 
 		return content.replaceAll("\r\n", "\n");

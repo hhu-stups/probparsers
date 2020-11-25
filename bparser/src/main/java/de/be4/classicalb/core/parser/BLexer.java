@@ -23,6 +23,8 @@ public class BLexer extends Lexer {
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
+	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
+	private static Set<Class<? extends Token>> literalTokenClasses = new HashSet<>();
 	
 	public void setLexerPreparse(){
 		parse_definition = true; 
@@ -110,6 +112,8 @@ public class BLexer extends Lexer {
 			addInvalid(binOpTokenClass, TElsif.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TThen.class,  "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TRightPar.class, "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TRightBrace.class, "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TRightBracket.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TSemicolon.class,"Argument to binary operator is missing.");
 			addInvalid(TLeftPar.class, binOpTokenClass,  "Argument to binary operator is missing.");
 			addInvalid(TSemicolon.class, binOpTokenClass,"Argument to binary operator is missing.");
@@ -136,35 +140,134 @@ public class BLexer extends Lexer {
 		addInvalid(TLogicalOr.class, TLogicalOr.class, "Probably one 'or' too many.");
 		addInvalid(TLess.class, TGreater.class, "<> is not allowed anymore, use [] for the empty sequence."); // this is rule is only of limited usefulness, until we remove the empty_sequence token
 		
+		
+		// a few rules for keywords which are unary functions and require an opening parenthesis afterwards
+		// real operators floor(.), ceiling(.), real(.)
+		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
+		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
+		funOpKeywordTokenClasses.add(TConvertReal.class);
+		// regular operators
+		funOpKeywordTokenClasses.add(TBoolCast.class);
+		funOpKeywordTokenClasses.add(TCard.class);
+		funOpKeywordTokenClasses.add(TIterate.class);
+		funOpKeywordTokenClasses.add(TClosure.class);
+		funOpKeywordTokenClasses.add(TClosure1.class);
+		funOpKeywordTokenClasses.add(TRel.class);
+		funOpKeywordTokenClasses.add(TFnc.class);
+		funOpKeywordTokenClasses.add(TPerm.class);
+		funOpKeywordTokenClasses.add(TMin.class);
+		funOpKeywordTokenClasses.add(TMax.class);
+		funOpKeywordTokenClasses.add(TDom.class);
+		funOpKeywordTokenClasses.add(TRan.class);
+		funOpKeywordTokenClasses.add(TId.class); // ( {2} ; id) not allowed
+		// TO DO:  prj1, prj2
+		// Record operators:
+		funOpKeywordTokenClasses.add(TStruct.class);
+		funOpKeywordTokenClasses.add(TRec.class);
+		// sequence operators:
+		funOpKeywordTokenClasses.add(TSize.class);
+		funOpKeywordTokenClasses.add(TFront.class);
+		funOpKeywordTokenClasses.add(TFirst.class); //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
+		funOpKeywordTokenClasses.add(TTail.class);
+		funOpKeywordTokenClasses.add(TLast.class);
+		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
+		funOpKeywordTokenClasses.add(TConc.class);
+		// tree operators:
+		funOpKeywordTokenClasses.add(TTree.class);
+		funOpKeywordTokenClasses.add(TConst.class);
+		funOpKeywordTokenClasses.add(TTop.class);
+		funOpKeywordTokenClasses.add(TSons.class);
+		funOpKeywordTokenClasses.add(TPrefix.class);
+		funOpKeywordTokenClasses.add(TPostfix.class);
+		funOpKeywordTokenClasses.add(TSizet.class);
+		funOpKeywordTokenClasses.add(TMirror.class);
+		// tree node operators:
+		funOpKeywordTokenClasses.add(TRank.class);
+		funOpKeywordTokenClasses.add(TFather.class);
+		funOpKeywordTokenClasses.add(TSon.class);
+		funOpKeywordTokenClasses.add(TSubtree.class);
+		funOpKeywordTokenClasses.add(TArity.class);
+		// binary tree operators:
+		funOpKeywordTokenClasses.add(TBtree.class);
+		funOpKeywordTokenClasses.add(TBin.class);
+		funOpKeywordTokenClasses.add(TLeft.class);
+		funOpKeywordTokenClasses.add(TRight.class);
+		funOpKeywordTokenClasses.add(TInfix.class);
+		
+		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
+			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
+			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
+			if (funOpClass == TConvertIntFloor.class) {
+			   opName = new String("floor");
+			} else if( funOpClass == TConvertIntCeiling.class) {
+			   opName = new String("ceiling");
+			} else if( funOpClass == TConvertReal.class) {
+			   opName = new String("real");
+			} else if( funOpClass == TBoolCast.class) {
+			   opName = new String("bool");
+			} 
+		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
+			addInvalid(funOpClass, TRightPar.class, Errmsg);
+			addInvalid(funOpClass, TRightBrace.class, Errmsg);
+			addInvalid(funOpClass, TRightBracket.class, Errmsg);
+			addInvalid(funOpClass, TSemicolon.class, Errmsg);
+			addInvalid(funOpClass, TWhere.class, Errmsg);
+			addInvalid(funOpClass, TThen.class, Errmsg);
+			addInvalid(funOpClass, TElse.class, Errmsg);
+			addInvalid(funOpClass, TEnd.class, Errmsg);
+			for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+			     addInvalid(funOpClass, binOpTokenClass, Errmsg);
+			}
+			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+				addInvalid(funOpClass,clauseTokenClass, Errmsg);
+			}
+			
+		    String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
+			addInvalid(TAny.class,funOpClass, Errmsg2);
+			addInvalid(TConstants.class,funOpClass, Errmsg2);
+			addInvalid(TAbstractConstants.class,funOpClass, Errmsg2);
+			addInvalid(TConcreteConstants.class,funOpClass, Errmsg2);
+			addInvalid(TVariables.class,funOpClass, Errmsg2);
+			addInvalid(TAbstractVariables.class,funOpClass, Errmsg2);
+			addInvalid(TConcreteVariables.class,funOpClass, Errmsg2);
+			addInvalid(TOperations.class,funOpClass, Errmsg2);
+		}
+		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
+		
+		addInvalid(TComma.class, TRightPar.class, "Missing expression after comma.");
+		addInvalid(TComma.class, TRightBrace.class, "Missing expression after comma.");
+		addInvalid(TComma.class, TRightBracket.class, "Missing expression after comma.");
+		addInvalid(TSemicolon.class, TRightPar.class, "Missing expression after semicolon.");
+		addInvalid(TSemicolon.class, TRightBrace.class, "Missing expression after semicolon.");
+		addInvalid(TSemicolon.class, TRightBracket.class, "Missing expression after semicolon.");
+		
 		addInvalid(TComma.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TSemicolon.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TPragmaLabel.class, TComma.class,  "A label pragma must be put *before* a predicate.");
 		addInvalid(TPragmaLabel.class, TSemicolon.class,  "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-		addInvalid(TIdentifierLiteral.class, THexLiteral.class,  "Missing operator or separator between identifier and hexadecimal.");
+		
+		literalTokenClasses = new HashSet<>();
+		literalTokenClasses.add(TIntegerLiteral.class);
+		literalTokenClasses.add(TStringLiteral.class);
+		literalTokenClasses.add(TRealLiteral.class);
+		literalTokenClasses.add(THexLiteral.class);
+		for (Class<? extends Token> litClass : literalTokenClasses) {
+		    addInvalid(TIdentifierLiteral.class, litClass,
+		         "Missing operator or separator between identifier and literal.");
+		    addInvalid(litClass,TIdentifierLiteral.class,
+		         "Missing operator or separator between literal and identifier.");
+			for (Class<? extends Token> litClass2 : literalTokenClasses) {
+					 addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
+			}
+		}
 		// addInvalid(TIdentifierLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between identifier and identifier.");
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
-		addInvalid(TIdentifierLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between identifier and integer.");
-		addInvalid(TIdentifierLiteral.class, TStringLiteral.class,  "Missing operator or separator between identifier and string.");
 		
-		addInvalid(TIntegerLiteral.class, THexLiteral.class,  "Missing operator or separator between integer and hexadecimal.");
-		addInvalid(TIntegerLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between integer and identifier.");
-		addInvalid(TIntegerLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between integer and integer.");
-		addInvalid(TIntegerLiteral.class, TStringLiteral.class,  "Missing operator or separator between integer and string.");
-		
-		addInvalid(TStringLiteral.class, THexLiteral.class,  "Missing operator or separator between string and hexadecimal.");
-		addInvalid(TStringLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between string and identifier.");
-		addInvalid(TStringLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between string and integer.");
-		addInvalid(TStringLiteral.class, TStringLiteral.class,  "Missing operator or separator between string and string.");
-		
-		addInvalid(THexLiteral.class, THexLiteral.class,  "Missing operator or separator between hexadecimal and hexadecimal.");
-		addInvalid(THexLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between hexadecimal and identifier.");
-		addInvalid(THexLiteral.class, TIntegerLiteral.class,  "Missing operator or separator between hexadecimal and integer.");
-		addInvalid(THexLiteral.class, TStringLiteral.class,  "Missing operator or separator between hexadecimal and string.");
 	}
 	
 	private static void AddBinExprOperators() {

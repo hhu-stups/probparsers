@@ -46,6 +46,14 @@ public class SetType extends AbstractHasFollowers {
 			return (SetType) other.unify(this, typechecker);
 		}
 
+		if (other instanceof RealOrSetType) {
+			return (SetType) other.unify(this, typechecker);
+		}
+
+		if (other instanceof RealOrSetOfPairType) {
+			return (SetType) other.unify(this, typechecker);
+		}
+
 		if (other instanceof FunctionType) {
 			return (SetType) other.unify(this, typechecker);
 		}
@@ -75,6 +83,12 @@ public class SetType extends AbstractHasFollowers {
 		if (other instanceof UntypedType)
 			return true;
 		if (other instanceof IntegerOrSetType || other instanceof IntegerOrSetOfPairType) {
+			return true;
+		} else if (other instanceof FunctionType) {
+			return other.compare(this);
+		}
+
+		if (other instanceof RealOrSetType || other instanceof RealOrSetOfPairType) {
 			return true;
 		} else if (other instanceof FunctionType) {
 			return other.compare(this);
