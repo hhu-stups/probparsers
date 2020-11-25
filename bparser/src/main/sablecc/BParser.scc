@@ -193,7 +193,7 @@ Tokens
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
   {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
-  {normal} power_of = '**';
+  {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = plus;
   {normal} partial_function = plus minus gt | 0x21f8;
   {normal} partial_surjection = plus minus gt gt | 0x2900;
@@ -213,7 +213,7 @@ Tokens
   {normal} not_equal = '/=' | 0x2260;
   {normal} set_subtraction = '\' | 0x2216; // decimal 8726, used in Rodin
   {normal} intersection = '/\' | 0x2229;
-  {normal} restrict_head_sequence = '/|\' | 0x2191;
+  {normal} restrict_head_sequence = '/|\' | 0x2191;    // unicode uparrow for restrict_front operator
   {normal} element_of = ':' | 0x2208;
   {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
   {normal} assign = ':' eq | 0x2254; //8788 decimal, used in Rodin
