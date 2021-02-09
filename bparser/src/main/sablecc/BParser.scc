@@ -638,7 +638,9 @@ set_def_list {-> set*} =
 set {-> set} =
   {description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
-  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])};
+  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
+  {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
+          {-> New set.enumerated_set_via_def([identifier.identifier_literal], [elem_def.identifier_literal])};
   // TO DO: allow description pragmas for enumerated set elements
 
 properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-> New machine_clause.properties(predicates.predicate)};
@@ -1257,7 +1259,8 @@ definition =
 set =
   {description} T.pragma_free_text set |
   {deferred_set} [identifier]:identifier_literal* |
-  {enumerated_set} [identifier]:identifier_literal* [elements]:expression*;
+  {enumerated_set} [identifier]:identifier_literal* [elements]:expression* |
+  {enumerated_set_via_def} [identifier]:identifier_literal* [elements_def]:identifier_literal*;  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
 
 freetype = [name]:identifier_literal [constructors]:freetype_constructor+;
 freetype_constructor =
