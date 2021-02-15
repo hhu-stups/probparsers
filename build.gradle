@@ -11,7 +11,7 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "6.3"
+    gradleVersion = "6.8.2"
     distributionType = Wrapper.DistributionType.ALL
 }
 
