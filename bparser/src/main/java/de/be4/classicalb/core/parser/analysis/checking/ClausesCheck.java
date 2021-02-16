@@ -181,13 +181,20 @@ public class ClausesCheck implements SemanticCheck {
 		}
 	}
 
+	private static String clauseNameFromNodeClassName(final String nodeClassName) {
+		final int endIndex = nodeClassName.indexOf("MachineClause");
+		return nodeClassName.substring(1, endIndex).toUpperCase();
+	}
+
 	private void findForbidden(final String[] forbiddenClassNames, final String machineKindDescription) {
 		final Set<String> clauseClasses = clauses.keySet();
 
+		final Set<String> wrongClauseNames = new HashSet<>();
 		final Set<Set<Node>> wrongClauses = new HashSet<>();
 
 		for (int i = 0; i < forbiddenClassNames.length; i++) {
 			if (clauseClasses.contains(forbiddenClassNames[i])) {
+				wrongClauseNames.add(clauseNameFromNodeClassName(forbiddenClassNames[i]));
 				wrongClauses.add(clauses.get(forbiddenClassNames[i]));
 			}
 		}
@@ -199,7 +206,7 @@ public class ClausesCheck implements SemanticCheck {
 				final Set<Node> nodeSet = iterator.next();
 				nodes.addAll(nodeSet);
 			}
-			exceptions.add(new CheckException("Clause not allowed in " + machineKindDescription,
+			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames),
 					nodes.toArray(new Node[nodes.size()])));
 		}
 	}
@@ -213,9 +220,7 @@ public class ClausesCheck implements SemanticCheck {
 
 			if (nodesforClause.size() > 1) {
 				final Node clauseNode = nodesforClause.iterator().next();
-				final String simpleClassName = clauseNode.getClass().getSimpleName();
-				final int endIndex = simpleClassName.indexOf("MachineClause");
-				final String clauseName = simpleClassName.substring(1, endIndex).toUpperCase();
+				final String clauseName = clauseNameFromNodeClassName(clauseNode.getClass().getSimpleName());
 
 				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
 						nodesforClause.toArray(new Node[nodesforClause.size()])));
