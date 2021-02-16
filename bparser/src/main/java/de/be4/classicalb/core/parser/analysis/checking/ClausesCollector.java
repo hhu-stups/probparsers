@@ -31,13 +31,7 @@ public class ClausesCollector extends DepthFirstAdapter {
 		return refinement;
 	}
 	
-	@Override
-	public void inAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
-		super.inAAbstractMachineParseUnit(node);
-
-		final LinkedList<PMachineClause> machineClauses = node
-				.getMachineClauses();
-
+	private void addMachineClauses(final LinkedList<PMachineClause> machineClauses) {
 		for (final Iterator<PMachineClause> iterator = machineClauses
 				.iterator(); iterator.hasNext();) {
 			final PMachineClause clause = iterator.next();
@@ -55,8 +49,15 @@ public class ClausesCollector extends DepthFirstAdapter {
 	}
 	
 	@Override
+	public void inAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
+		super.inAAbstractMachineParseUnit(node);
+		addMachineClauses(node.getMachineClauses());
+	}
+	
+	@Override
 	public void inARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		super.inARefinementMachineParseUnit(node);
+		addMachineClauses(node.getMachineClauses());
 		refinement = true;
 	}
 	
@@ -64,6 +65,7 @@ public class ClausesCollector extends DepthFirstAdapter {
 	public void inAImplementationMachineParseUnit(
 			AImplementationMachineParseUnit node) {
 		super.inAImplementationMachineParseUnit(node);
+		addMachineClauses(node.getMachineClauses());
 		refinement = true;
 	}
 
