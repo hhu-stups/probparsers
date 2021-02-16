@@ -102,7 +102,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(IMPLEMENTATION_FORBIDDEN_CLAUSES);
+		findForbidden(IMPLEMENTATION_FORBIDDEN_CLAUSES, "implementation machine");
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(REFINEMENT_FORBIDDEN_CLAUSES);
+		findForbidden(REFINEMENT_FORBIDDEN_CLAUSES, "refinement machine");
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(MACHINE_FORBIDDEN_CLAUSES);
+		findForbidden(MACHINE_FORBIDDEN_CLAUSES, "abstract machine");
 	}
 
 	private void checkVariablesClauses() {
@@ -179,7 +179,7 @@ public class ClausesCheck implements SemanticCheck {
 		}
 	}
 
-	private void findForbidden(final String[] forbiddenClassNames) {
+	private void findForbidden(final String[] forbiddenClassNames, final String machineKindDescription) {
 		final Set<String> clauseClasses = clauses.keySet();
 
 		final Set<Set<Node>> wrongClauses = new HashSet<>();
@@ -197,7 +197,7 @@ public class ClausesCheck implements SemanticCheck {
 				final Set<Node> nodeSet = iterator.next();
 				nodes.addAll(nodeSet);
 			}
-			exceptions.add(new CheckException("Clause not allowed in abstract machine",
+			exceptions.add(new CheckException("Clause not allowed in " + machineKindDescription,
 					nodes.toArray(new Node[nodes.size()])));
 		}
 	}
