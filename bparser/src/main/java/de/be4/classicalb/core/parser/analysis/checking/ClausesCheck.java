@@ -77,10 +77,12 @@ public class ClausesCheck implements SemanticCheck {
 		checkMachineClauses(rootNode);
 		checkRefinementClauses(rootNode);
 		checkImplementationClauses(rootNode);
-		checkConstantsClause();
-		checkVariablesClauses();
-		if (collector.hasScalarParameter() && !collector.isRefinement()) {
-			checkConstraintExistance(rootNode);
+		if (!collector.isRefinement()) {
+			checkConstantsClause();
+			checkVariablesClauses();
+			if (collector.hasScalarParameter()) {
+				checkConstraintExistance(rootNode);
+			}
 		}
 	}
 
