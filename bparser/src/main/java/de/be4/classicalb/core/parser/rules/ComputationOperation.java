@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 public class ComputationOperation extends AbstractOperation {
@@ -24,11 +24,11 @@ public class ComputationOperation extends AbstractOperation {
 		String name = identifierLiteral.getText();
 		if (defineMap.containsKey(name)) {
 			throw new CheckException("Variable '" + name + "' is defined more than once.",
-					new Node[] { identifierLiteral, defineMap.get(name) });
+					Arrays.asList(identifierLiteral, defineMap.get(name)));
 		}
 		if (readMap.containsKey(name)) {
 			throw new CheckException("Variable '" + name + "' read before defined.",
-					new Node[] { readMap.get(name), identifierLiteral });
+					Arrays.asList(readMap.get(name), identifierLiteral));
 		}
 		defineMap.put(name, identifierLiteral);
 	}

@@ -160,7 +160,7 @@ public class ClausesCheck implements SemanticCheck {
 				}
 				message.append("INITIALISATION");
 			}
-			exceptions.add(new CheckException(message.toString(), nodes.toArray(new Node[nodes.size()])));
+			exceptions.add(new CheckException(message.toString(), new ArrayList<>(nodes)));
 		}
 	}
 
@@ -178,7 +178,7 @@ public class ClausesCheck implements SemanticCheck {
 			if (clauses.containsKey(AAbstractConstantsMachineClause.class)) {
 				nodes.addAll(clauses.get(AAbstractConstantsMachineClause.class));
 			}
-			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", nodes.toArray(new Node[nodes.size()])));
+			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", new ArrayList<>(nodes)));
 		}
 	}
 
@@ -201,7 +201,7 @@ public class ClausesCheck implements SemanticCheck {
 				wrongClauseNames.add(clauseNameFromNodeClass(wrongClauseClass));
 			}
 			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames),
-					nodes.toArray(new Node[nodes.size()])));
+					new ArrayList<>(nodes)));
 		}
 	}
 
@@ -217,7 +217,7 @@ public class ClausesCheck implements SemanticCheck {
 				final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
 
 				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
-						nodesforClause.toArray(new Node[nodesforClause.size()])));
+						new ArrayList<>(nodesforClause)));
 			}
 		}
 	}

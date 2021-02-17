@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,9 +139,9 @@ public final class PrologExceptionPrinter {
 
 	private static void printCheckException(final IPrologTermOutput pto, final CheckException cause,
 			final String filename, final boolean useIndentation, final boolean lineOneOff) {
-		final Node[] nodes = cause.getNodes();
-		if (nodes != null && nodes.length > 0) {
-			final Node node = nodes[0];
+		final List<Node> nodes = cause.getNodesList();
+		if (nodes != null && !nodes.isEmpty()) {
+			final Node node = nodes.get(0);
 			printExceptionWithSourceRange(pto, cause, filename, node.getStartPos(), node.getEndPos(), useIndentation,
 					lineOneOff);
 		} else {

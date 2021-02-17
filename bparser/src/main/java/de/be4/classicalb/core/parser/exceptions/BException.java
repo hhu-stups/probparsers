@@ -59,7 +59,7 @@ public class BException extends Exception {
 		//super(e.getMessage());
 		//this.filename = filename;
 		//this.cause = e.getCause();
-		for (Node node : e.getNodes()) {
+		for (Node node : e.getNodesList()) {
 			locations.add(new Location(filename, node.getStartPos().getLine(), node.getStartPos().getPos(),
 					node.getEndPos().getLine(), node.getEndPos().getPos()));
 		}
