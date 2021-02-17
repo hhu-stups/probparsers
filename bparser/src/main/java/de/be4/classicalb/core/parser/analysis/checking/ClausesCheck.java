@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.checking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,20 @@ public class ClausesCheck implements SemanticCheck {
 		AAbstractConstantsMachineClause.class,
 		AVariablesMachineClause.class
 	)));
+
+	private static final Map<Class<? extends Node>, String> CLAUSE_NAMES_BY_CLASS;
+	static {
+		final Map<Class<? extends Node>, String> clauseNamesByClass = new HashMap<>();
+		clauseNamesByClass.put(AAbstractConstantsMachineClause.class, "ABSTRACT_CONSTANTS");
+		clauseNamesByClass.put(AConstraintsMachineClause.class, "CONSTRAINTS");
+		clauseNamesByClass.put(AImportsMachineClause.class, "IMPORTS");
+		clauseNamesByClass.put(AIncludesMachineClause.class, "INCLUDES");
+		clauseNamesByClass.put(ALocalOperationsMachineClause.class, "LOCAL_OPERATIONS");
+		clauseNamesByClass.put(AUsesMachineClause.class, "USES");
+		clauseNamesByClass.put(AValuesMachineClause.class, "VALUES");
+		clauseNamesByClass.put(AVariablesMachineClause.class, "VARIABLES (or ABSTRACT_VARIABLES)");
+		CLAUSE_NAMES_BY_CLASS = Collections.unmodifiableMap(clauseNamesByClass);
+	}
 
 	private Map<Class<? extends Node>, Set<Node>> clauses;
 
@@ -182,9 +197,14 @@ public class ClausesCheck implements SemanticCheck {
 	}
 
 	private static String clauseNameFromNodeClass(final Class<? extends Node> nodeClass) {
-		final String nodeClassName = nodeClass.getSimpleName();
-		final int endIndex = nodeClassName.indexOf("MachineClause");
-		return nodeClassName.substring(1, endIndex).toUpperCase();
+		if (CLAUSE_NAMES_BY_CLASS.containsKey(nodeClass)) {
+			return CLAUSE_NAMES_BY_CLASS.get(nodeClass);
+		} else {
+			// Fallback - should never be used.
+			// If a clause class is not listed in CLAUSE_NAMES_BY_CLASS,
+			// please add it!
+			return nodeClass.getSimpleName();
+		}
 	}
 
 	private void findForbidden(final Set<Class<? extends Node>> forbiddenClasses, final String machineKindDescription) {
