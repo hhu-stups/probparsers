@@ -43,7 +43,6 @@ public class ClausesCheck implements SemanticCheck {
 		AIncludesMachineClause.class,
 		AUsesMachineClause.class,
 		AAbstractConstantsMachineClause.class,
-		AVariablesMachineClause.class,
 		AVariablesMachineClause.class
 	)));
 
