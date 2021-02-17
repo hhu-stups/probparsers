@@ -10,9 +10,13 @@ import de.be4.classicalb.core.parser.node.Node;
 public class CheckException extends Exception {
 	private final List<Node> nodes;
 
-	public CheckException(final String message, final List<Node> nodes) {
-		super(message);
+	public CheckException(final String message, final List<Node> nodes, final Throwable cause) {
+		super(message, cause);
 		this.nodes = nodes;
+	}
+
+	public CheckException(final String message, final List<Node> nodes) {
+		this(message, nodes, null);
 	}
 
 	/**
@@ -23,14 +27,12 @@ public class CheckException extends Exception {
 		this(message, Arrays.asList(nodes));
 	}
 
-	public CheckException(final String message, final Node node) {
-		this(message, Collections.singletonList(node));
+	public CheckException(final String message, final Node node, final Throwable cause) {
+		this(message, Collections.singletonList(node), cause);
 	}
 
-	public CheckException(String message, Node aStringExpr, Exception e) {
-		super(message, e);
-		this.nodes = Collections.singletonList(aStringExpr);
-
+	public CheckException(final String message, final Node node) {
+		this(message, Collections.singletonList(node));
 	}
 
 	/**
