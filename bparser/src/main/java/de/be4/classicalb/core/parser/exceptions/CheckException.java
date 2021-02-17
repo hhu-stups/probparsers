@@ -14,7 +14,7 @@ public class CheckException extends Exception {
 		super(message);
 		this.nodes = nodes;
 	}
-	
+
 	/**
 	 * @deprecated Use {@link #CheckException(String, List)} with a {@link List} argument instead.
 	 */
@@ -62,6 +62,10 @@ public class CheckException extends Exception {
 		return this.getNodesList().toArray(new Node[0]);
 	}
 
+	/**
+	 * @deprecated Use {@code .getNodesList().get(0)} instead.
+	 */
+	@Deprecated
 	public Node getFirstNode() {
 		return this.getNodesList().get(0);
 	}
