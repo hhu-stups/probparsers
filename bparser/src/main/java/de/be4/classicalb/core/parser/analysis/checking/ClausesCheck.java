@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,12 +41,15 @@ public class ClausesCheck implements SemanticCheck {
 	private static final String NAME_CONSTRAINTS = AConstraintsMachineClause.class.getSimpleName();
 	private static final String NAME_INCLUDES = AIncludesMachineClause.class.getSimpleName();
 
-	private static final String[] MACHINE_FORBIDDEN_CLAUSES = new String[] { /* NAME_LOCAL_OPERATIONS, */ NAME_IMPORTS,
-			NAME_VALUES };
-	private static final String[] REFINEMENT_FORBIDDEN_CLAUSES = new String[] { NAME_USES, NAME_CONSTRAINTS,
-			NAME_LOCAL_OPERATIONS, NAME_IMPORTS, NAME_VALUES };
-	private static final String[] IMPLEMENTATION_FORBIDDEN_CLAUSES = new String[] { NAME_CONSTRAINTS, NAME_INCLUDES,
-			NAME_USES, NAME_ABSTRACT_CONSTANTS, NAME_VARIABLES, NAME_VARIABLES };
+	private static final Set<String> MACHINE_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		/* NAME_LOCAL_OPERATIONS, */ NAME_IMPORTS, NAME_VALUES
+	)));
+	private static final Set<String> REFINEMENT_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		NAME_USES, NAME_CONSTRAINTS, NAME_LOCAL_OPERATIONS, NAME_IMPORTS, NAME_VALUES
+	)));
+	private static final Set<String> IMPLEMENTATION_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		NAME_CONSTRAINTS, NAME_INCLUDES, NAME_USES, NAME_ABSTRACT_CONSTANTS, NAME_VARIABLES, NAME_VARIABLES
+	)));
 
 	private Map<String, Set<Node>> clauses;
 
@@ -186,25 +191,17 @@ public class ClausesCheck implements SemanticCheck {
 		return nodeClassName.substring(1, endIndex).toUpperCase();
 	}
 
-	private void findForbidden(final String[] forbiddenClassNames, final String machineKindDescription) {
-		final Set<String> clauseClasses = clauses.keySet();
+	private void findForbidden(final Set<String> forbiddenClassNames, final String machineKindDescription) {
+		final Set<String> wrongClauseClassNames = new HashSet<>(clauses.keySet());
+		wrongClauseClassNames.retainAll(forbiddenClassNames);
 
-		final Set<String> wrongClauseNames = new HashSet<>();
-		final Set<Set<Node>> wrongClauses = new HashSet<>();
-
-		for (int i = 0; i < forbiddenClassNames.length; i++) {
-			if (clauseClasses.contains(forbiddenClassNames[i])) {
-				wrongClauseNames.add(clauseNameFromNodeClassName(forbiddenClassNames[i]));
-				wrongClauses.add(clauses.get(forbiddenClassNames[i]));
-			}
-		}
-
-		if (!wrongClauses.isEmpty()) {
+		if (!wrongClauseClassNames.isEmpty()) {
 			final Set<Node> nodes = new HashSet<>();
+			final Set<String> wrongClauseNames = new HashSet<>();
 
-			for (final Iterator<Set<Node>> iterator = wrongClauses.iterator(); iterator.hasNext();) {
-				final Set<Node> nodeSet = iterator.next();
-				nodes.addAll(nodeSet);
+			for (final String wrongClauseClassName : wrongClauseClassNames) {
+				nodes.addAll(clauses.get(wrongClauseClassName));
+				wrongClauseNames.add(clauseNameFromNodeClassName(wrongClauseClassName));
 			}
 			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames),
 					nodes.toArray(new Node[nodes.size()])));
