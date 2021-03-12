@@ -91,16 +91,10 @@ public final class PrologExceptionPrinter {
 			// TODO Check which of these special cases are actually necessary.
 			// Ideally, all exception types would be handled generically
 			// using BException's location info and printGeneralParseException.
-			if (cause instanceof BLexerException) {
-				printBLexerException(pto, (BLexerException) cause, filename, useIndentation, lineOneOff);
-			} else if (cause instanceof LexerException) {
+			if (cause instanceof LexerException) {
 				printLexerException(pto, (LexerException) cause, filename, useIndentation, lineOneOff);
-			} else if (cause instanceof BParseException) {
-				printBParseException(pto, (BParseException) cause, filename, useIndentation, lineOneOff);
 			} else if (cause instanceof PreParseException) {
 				printPreParseException(pto, (PreParseException) cause, filename, useIndentation, lineOneOff);
-			} else if (cause instanceof CheckException) {
-				printCheckException(pto, (CheckException) cause, filename, useIndentation, lineOneOff);
 			} else {
 				printGeneralParseException(pto, e, useIndentation, lineOneOff);
 			}
@@ -121,18 +115,6 @@ public final class PrologExceptionPrinter {
 			pos = null;
 		}
 		printExceptionWithSourcePosition(pto, cause, filename, pos, useIndentation, lineOneOff);
-	}
-
-	private static void printCheckException(final IPrologTermOutput pto, final CheckException cause,
-			final String filename, final boolean useIndentation, final boolean lineOneOff) {
-		final List<Node> nodes = cause.getNodesList();
-		if (nodes != null && !nodes.isEmpty()) {
-			final Node node = nodes.get(0);
-			printExceptionWithSourceRange(pto, cause, filename, node.getStartPos(), node.getEndPos(), useIndentation,
-					lineOneOff);
-		} else {
-			printExceptionWithSourcePosition(pto, cause, filename, null, useIndentation, lineOneOff);
-		}
 	}
 
 	private static void printGeneralParseException(final IPrologTermOutput pto, final BException e, final boolean useIndentation, final boolean lineOneOff) {
@@ -186,13 +168,6 @@ public final class PrologExceptionPrinter {
 		pto.closeList();
 		printMsg(pto, e, useIndentation);
 		pto.closeTerm();
-	}
-
-	private static void printBParseException(final IPrologTermOutput pto, final BParseException e,
-			final String filename, final boolean useIndentation, final boolean lineOneOff) {
-		final Token token = e.getToken();
-		final SourcePosition pos = token == null ? null : new SourcePosition(token.getLine(), token.getPos());
-		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
 	}
 
 	private static void printBLexerException(final IPrologTermOutput pto, final BLexerException e,
