@@ -52,9 +52,14 @@ public final class PrologExceptionPrinter {
 		printException(out, e, true, false);
 	}
 
-	public static void printException(final OutputStream out, final BCompoundException e, boolean useIndentation,
-			boolean lineOneOff) {
+	public static void printException(final OutputStream out, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {
 		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
+		printException(pto, e, useIndentation, lineOneOff);
+		pto.fullstop();
+		pto.flush();
+	}
+
+	public static void printException(final IPrologTermOutput pto, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {
 		if (e.getBExceptions().size() > 1) {
 			pto.openTerm("compound_exception", true);
 			pto.openList();
@@ -70,14 +75,9 @@ public final class PrologExceptionPrinter {
 			}
 			pto.closeList();
 			pto.closeTerm();
-			pto.fullstop();
-			pto.flush();
-			return;
 		} else if (e.getBExceptions().size() == 1) {
 			// single BException
 			printBException(pto, e.getBExceptions().get(0), useIndentation, lineOneOff);
-			pto.fullstop();
-			pto.flush();
 		} else {
 			throw new IllegalStateException("Empty compoundException.");
 		}
