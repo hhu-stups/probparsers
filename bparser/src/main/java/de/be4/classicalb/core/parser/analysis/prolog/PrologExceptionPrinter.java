@@ -81,13 +81,16 @@ public final class PrologExceptionPrinter {
 		Throwable cause = e.getCause();
 		String filename = e.getFilename();
 		if (cause == null) {
-			printGeneralException(pto, e, useIndentation);
+			printGeneralParseException(pto, e, useIndentation, lineOneOff);
 		} else {
 			while (cause.getClass().equals(BException.class) && cause.getCause() != null) {
 				BException bex = (BException) cause;
 				cause = bex.getCause();
 				filename = bex.getFilename();
 			}
+			// TODO Check which of these special cases are actually necessary.
+			// Ideally, all exception types would be handled generically
+			// using BException's location info and printGeneralParseException.
 			if (cause instanceof BLexerException) {
 				printBLexerException(pto, (BLexerException) cause, filename, useIndentation, lineOneOff);
 			} else if (cause instanceof LexerException) {
@@ -99,7 +102,7 @@ public final class PrologExceptionPrinter {
 			} else if (cause instanceof CheckException) {
 				printCheckException(pto, (CheckException) cause, filename, useIndentation, lineOneOff);
 			} else {
-				printGeneralException(pto, cause, useIndentation);
+				printGeneralParseException(pto, e, useIndentation, lineOneOff);
 			}
 		}
 	}
@@ -132,11 +135,21 @@ public final class PrologExceptionPrinter {
 		}
 	}
 
-	private static void printGeneralException(final IPrologTermOutput pto, final Throwable cause,
-			final boolean useIndentation) {
-		pto.openTerm("exception");
-		printMsg(pto, cause, useIndentation);
-		pto.closeTerm();
+	private static void printGeneralParseException(final IPrologTermOutput pto, final BException e, final boolean useIndentation, final boolean lineOneOff) {
+		if (e.getLocations().isEmpty()) {
+			printExceptionWithSourcePosition(pto, e, e.getFilename(), null, useIndentation, lineOneOff);
+		} else {
+			// TODO Handle more than one location
+			final BException.Location location = e.getLocations().get(0);
+			final SourcePosition beginPos = new SourcePosition(location.getStartLine(), location.getStartColumn());
+			final SourcePosition endPos = new SourcePosition(location.getEndLine(), location.getEndColumn());
+			if (beginPos.compareTo(endPos) == 0) {
+				// Begin and end position are equal, so return a single position instead of a range.
+				printExceptionWithSourcePosition(pto, e, location.getFilename(), beginPos, useIndentation, lineOneOff);
+			} else {
+				printExceptionWithSourceRange(pto, e, location.getFilename(), beginPos, endPos, useIndentation, lineOneOff);
+			}
+		}
 	}
 
 	private static void printPreParseException(final IPrologTermOutput pto, final PreParseException e,
