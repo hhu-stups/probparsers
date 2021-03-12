@@ -63,15 +63,8 @@ public final class PrologExceptionPrinter {
 		if (e.getBExceptions().size() > 1) {
 			pto.openTerm("compound_exception", true);
 			pto.openList();
-			BCompoundException comp = e;
-			for (Exception ex : comp.getBExceptions()) {
-				try {
-					printBException(pto, (BException) ex, useIndentation, lineOneOff);
-				} catch (ClassCastException e2) {
-					throw new IllegalStateException(
-							"Unexpected exception in compound exceptions:" + ex.getClass().getSimpleName());
-				}
-
+			for (BException ex : e.getBExceptions()) {
+				printBException(pto, ex, useIndentation, lineOneOff);
 			}
 			pto.closeList();
 			pto.closeTerm();
