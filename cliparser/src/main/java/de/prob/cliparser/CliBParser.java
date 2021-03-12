@@ -343,22 +343,21 @@ public class CliBParser {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false);
+			Start start = parser.parse(theFormula, false); // debugOutput=false
+			
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
 			NodeIdAssignment na = new NodeIdAssignment();
 			start.apply(na);
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
-
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
 			strOutput.fullstop();
 
 			// A Friendly Reminder: strOutput includes a newline!
-			String output = strOutput.toString();
-			print(output);
+			print(strOutput.toString());
 		} catch (NullPointerException e) {
 			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
 			// NullPointerException returns NULL itself, thus triggering another
@@ -370,8 +369,7 @@ public class CliBParser {
 			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
 			strOutput.fullstop();
 			strOutput.flush();
-			String output = strOutput.toString();
-			print(output);
+			print(strOutput.toString());
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 
