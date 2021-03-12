@@ -106,28 +106,18 @@ public final class PrologExceptionPrinter {
 
 	private static void printLexerException(IPrologTermOutput pto, Exception cause, String filename,
 			boolean useIndentation, boolean lineOneOff) {
-		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
 		// there is no source information / position attached to lexer
 		// exceptions -> extract from message
 		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
 		Matcher m = p.matcher(cause.getMessage());
 		boolean posFound = m.lookingAt();
+		final SourcePosition pos;
 		if (posFound) {
-			pto.openTerm("pos");
-			int line = Integer.parseInt(m.group(1));
-			if (lineOneOff) {
-				line--;
-			}
-			pto.printNumber(line);
-			pto.printNumber(Integer.parseInt(m.group(2)));
-			pto.printAtom(filename);
-			pto.closeTerm();
+			pos = new SourcePosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
 		} else {
-			pto.printAtom("none");
+			pos = null;
 		}
-
-		printMsg(pto, cause, useIndentation);
-		pto.closeTerm();
+		printExceptionWithSourcePosition(pto, cause, filename, pos, useIndentation, lineOneOff);
 	}
 
 	private static void printCheckException(final IPrologTermOutput pto, final CheckException cause,
