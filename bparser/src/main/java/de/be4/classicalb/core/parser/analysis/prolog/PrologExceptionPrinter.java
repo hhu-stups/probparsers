@@ -136,16 +136,15 @@ public final class PrologExceptionPrinter {
 			return;
 		}
 
-		de.be4.classicalb.core.preparser.node.Token[] tokens = e.getTokens();
-		if (tokens.length == 0 && e.getCause() instanceof de.be4.classicalb.core.preparser.lexer.LexerException) {
+		final List<de.be4.classicalb.core.preparser.node.Token> tokens = e.getTokensList();
+		if (tokens.isEmpty() && e.getCause() instanceof de.be4.classicalb.core.preparser.lexer.LexerException) {
 			printLexerException(pto, (Exception) e.getCause(), filename, useIndentation, lineOneOff);
 			return;
 		}
 		pto.openTerm("preparse_exception");
 		pto.openList();
 
-		for (int i = 0; i < tokens.length; i++) {
-			de.be4.classicalb.core.preparser.node.Token token = tokens[i];
+		for (final de.be4.classicalb.core.preparser.node.Token token : tokens) {
 			if (token == null) {
 				pto.printAtom("none");
 			} else {
