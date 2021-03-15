@@ -113,20 +113,28 @@ public final class PrologExceptionPrinter {
 	}
 
 	private static void printGeneralParseException(final IPrologTermOutput pto, final BException e, final boolean useIndentation, final boolean lineOneOff) {
-		if (e.getLocations().isEmpty()) {
-			printExceptionWithSourcePosition(pto, e, e.getFilename(), null, useIndentation, lineOneOff);
-		} else {
-			// TODO Handle more than one location
-			final BException.Location location = e.getLocations().get(0);
-			final SourcePosition beginPos = new SourcePosition(location.getStartLine(), location.getStartColumn());
-			final SourcePosition endPos = new SourcePosition(location.getEndLine(), location.getEndColumn());
-			if (beginPos.compareTo(endPos) == 0) {
-				// Begin and end position are equal, so return a single position instead of a range.
-				printExceptionWithSourcePosition(pto, e, location.getFilename(), beginPos, useIndentation, lineOneOff);
+		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
+		pto.openList();
+		for (final BException.Location location : e.getLocations()) {
+			pto.openTerm("pos");
+			if (lineOneOff) {
+				pto.printNumber(location.getStartLine() - 1);
 			} else {
-				printExceptionWithSourceRange(pto, e, location.getFilename(), beginPos, endPos, useIndentation, lineOneOff);
+				pto.printNumber(location.getStartLine());
 			}
+			pto.printNumber(location.getStartColumn());
+			if (lineOneOff) {
+				pto.printNumber(location.getEndLine() - 1);
+			} else {
+				pto.printNumber(location.getEndLine());
+			}
+			pto.printNumber(location.getEndColumn());
+			pto.printAtom(location.getFilename());
+			pto.closeTerm();
 		}
+		pto.closeList();
+		printMsg(pto, e, useIndentation);
+		pto.closeTerm();
 	}
 
 	private static void printPreParseException(final IPrologTermOutput pto, final PreParseException e,
@@ -169,33 +177,6 @@ public final class PrologExceptionPrinter {
 		final Token token = e.getLastToken();
 		final SourcePosition pos = token == null ? null : new SourcePosition(token.getLine(), token.getPos());
 		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
-	}
-
-	private static void printExceptionWithSourceRange(final IPrologTermOutput pto, final Throwable e,
-			final String filename, final SourcePosition beginPos, final SourcePosition endPos,
-			final boolean useIndentation, final boolean lineOneOff) {
-		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
-		if (beginPos == null) {
-			pto.printAtom("none");
-		} else {
-			pto.openTerm("pos");
-			if (lineOneOff) {
-				pto.printNumber((long) beginPos.getLine() - 1);
-			} else {
-				pto.printNumber(beginPos.getLine());
-			}
-			pto.printNumber(beginPos.getPos());
-			if (lineOneOff) {
-				pto.printNumber((long) endPos.getLine() - 1);
-			} else {
-				pto.printNumber(endPos.getLine());
-			}
-			pto.printNumber(endPos.getPos());
-			pto.printAtom(filename);
-			pto.closeTerm();
-		}
-		printMsg(pto, e, useIndentation);
-		pto.closeTerm();
 	}
 
 	private static void printExceptionWithSourcePosition(final IPrologTermOutput pto, final Throwable e,
