@@ -26,7 +26,7 @@ public class BException extends Exception {
 
 	public BException(String fileName, LexerException e) {
 		this(fileName, e.getMessage(), e);
-		final Location location = Location.parseFromSableCCMessage(e.getMessage(), fileName);
+		final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
 		if (location != null) {
 			locations.add(location);
 		}
@@ -47,7 +47,7 @@ public class BException extends Exception {
 
 	public BException(String fileName, PreParseException e) {
 		this(fileName, e.getMessage(), e);
-		final Location location = Location.parseFromSableCCMessage(e.getMessage(), fileName);
+		final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
 		if (location != null) {
 			locations.add(location);
 		}
@@ -123,7 +123,7 @@ public class BException extends Exception {
 			);
 		}
 
-		private static Location parseFromSableCCMessage(final String message, final String filename) {
+		private static Location parseFromSableCCMessage(final String filename, final String message) {
 			if (message == null) {
 				return null;
 			}
