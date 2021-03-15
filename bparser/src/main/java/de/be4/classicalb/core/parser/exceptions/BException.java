@@ -14,14 +14,12 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 public class BException extends Exception {
 
 	private static final long serialVersionUID = -693107947667081359L;
-	private final Throwable cause;
 	private final String filename;
 	private final List<Location> locations = new ArrayList<>();
 
-	public BException(final String filename, final String message, final Exception cause) {
-		super(message);
+	public BException(final String filename, final String message, final Throwable cause) {
+		super(message, cause);
 		this.filename = filename;
-		this.cause = cause;
 	}
 
 	public BException(String fileName, LexerException e) {
@@ -64,11 +62,6 @@ public class BException extends Exception {
 		this(filename, e.getMessage(), e);
 	}
 
-	@Override
-	public Throwable getCause() {
-		return this.cause;
-	}
-
 	public List<Location> getLocations() {
 		return this.locations;
 	}
@@ -81,11 +74,6 @@ public class BException extends Exception {
 	@Override
 	public String getLocalizedMessage() {
 		return getMessage();
-	}
-
-	@Override
-	public StackTraceElement[] getStackTrace() {
-		return cause.getStackTrace();
 	}
 
 	public static final class Location implements Serializable {
