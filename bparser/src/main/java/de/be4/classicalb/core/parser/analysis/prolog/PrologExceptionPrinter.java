@@ -88,12 +88,7 @@ public final class PrologExceptionPrinter {
 				cause = bex.getCause();
 				filename = bex.getFilename();
 			}
-			// TODO Check which of these special cases are actually necessary.
-			// Ideally, all exception types would be handled generically
-			// using BException's location info and printGeneralParseException.
-			if (cause instanceof LexerException && !(cause instanceof BLexerException)) {
-				printLexerException(pto, (LexerException) cause, filename, useIndentation, lineOneOff);
-			} else if (cause instanceof PreParseException) {
+			if (cause instanceof PreParseException) {
 				printPreParseException(pto, (PreParseException) cause, filename, useIndentation, lineOneOff);
 			} else {
 				printGeneralParseException(pto, e, useIndentation, lineOneOff);

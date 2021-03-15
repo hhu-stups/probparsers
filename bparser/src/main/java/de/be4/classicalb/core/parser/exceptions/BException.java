@@ -26,6 +26,10 @@ public class BException extends Exception {
 
 	public BException(String fileName, LexerException e) {
 		this(fileName, e.getMessage(), e);
+		final Location location = Location.parseFromSableCCMessage(e.getMessage(), fileName);
+		if (location != null) {
+			locations.add(location);
+		}
 	}
 
 
