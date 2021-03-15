@@ -71,11 +71,6 @@ public class BException extends Exception {
 		return filename;
 	}
 
-	@Override
-	public String getLocalizedMessage() {
-		return getMessage();
-	}
-
 	public static final class Location implements Serializable {
 
 		private static final long serialVersionUID = -7391092302311266417L;
