@@ -40,6 +40,7 @@ public class PreParseException extends Exception {
 	/**
 	 * @deprecated Use {@link #PreParseException(List, String)} with a {@link List} argument instead.
 	 */
+	@Deprecated
 	public PreParseException(final Token[] tokens, final String message) {
 		this(Arrays.asList(tokens), message);
 	}
