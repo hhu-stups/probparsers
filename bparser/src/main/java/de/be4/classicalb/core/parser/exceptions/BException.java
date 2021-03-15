@@ -47,10 +47,7 @@ public class BException extends Exception {
 
 	public BException(String fileName, PreParseException e) {
 		this(fileName, e.getMessage(), e);
-		final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
-		if (location != null) {
-			locations.add(location);
-		}
+		e.getTokensList().forEach(token -> locations.add(Location.fromNode(fileName, token)));
 	}
 
 	public BException(final String filename, final CheckException e) {
