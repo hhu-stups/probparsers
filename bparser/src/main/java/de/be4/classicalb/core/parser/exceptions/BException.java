@@ -44,13 +44,9 @@ public class BException extends Exception {
 
 	public BException(String fileName, PreParseException e) {
 		this(fileName, e.getMessage(), e);
-		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
-		Matcher m = p.matcher(cause.getMessage());
-		boolean posFound = m.lookingAt();
-		if (posFound) {
-			int line = Integer.parseInt(m.group(1));
-			int pos = Integer.parseInt(m.group(2));
-			locations.add(new Location(filename, line, pos, line, pos));
+		final Location location = Location.parseFromSableCCMessage(e.getMessage(), fileName);
+		if (location != null) {
+			locations.add(location);
 		}
 	}
 
@@ -96,6 +92,9 @@ public class BException extends Exception {
 	public static final class Location implements Serializable {
 
 		private static final long serialVersionUID = -7391092302311266417L;
+
+		private static final Pattern SABLECC_MESSAGE_LOCATION_PATTERN = Pattern.compile("\\[(\\d+),(\\d+)\\].*", Pattern.DOTALL);
+
 		private final String filename;
 		private final int startLine;
 		private final int startColumn;
@@ -110,6 +109,21 @@ public class BException extends Exception {
 			this.startColumn = startColumn;
 			this.endLine = endLine;
 			this.endColumn = endColumn;
+		}
+
+		private static Location parseFromSableCCMessage(final String message, final String filename) {
+			if (message == null) {
+				return null;
+			}
+
+			final Matcher matcher = SABLECC_MESSAGE_LOCATION_PATTERN.matcher(message);
+			if (matcher.lookingAt()) {
+				final int line = Integer.parseInt(matcher.group(1));
+				final int pos = Integer.parseInt(matcher.group(2));
+				return new Location(filename, line, pos, line, pos);
+			} else {
+				return null;
+			}
 		}
 
 		public String getFilename() {
