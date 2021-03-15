@@ -332,7 +332,7 @@ public class BLexer extends Lexer {
 		Class<? extends Token> lastTokenClass = lastToken.getClass();
 		Class<? extends Token> tokenClass = token.getClass();
 
-		if(parseOptions != null && !parseOptions.isIgnoreCheckingValidCombinations()) {
+		if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
 			checkForInvalidCombinations(lastTokenClass, tokenClass);
 			// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
 		}
