@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class BException extends Exception {
 
@@ -41,8 +41,7 @@ public class BException extends Exception {
 	public BException(String fileName, BParseException e) {
 		this(fileName, e.getMessage(), e);
 		if (e.getToken() != null) {
-			Token token = e.getToken();
-			locations.add(new Location(filename, token.getLine(), token.getPos(), token.getLine(), token.getPos()));
+			locations.add(Location.fromNode(fileName, e.getToken()));
 		}
 	}
 
@@ -60,8 +59,7 @@ public class BException extends Exception {
 		//this.filename = filename;
 		//this.cause = e.getCause();
 		for (Node node : e.getNodesList()) {
-			locations.add(new Location(filename, node.getStartPos().getLine(), node.getStartPos().getPos(),
-					node.getEndPos().getLine(), node.getEndPos().getPos()));
+			locations.add(Location.fromNode(filename, node));
 		}
 	}
 
@@ -113,6 +111,16 @@ public class BException extends Exception {
 			this.startColumn = startColumn;
 			this.endLine = endLine;
 			this.endColumn = endColumn;
+		}
+
+		private static Location fromNode(final String filename, final PositionedNode node) {
+			return new Location(
+				filename,
+				node.getStartPos().getLine(),
+				node.getStartPos().getPos(),
+				node.getEndPos().getLine(),
+				node.getEndPos().getPos()
+			);
 		}
 
 		private static Location parseFromSableCCMessage(final String message, final String filename) {
