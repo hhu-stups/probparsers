@@ -2,8 +2,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -100,19 +98,4 @@ public final class PrologExceptionPrinter {
 
 		}
 	}
-
-	@SuppressWarnings("unused")
-	private static String fixMessageLineOneOff(String message) {
-		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\](.*)", Pattern.DOTALL);
-		Matcher m = p.matcher(message);
-
-		if (m.lookingAt()) {
-			int actualLineNr = Integer.parseInt(m.group(1)) - 1;
-			return message.replaceFirst(m.group(1), Integer.toString(actualLineNr));
-		} else {
-			// did not match - can not fix line number
-			return message;
-		}
-	}
-
 }
