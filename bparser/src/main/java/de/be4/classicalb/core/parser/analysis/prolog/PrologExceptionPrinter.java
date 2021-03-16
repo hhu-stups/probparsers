@@ -2,20 +2,11 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.Token;
-import de.hhu.stups.sablecc.patch.SourcePosition;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -78,38 +69,7 @@ public final class PrologExceptionPrinter {
 
 	public static void printBException(IPrologTermOutput pto, final BException e, boolean useIndentation,
 			boolean lineOneOff) {
-		Throwable cause = e.getCause();
-		String filename = e.getFilename();
-		if (cause == null) {
-			printGeneralParseException(pto, e, useIndentation, lineOneOff);
-		} else {
-			while (cause.getClass().equals(BException.class) && cause.getCause() != null) {
-				BException bex = (BException) cause;
-				cause = bex.getCause();
-				filename = bex.getFilename();
-			}
-			if (cause instanceof PreParseException) {
-				printPreParseException(pto, (PreParseException) cause, filename, useIndentation, lineOneOff);
-			} else {
-				printGeneralParseException(pto, e, useIndentation, lineOneOff);
-			}
-		}
-	}
-
-	private static void printLexerException(IPrologTermOutput pto, Exception cause, String filename,
-			boolean useIndentation, boolean lineOneOff) {
-		// there is no source information / position attached to lexer
-		// exceptions -> extract from message
-		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
-		Matcher m = p.matcher(cause.getMessage());
-		boolean posFound = m.lookingAt();
-		final SourcePosition pos;
-		if (posFound) {
-			pos = new SourcePosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
-		} else {
-			pos = null;
-		}
-		printExceptionWithSourcePosition(pto, cause, filename, pos, useIndentation, lineOneOff);
+		printGeneralParseException(pto, e, useIndentation, lineOneOff);
 	}
 
 	private static void printGeneralParseException(final IPrologTermOutput pto, final BException e, final boolean useIndentation, final boolean lineOneOff) {
@@ -133,68 +93,6 @@ public final class PrologExceptionPrinter {
 			pto.closeTerm();
 		}
 		pto.closeList();
-		printMsg(pto, e, useIndentation);
-		pto.closeTerm();
-	}
-
-	private static void printPreParseException(final IPrologTermOutput pto, final PreParseException e,
-			final String filename, final boolean useIndentation, final boolean lineOneOff) {
-		if (e.getCause() instanceof BLexerException) {
-			printBLexerException(pto, (BLexerException) e.getCause(), filename, useIndentation, lineOneOff);
-			return;
-		}
-
-		final List<de.be4.classicalb.core.preparser.node.Token> tokens = e.getTokensList();
-		if (tokens.isEmpty() && e.getCause() instanceof de.be4.classicalb.core.preparser.lexer.LexerException) {
-			printLexerException(pto, (Exception) e.getCause(), filename, useIndentation, lineOneOff);
-			return;
-		}
-		pto.openTerm("preparse_exception");
-		pto.openList();
-
-		for (final de.be4.classicalb.core.preparser.node.Token token : tokens) {
-			if (token == null) {
-				pto.printAtom("none");
-			} else {
-				pto.openTerm("pos");
-				if (lineOneOff) {
-					pto.printNumber((long) token.getLine() - 1);
-				} else {
-					pto.printNumber(token.getLine());
-				}
-				pto.printNumber(token.getPos());
-				pto.printAtom(filename);
-				pto.closeTerm();
-			}
-		}
-		pto.closeList();
-		printMsg(pto, e, useIndentation);
-		pto.closeTerm();
-	}
-
-	private static void printBLexerException(final IPrologTermOutput pto, final BLexerException e,
-			final String filename, final boolean useIndentation, final boolean lineOneOff) {
-		final Token token = e.getLastToken();
-		final SourcePosition pos = token == null ? null : new SourcePosition(token.getLine(), token.getPos());
-		printExceptionWithSourcePosition(pto, e, filename, pos, useIndentation, lineOneOff);
-	}
-
-	private static void printExceptionWithSourcePosition(final IPrologTermOutput pto, final Throwable e,
-			final String filename, final SourcePosition pos, final boolean useIndentation, final boolean lineOneOff) {
-		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
-		if (pos == null) {
-			pto.printAtom("none");
-		} else {
-			pto.openTerm("pos");
-			if (lineOneOff) {
-				pto.printNumber((long) pos.getLine() - 1);
-			} else {
-				pto.printNumber(pos.getLine());
-			}
-			pto.printNumber(pos.getPos());
-			pto.printAtom(filename);
-			pto.closeTerm();
-		}
 		printMsg(pto, e, useIndentation);
 		pto.closeTerm();
 	}
