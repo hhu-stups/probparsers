@@ -45,7 +45,19 @@ public class BException extends Exception {
 
 	public BException(String fileName, PreParseException e) {
 		this(fileName, e.getMessage(), e);
-		e.getTokensList().forEach(token -> locations.add(Location.fromNode(fileName, token)));
+		if (e.getTokensList().isEmpty()) {
+			// Fallback for LexerException wrapped in PreParseException.
+			// In this case there are no tokens attached to the exception
+			// (it's a lexer error, so there can be no token for the error location),
+			// but there is position information in the message,
+			// which can be extracted.
+			final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
+			if (location != null) {
+				locations.add(location);
+			}
+		} else {
+			e.getTokensList().forEach(token -> locations.add(Location.fromNode(fileName, token)));
+		}
 	}
 
 	public BException(final String filename, final CheckException e) {
