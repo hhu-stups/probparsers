@@ -20,8 +20,6 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  */
 public final class PrologExceptionPrinter {
-	private static final String PARSE_EXCEPTION_PROLOG_TERM = "parse_exception";
-
 	private PrologExceptionPrinter() {
 		// this class contains only static methods
 	}
@@ -69,11 +67,7 @@ public final class PrologExceptionPrinter {
 
 	public static void printBException(IPrologTermOutput pto, final BException e, boolean useIndentation,
 			boolean lineOneOff) {
-		printGeneralParseException(pto, e, useIndentation, lineOneOff);
-	}
-
-	private static void printGeneralParseException(final IPrologTermOutput pto, final BException e, final boolean useIndentation, final boolean lineOneOff) {
-		pto.openTerm(PARSE_EXCEPTION_PROLOG_TERM);
+		pto.openTerm("parse_exception");
 		pto.openList();
 		for (final BException.Location location : e.getLocations()) {
 			pto.openTerm("pos");
