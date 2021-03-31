@@ -22,41 +22,41 @@ public class BException extends Exception {
 		this.filename = filename;
 	}
 
-	public BException(String fileName, LexerException e) {
-		this(fileName, e.getMessage(), e);
-		final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
+	public BException(String filename, LexerException e) {
+		this(filename, e.getMessage(), e);
+		final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
 		if (location != null) {
 			locations.add(location);
 		}
 	}
 
 
-	public BException(String fileName, BLexerException e) {
-		this(fileName, e.getMessage(), e);
+	public BException(String filename, BLexerException e) {
+		this(filename, e.getMessage(), e);
 		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos()));
 	}
 
-	public BException(String fileName, BParseException e) {
-		this(fileName, e.getMessage(), e);
+	public BException(String filename, BParseException e) {
+		this(filename, e.getMessage(), e);
 		if (e.getToken() != null) {
-			locations.add(Location.fromNode(fileName, e.getToken()));
+			locations.add(Location.fromNode(filename, e.getToken()));
 		}
 	}
 
-	public BException(String fileName, PreParseException e) {
-		this(fileName, e.getMessage(), e);
+	public BException(String filename, PreParseException e) {
+		this(filename, e.getMessage(), e);
 		if (e.getTokensList().isEmpty()) {
 			// Fallback for LexerException wrapped in PreParseException.
 			// In this case there are no tokens attached to the exception
 			// (it's a lexer error, so there can be no token for the error location),
 			// but there is position information in the message,
 			// which can be extracted.
-			final Location location = Location.parseFromSableCCMessage(fileName, e.getMessage());
+			final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
 			if (location != null) {
 				locations.add(location);
 			}
 		} else {
-			e.getTokensList().forEach(token -> locations.add(Location.fromNode(fileName, token)));
+			e.getTokensList().forEach(token -> locations.add(Location.fromNode(filename, token)));
 		}
 	}
 
@@ -95,10 +95,10 @@ public class BException extends Exception {
 		private final int endLine;
 		private final int endColumn;
 
-		public Location(final String fileName, final int startLine, final int startColumn, final int endLine,
+		public Location(final String filename, final int startLine, final int startColumn, final int endLine,
 				final int endColumn) {
 
-			this.filename = fileName;
+			this.filename = filename;
 			this.startLine = startLine;
 			this.startColumn = startColumn;
 			this.endLine = endLine;
