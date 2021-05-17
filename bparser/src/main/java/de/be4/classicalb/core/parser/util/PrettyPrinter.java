@@ -562,6 +562,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append(" END");
 	}
 
+	@Override
+	public void caseALetExpressionExpression(final ALetExpressionExpression node) {
+		sb.append("LET ");
+		commaSeparatedExpressionList(node.getIdentifiers());
+		sb.append(" BE ");
+		node.getAssignment().apply(this);
+		sb.append(" IN ");
+		node.getExpr().apply(this);
+		sb.append(" END");
+	}
+
 	private void commaSeparatedExpressionList(List<PExpression> list) {
 		list.get(0).apply(this);
 		for (int i = 1; i < list.size(); i++) {
@@ -1535,6 +1546,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAStringSetExpression(final AStringSetExpression arg0) {
 		sb.append("STRING");
+	}
+
+	@Override
+	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
+		sb.append("LET ");
+		commaSeparatedExpressionList(node.getIdentifiers());
+		sb.append(" BE ");
+		node.getAssignment().apply(this);
+		sb.append(" IN ");
+		node.getPred().apply(this);
+		sb.append(" END");
 	}
 
 	@Override
