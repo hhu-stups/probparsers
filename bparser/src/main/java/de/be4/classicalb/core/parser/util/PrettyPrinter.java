@@ -28,6 +28,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	public void setup() {
 		prio.put(AParallelProductExpression.class, PRIORITY20);
+		prio.put(AImplicationPredicate.class, PRIORITY30);
+		prio.put(ADisjunctPredicate.class, PRIORITY40);
+		prio.put(AConjunctPredicate.class, PRIORITY40);
+		prio.put(AEquivalencePredicate.class, PRIORITY60);
 		prio.put(ARelationsExpression.class, PRIORITY125);
 		prio.put(ATotalFunctionExpression.class, PRIORITY125);
 		prio.put(APartialInjectionExpression.class, PRIORITY125);
@@ -64,10 +68,6 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AUnaryMinusExpression.class, PRIORITY210);
 		prio.put(AReverseExpression.class, PRIORITY230);
 		prio.put(AImageExpression.class, PRIORITY231);
-		prio.put(AImplicationPredicate.class, PRIORITY30);
-		prio.put(ADisjunctPredicate.class, PRIORITY40);
-		prio.put(AConjunctPredicate.class, PRIORITY40);
-		prio.put(AEquivalencePredicate.class, PRIORITY60);
 	}
 
 	public PrettyPrinter() {
