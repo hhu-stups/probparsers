@@ -30,7 +30,7 @@ Helpers
 
   /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */
   strong_fair_all = 'SEF';
-  strong_fair_start_capital = 'SF(';
+  strong_fair_start_capital = 'SF('; /* TO DO: does not allow space between SF and bracket */
   weak_fair_start_capital = 'WF(';
   weak_fair_all = 'WEF';
 

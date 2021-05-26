@@ -29,7 +29,9 @@ public class LtlParser extends TemporalLogicParser<Start> {
 	protected Start parseFormula(final String formula)
 			throws LtlParseException, IOException {
 		StringReader reader = new StringReader(formula);
-		PushbackReader r = new PushbackReader(reader);
+		// PUSHBACK_BUFFER_SIZE=99 should be more than the max length of any keyword
+		// Due to SF(, SEF, ... we need at least to pushback two chars
+		PushbackReader r = new PushbackReader(reader,99);
 		Lexer l = new LtlLexer(r);
 		Parser p = new Parser(l);
 		Start ast = null;

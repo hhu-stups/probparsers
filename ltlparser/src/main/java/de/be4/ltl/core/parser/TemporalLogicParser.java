@@ -27,7 +27,7 @@ public abstract class TemporalLogicParser<T> {
 		try {
 			ast = parseFormula(formula);
 		} catch (IOException e) {
-			String msg = "StringReader should not cause IOExceptions: " + e;
+			String msg = "IOException during parsing of formula (possibly pushback buffer overflow in Lexer): " + e;
 			throw new IllegalStateException(msg);
 		}
 		StructuredPrologOutput pto = new StructuredPrologOutput();
