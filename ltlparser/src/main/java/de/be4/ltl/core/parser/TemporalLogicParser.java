@@ -27,7 +27,7 @@ public abstract class TemporalLogicParser<T> {
 		try {
 			ast = parseFormula(formula);
 		} catch (IOException e) {
-			String msg = "StringReader should not cause IOExceptions";
+			String msg = "StringReader should not cause IOExceptions: " + e;
 			throw new IllegalStateException(msg);
 		}
 		StructuredPrologOutput pto = new StructuredPrologOutput();
