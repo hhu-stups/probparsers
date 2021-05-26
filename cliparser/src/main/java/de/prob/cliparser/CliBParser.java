@@ -251,7 +251,7 @@ public class CliBParser {
 				break;
 			case ltl:
 				String extension = in.readLine();
-				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension);
+				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension,context);
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
@@ -259,7 +259,7 @@ public class CliBParser {
 				break;
 			case ctl:
 				String extension2 = in.readLine();
-				final ProBParserBase extParser2 = LtlConsoleParser.getExtensionParser(extension2);
+				final ProBParserBase extParser2 = LtlConsoleParser.getExtensionParser(extension2,context);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
 				break;

@@ -13,24 +13,22 @@ public class ClassicalBParser implements ProBParserBase {
 	private static final String WRAPPER_EXPR = "bexpr";
 	private static final String WRAPPER_PRED = "bpred";
 	private static final String WRAPPER_TRANS = "bop";
-
-	private IDefinitions context;
-
+	
+	private BParser bparser;
+	
 	public ClassicalBParser() {
-		this.context = new Definitions();
+		this(new BParser());
 	}
 
-	public ClassicalBParser(IDefinitions context) {
-		this.context = context;
+	public ClassicalBParser(final BParser bparser) {
+		this.bparser = bparser;
 	}
 
 	@Override
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap)
 			throws ProBParseException {
 		try {
-			BParser parser = new BParser();
-			parser.setDefinitions(context);
-			Start ast = parser.parseExpression(expression);
+			Start ast = bparser.parseExpression(expression);
 			printAst(pto, ast, wrap, WRAPPER_EXPR);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
@@ -41,9 +39,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
 			throws ProBParseException {
 		try {
-			BParser parser = new BParser();
-			parser.setDefinitions(context);
-			Start ast = parser.parsePredicate(predicate);
+			Start ast = bparser.parsePredicate(predicate);
 			printAst(pto, ast, wrap, WRAPPER_PRED);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
@@ -54,9 +50,7 @@ public class ClassicalBParser implements ProBParserBase {
 	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
 			throws ProBParseException {
 		try {
-			BParser parser = new BParser();
-			parser.setDefinitions(context);
-			Start ast = parser.parseTransition(trans);
+			Start ast = bparser.parseTransition(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);
 		} catch (BCompoundException e) {
 			throw new ProBParseException(e.getFirstException().getLocalizedMessage(), e);
@@ -77,7 +71,4 @@ public class ClassicalBParser implements ProBParserBase {
 		}
 	}
 
-	public void setContext(IDefinitions context) {
-		this.context = context;
-	}
 }
