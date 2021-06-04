@@ -284,6 +284,13 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
+		sb.append("CONSTRAINTS ");
+		node.getPredicates().apply(this);
+		sb.append("\n");
+	}
+
+	@Override
 	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
 		sb.append("INITIALISATION ");
 		node.getSubstitutions().apply(this);
