@@ -88,6 +88,7 @@ Tokens
 
   /* Boolean Operators */
   {ltl} implies = '=>' | 0x21d2 | 'implies';
+  {ltl} equivalent = '<=>' | 0x21d4 | 'equivalent';
   {ltl} and = '&' | 0x2227 | 'and';  // TO DO: allow Spin syntax?
   {ltl} or = 'or' | 0x2228 | '||';
   {ltl} not = 'not' | 0x00ac;
@@ -128,7 +129,11 @@ Ignored Tokens
  *******************************************************************/
 Productions
   ltl_formula {-> ltl} =
-    {fairness_implication} [left]:ltl_fairness implies [right]:ltl_formula1 {-> New ltl.fairness_implication(left.ltl, right.ltl)} |
+    {fairness_implication} [left]:ltl_fairness implies [right]:ltl_formula0 {-> New ltl.fairness_implication(left.ltl, right.ltl)} |
+    ltl_formula0 {-> ltl_formula0.ltl};
+
+  ltl_formula0 {-> ltl} =
+    {equivalent} [left]:ltl_formula1 equivalent [right]:ltl_formula1 {-> New ltl.equivalent(left.ltl, right.ltl)} |
     ltl_formula1 {-> ltl_formula1.ltl};
 
   ltl_formula1 {-> ltl} =
@@ -221,6 +226,7 @@ Productions
 Abstract Syntax Tree
   ltl =
    {implies} [left]:ltl [right]:ltl |
+   {equivalent} [left]:ltl [right]:ltl |
    {and} [left]:ltl [right]:ltl |
    {or} [left]:ltl [right]:ltl |
    {until} [left]:ltl [right]:ltl |
