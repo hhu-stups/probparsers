@@ -87,27 +87,27 @@ Tokens
   {actions} action_char = ([0 .. 0xffff]);
 
   /* Boolean Operators */
-  {ltl} implies = '=>' | 0x21d2;
-  {ltl} and = '&' | 0x2227;
-  {ltl} or = 'or' | 0x2228;
-  {ltl} not = 'not'| 0x00ac;
+  {ltl} implies = '=>' | 0x21d2 | 'implies';
+  {ltl} and = '&' | 0x2227 | 'and';  // TO DO: allow Spin syntax?
+  {ltl} or = 'or' | 0x2228 | '||';
+  {ltl} not = 'not' | 0x00ac;
 
   /* LTL temporal operators */
-  {ltl} until = 'U';
-  {ltl} weakuntil ='W';
-  {ltl} release = 'R';
+  {ltl} until =     'U' | 'until' | 'stronguntil';
+  {ltl} weakuntil = 'W' | 'weakuntil;
+  {ltl} release =   'R' | 'release';
 
-  {ltl} globally = 'G';
-  {ltl} finally = 'F';
+  {ltl} globally = 'G' | 'globally'   | 'always'; // TODO support '[]'
+  {ltl} finally =  'F' | 'eventually' | 'finally' | '<>';
   {ltl} next = 'X';
 
   /* Past LTL temporal operators */
-  {ltl} since = 'S';
-  {ltl} trigger = 'T';
+  {ltl} since = 'S' | 'since';
+  {ltl} trigger = 'T' | 'trigger';
 
-  {ltl} historically = 'H';
-  {ltl} once = 'O';
-  {ltl} yesterday = 'Y';
+  {ltl} historically = 'H' | 'historically';
+  {ltl} once = 'O' | 'once';
+  {ltl} yesterday = 'Y'| 'yesterday';
 
   /* Fairness LTL operators */
   {ltl} strong_fair_everything = strong_fair_all;
