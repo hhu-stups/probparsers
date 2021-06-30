@@ -94,12 +94,12 @@ Tokens
 
   /* LTL temporal operators */
   {ltl} until =     'U' | 'until' | 'stronguntil';
-  {ltl} weakuntil = 'W' | 'weakuntil;
+  {ltl} weakuntil = 'W' | 'weakuntil';
   {ltl} release =   'R' | 'release';
 
   {ltl} globally = 'G' | 'globally'   | 'always'; // TODO support '[]'
   {ltl} finally =  'F' | 'eventually' | 'finally' | '<>';
-  {ltl} next = 'X';
+  {ltl} next = 'X' | 'next';
 
   /* Past LTL temporal operators */
   {ltl} since = 'S' | 'since';
