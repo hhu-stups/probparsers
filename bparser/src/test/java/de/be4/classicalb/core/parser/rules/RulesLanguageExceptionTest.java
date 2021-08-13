@@ -21,7 +21,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test(a) CONSTRAINTS a : INTEGER END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("parse_exception(pos(1,15"));
+		assertTrue(result.contains("parse_exception("));
+		assertTrue(result.contains("pos(1,15"));
 		assertTrue(result.contains("A RULES_MACHINE must not have any machine parameters"));
 	}
 
@@ -30,7 +31,8 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test.Foo END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
 		System.out.println(result);
-		assertTrue(result.contains("parse_exception(pos(1,15,1,23"));
+		assertTrue(result.contains("parse_exception("));
+		assertTrue(result.contains("pos(1,15,1,23"));
 		assertTrue(result.contains("Renaming of a RULES_MACHINE name is not allowed"));
 	}
 

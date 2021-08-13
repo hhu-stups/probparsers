@@ -93,7 +93,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		final Set<Node> assignErrorNodes = assignCheck.nonIdentifiers;
 		if (!assignErrorNodes.isEmpty()) {
 			exceptions.add(new CheckException("Identifier or function or record field expected",
-					assignErrorNodes.toArray(new Node[assignErrorNodes.size()])));
+					new ArrayList<>(assignErrorNodes)));
 		}
 
 		/*
@@ -105,7 +105,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 		if (!nonIdentifiers.isEmpty()) {
 			// at least one error was found
 			exceptions.add(
-					new CheckException("Identifier expected", nonIdentifiers.toArray(new Node[nonIdentifiers.size()])));
+					new CheckException("Identifier expected", new ArrayList<>(nonIdentifiers)));
 		}
 	}
 

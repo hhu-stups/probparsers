@@ -9,48 +9,54 @@ import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class BException extends Exception {
 
 	private static final long serialVersionUID = -693107947667081359L;
-	private final Throwable cause;
 	private final String filename;
 	private final List<Location> locations = new ArrayList<>();
 
-	public BException(final String filename, final String message, final Exception cause) {
-		super(message);
+	public BException(final String filename, final String message, final Throwable cause) {
+		super(message, cause);
 		this.filename = filename;
-		this.cause = cause;
 	}
 
-	public BException(String fileName, LexerException e) {
-		this(fileName, e.getMessage(), e);
-	}
-
-
-	public BException(String fileName, BLexerException e) {
-		this(fileName, e.getMessage(), e);
-		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos()));
-	}
-
-	public BException(String fileName, BParseException e) {
-		this(fileName, e.getMessage(), e);
-		if (e.getToken() != null) {
-			Token token = e.getToken();
-			locations.add(new Location(filename, token.getLine(), token.getPos(), token.getLine(), token.getPos()));
+	public BException(String filename, LexerException e) {
+		this(filename, e.getMessage(), e);
+		final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
+		if (location != null) {
+			locations.add(location);
 		}
 	}
 
-	public BException(String fileName, PreParseException e) {
-		this(fileName, e.getMessage(), e);
-		Pattern p = Pattern.compile("\\[(\\d+)[,](\\d+)\\].*", Pattern.DOTALL);
-		Matcher m = p.matcher(cause.getMessage());
-		boolean posFound = m.lookingAt();
-		if (posFound) {
-			int line = Integer.parseInt(m.group(1));
-			int pos = Integer.parseInt(m.group(2));
-			locations.add(new Location(filename, line, pos, line, pos));
+
+	public BException(String filename, BLexerException e) {
+		this(filename, e.getMessage(), e);
+		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos()));
+	}
+
+	public BException(String filename, BParseException e) {
+		this(filename, e.getMessage(), e);
+		if (e.getToken() != null) {
+			locations.add(Location.fromNode(filename, e.getToken()));
+		}
+	}
+
+	public BException(String filename, PreParseException e) {
+		this(filename, e.getMessage(), e);
+		if (e.getTokensList().isEmpty()) {
+			// Fallback for LexerException wrapped in PreParseException.
+			// In this case there are no tokens attached to the exception
+			// (it's a lexer error, so there can be no token for the error location),
+			// but there is position information in the message,
+			// which can be extracted.
+			final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
+			if (location != null) {
+				locations.add(location);
+			}
+		} else {
+			e.getTokensList().forEach(token -> locations.add(Location.fromNode(filename, token)));
 		}
 	}
 
@@ -59,19 +65,13 @@ public class BException extends Exception {
 		//super(e.getMessage());
 		//this.filename = filename;
 		//this.cause = e.getCause();
-		for (Node node : e.getNodes()) {
-			locations.add(new Location(filename, node.getStartPos().getLine(), node.getStartPos().getPos(),
-					node.getEndPos().getLine(), node.getEndPos().getPos()));
+		for (Node node : e.getNodesList()) {
+			locations.add(Location.fromNode(filename, node));
 		}
 	}
 
 	public BException(final String filename, final IOException e) {
 		this(filename, e.getMessage(), e);
-	}
-
-	@Override
-	public Throwable getCause() {
-		return this.cause;
 	}
 
 	public List<Location> getLocations() {
@@ -83,33 +83,51 @@ public class BException extends Exception {
 		return filename;
 	}
 
-	@Override
-	public String getLocalizedMessage() {
-		return getMessage();
-	}
-
-	@Override
-	public StackTraceElement[] getStackTrace() {
-		return cause.getStackTrace();
-	}
-
 	public static final class Location implements Serializable {
 
 		private static final long serialVersionUID = -7391092302311266417L;
+
+		private static final Pattern SABLECC_MESSAGE_LOCATION_PATTERN = Pattern.compile("\\[(\\d+),(\\d+)\\].*", Pattern.DOTALL);
+
 		private final String filename;
 		private final int startLine;
 		private final int startColumn;
 		private final int endLine;
 		private final int endColumn;
 
-		public Location(final String fileName, final int startLine, final int startColumn, final int endLine,
+		public Location(final String filename, final int startLine, final int startColumn, final int endLine,
 				final int endColumn) {
 
-			this.filename = fileName;
+			this.filename = filename;
 			this.startLine = startLine;
 			this.startColumn = startColumn;
 			this.endLine = endLine;
 			this.endColumn = endColumn;
+		}
+
+		private static Location fromNode(final String filename, final PositionedNode node) {
+			return new Location(
+				filename,
+				node.getStartPos().getLine(),
+				node.getStartPos().getPos(),
+				node.getEndPos().getLine(),
+				node.getEndPos().getPos()
+			);
+		}
+
+		private static Location parseFromSableCCMessage(final String filename, final String message) {
+			if (message == null) {
+				return null;
+			}
+
+			final Matcher matcher = SABLECC_MESSAGE_LOCATION_PATTERN.matcher(message);
+			if (matcher.lookingAt()) {
+				final int line = Integer.parseInt(matcher.group(1));
+				final int pos = Integer.parseInt(matcher.group(2));
+				return new Location(filename, line, pos, line, pos);
+			} else {
+				return null;
+			}
 		}
 
 		public String getFilename() {

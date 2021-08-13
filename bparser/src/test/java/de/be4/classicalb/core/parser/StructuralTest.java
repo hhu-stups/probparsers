@@ -219,7 +219,7 @@ public class StructuralTest {
 			fail("Missing Semicolon was not detected");
 		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodes()[0];
+			Node node = cause.getNodesList().get(0);
 			assertEquals(4, node.getStartPos().getLine());
 			assertEquals(3, node.getStartPos().getPos());
 			assertTrue(e.getMessage().contains("Semicolon missing"));
@@ -234,7 +234,7 @@ public class StructuralTest {
 			fail("Invalid Semicolon was not detected");
 		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodes()[0];
+			Node node = cause.getNodesList().get(0);
 			System.out.println(cause.getMessage());
 			assertEquals(4, node.getStartPos().getLine());
 			assertEquals(1, node.getStartPos().getPos());
@@ -250,7 +250,7 @@ public class StructuralTest {
 			fail("Invalid Semicolon was not detected");
 		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodes()[0];
+			Node node = cause.getNodesList().get(0);
 			assertEquals(4, node.getStartPos().getLine());
 			assertEquals(1, node.getStartPos().getPos());
 			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
@@ -265,7 +265,7 @@ public class StructuralTest {
 			fail("Invalid Semicolon was not detected");
 		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodes()[0];
+			Node node = cause.getNodesList().get(0);
 			assertEquals(4, node.getStartPos().getLine());
 			assertEquals(1, node.getStartPos().getPos());
 			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
@@ -281,7 +281,7 @@ public class StructuralTest {
 			fail("Expecting exception");
 		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(2, cause.getNodes().length);
+			assertEquals(2, cause.getNodesList().size());
 			// IGNORE: is expected
 		}
 	}
@@ -294,7 +294,7 @@ public class StructuralTest {
 			fail("Expecting exception");
 		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodes().length);
+			assertEquals(1, cause.getNodesList().size());
 			assertEquals("Clause(s) missing: PROPERTIES", cause.getMessage());
 			// IGNORE: is expected
 		}

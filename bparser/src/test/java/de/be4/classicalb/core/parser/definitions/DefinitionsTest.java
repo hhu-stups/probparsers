@@ -308,8 +308,8 @@ public class DefinitionsTest {
 			fail("Expected exception was not thrown");
 		} catch (final BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodes().length);
-			assertNotNull(cause.getNodes()[0]);
+			assertEquals(1, cause.getNodesList().size());
+			assertNotNull(cause.getNodesList().get(0));
 			String result = cause.getLocalizedMessage();
 		    assertTrue(result.contains("Number of parameters"));
 		    assertTrue(result.contains("doesn't match declaration of definition"));

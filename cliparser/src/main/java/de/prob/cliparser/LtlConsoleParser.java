@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
@@ -77,7 +79,7 @@ public class LtlConsoleParser {
 
 		final String lang = options.isOptionSet(CLI_LANG) ? options
 				.getOptions(CLI_LANG)[0] : null;
-		final ProBParserBase extParser = getExtensionParser(lang);
+		final ProBParserBase extParser = getExtensionParser(lang, null);
 
 		final IPrologTermOutput pto = new PrologTermOutput(out, false);
 
@@ -177,7 +179,7 @@ public class LtlConsoleParser {
 		return sb.toString();
 	}
 
-	static ProBParserBase getExtensionParser(final String pattern) {
+	static ProBParserBase getExtensionParser(final String pattern, IDefinitions context) {
 		final ProBParserBase result;
 		if (pattern == null) {
 			result = UNPARSED_PARSER_BASE;
@@ -190,7 +192,11 @@ public class LtlConsoleParser {
 				if ("none".equals(lang)) {
 					sub = UNPARSED_PARSER_BASE;
 				} else if ("B".equals(lang)) {
-					sub = new ClassicalBParser();
+				    BParser bparser = new BParser();
+			        if (context!=null) {
+			          bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
+			        }
+					sub = new ClassicalBParser(bparser);
 				} else
 					throw new IllegalArgumentException("Unknown language "
 							+ lang);

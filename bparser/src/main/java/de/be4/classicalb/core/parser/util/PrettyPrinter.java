@@ -28,6 +28,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	public void setup() {
 		prio.put(AParallelProductExpression.class, PRIORITY20);
+		prio.put(AImplicationPredicate.class, PRIORITY30);
+		prio.put(ADisjunctPredicate.class, PRIORITY40);
+		prio.put(AConjunctPredicate.class, PRIORITY40);
+		prio.put(AEquivalencePredicate.class, PRIORITY60);
 		prio.put(ARelationsExpression.class, PRIORITY125);
 		prio.put(ATotalFunctionExpression.class, PRIORITY125);
 		prio.put(APartialInjectionExpression.class, PRIORITY125);
@@ -64,10 +68,6 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AUnaryMinusExpression.class, PRIORITY210);
 		prio.put(AReverseExpression.class, PRIORITY230);
 		prio.put(AImageExpression.class, PRIORITY231);
-		prio.put(AImplicationPredicate.class, PRIORITY30);
-		prio.put(ADisjunctPredicate.class, PRIORITY40);
-		prio.put(AConjunctPredicate.class, PRIORITY40);
-		prio.put(AEquivalencePredicate.class, PRIORITY60);
 	}
 
 	public PrettyPrinter() {
@@ -279,6 +279,13 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
 		sb.append("INVARIANT ");
+		node.getPredicates().apply(this);
+		sb.append("\n");
+	}
+
+	@Override
+	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
+		sb.append("CONSTRAINTS ");
 		node.getPredicates().apply(this);
 		sb.append("\n");
 	}
@@ -559,6 +566,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		node.getThen().apply(this);
 		sb.append(" ELSE ");
 		node.getElse().apply(this);
+		sb.append(" END");
+	}
+
+	@Override
+	public void caseALetExpressionExpression(final ALetExpressionExpression node) {
+		sb.append("LET ");
+		commaSeparatedExpressionList(node.getIdentifiers());
+		sb.append(" BE ");
+		node.getAssignment().apply(this);
+		sb.append(" IN ");
+		node.getExpr().apply(this);
 		sb.append(" END");
 	}
 
@@ -1535,6 +1553,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAStringSetExpression(final AStringSetExpression arg0) {
 		sb.append("STRING");
+	}
+
+	@Override
+	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
+		sb.append("LET ");
+		commaSeparatedExpressionList(node.getIdentifiers());
+		sb.append(" BE ");
+		node.getAssignment().apply(this);
+		sb.append(" IN ");
+		node.getPred().apply(this);
+		sb.append(" END");
 	}
 
 	@Override

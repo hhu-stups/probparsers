@@ -1,6 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,29 +27,41 @@ import de.be4.classicalb.core.parser.util.Utils;
  * 
  */
 public class ClausesCheck implements SemanticCheck {
+	private static final Set<Class<? extends Node>> MACHINE_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		/* ALocalOperationsMachineClause.class, */
+		AImportsMachineClause.class,
+		AValuesMachineClause.class
+	)));
+	private static final Set<Class<? extends Node>> REFINEMENT_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		AUsesMachineClause.class,
+		AConstraintsMachineClause.class,
+		ALocalOperationsMachineClause.class,
+		AImportsMachineClause.class,
+		AValuesMachineClause.class
+	)));
+	private static final Set<Class<? extends Node>> IMPLEMENTATION_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		AConstraintsMachineClause.class,
+		AIncludesMachineClause.class,
+		AUsesMachineClause.class,
+		AAbstractConstantsMachineClause.class,
+		AVariablesMachineClause.class
+	)));
 
-	private static final String NAME_LOCAL_OPERATIONS = ALocalOperationsMachineClause.class.getSimpleName();
-	private static final String NAME_VALUES = AValuesMachineClause.class.getSimpleName();
-	private static final String NAME_IMPORTS = AImportsMachineClause.class.getSimpleName();
-	private static final String NAME_CONSTANTS = AConstantsMachineClause.class.getSimpleName();
-	private static final String NAME_ABSTRACT_CONSTANTS = AAbstractConstantsMachineClause.class.getSimpleName();
-	private static final String NAME_VARIABLES = AVariablesMachineClause.class.getSimpleName();
-	private static final String NAME_CONCRETE_VARIABLES = AConcreteVariablesMachineClause.class.getSimpleName();
-	private static final String NAME_PROPERTIES = APropertiesMachineClause.class.getSimpleName();
-	private static final String NAME_INVARIANT = AInvariantMachineClause.class.getSimpleName();
-	private static final String NAME_INITIALISATION = AInitialisationMachineClause.class.getSimpleName();
-	private static final String NAME_USES = AUsesMachineClause.class.getSimpleName();
-	private static final String NAME_CONSTRAINTS = AConstraintsMachineClause.class.getSimpleName();
-	private static final String NAME_INCLUDES = AIncludesMachineClause.class.getSimpleName();
+	private static final Map<Class<? extends Node>, String> CLAUSE_NAMES_BY_CLASS;
+	static {
+		final Map<Class<? extends Node>, String> clauseNamesByClass = new HashMap<>();
+		clauseNamesByClass.put(AAbstractConstantsMachineClause.class, "ABSTRACT_CONSTANTS");
+		clauseNamesByClass.put(AConstraintsMachineClause.class, "CONSTRAINTS");
+		clauseNamesByClass.put(AImportsMachineClause.class, "IMPORTS");
+		clauseNamesByClass.put(AIncludesMachineClause.class, "INCLUDES");
+		clauseNamesByClass.put(ALocalOperationsMachineClause.class, "LOCAL_OPERATIONS");
+		clauseNamesByClass.put(AUsesMachineClause.class, "USES");
+		clauseNamesByClass.put(AValuesMachineClause.class, "VALUES");
+		clauseNamesByClass.put(AVariablesMachineClause.class, "VARIABLES (or ABSTRACT_VARIABLES)");
+		CLAUSE_NAMES_BY_CLASS = Collections.unmodifiableMap(clauseNamesByClass);
+	}
 
-	private static final String[] MACHINE_FORBIDDEN_CLAUSES = new String[] { /* NAME_LOCAL_OPERATIONS, */ NAME_IMPORTS,
-			NAME_VALUES };
-	private static final String[] REFINEMENT_FORBIDDEN_CLAUSES = new String[] { NAME_USES, NAME_CONSTRAINTS,
-			NAME_LOCAL_OPERATIONS, NAME_IMPORTS, NAME_VALUES };
-	private static final String[] IMPLEMENTATION_FORBIDDEN_CLAUSES = new String[] { NAME_CONSTRAINTS, NAME_INCLUDES,
-			NAME_USES, NAME_ABSTRACT_CONSTANTS, NAME_VARIABLES, NAME_VARIABLES };
-
-	private Map<String, Set<Node>> clauses;
+	private Map<Class<? extends Node>, Set<Node>> clauses;
 
 	private final List<CheckException> exceptions = new ArrayList<>();
 
@@ -77,16 +92,18 @@ public class ClausesCheck implements SemanticCheck {
 		checkMachineClauses(rootNode);
 		checkRefinementClauses(rootNode);
 		checkImplementationClauses(rootNode);
-		checkConstantsClause();
-		checkVariablesClauses();
-		if (collector.hasScalarParameter() && !collector.isRefinement()) {
-			checkConstraintExistance(rootNode);
+		if (!collector.isRefinement()) {
+			checkConstantsClause();
+			checkVariablesClauses();
+			if (collector.hasScalarParameter()) {
+				checkConstraintExistance(rootNode);
+			}
 		}
 	}
 
 	private void checkConstraintExistance(Start rootNode) {
 
-		if (!clauses.containsKey(NAME_CONSTRAINTS)) {
+		if (!clauses.containsKey(AConstraintsMachineClause.class)) {
 			exceptions.add(new CheckException("Specification has formal scalar parameter and no CONSTRAINTS clause.",
 					rootNode.getPParseUnit()));
 		}
@@ -102,7 +119,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(IMPLEMENTATION_FORBIDDEN_CLAUSES);
+		findForbidden(IMPLEMENTATION_FORBIDDEN_CLAUSES, "implementation machine");
 	}
 
 	/**
@@ -114,7 +131,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(REFINEMENT_FORBIDDEN_CLAUSES);
+		findForbidden(REFINEMENT_FORBIDDEN_CLAUSES, "refinement machine");
 	}
 
 	/**
@@ -126,7 +143,7 @@ public class ClausesCheck implements SemanticCheck {
 			return;
 		}
 
-		findForbidden(MACHINE_FORBIDDEN_CLAUSES);
+		findForbidden(MACHINE_FORBIDDEN_CLAUSES, "abstract machine");
 	}
 
 	private void checkVariablesClauses() {
@@ -134,30 +151,30 @@ public class ClausesCheck implements SemanticCheck {
 		 * CONCRETE_VARIABLES || VARIABLES || ABSTRACT_VARIABLES => INVARIANT &&
 		 * INITIALISATION
 		 */
-		if ((clauses.containsKey(NAME_VARIABLES) || clauses.containsKey(NAME_CONCRETE_VARIABLES))
-				&& (!clauses.containsKey(NAME_INVARIANT) || !clauses.containsKey(NAME_INITIALISATION))) {
+		if ((clauses.containsKey(AVariablesMachineClause.class) || clauses.containsKey(AConcreteVariablesMachineClause.class))
+				&& (!clauses.containsKey(AInvariantMachineClause.class) || !clauses.containsKey(AInitialisationMachineClause.class))) {
 
 			final Set<Node> nodes = new HashSet<>();
-			if (clauses.containsKey(NAME_VARIABLES)) {
-				nodes.addAll(clauses.get(NAME_VARIABLES));
+			if (clauses.containsKey(AVariablesMachineClause.class)) {
+				nodes.addAll(clauses.get(AVariablesMachineClause.class));
 			}
-			if (clauses.containsKey(NAME_CONCRETE_VARIABLES)) {
-				nodes.addAll(clauses.get(NAME_CONCRETE_VARIABLES));
+			if (clauses.containsKey(AConcreteVariablesMachineClause.class)) {
+				nodes.addAll(clauses.get(AConcreteVariablesMachineClause.class));
 			}
 
 			final StringBuilder message = new StringBuilder("Clause(s) missing: ");
 			boolean first = true;
-			if (!clauses.containsKey(NAME_INVARIANT)) {
+			if (!clauses.containsKey(AInvariantMachineClause.class)) {
 				message.append("INVARIANT");
 				first = false;
 			}
-			if (!clauses.containsKey(NAME_INITIALISATION)) {
+			if (!clauses.containsKey(AInitialisationMachineClause.class)) {
 				if (!first) {
 					message.append(", ");
 				}
 				message.append("INITIALISATION");
 			}
-			exceptions.add(new CheckException(message.toString(), nodes.toArray(new Node[nodes.size()])));
+			exceptions.add(new CheckException(message.toString(), new ArrayList<>(nodes)));
 		}
 	}
 
@@ -165,40 +182,45 @@ public class ClausesCheck implements SemanticCheck {
 		/*
 		 * CONCRETE_CONSTANTS || CONSTANTS || ABSTRACT_CONSTANTS => PROPERTIES
 		 */
-		if ((clauses.containsKey(NAME_CONSTANTS) || clauses.containsKey(NAME_ABSTRACT_CONSTANTS))
-				&& !clauses.containsKey(NAME_PROPERTIES)) {
+		if ((clauses.containsKey(AConstantsMachineClause.class) || clauses.containsKey(AAbstractConstantsMachineClause.class))
+				&& !clauses.containsKey(APropertiesMachineClause.class)) {
 			final Set<Node> nodes = new HashSet<>();
 
-			if (clauses.containsKey(NAME_CONSTANTS)) {
-				nodes.addAll(clauses.get(NAME_CONSTANTS));
+			if (clauses.containsKey(AConstantsMachineClause.class)) {
+				nodes.addAll(clauses.get(AConstantsMachineClause.class));
 			}
-			if (clauses.containsKey(NAME_ABSTRACT_CONSTANTS)) {
-				nodes.addAll(clauses.get(NAME_ABSTRACT_CONSTANTS));
+			if (clauses.containsKey(AAbstractConstantsMachineClause.class)) {
+				nodes.addAll(clauses.get(AAbstractConstantsMachineClause.class));
 			}
-			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", nodes.toArray(new Node[nodes.size()])));
+			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", new ArrayList<>(nodes)));
 		}
 	}
 
-	private void findForbidden(final String[] forbiddenClassNames) {
-		final Set<String> clauseClasses = clauses.keySet();
-
-		final Set<Set<Node>> wrongClauses = new HashSet<>();
-
-		for (int i = 0; i < forbiddenClassNames.length; i++) {
-			if (clauseClasses.contains(forbiddenClassNames[i])) {
-				wrongClauses.add(clauses.get(forbiddenClassNames[i]));
-			}
+	private static String clauseNameFromNodeClass(final Class<? extends Node> nodeClass) {
+		if (CLAUSE_NAMES_BY_CLASS.containsKey(nodeClass)) {
+			return CLAUSE_NAMES_BY_CLASS.get(nodeClass);
+		} else {
+			// Fallback - should never be used.
+			// If a clause class is not listed in CLAUSE_NAMES_BY_CLASS,
+			// please add it!
+			return nodeClass.getSimpleName();
 		}
+	}
 
-		if (!wrongClauses.isEmpty()) {
+	private void findForbidden(final Set<Class<? extends Node>> forbiddenClasses, final String machineKindDescription) {
+		final Set<Class<? extends Node>> wrongClauseClasses = new HashSet<>(clauses.keySet());
+		wrongClauseClasses.retainAll(forbiddenClasses);
+
+		if (!wrongClauseClasses.isEmpty()) {
 			final Set<Node> nodes = new HashSet<>();
+			final Set<String> wrongClauseNames = new HashSet<>();
 
-			for (final Iterator<Set<Node>> iterator = wrongClauses.iterator(); iterator.hasNext();) {
-				final Set<Node> nodeSet = iterator.next();
-				nodes.addAll(nodeSet);
+			for (final Class<? extends Node> wrongClauseClass : wrongClauseClasses) {
+				nodes.addAll(clauses.get(wrongClauseClass));
+				wrongClauseNames.add(clauseNameFromNodeClass(wrongClauseClass));
 			}
-			exceptions.add(new CheckException("Clause not allowed in abstract machine",
-					nodes.toArray(new Node[nodes.size()])));
+			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames),
+					new ArrayList<>(nodes)));
 		}
 	}
 
@@ -211,12 +233,10 @@ public class ClausesCheck implements SemanticCheck {
 
 			if (nodesforClause.size() > 1) {
 				final Node clauseNode = nodesforClause.iterator().next();
-				final String simpleClassName = clauseNode.getClass().getSimpleName();
-				final int endIndex = simpleClassName.indexOf("MachineClause");
-				final String clauseName = simpleClassName.substring(1, endIndex).toUpperCase();
+				final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
 
 				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
-						nodesforClause.toArray(new Node[nodesforClause.size()])));
+						new ArrayList<>(nodesforClause)));
 			}
 		}
 	}

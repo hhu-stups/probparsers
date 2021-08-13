@@ -142,6 +142,7 @@ public class CliBParser {
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
 		socket = serverSocket.accept();
+		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
 		socketOutputStream = socket.getOutputStream();
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
@@ -251,7 +252,7 @@ public class CliBParser {
 				break;
 			case ltl:
 				String extension = in.readLine();
-				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension);
+				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension,context);
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
@@ -259,7 +260,7 @@ public class CliBParser {
 				break;
 			case ctl:
 				String extension2 = in.readLine();
-				final ProBParserBase extParser2 = LtlConsoleParser.getExtensionParser(extension2);
+				final ProBParserBase extParser2 = LtlConsoleParser.getExtensionParser(extension2,context);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
 				break;
@@ -343,22 +344,21 @@ public class CliBParser {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false);
+			Start start = parser.parse(theFormula, false); // debugOutput=false
+			
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
 			NodeIdAssignment na = new NodeIdAssignment();
 			start.apply(na);
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
-
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
 			strOutput.fullstop();
 
 			// A Friendly Reminder: strOutput includes a newline!
-			String output = strOutput.toString();
-			print(output);
+			print(strOutput.toString());
 		} catch (NullPointerException e) {
 			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
 			// NullPointerException returns NULL itself, thus triggering another
@@ -370,8 +370,7 @@ public class CliBParser {
 			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
 			strOutput.fullstop();
 			strOutput.flush();
-			String output = strOutput.toString();
-			print(output);
+			print(strOutput.toString());
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
 

@@ -103,6 +103,8 @@ Tokens
   {init->normal} no = 'no';
   {init->normal} yes = 'yes';
   {init->normal} interrupted = 'interrupted';
+  {init->normal} progress = 'progress';
+  {init->normal} call_back = 'call_back';
   {init->exception} exception = 'exception';
 
   // P R O L O G - S T U F F
@@ -129,7 +131,12 @@ Ignored Tokens
  * Productions                                                     *
  *******************************************************************/
 Productions
-  result = {no} no | {yes} yes l_par term r_par | {interrupted} interrupted | {exception} exception string;
+  result = {no} no
+        | {yes} yes l_par term r_par
+        | {interrupted} interrupted
+        | {exception} exception string
+        | {progress} progress l_par term r_par
+        | {call_back} call_back l_par term r_par;
   term = {number} number | {atom} name | {variable} variable | [functor]:name params;
   params = l_par term more_params r_par;
   more_params = {empty} | comma term more_params;

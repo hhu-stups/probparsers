@@ -22,6 +22,11 @@ public class ParseOptions {
 	 * if true the parser will throw a LexerException when unrecognised pragmas appear
 	*/
 	private boolean strictPragmaChecking = false;
+
+	/*
+	* if true the parser will ignore checking valid combinations
+	*/
+	private boolean ignoreCheckingValidCombinations = false;
 	
 	private IGrammar grammar = new DefaultGrammar();
 
@@ -57,4 +62,11 @@ public class ParseOptions {
 		this.strictPragmaChecking = newVal;
 	}
 
+	public boolean isIgnoreCheckingValidCombinations() {
+		return ignoreCheckingValidCombinations;
+	}
+
+	public void setIgnoreCheckingValidCombinations(boolean ignoreCheckingValidCombinations) {
+		this.ignoreCheckingValidCombinations = ignoreCheckingValidCombinations;
+	}
 }

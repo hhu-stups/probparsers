@@ -12,6 +12,8 @@ import de.prob.core.sablecc.node.AAtomTerm;
 import de.prob.core.sablecc.node.AEmptyMoreParams;
 import de.prob.core.sablecc.node.AExceptionResult;
 import de.prob.core.sablecc.node.AInterruptedResult;
+import de.prob.core.sablecc.node.AProgressResult;
+import de.prob.core.sablecc.node.ACallBackResult;
 import de.prob.core.sablecc.node.AMoreParams;
 import de.prob.core.sablecc.node.ANoResult;
 import de.prob.core.sablecc.node.ANumberTerm;
@@ -51,6 +53,10 @@ public class PrologTermGenerator {
 			String message = "ProB raised an exception: "
 					+ ((AExceptionResult) topnode).getString().getText();
 			throw new ResultParserException(message, null);
+		} else if (topnode instanceof AProgressResult) {
+			term = toPrologTerm(((AProgressResult) topnode).getTerm());
+		} else if (topnode instanceof ACallBackResult) {
+			term = toPrologTerm(((ACallBackResult) topnode).getTerm());
 		} else
 			throw new IllegalStateException("Unknown subclass of PResult: "
 					+ topnode.getClass().getCanonicalName());

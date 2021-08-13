@@ -122,7 +122,8 @@ public class RulesMachineFilesTest {
 		String result = getRulesMachineAsPrologTerm(
 				"rules/project/RulesMachineNameDoesNotMatchFileName.rmch");
 		System.out.println(result);
-		assertTrue(result.contains("parse_exception(pos(1,15"));
+		assertTrue(result.contains("parse_exception("));
+		assertTrue(result.contains("pos(1,15"));
 		assertTrue(result.contains("RULES_MACHINE name must match the file name"));
 	}
 
@@ -290,7 +291,8 @@ public class RulesMachineFilesTest {
 		String result = getRulesMachineAsPrologTerm(
 				"rules/project/references/packagePragma/ImportedPackageDoesNotExist2.rmch");
 		System.out.println(result);
-		assertTrue(result.contains("parse_exception(pos(3,19,"));
+		assertTrue(result.contains("parse_exception("));
+		assertTrue(result.contains("pos(3,19,"));
 		assertTrue(result.contains("Imported package does not exist"));
 
 	}
