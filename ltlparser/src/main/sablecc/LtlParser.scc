@@ -66,7 +66,7 @@ Tokens
   {ltl} l_par = l_paren;
   {ltl} r_par = r_paren;
 
-  {ltl -> action} l_sq = l_bracket;
+  {ltl -> action} l_sq = l_bracket; // TODO: also allow textual version 'executed('
   {ltl -> action} enabled = enabled_start;
   {ltl -> action} available = available_start;
 
@@ -75,7 +75,7 @@ Tokens
   {atomic} atomic_proposition_end = r_cur;
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket];
+  {action} action_end = [r_paren + r_bracket]; // TODO: does to check that parens/bracket match!
   {action} action_begin = [l_paren + l_bracket];
   {action} tp_char = ([0 .. 0xffff]);
 
