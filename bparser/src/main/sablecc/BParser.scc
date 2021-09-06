@@ -244,6 +244,8 @@ Tokens
   {normal} greater_equal = gt eq | 0x2265;
   {normal} abstract_constants = 'ABSTRACT_CONSTANTS';
   {normal} abstract_variables = 'ABSTRACT_VARIABLES';
+  {normal} abstracted_variables = 'ABSTRACTED_VARIABLES';
+  {normal} abstracted_constants = 'ABSTRACTED_CONSTANTS';
   {normal} any = 'ANY';
   {normal} assert = 'ASSERT';
   {normal} assertions = 'ASSERTIONS';
@@ -303,6 +305,8 @@ Tokens
   {normal} properties = 'PROPERTIES';
   {normal} refines = 'REFINES';
   {section->normal,normal} refinement = 'REFINEMENT';
+  {normal} abstracts = 'ABSTRACTS';
+  {section->normal,normal} abstraction = 'ABSTRACTION';
   {normal} sees = 'SEES';
   {normal} select = 'SELECT';
   {normal} sets = 'SETS';
@@ -511,6 +515,7 @@ import_package_list {-> import_package*} =
 machine_x {-> parse_unit} =
   {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
   {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
+  {abstraction} T.abstraction [header]:machine_header abstracts [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstracted_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
   {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
 
 machine_variant {-> machine_variant} =
@@ -545,9 +550,12 @@ machine_clause {-> machine_clause} =
   {sets} [clause]:sets_clause {-> clause.machine_clause} |
   {constants} [clause]:constants_clause {-> clause.machine_clause} |
   {abstract_constants} [clause]:abstract_constants_clause {-> clause.machine_clause} |
+  {abstracted_constants} [clause]:abstracted_constants_clause {-> clause.machine_clause} |
   {properties} [clause]:properties_clause {-> clause.machine_clause} |
   {concrete_variables} [clause]:concrete_variables_clause {-> clause.machine_clause} |
   {variables} [clause]:variables_clause {-> clause.machine_clause} |
+  {abstracted_variables} [clause]:abstracted_variables_clause {-> clause.machine_clause} |
+
   {assertions} [clause]:assertions_clause {-> clause.machine_clause} |
   {initialisation} [clause]:initialisation_clause {-> clause.machine_clause} |
   {local_operations} [clause]:local_operations_clause {-> clause.machine_clause} |
@@ -629,7 +637,12 @@ constants_clause {-> machine_clause} =
 
 concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])};
 
+abstracted_variables_clause {-> machine_clause} = abstracted_variables [identifiers]:identifier_list {-> New machine_clause.abstracted_variables([identifiers.expression])};
+
 abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])};
+
+abstracted_constants_clause {-> machine_clause} = abstracted_constants [identifiers]:identifier_list {-> New machine_clause.abstracted_constants([identifiers.expression])};
+
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -1179,6 +1192,7 @@ parse_unit =
   {package} [package]:pragma_id_or_string [imports]:import_package* parse_unit |
   {abstract_machine} [variant]:machine_variant [header]:machine_header [machine_clauses]:machine_clause* |
   {refinement_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
+  {abstracted_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
   {implementation_machine} [header]:machine_header [ref_machine]:identifier_literal [machine_clauses]:machine_clause* |
   {definition_file} [definitions_clauses]:machine_clause |
   {predicate} predicate |
@@ -1216,7 +1230,8 @@ model_clause =
   {invariant} [predicates]:predicate* |
   {theorems} [predicates]:predicate* |
   {variant} [variant]:expression |
-  {events} event*;
+  {events} event* |
+  {abstracts} [abstracts]:identifier_literal ;
 
 machine_clause =
   {definitions} [definitions]:definition* |
@@ -1230,7 +1245,9 @@ machine_clause =
   {freetypes} [freetypes]:freetype* |
   {variables} [identifiers]:expression* |
   {concrete_variables} [identifiers]:expression* |
+  {abstracted_variables} [identifiers]:expression* |
   {abstract_constants} [identifiers]:expression* |
+  {abstracted_constants} [identifiers]:expression* |
   {constants} [identifiers]:expression* |
   {properties} [predicates]:predicate |
   {constraints} [predicates]:predicate |
