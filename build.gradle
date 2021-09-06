@@ -57,7 +57,10 @@ subprojects {
     }
 
     dependencies {
-        testImplementation group: "junit", name: "junit", version: "4.13"
+        testImplementation(platform('org.junit:junit-bom:5.7.0'))
+        testImplementation('org.junit.jupiter:junit-jupiter')
+        // TODO Update all tests to JUnit 5, then remove the JUnit Vintage dependency
+        testImplementation group: "org.junit.vintage", name: "junit-vintage-engine"
     }
 
     java {
