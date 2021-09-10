@@ -99,9 +99,11 @@ Tokens
   {ltl} weakuntil = 'W' | 'weakuntil';
   {ltl} release =   'R' | 'release';
 
-  {ltl} globally = 'G' | 'globally'   | 'always'; // TODO support '[]'
-  {ltl} finally =  'F' | 'eventually' | 'finally' | '<>';
+  {ltl} globally = 'G' | 'globally'   | 'always' | 0x25a1; // Unicode White Square; TODO support ASCII '[]'
+  {ltl} finally =  'F' | 'eventually' | 'finally' | '<>' | 0x22c4; // Unicode Diamond Operator
   {ltl} next = 'X' | 'next';
+
+  // TODO: support leadsto operator ~>, Unicode 0x21dd
 
   /* Past LTL temporal operators */
   {ltl} since = 'S' | 'since';
