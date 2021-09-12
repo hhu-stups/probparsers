@@ -179,7 +179,7 @@ Tokens
   {definitions, definitions_rhs} slash = slash;
   {definitions} comma = ',';
 
-  {definitions -> definitions_rhs} begin_def_body = '==';
+  {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
   {definitions_rhs} rhs_body = [word_chars - double_quotation] | string_literal;
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
