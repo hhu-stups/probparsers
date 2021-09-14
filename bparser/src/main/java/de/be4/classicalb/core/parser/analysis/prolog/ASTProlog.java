@@ -2,11 +2,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
@@ -247,8 +243,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	private String formatCamel(final String input) {
 		StringWriter out = new StringWriter();
 		char[] chars = input.toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			char current = chars[i];
+		for (char current : chars) {
 			if (Character.isUpperCase(current)) {
 				out.append('_');
 				out.append(Character.toLowerCase(current));
@@ -313,6 +308,16 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseAImplementationMachineParseUnit(final AImplementationMachineParseUnit node) {
+		open(node);
+		node.getHeader().apply(this);
+		node.getRefMachine().apply(this);
+		printAsList(node.getMachineClauses());
+		close(node);
+	}
+
+	@Override
+	public void caseAAbstractedMachineParseUnit(AAbstractedMachineParseUnit node)
+	{
 		open(node);
 		node.getHeader().apply(this);
 		node.getRefMachine().apply(this);

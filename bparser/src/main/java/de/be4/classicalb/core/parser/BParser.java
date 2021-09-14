@@ -94,7 +94,7 @@ public class BParser {
 	}
 
 	public BParser() {
-		this((String) null);
+		this(null);
 	}
 
 	public BParser(final String fileName) {
@@ -114,17 +114,15 @@ public class BParser {
 	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
 					throws BCompoundException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
-				parsingBehaviour);
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider, parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		rml.printAsProlog(new PrintWriter(out));
 	}
 
-	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
+	public static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
 					throws BCompoundException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
-				parsingBehaviour);
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider, parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
@@ -141,6 +139,8 @@ public class BParser {
 		FastReadTransformer transformer = new FastReadTransformer(output);
 		return transformer.write();
 	}
+
+
 
 	/**
 	 * Parses the input file.
