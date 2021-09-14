@@ -2,6 +2,7 @@ package de.hhu.stups.sablecc.gradle;
 
 import javax.inject.Inject;
 
+import org.gradle.api.NonNullApi;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
@@ -9,6 +10,7 @@ import org.gradle.api.internal.tasks.DefaultSourceSet;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 
+@NonNullApi
 public class SableCCPlugin implements Plugin<Project> {
 	public static final String SABLECC_CONFIGURATION_NAME = "sableCC";
 	public static final String SABLECC_TASK_VERB = "generate";

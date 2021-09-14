@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gradle.api.NonNullApi;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
@@ -19,6 +20,7 @@ import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.NormalizeLineEndings;
 
+@NonNullApi
 public class SableCCTask extends SourceTask {
 	private FileCollection sableCCClasspath;
 	private String maxHeapSize;
