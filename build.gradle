@@ -132,9 +132,9 @@ ext {
         final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
         jacocoTestReportTask.configure {JacocoReport task ->
             task.reports {
-                xml.enabled = false
-                csv.enabled = false
-                html.destination = new File(subproject.buildDir, "jacocoHtml")
+                xml.required = false
+                csv.required = false
+                html.outputLocation = new File(subproject.buildDir, "jacocoHtml")
             }
             
             task.classDirectories.from = task.classDirectories.from.collect {

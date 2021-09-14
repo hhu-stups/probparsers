@@ -82,7 +82,7 @@ public class SableCCTask extends SourceTask {
 			public void execute(final JavaExecSpec spec) {
 				spec.setClasspath(SableCCTask.this.getSableCCClasspath());
 				spec.setMaxHeapSize(SableCCTask.this.getMaxHeapSize());
-				spec.setMain("org.sablecc.sablecc.SableCC");
+				spec.getMainClass().set("org.sablecc.sablecc.SableCC");
 				final List<String> args = new ArrayList<>();
 				args.add("-d");
 				args.add(destinationJavaDir.get().getAsFile().getPath());
