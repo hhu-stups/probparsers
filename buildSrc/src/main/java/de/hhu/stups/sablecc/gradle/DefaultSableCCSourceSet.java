@@ -1,13 +1,10 @@
 package de.hhu.stups.sablecc.gradle;
 
-import groovy.lang.Closure;
-
 import org.gradle.api.Action;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
-import org.gradle.util.ConfigureUtil;
 
 final class DefaultSableCCSourceSet implements SableCCSourceSet, HasPublicType {
 	private final SourceDirectorySet sableCC;
@@ -23,12 +20,6 @@ final class DefaultSableCCSourceSet implements SableCCSourceSet, HasPublicType {
 	@Override
 	public SourceDirectorySet getSableCC() {
 		return this.sableCC;
-	}
-	
-	@Override
-	public SableCCSourceSet sableCC(final Closure<?> configureClosure) {
-		ConfigureUtil.configure(configureClosure, this.getSableCC());
-		return this;
 	}
 	
 	@Override
