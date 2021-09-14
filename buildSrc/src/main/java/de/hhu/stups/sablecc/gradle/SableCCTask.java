@@ -7,12 +7,17 @@ import java.util.List;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.IgnoreEmptyDirectories;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.NormalizeLineEndings;
 
 public class SableCCTask extends SourceTask {
 	private FileCollection sableCCClasspath;
@@ -26,6 +31,14 @@ public class SableCCTask extends SourceTask {
 		this.sableCCClasspath = null;
 		this.destinationJavaDir = this.getProject().getObjects().directoryProperty();
 		this.destinationResourcesDir = this.getProject().getObjects().directoryProperty();
+	}
+	
+	@IgnoreEmptyDirectories
+	@NormalizeLineEndings
+	@PathSensitive(PathSensitivity.NONE)
+	@Override
+	public FileTree getSource() {
+		return super.getSource();
 	}
 	
 	@Classpath
