@@ -5,10 +5,9 @@ import javax.inject.Inject;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
-import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.internal.tasks.DefaultSourceSet;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 
 public class SableCCPlugin implements Plugin<Project> {
 	public static final String SABLECC_CONFIGURATION_NAME = "sableCC";
@@ -34,11 +33,11 @@ public class SableCCPlugin implements Plugin<Project> {
 			sableCCTask.getConventionMapping().map("sableCCClasspath", () -> project.getConfigurations().getByName(SABLECC_CONFIGURATION_NAME))
 		);
 		
-		project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(sourceSet -> {
+		project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets().all(sourceSet -> {
 			// Create the sablecc source directory set.
 			final String sourceSetDisplayName = ((DefaultSourceSet)sourceSet).getDisplayName();
 			final SableCCSourceSet sableCCSourceSet = new DefaultSableCCSourceSet(sourceSetDisplayName, project.getObjects());
-			new DslObject(sourceSet).getConvention().getPlugins().put(SableCCSourceSet.NAME, sableCCSourceSet);
+			sourceSet.getExtensions().add(SableCCSourceSet.class, SableCCSourceSet.NAME, sableCCSourceSet);
 			sableCCSourceSet.getSableCC().srcDir("src/" + sourceSet.getName() + "/sablecc");
 			sourceSet.getAllSource().source(sableCCSourceSet.getSableCC());
 			
