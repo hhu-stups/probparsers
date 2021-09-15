@@ -45,4 +45,21 @@ public class PrettyMachinePrinterTest {
 		assertFalse(result2.isEmpty());
 		assertEquals(result1, result2);
 	}
+
+	@Test
+	public void testPrettyPrint3() throws IOException, URISyntaxException {
+		final URI uri = this.getClass()
+				.getResource("/prettyprinter/PrettyPrinter2.mch")
+				.toURI();
+		final File file = new File(uri);
+		final String testMachine = Utils.readFile(file);
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+		final String result2 = Helpers.getPrettyPrint(result1);
+
+		assertFalse(result1.isEmpty());
+		assertFalse(result2.isEmpty());
+		assertEquals(result1, result2);
+
+		System.out.println(result1);
+	}
 }

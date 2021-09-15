@@ -365,9 +365,22 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAOpSubstitution(AOpSubstitution node) {
+		node.getName().apply(this);
+		if (!node.getParameters().isEmpty()) {
+			sb.append("(");
+			commaSeparatedExpressionList(node.getParameters());
+			sb.append(")");
+		}
+	}
+
+
+	@Override
 	public void caseAOperationCallSubstitution(AOperationCallSubstitution node) {
-		commaSeparatedExpressionList(node.getResultIdentifiers());
-		sb.append("<--");
+		if (!node.getResultIdentifiers().isEmpty()) {
+			commaSeparatedExpressionList(node.getResultIdentifiers());
+			sb.append("<--");
+		}
 		ArrayList<TIdentifierLiteral> copy = new ArrayList<>(node.getOperation());
 		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
 			final TIdentifierLiteral e = iterator.next();
