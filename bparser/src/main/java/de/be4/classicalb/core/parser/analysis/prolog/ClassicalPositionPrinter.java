@@ -3,6 +3,10 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import de.be4.classicalb.core.parser.node.Node;
 import de.prob.prolog.output.IPrologTermOutput;
 
+
+import de.be4.classicalb.core.parser.node.AIfElsifSubstitution;
+import de.be4.classicalb.core.parser.node.ASelectWhenSubstitution;
+
 /**
  * @author Daniel Plagge
  */
@@ -43,12 +47,24 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.columnOffset = columnOffset;
 	}
 
+    private static boolean uselessPositionInfo (final Node node) {
+        // return true for those nodes which do not require a position info
+        if (node instanceof AIfElsifSubstitution) { // if_elsif infos not used in ProB
+           return true;
+        } else if (node instanceof ASelectWhenSubstitution) { // select_when infos not used in ProB
+           return true;
+        }
+        return false;
+    }
+    
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
 		if (id == null) {
 			pout.printAtom("none");
+		} else if (uselessPositionInfo(node)) {
+		   pout.printNumber(id);
 		} else {
-			if (printSourcePositions) {
+			if (printSourcePositions) { // print Prolog pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 				pout.openTerm("pos", true);
 				pout.printNumber(id);
 				pout.printNumber(nodeIds.lookupFileNumber(node));
