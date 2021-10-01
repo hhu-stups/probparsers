@@ -18,6 +18,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	public final NodeIdAssignment nodeIds;
 
 	private boolean printSourcePositions = false;
+	private boolean legacyPositions = false;
 
 	private int lineOffset = 0;
 	private int columnOffset = 0;
@@ -33,6 +34,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;
 		this.printSourcePositions = true;
+		this.legacyPositions = false;
 	}
 
 	public void printSourcePositions(boolean b) {
@@ -64,13 +66,36 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		} else if (uselessPositionInfo(node)) {
 		   pout.printNumber(id);
 		} else {
-			if (printSourcePositions) { // print Prolog pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
-				pout.openTerm("pos", true);
-				pout.printNumber(id);
-				pout.printNumber(nodeIds.lookupFileNumber(node));
-				pout.printNumber(getStartLine(node));
-				pout.printNumber(getStartColumn(node));
-				pout.printNumber(getEndLine(node));
+			if (printSourcePositions) { // print Prolog 
+			   int fileNr = nodeIds.lookupFileNumber(node);
+			   int startLine = getStartLine(node);
+			   int endLine = getEndLine(node);
+			   if (legacyPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
+					pout.openTerm("pos", true);
+					pout.printNumber(id);
+					pout.printNumber(fileNr);
+					pout.printNumber(startLine);
+					pout.printNumber(getStartColumn(node));
+					pout.printNumber(endLine);
+				} else { // new terms with no UniqueID and with less infos if possible
+				    if (fileNr==1 && startLine==endLine){
+						pout.openTerm("p3", true);
+						pout.printNumber(startLine);
+						pout.printNumber(getStartColumn(node));
+					// we could also provide one case where fileNr=1 and startLine !== endLine
+					} else if (startLine==endLine) {
+						pout.openTerm("p4", true);
+						pout.printNumber(fileNr);
+						pout.printNumber(startLine);
+						pout.printNumber(getStartColumn(node));
+				    } else {
+						pout.openTerm("p5", true);
+						pout.printNumber(fileNr);
+						pout.printNumber(startLine);
+						pout.printNumber(getStartColumn(node));
+						pout.printNumber(endLine);
+					}
+				}
 				pout.printNumber(getEndColumn(node));
 				pout.closeTerm();
 			} else {
