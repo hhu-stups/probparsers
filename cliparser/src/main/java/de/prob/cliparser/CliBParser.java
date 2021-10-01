@@ -101,7 +101,7 @@ public class CliBParser {
 		behaviour.setOutputFile(f);
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
-		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES));
+		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setUseIndention(options.isOptionSet(CLI_SWITCH_INDENTION));
 		behaviour.setDisplayGraphically(options.isOptionSet(CLI_SWITCH_UI));
 		behaviour.setPrintAST(options.isOptionSet(CLI_SWITCH_AST)); // -ast flag
@@ -111,6 +111,7 @@ public class CliBParser {
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
+		// TO DO: check if some other flags are not recognised
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);
