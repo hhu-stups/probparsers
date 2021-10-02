@@ -31,9 +31,9 @@ public class RulesMachineFilesTest {
 		String output = getRulesMachineAsPrologTerm(dir + "project/project_with_def_file/Main.rmch");
 		System.out.println(output);
 		assertTrue(output.contains("Defs.def"));
-		// assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
-		assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'")); // new position format
-
+		assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
+		//assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'")); // new position format
+        // requires parsingBehaviour.setCompactPrologPositions(); to be called
 	}
 
 	@Test

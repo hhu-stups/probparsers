@@ -43,6 +43,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_UI = "-ui";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
 	private static final String CLI_SWITCH_FASTPROLOG = "-fastprolog";
+	private static final String CLI_SWITCH_COMPACT_POSITIONS = "-compactpos";
 	private static final String CLI_SWITCH_PROLOG_LINES = "-lineno";
 	private static final String CLI_SWITCH_OUTPUT = "-out";
 	private static final String CLI_SWITCH_INDENTION = "-indent";
@@ -110,6 +111,7 @@ public class CliBParser {
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
+		behaviour.setCompactPrologPositions(options.isOptionSet(CLI_SWITCH_COMPACT_POSITIONS));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
 		// TO DO: check if some other flags are not recognised
 
@@ -420,9 +422,11 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
 		options.addOption(CLI_SWITCH_UI, "Show AST as Swing UI");
 		options.addOption(CLI_SWITCH_PROLOG, "Show AST as Prolog term");
+		// TO DO: add option for less precise position infos
 		options.addOption(CLI_SWITCH_PROLOG_LINES, "Put line numbers into prolog terms");
 		options.addOption(CLI_SWITCH_OUTPUT, "Specify output file", 1);
 		options.addOption(CLI_SWITCH_VERSION, "Print the parser version and exit.");
+		options.addOption(CLI_SWITCH_COMPACT_POSITIONS, "Use new more compact Prolog position terms");
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");

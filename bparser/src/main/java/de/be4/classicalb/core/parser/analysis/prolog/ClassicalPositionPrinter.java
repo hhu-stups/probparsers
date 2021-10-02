@@ -18,7 +18,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	public final NodeIdAssignment nodeIds;
 
 	private boolean printSourcePositions = false;
-	private boolean legacyPositions = false;
+	private boolean compactPositions = false;
 
 	private int lineOffset = 0;
 	private int columnOffset = 0;
@@ -34,11 +34,12 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;
 		this.printSourcePositions = true;
-		this.legacyPositions = false;
+		this.compactPositions = false;
 	}
 
-	public void printSourcePositions(boolean b) {
+	public void setPrintSourcePositions(boolean b, boolean compact) {
 		this.printSourcePositions = b;
+		this.compactPositions = compact;
 	}
 
 	public void setLineOffset(int lineOffset) {
@@ -70,7 +71,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 			   int fileNr = nodeIds.lookupFileNumber(node);
 			   int startLine = getStartLine(node);
 			   int endLine = getEndLine(node);
-			   if (legacyPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
+			   if (! compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 					pout.openTerm("pos", true);
 					pout.printNumber(id);
 					pout.printNumber(fileNr);

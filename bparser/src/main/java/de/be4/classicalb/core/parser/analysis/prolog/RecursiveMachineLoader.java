@@ -79,7 +79,8 @@ public class RecursiveMachineLoader {
 
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
-		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
+		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),
+		                                 parsingBehaviour.isCompactPrologPositions());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		// parser version
