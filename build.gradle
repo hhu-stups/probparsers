@@ -4,15 +4,14 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.28'
+project.version = '2.9.29'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "6.8.2"
-    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "7.2"
 }
 
 ext {
@@ -133,9 +132,9 @@ ext {
         final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
         jacocoTestReportTask.configure {JacocoReport task ->
             task.reports {
-                xml.enabled = false
-                csv.enabled = false
-                html.destination = new File(subproject.buildDir, "jacocoHtml")
+                xml.required = false
+                csv.required = false
+                html.outputLocation = new File(subproject.buildDir, "jacocoHtml")
             }
             
             task.classDirectories.from = task.classDirectories.from.collect {

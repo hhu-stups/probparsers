@@ -15,6 +15,7 @@ public class ParsingBehaviour {
 	private boolean printAST = false;           // -ast flag in CliBParser
 	private boolean prettyPrintB = false;           // -pp flag in CliBParser
 	private boolean fastPrologOutput = false;   // -fastprolog flag in CliBParser
+	private boolean compactPositions = false;     // false means use old style pos/5 positions
 	private File outputFile;
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
 	
@@ -95,6 +96,14 @@ public class ParsingBehaviour {
 
 	public void setFastPrologOutput(boolean fastPrologOutput) {
 		this.fastPrologOutput = fastPrologOutput;
+	}
+	
+	public boolean isCompactPrologPositions() {
+		return compactPositions;
+	}
+
+	public void setCompactPrologPositions(boolean compactPositions) {
+		this.compactPositions = compactPositions;
 	}
 
 	public File getOutputFile() {

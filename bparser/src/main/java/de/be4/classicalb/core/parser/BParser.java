@@ -117,6 +117,7 @@ public class BParser {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
+			    // TO DO: precise position info flag
 		rml.printAsProlog(new PrintWriter(out));
 	}
 

@@ -4,20 +4,23 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gradle.api.Action;
-import org.gradle.api.file.ConfigurableFileTree;
-import org.gradle.api.file.CopySpec;
+import org.gradle.api.NonNullApi;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.IgnoreEmptyDirectories;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.process.JavaExecSpec;
+import org.gradle.work.NormalizeLineEndings;
 
+@NonNullApi
 public class SableCCTask extends SourceTask {
 	private FileCollection sableCCClasspath;
 	private String maxHeapSize;
@@ -30,6 +33,14 @@ public class SableCCTask extends SourceTask {
 		this.sableCCClasspath = null;
 		this.destinationJavaDir = this.getProject().getObjects().directoryProperty();
 		this.destinationResourcesDir = this.getProject().getObjects().directoryProperty();
+	}
+	
+	@IgnoreEmptyDirectories
+	@NormalizeLineEndings
+	@PathSensitive(PathSensitivity.NONE)
+	@Override
+	public FileTree getSource() {
+		return super.getSource();
 	}
 	
 	@Classpath
@@ -77,36 +88,25 @@ public class SableCCTask extends SourceTask {
 		this.getProject().mkdir(this.getDestinationResourcesDir());
 		
 		// Call SableCC to generate the source files.
-		this.getProject().javaexec(new Action<JavaExecSpec>() {
-			@Override
-			public void execute(final JavaExecSpec spec) {
-				spec.setClasspath(SableCCTask.this.getSableCCClasspath());
-				spec.setMaxHeapSize(SableCCTask.this.getMaxHeapSize());
-				spec.setMain("org.sablecc.sablecc.SableCC");
-				final List<String> args = new ArrayList<>();
-				args.add("-d");
-				args.add(destinationJavaDir.get().getAsFile().getPath());
-				for (final File file : SableCCTask.this.getSource().getFiles()) {
-					args.add(file.getPath());
-				}
-				spec.setArgs(args);
+		this.getProject().javaexec(spec -> {
+			spec.setClasspath(this.getSableCCClasspath());
+			spec.setMaxHeapSize(this.getMaxHeapSize());
+			spec.getMainClass().set("org.sablecc.sablecc.SableCC");
+			final List<String> args = new ArrayList<>();
+			args.add("-d");
+			args.add(destinationJavaDir.get().getAsFile().getPath());
+			for (final File file : this.getSource().getFiles()) {
+				args.add(file.getPath());
 			}
+			spec.setArgs(args);
 		});
 		
 		// Move generated dat files from Java source directory to resources directory.
-		this.getProject().copy(new Action<CopySpec>() {
-			@Override
-			public void execute(final CopySpec spec) {
-				spec.from(SableCCTask.this.getDestinationJavaDir());
-				spec.into(SableCCTask.this.getDestinationResourcesDir());
-				spec.include("**/*.dat");
-			}
+		this.getProject().copy(spec -> {
+			spec.from(this.getDestinationJavaDir());
+			spec.into(this.getDestinationResourcesDir());
+			spec.include("**/*.dat");
 		});
-		this.getProject().delete(this.getProject().fileTree(this.getDestinationJavaDir(), new Action<ConfigurableFileTree>() {
-			@Override
-			public void execute(final ConfigurableFileTree files) {
-				files.include("**/*.dat");
-			}
-		}));
+		this.getProject().delete(this.getProject().fileTree(this.getDestinationJavaDir(), files -> files.include("**/*.dat")));
 	}
 }

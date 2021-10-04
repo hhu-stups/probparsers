@@ -173,7 +173,8 @@ public class RulesParseUnit implements IModel {
 	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
-		pprinter.printSourcePositions(parsingBehaviour.isAddLineNumbers());
+		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),
+		                                 parsingBehaviour.isCompactPrologPositions());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		pout.openTerm("machine");
 		start.apply(prolog);

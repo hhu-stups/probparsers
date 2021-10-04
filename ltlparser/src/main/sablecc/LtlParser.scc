@@ -22,21 +22,22 @@ Helpers
   l_bracket = '[';
   r_bracket = ']';
 
-  enabled_start = 'e(';
-  available_start = 'Av(';
+  opt_white_space = layout_char*; // note: no newline (so as not to disturb counting); no comments
+  // TODO: maybe allow full whitespace for enabled, available, ...
 
-  strong_fair_start = 'sf(';
-  weak_fair_start = 'wf(';
+  enabled_start   = 'e'  opt_white_space '(' | 'enabled'   opt_white_space '(';
+  available_start = 'Av' opt_white_space '(' | 'available' opt_white_space '(';
+
+  strong_fair_start = 'sf' opt_white_space '(' | 'SF' opt_white_space '(';
+  weak_fair_start   = 'wf' opt_white_space '(' | 'WF' opt_white_space '(';
 
   /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */
   strong_fair_all = 'SEF';
-  strong_fair_start_capital = 'SF('; /* TO DO: does not allow space between SF and bracket */
-  weak_fair_start_capital = 'WF(';
   weak_fair_all = 'WEF';
 
-  dlk_action_start = 'deadlock(';
-  det_action_start = 'deterministic(';
-  ctrl_action_start = 'controller(';
+  dlk_action_start  = 'deadlock' opt_white_space '(';
+  det_action_start  = 'deterministic' opt_white_space '(';
+  ctrl_action_start = 'controller' opt_white_space '(';
 
   exists_quantor = '#';
   forall_quantor = '!';
@@ -65,7 +66,7 @@ Tokens
   {ltl} l_par = l_paren;
   {ltl} r_par = r_paren;
 
-  {ltl -> action} l_sq = l_bracket;
+  {ltl -> action} l_sq = l_bracket; // TODO: also allow textual version 'executed('
   {ltl -> action} enabled = enabled_start;
   {ltl -> action} available = available_start;
 
@@ -74,7 +75,7 @@ Tokens
   {atomic} atomic_proposition_end = r_cur;
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket];
+  {action} action_end = [r_paren + r_bracket]; // TODO: does to check that parens/bracket match!
   {action} action_begin = [l_paren + l_bracket];
   {action} tp_char = ([0 .. 0xffff]);
 
@@ -98,9 +99,11 @@ Tokens
   {ltl} weakuntil = 'W' | 'weakuntil';
   {ltl} release =   'R' | 'release';
 
-  {ltl} globally = 'G' | 'globally'   | 'always'; // TODO support '[]'
-  {ltl} finally =  'F' | 'eventually' | 'finally' | '<>';
+  {ltl} globally = 'G' | 'globally'   | 'always' | 0x25a1; // Unicode White Square; TODO support ASCII '[]'
+  {ltl} finally =  'F' | 'eventually' | 'finally' | '<>' | 0x22c4; // Unicode Diamond Operator
   {ltl} next = 'X' | 'next';
+
+  // TODO: support leadsto operator ~>, Unicode 0x21dd
 
   /* Past LTL temporal operators */
   {ltl} since = 'S' | 'since';
@@ -113,8 +116,8 @@ Tokens
   /* Fairness LTL operators */
   {ltl} strong_fair_everything = strong_fair_all;
   {ltl} weak_fair_everything = weak_fair_all;
-  {ltl -> action} strong_fair = (strong_fair_start | strong_fair_start_capital);
-  {ltl -> action} weak_fair = (weak_fair_start | weak_fair_start_capital);
+  {ltl -> action} strong_fair = strong_fair_start;
+  {ltl -> action} weak_fair = weak_fair_start;
 
   white_space = white_space;
 

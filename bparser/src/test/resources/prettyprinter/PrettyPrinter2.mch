@@ -1,0 +1,5 @@
+MACHINE PrettyPrinter2
+INCLUDES M1
+OPERATIONS
+  Foo = Inc(2,5)
+END

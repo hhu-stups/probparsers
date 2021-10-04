@@ -43,6 +43,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_UI = "-ui";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
 	private static final String CLI_SWITCH_FASTPROLOG = "-fastprolog";
+	private static final String CLI_SWITCH_COMPACT_POSITIONS = "-compactpos";
 	private static final String CLI_SWITCH_PROLOG_LINES = "-lineno";
 	private static final String CLI_SWITCH_OUTPUT = "-out";
 	private static final String CLI_SWITCH_INDENTION = "-indent";
@@ -101,7 +102,7 @@ public class CliBParser {
 		behaviour.setOutputFile(f);
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
-		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES));
+		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setUseIndention(options.isOptionSet(CLI_SWITCH_INDENTION));
 		behaviour.setDisplayGraphically(options.isOptionSet(CLI_SWITCH_UI));
 		behaviour.setPrintAST(options.isOptionSet(CLI_SWITCH_AST)); // -ast flag
@@ -110,7 +111,9 @@ public class CliBParser {
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
+		behaviour.setCompactPrologPositions(options.isOptionSet(CLI_SWITCH_COMPACT_POSITIONS));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
+		// TO DO: check if some other flags are not recognised
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);
@@ -220,35 +223,35 @@ public class CliBParser {
 				break;
 			case formula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case expression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case predicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case substitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case extendedformula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedexpression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedpredicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedsubstitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -296,11 +299,16 @@ public class CliBParser {
 		print(strOutput.toString());
 	}
 
-	private static void parseExtendedFormula(String theFormula, IDefinitions context) {
+	private static void parseFormulaInternal(String theFormula, IDefinitions context, final ParsingBehaviour behaviour, final boolean extended) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.eparse(theFormula, context);
+			Start start;
+			if (extended) {
+				start = parser.eparse(theFormula, context);
+			} else {
+				start = parser.parse(theFormula, false); // debugOutput=false
+			}
 
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
@@ -308,6 +316,8 @@ public class CliBParser {
 			start.apply(na);
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
+			                                 behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
@@ -340,41 +350,12 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseFormula(String theFormula, IDefinitions context) {
-		try {
-			BParser parser = new BParser();
-			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false); // debugOutput=false
-			
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
+	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
+		parseFormulaInternal(theFormula, context, behaviour, true);
+	}
 
-			NodeIdAssignment na = new NodeIdAssignment();
-			start.apply(na);
-
-			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
-			ASTProlog printer = new ASTProlog(strOutput, pprinter);
-
-			start.apply(printer);
-			strOutput.fullstop();
-
-			// A Friendly Reminder: strOutput includes a newline!
-			print(strOutput.toString());
-		} catch (NullPointerException e) {
-			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
-			// NullPointerException returns NULL itself, thus triggering another
-			// NullPointerException in the catch statement. Therefore we need a
-			// second catch statement with a special case for the
-			// NullPointerException instead of catching a general Exception
-			// print("EXCEPTION NullPointerException" + System.lineSeparator());
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
-			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
-			strOutput.fullstop();
-			strOutput.flush();
-			print(strOutput.toString());
-		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
-
-		}
+	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
+		parseFormulaInternal(theFormula, context, behaviour, false);
 	}
 
 	private static void print(String output) {
@@ -419,9 +400,11 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
 		options.addOption(CLI_SWITCH_UI, "Show AST as Swing UI");
 		options.addOption(CLI_SWITCH_PROLOG, "Show AST as Prolog term");
+		// TO DO: add option for less precise position infos
 		options.addOption(CLI_SWITCH_PROLOG_LINES, "Put line numbers into prolog terms");
 		options.addOption(CLI_SWITCH_OUTPUT, "Specify output file", 1);
 		options.addOption(CLI_SWITCH_VERSION, "Print the parser version and exit.");
+		options.addOption(CLI_SWITCH_COMPACT_POSITIONS, "Use new more compact Prolog position terms");
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");
