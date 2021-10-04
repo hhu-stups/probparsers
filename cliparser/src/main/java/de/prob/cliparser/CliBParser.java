@@ -299,11 +299,16 @@ public class CliBParser {
 		print(strOutput.toString());
 	}
 
-	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
+	private static void parseFormulaInternal(String theFormula, IDefinitions context, final ParsingBehaviour behaviour, final boolean extended) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
-			Start start = parser.eparse(theFormula, context);
+			Start start;
+			if (extended) {
+				start = parser.eparse(theFormula, context);
+			} else {
+				start = parser.parse(theFormula, false); // debugOutput=false
+			}
 
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
@@ -345,43 +350,12 @@ public class CliBParser {
 		}
 	}
 
+	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
+		parseFormulaInternal(theFormula, context, behaviour, true);
+	}
+
 	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		try {
-			BParser parser = new BParser();
-			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false); // debugOutput=false
-			
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
-
-			NodeIdAssignment na = new NodeIdAssignment();
-			start.apply(na);
-
-			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
-			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
-			                                 behaviour.isCompactPrologPositions());
-			ASTProlog printer = new ASTProlog(strOutput, pprinter);
-
-			start.apply(printer);
-			strOutput.fullstop();
-
-			// A Friendly Reminder: strOutput includes a newline!
-			print(strOutput.toString());
-		} catch (NullPointerException e) {
-			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
-			// NullPointerException returns NULL itself, thus triggering another
-			// NullPointerException in the catch statement. Therefore we need a
-			// second catch statement with a special case for the
-			// NullPointerException instead of catching a general Exception
-			// print("EXCEPTION NullPointerException" + System.lineSeparator());
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
-			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
-			strOutput.fullstop();
-			strOutput.flush();
-			print(strOutput.toString());
-		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
-
-		}
+		parseFormulaInternal(theFormula, context, behaviour, false);
 	}
 
 	private static void print(String output) {
