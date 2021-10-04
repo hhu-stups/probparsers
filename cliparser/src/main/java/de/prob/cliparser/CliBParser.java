@@ -223,35 +223,35 @@ public class CliBParser {
 				break;
 			case formula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case expression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case predicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case substitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context);
+				parseFormula(theFormula, context, behaviour);
 				break;
 			case extendedformula:
 				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedexpression:
 				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedpredicate:
 				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case extendedsubstitution:
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context);
+				parseExtendedFormula(theFormula, context, behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -299,7 +299,7 @@ public class CliBParser {
 		print(strOutput.toString());
 	}
 
-	private static void parseExtendedFormula(String theFormula, IDefinitions context) {
+	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
@@ -311,6 +311,8 @@ public class CliBParser {
 			start.apply(na);
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
+			                                 behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
@@ -343,7 +345,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseFormula(String theFormula, IDefinitions context) {
+	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
@@ -355,6 +357,8 @@ public class CliBParser {
 			start.apply(na);
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
+			                                 behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
 
 			start.apply(printer);
