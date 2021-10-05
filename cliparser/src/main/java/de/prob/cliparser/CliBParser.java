@@ -49,6 +49,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_INDENTION = "-indent";
 	private static final String CLI_SWITCH_PREPL = "-prepl";
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
+	// other interesting parameters: System.getProperty : prob.stdlib
 
 	private static final String osEncoding = System.getProperty("file.encoding");
 	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"

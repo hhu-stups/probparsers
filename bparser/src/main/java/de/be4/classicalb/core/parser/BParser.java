@@ -120,8 +120,23 @@ public class BParser {
 			    // TO DO: precise position info flag
 		rml.printAsProlog(new PrintWriter(out));
 	}
-
-	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
+	
+	/*
+	write AST as facts in SICStus fastrw format
+	parser_version(VERS).
+    classical_b(NAME,[Files,...]).
+    machine(). ....
+    
+    file can be read in Prolog with
+    :- use_module(library(fastrw)).
+    
+    open(FILE,read,S,[type(binary)]),
+    fast_read(S,ParserVersionTerm),
+    fast_read(S,FilesTerm), ... until end_of_file
+    close(S)
+   */
+	private static void printASTasFastProlog(final PrintStream out,
+	        final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
 					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
@@ -130,17 +145,14 @@ public class BParser {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
-		StructuredPrologOutput output = new StructuredPrologOutput();
 
-		output.openList();
 		for (PrologTerm term : sentences) {
+		    StructuredPrologOutput output = new StructuredPrologOutput();
 			output.printTerm(term);
+		    output.fullstop();
+			FastReadTransformer transformer = new FastReadTransformer(output);
+			out.print(transformer.write());
 		}
-		output.closeList();
-		output.fullstop();
-
-		FastReadTransformer transformer = new FastReadTransformer(output);
-		return transformer.write();
 	}
 
 	/**
@@ -558,8 +570,9 @@ public class BParser {
 
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 				// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
-				String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
-				out.println(fp);
+				//String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
+				//out.print(fp); // no println
+				printASTasFastProlog(out,this, bfile, tree, parsingBehaviour, contentProvider);
 			} else if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
 				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
 			}
