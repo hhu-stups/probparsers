@@ -94,6 +94,34 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
+		sb.append("REFINEMENT ");
+		node.getHeader().apply(this);
+		sb.append("\nREFINES ");
+		node.getRefMachine().apply(this);
+		sb.append("\n");
+		List<PMachineClause> copy = new ArrayList<>(node.getMachineClauses());
+		for (PMachineClause e : copy) {
+			e.apply(this);
+		}
+		sb.append("END");
+	}
+
+	@Override
+	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
+		sb.append("IMPLEMENTATION ");
+		node.getHeader().apply(this);
+		sb.append("\nREFINES ");
+		node.getRefMachine().apply(this);
+		sb.append("\n");
+		List<PMachineClause> copy = new ArrayList<>(node.getMachineClauses());
+		for (PMachineClause e : copy) {
+			e.apply(this);
+		}
+		sb.append("END");
+	}
+
+	@Override
 	public void caseAMachineMachineVariant(AMachineMachineVariant node) {
 		sb.append("MACHINE");
 	}
@@ -255,6 +283,15 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		printCommaSeparatedlist(copy);
 		sb.append("\n");
 	}
+
+	@Override
+	public void caseAExtendsMachineClause(AExtendsMachineClause node) {
+		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
+		sb.append("EXTENDS ");
+		printCommaSeparatedlist(copy);
+		sb.append("\n");
+	}
+
 	@Override
 	public void caseAPromotesMachineClause(APromotesMachineClause node) {
 		List<PExpression> copy = new ArrayList<>(node.getOperationNames());
