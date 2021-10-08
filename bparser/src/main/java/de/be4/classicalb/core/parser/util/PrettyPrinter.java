@@ -134,15 +134,19 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("SYSTEM");
 	}
 
+	private void printParameters(final List<PExpression> parameters) {
+		if (!parameters.isEmpty()) {
+			sb.append('(');
+			commaSeparatedExpressionList(parameters);
+			sb.append(')');
+		}
+	}
+
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		List<TIdentifierLiteral> copy = new ArrayList<>(node.getName());
-		copy.get(0).apply(this);
-		// List<PExpression> copy = new
-		// ArrayList<PExpression>(node.getParameters());
-		// for (PExpression e : copy) {
-		// e.apply(this);
-		// }
+		assert node.getName().size() == 1;
+		node.getName().get(0).apply(this);
+		printParameters(node.getParameters());
 	}
 
 	@Override
@@ -903,7 +907,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 				sb.append(".");
 			}
 		}
-		// TO DO: Parameters are missing  List<PExpression>  using node.getParameters()
+
+		printParameters(node.getParameters());
 	}
 
 	@Override
