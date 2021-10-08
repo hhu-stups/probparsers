@@ -23,13 +23,9 @@ public final class PrologExceptionPrinter {
 	}
 
 	public static void printException(final OutputStream out, final IOException e) {
-		printException(out, e, true);
-	}
-
-	public static void printException(final OutputStream out, final IOException e, boolean useIndentation) {
-		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
+		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		pto.openTerm("io_exception");
-		printMsg(pto, e, useIndentation);
+		pto.printAtom(e.getMessage());
 		pto.closeTerm();
 		pto.fullstop();
 		pto.flush();
