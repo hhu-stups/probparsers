@@ -340,7 +340,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (BCompoundException e) {
-			final IPrologTermOutput pto = new PrologTermOutput(socketWriter);
+			final IPrologTermOutput pto = new PrologTermOutput(socketWriter, false);
 			PrologExceptionPrinter.printException(pto, e, false, true);
 			pto.fullstop();
 			pto.flush();
@@ -351,7 +351,7 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			final IPrologTermOutput pto = new PrologTermOutput(socketWriter);
+			final IPrologTermOutput pto = new PrologTermOutput(socketWriter, false);
 			PrologExceptionPrinter.printException(pto, e);
 			pto.fullstop();
 			pto.flush();
