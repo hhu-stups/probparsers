@@ -1,14 +1,15 @@
 package de.prob.cliparser;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -30,6 +31,8 @@ import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
 import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.ProBParserBase;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.PrologTermStringOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -54,7 +57,7 @@ public class CliBParser {
 	private static final String encoding = "UTF-8";
 
 	private static Socket socket;
-	private static OutputStream socketOutputStream;
+	private static PrintWriter socketWriter;
 
 	public static void main(final String[] args) throws IOException {
 		// System.out.println("Ready. Press enter");
@@ -145,7 +148,7 @@ public class CliBParser {
 		System.out.println(serverSocket.getLocalPort() + ".");
 		socket = serverSocket.accept();
 		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
-		socketOutputStream = socket.getOutputStream();
+		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), encoding)));
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
 		String line = "";
@@ -337,7 +340,10 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(socketOutputStream, e, false, true);
+			final IPrologTermOutput pto = new PrologTermOutput(socketWriter);
+			PrologExceptionPrinter.printException(pto, e, false, true);
+			pto.fullstop();
+			pto.flush();
 		} catch (LexerException e) {
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
@@ -345,7 +351,10 @@ public class CliBParser {
 			strOutput.flush();
 			print(strOutput.toString());
 		} catch (IOException e) {
-			PrologExceptionPrinter.printException(socketOutputStream, e);
+			final IPrologTermOutput pto = new PrologTermOutput(socketWriter);
+			PrologExceptionPrinter.printException(pto, e);
+			pto.fullstop();
+			pto.flush();
 		}
 	}
 
@@ -358,12 +367,8 @@ public class CliBParser {
 	}
 
 	private static void print(String output) {
-		try {
-			PrintStream out = new PrintStream(socketOutputStream, true, CliBParser.encoding);
-			out.print(output);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		socketWriter.print(output);
+		socketWriter.flush();
 	}
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err,
