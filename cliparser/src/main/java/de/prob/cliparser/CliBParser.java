@@ -51,9 +51,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
 	// other interesting parameters: System.getProperty : prob.stdlib
 
-	private static final String osEncoding = System.getProperty("file.encoding");
-	private static final String encoding = "MacRoman".equals(osEncoding) || "Cp1252".equals(osEncoding) ? "UTF-8"
-			: osEncoding;
+	private static final String encoding = "UTF-8";
 
 	private static Socket socket;
 	private static OutputStream socketOutputStream;
