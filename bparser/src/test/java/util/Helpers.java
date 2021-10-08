@@ -1,10 +1,11 @@
 package util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -64,50 +65,26 @@ public class Helpers {
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		PrintStream printStream = new PrintStream(output);
 		parser.fullParsing(machineFile, parsingBehaviour, printStream, printStream);
 		printStream.flush();
 		printStream.close();
-		return output.toString();
+		return new String(output.toByteArray(), StandardCharsets.UTF_8);
 	}
 
 	public static String parseMachineAndGetPrologOutput(String input) {
 		final BParser parser = new BParser("Test");
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		try {
 			Start start = parser.parse(input, false);
 			final IPrologTermOutput pout = new PrologTermOutput(output, false);
 			printAsProlog(start, pout);
-			return output.toString();
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(output, e, false, false);
-			return output.toString();
 		}
-		
+		return new String(output.toByteArray(), StandardCharsets.UTF_8);
 	}
 
 	public static String getMachineAsPrologTerm(String input) {
@@ -119,21 +96,10 @@ public class Helpers {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		final IPrologTermOutput pout = new PrologTermOutput(output, false);
 		printAsProlog(start, pout);
-		return output.toString();
+		return new String(output.toByteArray(), StandardCharsets.UTF_8);
 	}
 
 	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
