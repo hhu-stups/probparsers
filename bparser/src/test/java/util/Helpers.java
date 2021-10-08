@@ -45,37 +45,6 @@ public class Helpers {
 		return pp.getPrettyPrint();
 	}
 
-	public static String parseFile2(String filename) throws IOException {
-		final File machineFile = new File(filename);
-		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		Start tree;
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-
-		try {
-			tree = parser.parseFile(machineFile, false);
-			PrintStream printStream = new PrintStream(output);
-			BParser.printASTasProlog(printStream, parser, machineFile, tree, new ParsingBehaviour(),
-					parser.getContentProvider());
-			output.close();
-			return output.toString();
-		} catch (BCompoundException e) {
-			e.printStackTrace();
-			PrologExceptionPrinter.printException(output, e);
-			return output.toString();
-		}
-	}
-
 	public static String fullParsing(String filename) {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setPrologOutput(true);
