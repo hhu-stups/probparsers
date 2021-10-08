@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.util;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -123,8 +122,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append(" ");
 		node.getHeader().apply(this);
 		sb.append("\n");
-		List<PMachineClause> copy = new ArrayList<>(node.getMachineClauses());
-		for (PMachineClause e : copy) {
+		for (PMachineClause e : node.getMachineClauses()) {
 			e.apply(this);
 		}
 		sb.append("END");
@@ -137,8 +135,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("\nREFINES ");
 		node.getRefMachine().apply(this);
 		sb.append("\n");
-		List<PMachineClause> copy = new ArrayList<>(node.getMachineClauses());
-		for (PMachineClause e : copy) {
+		for (PMachineClause e : node.getMachineClauses()) {
 			e.apply(this);
 		}
 		sb.append("END");
@@ -151,8 +148,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("\nREFINES ");
 		node.getRefMachine().apply(this);
 		sb.append("\n");
-		List<PMachineClause> copy = new ArrayList<>(node.getMachineClauses());
-		for (PMachineClause e : copy) {
+		for (PMachineClause e : node.getMachineClauses()) {
 			e.apply(this);
 		}
 		sb.append("END");
@@ -180,9 +176,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
 		sb.append("DEFINITIONS\n");
-		List<PDefinition> copy = new ArrayList<>(node.getDefinitions());
-		for (int i = 0; i < copy.size(); i++) {
-			copy.get(i).apply(this);
+		for (final PDefinition e : node.getDefinitions()) {
+			e.apply(this);
 			sb.append(";\n");
 		}
 	}
@@ -329,9 +324,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAOperation(AOperation node) {
-		List<PExpression> returnValues = new ArrayList<>(node.getReturnValues());
-		if (!returnValues.isEmpty()) {
-			printCommaList(returnValues);
+		if (!node.getReturnValues().isEmpty()) {
+			printCommaList(node.getReturnValues());
 			sb.append(" <-- ");
 		}
 		printDottedIdentifier(node.getOpName());
@@ -450,8 +444,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAChoiceSubstitution(AChoiceSubstitution node) {
 		sb.append("CHOICE ");
-		List<PSubstitution> copy = new ArrayList<>(node.getSubstitutions());
-		for (PSubstitution e : copy) {
+		for (PSubstitution e : node.getSubstitutions()) {
 			e.apply(this);
 		}
 		sb.append(" END ");
@@ -477,11 +470,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		node.getCondition().apply(this);
 		sb.append(" THEN ");
 		node.getThen().apply(this);
-		{
-			List<PSubstitution> copy = new ArrayList<>(node.getWhenSubstitutions());
-			for (PSubstitution e : copy) {
-				e.apply(this);
-			}
+		for (PSubstitution e : node.getWhenSubstitutions()) {
+			e.apply(this);
 		}
 		if (node.getElse() != null) {
 			sb.append(" ELSE ");
@@ -504,11 +494,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		node.getCondition().apply(this);
 		sb.append(" THEN ");
 		node.getThen().apply(this);
-		{
-			List<PSubstitution> copy = new ArrayList<>(node.getElsifSubstitutions());
-			for (PSubstitution e : copy) {
-				e.apply(this);
-			}
+		for (PSubstitution e : node.getElsifSubstitutions()) {
+			e.apply(this);
 		}
 		if (node.getElse() != null) {
 			sb.append(" ELSE ");
@@ -533,9 +520,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		printCommaListCompact(node.getEitherExpr());
 		sb.append(" THEN ");
 		node.getEitherSubst().apply(this);
-		List<PSubstitution> copy = new ArrayList<>(node.getOrSubstitutions());
-		for (PSubstitution e : copy)
+		for (PSubstitution e : node.getOrSubstitutions()) {
 			e.apply(this);
+		}
 		if (node.getElse() != null) {
 			sb.append(" ELSE ");
 			node.getElse().apply(this);
@@ -812,11 +799,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
-		final List<PExpression> copy = new ArrayList<>(node.getList());
 		sb.append("(");
-		copy.get(0).apply(this);
+		node.getList().get(0).apply(this);
 		sb.append(",");
-		copy.get(1).apply(this);
+		node.getList().get(1).apply(this);
 		sb.append(")");
 	}
 
