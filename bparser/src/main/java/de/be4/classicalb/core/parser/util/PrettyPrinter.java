@@ -3,13 +3,13 @@ package de.be4.classicalb.core.parser.util;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class PrettyPrinter extends DepthFirstAdapter {
-
-	HashMap<Class<? extends Node>, Integer> prio = new HashMap<>();
 	private static final int PRIORITY20 = 20;
 	private static final int PRIORITY30 = 30;
 	private static final int PRIORITY40 = 40;
@@ -24,7 +24,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	private static final int PRIORITY230 = 230;
 	private static final int PRIORITY231 = 231;
 
-	public void setup() {
+	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
+	static {
+		final Map<Class<? extends Node>, Integer> prio = new HashMap<>();
 		prio.put(AParallelProductExpression.class, PRIORITY20);
 		prio.put(AImplicationPredicate.class, PRIORITY30);
 		prio.put(ADisjunctPredicate.class, PRIORITY40);
@@ -66,11 +68,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AUnaryMinusExpression.class, PRIORITY210);
 		prio.put(AReverseExpression.class, PRIORITY230);
 		prio.put(AImageExpression.class, PRIORITY231);
+		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
-	public PrettyPrinter() {
-		setup();
-	}
+	public PrettyPrinter() {}
 
 	private final StringBuilder sb = new StringBuilder();
 
@@ -564,8 +565,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	public void leftParAssoc(final Node node, final Node right) {
-		Integer priorityNode = prio.get(node.getClass());
-		Integer priorityRight = prio.get(right.getClass());
+		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
+		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		// we do not insert parentheses when priority is the same
 		if (priorityNode != null && priorityRight != null && priorityRight < priorityNode) {
 			sb.append("(");
@@ -573,24 +574,24 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	public void rightParAssoc(final Node node, final Node right) {
-		Integer priorityNode = prio.get(node.getClass());
-		Integer priorityRight = prio.get(right.getClass());
+		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
+		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight < priorityNode) {
 			sb.append(")");
 		}
 	}
 
 	public void leftPar(final Node node, final Node right) {
-		Integer priorityNode = prio.get(node.getClass());
-		Integer priorityRight = prio.get(right.getClass());
+		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
+		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
 			sb.append("(");
 		}
 	}
 
 	public void rightPar(final Node node, final Node right) {
-		Integer priorityNode = prio.get(node.getClass());
-		Integer priorityRight = prio.get(right.getClass());
+		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
+		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
 			sb.append(")");
 		}
