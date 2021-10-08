@@ -1099,7 +1099,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAEmptySequenceExpression(final AEmptySequenceExpression arg0) {
+	public void caseAEmptySequenceExpression(final AEmptySequenceExpression node) {
 		sb.append("[]");
 	}
 
@@ -1223,22 +1223,22 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseABooleanTrueExpression(final ABooleanTrueExpression arg0) {
+	public void caseABooleanTrueExpression(final ABooleanTrueExpression node) {
 		sb.append("TRUE");
 	}
 
 	@Override
-	public void caseABooleanFalseExpression(final ABooleanFalseExpression arg0) {
+	public void caseABooleanFalseExpression(final ABooleanFalseExpression node) {
 		sb.append("FALSE");
 	}
 
 	@Override
-	public void caseAMaxIntExpression(final AMaxIntExpression arg0) {
+	public void caseAMaxIntExpression(final AMaxIntExpression node) {
 		sb.append("MAXINT");
 	}
 
 	@Override
-	public void caseAMinIntExpression(final AMinIntExpression arg0) {
+	public void caseAMinIntExpression(final AMinIntExpression node) {
 		sb.append("MININT");
 	}
 
@@ -1248,42 +1248,42 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAIntegerSetExpression(final AIntegerSetExpression arg0) {
+	public void caseAIntegerSetExpression(final AIntegerSetExpression node) {
 		sb.append("INTEGER");
 	}
 
 	@Override
-	public void caseANaturalSetExpression(final ANaturalSetExpression arg0) {
+	public void caseANaturalSetExpression(final ANaturalSetExpression node) {
 		sb.append("NATURAL");
 	}
 
 	@Override
-	public void caseANatural1SetExpression(final ANatural1SetExpression arg0) {
+	public void caseANatural1SetExpression(final ANatural1SetExpression node) {
 		sb.append("NATURAL1");
 	}
 
 	@Override
-	public void caseANatSetExpression(final ANatSetExpression arg0) {
+	public void caseANatSetExpression(final ANatSetExpression node) {
 		sb.append("NAT");
 	}
 
 	@Override
-	public void caseANat1SetExpression(final ANat1SetExpression arg0) {
+	public void caseANat1SetExpression(final ANat1SetExpression node) {
 		sb.append("NAT1");
 	}
 
 	@Override
-	public void caseAIntSetExpression(final AIntSetExpression arg0) {
+	public void caseAIntSetExpression(final AIntSetExpression node) {
 		sb.append("INT");
 	}
 
 	@Override
-	public void caseABoolSetExpression(final ABoolSetExpression arg0) {
+	public void caseABoolSetExpression(final ABoolSetExpression node) {
 		sb.append("BOOL");
 	}
 
 	@Override
-	public void caseAStringSetExpression(final AStringSetExpression arg0) {
+	public void caseAStringSetExpression(final AStringSetExpression node) {
 		sb.append("STRING");
 	}
 
