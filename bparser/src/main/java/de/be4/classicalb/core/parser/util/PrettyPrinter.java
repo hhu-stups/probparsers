@@ -331,9 +331,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		printDottedIdentifier(node.getOpName());
 		printParameterList(node.getParameters());
 		sb.append(" = ");
-		if (node.getOperationBody() != null) {
-			node.getOperationBody().apply(this);
-		}
+		node.getOperationBody().apply(this);
 	}
 
 	@Override
@@ -599,35 +597,27 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	public void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
-		if (left != null) {
-			leftParAssoc(node, left);
-			left.apply(this);
-			rightParAssoc(node, left);
-		}
+		leftParAssoc(node, left);
+		left.apply(this);
+		rightParAssoc(node, left);
 
 		sb.append(operatorStr);
 
-		if (right != null) {
-			leftPar(node, right);
-			right.apply(this);
-			rightPar(node, right);
-		}
+		leftPar(node, right);
+		right.apply(this);
+		rightPar(node, right);
 	}
 
 	public void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
-		if (left != null) {
-			leftPar(node, left);
-			left.apply(this);
-			rightPar(node, left);
-		}
+		leftPar(node, left);
+		left.apply(this);
+		rightPar(node, left);
 
 		sb.append(operatorStr);
 
-		if (right != null) {
-			leftParAssoc(node, right);
-			right.apply(this);
-			rightParAssoc(node, right);
-		}
+		leftParAssoc(node, right);
+		right.apply(this);
+		rightParAssoc(node, right);
 	}
 
 	@Override
@@ -824,31 +814,20 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
 		sb.append("-");
-
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 	}
 
 	@Override
 	public void caseAReverseExpression(final AReverseExpression node) {
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append("~");
 	}
 
 	@Override
 	public void caseAImageExpression(final AImageExpression node) {
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-
+		node.getLeft().apply(this);
 		sb.append("[");
-
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
+		node.getRight().apply(this);
 		sb.append("]");
 
 	}
@@ -856,41 +835,25 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAParallelProductExpression(final AParallelProductExpression node) {
 		sb.append("(");
-
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-
+		node.getLeft().apply(this);
 		sb.append("||");
-
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
-
+		node.getRight().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseACompositionExpression(final ACompositionExpression node) {
 		sb.append("(");
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
-
+		node.getLeft().apply(this);
 		sb.append(";");
-
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
+		node.getRight().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAConvertBoolExpression(final AConvertBoolExpression node) {
 		sb.append("bool(");
-		if (node.getPredicate() != null) {
-			node.getPredicate().apply(this);
-		}
+		node.getPredicate().apply(this);
 		sb.append(")");
 	}
 
@@ -902,9 +865,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAMaxExpression(final AMaxExpression node) {
 		sb.append("max(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -962,18 +923,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAMinExpression(final AMinExpression node) {
 		sb.append("min(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseACardExpression(final ACardExpression node) {
 		sb.append("card(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -982,13 +939,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("SIGMA(");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
-		if (node.getPredicates() != null) {
-			node.getPredicates().apply(this);
-		}
+		node.getPredicates().apply(this);
 		sb.append("|");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -997,13 +950,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("PI(");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
-		if (node.getPredicates() != null) {
-			node.getPredicates().apply(this);
-		}
+		node.getPredicates().apply(this);
 		sb.append("|");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1015,99 +964,77 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAPowSubsetExpression(final APowSubsetExpression node) {
 		sb.append("POW(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAPow1SubsetExpression(final APow1SubsetExpression node) {
 		sb.append("POW1(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAFinSubsetExpression(final AFinSubsetExpression node) {
 		sb.append("FIN(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAFin1SubsetExpression(final AFin1SubsetExpression node) {
 		sb.append("FIN1(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAGeneralUnionExpression(final AGeneralUnionExpression node) {
 		sb.append("union(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAGeneralIntersectionExpression(final AGeneralIntersectionExpression node) {
 		sb.append("inter(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAIdentityExpression(final AIdentityExpression node) {
 		sb.append("id(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAReflexiveClosureExpression(final AReflexiveClosureExpression node) {
 		sb.append("closure(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAClosureExpression(final AClosureExpression node) {
 		sb.append("closure1(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseADomainExpression(final ADomainExpression node) {
 		sb.append("dom(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseARangeExpression(final ARangeExpression node) {
 		sb.append("ran(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1116,76 +1043,58 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("%");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
-		if (node.getPredicate() != null) {
-			node.getPredicate().apply(this);
-		}
+		node.getPredicate().apply(this);
 		sb.append("|");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseATransFunctionExpression(final ATransFunctionExpression node) {
 		sb.append("fnc(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseATransRelationExpression(final ATransRelationExpression node) {
 		sb.append("rel(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseASeqExpression(final ASeqExpression node) {
 		sb.append("seq(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseASeq1Expression(final ASeq1Expression node) {
 		sb.append("seq1(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAIseqExpression(final AIseqExpression node) {
 		sb.append("iseq(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAIseq1Expression(final AIseq1Expression node) {
 		sb.append("iseq1(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAPermExpression(final APermExpression node) {
 		sb.append("perm(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1197,97 +1106,69 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseASizeExpression(final ASizeExpression node) {
 		sb.append("size(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAFirstExpression(final AFirstExpression node) {
 		sb.append("first(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseALastExpression(final ALastExpression node) {
 		sb.append("last(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAFrontExpression(final AFrontExpression node) {
 		sb.append("front(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseATailExpression(final ATailExpression node) {
 		sb.append("tail(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseARevExpression(final ARevExpression node) {
 		sb.append("rev(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAFirstProjectionExpression(final AFirstProjectionExpression node) {
 		sb.append("prj1(");
-		if (node.getExp1() != null) {
-			node.getExp1().apply(this);
-		}
-
+		node.getExp1().apply(this);
 		sb.append(",");
-
-		if (node.getExp2() != null) {
-			node.getExp2().apply(this);
-		}
+		node.getExp2().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseASecondProjectionExpression(final ASecondProjectionExpression node) {
 		sb.append("prj2(");
-		if (node.getExp1() != null) {
-			node.getExp1().apply(this);
-		}
-
+		node.getExp1().apply(this);
 		sb.append(",");
-
-		if (node.getExp2() != null) {
-			node.getExp2().apply(this);
-		}
+		node.getExp2().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAIterationExpression(final AIterationExpression node) {
 		sb.append("iterate(");
-		if (node.getLeft() != null) {
-			node.getLeft().apply(this);
-		}
+		node.getLeft().apply(this);
 		sb.append(",");
-		if (node.getRight() != null) {
-			node.getRight().apply(this);
-		}
+		node.getRight().apply(this);
 		sb.append(")");
 	}
 
@@ -1296,17 +1177,13 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("{");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append("|");
-		if (node.getPredicates() != null) {
-			node.getPredicates().apply(this);
-		}
+		node.getPredicates().apply(this);
 		sb.append("}");
 	}
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		if (node.getText() != null) {
-			sb.append(node.getText());
-		}
+		sb.append(node.getText());
 	}
 
 	@Override
@@ -1314,13 +1191,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("UNION(");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
-		if (node.getPredicates() != null) {
-			node.getPredicates().apply(this);
-		}
+		node.getPredicates().apply(this);
 		sb.append("|");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1329,13 +1202,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("INTER(");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
-		if (node.getPredicates() != null) {
-			node.getPredicates().apply(this);
-		}
+		node.getPredicates().apply(this);
 		sb.append("|");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1349,9 +1218,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAGeneralConcatExpression(final AGeneralConcatExpression node) {
 		sb.append("conc(");
-		if (node.getExpression() != null) {
-			node.getExpression().apply(this);
-		}
+		node.getExpression().apply(this);
 		sb.append(")");
 	}
 
@@ -1512,9 +1379,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("!");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
-		if (node.getImplication() != null) {
-			node.getImplication().apply(this);
-		}
+		node.getImplication().apply(this);
 		sb.append(")");
 	}
 
@@ -1523,27 +1388,21 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("#");
 		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
-		if (node.getPredicate() != null) {
-			node.getPredicate().apply(this);
-		}
+		node.getPredicate().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseANegationPredicate(final ANegationPredicate node) {
 		sb.append("not(");
-		if (node.getPredicate() != null) {
-			node.getPredicate().apply(this);
-		}
+		node.getPredicate().apply(this);
 		sb.append(")");
 	}
 
 	@Override
 	public void caseAStringExpression(final AStringExpression node) {
 		sb.append("\"");
-		if (node.getContent() != null) {
-			sb.append(Utils.escapeStringContents(node.getContent().getText()));
-		}
+		sb.append(Utils.escapeStringContents(node.getContent().getText()));
 		sb.append("\"");
 
 	}
