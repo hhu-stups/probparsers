@@ -24,11 +24,15 @@ public final class PrologExceptionPrinter {
 
 	public static void printException(final OutputStream out, final IOException e) {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
+		printException(pto, e);
+		pto.fullstop();
+		pto.flush();
+	}
+
+	public static void printException(final IPrologTermOutput pto, final IOException e) {
 		pto.openTerm("io_exception");
 		pto.printAtom(e.getMessage());
 		pto.closeTerm();
-		pto.fullstop();
-		pto.flush();
 	}
 
 	public static void printException(final OutputStream out, final BCompoundException e) {
