@@ -353,9 +353,9 @@ public class DefinitionsTest {
 	
 	@Ignore
 	@Test
-	public void testMisleadingParseError() {
+	public void testMisleadingParseError() throws BCompoundException {
 		final String testMachine = "MACHINE foo \nDEFINITIONS \nCONSTANTS a \nPROPERTIES a = 1  END";
-		String output = Helpers.parseMachineAndGetPrologOutput(testMachine);
+		String output = Helpers.getMachineAsPrologTerm(testMachine);
 		System.out.println(output);
 		//TODO
 	}

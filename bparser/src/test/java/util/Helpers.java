@@ -12,7 +12,6 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
@@ -71,19 +70,6 @@ public class Helpers {
 		printStream.flush();
 		printStream.close();
 		return new String(output.toByteArray(), StandardCharsets.UTF_8);
-	}
-
-	public static String parseMachineAndGetPrologOutput(String input) {
-		final BParser parser = new BParser("Test");
-
-		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		try {
-			Start start = parser.parse(input, false);
-			printAsProlog(start, pout);
-		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(pout, e, false, false);
-		}
-		return pout.toString();
 	}
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {

@@ -1,20 +1,23 @@
 package de.be4.classicalb.core.parser.pragmas;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 
-import org.junit.Test;
-
-import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.node.Start;
+
+import org.junit.Test;
+
+import util.Helpers;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FilePragmaTest {
 
@@ -34,10 +37,14 @@ public class FilePragmaTest {
 	@Test
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
-		String output = Helpers.parseMachineAndGetPrologOutput(testMachine);
-		System.out.println(output);
-		assertTrue(output.contains("parse_exception"));
-		assertTrue(output.contains("A file pragma"));
+		try {
+			String output = Helpers.getMachineAsPrologTerm(testMachine);
+			System.out.println(output);
+			fail("Expected parser exception was not thrown");
+		} catch (BCompoundException e) {
+			assertTrue(e.getCause() instanceof BParseException);
+			assertTrue(e.getCause().getMessage().contains("A file pragma"));
+		}
 	}
 
 	@Test(expected = BCompoundException.class)
