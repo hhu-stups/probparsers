@@ -20,7 +20,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testString() {
+	public void testString() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES \"a\\\"b\" = \"a\" END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -34,16 +34,15 @@ public class StringTest {
 		try {
 			Helpers.getMachineAsPrologTerm(testMachine);
 			fail("Should raise a parser exception");
-		} catch (RuntimeException e) {
-			BCompoundException cause = (BCompoundException) e.getCause();
-			String message = cause.getFirstException().getMessage();
+		} catch (BCompoundException e) {
+			String message = e.getFirstException().getMessage();
 			assertTrue(message.contains("Unknown token: \""));
 			System.out.println(message);
 		}
 	}
 
 	@Test
-	public void testDoubleBackslash() {
+	public void testDoubleBackslash() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\ ''' = ''' \\\\ ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -52,7 +51,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testNewline() {
+	public void testNewline() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\n ''' = ''' \n ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -61,7 +60,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testTab() {
+	public void testTab() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\t ''' = ''' \t ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -70,7 +69,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testCarriageReturn() {
+	public void testCarriageReturn() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\r ''' = ''' \r ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -79,7 +78,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testSignleQuote() {
+	public void testSignleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\' ''' = ''' ' ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -88,7 +87,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testDoubleQuote() {
+	public void testDoubleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\\" ''' = ''' \" ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -97,7 +96,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testMultiLineString() {
+	public void testMultiLineString() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a\" ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
@@ -106,7 +105,7 @@ public class StringTest {
 	}
 
 	@Test
-	public void testMultiLineString2() {
+	public void testMultiLineString2() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a ''' END";
 		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);

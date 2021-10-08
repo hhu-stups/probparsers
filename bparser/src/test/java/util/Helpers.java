@@ -86,15 +86,9 @@ public class Helpers {
 		return pout.toString();
 	}
 
-	public static String getMachineAsPrologTerm(String input) {
+	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
-		Start start;
-		try {
-			start = parser.parse(input, true);
-		} catch (BCompoundException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
+		Start start = parser.parse(input, true);
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		printAsProlog(start, pout);
 		return pout.toString();

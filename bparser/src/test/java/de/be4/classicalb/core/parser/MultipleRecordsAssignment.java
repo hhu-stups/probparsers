@@ -1,7 +1,9 @@
 package de.be4.classicalb.core.parser;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
+
 import util.Helpers;
 
 import static org.junit.Assert.assertTrue;
@@ -11,7 +13,7 @@ public class MultipleRecordsAssignment {
 
 
 	@Test
-	public void testTipple() {
+	public void testTipple() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa'bb := 4 ";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("machine(assign(2,[record_field(3,record_field(4,identifier(5,xx),identifier(6,aa)),identifier(7,bb))],[integer(8,4)]))"));
@@ -19,7 +21,7 @@ public class MultipleRecordsAssignment {
 
 
 	@Test
-	public void testDouble() {
+	public void testDouble() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa := 4 ";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("machine(assign(2,[record_field(3,identifier(4,xx),identifier(5,aa))],[integer(6,4)]))"));
@@ -27,7 +29,7 @@ public class MultipleRecordsAssignment {
 
 
 	@Test
-	public void moreContext() {
+	public void moreContext() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() +  " out := xx'aa'bb";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("machine(parallel(2,[assign(3,[record_field(4,record_field(5,identifier(6,xx)," +
