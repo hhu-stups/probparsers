@@ -117,26 +117,26 @@ public class BParser {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
 				parsingBehaviour);
 		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
-			    // TO DO: precise position info flag
+		// TO DO: precise position info flag
 		rml.printAsProlog(new PrintWriter(out));
 	}
 	
 	/*
 	write AST as facts in SICStus fastrw format
 	parser_version(VERS).
-    classical_b(NAME,[Files,...]).
-    machine(). ....
-    
-    file can be read in Prolog with
-    :- use_module(library(fastrw)).
-    
-    open(FILE,read,S,[type(binary)]),
-    fast_read(S,ParserVersionTerm),
-    fast_read(S,FilesTerm), ... until end_of_file
-    close(S)
-   */
+	classical_b(NAME,[Files,...]).
+	machine(). ....
+	
+	file can be read in Prolog with
+	:- use_module(library(fastrw)).
+	
+	open(FILE,read,S,[type(binary)]),
+	fast_read(S,ParserVersionTerm),
+	fast_read(S,FilesTerm), ... until end_of_file
+	close(S)
+	*/
 	private static void printASTasFastProlog(final PrintStream out,
-	        final BParser parser, final File bfile, final Start tree,
+			final BParser parser, final File bfile, final Start tree,
 			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
 					throws BCompoundException {
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
@@ -147,9 +147,9 @@ public class BParser {
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
 
 		for (PrologTerm term : sentences) {
-		    StructuredPrologOutput output = new StructuredPrologOutput();
+			StructuredPrologOutput output = new StructuredPrologOutput();
 			output.printTerm(term);
-		    output.fullstop();
+			output.fullstop();
 			FastReadTransformer transformer = new FastReadTransformer(output);
 			out.print(transformer.write());
 		}
