@@ -6,7 +6,6 @@ import de.be4.classicalb.core.parser.node.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public class PrettyPrinter extends DepthFirstAdapter {
@@ -80,6 +79,44 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		return sb.toString();
 	}
 
+	private void printList(final List<? extends Node> list, final String separator) {
+		for (final Iterator<? extends Node> it = list.iterator(); it.hasNext();) {
+			final Node node = it.next();
+			node.apply(this);
+			if (it.hasNext()) {
+				sb.append(separator);
+			}
+		}
+	}
+
+	private void printDottedIdentifier(final List<TIdentifierLiteral> list) {
+		printList(list, ".");
+	}
+
+	private void printCommaList(final List<? extends Node> list) {
+		printList(list, ", ");
+	}
+
+	private void printCommaListCompact(final List<? extends Node> list) {
+		printList(list, ",");
+	}
+
+	private void printSemicolonList(final List<? extends Node> list) {
+		printList(list, ";\n");
+	}
+
+	private void printSemicolonListSingleLine(final List<? extends Node> list) {
+		printList(list, "; ");
+	}
+
+	private void printParameterList(final List<PExpression> parameters) {
+		if (!parameters.isEmpty()) {
+			sb.append('(');
+			printCommaList(parameters);
+			sb.append(')');
+		}
+	}
+
 	@Override
 	public void caseAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		node.getVariant().apply(this);
@@ -134,19 +171,10 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("SYSTEM");
 	}
 
-	private void printParameters(final List<PExpression> parameters) {
-		if (!parameters.isEmpty()) {
-			sb.append('(');
-			commaSeparatedExpressionList(parameters);
-			sb.append(')');
-		}
-	}
-
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
-		assert node.getName().size() == 1;
-		node.getName().get(0).apply(this);
-		printParameters(node.getParameters());
+		printDottedIdentifier(node.getName());
+		printParameterList(node.getParameters());
 	}
 
 	@Override
@@ -162,12 +190,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
 		sb.append(node.getName().getText());
-		List<PExpression> copy = new ArrayList<>(node.getParameters());
-		if (!copy.isEmpty()) {
-			sb.append("(");
-			printExprList(copy);
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
 	}
@@ -175,12 +198,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		sb.append(node.getName().getText());
-		List<PExpression> copy = new ArrayList<>(node.getParameters());
-		if (!copy.isEmpty()) {
-			sb.append("(");
-			printExprList(copy);
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
 	}
@@ -188,12 +206,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
 		sb.append(node.getName().getText());
-		List<PExpression> copy = new ArrayList<>(node.getParameters());
-		if (!copy.isEmpty()) {
-			sb.append("(");
-			printExprList(copy);
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
 	}
@@ -201,23 +214,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseASetsMachineClause(ASetsMachineClause node) {
 		sb.append("SETS ");
-		List<PSet> list = new ArrayList<>(node.getSetDefinitions());
-		for (int i = 0; i < list.size(); i++) {
-			list.get(i).apply(this);
-			if (i < list.size() - 1) {
-				sb.append("; ");
-			}
-		}
+		printSemicolonListSingleLine(node.getSetDefinitions());
 		sb.append("\n");
-	}
-
-	private void printCommaSeparatedlist(List<? extends Node> list) {
-		for (int i = 0; i < list.size(); i++) {
-			list.get(i).apply(this);
-			if (i < list.size() - 1) {
-				sb.append(", ");
-			}
-		}
 	}
 
 	@Override
@@ -229,91 +227,75 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
 		sb.append("ABSTRACT_CONSTANTS ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getIdentifiers());
 		sb.append("\n");
 	}
 
 	@Override
 	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
 		sb.append("CONSTANTS ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getIdentifiers());
 		sb.append("\n");
 	}
 
 	@Override
 	public void caseAVariablesMachineClause(AVariablesMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
 		sb.append("VARIABLES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getIdentifiers());
 		sb.append("\n");
 	}
 	
 	@Override
 	public void caseAConcreteVariablesMachineClause(AConcreteVariablesMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
 		sb.append("CONCRETE_VARIABLES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getIdentifiers());
 		sb.append("\n");
 	}
 	
 	@Override
 	public void caseAIncludesMachineClause(AIncludesMachineClause node) {
-		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
 		sb.append("INCLUDES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getMachineReferences());
 		sb.append("\n");
 	}
 	@Override
 	public void caseASeesMachineClause(ASeesMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
 		sb.append("SEES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getMachineNames());
 		sb.append("\n");
 	}
 	@Override
 	public void caseAUsesMachineClause(AUsesMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getMachineNames());
 		sb.append("USES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getMachineNames());
 		sb.append("\n");
 	}
 	@Override
 	public void caseAImportsMachineClause(AImportsMachineClause node) {
-		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
 		sb.append("IMPORTS ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getMachineReferences());
 		sb.append("\n");
 	}
 
 	@Override
 	public void caseAExtendsMachineClause(AExtendsMachineClause node) {
-		List<PMachineReference> copy = new ArrayList<>(node.getMachineReferences());
 		sb.append("EXTENDS ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getMachineReferences());
 		sb.append("\n");
 	}
 
 	@Override
 	public void caseAPromotesMachineClause(APromotesMachineClause node) {
-		List<PExpression> copy = new ArrayList<>(node.getOperationNames());
 		sb.append("PROMOTES ");
-		printCommaSeparatedlist(copy);
+		printCommaList(node.getOperationNames());
 		sb.append("\n");
 	}
 
 	@Override
 	public void caseAAssertionsMachineClause(AAssertionsMachineClause node) {
 		sb.append("ASSERTIONS\n");
-		List<PPredicate> copy = new ArrayList<>(node.getPredicates());
-		for (int i = 0; i < copy.size(); i++) {
-			copy.get(i).apply(this);
-			if (i < copy.size() - 1) {
-				sb.append("; ");
-			}
-		}
+		printSemicolonListSingleLine(node.getPredicates());
 		sb.append("\n");
 	}
 
@@ -341,13 +323,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
 		sb.append("OPERATIONS\n");
-		List<POperation> copy = new ArrayList<>(node.getOperations());
-		for (int i = 0; i < copy.size(); i++) {
-			copy.get(i).apply(this);
-			if (i < copy.size() - 1) {
-				sb.append(";\n");
-			}
-		}
+		printSemicolonList(node.getOperations());
 		sb.append("\n");
 	}
 
@@ -355,19 +331,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseAOperation(AOperation node) {
 		List<PExpression> returnValues = new ArrayList<>(node.getReturnValues());
 		if (!returnValues.isEmpty()) {
-			printExprList(returnValues);
+			printCommaList(returnValues);
 			sb.append(" <-- ");
 		}
 		List<TIdentifierLiteral> nameLiterals = new ArrayList<>(node.getOpName());
 		for (TIdentifierLiteral e : nameLiterals) {
 			e.apply(this);
 		}
-		List<PExpression> parameters = new ArrayList<>(node.getParameters());
-		if (!parameters.isEmpty()) {
-			sb.append("(");
-			printExprList(parameters);
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 		sb.append(" = ");
 		if (node.getOperationBody() != null) {
 			node.getOperationBody().apply(this);
@@ -376,11 +347,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAAssignSubstitution(AAssignSubstitution node) {
-		LinkedList<PExpression> lhs = node.getLhsExpression();
-		commaSeparatedExpressionList(lhs);
+		printCommaListCompact(node.getLhsExpression());
 		sb.append(" := ");
-		LinkedList<PExpression> rhs = node.getRhsExpressions();
-		commaSeparatedExpressionList(rhs);
+		printCommaListCompact(node.getRhsExpressions());
 	}
 
 	@Override
@@ -390,7 +359,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseABecomesElementOfSubstitution(ABecomesElementOfSubstitution node) {
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append("::");
 		node.getSet().apply(this);
 
@@ -398,7 +367,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseABecomesSuchSubstitution(ABecomesSuchSubstitution node) {
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" :(");
 
 		node.getPredicate().apply(this);
@@ -408,18 +377,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAOpSubstitution(AOpSubstitution node) {
 		node.getName().apply(this);
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			commaSeparatedExpressionList(node.getParameters());
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 	}
 
 
 	@Override
 	public void caseAOperationCallSubstitution(AOperationCallSubstitution node) {
 		if (!node.getResultIdentifiers().isEmpty()) {
-			commaSeparatedExpressionList(node.getResultIdentifiers());
+			printCommaListCompact(node.getResultIdentifiers());
 			sb.append("<--");
 		}
 		ArrayList<TIdentifierLiteral> copy = new ArrayList<>(node.getOperation());
@@ -427,37 +392,23 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			final TIdentifierLiteral e = iterator.next();
 			e.apply(this);
 		}
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			commaSeparatedExpressionList(node.getParameters());
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseAParallelSubstitution(AParallelSubstitution node) {
-		List<PSubstitution> copy = new ArrayList<>(node.getSubstitutions());
-		copy.get(0).apply(this);
-		for (int i = 1; i < copy.size(); i++) {
-			sb.append(" || ");
-			copy.get(i).apply(this);
-		}
+		printList(node.getSubstitutions(), " || ");
 	}
 
 	@Override
 	public void caseASequenceSubstitution(ASequenceSubstitution node) {
-		List<PSubstitution> copy = new ArrayList<>(node.getSubstitutions());
-		copy.get(0).apply(this);
-		for (int i = 1; i < copy.size(); i++) {
-			sb.append(" ; ");
-			copy.get(i).apply(this);
-		}
+		printList(node.getSubstitutions(), " ; ");
 	}
 
 	@Override
 	public void caseAAnySubstitution(AAnySubstitution node) {
 		sb.append("ANY ");
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" WHERE ");
 		node.getWhere().apply(this);
 		sb.append(" THEN ");
@@ -468,7 +419,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
 		sb.append("LET ");
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" BE ");
 		node.getPredicate().apply(this);
 		sb.append(" IN ");
@@ -479,7 +430,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAVarSubstitution(AVarSubstitution node) {
 		sb.append("VAR ");
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" IN ");
 		node.getSubstitution().apply(this);
 		sb.append(" END ");
@@ -576,7 +527,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseACaseOrSubstitution(ACaseOrSubstitution node) {
 		sb.append(" OR ");
-		commaSeparatedExpressionList(node.getExpressions());
+		printCommaListCompact(node.getExpressions());
 		sb.append(" THEN ");
 		node.getSubstitution().apply(this);
 	}
@@ -586,7 +537,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("CASE ");
 		node.getExpression().apply(this);
 		sb.append(" OF EITHER ");
-		commaSeparatedExpressionList(node.getEitherExpr());
+		printCommaListCompact(node.getEitherExpr());
 		sb.append(" THEN ");
 		node.getEitherSubst().apply(this);
 		List<PSubstitution> copy = new ArrayList<>(node.getOrSubstitutions());
@@ -626,20 +577,12 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseALetExpressionExpression(final ALetExpressionExpression node) {
 		sb.append("LET ");
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" BE ");
 		node.getAssignment().apply(this);
 		sb.append(" IN ");
 		node.getExpr().apply(this);
 		sb.append(" END");
-	}
-
-	private void commaSeparatedExpressionList(List<PExpression> list) {
-		list.get(0).apply(this);
-		for (int i = 1; i < list.size(); i++) {
-			sb.append(",");
-			list.get(i).apply(this);
-		}
 	}
 
 	public void leftParAssoc(final Node node, final Node right) {
@@ -886,29 +829,12 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
-		final List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
-		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
-			final TIdentifierLiteral e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(".");
-			}
-		}
+		printDottedIdentifier(node.getIdentifier());
 	}
 	@Override
 	public void caseAMachineReference(final AMachineReference node) {
-		final List<TIdentifierLiteral> copy = new ArrayList<>(node.getMachineName());
-		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
-			final TIdentifierLiteral e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(".");
-			}
-		}
-
-		printParameters(node.getParameters());
+		printDottedIdentifier(node.getMachineName());
+		printParameterList(node.getParameters());
 	}
 
 	@Override
@@ -1006,15 +932,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		sb.append("{");
-		final List<PExpression> copy = new ArrayList<>(node.getExpressions());
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		printCommaListCompact(node.getExpressions());
 		sb.append("}");
 	}
 
@@ -1030,16 +948,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
 		sb.append("/*@symbolic*/ ");
 		sb.append("{");
-		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(", ");
-			}
-		}
-
+		printCommaList(node.getIdentifiers());
 		sb.append("|");
 		node.getPredicates().apply(this);
 		sb.append("}");
@@ -1049,16 +958,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
 		sb.append("/*@symbolic*/ ");
 		sb.append("%");
-		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(", ");
-			}
-		}
-
+		printCommaList(node.getIdentifiers());
 		sb.append(".");
 		sb.append("(");
 		node.getPredicate().apply(this);
@@ -1071,16 +971,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
 		sb.append("/*@symbolic*/ ");
 		sb.append("UNION");
-		final List<PExpression> identifiers = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(", ");
-			}
-		}
-
+		printCommaList(node.getIdentifiers());
 		sb.append(".");
 		sb.append("(");
 		node.getPredicates().apply(this);
@@ -1109,17 +1000,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralSumExpression(final AGeneralSumExpression node) {
-		sb.append("SIGMA");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		sb.append("(");
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		sb.append("SIGMA(");
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
 		if (node.getPredicates() != null) {
 			node.getPredicates().apply(this);
@@ -1133,17 +1015,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralProductExpression(final AGeneralProductExpression node) {
-		sb.append("PI");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		sb.append("(");
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		sb.append("PI(");
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
 		if (node.getPredicates() != null) {
 			node.getPredicates().apply(this);
@@ -1262,16 +1135,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseALambdaExpression(final ALambdaExpression node) {
 		sb.append("%");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
-
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
 		if (node.getPredicate() != null) {
 			node.getPredicate().apply(this);
@@ -1451,16 +1315,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAComprehensionSetExpression(final AComprehensionSetExpression node) {
 		sb.append("{");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
-
+		printCommaListCompact(node.getIdentifiers());
 		sb.append("|");
 		if (node.getPredicates() != null) {
 			node.getPredicates().apply(this);
@@ -1478,15 +1333,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
 		sb.append("UNION(");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
 		if (node.getPredicates() != null) {
 			node.getPredicates().apply(this);
@@ -1501,15 +1348,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
 		sb.append("INTER(");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(").(");
 		if (node.getPredicates() != null) {
 			node.getPredicates().apply(this);
@@ -1523,16 +1362,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseASequenceExtensionExpression(final ASequenceExtensionExpression node) {
-		final List<PExpression> copy = new ArrayList<>(node.getExpression());
 		sb.append("[");
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		printCommaListCompact(node.getExpression());
 		sb.append("]");
 	}
 
@@ -1613,7 +1444,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
 		sb.append("LET ");
-		commaSeparatedExpressionList(node.getIdentifiers());
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(" BE ");
 		node.getAssignment().apply(this);
 		sb.append(" IN ");
@@ -1700,17 +1531,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAForallPredicate(final AForallPredicate node) {
 		sb.append("!");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
-
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
 		if (node.getImplication() != null) {
 			node.getImplication().apply(this);
@@ -1721,17 +1542,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAExistsPredicate(final AExistsPredicate node) {
 		sb.append("#");
-		final List<PExpression> copy = new ArrayList<>(node.getIdentifiers());
-
-		for (final Iterator<PExpression> iterator = copy.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
-
+		printCommaListCompact(node.getIdentifiers());
 		sb.append(".(");
 		if (node.getPredicate() != null) {
 			node.getPredicate().apply(this);
@@ -1772,77 +1583,41 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	public void caseADefinitionExpression(final ADefinitionExpression node) {
 		String defLiteral = node.getDefLiteral().getText();
 		sb.append(defLiteral);
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			printExprList(node.getParameters());
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
 		String defLiteral = node.getDefLiteral().getText();
 		sb.append(defLiteral);
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			printExprList(node.getParameters());
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseADefinitionSubstitution(ADefinitionSubstitution node) {
 		String defLiteral = node.getDefLiteral().getText();
 		sb.append(defLiteral);
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			printExprList(node.getParameters());
-			sb.append(")");
-		}
-	}
-
-	private void printExprList(final List<PExpression> parameters) {
-		for (final Iterator<PExpression> iterator = parameters.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-			if (iterator.hasNext()) {
-				sb.append(", ");
-			}
-		}
+		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseAFunctionExpression(final AFunctionExpression node) {
 		node.getIdentifier().apply(this);
-		if (!node.getParameters().isEmpty()) {
-			sb.append("(");
-			printExprList(node.getParameters());
-			sb.append(")");
-		}
+		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseAStructExpression(final AStructExpression node) {
 		sb.append("struct(");
-		processEntries(node.getEntries());
+		printCommaListCompact(node.getEntries());
 		sb.append(")");
 	}
 
 	@Override
 	public void caseARecExpression(final ARecExpression node) {
 		sb.append("rec(");
-		processEntries(node.getEntries());
+		printCommaListCompact(node.getEntries());
 		sb.append(")");
-	}
-
-	private void processEntries(final List<PRecEntry> list) {
-		for (final Iterator<PRecEntry> iterator = list.iterator(); iterator.hasNext();) {
-			final PRecEntry e = iterator.next();
-			e.apply(this);
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
 	}
 
 	@Override
@@ -1861,30 +1636,11 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
-		final List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
-
-		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
-			final TIdentifierLiteral e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
-		sb.append("=");
-
-		final List<PExpression> copy2 = new ArrayList<>(node.getElements());
-		sb.append("{");
-		for (final Iterator<PExpression> iterator = copy2.iterator(); iterator.hasNext();) {
-			final PExpression e = iterator.next();
-			e.apply(this);
-
-			if (iterator.hasNext()) {
-				sb.append(",");
-			}
-		}
+		// FIXME Shouldn't this be a dotted identifier?
+		printCommaListCompact(node.getIdentifier());
+		sb.append("={");
+		printCommaListCompact(node.getElements());
 		sb.append("}");
-
 	}
 
 }
