@@ -36,6 +36,8 @@ public class PrettyPredicatePrinterTest {
 			"#X,Y.(X:NAT&Y:NAT=>x<y)",
 			"1=4 or 12=19",
 			"1=4 => 12=19",
+			"x=1 => y=2 => z=3",
+			"x=1 => (y=2 => z=3)",
 			"1=4 <=> 12=19",
 			"not(7=3)",
 			"!y.(y:DOM => !(x1,x2).(x1:DOM & x1<x2 & x2:DOM  => (Board(x1)(y) /= Board(x2)(y) &	Board(y)(x1) /= Board(y)(x2))))&!(s1,s2).(s1:SUBSQ & s2:SUBSQ => !(x1,y1,x2,y2).( (x1:s1 & x2:s1 & x1>=x2 & (x1=x2 => y1>y2) & y1:s2 & y2:s2 & (x1,y1) /= (x2,y2)) => Board(x1)(y1) /= Board(x2)(y2)))",
