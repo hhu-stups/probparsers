@@ -17,7 +17,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 public class Helpers {
 
@@ -76,15 +76,14 @@ public class Helpers {
 	public static String parseMachineAndGetPrologOutput(String input) {
 		final BParser parser = new BParser("Test");
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		try {
 			Start start = parser.parse(input, false);
-			final IPrologTermOutput pout = new PrologTermOutput(output, false);
 			printAsProlog(start, pout);
 		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(output, e, false, false);
+			PrologExceptionPrinter.printException(pout, e, false, false);
 		}
-		return new String(output.toByteArray(), StandardCharsets.UTF_8);
+		return pout.toString();
 	}
 
 	public static String getMachineAsPrologTerm(String input) {
@@ -96,10 +95,9 @@ public class Helpers {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		final IPrologTermOutput pout = new PrologTermOutput(output, false);
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		printAsProlog(start, pout);
-		return new String(output.toByteArray(), StandardCharsets.UTF_8);
+		return pout.toString();
 	}
 
 	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
