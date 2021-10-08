@@ -334,10 +334,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			printCommaList(returnValues);
 			sb.append(" <-- ");
 		}
-		List<TIdentifierLiteral> nameLiterals = new ArrayList<>(node.getOpName());
-		for (TIdentifierLiteral e : nameLiterals) {
-			e.apply(this);
-		}
+		printDottedIdentifier(node.getOpName());
 		printParameterList(node.getParameters());
 		sb.append(" = ");
 		if (node.getOperationBody() != null) {
@@ -387,11 +384,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			printCommaListCompact(node.getResultIdentifiers());
 			sb.append("<--");
 		}
-		ArrayList<TIdentifierLiteral> copy = new ArrayList<>(node.getOperation());
-		for (final Iterator<TIdentifierLiteral> iterator = copy.iterator(); iterator.hasNext();) {
-			final TIdentifierLiteral e = iterator.next();
-			e.apply(this);
-		}
+		printDottedIdentifier(node.getOperation());
 		printParameterList(node.getParameters());
 	}
 
@@ -1636,8 +1629,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
-		// FIXME Shouldn't this be a dotted identifier?
-		printCommaListCompact(node.getIdentifier());
+		printDottedIdentifier(node.getIdentifier());
 		sb.append("={");
 		printCommaListCompact(node.getElements());
 		sb.append("}");
