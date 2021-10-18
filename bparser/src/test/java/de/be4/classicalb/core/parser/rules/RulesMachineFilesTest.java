@@ -1,18 +1,18 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.URISyntaxException;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 import org.junit.Test;
 
@@ -163,10 +163,15 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testMainFileDoesNotExist() {
-		final String fileName = "rules/project/FileDoesNotExist.rmch";
-		String result = getRulesMachineAsPrologTerm(fileName);
-		assertTrue(result.contains("FileDoesNotExist.rmch"));
-		assertTrue(result.contains("exception"));
+		// Cannot use RulesUtil here,
+		// because it throws a different exception than RulesProject does
+		// when asked to load a nonexistant file.
+		final RulesProject project = new RulesProject();
+		project.parseProject(new File("DirDoesNotExist/FileDoesNotExist.rmch"));
+		assertTrue(project.hasErrors());
+		final BException e = project.getBExceptionList().get(0);
+		assertTrue(e.getCause() instanceof FileNotFoundException);
+		assertTrue(e.getMessage().contains("FileDoesNotExist.rmch"));
 	}
 
 	@Test
@@ -360,32 +365,15 @@ public class RulesMachineFilesTest {
 	}
 
 	private String getRulesMachineAsPrologTerm(String fileName) {
-		File file;
 		try {
-			file = new File(this.getClass().getClassLoader().getResource(fileName).toURI());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		} catch (NullPointerException e) {
-			file = new File(fileName);
+			return RulesUtil.getFileAsPrologTerm(fileName, true);
+		} catch (BCompoundException e) {
+			final PrologTermStringOutput pout = new PrologTermStringOutput();
+			PrologExceptionPrinter.printException(pout, e, false, false);
+			pout.flush();
+			pout.fullstop();
+			return pout.toString();
 		}
-		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setAddLineNumbers(true);
-		parsingBehaviour.setPrologOutput(true);
-		OutputStream out = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			@Override
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		RulesProject.parseProject(file, parsingBehaviour, new PrintStream(out), new PrintStream(out));
-		return out.toString();
 	}
 
 }
