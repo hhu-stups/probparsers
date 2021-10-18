@@ -48,8 +48,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testForAllPredicate() throws BCompoundException {
-		String file = "rules/ForAllPredicate.rmch";
-		String result = getFileAsPrologTerm(file);
+		String result = getFileAsPrologTerm("ForAllPredicate.rmch");
 	}
 
 	@Test

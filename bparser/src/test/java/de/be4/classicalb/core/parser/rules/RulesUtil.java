@@ -35,7 +35,7 @@ public class RulesUtil {
 	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) throws BCompoundException {
 		File file;
 		try {
-			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
+			file = new File(RulesUtil.class.getResource("/rules/" + filename).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
