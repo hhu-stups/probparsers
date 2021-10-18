@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,16 +10,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
+
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.rules.RulesMachineRunConfiguration.RuleGoalAssumption;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class RulesMachineFilesTest {
 	public static final String dir = "rules/";
 
 	@Test
-	public void testSyntax() throws Exception {
+	public void testSyntax() throws BCompoundException {
 		String output = RulesUtil.getFileAsPrologTerm(dir + "project/RulesMachineSyntax.rmch");
 	}
 

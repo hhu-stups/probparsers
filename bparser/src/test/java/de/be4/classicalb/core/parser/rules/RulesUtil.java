@@ -9,26 +9,25 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.prolog.output.PrologTermStringOutput;
 
 public class RulesUtil {
-	private static String checkAndFormatProject(final RulesProject project) {
+	private static String checkAndFormatProject(final RulesProject project) throws BCompoundException {
 		project.checkAndTranslateProject();
-		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		if (project.hasErrors()) {
-			BCompoundException comp = new BCompoundException(project.getBExceptionList());
-			PrologExceptionPrinter.printException(pout, comp, false, false);
-		} else {
-			project.printProjectAsPrologTerm(pout);
-			pout.flush();
+			throw new BCompoundException(project.getBExceptionList());
 		}
+
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
+		project.printProjectAsPrologTerm(pout);
+		pout.flush();
 		return pout.toString();
 	}
 
-	public static String getRulesProjectAsPrologTerm(final String content) {
+	public static String getRulesProjectAsPrologTerm(final String content) throws BCompoundException {
 		RulesProject rulesProject = new RulesProject();
 		rulesProject.parseRulesMachines(content, new String[] {});
 		return checkAndFormatProject(rulesProject);
 	}
 
-	public static String getFileAsPrologTerm(final String filename) {
+	public static String getFileAsPrologTerm(final String filename) throws BCompoundException {
 		File file;
 		try {
 			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
