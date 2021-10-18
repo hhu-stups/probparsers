@@ -60,7 +60,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testDublicateRuleName() {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY skip END;RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END;RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		try {
 			String result = getRulesProjectAsPrologTerm(testMachine);
 			fail("Expected exception was not thrown");
@@ -216,7 +216,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleIfThenElse() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo = BEGIN IF 1=1 THEN RULE_SUCCESS ELSE RULE_FAIL END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY IF 1=1 THEN skip ELSE RULE_FAIL COUNTEREXAMPLE \"never\" END END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 
