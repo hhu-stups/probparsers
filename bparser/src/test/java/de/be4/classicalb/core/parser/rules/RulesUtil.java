@@ -1,8 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 
@@ -18,18 +17,7 @@ public class RulesUtil {
 		rulesProject.parseRulesMachines(content, new String[] {});
 		rulesProject.checkAndTranslateProject();
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		rulesProject.printPrologOutput(new PrintStream(output), new PrintStream(output));
 		return output.toString();
 	}
@@ -47,18 +35,7 @@ public class RulesUtil {
 		}
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(addLineNumbers);
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		RulesProject.parseProject(file, pb, new PrintStream(output), new PrintStream(output));
 		return output.toString();
 	}
@@ -72,18 +49,7 @@ public class RulesUtil {
 		unit.parse();
 		unit.translate();
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
 		return output.toString();
 	}
