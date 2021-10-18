@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.net.URISyntaxException;
 
-import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
