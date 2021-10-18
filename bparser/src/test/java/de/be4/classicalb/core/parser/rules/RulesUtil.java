@@ -9,7 +9,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.prolog.output.PrologTermStringOutput;
 
 public class RulesUtil {
-	private static String checkAndFormatProject(final RulesProject project) throws BCompoundException {
+	public static String getParsedProjectAsPrologTerm(final RulesProject project) throws BCompoundException {
 		project.checkAndTranslateProject();
 		if (project.hasErrors()) {
 			throw new BCompoundException(project.getBExceptionList());
@@ -24,7 +24,7 @@ public class RulesUtil {
 	public static String getRulesProjectAsPrologTerm(final String content) throws BCompoundException {
 		RulesProject rulesProject = new RulesProject();
 		rulesProject.parseRulesMachines(content, new String[] {});
-		return checkAndFormatProject(rulesProject);
+		return getParsedProjectAsPrologTerm(rulesProject);
 	}
 
 	public static String getFileAsPrologTerm(final String filename) throws BCompoundException {
@@ -36,7 +36,7 @@ public class RulesUtil {
 		}
 		final RulesProject project = new RulesProject();
 		project.parseProject(file);
-		return checkAndFormatProject(project);
+		return getParsedProjectAsPrologTerm(project);
 	}
 
 	public static String getRulesMachineAsPrologTerm(final String content) {
