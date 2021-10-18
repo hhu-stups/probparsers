@@ -21,8 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class RulesMachineFilesTest {
-	public static final String dir = "rules/";
-
 	@Test
 	public void testSyntax() throws BCompoundException {
 		String output = RulesUtil.getFileAsPrologTerm("project/RulesMachineSyntax.rmch");
@@ -38,22 +36,13 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testProject2() throws Exception {
-		File file = new File(dir + "project/references/test1/Rule1.rmch");
-		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setAddLineNumbers(true);
-		parsingBehaviour.setPrologOutput(true);
-		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
+	public void testProject2() throws BCompoundException {
+		final String result = RulesUtil.getFileAsPrologTerm("project/references/test1/Rule1.rmch");
 	}
 
 	@Test
-	public void testImplicitDependenciesDueToFunctionCall() throws Exception {
-		File file = new File(dir + "ImplicitDependencyDueFunctionCall.rmch");
-		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setAddLineNumbers(true);
-		parsingBehaviour.setPrologOutput(true);
-		RulesProject.parseProject(file, parsingBehaviour, System.out, System.err);
-
+	public void testImplicitDependenciesDueToFunctionCall() throws BCompoundException {
+		final String result = RulesUtil.getFileAsPrologTerm("ImplicitDependencyDueFunctionCall.rmch");
 	}
 
 	@Test
@@ -136,11 +125,8 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testForAll() throws Exception {
-		String f = "rules/ForAllPredicate.rmch";
-		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setAddLineNumbers(true);
-		RulesProject.parseProject(new File(f), parsingBehaviour, System.out, System.err);
+	public void testForAll() throws BCompoundException {
+		final String result = RulesUtil.getFileAsPrologTerm("ForAllPredicate.rmch");
 	}
 
 	@Test

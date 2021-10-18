@@ -30,6 +30,11 @@ BODY
   IN
     v <-- FUNC_add(12)
   END
+  ;
+  RULE_FAIL
+  WHEN 1=2
+  COUNTEREXAMPLE "never"
+  END
 END
 
 END
