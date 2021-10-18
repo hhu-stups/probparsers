@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -27,14 +28,21 @@ public class RulesUtil {
 		return getParsedProjectAsPrologTerm(rulesProject);
 	}
 
-	public static String getFileAsPrologTerm(final String filename) throws BCompoundException {
+	public static String getFileAsPrologTerm(final String file) throws BCompoundException {
+		return getFileAsPrologTerm(file, false);
+	}
+
+	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) throws BCompoundException {
 		File file;
 		try {
 			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
+		ParsingBehaviour pb = new ParsingBehaviour();
+		pb.setAddLineNumbers(addLineNumbers);
 		final RulesProject project = new RulesProject();
+		project.setParsingBehaviour(pb);
 		project.parseProject(file);
 		return getParsedProjectAsPrologTerm(project);
 	}
