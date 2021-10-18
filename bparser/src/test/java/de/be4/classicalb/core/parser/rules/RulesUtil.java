@@ -1,18 +1,26 @@
 package de.be4.classicalb.core.parser.rules;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 public class RulesUtil {
 	private static String checkAndFormatProject(final RulesProject project) {
 		project.checkAndTranslateProject();
-		final ByteArrayOutputStream output = new ByteArrayOutputStream();
-		project.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
+		if (project.hasErrors()) {
+			BCompoundException comp = new BCompoundException(project.getBExceptionList());
+			PrologExceptionPrinter.printException(pout, comp, false, false);
+		} else {
+			project.printProjectAsPrologTerm(pout);
+			pout.flush();
+		}
+		return pout.toString();
 	}
 
 	public static String getRulesProjectAsPrologTerm(final String content) {
@@ -52,9 +60,14 @@ public class RulesUtil {
 		unit.parse();
 		unit.translate();
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
+		if (unit.hasError()) {
+			PrologExceptionPrinter.printException(pout, unit.getCompoundException(), false, false);
+		} else {
+			unit.printAsProlog(pout, new NodeIdAssignment());
+			pout.flush();
+		}
+		return pout.toString();
 	}
 
 }
