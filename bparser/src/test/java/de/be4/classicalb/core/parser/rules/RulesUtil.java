@@ -8,6 +8,12 @@ import java.net.URISyntaxException;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 
 public class RulesUtil {
+	private static String checkAndFormatProject(final RulesProject project) {
+		project.checkAndTranslateProject();
+		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+		project.printPrologOutput(new PrintStream(output), new PrintStream(output));
+		return output.toString();
+	}
 
 	public static String getRulesProjectAsPrologTerm(final String content) {
 		RulesProject rulesProject = new RulesProject();
@@ -15,11 +21,7 @@ public class RulesUtil {
 		pb.setAddLineNumbers(false);
 		rulesProject.setParsingBehaviour(pb);
 		rulesProject.parseRulesMachines(content, new String[] {});
-		rulesProject.checkAndTranslateProject();
-
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		rulesProject.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		return checkAndFormatProject(rulesProject);
 	}
 
 	public static String getFileAsPrologTerm(final String file) {
@@ -35,9 +37,10 @@ public class RulesUtil {
 		}
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(addLineNumbers);
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		RulesProject.parseProject(file, pb, new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final RulesProject project = new RulesProject();
+		project.setParsingBehaviour(pb);
+		project.parseProject(file);
+		return checkAndFormatProject(project);
 	}
 
 	public static String getRulesMachineAsPrologTerm(final String content) {
