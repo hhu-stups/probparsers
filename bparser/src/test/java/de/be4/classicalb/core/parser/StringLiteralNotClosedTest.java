@@ -35,24 +35,19 @@ public class StringLiteralNotClosedTest {
 			getTreeAsString(testMachine);
 			fail("Exception did not occur");
 		} catch (BCompoundException e) {
-			System.out.println(e.getCause());
 			assertTrue(e.getCause() instanceof PreParseException);
 			assertTrue(e.getLocalizedMessage().contains("Unknown token:"));
 		}
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setGrammar(RulesGrammar.getInstance());
 		final Start startNode = parser.parse(testMachine, false);
 
-		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
+		return ast2String.toString();
 	}
 
 	String randomString(final int length) {

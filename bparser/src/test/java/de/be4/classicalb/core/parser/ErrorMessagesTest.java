@@ -25,7 +25,6 @@ public class ErrorMessagesTest {
  			//BParseException e1 = (BParseException) e.getFirstException().getCause();
  			// assertEquals("left", e1.getToken().getText());
 		    // this is now caught as an invalid token combination classicalb.core.parser.exceptions.BLexerException
-			System.out.println(e.getMessage());
 			// TO DO: maybe check contents
 		}
 	}
@@ -37,7 +36,6 @@ public class ErrorMessagesTest {
 			parseString(testMachine);
 			fail("Invalid identifier not detected");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 		    // this is now caught as an invalid token combination classicalb.core.parser.exceptions.BLexerException
 			//BParseException e1 = (BParseException) e.getFirstException().getCause();
 			//assertEquals("right", e1.getToken().getText());
@@ -59,7 +57,6 @@ public class ErrorMessagesTest {
 	}
 
 	private void parseString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setGrammar(RulesGrammar.getInstance());
 		final Start startNode = parser.parse(testMachine, false);

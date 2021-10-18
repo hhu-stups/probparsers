@@ -12,7 +12,6 @@ public class IfThenElseExpressionTest {
 	public void testIfThenElseExpression() throws Exception {
 		final String testMachine = "#EXPRESSION IF x < 3 THEN 5 ELSE 17 END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("if_then_else(2,less(3,identifier(4,x),integer(5,3)),integer(6,5),integer(7,17))"));
 	}
 
@@ -20,8 +19,6 @@ public class IfThenElseExpressionTest {
 	public void testIfThenElseSubstitution() throws Exception {
 		final String testMachine = "#SUBSTITUTION IF x < 3 THEN skip ELSIF 1=1 THEN skip ELSE skip END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-
 	}
 
 	@Test

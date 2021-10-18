@@ -19,7 +19,6 @@ public class RulesProjectExceptionTest {
 	public void testDuplicateOperationNameException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION foo BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Duplicate operation name: \\'foo\\'"));
 	}
 
@@ -27,7 +26,6 @@ public class RulesProjectExceptionTest {
 	public void testDependsOnRuleIsNotARuleException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION bar BODY skip END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Operation \\'bar\\' is not a RULE operation.'"));
 	}
 
@@ -35,7 +33,6 @@ public class RulesProjectExceptionTest {
 	public void testUnkownRuleInPredicateOperatorException() throws Exception {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE(foo) END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("Unknown rule \\'foo\\'"));
 	}
 
@@ -43,7 +40,6 @@ public class RulesProjectExceptionTest {
 	public void testUnknownFunction() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END;RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Unknown FUNCTION name \\'Foo\\''"));
 	}
 
@@ -51,7 +47,6 @@ public class RulesProjectExceptionTest {
 	public void testWritingDefineVariable() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result
 				.contains("'Identifier \\'v1\\' is not a local variable (VAR). Hence, it can not be assigned here.'"));
 	}
@@ -77,7 +72,6 @@ public class RulesProjectExceptionTest {
 		BParser bParser = new BParser("");
 		bParser.fullParsing(new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineInOrdinaryMachineFile.mch").toURI()),
 				parsingBehaviour, pStream, pStream);
-		System.out.println(output.toString());
 		assertTrue(output.toString().contains("parse_exception"));
 	}
 }

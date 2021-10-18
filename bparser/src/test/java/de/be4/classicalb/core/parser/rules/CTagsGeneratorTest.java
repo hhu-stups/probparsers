@@ -12,7 +12,6 @@ public class CTagsGeneratorTest {
 		RulesProject rulesProject = new RulesProject();
 		rulesProject.parseRulesMachines(machine1);
 		rulesProject.checkAndTranslateProject();
-		System.out.println(rulesProject.getBExceptionList());
 		File file = File.createTempFile("ctags", ".tags");
 		CTagsGenerator.generateCtagsFile(rulesProject, file);
 		// no error occurred
@@ -24,7 +23,6 @@ public class CTagsGeneratorTest {
 		RulesProject rulesProject = new RulesProject();
 		rulesProject.parseRulesMachines(machine1);
 		rulesProject.checkAndTranslateProject();
-		System.out.println(rulesProject.getBExceptionList());
 		File file = File.createTempFile("ctags", ".tags");
 		CTagsGenerator.generateCtagsFile(rulesProject, file);
 	}

@@ -37,8 +37,6 @@ public class ExceptionWhenParsingDefFileOnTopLevel {
 
 		final BParser parser = new BParser(machine.getName());
 		int returnValue = parser.fullParsing(machine, behaviour, out, out);
-
-		System.out.println(baos.toString());
         
         // We now permit to load .def files at the top-level; ProB converts them to a virtual abstract_machine
 		assertEquals(returnValue, 0); // was -3

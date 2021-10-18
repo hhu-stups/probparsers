@@ -23,8 +23,6 @@ public class PreParserTest {
 										new ByteArrayInputStream(
 												testMachine.getBytes())), 99)));
 		final Start startNode = parser.parse();
-		System.out.println();
-
 		startNode.apply(new PreParserASTPrinter());
 	}
 

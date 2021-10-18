@@ -1,11 +1,9 @@
 package util;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
+
+import org.junit.Test;
 
 public class ParserBugTest {
 	String s = "MACHINE ParserDefBug\n DEFINITIONS\n D(y) == f\n "
@@ -17,9 +15,7 @@ public class ParserBugTest {
 	public void test() throws Exception {
 		BParser parser = new BParser();
 		Start ast = parser.parse(s, true);
-		ast.apply(new ASTPrinter());
 		// parser does not raise an exception, everything is fine
-		assertTrue(true);
 	}
 
 }

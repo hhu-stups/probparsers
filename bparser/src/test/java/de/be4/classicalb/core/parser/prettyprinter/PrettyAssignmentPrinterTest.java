@@ -58,8 +58,6 @@ public class PrettyAssignmentPrinterTest {
 
 		parse.apply(prettyprinter);
 		String prettyPrint = prettyprinter.getPrettyPrint();
-		// System.out.println("org: " + theString);
-		// System.out.println("pp: " + prettyPrint);
 		Start parse2 = BParser.parse(PREFIX + prettyPrint);
 		PrettyPrinter prettyprinter2 = new PrettyPrinter();
 

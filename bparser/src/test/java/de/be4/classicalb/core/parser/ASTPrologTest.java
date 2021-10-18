@@ -63,7 +63,6 @@ public class ASTPrologTest {
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 		node.apply(prolog);
 		swriter.flush();
-		System.out.println(swriter.toString());
 		return swriter.toString();
 	}
 

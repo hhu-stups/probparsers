@@ -10,6 +10,5 @@ public class TestMultipleExceptions {
 	public void testMultipleErrors() throws Exception {
 		final String testMachine = "./exceptions/MultipleErrors.mch";
 		String result = Helpers.fullParsing(testMachine);
-		System.out.println(result);
 	}
 }

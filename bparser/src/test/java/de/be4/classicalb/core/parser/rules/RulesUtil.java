@@ -20,14 +20,6 @@ public class RulesUtil {
 		rulesProject.setParsingBehaviour(pb);
 		rulesProject.parseRulesMachines(content, new String[] {});
 		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (bExceptionList.isEmpty()) {
-			IModel model = bModels.get(bModels.size() - 2);
-			PrettyPrinter pp = new PrettyPrinter();
-			model.getStart().apply(pp);
-			System.out.println(pp.getPrettyPrint());
-		}
 
 		OutputStream output = new OutputStream() {
 			private StringBuilder string = new StringBuilder();

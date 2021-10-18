@@ -24,12 +24,9 @@ public class Helpers {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
-		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
+		return ast2String.toString();
 	}
 
 	public static String getPrettyPrint(final String testMachine) {

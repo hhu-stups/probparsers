@@ -168,12 +168,10 @@ public class PrettyPrinterTest {
 
 		parse.apply(prettyprinter);
 		String prettyPrint = prettyprinter.getPrettyPrint();
-		System.out.println(prettyPrint);
 		Start parse2 = BParser.parse(PREFIX + prettyPrint);
 		PrettyPrinter prettyprinter2 = new PrettyPrinter();
 
 		parse2.apply(prettyprinter2);
-		System.out.println( prettyprinter2.getPrettyPrint());
 		assertEquals(Ast2String.getTreeAsString(parse),
 				Ast2String.getTreeAsString(parse2));
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());

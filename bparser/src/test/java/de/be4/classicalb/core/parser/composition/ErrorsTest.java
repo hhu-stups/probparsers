@@ -16,7 +16,6 @@ public class ErrorsTest {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNotFound.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains(
 				"'Machine not found: \\'MachineDoesNotExist\\' in \\'MachineNotFound.mch\\''"));
 	}
@@ -26,7 +25,6 @@ public class ErrorsTest {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNameDoesNotMatchFileName.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains(
 				"'Machine name does not match the file name: \\'Foo\\' vs \\'MachineNameDoesNotMatchFileName\\''"));
 	}

@@ -20,7 +20,6 @@ public class RulesLanguageExceptionTest {
 	public void testMachineParameterException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test(a) CONSTRAINTS a : INTEGER END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("parse_exception("));
 		assertTrue(result.contains("pos(1,15"));
 		assertTrue(result.contains("A RULES_MACHINE must not have any machine parameters"));
@@ -30,7 +29,6 @@ public class RulesLanguageExceptionTest {
 	public void testRenamedMachineNameException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test.Foo END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("parse_exception("));
 		assertTrue(result.contains("pos(1,15,1,23"));
 		assertTrue(result.contains("Renaming of a RULES_MACHINE name is not allowed"));
@@ -40,7 +38,6 @@ public class RulesLanguageExceptionTest {
 	public void testOperatorFailedRulesErrorTypeWithSecondArgumentNotAnIntegerLiteral() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule, 1+1) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.'"));
 	}
 
@@ -48,7 +45,6 @@ public class RulesLanguageExceptionTest {
 	public void testChoiceSubstitutionException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE RULE_FAIL COUNTEREXAMPLE \"never\" END OR RULE_FAIL COUNTEREXAMPLE \"never\" END END  END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'A CHOICE substitution is not allowed in a RULES_MACHINE.'"));
 	}
 
@@ -56,7 +52,6 @@ public class RulesLanguageExceptionTest {
 	public void testGoalIsNotAPredicateException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == skip END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The GOAL definition must be a predicate.'"));
 	}
 
@@ -64,7 +59,6 @@ public class RulesLanguageExceptionTest {
 	public void testGoalIsNotAPredicate2Exception() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The GOAL definition must be a predicate.'"));
 	}
 
@@ -72,7 +66,6 @@ public class RulesLanguageExceptionTest {
 	public void testNoNumberOfErrorTypesDefinedException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result
 				.contains("'The error type exceeded the number of error types specified for this rule operation.'"));
 	}
@@ -81,7 +74,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypeIsNotImplemented() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Error type \\'1\\' is not implemented in rule \\'foo\\'"));
 	}
 
@@ -89,14 +81,12 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypeIsNotImplemented2() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 	}
 
 	@Test
 	public void testInvalidRuleTag() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Expected identifier or string after the TAGS attribute."));
 	}
 
@@ -104,7 +94,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypeZeroException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 0 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The ERROR_TYPE must be a natural number greater than zero.'"));
 	}
 
@@ -112,7 +101,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleForallUsedOutsideOfARuleOperationException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FORALL x WHERE x : 1..3 EXPECT 1=1 COUNTEREXAMPLE \"Fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'RULE_FORALL used outside of a RULE operation.'"));
 	}
 	
@@ -121,7 +109,6 @@ public class RulesLanguageExceptionTest {
 	public void testDefineUsedInRuleException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY FOR i IN {1} DO DEFINE x TYPE POW(INTEGER) VALUE {i} END END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'A DEFINE substitution must not be contained in a loop substitution.'"));
 	}
 
@@ -129,7 +116,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleFailUsedOutsideOfARuleOperationException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY RULE_FAIL x WHEN x : 1..3 COUNTEREXAMPLE \"Fail\"END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'RULE_FAIL used outside of a RULE operation.'"));
 	}
 
@@ -137,7 +123,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypeExceededTheNumberOfErrorTypesException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 3 COUNTEREXAMPLE \"abc\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result
 				.contains("'The error type exceeded the number of error types specified for this rule operation.'"));
 	}
@@ -162,7 +147,6 @@ public class RulesLanguageExceptionTest {
 	public void testSucceededRuleOperatorWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(1,2) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.'"));
 	}
 
@@ -170,7 +154,6 @@ public class RulesLanguageExceptionTest {
 	public void testSucceededRuleErrorTypeOperatorWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(1,2,3) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(
 				result.contains("'The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.'"));
 	}
@@ -179,7 +162,6 @@ public class RulesLanguageExceptionTest {
 	public void testFailedRuleOperatorWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(1,2) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The FAILED_RULE predicate operator expects exactly one rule identifier.'"));
 	}
 
@@ -187,7 +169,6 @@ public class RulesLanguageExceptionTest {
 	public void testFailedRuleErrorTypeOperatorWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(1,2,3) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.'"));
 	}
 
@@ -195,7 +176,6 @@ public class RulesLanguageExceptionTest {
 	public void testNotCheckedRuleWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == NOT_CHECKED_RULE(1,2) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.'"));
 	}
 
@@ -203,7 +183,6 @@ public class RulesLanguageExceptionTest {
 	public void testDisabledRuleWrongNumberOfArgumentsException() throws Exception {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == DISABLED_RULE(1,2) END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'The DISABLED_RULE predicate operator expects exactly one rule identifier.'"));
 	}
 
@@ -211,7 +190,6 @@ public class RulesLanguageExceptionTest {
 	public void testRenamingIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test PROPERTIES a.b = 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Identifier renaming is not allowed in a RULES_MACHINE.'"));
 	}
 
@@ -219,7 +197,6 @@ public class RulesLanguageExceptionTest {
 	public void testAssignToANonIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test INITIALISATION f(1) := 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains(
 				"'There must be an identifier on the left side of the assign substitution. A function assignment \\'f(1) := 1\\' is also not permitted.'"));
 	}
@@ -228,7 +205,6 @@ public class RulesLanguageExceptionTest {
 	public void testRenamingOperationCallsException() throws Exception {
 		final String testMachine = "RULES_MACHINE test INITIALISATION f <-- Foo.bar END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Renaming of operation names is not allowed.'"));
 	}
 
@@ -236,7 +212,6 @@ public class RulesLanguageExceptionTest {
 	public void testActivationClauseIsUsedMoreThanOnceException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ACTIVATION 1=1 ACTIVATION 1=1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'ACTIVATION clause is used more than once in operation \\'foo\\'."));
 	}
 
@@ -244,7 +219,6 @@ public class RulesLanguageExceptionTest {
 	public void testPreconditionInRuleOperationException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo PRECONDITION 1=1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'PRECONDITION clause is not allowed for a RULE or COMPUTATION operation.'"));
 	}
 
@@ -252,7 +226,6 @@ public class RulesLanguageExceptionTest {
 	public void testPreconditionClauseIsUsedMoreThanOnceException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION out <-- foo PRECONDITION 1=1 PRECONDITION 1=1 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'PRECONDITION clause is used more than once in operation \\'foo\\'."));
 	}
 
@@ -260,7 +233,6 @@ public class RulesLanguageExceptionTest {
 	public void testDependsOnRuleUsedMoreThanOnceException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar DEPENDS_ON_RULE bazz BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'DEPENDS_ON_RULE clause is used more than once in operation \\'foo\\'."));
 	}
 
@@ -268,7 +240,6 @@ public class RulesLanguageExceptionTest {
 	public void testDependsOnRuleInvalidIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Expected a list of identifiers after DEPENDS_ON_RULE.'"));
 	}
 
@@ -276,7 +247,6 @@ public class RulesLanguageExceptionTest {
 	public void testActivationFunction() throws Exception {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS FUNCTION out <-- foo ACTIVATION k = TRUE BODY skip END END";
 		final String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'ACTIVATION is not a valid attribute of a FUNCTION operation.'";
 		assertTrue(result.contains(expected));
 	}
@@ -285,7 +255,6 @@ public class RulesLanguageExceptionTest {
 	public void testDependsOnComputationUsedMoreThanOnceException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION bar DEPENDS_ON_COMPUTATION bazz BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'DEPENDS_ON_COMPUTATION clause is used more than once in operation \\'foo\\'";
 		assertTrue(result.contains(expected));
 	}
@@ -294,7 +263,6 @@ public class RulesLanguageExceptionTest {
 	public void testDependsOnComputationInvalidIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_COMPUTATION 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Expected a list of identifiers after DEPENDS_ON_COMPUTATION.'";
 		assertTrue(result.contains(expected));
 	}
@@ -303,7 +271,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleIdAttributeIsUsedMoreThanOnceException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1 RULEID req2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'RULEID clause is used more than once in operation \\'foo\\'.'";
 		assertTrue(result.contains(expected));
 	}
@@ -312,7 +279,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleIdAttributeInvalidIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID 1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Expected exactly one identifier behind RULEID.'";
 		assertTrue(result.contains(expected));
 	}
@@ -321,7 +287,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleIdAttributeTwoIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo RULEID req1, req2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Expected exactly one identifier behind RULEID.'";
 		assertTrue(result.contains(expected));
 	}
@@ -330,7 +295,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleIdInComputationException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION foo RULEID req1 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'RULEID is not an attribute of a FUNCTION or Computation operation.'";
 		assertTrue(result.contains(expected));
 	}
@@ -339,7 +303,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypesAttributeNoIntegerValueException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES k BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Expected exactly one integer after ERROR_TYPES.'";
 		assertTrue(result.contains(expected));
 	}
@@ -348,7 +311,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypesAttributeTwoIntegersException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo ERROR_TYPES 1,2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Expected exactly one integer after ERROR_TYPES.'";
 		assertTrue(result.contains(expected));
 	}
@@ -357,7 +319,6 @@ public class RulesLanguageExceptionTest {
 	public void testErrorTypesAttributeInFunctionOrComputationException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION foo ERROR_TYPES 2 BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.'";
 		assertTrue(result.contains(expected));
 	}
@@ -366,7 +327,6 @@ public class RulesLanguageExceptionTest {
 	public void testSeesException() throws Exception {
 		final String testMachine = "RULES_MACHINE test SEES foo END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'The SEES clause is not allowed in a RULES_MACHINE.'";
 		assertTrue(result.contains(expected));
 	}
@@ -375,7 +335,6 @@ public class RulesLanguageExceptionTest {
 	public void testUsesException() throws Exception {
 		final String testMachine = "RULES_MACHINE test USES foo END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'The USES clause is not allowed in a RULES_MACHINE.'";
 		assertTrue(result.contains(expected));
 	}
@@ -384,7 +343,6 @@ public class RulesLanguageExceptionTest {
 	public void testGetRuleCounterexamplesException() throws Exception {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(1,2,3) = {} END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("'Invalid number of arguments. Expected one or two arguments.'"));
 	}
 
@@ -392,7 +350,6 @@ public class RulesLanguageExceptionTest {
 	public void testGetRuleCounterexamples2Exception() throws Exception {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(1) = {} END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.'";
 		assertTrue(result.contains(expected));
 	}
@@ -401,7 +358,6 @@ public class RulesLanguageExceptionTest {
 	public void testGetRuleCounterexamples3Exception() throws Exception {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(foo) = {} END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'\\'foo\\' does not match any rule visible to this machine.'";
 		assertTrue(result.contains(expected));
 	}
@@ -410,7 +366,6 @@ public class RulesLanguageExceptionTest {
 	public void testIdentifierAlreadyExists() throws Exception {
 		final String testMachine = "RULES_MACHINE test CONSTANTS k, k PROPERTIES k = 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "Identifier already exists.'";
 		assertTrue(result.contains(expected));
 	}
@@ -419,7 +374,6 @@ public class RulesLanguageExceptionTest {
 	public void testRenamingIsNotAllowed() throws Exception {
 		final String testMachine = "RULES_MACHINE test CONSTANTS k PROPERTIES k.a = 1 END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Identifier renaming is not allowed in a RULES_MACHINE.'";
 		assertTrue(result.contains(expected));
 	}
@@ -428,7 +382,6 @@ public class RulesLanguageExceptionTest {
 	public void testRuleFailWithParameterButWithoutWHEN() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL x COUNTEREXAMPLE x END END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'The WHEN predicate must be provided if RULE_FAIL has at least one parameter.'";
 		assertTrue(result.contains(expected));
 	}
@@ -437,7 +390,6 @@ public class RulesLanguageExceptionTest {
 	public void testFunctionReturnValuesNoIdentifierException() throws Exception {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION a /*@desc dd */ <-- foo BODY skip END END";
 		String result = getRulesMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		String expected = "'Identifier expected.'";
 		assertTrue(result.contains(expected));
 	}

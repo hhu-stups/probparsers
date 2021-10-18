@@ -40,7 +40,6 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingDefinitionsFromAnotherMachine.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("DefinitionOfMachineWithDefinitions"));
 	}
 	
@@ -67,7 +66,6 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineOverridingDefinition.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("Duplicate definition: DefinitionOfBar"));
 	}
 	
@@ -76,7 +74,6 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/overridingDefinition/";
 		String file = PATH + "MachineIncludesA.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("Duplicate definition: A1"));
 	}
 	
@@ -85,7 +82,6 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/overridingDefinition/";
 		String file = PATH + "MachineIncludesAAndA2.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertTrue(result.contains("exception"));
 	}
 	
@@ -94,7 +90,6 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/seesAndIncludes/";
 		String file = PATH + "A.mch";
 		String result = Helpers.fullParsing(file);
-		System.out.println(result);
 		assertFalse(result.contains("exception"));
 	}
 	

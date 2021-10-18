@@ -25,7 +25,6 @@ public class StructuralTest {
 	public void testEmptyMachine() throws Exception {
 		final String testMachine = "MACHINE SimplyStructure END";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 
@@ -77,7 +76,6 @@ public class StructuralTest {
 	public void testVariablesClause() throws Exception {
 		final String testMachine = "MACHINE SimplyStructure\nVARIABLES aa, b, Cc\nINVARIANT aa : NAT & b : NAT & Cc : NAT\nINITIALISATION aa:=1 || b:=2 || c:=3\nEND";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 		assertNotNull(startNode);
@@ -89,7 +87,6 @@ public class StructuralTest {
 	public void testConstantsClause() throws Exception {
 		final String testMachine = "MACHINE SimplyStructure\nCONSTANTS dd, e, Ff\nPROPERTIES dd : BOOL\nEND";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 		assertNotNull(startNode);
@@ -101,7 +98,6 @@ public class StructuralTest {
 	public void testSetsClause() throws Exception {
 		final String testMachine = "MACHINE SimplyStructure SETS GGG; Hhh; JJ = {dada, dudu, TUTUT}; iII; kkk = {LLL} END";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 		assertNotNull(startNode);
@@ -113,7 +109,6 @@ public class StructuralTest {
 	public void testClause1() throws Exception {
 		final String testMachine = "MACHINE SimplyStructure END";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 		assertNotNull(startNode);
@@ -152,7 +147,6 @@ public class StructuralTest {
 				+ "INITIALISATION aa:=1\n" + "CONSTANTS dd, e, Ff\n" + "PROPERTIES dd : NAT\n"
 				+ "SETS GGG; Hhh; JJ = {dada, dudu, TUTUT}; iII; kkk = {LLL}\nEND";
 
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, true);
 		assertNotNull(startNode);
@@ -235,7 +229,6 @@ public class StructuralTest {
 		} catch (BCompoundException e) {
 			final CheckException cause = (CheckException) e.getCause();
 			Node node = cause.getNodesList().get(0);
-			System.out.println(cause.getMessage());
 			assertEquals(4, node.getStartPos().getLine());
 			assertEquals(1, node.getStartPos().getPos());
 			assertTrue(e.getMessage().contains("Invalid semicolon after last operation"));
@@ -301,17 +294,12 @@ public class StructuralTest {
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
-		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		// System.out.println();
-		return string;
+		return ast2String.toString();
 	}
 
 	@Test

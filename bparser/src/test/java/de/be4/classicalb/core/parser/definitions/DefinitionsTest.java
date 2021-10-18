@@ -102,7 +102,6 @@ public class DefinitionsTest {
 			getTreeAsString(testMachine);
 			fail("Was expecting BParseException");
 		} catch (final BCompoundException e) {
-			System.out.println(e.getLocalizedMessage());
 			// IGNORE is expected
 		}
 	}
@@ -322,7 +321,6 @@ public class DefinitionsTest {
 	public void testDefOrder() throws BCompoundException {
 		final String testMachine = "MACHINE Test  \n DEFINITIONS  \n bar(y) == foo(y);  \n foo(x)==x<3;  \n END";
 		String asString = getTreeAsString(testMachine);
-		System.out.println(asString);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[ADefinitionsMachineClause([APredicateDefinitionDefinition(bar,[AIdentifierExpression([y])],ADefinitionPredicate(foo,[AIdentifierExpression([y])])),APredicateDefinitionDefinition(foo,[AIdentifierExpression([x])],ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(3)))])]))",
 				asString);
@@ -356,7 +354,6 @@ public class DefinitionsTest {
 	public void testMisleadingParseError() throws BCompoundException {
 		final String testMachine = "MACHINE foo \nDEFINITIONS \nCONSTANTS a \nPROPERTIES a = 1  END";
 		String output = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(output);
 		//TODO
 	}
 

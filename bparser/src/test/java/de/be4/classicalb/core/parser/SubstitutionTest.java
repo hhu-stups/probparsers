@@ -24,7 +24,6 @@ public class SubstitutionTest {
 	public void testSimultaneousSubstitution() throws Exception {
 		final String testMachine = "MACHINE test OPERATIONS foo = skip || skip END";
 		final String result = getTreeAsString(testMachine);
-		System.out.println(result);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([test],[]),[AOperationsMachineClause([AOperation([],[foo],[],AParallelSubstitution([ASkipSubstitution(),ASkipSubstitution()]))])]))",
 				result);
@@ -143,15 +142,11 @@ public class SubstitutionTest {
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
-		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
+		return ast2String.toString();
 	}
 }

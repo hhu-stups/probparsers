@@ -17,7 +17,6 @@ public class ConsoleOptionsTest {
 		options.parseOptions(args);
 
 		assertFalse(options.isOptionSet("-out"));
-		System.out.println(options.getRemainingOptions()[0]);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

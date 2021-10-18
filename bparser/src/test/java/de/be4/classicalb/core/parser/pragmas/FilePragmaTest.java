@@ -38,8 +38,7 @@ public class FilePragmaTest {
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
 		try {
-			String output = Helpers.getMachineAsPrologTerm(testMachine);
-			System.out.println(output);
+			Helpers.getMachineAsPrologTerm(testMachine);
 			fail("Expected parser exception was not thrown");
 		} catch (BCompoundException e) {
 			assertTrue(e.getCause() instanceof BParseException);

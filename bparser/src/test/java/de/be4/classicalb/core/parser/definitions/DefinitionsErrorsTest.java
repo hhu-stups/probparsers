@@ -18,7 +18,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid substitution was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,3]"));
 		}
@@ -31,7 +30,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid substitution was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,2]"));
 		}
@@ -44,7 +42,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid definition was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[4,1]"));
 		}
 	}
@@ -52,12 +49,10 @@ public class DefinitionsErrorsTest {
 	@Test
 	public void checkForErrorPositionInDefinitionWithMultilineComments() throws Exception {
 		String s = "MACHINE Definitions \n DEFINITIONS \n foo == 1=1\n /* \n comment\n comment2\n comment3 \n */\n&& 1=1 \nEND";
-		System.out.println(s);
 		try {
 			parseString(s);
 			fail("Invalid definition was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[9,2]"));
 		}
 	}
@@ -69,7 +64,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid substitution was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,15]"));
 			assertTrue(e.getMessage().contains("expecting end of definition") ||
@@ -84,7 +78,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid formula was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,4]"));
 		}
@@ -97,7 +90,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid formula was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,4]"));
 		}
@@ -110,7 +102,6 @@ public class DefinitionsErrorsTest {
 			parseString(s);
 			fail("Invalid formula was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[4,1]"));
 			assertTrue(e.getMessage().contains("expecting: ')'"));
@@ -118,7 +109,6 @@ public class DefinitionsErrorsTest {
 	}
 
 	private void parseString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 	}

@@ -20,7 +20,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Missing Semicolon was not detected");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("Two succeeding"));
 		}
 	}
@@ -33,7 +32,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("& VARIABLES was not detected");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("Invalid combination of symbols"));
 			assertTrue(e.getMessage().contains("&"));
 			assertTrue(e.getMessage().contains("VARIABLES"));
@@ -48,7 +46,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			final BLexerException ex = (BLexerException) e.getCause();
 			// checking the position of the second &
 			assertEquals(4, ex.getLastLine());
@@ -63,7 +60,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("'&' and '&'"));
 			final BLexerException ex = (BLexerException) e.getCause();
 			// checking the position of the second &
@@ -79,7 +75,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("'&' and '&'"));
 		}
 	}
@@ -91,7 +86,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[3,14]"));
 			assertTrue(e.getMessage().contains("'&' and '&'"));
@@ -105,7 +99,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate & was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			// there is no token available, hence the position is in the text
 			assertTrue(e.getMessage().contains("[6,6]"));
 			assertTrue(e.getMessage().contains("'&' and '&'"));
@@ -120,7 +113,6 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 			getTreeAsString(s);
 			fail("Duplicate 'DEFINITION' clause was not detected.");
 		} catch (BCompoundException e) {
-			System.out.println(e.getMessage());
 			assertTrue(e.getMessage().contains("[5,2] Clause 'DEFINITIONS' is used more than once"));
 		}
 	}
@@ -130,16 +122,11 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	
 	
 	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing: \"" + testMachine + "\":");
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parse(testMachine, false);
 
-		// startNode.apply(new ASTPrinter());
 		final Ast2String ast2String = new Ast2String();
 		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		// System.out.println();
-		return string;
+		return ast2String.toString();
 	}
 }
