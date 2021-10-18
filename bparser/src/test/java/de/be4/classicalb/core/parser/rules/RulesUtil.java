@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
 
 public class RulesUtil {
 
@@ -35,36 +32,6 @@ public class RulesUtil {
 		};
 		rulesProject.printPrologOutput(new PrintStream(output), new PrintStream(output));
 		return output.toString();
-	}
-
-	public static String getRulesMachineAsBMachine(File file) {
-		RulesProject rulesProject = new RulesProject();
-		rulesProject.parseProject(file);
-		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (!bExceptionList.isEmpty()) {
-			throw new RuntimeException(bExceptionList.get(0));
-		}
-		IModel model = bModels.get(bModels.size() - 2);
-		PrettyPrinter pp = new PrettyPrinter();
-		model.getStart().apply(pp);
-		return pp.getPrettyPrint();
-	}
-
-	public static String getRulesMachineAsBMachine(final String content) {
-		RulesProject rulesProject = new RulesProject();
-		rulesProject.parseRulesMachines(content, new String[] {});
-		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (!bExceptionList.isEmpty()) {
-			throw new RuntimeException(bExceptionList.get(0));
-		}
-		IModel model = bModels.get(bModels.size() - 2);
-		PrettyPrinter pp = new PrettyPrinter();
-		model.getStart().apply(pp);
-		return pp.getPrettyPrint();
 	}
 
 	public static String getFileAsPrologTerm(final String file) {

@@ -165,10 +165,7 @@ public class RulesLanguageTest {
 		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = FALSE OPERATIONS RULE foo ACTIVATION k = TRUE BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		assertTrue(!result.contains("exception"));
-		String rulesMachineAsBMachine = getRulesMachineAsBMachine(testMachine);
-		// TODO do not use the prettyprinter
-		assertTrue(rulesMachineAsBMachine.contains("foo := IF k=TRUE THEN \"NOT_CHECKED\" ELSE \"DISABLED\" END"));
-
+		assertTrue(result.contains("if_then_else(none,equal(none,identifier(none,k),boolean_true(none)),string(none,'NOT_CHECKED'),string(none,'DISABLED'))"));
 	}
 
 	@Test
@@ -267,22 +264,22 @@ public class RulesLanguageTest {
 	@Test
 	public void testGetCounterexamples() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1,2) = {} OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
-		final String result = getRulesMachineAsBMachine(testMachine);
-		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={}"));
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("equal(none,function(none,lambda(none,[identifier(none,'$x')],member(none,identifier(none,'$x'),interval(none,integer(none,1),integer(none,1))),image(none,identifier(none,rule1_Counterexamples),set_extension(none,[identifier(none,'$x')]))),[integer(none,2)]),empty_set(none))"));
 	}
 
 	@Test
 	public void testSucceededRuleErrorType() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
-		final String result = getRulesMachineAsBMachine(testMachine);
-		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)={};"));
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("equal(none,function(none,lambda(none,[identifier(none,'$x')],member(none,identifier(none,'$x'),interval(none,integer(none,1),integer(none,1))),image(none,identifier(none,rule1_Counterexamples),set_extension(none,[identifier(none,'$x')]))),[integer(none,2)]),empty_set(none))"));
 	}
 
 	@Test
 	public void testFailedRuleErrorType() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
-		final String result = getRulesMachineAsBMachine(testMachine);
-		assertTrue(result.contains("%$x.($x:1..1|rule1_Counterexamples[{$x}])(2)/={};"));
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("not_equal(none,function(none,lambda(none,[identifier(none,'$x')],member(none,identifier(none,'$x'),interval(none,integer(none,1),integer(none,1))),image(none,identifier(none,rule1_Counterexamples),set_extension(none,[identifier(none,'$x')]))),[integer(none,2)]),empty_set(none))"));
 	}
 
 	@Test
