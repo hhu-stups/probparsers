@@ -32,11 +32,7 @@ public class RulesUtil {
 		return checkAndFormatProject(rulesProject);
 	}
 
-	public static String getFileAsPrologTerm(final String file) {
-		return getFileAsPrologTerm(file, false);
-	}
-
-	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) {
+	public static String getFileAsPrologTerm(final String filename) {
 		File file;
 		try {
 			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
@@ -44,7 +40,7 @@ public class RulesUtil {
 			throw new RuntimeException(e);
 		}
 		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(addLineNumbers);
+		pb.setAddLineNumbers(false);
 		final RulesProject project = new RulesProject();
 		project.setParsingBehaviour(pb);
 		project.parseProject(file);
