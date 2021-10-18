@@ -25,9 +25,6 @@ public class RulesUtil {
 
 	public static String getRulesProjectAsPrologTerm(final String content) {
 		RulesProject rulesProject = new RulesProject();
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		rulesProject.setParsingBehaviour(pb);
 		rulesProject.parseRulesMachines(content, new String[] {});
 		return checkAndFormatProject(rulesProject);
 	}
@@ -39,10 +36,7 @@ public class RulesUtil {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
 		final RulesProject project = new RulesProject();
-		project.setParsingBehaviour(pb);
 		project.parseProject(file);
 		return checkAndFormatProject(project);
 	}
@@ -50,9 +44,6 @@ public class RulesUtil {
 	public static String getRulesMachineAsPrologTerm(final String content) {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
 
