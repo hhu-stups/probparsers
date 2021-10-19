@@ -24,7 +24,7 @@ public class RulesUtil {
 
 	public static String getRulesProjectAsPrologTerm(final String content) throws BCompoundException {
 		RulesProject rulesProject = new RulesProject();
-		rulesProject.parseRulesMachines(content, new String[] {});
+		rulesProject.parseRulesMachines(content);
 		return getParsedProjectAsPrologTerm(rulesProject);
 	}
 
