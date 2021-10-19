@@ -1,12 +1,16 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.Start;
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class SubstitutionTest {
 
@@ -30,37 +34,24 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testParallelAssignWithNonIdentifier() throws BCompoundException {
+	public void testParallelAssignWithNonIdentifier() {
 		final String testMachine = "#SUBSTITUTION xx,yy,5  := 5, 3, zz";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-			// final CheckException cause = (CheckException) e.getCause();
-			// assertEquals(1, cause.getNodes().length);
-			// assertNotNull(cause.getNodes()[0]);
-		}
-
+		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
+		// final CheckException cause = (CheckException) e.getCause();
+		// assertEquals(1, e.getNodes().length);
+		// assertNotNull(e.getNodes()[0]);
 	}
 
 	@Test
 	public void testRenamedIdentifierInAnySubstitution() {
 		final String testMachine = "#SUBSTITUTION ANY x.y WHERE x.y = 1 THEN skip END ";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-		}
+		assertThrows(BCompoundException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
 	public void testInvalidIdentifierListInAnySubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION ANY (x|->y) WHERE x = 1 & y = 1 THEN skip END ";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-		}
+		assertThrows(BCompoundException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test

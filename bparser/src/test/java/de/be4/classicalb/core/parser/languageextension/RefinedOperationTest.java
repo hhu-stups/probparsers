@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.languageextension;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
@@ -8,7 +7,6 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class RefinedOperationTest {
 
@@ -22,13 +20,8 @@ public class RefinedOperationTest {
 	@Test
 	public void testInvalidKeyword() {
 		final String testMachine = "MACHINE Test OPERATIONS foo NotRef fooA = skip END";
-		try {
-			Helpers.getMachineAsPrologTerm(testMachine);
-			fail("Expected parser exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertTrue(e.getCause().getMessage().contains("Expect 'ref' key word in operation definition."));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertTrue(e.getMessage().contains("Expect 'ref' key word in operation definition."));
 	}
 	
 }

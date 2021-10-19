@@ -1,17 +1,18 @@
 package de.be4.classicalb.core.parser.definitions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static util.Helpers.getTreeAsString;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
 import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static util.Helpers.getTreeAsString;
 
 public class DefinitionsTest {
 
@@ -98,12 +99,7 @@ public class DefinitionsTest {
 	@Test
 	public void testUnparsableRhs() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 < \n OPERATIONS op = PRE def_expr1 THEN skip END END";
-		try {
-			getTreeAsString(testMachine);
-			fail("Was expecting BParseException");
-		} catch (final BCompoundException e) {
-			// IGNORE is expected
-		}
+		assertThrows(BCompoundException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
@@ -119,12 +115,7 @@ public class DefinitionsTest {
 	@Test
 	public void testDoubleSemicolon() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\npt == (PP=TRUE);;\nqt == (QQ=TRUE)\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			// IGNORE, is expected
-		}
+		assertThrows(BCompoundException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
@@ -226,29 +217,15 @@ public class DefinitionsTest {
 	@Test
 	public void testExprOrSubst3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=PRE defExpr=42 THEN defExpr END\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals("Expecting substitution here but found definition with type 'Expression'",
-					cause.getLocalizedMessage());
-			// IGNORE, is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
 	}
 
 	@Test
 	public void testExprOrSubst4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=BEGIN defExpr; a:=defExpr END\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals("Expecting expression here but found definition with type 'Substitution'",
-					cause.getLocalizedMessage());
-			// IGNORE, is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
 	}
 
 	@Test
@@ -274,47 +251,27 @@ public class DefinitionsTest {
 	@Test
 	public void testExprOrSubstWParams3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=PRE defExpr(x)=42 THEN defExpr(x) END\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals("Expecting substitution here but found definition with type 'Expression'",
-					cause.getLocalizedMessage());
-			// IGNORE, is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
 	}
 
 	@Test
 	public void testExprOrSubstWParams4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); a:=defExpr(x) END\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals("Expecting expression here but found definition with type 'Substitution'",
-					cause.getLocalizedMessage());
-			// IGNORE, is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
 	}
 
 	@Test
 	public void testParamsCount1() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr END\nEND";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodesList().size());
-			assertNotNull(cause.getNodesList().get(0));
-			String result = cause.getLocalizedMessage();
-		    assertTrue(result.contains("Number of parameters"));
-		    assertTrue(result.contains("doesn't match declaration of definition"));
-		    assertTrue(result.contains("defExpr"));
-			// IGNORE, is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		String result = e.getLocalizedMessage();
+		assertTrue(result.contains("Number of parameters"));
+		assertTrue(result.contains("doesn't match declaration of definition"));
+		assertTrue(result.contains("defExpr"));
 	}
 
 	@Test

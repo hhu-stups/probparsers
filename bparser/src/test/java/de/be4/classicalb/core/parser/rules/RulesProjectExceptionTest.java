@@ -7,76 +7,50 @@ import java.io.PrintStream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
 
-import static de.be4.classicalb.core.parser.rules.RulesUtil.getRulesProjectAsPrologTerm;
+import util.Helpers;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class RulesProjectExceptionTest {
 
 	@Test
 	public void testDuplicateOperationNameException() {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION foo BODY skip END END";
-		try {
-			String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Duplicate operation name: 'foo'.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Duplicate operation name: 'foo'.", e.getMessage());
 	}
 
 	@Test
 	public void testDependsOnRuleIsNotARuleException() {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo DEPENDS_ON_RULE bar BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; COMPUTATION bar BODY skip END END";
-		try {
-			String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Operation 'bar' is not a RULE operation.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Operation 'bar' is not a RULE operation.", e.getMessage());
 	}
 
 	@Test
 	public void testUnkownRuleInPredicateOperatorException() {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE(foo) END";
-		try {
-			String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Unknown rule 'foo'.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Unknown rule 'foo'.", e.getMessage());
 	}
 
 	@Test
 	public void testUnknownFunction() {
 		final String testMachine = "RULES_MACHINE test OPERATIONS RULE foo BODY VAR x IN x <--Foo(1) END;RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
-		try {
-			String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Unknown FUNCTION name 'Foo'", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Unknown FUNCTION name 'Foo'", e.getMessage());
 	}
 
 	@Test
 	public void testWritingDefineVariable() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE v1 TYPE POW(INTEGER) VALUE {1} END; v1 := {2} END END";
-		try {
-			final String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Identifier 'v1' is not a local variable (VAR). Hence, it can not be assigned here.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Identifier 'v1' is not a local variable (VAR). Hence, it can not be assigned here.", e.getMessage());
 	}
 
 	@Test

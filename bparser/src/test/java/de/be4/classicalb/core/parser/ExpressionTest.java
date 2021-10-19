@@ -1,14 +1,18 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Start;
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class ExpressionTest {
 
@@ -119,14 +123,9 @@ public class ExpressionTest {
 	}
 
 	@Test
-	public void testQuantifiedUnionExpression() throws Exception {
+	public void testQuantifiedUnionExpression() {
 		final String testMachine = "#EXPRESSION UNION x.y.(x=0 | x )";
-		try {
-			getTreeAsString(testMachine);
-			fail("Invalid renaming of identifier not detected");
-		} catch (BCompoundException e) {
-		}
-
+		assertThrows(BCompoundException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
@@ -341,7 +340,7 @@ public class ExpressionTest {
 	}
 
 	@Test
-	public void testProverComprehensionSets() throws Exception {
+	public void testProverComprehensionSets() throws BCompoundException {
 		final String expression = "SET(i).(i>0)";
 
 		parser.getOptions().setRestrictProverExpressions(false);
@@ -350,12 +349,7 @@ public class ExpressionTest {
 		assertEquals(expected, prover);
 
 		parser.getOptions().setRestrictProverExpressions(true);
-		try {
-			getExpressionAsString(expression);
-			fail("exception expected");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-		}
+		Helpers.assertThrowsCompound(CheckException.class, () -> getExpressionAsString(expression));
 	}
 
 	@Test

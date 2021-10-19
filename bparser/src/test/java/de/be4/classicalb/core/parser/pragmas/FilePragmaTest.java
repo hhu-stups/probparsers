@@ -17,7 +17,6 @@ import util.Helpers;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class FilePragmaTest {
 
@@ -37,13 +36,8 @@ public class FilePragmaTest {
 	@Test
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
-		try {
-			Helpers.getMachineAsPrologTerm(testMachine);
-			fail("Expected parser exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof BParseException);
-			assertTrue(e.getCause().getMessage().contains("A file pragma"));
-		}
+		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertTrue(e.getMessage().contains("A file pragma"));
 	}
 
 	@Test(expected = BCompoundException.class)

@@ -5,12 +5,13 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
 
+import util.Helpers;
+
 import static de.be4.classicalb.core.parser.rules.RulesUtil.getFileAsPrologTerm;
 import static de.be4.classicalb.core.parser.rules.RulesUtil.getRulesProjectAsPrologTerm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class RulesLanguageTest {
 
@@ -60,13 +61,8 @@ public class RulesLanguageTest {
 	@Test
 	public void testDublicateRuleName() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END;RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
-		try {
-			String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertTrue(e.getCause().getMessage().contains("Duplicate operation name"));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesProjectAsPrologTerm(testMachine));
+		assertTrue(e.getMessage().contains("Duplicate operation name"));
 	}
 
 	@Test
@@ -180,37 +176,22 @@ public class RulesLanguageTest {
 	@Test
 	public void testDefineReadItself() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION foo BODY DEFINE xx TYPE POW(INTEGER) VALUE xx END END END";
-		try {
-			final String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertTrue(e.getCause().getMessage().contains("Variable 'xx' read before defined."));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesProjectAsPrologTerm(testMachine));
+		assertTrue(e.getMessage().contains("Variable 'xx' read before defined."));
 	}
 
 	@Test
 	public void testVariableDefinedTwice() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute_x BODY DEFINE x TYPE POW(INTEGER) VALUE {1} END; \n DEFINE x TYPE POW(INTEGER) VALUE {2} END END END";
-		try {
-			final String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Variable 'x' is defined more than once.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Variable 'x' is defined more than once.", e.getMessage());
 	}
 
 	@Test
 	public void testInvalidComputation() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION compute_x_y BODY DEFINE x TYPE POW(STRING) VALUE y END \n; DEFINE y TYPE POW(STRING) VALUE {\"foo\"}END END END";
-		try {
-			final String result = getRulesProjectAsPrologTerm(testMachine);
-			fail("Expected exception was not thrown");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof CheckException);
-			assertEquals("Variable 'y' read before defined.", e.getCause().getMessage());
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Variable 'y' read before defined.", e.getMessage());
 	}
 
 	@Test

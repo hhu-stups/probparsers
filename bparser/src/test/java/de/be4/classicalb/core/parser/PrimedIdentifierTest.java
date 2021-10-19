@@ -1,17 +1,17 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
 
 public class PrimedIdentifierTest {
 	private BParser parser = new BParser("testcase");
@@ -27,25 +27,13 @@ public class PrimedIdentifierTest {
 	@Test
 	public void testRestrictedUsage() {
 		final String testMachine = "#SUBSTITUTION x : (x = x$5)";
-		try {
-			getTreeAsString(testMachine);
-			fail("exception expected");
-		} catch (BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof CheckException);
-			// ok
-		}
+		Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
 	public void testDontPrimedIdentifiersInQuantifiers() {
 		final String testMachine = "#PREDICATE !a$0.(a=5 => b=6)";
-		try {
-			getTreeAsString(testMachine);
-			fail("exception expected");
-		} catch (BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof BParseException);
-			// ok
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test(expected = BCompoundException.class)
@@ -59,13 +47,7 @@ public class PrimedIdentifierTest {
 	@Test
 	public void testPrimedIdentifiersInQuantifiers() throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
-		try {
-			getTreeAsString(testMachine);
-			fail("exception expected");
-		} catch (BCompoundException e) {
-			assertTrue(e.getCause() instanceof BParseException);
-			// ok
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Before

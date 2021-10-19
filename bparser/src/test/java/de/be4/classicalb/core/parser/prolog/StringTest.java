@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import util.Helpers;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class StringTest {
 
@@ -28,13 +28,9 @@ public class StringTest {
 	@Test
 	public void testNewlineInSingleLineString() {
 		final String testMachine = "MACHINE Test PROPERTIES k = \" \n \" END";
-		try {
-			Helpers.getMachineAsPrologTerm(testMachine);
-			fail("Should raise a parser exception");
-		} catch (BCompoundException e) {
-			String message = e.getFirstException().getMessage();
-			assertTrue(message.contains("Unknown token: \""));
-		}
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		String message = e.getFirstException().getMessage();
+		assertTrue(message.contains("Unknown token: \""));
 	}
 
 	@Test

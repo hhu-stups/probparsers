@@ -18,6 +18,9 @@ import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermStringOutput;
 
+import org.junit.Assert;
+import org.junit.function.ThrowingRunnable;
+
 public class Helpers {
 
 	public static String getTreeAsString(final String testMachine) throws BCompoundException {
@@ -109,4 +112,19 @@ public class Helpers {
 			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
 	}
 
+	/**
+	 * Assert that {@code runnable} throws a {@link BCompoundException} whose cause is of type {@code wrappedExceptionType}
+	 * (the cause must not be {@code null}).
+	 * This method behaves similarly to {@link Assert#assertThrows(Class, ThrowingRunnable)}.
+	 * 
+	 * @param wrappedExceptionType the expected type of the {@link BCompoundException}'s cause
+	 * @param runnable the code that should throw a {@link BCompoundException}
+	 * @param <T> the expected type of the {@link BCompoundException}'s cause
+	 * @return the cause of the thrown {@link BCompoundException}
+	 */
+	public static <T extends Throwable> T assertThrowsCompound(final Class<T> wrappedExceptionType, final ThrowingRunnable runnable) {
+		final BCompoundException e = Assert.assertThrows(BCompoundException.class, runnable);
+		Assert.assertNotNull("BCompoundException is missing a cause", e);
+		return wrappedExceptionType.cast(e.getCause());
+	}
 }

@@ -1,13 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.LinkedList;
-
-import org.junit.Test;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
@@ -17,7 +10,15 @@ import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
+
+import org.junit.Test;
+
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class StructuralTest {
 
@@ -173,16 +174,11 @@ public class StructuralTest {
 	@Test
 	public void testUnclosedComment() {
 		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
-		try {
-			getTreeAsString(emptyMachine);
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			final BLexerException ex = (BLexerException) e.getCause();
-			// checking the start position of the comment
-			assertEquals(3, ex.getLastLine());
-			assertEquals(2, ex.getLastPos());
-			assertTrue(e.getMessage().contains("Comment not closed."));
-		}
+		final BLexerException ex = Helpers.assertThrowsCompound(BLexerException.class, () -> getTreeAsString(emptyMachine));
+		// checking the start position of the comment
+		assertEquals(3, ex.getLastLine());
+		assertEquals(2, ex.getLastPos());
+		assertTrue(ex.getMessage().contains("Comment not closed."));
 	}
 
 	@Test
@@ -206,91 +202,59 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void checkForMissingSemicolon() throws Exception {
+	public void checkForMissingSemicolon() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n  BAR= BEGIN r := xx END\nEND";
-		try {
-			getTreeAsString(s);
-			fail("Missing Semicolon was not detected");
-		} catch (BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodesList().get(0);
-			assertEquals(4, node.getStartPos().getLine());
-			assertEquals(3, node.getStartPos().getPos());
-			assertTrue(e.getMessage().contains("Semicolon missing"));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(s));
+		Node node = e.getNodesList().get(0);
+		assertEquals(4, node.getStartPos().getLine());
+		assertEquals(3, node.getStartPos().getPos());
+		assertTrue(e.getMessage().contains("Semicolon missing"));
 	}
 
 	@Test
-	public void checkForInvalidSemicolon() throws Exception {
+	public void checkForInvalidSemicolon() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n;\nEND";
-		try {
-			getTreeAsString(s);
-			fail("Invalid Semicolon was not detected");
-		} catch (BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodesList().get(0);
-			assertEquals(4, node.getStartPos().getLine());
-			assertEquals(1, node.getStartPos().getPos());
-			assertTrue(e.getMessage().contains("Invalid semicolon after last operation"));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(s));
+		Node node = e.getNodesList().get(0);
+		assertEquals(4, node.getStartPos().getLine());
+		assertEquals(1, node.getStartPos().getPos());
+		assertTrue(e.getMessage().contains("Invalid semicolon after last operation"));
 	}
 
 	@Test
-	public void checkForInvalidSemicolonBeforeEnd() throws Exception {
+	public void checkForInvalidSemicolonBeforeEnd() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip\n; END\nEND";
-		try {
-			getTreeAsString(s);
-			fail("Invalid Semicolon was not detected");
-		} catch (BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodesList().get(0);
-			assertEquals(4, node.getStartPos().getLine());
-			assertEquals(1, node.getStartPos().getPos());
-			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(s));
+		Node node = e.getNodesList().get(0);
+		assertEquals(4, node.getStartPos().getLine());
+		assertEquals(1, node.getStartPos().getPos());
+		assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
 	}
 
 	@Test
-	public void checkForInvalidSemicolonBeforeEnd2() throws Exception {
+	public void checkForInvalidSemicolonBeforeEnd2() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip;skip\n; END\nEND";
-		try {
-			getTreeAsString(s);
-			fail("Invalid Semicolon was not detected");
-		} catch (BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			Node node = cause.getNodesList().get(0);
-			assertEquals(4, node.getStartPos().getLine());
-			assertEquals(1, node.getStartPos().getPos());
-			assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(s));
+		Node node = e.getNodesList().get(0);
+		assertEquals(4, node.getStartPos().getLine());
+		assertEquals(1, node.getStartPos().getPos());
+		assertTrue(e.getMessage().contains("Invalid semicolon after last substitution"));
 	}
 
 	@Test
 	public void testRepeatingClauses() {
 		final String testMachine = "MACHINE TestMachineX\n" + "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"
 				+ "VARIABLES x,y,z\n" + "END";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expecting exception");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(2, cause.getNodesList().size());
-			// IGNORE: is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals(2, e.getNodesList().size());
 	}
 
 	@Test
 	public void testMissingProperties() {
 		final String testMachine = "MACHINE TestMachineX\n" + "CONSTANTS X,Y,Z\n" + "END";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expecting exception");
-		} catch (final BCompoundException e) {
-			final CheckException cause = (CheckException) e.getCause();
-			assertEquals(1, cause.getNodesList().size());
-			assertEquals("Clause(s) missing: PROPERTIES", cause.getMessage());
-			// IGNORE: is expected
-		}
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getTreeAsString(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertEquals("Clause(s) missing: PROPERTIES", e.getMessage());
 	}
 
 	private String getTreeAsString(final String testMachine) throws BCompoundException {

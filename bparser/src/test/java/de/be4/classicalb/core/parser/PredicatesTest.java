@@ -1,16 +1,16 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
+import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Start;
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PredicatesTest {
 
@@ -42,12 +42,7 @@ public class PredicatesTest {
 	@Test
 	public void testParallelBelongs2() {
 		final String testMachine = "#PREDICATE x,y : ID";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected ParseException missing");
-		} catch (final Exception e) {
-			// IGNORE, is expected
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
@@ -133,12 +128,7 @@ public class PredicatesTest {
 	public void testBFalse() throws BCompoundException {
 // we now allow bfalse always
 // 		parser.getOptions().setRestrictProverExpressions(true);
-// 		try {
-// 			getPredicateAsString("bfalse");
-// 			fail("exception expected");
-// 		} catch (BCompoundException e) {
-// 			assertTrue(e.getFirstException().getCause() instanceof CheckException);
-// 		}
+// 		Helpers.assertThrowsCompound(CheckException.class, () -> getPredicateAsString("bfalse"));
 // 
 // 		parser.getOptions().setRestrictProverExpressions(false);
 		final String actual = getPredicateAsString("bfalse");
@@ -156,23 +146,13 @@ public class PredicatesTest {
 	@Test
 	public void testNonIdentifiersInQuantification() {
 		final String testMachine = "#PREDICATE ! a,5. (a=5 => a/=5 )";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof BParseException);
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
 	public void testNonIdentifiersInQuantificationFormula() {
 		final String testMachine = "#FORMULA ! a,5. (a=5 => a/=5 )";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof BParseException);
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	@Test
@@ -188,12 +168,7 @@ public class PredicatesTest {
 	@Test
 	public void testNoPredicateSubstitutionsInNormalMode() {
 		final String testMachine = "#PREDICATE ! a,5. (a=5 => a/=5 )";
-		try {
-			getTreeAsString(testMachine);
-			fail("Expected exception");
-		} catch (final BCompoundException e) {
-			assertTrue(e.getFirstException().getCause() instanceof BParseException);
-		}
+		Helpers.assertThrowsCompound(BParseException.class, () -> getTreeAsString(testMachine));
 	}
 
 	private String getPredicateAsString(final String expression) throws BCompoundException {
