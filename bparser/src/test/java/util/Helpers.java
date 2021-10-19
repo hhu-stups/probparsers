@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
@@ -65,7 +66,12 @@ public class Helpers {
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		PrintStream printStream = new PrintStream(output);
+		PrintStream printStream;
+		try {
+			printStream = new PrintStream(output, false, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new AssertionError(e);
+		}
 		parser.fullParsing(machineFile, parsingBehaviour, printStream, printStream);
 		printStream.flush();
 		printStream.close();
