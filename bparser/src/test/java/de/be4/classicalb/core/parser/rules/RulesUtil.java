@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.prolog.output.PrologTermStringOutput;
 
@@ -47,19 +46,18 @@ public class RulesUtil {
 		return getParsedProjectAsPrologTerm(project);
 	}
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
+	public static String getRulesMachineAsPrologTerm(final String content) throws BCompoundException {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
 		unit.parse();
 		unit.translate();
+		if (unit.hasError()) {
+			throw unit.getCompoundException();
+		}
 
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		if (unit.hasError()) {
-			PrologExceptionPrinter.printException(pout, unit.getCompoundException(), false, false);
-		} else {
-			unit.printAsProlog(pout, new NodeIdAssignment());
-			pout.flush();
-		}
+		unit.printAsProlog(pout, new NodeIdAssignment());
+		pout.flush();
 		return pout.toString();
 	}
 
