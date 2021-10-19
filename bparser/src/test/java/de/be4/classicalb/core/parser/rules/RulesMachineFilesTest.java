@@ -31,7 +31,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testMachineIncludingDefsFile() throws BCompoundException {
-		String output = getRulesMachineAsPrologTerm("project/project_with_def_file/Main.rmch");
+		String output = RulesUtil.getFileAsPrologTerm("project/project_with_def_file/Main.rmch", true);
 		assertTrue(output.contains("Defs.def"));
 		assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
 		//assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'")); // new position format
@@ -50,29 +50,29 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testFunctionCalledAsExpression() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("FunctionCalledAsExpression.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("FunctionCalledAsExpression.rmch");
 	}
 	
 	@Test
 	public void testFunctionUsesDefinitionOfCallingComputation() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("FunctionUsesDefinitionOfCallingComputation.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("FunctionUsesDefinitionOfCallingComputation.rmch"));
 		assertEquals("Cyclic dependencies between operations: compute_xx -> FUNC_add -> compute_xx", e.getMessage());
 	}
 
 	@Test
 	public void testSelfReferenceException() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/SelfReference.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/SelfReference.rmch"));
 		assertEquals("The reference 'SelfReference' has the same name as the machine in which it is contained.", e.getMessage());
 	}
 
 	@Test
 	public void testReadXML() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("ReadXML.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("ReadXML.rmch");
 	}
 
 	@Test
 	public void testReadInvalidXML() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("ReadInvalidXML.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("ReadInvalidXML.rmch"));
 		assertEquals("XML document structures must start and end within the same entity.", e.getMessage());
 	}
 
@@ -104,7 +104,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testRulesMachineNameDoesNotMatchFileName() {
-		final BCompoundException e = assertThrows(BCompoundException.class, () -> getRulesMachineAsPrologTerm("project/RulesMachineNameDoesNotMatchFileName.rmch"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/RulesMachineNameDoesNotMatchFileName.rmch"));
 		final BException e1 = e.getFirstException();
 		assertEquals(1, e1.getLocations().size());
 		final BException.Location loc = e1.getLocations().get(0);
@@ -115,13 +115,13 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testCyclicComputationDependencies() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("CyclicComputationDependencies.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("CyclicComputationDependencies.rmch"));
 		assertTrue(e.getMessage().contains("Cyclic dependencies between operations"));
 	}
 
 	@Test
 	public void testPackage() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/references/folder/M1.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/references/folder/M1.rmch");
 	}
 
 	@Test
@@ -131,17 +131,17 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testTransitiveDependency() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/TransitiveDependency.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/TransitiveDependency.rmch");
 	}
 
 	@Test
 	public void testDisabled() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/Disabled.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/Disabled.rmch");
 	}
 
 	@Test
 	public void testTransitiveDependencyRule() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/TransitiveDependencyRule.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/TransitiveDependencyRule.rmch");
 	}
 
 	@Test
@@ -159,86 +159,86 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testUnknownRule() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/UnknownRule.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/UnknownRule.rmch"));
 		String expected = "Unknown operation: ";
 		assertTrue(e.getMessage().contains(expected));
 	}
 
 	@Test
 	public void testUnknownIdentifier() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/UnknownIdentifier.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/UnknownIdentifier.rmch"));
 		String expected = "Unknown identifier ";
 		assertTrue(e.getMessage().contains(expected));
 	}
 
 	@Test
 	public void testParseError() {
-		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> getRulesMachineAsPrologTerm("project/ParseError.rmch"));
+		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> RulesUtil.getFileAsPrologTerm("project/ParseError.rmch"));
 		String expected = "[4,1] expecting: ";
 		assertTrue(e.getMessage().contains(expected));
 	}
 
 	@Test
 	public void testFileNameDoesNotMatchMachineName() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/DifferentFileName.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/DifferentFileName.rmch"));
 		assertTrue(e.getMessage().contains("RULES_MACHINE name must match the file name"));
 	}
 
 	@Test
 	public void testRuleDependsOnItSelf() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/RuleDependsOnItSelf.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/RuleDependsOnItSelf.rmch"));
 		assertEquals("Cyclic dependencies between operations: rule1 -> rule1", e.getMessage());
 	}
 
 	@Test
 	public void testFilePragma() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/references/FilePragma.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/references/FilePragma.rmch");
 	}
 
 	@Test
 	public void testInvalidFilePragma() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
 		assertTrue(e.getMessage().contains("is a directory"));
 	}
 
 	@Test
 	public void testFileDoesNotExistInFilePragma() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
 		assertTrue(e.getMessage().contains("does not exist"));
 	}
 
 	@Test
 	public void testFunctionDependencies() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("FunctionDependencies.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("FunctionDependencies.rmch");
 	}
 
 	@Test
 	public void testReferencedMachineNotFound() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/ReferencedMachineNotFound.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/ReferencedMachineNotFound.rmch"));
 		assertTrue(e.getMessage().contains("Machine not found"));
 	}
 
 	@Test
 	public void testPackagePragma() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/references/PackagePragma.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/references/PackagePragma.rmch");
 	}
 
 	@Test
 	public void testReplacement() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("project/references/Replacement.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("project/references/Replacement.rmch");
 		// the result should not contain name of the replacement operation
 		assertFalse(result.contains("COMP_comp2New"));
 	}
 
 	@Test
 	public void testImportedPackageDoesNotExist() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist.rmch"));
 		assertTrue(e.getMessage().contains("Imported package does not exist"));
 	}
 
 	@Test
 	public void testImportedPackageDoesNotExist2() {
-		final BCompoundException e = assertThrows(BCompoundException.class, () -> getRulesMachineAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist2.rmch"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist2.rmch"));
 		final BException e1 = e.getFirstException();
 		assertEquals(1, e1.getLocations().size());
 		final BException.Location loc = e1.getLocations().get(0);
@@ -249,77 +249,72 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testDuplicatePackageImport() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/packagePragma/DuplicatePackageImport.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/DuplicatePackageImport.rmch"));
 		assertTrue(e.getMessage().contains("Duplicate package import"));
 	}
 
 	@Test
 	public void testInvalidPackagePragma() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/InvalidPackagePragma.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/InvalidPackagePragma.rmch"));
 		assertTrue(e.getMessage().contains("does not match the folder structure"));
 	}
 
 	@Test
 	public void testInvalidPackagePragma2() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/InvalidPackagePragma2.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/InvalidPackagePragma2.rmch"));
 		assertTrue(e.getMessage().contains("Invalid folder name"));
 	}
 
 	@Test
 	public void testComputationDependsOnItSelf() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/ComputationDependsOnItSelf.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/ComputationDependsOnItSelf.rmch"));
 		assertEquals("Cyclic dependencies between operations: compute_x -> compute_x", e.getMessage());
 	}
 
 	@Test
 	public void testImplicitDependencyToComputation() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("ImplicitDependencyToComputation.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("ImplicitDependencyToComputation.rmch");
 	}
 
 	@Test
 	public void testConfuseRuleAndComputation() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/ConfuseRuleAndComputation.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/ConfuseRuleAndComputation.rmch"));
 		assertEquals("Identifier 'rule1' is not a COMPUTATION.", e.getMessage());
 	}
 
 	@Test
 	public void testCyclicRules() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/CyclicRules.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/CyclicRules.rmch"));
 		assertTrue(e.getMessage().contains("Cyclic dependencies between operations"));
 	}
 
 	@Test
 	public void testInvisibleComputation() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/MissingReference/M1.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/MissingReference/M1.rmch"));
 		assertEquals("Operation 'compute_xx' is not visible in RULES_MACHINE 'M2'.", e.getMessage());
 	}
 
 	@Test
 	public void testUnknwonComputation() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("project/references/MissingReference/M2.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/MissingReference/M2.rmch"));
 		assertEquals("Unknown operation: 'compute_xx'.", e.getMessage());
 	}
 
 	@Test
 	public void testReplaces() throws BCompoundException {
-		String result = getRulesMachineAsPrologTerm("replaces/Replaces.rmch");
+		String result = RulesUtil.getFileAsPrologTerm("replaces/Replaces.rmch");
 		assertFalse(result.contains("COMP_NewComp1"));
 	}
 
 	@Test
 	public void testInvalidDoubleReplacement() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("replaces/DoubleReplacement.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("replaces/DoubleReplacement.rmch"));
 		assertTrue(e.getMessage().contains("COMP_comp1"));
 	}
 
 	@Test
 	public void testVariableNotReplaced() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesMachineAsPrologTerm("replaces/VariableNotReplaced.rmch"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("replaces/VariableNotReplaced.rmch"));
 		assertTrue(e.getMessage().contains("COMP_comp1"));
 	}
-
-	private String getRulesMachineAsPrologTerm(String fileName) throws BCompoundException {
-		return RulesUtil.getFileAsPrologTerm(fileName, true);
-	}
-
 }
