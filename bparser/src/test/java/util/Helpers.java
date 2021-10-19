@@ -51,7 +51,6 @@ public class Helpers {
 		parsingBehaviour.setPrologOutput(true);
 		parsingBehaviour.setUseIndention(false);
 		parsingBehaviour.setAddLineNumbers(false);
-		parsingBehaviour.setVerbose(true);
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}
@@ -75,7 +74,7 @@ public class Helpers {
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
-		Start start = parser.parse(input, true);
+		Start start = parser.parse(input, false);
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		printAsProlog(start, pout);
 		return pout.toString();
@@ -103,11 +102,8 @@ public class Helpers {
 			BParser parser = new BParser(filename);
 			Start tree = parser.parseFile(machineFile, false);
 
-			final ParsingBehaviour behaviour = new ParsingBehaviour();
-			behaviour.setVerbose(true);
-
 			PrintStream output = new PrintStream(probFile);
-			BParser.printASTasProlog(output, parser, machineFile, tree, behaviour, parser.getContentProvider());
+			BParser.printASTasProlog(output, parser, machineFile, tree, new ParsingBehaviour(), parser.getContentProvider());
 			output.close();
 		} else
 			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
