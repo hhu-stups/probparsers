@@ -1,12 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
@@ -54,26 +47,8 @@ public class RulesProjectExceptionTest {
 	}
 
 	@Test
-	public void testRulesMachineInOrdinaryMachineFileException() throws Exception {
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			@Override
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		PrintStream pStream = new PrintStream(output);
-		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setPrologOutput(true);
-		BParser bParser = new BParser("");
-		bParser.fullParsing(new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineInOrdinaryMachineFile.mch").toURI()),
-				parsingBehaviour, pStream, pStream);
-		assertTrue(output.toString().contains("parse_exception"));
+	public void testRulesMachineInOrdinaryMachineFileException() {
+		final String result = Helpers.fullParsing("rules/project/RulesMachineInOrdinaryMachineFile.mch");
+		assertTrue(result.contains("parse_exception"));
 	}
 }
