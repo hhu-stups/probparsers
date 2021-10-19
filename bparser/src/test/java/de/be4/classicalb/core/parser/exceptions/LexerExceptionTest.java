@@ -20,7 +20,6 @@ public class LexerExceptionTest {
 	@Test
 	public void testLexerThrowsExceptionAndProvidesPositionInfo() {
 		final BCompoundException b = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/IfAndPredicates.mch"));
-		Assert.assertNotNull(b.getBExceptions().get(0));
-		Assert.assertEquals(1, b.getBExceptions().get(0).getLocations().size());
+		Helpers.assertParseErrorLocation(b, 18, 18, 18, 18);
 	}
 }

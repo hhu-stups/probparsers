@@ -105,11 +105,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testRulesMachineNameDoesNotMatchFileName() {
 		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/RulesMachineNameDoesNotMatchFileName.rmch"));
-		final BException e1 = e.getFirstException();
-		assertEquals(1, e1.getLocations().size());
-		final BException.Location loc = e1.getLocations().get(0);
-		assertEquals(1, loc.getStartLine());
-		assertEquals(15, loc.getStartColumn());
+		Helpers.assertParseErrorLocation(e, 1, 15, 1, 26);
 		assertTrue(e.getMessage().contains("RULES_MACHINE name must match the file name"));
 	}
 
@@ -239,12 +235,8 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testImportedPackageDoesNotExist2() {
 		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist2.rmch"));
-		final BException e1 = e.getFirstException();
-		assertEquals(1, e1.getLocations().size());
-		final BException.Location loc = e1.getLocations().get(0);
-		assertEquals(3, loc.getStartLine());
-		assertEquals(19, loc.getStartColumn());
-		assertTrue(e1.getMessage().contains("Imported package does not exist"));
+		Helpers.assertParseErrorLocation(e, 3, 19, 3, 36);
+		assertTrue(e.getMessage().contains("Imported package does not exist"));
 	}
 
 	@Test

@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -126,5 +127,21 @@ public class Helpers {
 		final BCompoundException e = Assert.assertThrows(BCompoundException.class, runnable);
 		Assert.assertNotNull("BCompoundException is missing a cause", e);
 		return wrappedExceptionType.cast(e.getCause());
+	}
+
+	public static void assertParseErrorLocation(final BException.Location loc, final int startLine, final int startColumn, final int endLine, final int endColumn) {
+		Assert.assertEquals("Incorrect start line", startLine, loc.getStartLine());
+		Assert.assertEquals("Incorrect start column", startColumn, loc.getStartColumn());
+		Assert.assertEquals("Incorrect end line", endLine, loc.getEndLine());
+		Assert.assertEquals("Incorrect end column", endColumn, loc.getEndColumn());
+	}
+
+	public static void assertParseErrorLocation(final BException e, final int startLine, final int startColumn, final int endLine, final int endColumn) {
+		Assert.assertEquals(1, e.getLocations().size());
+		assertParseErrorLocation(e.getLocations().get(0), startLine, startColumn, endLine, endColumn);
+	}
+
+	public static void assertParseErrorLocation(final BCompoundException e, final int startLine, final int startColumn, final int endLine, final int endColumn) {
+		assertParseErrorLocation(e.getFirstException(), startLine, startColumn, endLine, endColumn);
 	}
 }
