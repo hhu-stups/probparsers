@@ -520,12 +520,12 @@ public class BParser {
 			// }
 			// }
 
-			final long start = System.currentTimeMillis();
+			final long startParseMain = System.currentTimeMillis();
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
-			final long end = System.currentTimeMillis();
+			final long endParseMain = System.currentTimeMillis();
 
 			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("% Time for parsing: " + (end - start) + " ms");
+				out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
 			}
 
 			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
@@ -537,24 +537,31 @@ public class BParser {
 				System.out.println(pp.getPrettyPrint());
 			}
 
-			final long start2 = System.currentTimeMillis();
-
 			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
 			if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
+				final long startParseRecursive = System.currentTimeMillis();
 				final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider, parsingBehaviour);
 				rml.loadAllMachines(bfile, tree, getDefinitions());
+				final long endParseRecursive = System.currentTimeMillis();
 
+				if (parsingBehaviour.isPrintTime()) {
+					out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
+				}
+
+				final long startOutput = System.currentTimeMillis();
 				if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 					printASTasFastProlog(out, rml);
 				} else { // -prolog flag in CliBParser
 					rml.printAsProlog(new PrintWriter(out));
 				}
+				final long endOutput = System.currentTimeMillis();
+
+				if (parsingBehaviour.isPrintTime()) {
+					out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
+				}
 			}
 
-			final long end2 = System.currentTimeMillis();
-
 			if (parsingBehaviour.isPrintTime()) {
-				out.println("% Time for Prolog output: " + (end2 - start2) + " ms");
 				out.println("% Used memory : " + 
 				           (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
 				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
