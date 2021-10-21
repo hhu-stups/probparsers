@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.eventbalg.core.parser.analysis.ASTDisplay;
 import de.be4.eventbalg.core.parser.analysis.ASTPrinter;
 import de.be4.eventbalg.core.parser.lexer.LexerException;
 import de.be4.eventbalg.core.parser.node.Start;
@@ -33,7 +32,6 @@ public class EventBParser {
 	private static final String CLI_SWITCH_VERBOSE = "-v";
 	private static final String CLI_SWITCH_TIME = "-time";
 	private static final String CLI_SWITCH_AST = "-ast";
-	private static final String CLI_SWITCH_UI = "-ui";
 
 	private SourcePositions sourcePositions;
 
@@ -45,7 +43,6 @@ public class EventBParser {
 			System.err.println(CLI_SWITCH_VERBOSE + "\t\tVerbose output during lexing and parsing");
 			System.err.println(CLI_SWITCH_TIME + "\t\tOutput time used for complete parsing process.");
 			System.err.println(CLI_SWITCH_AST + "\t\tPrint AST on standard output.");
-			System.err.println(CLI_SWITCH_UI + "\t\tShow AST as Swing UI.");
 			System.exit(-1);
 		}
 
@@ -64,10 +61,6 @@ public class EventBParser {
 			if (isCliSwitchSet(args, CLI_SWITCH_AST)) {
 				System.out.println("AST:");
 				tree.apply(new ASTPrinter());
-			}
-
-			if (isCliSwitchSet(args, CLI_SWITCH_UI)) {
-				tree.apply(new ASTDisplay());
 			}
 		} catch (final IOException e) {
 			System.err.println();

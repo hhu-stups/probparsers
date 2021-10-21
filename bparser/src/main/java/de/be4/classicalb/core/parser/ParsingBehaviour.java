@@ -8,7 +8,6 @@ public class ParsingBehaviour {
 	private boolean prologOutput = false;       // -prolog flag in CliBParser
 	private boolean useIndention = false;       // -indent flag in CliBParser
 	private boolean addLineNumbers = false;     // -lineno flag in CliBParser
-	private boolean displayGraphically = false; // -ui flag in CliBParser
 	private boolean verbose = false; //verbose mode includes debug prints, -v flag in CliBParser
 	private boolean printTime = false;          // -time flag in CliBParser
 	private PrintStream out = System.out;
@@ -42,14 +41,6 @@ public class ParsingBehaviour {
 
 	public void setAddLineNumbers(boolean addLineNumbers) {
 		this.addLineNumbers = addLineNumbers;
-	}
-
-	public boolean isDisplayGraphically() {
-		return displayGraphically;
-	}
-
-	public void setDisplayGraphically(boolean displayGraphically) {
-		this.displayGraphically = displayGraphically;
 	}
 
 	public boolean isVerbose() {

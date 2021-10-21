@@ -47,7 +47,6 @@ import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
 import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
@@ -557,12 +556,6 @@ public class BParser {
 				PrettyPrinter pp = new PrettyPrinter();
 				tree.apply(pp);
 				System.out.println(pp.getPrettyPrint());
-			}
-			
-			
-
-			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
-				tree.apply(new ASTDisplay());
 			}
 
 			final long start2 = System.currentTimeMillis();
