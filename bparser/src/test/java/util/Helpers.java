@@ -52,9 +52,6 @@ public class Helpers {
 
 	public static String fullParsing(String filename) {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
-		parsingBehaviour.setPrologOutput(true);
-		parsingBehaviour.setUseIndention(false);
-		parsingBehaviour.setAddLineNumbers(false);
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}
