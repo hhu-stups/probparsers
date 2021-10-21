@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import de.be4.eventbalg.core.parser.analysis.ASTPrinter;
 import de.be4.eventbalg.core.parser.lexer.LexerException;
 import de.be4.eventbalg.core.parser.node.Start;
 import de.be4.eventbalg.core.parser.node.TComment;
@@ -29,49 +28,7 @@ public class EventBParser {
 
 	public static final String MSG_COMMENT_PLACEMENT = "Comment can only be place behind the element they belong to. Please move the comment to an appropriate place!";
 
-	private static final String CLI_SWITCH_VERBOSE = "-v";
-	private static final String CLI_SWITCH_TIME = "-time";
-	private static final String CLI_SWITCH_AST = "-ast";
-
 	private SourcePositions sourcePositions;
-
-	public static void main(final String[] args) {
-		if (args.length < 1) {
-			System.err.println("usage: BParser [options] <BMachine file>");
-			System.err.println();
-			System.err.println("Available options are:");
-			System.err.println(CLI_SWITCH_VERBOSE + "\t\tVerbose output during lexing and parsing");
-			System.err.println(CLI_SWITCH_TIME + "\t\tOutput time used for complete parsing process.");
-			System.err.println(CLI_SWITCH_AST + "\t\tPrint AST on standard output.");
-			System.exit(-1);
-		}
-
-		try {
-			final long start = System.currentTimeMillis();
-			final EventBParser parser = new EventBParser();
-			final Start tree = parser.parseFile(new File(args[args.length - 1]),
-					isCliSwitchSet(args, CLI_SWITCH_VERBOSE));
-			final long end = System.currentTimeMillis();
-			System.out.println();
-
-			if (isCliSwitchSet(args, CLI_SWITCH_TIME)) {
-				System.out.println("Time for parsing: " + (end - start) + "ms");
-			}
-
-			if (isCliSwitchSet(args, CLI_SWITCH_AST)) {
-				System.out.println("AST:");
-				tree.apply(new ASTPrinter());
-			}
-		} catch (final IOException e) {
-			System.err.println();
-			System.err.println("Error reading input file: " + e.getLocalizedMessage());
-			System.exit(-2);
-		} catch (final BException e) {
-			System.err.println();
-			System.err.println("Error parsing input file: " + e.getLocalizedMessage());
-			System.exit(-3);
-		}
-	}
 
 	/**
 	 * Parses the input file.
@@ -209,16 +166,6 @@ public class EventBParser {
 		message = message.replaceFirst(" at", " @");
 
 		return new EventBParseException(token, message);
-	}
-
-	private static boolean isCliSwitchSet(final String[] args, final String cliSwitch) {
-		for (int i = 0; i < args.length; i++) {
-			if (cliSwitch.equals(args[i])) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public SourcePositions getSourcePositions() {
