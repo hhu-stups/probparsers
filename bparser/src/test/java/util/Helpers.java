@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,7 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -73,7 +75,17 @@ public class Helpers {
 		} catch (UnsupportedEncodingException e) {
 			throw new AssertionError(e);
 		}
-		parser.fullParsing(machineFile, parsingBehaviour, printStream, printStream);
+		try {
+			final Start tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose());
+			
+			final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider(), parsingBehaviour);
+			rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
+			rml.printAsProlog(new PrintWriter(printStream));
+		} catch (final IOException e) {
+			PrologExceptionPrinter.printException(printStream, e);
+		} catch (final BCompoundException e) {
+			PrologExceptionPrinter.printException(printStream, e, parsingBehaviour.isUseIndention(), false);
+		}
 		printStream.flush();
 		printStream.close();
 		return new String(output.toByteArray(), StandardCharsets.UTF_8);
