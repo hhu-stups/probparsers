@@ -511,15 +511,6 @@ public class BParser {
 			final PrintStream err) {
 
 		try {
-
-			// Properties hashes = new Properties();
-
-			// if (parsingBehaviour.getOutputFile() != null) {
-			// if (hashesStillValid(parsingBehaviour.getOutputFile())){
-			// return 0;
-			// }
-			// }
-
 			final long startParseMain = System.currentTimeMillis();
 			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
 			final long endParseMain = System.currentTimeMillis();
@@ -589,42 +580,7 @@ public class BParser {
 		return 0;
 	}
 	
-	@SuppressWarnings("unused")
-	private boolean hashesStillValid(final File outputFile) {
-		// File dir = outputFile.getParentFile();
-		// Properties hashValues = readHashValues(outputFile, dir);
-		// Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
-		// for (Entry<Object, Object> entry : entrySet) {
-		// String file = (String) entry.getKey();
-		// String hash = (String) entry.getValue();
-		// File f = new File(dir + File.separator + file);
-		// try {
-		// if (!(f.exists() || FileDigest.sha(f).equals(hash)))
-		// return false;
-		// } catch (Exception e) {
-		// return false;
-		// }
-		// }
-		return false;
-	}
-
 	public void setDirectory(final File directory) {
 		this.directory = directory;
 	}
-
-	// private Properties readHashValues(final File target, final File dir) {
-	// String name = target.getName();
-	// Properties p = new Properties();
-	// String hashfile = name + ".hashes";
-	// File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-	// if (!hf.exists())
-	// return p;
-	// try {
-	// p.load(new BufferedInputStream(new FileInputStream(hf)));
-	// } catch (Exception e) {
-	// // ignore
-	// }
-	// return p;
-	// }
-
 }
