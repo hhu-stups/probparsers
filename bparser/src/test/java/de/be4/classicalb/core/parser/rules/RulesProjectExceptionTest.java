@@ -48,6 +48,6 @@ public class RulesProjectExceptionTest {
 
 	@Test
 	public void testRulesMachineInOrdinaryMachineFileException() {
-		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.fullParsing("rules/project/RulesMachineInOrdinaryMachineFile.mch"));
+		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.parseFile("rules/project/RulesMachineInOrdinaryMachineFile.mch"));
 	}
 }

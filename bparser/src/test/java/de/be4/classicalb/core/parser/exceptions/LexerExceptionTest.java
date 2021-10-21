@@ -9,7 +9,7 @@ public class LexerExceptionTest {
 
 	@Test
 	public void testLexerException() {
-		final BCompoundException e = Assert.assertThrows(BCompoundException.class, () -> Helpers.fullParsing("exceptions/LexerStringError.mch"));
+		final BCompoundException e = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/LexerStringError.mch"));
 		Helpers.assertParseErrorLocation(e, 3, 12, 3, 12);
 		Assert.assertTrue(e.getFirstException().getLocations().get(0).getFilename().contains("LexerStringError.mch"));
 	}

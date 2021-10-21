@@ -9,7 +9,6 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -45,13 +44,13 @@ public class Helpers {
 		return pp.getPrettyPrint();
 	}
 
-	public static String fullParsing(String filename) throws IOException, BCompoundException {
+	public static String parseFile(String filename) throws IOException, BCompoundException {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
-		return fullParsing(filename, parsingBehaviour);
+		return parseFile(filename, parsingBehaviour);
 	}
 
-	public static String fullParsing(String filename, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
+	public static String parseFile(String filename, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
 		final File machineFile;
 		try {
 			machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
@@ -87,17 +86,6 @@ public class Helpers {
 		pout.closeTerm();
 		pout.fullstop();
 		pout.flush();
-	}
-
-	public static void parseFile(final String filename) throws IOException, BCompoundException, URISyntaxException {
-		final File machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
-
-		BParser parser = new BParser(filename);
-		Start tree = parser.parseFile(machineFile, false);
-
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider());
-		rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
-		rml.printAsProlog(new PrologTermStringOutput());
 	}
 
 	/**

@@ -14,7 +14,7 @@ public class ErrorsTest {
 	public void testMachineNotFound() {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNotFound.mch";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
 		assertEquals("Machine not found: 'MachineDoesNotExist' in 'MachineNotFound.mch'", e.getMessage());
 	}
 	
@@ -22,7 +22,7 @@ public class ErrorsTest {
 	public void testMachineNameDoesNotMachtFileName() {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNameDoesNotMatchFileName.mch";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
 		assertEquals("Machine name does not match the file name: 'Foo' vs 'MachineNameDoesNotMatchFileName'", e.getMessage());
 	}
 

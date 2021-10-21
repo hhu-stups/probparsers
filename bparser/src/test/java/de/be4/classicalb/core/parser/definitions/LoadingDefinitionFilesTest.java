@@ -19,7 +19,7 @@ public class LoadingDefinitionFilesTest {
 	public void testDefinitionFileLoadedByADefinitionFile() throws IOException, BCompoundException {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingDefinitionFiles.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("MachineIncludingDefinitionFiles.mch"));
 		assertTrue(result.contains("Foo.def"));
 		assertTrue(result.contains("Bar.def"));
@@ -29,7 +29,7 @@ public class LoadingDefinitionFilesTest {
 	public void testDefinitionFileDoesNotExists() {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingNotExistingDefinitionFile.mch";
-		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.fullParsing(file));
+		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.parseFile(file));
 		assertTrue(e.getMessage().contains("Definition file cannot be read"));
 	}
 	
@@ -37,7 +37,7 @@ public class LoadingDefinitionFilesTest {
 	public void testCyclicDefinitionFile() {
 		String PATH = "definitions/definitionFiles/cycle/";
 		String file = PATH + "MachineIncludingCyclicDefinitionFiles.mch";
-		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.fullParsing(file));
+		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.parseFile(file));
 		assertTrue(e.getMessage().contains("Cyclic references in definition files"));
 	}
 	
@@ -45,7 +45,7 @@ public class LoadingDefinitionFilesTest {
 	public void testLoadingDefinitionsFilesFormAnotherMachine() throws IOException, BCompoundException {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingDefinitionsFromAnotherMachine.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("DefinitionOfMachineWithDefinitions"));
 	}
 	
@@ -53,7 +53,7 @@ public class LoadingDefinitionFilesTest {
 	public void testLoadingDefinitionsFilesInSubdirectory() throws IOException, BCompoundException {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingDefinitionFileInSubdirectory.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("DefinitionInSubdirectory"));
 	}
 	
@@ -61,7 +61,7 @@ public class LoadingDefinitionFilesTest {
 	public void testLoadingDefinitionChain() throws IOException, BCompoundException {
 		String PATH = "definitions/definitionFiles/chain/";
 		String file = PATH + "MachineIncludingDefinitionFileChain.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("A.def"));
 		assertTrue(result.contains("B.def"));
 		assertTrue(result.contains("C.def"));
@@ -71,7 +71,7 @@ public class LoadingDefinitionFilesTest {
 	public void testOverridingDefinition() {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineOverridingDefinition.mch";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
 		assertTrue(e.getMessage().contains("Duplicate definition: DefinitionOfBar"));
 	}
 	
@@ -79,7 +79,7 @@ public class LoadingDefinitionFilesTest {
 	public void testOverridingDefinition2() {
 		String PATH = "definitions/definitionFiles/overridingDefinition/";
 		String file = PATH + "MachineIncludesA.mch";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
 		assertTrue(e.getMessage().contains("Duplicate definition: A1"));
 	}
 	
@@ -87,14 +87,14 @@ public class LoadingDefinitionFilesTest {
 	public void testOverridingDefinition3() {
 		String PATH = "definitions/definitionFiles/overridingDefinition/";
 		String file = PATH + "MachineIncludesAAndA2.mch";
-		Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.fullParsing(file));
+		Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.parseFile(file));
 	}
 	
 	@Test
 	public void testSeesAndIncludes() throws IOException, BCompoundException {
 		String PATH = "definitions/definitionFiles/seesAndIncludes/";
 		String file = PATH + "A.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 	}
 	
 }

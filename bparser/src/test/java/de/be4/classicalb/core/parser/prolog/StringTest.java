@@ -16,7 +16,7 @@ public class StringTest {
 	@Test
 	public void testFile() throws IOException, BCompoundException {
 		String file = "strings/StringIncludingQuotes.mch";
-		String result = Helpers.fullParsing(file);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("'a\"b'"));
 	}
 
