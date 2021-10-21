@@ -41,7 +41,6 @@ public class CliBParser {
 	private static final String CLI_SWITCH_VERBOSE = "-v";
 	private static final String CLI_SWITCH_VERSION = "-version";
 	private static final String CLI_SWITCH_TIME = "-time";
-	private static final String CLI_SWITCH_AST = "-ast";
 	private static final String CLI_SWITCH_PP = "-pp";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
 	private static final String CLI_SWITCH_FASTPROLOG = "-fastprolog";
@@ -105,7 +104,6 @@ public class CliBParser {
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setUseIndention(options.isOptionSet(CLI_SWITCH_INDENTION));
-		behaviour.setPrintAST(options.isOptionSet(CLI_SWITCH_AST)); // -ast flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
 		// flags above treated in bparser in main/java/de/be4/classicalb/core/parser/BParser.java
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
@@ -398,7 +396,6 @@ public class CliBParser {
 				+ ")\nusage: BParser [options] <BMachine file>\n\nAvailable options are:");
 		options.addOption(CLI_SWITCH_VERBOSE, "Verbose output during lexing and parsing");
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");
-		options.addOption(CLI_SWITCH_AST, "Print AST on standard output");
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
 		options.addOption(CLI_SWITCH_PROLOG, "Show AST as Prolog term");
 		// TO DO: add option for less precise position infos

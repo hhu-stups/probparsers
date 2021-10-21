@@ -47,7 +47,6 @@ import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -545,10 +544,6 @@ public class BParser {
 				out.println("% Time for parsing: " + (end - start) + " ms");
 			}
 
-			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
-				ASTPrinter sw = new ASTPrinter(out);
-				tree.apply(sw);
-			}
 			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
 			    if (parsingBehaviour.isVerbose()) {
 				    System.out.println("Pretty printing " + bfile + " in B format:");
