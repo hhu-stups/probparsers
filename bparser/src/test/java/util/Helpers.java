@@ -45,13 +45,13 @@ public class Helpers {
 		return pp.getPrettyPrint();
 	}
 
-	public static String fullParsing(String filename) {
+	public static String fullParsing(String filename) throws IOException, BCompoundException {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
 		return fullParsing(filename, parsingBehaviour);
 	}
 
-	public static String fullParsing(String filename, ParsingBehaviour parsingBehaviour) {
+	public static String fullParsing(String filename, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
 		final File machineFile;
 		try {
 			machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
@@ -59,23 +59,12 @@ public class Helpers {
 			throw new RuntimeException(e);
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
+		final Start tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose());
 
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider(), parsingBehaviour);
+		rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		try {
-			final Start tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose());
-			
-			final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider(), parsingBehaviour);
-			rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
-			rml.printAsProlog(pout);
-		} catch (final IOException e) {
-			PrologExceptionPrinter.printException(pout, e);
-			pout.fullstop();
-			pout.flush();
-		} catch (final BCompoundException e) {
-			PrologExceptionPrinter.printException(pout, e, parsingBehaviour.isUseIndention(), false);
-			pout.fullstop();
-			pout.flush();
-		}
+		rml.printAsProlog(pout);
 		return pout.toString();
 	}
 

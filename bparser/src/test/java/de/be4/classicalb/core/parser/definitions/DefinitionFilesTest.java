@@ -182,9 +182,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testErrorInDefinitions() throws IOException, BCompoundException {
 		String file = "./definitions/errors/DefinitionErrorPosition.mch";
 		// file contains DEFINITIONS aa == 1 + + END
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.startsWith("parse_exception("));
-		assertTrue(result.contains("pos(2,23,"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.fullParsing(file));
+		Helpers.assertParseErrorLocation(e, 2, 23, 2, 23);
 		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
 	}
 
@@ -192,9 +191,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testErrorInIncludedDefinitionFile() throws IOException,
 			BCompoundException {
 		String file = "./definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.startsWith("parse_exception("));
-		assertTrue(result.contains("pos(3,1,"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.fullParsing(file));
+		Helpers.assertParseErrorLocation(e, 3, 1, 3, 1);
 		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 

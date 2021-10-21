@@ -1,18 +1,21 @@
 package de.be4.classicalb.core.parser.pragmas;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
 
 import util.Helpers;
-import de.be4.classicalb.core.parser.exceptions.BException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PackagePragmaTest {
 
 	@Test
-	public void testImportPackagePragma() throws IOException, BException {
+	public void testImportPackagePragma() throws IOException, BCompoundException {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M1.mch";
 		String result = Helpers.fullParsing(file);
@@ -22,7 +25,7 @@ public class PackagePragmaTest {
 	}
 
 	@Test
-	public void testImportPackageIdentifier() throws IOException, BException {
+	public void testImportPackageIdentifier() throws IOException, BCompoundException {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M11.mch";
 		String result = Helpers.fullParsing(file);
@@ -32,52 +35,48 @@ public class PackagePragmaTest {
 	}
 
 	@Test
-	public void testInvalidImport() throws IOException, BException {
+	public void testInvalidImport() {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "InvalidImport.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains(
-				"'Invalid package pragma: foo.*.M2'"));
-
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertEquals("Invalid package pragma: foo.*.M2", e.getMessage());
 	}
 
 	@Test
-	public void testDuplicateImport() throws IOException, BException {
+	public void testDuplicateImport() {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "DuplicateImport.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains(
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertTrue(e.getMessage().contains(
 				"Duplicate import statement: foo.bar"));
 
 	}
 
 	@Test
-	public void testInvalidPackage() throws IOException, BException {
+	public void testInvalidPackage() {
 		String PATH = "pragmas/importPackagePragma/";
 		String file = PATH + "InvalidPackage1.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains("Package declaration \\'foo2\\' does not match the folder structure"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertTrue(e.getMessage().contains("Package declaration 'foo2' does not match the folder structure"));
 	}
 	
 	@Test
-	public void testPackageNotFound() throws IOException, BException {
+	public void testPackageNotFound() {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "PackageNotFound.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains("Imported package does not exist"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertTrue(e.getMessage().contains("Imported package does not exist"));
 	}
 	
 	@Test
-	public void testDuplicateMachineClause() throws Exception {
-		final String result = Helpers.fullParsing("pragmas/packagePragma/project1/Main.mch");
+	public void testDuplicateMachineClause() {
+		Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing("pragmas/packagePragma/project1/Main.mch"));
 		//semantic checks (e.g. duplicate clauses) were previously disabled for APackageParseUnit nodes
-		assertTrue(result.contains("parse_exception"));
 	}
 	
 	@Test
-	public void testDefinitionFileReferencesInDefinitionFilesClause() throws Exception {
+	public void testDefinitionFileReferencesInDefinitionFilesClause() throws IOException, BCompoundException {
 		final String result = Helpers.fullParsing("pragmas/packagePragma/definitionFiles/Main.mch");
-		assertFalse(result.contains("exception"));
 	}
 
 

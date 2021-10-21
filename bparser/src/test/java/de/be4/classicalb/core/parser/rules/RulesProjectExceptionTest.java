@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
@@ -7,7 +8,6 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class RulesProjectExceptionTest {
 
@@ -48,7 +48,6 @@ public class RulesProjectExceptionTest {
 
 	@Test
 	public void testRulesMachineInOrdinaryMachineFileException() {
-		final String result = Helpers.fullParsing("rules/project/RulesMachineInOrdinaryMachineFile.mch");
-		assertTrue(result.contains("parse_exception"));
+		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.fullParsing("rules/project/RulesMachineInOrdinaryMachineFile.mch"));
 	}
 }

@@ -1,32 +1,29 @@
 package de.be4.classicalb.core.parser.composition;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
 
 public class ErrorsTest {
 
 	@Test
-	public void testMachineNotFound() throws IOException, BException {
+	public void testMachineNotFound() {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNotFound.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains(
-				"'Machine not found: \\'MachineDoesNotExist\\' in \\'MachineNotFound.mch\\''"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertEquals("Machine not found: 'MachineDoesNotExist' in 'MachineNotFound.mch'", e.getMessage());
 	}
 	
 	@Test
-	public void testMachineNameDoesNotMachtFileName() throws IOException, BException {
+	public void testMachineNameDoesNotMachtFileName() {
 		String PATH = "composition/errors/";
 		String file = PATH + "MachineNameDoesNotMatchFileName.mch";
-		String result = Helpers.fullParsing(file);
-		assertTrue(result.contains(
-				"'Machine name does not match the file name: \\'Foo\\' vs \\'MachineNameDoesNotMatchFileName\\''"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.fullParsing(file));
+		assertEquals("Machine name does not match the file name: 'Foo' vs 'MachineNameDoesNotMatchFileName'", e.getMessage());
 	}
 
 }

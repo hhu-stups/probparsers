@@ -1,5 +1,7 @@
 package de.be4.classicalb.core.parser.prolog;
 
+import java.io.IOException;
+
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
@@ -12,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 public class StringTest {
 
 	@Test
-	public void testFile() {
+	public void testFile() throws IOException, BCompoundException {
 		String file = "strings/StringIncludingQuotes.mch";
 		String result = Helpers.fullParsing(file);
 		assertTrue(result.contains("'a\"b'"));

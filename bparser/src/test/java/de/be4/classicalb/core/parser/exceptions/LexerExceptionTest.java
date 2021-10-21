@@ -5,15 +5,13 @@ import org.junit.Test;
 
 import util.Helpers;
 
-import static org.junit.Assert.assertTrue;
-
 public class LexerExceptionTest {
 
 	@Test
-	public void testLexerException() throws Exception {
-		final String result = Helpers.fullParsing("exceptions/LexerStringError.mch");
-		assertTrue(result.contains("LexerStringError.mch"));
-		assertTrue(result.contains("[3,12]"));
+	public void testLexerException() {
+		final BCompoundException e = Assert.assertThrows(BCompoundException.class, () -> Helpers.fullParsing("exceptions/LexerStringError.mch"));
+		Helpers.assertParseErrorLocation(e, 3, 12, 3, 12);
+		Assert.assertTrue(e.getFirstException().getLocations().get(0).getFilename().contains("LexerStringError.mch"));
 	}
 
 

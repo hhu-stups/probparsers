@@ -1,13 +1,16 @@
 package de.be4.classicalb.core.parser.languageextension;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SyntaxExtensionTest {
 
@@ -25,7 +28,7 @@ public class SyntaxExtensionTest {
 	}
 
 	@Test
-	public void testFile() throws IOException, BException {
+	public void testFile() throws IOException, BCompoundException {
 		String file = "strings/MultiLineString.mch";
 		String result = Helpers.fullParsing(file);
 		assertTrue(result.contains("'\\n\\'\\na\\n\\'\\'\\'\\n'"));
