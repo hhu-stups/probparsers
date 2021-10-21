@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
@@ -100,19 +101,14 @@ public class Helpers {
 	}
 
 	public static void parseFile(final String filename) throws IOException, BCompoundException, URISyntaxException {
-		final int dot = filename.lastIndexOf('.');
-		if (dot >= 0) {
-			final File machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
-			File probFile = File.createTempFile(filename.substring(0, dot), ".prob");
+		final File machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
 
-			BParser parser = new BParser(filename);
-			Start tree = parser.parseFile(machineFile, false);
+		BParser parser = new BParser(filename);
+		Start tree = parser.parseFile(machineFile, false);
 
-			PrintStream output = new PrintStream(probFile);
-			BParser.printASTasProlog(output, parser, machineFile, tree, new ParsingBehaviour(), parser.getContentProvider());
-			output.close();
-		} else
-			throw new IllegalArgumentException("Filename '" + filename + "' has no extension");
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider());
+		rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
+		rml.printAsProlog(new PrologTermStringOutput());
 	}
 
 	/**
