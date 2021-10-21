@@ -1,13 +1,8 @@
 package util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -65,27 +60,23 @@ public class Helpers {
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		PrintStream printStream;
-		try {
-			printStream = new PrintStream(output, false, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new AssertionError(e);
-		}
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		try {
 			final Start tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose());
 			
 			final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider(), parsingBehaviour);
 			rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
-			rml.printAsProlog(new PrintWriter(printStream));
+			rml.printAsProlog(pout);
 		} catch (final IOException e) {
-			PrologExceptionPrinter.printException(printStream, e);
+			PrologExceptionPrinter.printException(pout, e);
+			pout.fullstop();
+			pout.flush();
 		} catch (final BCompoundException e) {
-			PrologExceptionPrinter.printException(printStream, e, parsingBehaviour.isUseIndention(), false);
+			PrologExceptionPrinter.printException(pout, e, parsingBehaviour.isUseIndention(), false);
+			pout.fullstop();
+			pout.flush();
 		}
-		printStream.flush();
-		printStream.close();
-		return new String(output.toByteArray(), StandardCharsets.UTF_8);
+		return pout.toString();
 	}
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
