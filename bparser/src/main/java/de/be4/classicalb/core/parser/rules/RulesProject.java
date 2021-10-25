@@ -645,7 +645,7 @@ public class RulesProject {
 	public int printPrologOutput(final PrintStream out, final PrintStream err) {
 		if (!this.bExceptionList.isEmpty()) {
 			BCompoundException comp = new BCompoundException(bExceptionList);
-			PrologExceptionPrinter.printException(err, comp, false, false);
+			PrologExceptionPrinter.printException(err, comp);
 			return -2;
 		} else {
 			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);

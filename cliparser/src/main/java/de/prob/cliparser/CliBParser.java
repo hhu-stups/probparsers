@@ -335,7 +335,7 @@ public class CliBParser {
 			print(strOutput.toString());
 		} catch (BCompoundException e) {
 			final IPrologTermOutput pto = new PrologTermOutput(socketWriter, false);
-			PrologExceptionPrinter.printException(pto, e, false, true);
+			PrologExceptionPrinter.printException(pto, e.withLinesOneOff());
 			pto.fullstop();
 			pto.flush();
 		} catch (LexerException e) {

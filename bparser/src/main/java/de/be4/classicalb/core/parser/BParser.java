@@ -573,8 +573,7 @@ public class BParser {
 		} catch (final BCompoundException e) {
 			if (parsingBehaviour.isPrologOutput() ||
 					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e, false, false);
-				// PrologExceptionPrinter.printException(err, e);
+				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
 				err.println("Error parsing input file: " + e.getLocalizedMessage());
