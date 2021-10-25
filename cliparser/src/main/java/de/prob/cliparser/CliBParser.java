@@ -47,7 +47,6 @@ public class CliBParser {
 	private static final String CLI_SWITCH_COMPACT_POSITIONS = "-compactpos";
 	private static final String CLI_SWITCH_PROLOG_LINES = "-lineno";
 	private static final String CLI_SWITCH_OUTPUT = "-out";
-	private static final String CLI_SWITCH_INDENTION = "-indent";
 	private static final String CLI_SWITCH_PREPL = "-prepl";
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
 	// other interesting parameters: System.getProperty : prob.stdlib
@@ -103,7 +102,6 @@ public class CliBParser {
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
-		behaviour.setUseIndention(options.isOptionSet(CLI_SWITCH_INDENTION));
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
 		// flags above treated in bparser in main/java/de/be4/classicalb/core/parser/BParser.java
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag

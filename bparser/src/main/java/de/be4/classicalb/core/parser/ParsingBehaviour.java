@@ -6,7 +6,6 @@ import java.io.PrintStream;
 public class ParsingBehaviour {
 	// Flags are set, e.g., in CliBParser.java
 	private boolean prologOutput = false;       // -prolog flag in CliBParser
-	private boolean useIndention = false;       // -indent flag in CliBParser
 	private boolean addLineNumbers = false;     // -lineno flag in CliBParser
 	private boolean verbose = false; //verbose mode includes debug prints, -v flag in CliBParser
 	private boolean printTime = false;          // -time flag in CliBParser
@@ -24,14 +23,6 @@ public class ParsingBehaviour {
 
 	public void setPrologOutput(boolean prologOutput) {
 		this.prologOutput = prologOutput;
-	}
-
-	public boolean isUseIndention() {
-		return useIndention;
-	}
-
-	public void setUseIndention(boolean useIndention) {
-		this.useIndention = useIndention;
 	}
 
 	public boolean isAddLineNumbers() {

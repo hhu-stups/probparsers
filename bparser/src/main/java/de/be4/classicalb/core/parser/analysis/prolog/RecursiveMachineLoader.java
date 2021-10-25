@@ -73,7 +73,7 @@ public class RecursiveMachineLoader {
 	}
 
 	public void printAsProlog(final PrintWriter out) {
-		final IPrologTermOutput pout = new PrologTermOutput(out, parsingBehaviour.isUseIndention());
+		final IPrologTermOutput pout = new PrologTermOutput(out, false);
 		printAsProlog(pout);
 	}
 
