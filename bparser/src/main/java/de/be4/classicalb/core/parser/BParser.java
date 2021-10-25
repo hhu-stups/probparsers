@@ -200,29 +200,29 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
-	public Start parseFormula(final String input) throws BCompoundException {
-		final String theFormula = FORMULA_PREFIX + "\n" + input;
+	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
+		final String theFormula = prefix + "\n" + input;
 		return this.parse(theFormula, false, new NoContentProvider());
+	}
+
+	public Start parseFormula(final String input) throws BCompoundException {
+		return this.parseWithKindPrefix(input, FORMULA_PREFIX);
 	}
 
 	public Start parseExpression(final String input) throws BCompoundException {
-		final String theFormula = EXPRESSION_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX);
 	}
 
 	public Start parseSubstitution(final String input) throws BCompoundException {
-		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX);
 	}
 
 	public Start parseTransition(final String input) throws BCompoundException {
-		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX);
 	}
 
 	public Start parsePredicate(final String input) throws BCompoundException {
-		final String theFormula = PREDICATE_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
 	}
 
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
