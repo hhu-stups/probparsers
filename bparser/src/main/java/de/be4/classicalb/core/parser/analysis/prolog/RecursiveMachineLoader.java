@@ -147,7 +147,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
-									   final boolean isMain, File directory, final IDefinitions definitions)
+			final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 
 

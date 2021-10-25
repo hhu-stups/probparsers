@@ -50,28 +50,28 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.columnOffset = columnOffset;
 	}
 
-    private static boolean uselessPositionInfo (final Node node) {
-        // return true for those nodes which do not require a position info
-        if (node instanceof AIfElsifSubstitution) { // if_elsif infos not used in ProB
-           return true;
-        } else if (node instanceof ASelectWhenSubstitution) { // select_when infos not used in ProB
-           return true;
-        }
-        return false;
-    }
-    
+	private static boolean uselessPositionInfo (final Node node) {
+		// return true for those nodes which do not require a position info
+		if (node instanceof AIfElsifSubstitution) { // if_elsif infos not used in ProB
+			return true;
+		} else if (node instanceof ASelectWhenSubstitution) { // select_when infos not used in ProB
+			return true;
+		}
+		return false;
+	}
+
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
 		if (id == null) {
 			pout.printAtom("none");
 		} else if (uselessPositionInfo(node)) {
-		   pout.printNumber(id);
+			pout.printNumber(id);
 		} else {
 			if (printSourcePositions) { // print Prolog 
-			   int fileNr = nodeIds.lookupFileNumber(node);
-			   int startLine = getStartLine(node);
-			   int endLine = getEndLine(node);
-			   if (! compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
+				int fileNr = nodeIds.lookupFileNumber(node);
+				int startLine = getStartLine(node);
+				int endLine = getEndLine(node);
+				if (! compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 					pout.openTerm("pos", true);
 					pout.printNumber(id);
 					pout.printNumber(fileNr);
@@ -79,7 +79,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 					pout.printNumber(getStartColumn(node));
 					pout.printNumber(endLine);
 				} else { // new terms with no UniqueID and with less infos if possible
-				    if (fileNr==1 && startLine==endLine){
+					if (fileNr==1 && startLine==endLine){
 						pout.openTerm("p3", true);
 						pout.printNumber(startLine);
 						pout.printNumber(getStartColumn(node));
@@ -89,7 +89,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 						pout.printNumber(fileNr);
 						pout.printNumber(startLine);
 						pout.printNumber(getStartColumn(node));
-				    } else {
+					} else {
 						pout.openTerm("p5", true);
 						pout.printNumber(fileNr);
 						pout.printNumber(startLine);
