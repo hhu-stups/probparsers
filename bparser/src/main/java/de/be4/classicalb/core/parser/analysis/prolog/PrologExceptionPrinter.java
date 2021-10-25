@@ -85,17 +85,7 @@ public final class PrologExceptionPrinter {
 			pto.closeTerm();
 		}
 		pto.closeList();
-		printMsg(pto, e, useIndentation);
+		pto.printAtom(e.getMessage());
 		pto.closeTerm();
-	}
-
-	private static void printMsg(final IPrologTermOutput pto, final Throwable cause, final boolean useIndentation) {
-		String message = cause.getMessage();
-		if (useIndentation) {
-			pto.printAtom(message);
-		} else {
-			pto.printAtom(message.replace("\n", " "));
-
-		}
 	}
 }
