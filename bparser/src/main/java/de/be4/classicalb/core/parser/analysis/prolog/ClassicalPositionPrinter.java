@@ -62,11 +62,13 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
-		if (id == null) {
-			pout.printAtom("none");
-		} else if (!printSourcePositions || uselessPositionInfo(node)) {
+		if (!printSourcePositions || uselessPositionInfo(node)) {
 			// only print the id
-			pout.printNumber(id);
+			if (id == null) {
+				pout.printAtom("none");
+			} else {
+				pout.printNumber(id);
+			}
 		} else {
 			// print full source positions
 			int fileNr = nodeIds.lookupFileNumber(node);
@@ -74,7 +76,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 			int endLine = getEndLine(node);
 			if (!compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 				pout.openTerm("pos", true);
-				pout.printNumber(id);
+				pout.printNumber(id == null ? -1 : id);
 				pout.printNumber(fileNr);
 				pout.printNumber(startLine);
 				pout.printNumber(getStartColumn(node));
