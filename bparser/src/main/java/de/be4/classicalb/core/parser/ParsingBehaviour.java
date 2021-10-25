@@ -1,19 +1,14 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.File;
-import java.io.PrintStream;
-
 public class ParsingBehaviour {
 	// Flags are set, e.g., in CliBParser.java
 	private boolean prologOutput = false;       // -prolog flag in CliBParser
 	private boolean addLineNumbers = false;     // -lineno flag in CliBParser
 	private boolean verbose = false; //verbose mode includes debug prints, -v flag in CliBParser
 	private boolean printTime = false;          // -time flag in CliBParser
-	private PrintStream out = System.out;
 	private boolean prettyPrintB = false;           // -pp flag in CliBParser
 	private boolean fastPrologOutput = false;   // -fastprolog flag in CliBParser
 	private boolean compactPositions = false;     // false means use old style pos/5 positions
-	private File outputFile;
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
 	
 
@@ -49,14 +44,6 @@ public class ParsingBehaviour {
 		this.printTime = printTime;
 	}
 
-	public PrintStream getOut() {
-		return out;
-	}
-
-	public void setOut(PrintStream out) {
-		this.out = out;
-	}
-
 	public boolean isPrettyPrintB() {
 		return prettyPrintB;
 	}
@@ -78,14 +65,6 @@ public class ParsingBehaviour {
 
 	public void setCompactPrologPositions(boolean compactPositions) {
 		this.compactPositions = compactPositions;
-	}
-
-	public File getOutputFile() {
-		return outputFile;
-	}
-
-	public void setOutputFile(File outputFile) {
-		this.outputFile = outputFile;
 	}
 
 	public boolean isMachineNameMustMatchFileName() {

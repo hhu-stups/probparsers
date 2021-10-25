@@ -76,11 +76,9 @@ public class CliBParser {
 
 		final ParsingBehaviour behaviour = new ParsingBehaviour();
 
-		final File f;
 		PrintStream out;
 		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
-			f = new File(filename);
 
 			try {
 				out = new PrintStream(filename);
@@ -95,10 +93,7 @@ public class CliBParser {
 			}
 		} else {
 			out = System.out;
-			f = null;
 		}
-		behaviour.setOut(out);
-		behaviour.setOutputFile(f);
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
