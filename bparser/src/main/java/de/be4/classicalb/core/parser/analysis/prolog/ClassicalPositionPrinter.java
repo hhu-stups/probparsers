@@ -72,6 +72,15 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		} else {
 			// print full source positions
 			int fileNr = nodeIds.lookupFileNumber(node);
+			if (id == null && fileNr == -1) {
+				// Workaround for errors about overridden main machine name when loading rules projects.
+				// The translated AST has no file numbers associated with it,
+				// so probcli incorrectly thinks that it comes from a non-main file.
+				// See e. g. probcli test 1831 or any of the rules tests in ProB 2.
+				// TODO Change rules machine translation to associate the generated AST with the correct file, or adjust the check in probcli?
+				pout.printAtom("none");
+				return;
+			}
 			int startLine = getStartLine(node);
 			int endLine = getEndLine(node);
 			if (!compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
