@@ -202,7 +202,11 @@ public class BParser {
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
 		final String theFormula = prefix + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		try {
+			return this.parse(theFormula, false, new NoContentProvider());
+		} catch (BCompoundException e) {
+			throw e.withLinesOneOff();
+		}
 	}
 
 	public Start parseFormula(final String input) throws BCompoundException {
