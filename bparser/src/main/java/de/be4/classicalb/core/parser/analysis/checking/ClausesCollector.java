@@ -11,16 +11,15 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PMachineClause;
+import de.be4.classicalb.core.parser.node.PMachineHeader;
 
 public class ClausesCollector extends DepthFirstAdapter {
 
 	private final Map<Class<? extends Node>, Set<Node>> availableClauses = new HashMap<>();
 	private boolean scalarParameter = false;
-	boolean collectParams = false;
 	boolean refinement = false;
 
 	public boolean hasScalarParameter() {
@@ -29,6 +28,15 @@ public class ClausesCollector extends DepthFirstAdapter {
 
 	public boolean isRefinement() {
 		return refinement;
+	}
+	
+	private void collectParams(final PMachineHeader machineHeader) {
+		machineHeader.apply(new DepthFirstAdapter() {
+			@Override
+			public void caseAIdentifierExpression(final AIdentifierExpression node) {
+				scalarParameter = scalarParameter || allLowerCase(node.getIdentifier().getLast().getText());
+			}
+		});
 	}
 	
 	private void addMachineClauses(final LinkedList<PMachineClause> machineClauses) {
@@ -48,44 +56,23 @@ public class ClausesCollector extends DepthFirstAdapter {
 	}
 	
 	@Override
-	public void inAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
-		super.inAAbstractMachineParseUnit(node);
+	public void caseAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
+		collectParams(node.getHeader());
 		addMachineClauses(node.getMachineClauses());
 	}
 	
 	@Override
-	public void inARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
-		super.inARefinementMachineParseUnit(node);
+	public void caseARefinementMachineParseUnit(final ARefinementMachineParseUnit node) {
+		collectParams(node.getHeader());
 		addMachineClauses(node.getMachineClauses());
 		refinement = true;
 	}
 	
 	@Override
-	public void inAImplementationMachineParseUnit(
-			AImplementationMachineParseUnit node) {
-		super.inAImplementationMachineParseUnit(node);
+	public void caseAImplementationMachineParseUnit(final AImplementationMachineParseUnit node) {
+		collectParams(node.getHeader());
 		addMachineClauses(node.getMachineClauses());
 		refinement = true;
-	}
-
-	@Override
-	public void inAMachineHeader(AMachineHeader node) {
-		super.inAMachineHeader(node);
-		collectParams = true;
-	}
-
-	@Override
-	public void outAMachineHeader(AMachineHeader node) {
-		super.outAMachineHeader(node);
-		collectParams = false;
-	}
-
-	@Override
-	public void inAIdentifierExpression(AIdentifierExpression node) {
-		super.inAIdentifierExpression(node);
-		scalarParameter = scalarParameter
-				|| (collectParams && allLowerCase(node.getIdentifier()
-						.getLast().getText()));
 	}
 
 	private boolean allLowerCase(String s) {

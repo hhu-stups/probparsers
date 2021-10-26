@@ -9,7 +9,9 @@ import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -29,7 +31,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * @author Fabian
  * 
  */
-public class DefinitionCollector extends DepthFirstAdapter {
+public class DefinitionCollector extends MachineClauseAdapter {
 
 	private final IDefinitions definitions;
 	private final DefinitionTypes defTypes;
@@ -49,26 +51,30 @@ public class DefinitionCollector extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		addDefinition(node, type, defName);
+	public void caseADefinitionsMachineClause(final ADefinitionsMachineClause definitions) {
+		definitions.apply(new DepthFirstAdapter() {
+			@Override
+			public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
+				final String defName = node.getName().getText();
+				final Type type = defTypes.getType(defName);
+				addDefinition(node, type, defName);
+			}
+			
+			@Override
+			public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
+				final String defName = node.getName().getText();
+				final Type type = defTypes.getType(defName);
+				addDefinition(node, type, defName);
+			}
+			
+			@Override
+			public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
+				final String defName = node.getName().getText();
+				final Type type = defTypes.getType(defName);
+				addDefinition(node, type, defName);
+			}
+		});
 	}
-
-	@Override
-	public void inASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		addDefinition(node, type, defName);
-	}
-
-	@Override
-	public void inAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
-		final String defName = node.getName().getText();
-		final Type type = defTypes.getType(defName);
-		addDefinition(node, type, defName);
-	}
-
 
 	private void addDefinition(PDefinition def, Type type, String name) {
 		if (definitions.containsDefinition(name)) {

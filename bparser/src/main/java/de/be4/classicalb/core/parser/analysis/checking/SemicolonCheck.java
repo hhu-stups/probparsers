@@ -5,11 +5,13 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AInvalidOperationsClauseMachineClause;
 import de.be4.classicalb.core.parser.node.AInvalidSubstitution;
+import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.AMissingSemicolonOperation;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
+import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
@@ -19,27 +21,32 @@ public class SemicolonCheck implements SemanticCheck {
 
 	private final List<CheckException> exceptions = new ArrayList<>();
 
-	private final class MissingSemicolonWalker extends DepthFirstAdapter {
-
+	private final class OperationMissingSemicolonWalker extends DepthFirstAdapter {
 		@Override
-		public void inAMissingSemicolonOperation(AMissingSemicolonOperation node) {
+		public void caseAMissingSemicolonOperation(final AMissingSemicolonOperation node) {
 			exceptions.add(new CheckException("Semicolon missing between operations", node.getOperation()));
 		}
 
 		@Override
-		public void inAInvalidOperationsClauseMachineClause(AInvalidOperationsClauseMachineClause node) {
+		public void caseAInvalidSubstitution(final AInvalidSubstitution node) {
+			exceptions.add(new CheckException("Invalid semicolon after last substitution (before END)", node.getSemicolon()));
+		}
+	}
+
+	private final class MissingSemicolonWalker extends MachineClauseAdapter {
+		@Override
+		public void caseAInvalidOperationsClauseMachineClause(final AInvalidOperationsClauseMachineClause node) {
 			exceptions.add(new CheckException("Invalid semicolon after last operation", node.getSemicolon()));
 		}
 
 		@Override
-		public void inAInvalidSubstitution(AInvalidSubstitution node) {
-			exceptions.add(
-					new CheckException("Invalid semicolon after last substitution (before END)", node.getSemicolon()));
+		public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
+			node.apply(new OperationMissingSemicolonWalker());
 		}
 
 		@Override
-		public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-			// skip properties clause
+		public void caseALocalOperationsMachineClause(final ALocalOperationsMachineClause node) {
+			node.apply(new OperationMissingSemicolonWalker());
 		}
 	}
 

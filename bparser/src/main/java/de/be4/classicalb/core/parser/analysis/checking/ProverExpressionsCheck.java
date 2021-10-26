@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.ParseOptions;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AProverComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AFalsityPredicate;
 import de.be4.classicalb.core.parser.node.ASubstitutionPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -17,7 +16,7 @@ import de.be4.classicalb.core.parser.node.Start;
  * 
  * @author plagge
  */
-public class ProverExpressionsCheck extends DepthFirstAdapter implements SemanticCheck {
+public class ProverExpressionsCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private ParseOptions options;
 	private final List<CheckException> exceptions = new ArrayList<>();

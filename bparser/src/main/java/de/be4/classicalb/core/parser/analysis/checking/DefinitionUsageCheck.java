@@ -1,13 +1,11 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParseOptions;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
@@ -16,7 +14,7 @@ import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class DefinitionUsageCheck extends DepthFirstAdapter implements SemanticCheck {
+public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final IDefinitions definitions;
 	private final List<CheckException> exceptions = new ArrayList<>();

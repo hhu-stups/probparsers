@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
@@ -18,7 +18,7 @@ import java.math.BigInteger;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
-public class SyntaxExtensionTranslator extends DepthFirstAdapter {
+public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
 		// IF P THE P2 ELSE P3 END
