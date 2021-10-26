@@ -354,10 +354,10 @@ public class BParser {
 			throws BCompoundException {
 		final Reader reader = new StringReader(input);
 		try {
-			// PreParsing
-			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
-
 			/*
+			 * Pre-parsing: find and parse any referenced definition files (.def)
+			 * and determine the types of all definitions.
+			 * 
 			 * The definition types are used in the lexer in order to replace an
 			 * identifier token by a definition call token. This is required if
 			 * the definition is a predicate because an identifier can not be
@@ -365,9 +365,9 @@ public class BParser {
 			 * would yield to a parse error. The lexer will replace the
 			 * identifier token "def" by a TDefLiteralPredicate which will be
 			 * excepted by the parser
-			 *
 			 */
-			defTypes.addAll(definitions.getTypes());
+			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
+
 			/*
 			 * Main parser
 			 */
