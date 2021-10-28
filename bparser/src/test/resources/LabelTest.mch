@@ -1,5 +1,5 @@
 
-MACHINE           Bus
+MACHINE           LabelTest
 
 VARIABLES         tickets, passengers
 

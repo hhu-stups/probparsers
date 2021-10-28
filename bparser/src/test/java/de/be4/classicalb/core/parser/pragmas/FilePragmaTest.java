@@ -1,36 +1,24 @@
 package de.be4.classicalb.core.parser.pragmas;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Test;
 
 import util.Helpers;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class FilePragmaTest {
 
 	@Test
-	public void testFilePragma() throws IOException, BCompoundException, URISyntaxException {
+	public void testFilePragma() throws IOException, BCompoundException {
 		String PATH = "pragmas/filePragma/";
 		String file = PATH + "Main1.mch";
-		File f = new File(this.getClass().getClassLoader().getResource(file).toURI());
-		BParser bparser = new BParser();
-		Start ast = bparser.parseFile(f, false);
-		assertNotNull(ast);
-		RecursiveMachineLoader rml = new RecursiveMachineLoader(f.getParent(), bparser.getContentProvider(),
-				new ParsingBehaviour());
-		rml.loadAllMachines(f, ast, bparser.getDefinitions());
+		Helpers.parseFile(file);
 	}
 
 	@Test
@@ -41,15 +29,10 @@ public class FilePragmaTest {
 	}
 
 	@Test(expected = BCompoundException.class)
-	public void testFilePragma2() throws IOException, BCompoundException, URISyntaxException {
+	public void testFilePragma2() throws IOException, BCompoundException {
 		String PATH = "pragmas/filePragma/";
 		String file = PATH + "Main2.mch";
-		File f = new File(this.getClass().getClassLoader().getResource(file).toURI());
-		BParser bparser = new BParser();
-		Start ast = bparser.parseFile(f, false);
-		assertNotNull(ast);
-		RecursiveMachineLoader rml = new RecursiveMachineLoader(PATH, bparser.getContentProvider());
-		rml.loadAllMachines(f, ast, bparser.getDefinitions());
+		Helpers.parseFile(file);
 	}
 
 	@Test

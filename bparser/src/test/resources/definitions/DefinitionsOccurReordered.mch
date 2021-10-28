@@ -1,4 +1,4 @@
-MACHINE DefinitionsOccurInLinearOrder
+MACHINE DefinitionsOccurReordered
 DEFINITIONS
   DPRED == (1=1);
   DPRED2 == not(DPRED);

@@ -1,20 +1,22 @@
 package de.be4.classicalb.core.parser.predvars;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
-
-import org.junit.Test;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.Utils;
+
+import org.junit.Test;
+
 import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SatProblem {
 	@Test
@@ -22,39 +24,23 @@ public class SatProblem {
 		final File f1 = new File(this.getClass().getClassLoader().getResource("predvars/sat_predvars").toURI());
 		final File f2 = new File(this.getClass().getClassLoader().getResource("predvars/sat_pred").toURI());
 
-		final Scanner s1 = new Scanner(f1);
-		final Scanner s2 = new Scanner(f2);
+		final String test = "#PREDICATE" + Utils.readFile(f1);
+		final String reference = "#PREDICATE" + Utils.readFile(f2);
 
-		final String test = "#PREDICATE" + s1.useDelimiter("\\Z").next();
-		final String reference = "#PREDICATE" + s2.useDelimiter("\\Z").next();
-
-		s1.close();
-		s2.close();
-
-		final String result1 = getTreeAsString(test);
-		final String result2 = getTreeAsStringOrg(reference);
+		final String result1 = getTreeAsStringEparse(test);
+		final String result2 = Helpers.getTreeAsString(reference);
 
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertEquals(result1, result2);
 	}
 
-	private String getTreeAsString(final String testMachine) throws BCompoundException,
+	private String getTreeAsStringEparse(final String testMachine) throws BCompoundException,
 			LexerException, IOException {
 		final BParser parser = new BParser("testcase");
 		Start ast = parser.eparse(testMachine, new Definitions());
 		final Ast2String ast2String = new Ast2String();
 		ast.apply(ast2String);
-		final String string = ast2String.toString();
-		return string;
-	}
-
-	private String getTreeAsStringOrg(final String testMachine)
-			throws BCompoundException {
-		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
 		final String string = ast2String.toString();
 		return string;
 	}

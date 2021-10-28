@@ -1,39 +1,21 @@
 package de.be4.classicalb.core.parser.languageextension;
 
-import static org.junit.Assert.assertEquals;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.Start;
-import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
 
 public class LetPredicateTest {
-
-	private BParser parser;
-
-	@Before
-	public void setUp() throws Exception {
-		parser = new BParser("testcase");
-	}
-
 	@Test
-	public void testSingleIdentifierLetPredicate() throws Exception {
+	public void testSingleIdentifierLetPredicate() throws BCompoundException {
 		final String testMachine = "#PREDICATE (LET x BE x = 5 IN x < 7 END)";
-		final String result = getTreeAsString(testMachine);
+		final String result = Helpers.getTreeAsString(testMachine);
 
 		assertEquals(
 				"Start(APredicateParseUnit(ALetPredicatePredicate(AIdentifierExpression([x])AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5))ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(7)))))",
 				result);
 	}
-
-	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		final Start startNode = parser.parse(testMachine, false);
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		return ast2String.toString();
-	}
-
 }
