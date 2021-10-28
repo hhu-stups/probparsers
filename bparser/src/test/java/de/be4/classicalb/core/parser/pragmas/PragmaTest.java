@@ -15,7 +15,7 @@ public class PragmaTest {
 	public void testLexer() throws BCompoundException {
 		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
 		final String result = Helpers.getMachineAsPrologTerm(input);
-		assertEquals("machine(abstract_machine(1,machine(2),machine_header(3,foo,[]),[constants(4,[description(5,'konstante nummero uno',identifier(6,c))]),properties(7,equal(8,identifier(9,c),integer(10,5))),variables(11,[description(12,'Hallo du variable',identifier(13,x))]),invariant(14,equal(15,identifier(16,x),integer(17,1))),initialisation(18,assign(19,[identifier(20,x)],[integer(21,1)]))])).\n",result);
+		assertTrue(result.contains("machine(abstract_machine(1,machine(2),machine_header(3,foo,[]),[constants(4,[description(5,'konstante nummero uno',identifier(6,c))]),properties(7,equal(8,identifier(9,c),integer(10,5))),variables(11,[description(12,'Hallo du variable',identifier(13,x))]),invariant(14,equal(15,identifier(16,x),integer(17,1))),initialisation(18,assign(19,[identifier(20,x)],[integer(21,1)]))]))."));
 	}
 
 	@Test
