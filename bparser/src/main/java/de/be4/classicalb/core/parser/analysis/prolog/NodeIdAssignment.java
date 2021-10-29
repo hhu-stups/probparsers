@@ -14,7 +14,7 @@ import de.be4.classicalb.core.parser.node.Node;
  * 
  * @author plagge
  */
-public class NodeIdAssignment extends DepthFirstAdapter {
+public class NodeIdAssignment extends DepthFirstAdapter implements INodeIds {
 	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();
 	private ArrayList<Node> nodes = new ArrayList<>(1000);
 	private int currentIdentifier = 0;
@@ -22,15 +22,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 	private int currentFileNumber = -1;
 	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
 
-	/**
-	 * Assign identifiers to all elements of the syntax tree.
-	 * 
-	 * @param fileNumber
-	 *            the file number which will be assigned to <code>node</code>
-	 *            and its child nodes
-	 * @param node
-	 *            The root node of the machine.
-	 */
+	@Override
 	public void assignIdentifiers(int fileNumber, Node node) {
 		if (fileNumber < 1) {
 			throw new IllegalArgumentException("File number should be >= 1");
@@ -40,13 +32,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		this.currentFileNumber = -1;
 	}
 
-	/**
-	 * Looks up the ID of the given node.
-	 * 
-	 * @param node
-	 *            The node, of which we want to have the ID.
-	 * @return The ID of the node, <code>null</code> if no ID can be found.
-	 */
+	@Override
 	public Integer lookup(Node node) {
 		return nodeToIdentifierMap.get(node);
 	}
@@ -64,6 +50,7 @@ public class NodeIdAssignment extends DepthFirstAdapter {
 		return result;
 	}
 
+	@Override
 	public int lookupFileNumber(Node node) {
 		Integer fileNumber = nodeToFileNumberMap.get(node);
 		return fileNumber == null ? -1 : fileNumber;

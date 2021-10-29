@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
@@ -219,7 +219,7 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded) {
+	public void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded) {
 		if (file != null) {
 			if(!machineFilesLoaded.contains(file)) {
 				machineFilesLoaded.add(file);

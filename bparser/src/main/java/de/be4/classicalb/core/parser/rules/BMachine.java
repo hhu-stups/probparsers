@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,7 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -33,6 +31,9 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
+
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.createConjunction;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.createIdentifier;
 
 public class BMachine implements IModel {
 	private final String machineName;
@@ -92,7 +93,7 @@ public class BMachine implements IModel {
 		return new ArrayList<>();
 	}
 
-	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
+	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),

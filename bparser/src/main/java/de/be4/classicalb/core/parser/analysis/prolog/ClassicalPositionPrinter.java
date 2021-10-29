@@ -15,7 +15,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	private IPrologTermOutput pout;
 
 	// to look up the identifier of each node
-	private final NodeIdAssignment nodeIds;
+	private final INodeIds nodeIds;
 
 	private boolean printSourcePositions = false;
 	private boolean compactPositions = false;
@@ -25,11 +25,11 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 
 	private static final int NO_LINE_OR_COLUMN_VALUE = 0;
 
-	public ClassicalPositionPrinter(final NodeIdAssignment nodeIds) {
+	public ClassicalPositionPrinter(final INodeIds nodeIds) {
 		this.nodeIds = nodeIds;
 	}
 
-	public ClassicalPositionPrinter(final NodeIdAssignment nodeIds, int lineOffset, int columnOffset) {
+	public ClassicalPositionPrinter(final INodeIds nodeIds, int lineOffset, int columnOffset) {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;

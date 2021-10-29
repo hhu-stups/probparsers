@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class RecursiveMachineLoader {
 	private static final String[] SUFFICES = new String[]{".ref", ".mch", ".sys", ".imp"};
 	private final File rootDirectory;
-	private final NodeIdAssignment nodeIds = new NodeIdAssignment();
+	private final INodeIds nodeIds = new NodeIdAssignment();
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
 	private final Map<String, File> parsedFiles = new TreeMap<>();
 	private final List<File> machineFilesLoaded = new ArrayList<>();
@@ -316,7 +316,7 @@ public class RecursiveMachineLoader {
 		tree.apply(defInjector);
 	}
 
-	public NodeIdAssignment getNodeIdMapping() {
+	public INodeIds getNodeIdMapping() {
 		return nodeIds;
 	}
 

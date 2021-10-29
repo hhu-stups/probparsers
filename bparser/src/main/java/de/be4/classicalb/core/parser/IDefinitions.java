@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
@@ -46,7 +46,7 @@ public abstract class IDefinitions {
 
 	public abstract void replaceDefinition(final String key, final Type type, final PDefinition node);
 
-	public abstract void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded);
+	public abstract void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded);
 
 	public abstract void setDefinitionType(String identifierString, Type expression);
 

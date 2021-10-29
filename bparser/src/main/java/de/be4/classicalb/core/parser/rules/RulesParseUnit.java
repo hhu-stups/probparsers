@@ -13,7 +13,7 @@ import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
@@ -151,7 +151,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
+	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),
