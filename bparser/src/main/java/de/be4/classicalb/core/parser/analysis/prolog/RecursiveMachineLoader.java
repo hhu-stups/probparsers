@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class RecursiveMachineLoader {
 	private static final String[] SUFFICES = new String[]{".ref", ".mch", ".sys", ".imp"};
 	private final File rootDirectory;
-	private final INodeIds nodeIds = new NodeIdAssignment();
+	private final INodeIds nodeIds;
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
 	private final Map<String, File> parsedFiles = new TreeMap<>();
 	private final List<File> machineFilesLoaded = new ArrayList<>();
@@ -47,6 +47,15 @@ public class RecursiveMachineLoader {
 			throw new BCompoundException(
 					new BException(null, new IOException("Directory does not exist: " + directory)));
 		}
+
+		// In the compact position format, node IDs are not used,
+		// so generate them only if the old non-compact format is requested.
+		if (parsingBehaviour.isCompactPrologPositions()) {
+			this.nodeIds = new NodeFileNumbers();
+		} else {
+			this.nodeIds = new NodeIdAssignment();
+		}
+
 		this.contentProvider = contentProvider;
 	}
 
