@@ -117,14 +117,8 @@ public class ASTPrologTest {
 	@Test
 	public void testMachine() throws BCompoundException {
 		String m = "MACHINE name" + "  OPERATIONS op=skip END";
-		String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo:
-																																					// warum
-																																					// taucht
-																																					// hier
-																																					// die
-																																					// 5
-																																					// zweimal
-																																					// auf?
+		// todo: warum taucht hier die 5 zweimal auf?
+		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(%,op),[],[],skip($))])])";
 		checkProlog(1, m, expected);
 	}
 
@@ -154,7 +148,7 @@ public class ASTPrologTest {
 
 	@Test
 	public void testEmptyString() throws BCompoundException {
-		checkExpression("\"test\"+\"\"", "add(2,string(3,test),string(4,''))");
+		checkExpression("\"test\"+\"\"", "add($,string($,test),string($,''))");
 	}
 
 	@Test
