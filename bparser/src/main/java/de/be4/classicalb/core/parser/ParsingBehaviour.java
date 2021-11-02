@@ -8,7 +8,7 @@ public class ParsingBehaviour {
 	private boolean printTime = false;          // -time flag in CliBParser
 	private boolean prettyPrintB = false;           // -pp flag in CliBParser
 	private boolean fastPrologOutput = false;   // -fastprolog flag in CliBParser
-	private boolean compactPositions = false;     // false means use old style pos/5 positions
+	private boolean compactPositions = true;     // false means use old style pos/5 positions
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
 	
 

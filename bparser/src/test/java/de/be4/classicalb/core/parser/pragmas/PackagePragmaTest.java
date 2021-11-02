@@ -20,7 +20,7 @@ public class PackagePragmaTest {
 		String file = PATH + "M1.mch";
 		String result = Helpers.parseFile(file);
 		assertTrue(result.contains(
-				"machine(abstract_machine(1,machine(2),machine_header(3,'M1',[]),[sees(4,[identifier(5,'M2')])]))."));
+				"machine(abstract_machine(none,machine(none),machine_header(none,'M1',[]),[sees(none,[identifier(none,'M2')])]))."));
 
 	}
 
@@ -30,7 +30,7 @@ public class PackagePragmaTest {
 		String file = PATH + "M11.mch";
 		String result = Helpers.parseFile(file);
 		assertTrue(result.contains(
-				"machine(abstract_machine(1,machine(2),machine_header(3,'M11',[]),[sees(4,[identifier(5,'M2')])]))."));
+				"machine(abstract_machine(none,machine(none),machine_header(none,'M11',[]),[sees(none,[identifier(none,'M2')])]))."));
 
 	}
 

@@ -33,9 +33,7 @@ public class RulesMachineFilesTest {
 	public void testMachineIncludingDefsFile() throws BCompoundException {
 		String output = RulesUtil.getFileAsPrologTerm("project/project_with_def_file/Main.rmch", true);
 		assertTrue(output.contains("Defs.def"));
-		assertTrue(output.contains("expression_definition(pos(104,3,2,3,2,16),'FooValue'"));
-		//assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'")); // new position format
-        // requires parsingBehaviour.setCompactPrologPositions(); to be called
+		assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'"));
 	}
 
 	@Test
