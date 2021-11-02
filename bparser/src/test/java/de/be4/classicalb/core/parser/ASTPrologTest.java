@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -54,10 +56,8 @@ public class ASTPrologTest {
 		remove_restrictions = false;
 	}
 
-	private String printAST(final Node node) {
+	private String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
-		NodeIdAssignment nodeids = new NodeIdAssignment();
-		node.apply(nodeids);
 		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
@@ -67,7 +67,10 @@ public class ASTPrologTest {
 	}
 
 	private void checkAST(final int counter, final String expected, final Node ast) {
-		assertEquals(insertNumbers(counter, expected), printAST(ast));
+		final NodeIdAssignment nodeids = new NodeIdAssignment();
+		ast.apply(nodeids);
+		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
+		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
 	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
@@ -112,6 +115,10 @@ public class ASTPrologTest {
 			}
 		}
 		return buf.toString();
+	}
+
+	private static String insertNonePositions(final String string) {
+		return string.replaceAll("[$%]", "none");
 	}
 
 	@Test
