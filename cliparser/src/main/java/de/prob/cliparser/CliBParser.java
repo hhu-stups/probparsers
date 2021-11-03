@@ -20,6 +20,8 @@ import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -303,10 +305,18 @@ public class CliBParser {
 
 			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
-			NodeIdAssignment na = new NodeIdAssignment();
-			start.apply(na);
+			// In the compact position format, node IDs are not used,
+			// so generate them only if the old non-compact format is requested.
+			final INodeIds nodeIds;
+			if (behaviour.isCompactPrologPositions()) {
+				nodeIds = new NodeFileNumbers();
+			} else {
+				final NodeIdAssignment na = new NodeIdAssignment();
+				start.apply(na);
+				nodeIds = na;
+			}
 
-			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds, -1, 0);
 			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
 			                                 behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(strOutput, pprinter);
