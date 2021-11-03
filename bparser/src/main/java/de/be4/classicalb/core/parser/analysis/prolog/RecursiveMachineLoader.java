@@ -63,6 +63,67 @@ public class RecursiveMachineLoader {
 		this(path, contentProvider, new ParsingBehaviour());
 	}
 
+	/**
+	 * Recursively parse any files referenced by the given already parsed main machine.
+	 *
+	 * @param parser the {@link BParser} instance that was used to parse the main machine - used for definitions and file name information
+	 * @param ast the parsed AST of the main machine
+	 * @param parsingBehaviour options controlling the behaviour of {@link RecursiveMachineLoader}
+	 * @param contentProvider controls how files referenced by the main file are read
+	 * @return a new {@link RecursiveMachineLoader} that has parsed all files referenced by the main machine
+	 * @throws BCompoundException if parsing fails in any way
+	 */
+	public static RecursiveMachineLoader loadFromAst(final BParser parser, final Start ast, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException {
+		final File mainFile = new File(parser.getFileName());
+		final String parent = mainFile.getParent() == null ? "." : mainFile.getParent();
+		final RecursiveMachineLoader rml = new RecursiveMachineLoader(parent, contentProvider, parsingBehaviour);
+		rml.loadAllMachines(mainFile, ast, parser.getDefinitions());
+		return rml;
+	}
+
+	/**
+	 * Recursively parse the given B machine and any other files that it references.
+	 * 
+	 * @param mainFile the B machine file to parse
+	 * @param parsingBehaviour options controlling the behaviour of {@link RecursiveMachineLoader}
+	 * @param contentProvider controls how files referenced by the main file are read
+	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
+	 * @throws BCompoundException if parsing fails in any way
+	 * @throws IOException if the main machine file cannot be read
+	 */
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException, IOException {
+		final BParser parser = new BParser(mainFile.toString());
+		final Start ast = parser.parseFile(mainFile, parsingBehaviour.isVerbose(), contentProvider);
+		return loadFromAst(parser, ast, parsingBehaviour, contentProvider);
+	}
+
+	/**
+	 * Recursively parse the given B machine and any other files that it references.
+	 * Identical to {@link #loadFile(File, ParsingBehaviour, IDefinitionFileProvider)} with a {@link CachingDefinitionFileProvider}.
+	 *
+	 * @param mainFile the B machine file to parse
+	 * @param parsingBehaviour options controlling the behaviour of {@link RecursiveMachineLoader}
+	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
+	 * @throws BCompoundException if parsing fails in any way
+	 * @throws IOException if the main machine file cannot be read
+	 */
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour) throws BCompoundException, IOException {
+		return loadFile(mainFile, parsingBehaviour, new CachingDefinitionFileProvider());
+	}
+
+	/**
+	 * Recursively parse the given B machine and any other files that it references.
+	 * Identical to {@link #loadFile(File, ParsingBehaviour)} with default {@link ParsingBehaviour} options.
+	 *
+	 * @param mainFile the B machine file to parse
+	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
+	 * @throws BCompoundException if parsing fails in any way
+	 * @throws IOException if the main machine file cannot be read
+	 */
+	public static RecursiveMachineLoader loadFile(final File mainFile) throws BCompoundException, IOException {
+		return loadFile(mainFile, new ParsingBehaviour());
+	}
+
 	public void loadAllMachines(final File startFile, final Start start,
 								final IDefinitions definitions) throws BCompoundException {
 		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);

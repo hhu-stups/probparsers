@@ -535,8 +535,7 @@ public class BParser {
 			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
 			if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
 				final long startParseRecursive = System.currentTimeMillis();
-				final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider, parsingBehaviour);
-				rml.loadAllMachines(bfile, tree, getDefinitions());
+				final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(this, tree, parsingBehaviour, contentProvider);
 				final long endParseRecursive = System.currentTimeMillis();
 
 				if (parsingBehaviour.isPrintTime()) {

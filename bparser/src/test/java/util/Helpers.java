@@ -57,11 +57,8 @@ public class Helpers {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
-		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		final Start tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose());
 
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(machineFile.getParent(), parser.getContentProvider(), parsingBehaviour);
-		rml.loadAllMachines(machineFile, tree, parser.getDefinitions());
+		final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFile(machineFile, parsingBehaviour);
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		rml.printAsProlog(pout);
 		return pout.toString();
