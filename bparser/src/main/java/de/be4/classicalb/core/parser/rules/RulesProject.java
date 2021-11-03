@@ -22,7 +22,7 @@ import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -45,7 +45,7 @@ public class RulesProject {
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
-	protected final INodeIds nodeIdAssignment = new NodeIdAssignment();
+	protected final INodeIds nodeIdAssignment = new NodeFileNumbers();
 	private List<File> filesLoaded = new ArrayList<>(); // rules machine files
 														// and definitions files
 	private HashMap<String, String> constantStringValues = new HashMap<>();
@@ -676,11 +676,8 @@ public class RulesProject {
 		pout.closeTerm();
 		pout.fullstop();
 
-		final INodeIds tempNodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
-				: new NodeIdAssignment();
-
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, tempNodeIdAssignment);
+			iModel.printAsProlog(pout, this.nodeIdAssignment);
 		}
 	}
 
