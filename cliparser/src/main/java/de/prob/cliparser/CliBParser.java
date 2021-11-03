@@ -199,13 +199,7 @@ public class CliBParser {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
 				try {
-					final String fileName = bfile.getName();
-					final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-					if (extension.equals("rmch")) {
-						returnValue = parseRulesProject(bfile, behaviour, out, ps);
-					} else {
-						returnValue = fullParsing(bfile, behaviour, out, ps);
-					}
+					returnValue = doFileParsing(behaviour, out, ps, bfile);
 					context = new MockedDefinitions();
 				} catch (Exception e) {
 					e.printStackTrace();
