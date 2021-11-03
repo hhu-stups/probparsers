@@ -197,7 +197,7 @@ public class CliBParser {
 					final String fileName = bfile.getName();
 					final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 					if (extension.equals("rmch")) {
-						returnValue = RulesProject.parseProject(bfile, behaviour, out, ps);
+						returnValue = parseRulesProject(bfile, behaviour, out, ps);
 					} else {
 						returnValue = fullParsing(bfile, behaviour, out, ps);
 					}
@@ -381,7 +381,7 @@ public class CliBParser {
 			final String fileName = bfile.getName();
 			final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 			if (extension.equals("rmch")) {
-				returnValue = RulesProject.parseProject(bfile, behaviour, out, err);
+				returnValue = parseRulesProject(bfile, behaviour, out, err);
 			} else {
 				returnValue = fullParsing(bfile, behaviour, out, err);
 			}
@@ -492,6 +492,24 @@ public class CliBParser {
 			output.fullstop();
 			FastReadTransformer transformer = new FastReadTransformer(output);
 			out.print(transformer.write());
+		}
+	}
+
+	private static int parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out, final PrintStream err) {
+		RulesProject project = new RulesProject();
+		project.setParsingBehaviour(parsingBehaviour);
+		project.parseProject(mainFile);
+		project.checkAndTranslateProject();
+
+		if (project.hasErrors()) {
+			BCompoundException comp = new BCompoundException(project.getBExceptionList());
+			PrologExceptionPrinter.printException(err, comp);
+			return -2;
+		} else {
+			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
+			project.printProjectAsPrologTerm(pout);
+			pout.flush();
+			return 0;
 		}
 	}
 
