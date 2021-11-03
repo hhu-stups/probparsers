@@ -13,8 +13,10 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.FastReadTransformer;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -24,10 +26,12 @@ import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
@@ -36,6 +40,7 @@ import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.PrologTermStringOutput;
+import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
 public class CliBParser {
@@ -194,8 +199,7 @@ public class CliBParser {
 					if (extension.equals("rmch")) {
 						returnValue = RulesProject.parseProject(bfile, behaviour, out, ps);
 					} else {
-						final BParser parser = new BParser(bfile.getAbsolutePath());
-						returnValue = parser.fullParsing(bfile, behaviour, out, ps);
+						returnValue = fullParsing(bfile, behaviour, out, ps);
 					}
 					context = new MockedDefinitions();
 				} catch (Exception e) {
@@ -379,8 +383,7 @@ public class CliBParser {
 			if (extension.equals("rmch")) {
 				returnValue = RulesProject.parseProject(bfile, behaviour, out, err);
 			} else {
-				final BParser parser = new BParser(bfile.getAbsolutePath());
-				returnValue = parser.fullParsing(bfile, behaviour, out, err);
+				returnValue = fullParsing(bfile, behaviour, out, err);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -391,6 +394,105 @@ public class CliBParser {
 			}
 		}
 		return returnValue;
+	}
+
+	private static int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out, final PrintStream err) {
+		final BParser parser = new BParser(bfile.getAbsolutePath());
+
+		try {
+			final long startParseMain = System.currentTimeMillis();
+			final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
+			final long endParseMain = System.currentTimeMillis();
+
+			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
+				out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
+			}
+
+			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
+				if (parsingBehaviour.isVerbose()) {
+					System.out.println("Pretty printing " + bfile + " in B format:");
+				}
+				PrettyPrinter pp = new PrettyPrinter();
+				tree.apply(pp);
+				System.out.println(pp.getPrettyPrint());
+			}
+
+			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
+			if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
+				final long startParseRecursive = System.currentTimeMillis();
+				final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
+				final long endParseRecursive = System.currentTimeMillis();
+
+				if (parsingBehaviour.isPrintTime()) {
+					out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
+				}
+
+				final long startOutput = System.currentTimeMillis();
+				if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+					printASTasFastProlog(out, rml);
+				} else { // -prolog flag in CliBParser
+					rml.printAsProlog(new PrintWriter(out));
+				}
+				final long endOutput = System.currentTimeMillis();
+
+				if (parsingBehaviour.isPrintTime()) {
+					out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
+				}
+			}
+
+			if (parsingBehaviour.isPrintTime()) {
+				out.println("% Used memory : " + 
+					(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
+				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
+			}
+		} catch (final IOException e) {
+			if (parsingBehaviour.isPrologOutput() ||
+					parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(err, e);
+			} else {
+				err.println();
+				err.println("Error reading input file: " + e.getLocalizedMessage());
+			}
+			return -2;
+		} catch (final BCompoundException e) {
+			if (parsingBehaviour.isPrologOutput() ||
+					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(err, e);
+			} else {
+				err.println();
+				err.println("Error parsing input file: " + e.getLocalizedMessage());
+			}
+			return -3;
+		}
+		return 0;
+	}
+
+	/*
+	write AST as facts in SICStus fastrw format
+	parser_version(VERS).
+	classical_b(NAME,[Files,...]).
+	machine(). ....
+	
+	file can be read in Prolog with
+	:- use_module(library(fastrw)).
+	
+	open(FILE,read,S,[type(binary)]),
+	fast_read(S,ParserVersionTerm),
+	fast_read(S,FilesTerm), ... until end_of_file
+	close(S)
+	*/
+	private static void printASTasFastProlog(final PrintStream out, final RecursiveMachineLoader rml) {
+		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
+		rml.printAsProlog(structuredPrologOutput);
+		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
+
+		for (PrologTerm term : sentences) {
+			StructuredPrologOutput output = new StructuredPrologOutput();
+			output.printTerm(term);
+			output.fullstop();
+			FastReadTransformer transformer = new FastReadTransformer(output);
+			out.print(transformer.write());
+		}
 	}
 
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
