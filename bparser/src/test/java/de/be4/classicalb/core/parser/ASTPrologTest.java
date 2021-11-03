@@ -313,21 +313,7 @@ public class ASTPrologTest {
 
 		AFreetypesMachineClause clause = new AFreetypesMachineClause(Arrays.<PFreetype>asList(freetype));
 
-		final StringWriter swriter = new StringWriter();
-		NodeIdAssignment nodeids = new NodeIdAssignment();
-		clause.apply(nodeids);
-		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
-		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
-		ASTProlog prolog = new ASTProlog(pout, pprinter);
-
-		clause.apply(prolog);
-
-		String code = swriter.toString();
-		assertFalse(code.isEmpty());
-		assertEquals(
-				"freetypes(0,[freetype(1,'T',[constructor(2,multi,pow_subset(3,integer_set(4))),constructor(5,single,integer_set(6))])])",
-				code);
-
+		checkAST(0, "freetypes($,[freetype($,'T',[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}
 
 }
