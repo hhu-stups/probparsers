@@ -59,9 +59,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * 
 	 */
 	public static void printFormula(Start start, final IPrologTermOutput pout) {
-		NodeIdAssignment na = new NodeIdAssignment();
-		start.apply(na);
-		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers(), -1, 0);
 		ASTProlog printer = new ASTProlog(pout, pprinter);
 		start.apply(printer);
 	}
