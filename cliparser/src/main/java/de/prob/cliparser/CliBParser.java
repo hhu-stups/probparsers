@@ -374,9 +374,7 @@ public class CliBParser {
 	}
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err, final File bfile) {
-		final String fileName = bfile.getName();
-		final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-		if (extension.equals("rmch")) {
+		if (bfile.getName().endsWith(".rmch")) {
 			return parseRulesProject(bfile, behaviour, out, err);
 		} else {
 			return fullParsing(bfile, behaviour, out, err);
