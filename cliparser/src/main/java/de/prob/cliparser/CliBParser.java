@@ -126,10 +126,15 @@ public class CliBParser {
 			String filename = options.getRemainingOptions()[0];
 			final File bfile = new File(filename);
 			int returnValue;
-			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
-				returnValue = doFileParsing(behaviour, out, System.err, true, bfile);
-			} else {
-				returnValue = doFileParsing(behaviour, out, System.err, false, bfile);
+			try {
+				returnValue = doFileParsing(behaviour, out, System.err, bfile);
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+				returnValue = -4;
+			} finally {
+				if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
+					out.close();
+				}
 			}
 			System.exit(returnValue);
 		}
@@ -374,26 +379,14 @@ public class CliBParser {
 		socketWriter.flush();
 	}
 
-	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err,
-			final boolean closeStream, final File bfile) {
-		int returnValue;
-		try {
-			final String fileName = bfile.getName();
-			final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-			if (extension.equals("rmch")) {
-				returnValue = parseRulesProject(bfile, behaviour, out, err);
-			} else {
-				returnValue = fullParsing(bfile, behaviour, out, err);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			returnValue = -4;
-		} finally {
-			if (closeStream) {
-				out.close();
-			}
+	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err, final File bfile) {
+		final String fileName = bfile.getName();
+		final String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+		if (extension.equals("rmch")) {
+			return parseRulesProject(bfile, behaviour, out, err);
+		} else {
+			return fullParsing(bfile, behaviour, out, err);
 		}
-		return returnValue;
 	}
 
 	private static int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out, final PrintStream err) {
