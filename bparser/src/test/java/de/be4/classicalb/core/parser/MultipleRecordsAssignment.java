@@ -16,7 +16,7 @@ public class MultipleRecordsAssignment {
 	public void testTipple() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa'bb := 4 ";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(assign(2,[record_field(3,record_field(4,identifier(5,xx),identifier(6,aa)),identifier(7,bb))],[integer(8,4)]))"));
+		assertTrue(result.contains("machine(assign(none,[record_field(none,record_field(none,identifier(none,xx),identifier(none,aa)),identifier(none,bb))],[integer(none,4)]))"));
 	}
 
 
@@ -24,7 +24,7 @@ public class MultipleRecordsAssignment {
 	public void testDouble() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa := 4 ";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(assign(2,[record_field(3,identifier(4,xx),identifier(5,aa))],[integer(6,4)]))"));
+		assertTrue(result.contains("machine(assign(none,[record_field(none,identifier(none,xx),identifier(none,aa))],[integer(none,4)]))"));
 	}
 
 
@@ -32,9 +32,9 @@ public class MultipleRecordsAssignment {
 	public void moreContext() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() +  " out := xx'aa'bb";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(parallel(2,[assign(3,[record_field(4,record_field(5,identifier(6,xx)," +
-				"identifier(7,aa)),identifier(8,bb))],[integer(9,5)]),assign(10,[identifier(11,out)],[" +
-				"record_field(12,record_field(13,identifier(14,xx),identifier(15,aa)),identifier(16,bb))])]))."));
+		assertTrue(result.contains("machine(parallel(none,[assign(none,[record_field(none,record_field(none,identifier(none,xx)," +
+				"identifier(none,aa)),identifier(none,bb))],[integer(none,5)]),assign(none,[identifier(none,out)],[" +
+				"record_field(none,record_field(none,identifier(none,xx),identifier(none,aa)),identifier(none,bb))])]))."));
 
 	}
 

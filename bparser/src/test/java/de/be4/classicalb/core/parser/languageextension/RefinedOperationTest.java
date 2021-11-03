@@ -14,7 +14,7 @@ public class RefinedOperationTest {
 	public void testRefKeyword() throws Exception {
 		final String testMachine = "MACHINE Test OPERATIONS foo ref fooA = skip END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(abstract_machine(1,machine(2),machine_header(3,'Test',[]),[operations(4,[refined_operation(5,identifier(5,foo),[],[],fooA,skip(6))])]))."));
+		assertTrue(result.contains("machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[operations(none,[refined_operation(none,identifier(none,foo),[],[],fooA,skip(none))])]))."));
 	}
 	
 	@Test

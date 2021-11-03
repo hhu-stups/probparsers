@@ -39,42 +39,42 @@ public class StringTest {
 	public void testDoubleBackslash() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\ ''' = ''' \\\\ ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("[properties(4,equal(5,string(6,' \\\\ '),string(7,' \\\\ ')))]"));
+		assertTrue(result.contains("[properties(none,equal(none,string(none,' \\\\ '),string(none,' \\\\ ')))]"));
 	}
 
 	@Test
 	public void testNewline() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\n ''' = ''' \n ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("[properties(4,equal(5,string(6,' \\n '),string(7,' \\n ')))]"));
+		assertTrue(result.contains("[properties(none,equal(none,string(none,' \\n '),string(none,' \\n ')))]"));
 	}
 
 	@Test
 	public void testTab() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\t ''' = ''' \t ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("string(6,' \\11\\ '),string(7,' \\11\\ '))"));
+		assertTrue(result.contains("string(none,' \\11\\ '),string(none,' \\11\\ '))"));
 	}
 
 	@Test
 	public void testCarriageReturn() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\r ''' = ''' \r ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("equal(5,string(6,' \\15\\ '),string(7,' \\15\\ '))"));
+		assertTrue(result.contains("equal(none,string(none,' \\15\\ '),string(none,' \\15\\ '))"));
 	}
 
 	@Test
 	public void testSignleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\' ''' = ''' ' ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("equal(5,string(6,' \\' '),string(7,' \\' '))"));
+		assertTrue(result.contains("equal(none,string(none,' \\' '),string(none,' \\' '))"));
 	}
 
 	@Test
 	public void testDoubleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\\" ''' = ''' \" ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("equal(5,string(6,' \" '),string(7,' \" '))"));
+		assertTrue(result.contains("equal(none,string(none,' \" '),string(none,' \" '))"));
 	}
 
 	@Test

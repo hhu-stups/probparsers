@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.prolog.output.PrologTermStringOutput;
 
@@ -56,7 +56,7 @@ public class RulesUtil {
 		}
 
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		unit.printAsProlog(pout, new NodeIdAssignment());
+		unit.printAsProlog(pout, new NodeFileNumbers());
 		pout.flush();
 		return pout.toString();
 	}
