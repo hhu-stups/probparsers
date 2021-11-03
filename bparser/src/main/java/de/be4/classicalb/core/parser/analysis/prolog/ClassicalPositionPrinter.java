@@ -72,7 +72,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		} else {
 			// print full source positions
 			int fileNr = nodeIds.lookupFileNumber(node);
-			if (id == null && fileNr == -1) {
+			if (id == null && fileNr == -1 && node.getStartPos() == null && node.getEndPos() == null) {
 				// Workaround for errors about overridden main machine name when loading rules projects.
 				// The translated AST has no file numbers associated with it,
 				// so probcli incorrectly thinks that it comes from a non-main file.
