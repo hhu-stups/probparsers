@@ -55,7 +55,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		// Remove the surrounding quotes "..." from the string token content
 		// and process backslash escape sequences.
 		final String text = node.getText();
-		final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text));
+		final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '"'));
 		node.replaceBy(new TStringLiteral(unescapedText, node.getLine(), node.getPos()));
 	}
 	
@@ -64,7 +64,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		final String text = node.getText();
 		// Unquote and unescape backquoted identifiers
 		if (text.startsWith("`") && text.endsWith("`")) {
-			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingBackquotes(text));
+			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
 			node.replaceBy(new TIdentifierLiteral(unescapedText, node.getLine(), node.getPos()));
 		}
 	}
