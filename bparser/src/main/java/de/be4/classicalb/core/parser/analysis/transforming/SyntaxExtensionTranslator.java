@@ -52,13 +52,11 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 
 	@Override
 	public void caseTStringLiteral(TStringLiteral node) {
-	// fix the fact that String content does not contain the two quotes "..." as content
-		String text = node.getText();
-		TStringLiteral tStringLiteral =
-			// for normal string literals we also get the surrounding quotes " as part of the token
-			// these need to be removed and the escaping codes dealt with
-			new TStringLiteral(Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text)), node.getLine(), node.getPos());
-		node.replaceBy(tStringLiteral);
+		// Remove the surrounding quotes "..." from the string token content
+		// and process backslash escape sequences.
+		final String text = node.getText();
+		final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text));
+		node.replaceBy(new TStringLiteral(unescapedText, node.getLine(), node.getPos()));
 	}
 	
 	@Override
