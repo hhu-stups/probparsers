@@ -373,65 +373,16 @@ public class CliBParser {
 	}
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err, final File bfile) {
-		if (bfile.getName().endsWith(".rmch")) {
-			return parseRulesProject(bfile, behaviour, out, err);
-		} else {
-			return fullParsing(bfile, behaviour, out, err);
-		}
-	}
-
-	private static int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out, final PrintStream err) {
-		final BParser parser = new BParser(bfile.getAbsolutePath());
-
 		try {
-			final long startParseMain = System.currentTimeMillis();
-			final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
-			final long endParseMain = System.currentTimeMillis();
-
-			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
+			if (bfile.getName().endsWith(".rmch")) {
+				parseRulesProject(bfile, behaviour, out);
+			} else {
+				fullParsing(bfile, behaviour, out);
 			}
-
-			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
-				if (parsingBehaviour.isVerbose()) {
-					System.out.println("Pretty printing " + bfile + " in B format:");
-				}
-				PrettyPrinter pp = new PrettyPrinter();
-				tree.apply(pp);
-				System.out.println(pp.getPrettyPrint());
-			}
-
-			// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
-			if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
-				final long startParseRecursive = System.currentTimeMillis();
-				final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
-				final long endParseRecursive = System.currentTimeMillis();
-
-				if (parsingBehaviour.isPrintTime()) {
-					out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
-				}
-
-				final long startOutput = System.currentTimeMillis();
-				if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-					printASTasFastProlog(out, rml);
-				} else { // -prolog flag in CliBParser
-					rml.printAsProlog(new PrintWriter(out));
-				}
-				final long endOutput = System.currentTimeMillis();
-
-				if (parsingBehaviour.isPrintTime()) {
-					out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
-				}
-			}
-
-			if (parsingBehaviour.isPrintTime()) {
-				out.println("% Used memory : " + 
-					(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
-				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
-			}
+			return 0;
 		} catch (final IOException e) {
-			if (parsingBehaviour.isPrologOutput() ||
-					parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+			if (behaviour.isPrologOutput() ||
+					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -439,8 +390,8 @@ public class CliBParser {
 			}
 			return -2;
 		} catch (final BCompoundException e) {
-			if (parsingBehaviour.isPrologOutput() ||
-					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
+			if (behaviour.isPrologOutput() ||
+					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println();
@@ -448,7 +399,56 @@ public class CliBParser {
 			}
 			return -3;
 		}
-		return 0;
+	}
+
+	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out) throws IOException, BCompoundException {
+		final BParser parser = new BParser(bfile.getAbsolutePath());
+
+		final long startParseMain = System.currentTimeMillis();
+		final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
+		final long endParseMain = System.currentTimeMillis();
+
+		if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
+			out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
+		}
+
+		if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
+			if (parsingBehaviour.isVerbose()) {
+				System.out.println("Pretty printing " + bfile + " in B format:");
+			}
+			PrettyPrinter pp = new PrettyPrinter();
+			tree.apply(pp);
+			System.out.println(pp.getPrettyPrint());
+		}
+
+		// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
+		if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
+			final long startParseRecursive = System.currentTimeMillis();
+			final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
+			final long endParseRecursive = System.currentTimeMillis();
+
+			if (parsingBehaviour.isPrintTime()) {
+				out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
+			}
+
+			final long startOutput = System.currentTimeMillis();
+			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+				printASTasFastProlog(out, rml);
+			} else { // -prolog flag in CliBParser
+				rml.printAsProlog(new PrintWriter(out));
+			}
+			final long endOutput = System.currentTimeMillis();
+
+			if (parsingBehaviour.isPrintTime()) {
+				out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
+			}
+		}
+
+		if (parsingBehaviour.isPrintTime()) {
+			out.println("% Used memory : " + 
+				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
+			out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
+		}
 	}
 
 	/*
@@ -479,22 +479,19 @@ public class CliBParser {
 		}
 	}
 
-	private static int parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out, final PrintStream err) {
+	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out) throws BCompoundException {
 		RulesProject project = new RulesProject();
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
 		project.checkAndTranslateProject();
 
 		if (project.hasErrors()) {
-			BCompoundException comp = new BCompoundException(project.getBExceptionList());
-			PrologExceptionPrinter.printException(err, comp);
-			return -2;
-		} else {
-			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
-			project.printProjectAsPrologTerm(pout);
-			pout.flush();
-			return 0;
+			throw new BCompoundException(project.getBExceptionList());
 		}
+
+		final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
+		project.printProjectAsPrologTerm(pout);
+		pout.flush();
 	}
 
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
