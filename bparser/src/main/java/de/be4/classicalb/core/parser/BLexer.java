@@ -10,7 +10,6 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.lexer.Lexer.State;
 import de.be4.classicalb.core.parser.node.*;
 
 public class BLexer extends Lexer {
@@ -437,7 +436,7 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void collectComment() throws LexerException, IOException {
+	private void collectComment() throws LexerException {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
 			final String text = token.getText();
