@@ -10,6 +10,7 @@ import de.be4.classicalb.core.parser.node.AMultilineStringExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.THexLiteral;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
@@ -64,8 +65,15 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		node.replaceBy(stringNode);
 	}
 	
-	// Should we do similar things for backquoted identifiers and call removeSurroundingBackquotes
-	// Identifiers can also occur in many other places
+	@Override
+	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
+		final String text = node.getText();
+		// Unquote and unescape backquoted identifiers
+		if (text.startsWith("`") && text.endsWith("`")) {
+			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingBackquotes(text));
+			node.replaceBy(new TIdentifierLiteral(unescapedText, node.getLine(), node.getPos()));
+		}
+	}
 	
 	@Override
 	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
