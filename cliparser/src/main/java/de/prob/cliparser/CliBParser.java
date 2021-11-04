@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -186,18 +185,14 @@ public class CliBParser {
 				final PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
 				final File bfile = new File(filename);
 
-				final StringWriter err = new StringWriter();
-				final PrintWriter pw = new PrintWriter(err);
-				int returnValue = doFileParsing(behaviour, out, pw, bfile);
-				pw.flush();
+				int returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
 				context = new MockedDefinitions();
 				out.close();
 
+				// Notify probcli that the call finished successfully.
+				// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
 				if (returnValue == 0) {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
-				} else {
-					String output = err.toString().replace(System.lineSeparator(), " ").trim();
-					print(output + System.lineSeparator());
 				}
 				break;
 			case formula:
@@ -369,7 +364,6 @@ public class CliBParser {
 					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
 			} else {
-				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -2;
@@ -378,7 +372,6 @@ public class CliBParser {
 					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
 			} else {
-				err.println();
 				err.println("Error parsing input file: " + e.getLocalizedMessage());
 			}
 			return -3;
@@ -387,7 +380,6 @@ public class CliBParser {
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
 			} else {
-				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -4;
