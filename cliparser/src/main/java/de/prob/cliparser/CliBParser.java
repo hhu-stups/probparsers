@@ -28,6 +28,7 @@ import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
@@ -124,16 +125,9 @@ public class CliBParser {
 			}
 			String filename = options.getRemainingOptions()[0];
 			final File bfile = new File(filename);
-			int returnValue;
-			try {
-				returnValue = doFileParsing(behaviour, out, System.err, bfile);
-			} catch (RuntimeException e) {
-				e.printStackTrace();
-				returnValue = -4;
-			} finally {
-				if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
-					out.close();
-				}
+			int returnValue = doFileParsing(behaviour, out, System.err, bfile);
+			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
+				out.close();
 			}
 			System.exit(returnValue);
 		}
@@ -194,20 +188,11 @@ public class CliBParser {
 				out = new PrintStream(outFile, encoding);
 				final File bfile = new File(filename);
 
-				int returnValue;
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
-				try {
-					returnValue = doFileParsing(behaviour, out, ps, bfile);
-					context = new MockedDefinitions();
-				} catch (Exception e) {
-					e.printStackTrace();
-					returnValue = -4;
-				} finally {
-					if (true) {
-						out.close();
-					}
-				}
+				int returnValue = doFileParsing(behaviour, out, ps, bfile);
+				context = new MockedDefinitions();
+				out.close();
 
 				if (returnValue == 0) {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
@@ -398,6 +383,15 @@ public class CliBParser {
 				err.println("Error parsing input file: " + e.getLocalizedMessage());
 			}
 			return -3;
+		} catch (final RuntimeException e) {
+			if (behaviour.isPrologOutput() ||
+				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
+			} else {
+				err.println();
+				err.println("Error reading input file: " + e.getLocalizedMessage());
+			}
+			return -4;
 		}
 	}
 
