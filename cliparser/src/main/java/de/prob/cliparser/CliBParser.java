@@ -41,7 +41,6 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
-import de.prob.prolog.output.PrologTermStringOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -256,23 +255,23 @@ public class CliBParser {
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
 			throws IOException {
 		String theFormula;
-		PrologTermStringOutput strOutput = new PrologTermStringOutput();
+		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 		theFormula = in.readLine();
 
 		try {
 			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
-			strOutput.openTerm("ltl").printTerm(term).closeTerm();
+			pout.openTerm("ltl").printTerm(term).closeTerm();
 		} catch (LtlParseException e) {
-			strOutput.openTerm("syntax_error").printAtom(e.getLocalizedMessage()).closeTerm();
+			pout.openTerm("syntax_error").printAtom(e.getLocalizedMessage()).closeTerm();
 		}
 
-		strOutput.fullstop();
-
-		// A Friendly Reminder: strOutput includes a newline!
-		print(strOutput.toString());
+		pout.fullstop();
+		pout.flush();
 	}
 
 	private static void parseFormulaInternal(String theFormula, IDefinitions context, final ParsingBehaviour behaviour, final boolean extended) {
+		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
+
 		try {
 			BParser parser = new BParser();
 			parser.setDefinitions(context);
@@ -282,8 +281,6 @@ public class CliBParser {
 			} else {
 				start = parser.parse(theFormula, false); // debugOutput=false
 			}
-
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
 
 			// In the compact position format, node IDs are not used,
 			// so generate them only if the old non-compact format is requested.
@@ -299,13 +296,9 @@ public class CliBParser {
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds, -1, 0);
 			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
 			                                 behaviour.isCompactPrologPositions());
-			ASTProlog printer = new ASTProlog(strOutput, pprinter);
+			ASTProlog printer = new ASTProlog(pout, pprinter);
 
 			start.apply(printer);
-			strOutput.fullstop();
-
-			// A Friendly Reminder: strOutput includes a newline!
-			print(strOutput.toString());
 		} catch (NullPointerException e) {
 			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
 			// NullPointerException returns NULL itself, thus triggering another
@@ -313,28 +306,17 @@ public class CliBParser {
 			// second catch statement with a special case for the
 			// NullPointerException instead of catching a general Exception
 			// print("EXCEPTION NullPointerException" + System.lineSeparator());
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
-			strOutput.openTerm("exception").printAtom("NullPointerException").closeTerm();
-			strOutput.fullstop();
-			strOutput.flush();
-			print(strOutput.toString());
+			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
-			final IPrologTermOutput pto = new PrologTermOutput(socketWriter, false);
-			PrologExceptionPrinter.printException(pto, e.withLinesOneOff());
-			pto.fullstop();
-			pto.flush();
+			PrologExceptionPrinter.printException(pout, e.withLinesOneOff());
 		} catch (LexerException e) {
-			PrologTermStringOutput strOutput = new PrologTermStringOutput();
-			strOutput.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
-			strOutput.fullstop();
-			strOutput.flush();
-			print(strOutput.toString());
+			pout.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
 		} catch (IOException e) {
-			final IPrologTermOutput pto = new PrologTermOutput(socketWriter, false);
-			PrologExceptionPrinter.printException(pto, e);
-			pto.fullstop();
-			pto.flush();
+			PrologExceptionPrinter.printException(pout, e);
 		}
+
+		pout.fullstop();
+		pout.flush();
 	}
 
 	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
