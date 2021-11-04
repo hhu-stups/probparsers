@@ -64,6 +64,9 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		node.replaceBy(stringNode);
 	}
 	
+	// Should we do similar things for backquoted identifiers and call removeSurroundingBackquotes
+	// Identifiers can also occur in many other places
+	
 	@Override
 	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
 	// transform hex_integer into integer case (so that Prolog AST does not have to deal with new node):

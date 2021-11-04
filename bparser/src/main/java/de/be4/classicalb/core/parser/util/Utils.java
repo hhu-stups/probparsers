@@ -174,6 +174,14 @@ public final class Utils {
 		return literal.substring(1, literal.length() - 1);
 	}
 	
+	public static String removeSurroundingBackquotes(final String literal) {
+		/// `foo` gets translated to foo
+		if (literal.length() < 2 || literal.charAt(0) != '`' || literal.charAt(literal.length()-1) != '`') {
+			throw new IllegalArgumentException("removeSurroundingBackquotes argument must be a double-backquoted string");
+		}
+		return literal.substring(1, literal.length() - 1);
+	}
+	
 	public static String unescapeStringContents(String contents) {
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < contents.length();) {

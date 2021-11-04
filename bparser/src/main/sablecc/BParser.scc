@@ -6,6 +6,7 @@ Package de.be4.classicalb.core.parser;
 Helpers
   underscore = '_';
   double_quotation = '"';
+  back_quote = '`';
   lf = 10;
   cr = 13;
   comment_start = '/*';
@@ -113,8 +114,15 @@ Helpers
   // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
+
+  all_chars_without_back_quote_newline_slash = [[[all_chars - back_quote] - line_break] - '\'];
+  quoted_identifier_literal = back_quote (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* back_quote; // backquote to generate identifiers with special symbols or which clash with keywords
+
+
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
-  identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
+  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
+  identifier_literal = regular_identifier_literal | quoted_identifier_literal;
+
   //pragma_identifier_literal = (letter | digit | underscore | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
