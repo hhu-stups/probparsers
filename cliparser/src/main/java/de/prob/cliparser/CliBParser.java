@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -58,8 +59,6 @@ public class CliBParser {
 	private static final String CLI_SWITCH_PREPL = "-prepl";
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
 	// other interesting parameters: System.getProperty : prob.stdlib
-
-	private static final String encoding = "UTF-8";
 
 	private static Socket socket;
 	private static PrintWriter socketWriter;
@@ -139,9 +138,9 @@ public class CliBParser {
 		System.out.println(serverSocket.getLocalPort() + ".");
 		socket = serverSocket.accept();
 		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
-		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), encoding)));
+		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)));
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), encoding));
+		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 		String line = "";
 		MockedDefinitions context = new MockedDefinitions();
 		boolean terminate = false;
