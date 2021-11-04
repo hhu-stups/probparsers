@@ -2,17 +2,18 @@ package de.prob.cliparser;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -84,12 +85,12 @@ public class CliBParser {
 
 		final ParsingBehaviour behaviour = new ParsingBehaviour();
 
-		PrintStream out;
+		PrintWriter out;
 		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
 
 			try {
-				out = new PrintStream(filename);
+				out = new PrintWriter(Files.newBufferedWriter(Paths.get(filename)));
 			} catch (final FileNotFoundException e) {
 				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
 					PrologExceptionPrinter.printException(System.err, e);
@@ -100,7 +101,7 @@ public class CliBParser {
 				return; // Unreachable, but needed
 			}
 		} else {
-			out = System.out;
+			out = new PrintWriter(System.out);
 		}
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
@@ -125,7 +126,7 @@ public class CliBParser {
 			}
 			String filename = options.getRemainingOptions()[0];
 			final File bfile = new File(filename);
-			int returnValue = doFileParsing(behaviour, out, System.err, bfile);
+			int returnValue = doFileParsing(behaviour, out, new PrintWriter(System.err), bfile);
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 				out.close();
 			}
@@ -134,9 +135,6 @@ public class CliBParser {
 	}
 
 	private static void runPRepl(final ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
-
-		PrintStream out;
-
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
@@ -185,19 +183,20 @@ public class CliBParser {
 			case machine:
 				String filename = in.readLine();
 				String outFile = in.readLine();
-				out = new PrintStream(outFile, encoding);
+				final PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
 				final File bfile = new File(filename);
 
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				PrintStream ps = new PrintStream(baos);
-				int returnValue = doFileParsing(behaviour, out, ps, bfile);
+				final StringWriter err = new StringWriter();
+				final PrintWriter pw = new PrintWriter(err);
+				int returnValue = doFileParsing(behaviour, out, pw, bfile);
+				pw.flush();
 				context = new MockedDefinitions();
 				out.close();
 
 				if (returnValue == 0) {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
 				} else {
-					String output = baos.toString().replace(System.lineSeparator(), " ").trim();
+					String output = err.toString().replace(System.lineSeparator(), " ").trim();
 					print(output + System.lineSeparator());
 				}
 				break;
@@ -357,7 +356,7 @@ public class CliBParser {
 		socketWriter.flush();
 	}
 
-	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintStream out, final PrintStream err, final File bfile) {
+	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintWriter out, final PrintWriter err, final File bfile) {
 		try {
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
@@ -368,7 +367,7 @@ public class CliBParser {
 		} catch (final IOException e) {
 			if (behaviour.isPrologOutput() ||
 					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e);
+				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
 			} else {
 				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
@@ -377,7 +376,7 @@ public class CliBParser {
 		} catch (final BCompoundException e) {
 			if (behaviour.isPrologOutput() ||
 					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e);
+				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
 			} else {
 				err.println();
 				err.println("Error parsing input file: " + e.getLocalizedMessage());
@@ -386,7 +385,7 @@ public class CliBParser {
 		} catch (final RuntimeException e) {
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
+				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
 			} else {
 				err.println();
 				err.println("Error reading input file: " + e.getLocalizedMessage());
@@ -395,7 +394,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out) throws IOException, BCompoundException {
+	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintWriter out) throws IOException, BCompoundException {
 		final BParser parser = new BParser(bfile.getAbsolutePath());
 
 		final long startParseMain = System.currentTimeMillis();
@@ -429,7 +428,7 @@ public class CliBParser {
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 				printASTasFastProlog(out, rml);
 			} else { // -prolog flag in CliBParser
-				rml.printAsProlog(new PrintWriter(out));
+				rml.printAsProlog(out);
 			}
 			final long endOutput = System.currentTimeMillis();
 
@@ -459,7 +458,7 @@ public class CliBParser {
 	fast_read(S,FilesTerm), ... until end_of_file
 	close(S)
 	*/
-	private static void printASTasFastProlog(final PrintStream out, final RecursiveMachineLoader rml) {
+	private static void printASTasFastProlog(final PrintWriter out, final RecursiveMachineLoader rml) {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
@@ -473,7 +472,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out) throws BCompoundException {
+	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintWriter out) throws BCompoundException {
 		RulesProject project = new RulesProject();
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
@@ -483,7 +482,7 @@ public class CliBParser {
 			throw new BCompoundException(project.getBExceptionList());
 		}
 
-		final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
+		final IPrologTermOutput pout = new PrologTermOutput(out, false);
 		project.printProjectAsPrologTerm(pout);
 		pout.flush();
 	}
