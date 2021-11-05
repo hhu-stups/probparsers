@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -30,6 +31,13 @@ public final class PrologExceptionPrinter {
 		pto.flush();
 	}
 
+	public static void printException(final PrintWriter out, final IOException e) {
+		IPrologTermOutput pto = new PrologTermOutput(out, false);
+		printException(pto, e);
+		pto.fullstop();
+		pto.flush();
+	}
+
 	public static void printException(final IPrologTermOutput pto, final IOException e) {
 		pto.openTerm("io_exception");
 		pto.printAtom(e.getMessage());
@@ -37,6 +45,13 @@ public final class PrologExceptionPrinter {
 	}
 
 	public static void printException(final OutputStream out, final BCompoundException e) {
+		IPrologTermOutput pto = new PrologTermOutput(out, false);
+		printException(pto, e);
+		pto.fullstop();
+		pto.flush();
+	}
+
+	public static void printException(final PrintWriter out, final BCompoundException e) {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		printException(pto, e);
 		pto.fullstop();

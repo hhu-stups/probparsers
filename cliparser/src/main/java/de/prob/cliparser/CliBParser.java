@@ -343,7 +343,7 @@ public class CliBParser {
 		} catch (final IOException e) {
 			if (behaviour.isPrologOutput() ||
 					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
+				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
@@ -351,7 +351,7 @@ public class CliBParser {
 		} catch (final BCompoundException e) {
 			if (behaviour.isPrologOutput() ||
 					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), e);
+				PrologExceptionPrinter.printException(err, e);
 			} else {
 				err.println("Error parsing input file: " + e.getLocalizedMessage());
 			}
@@ -359,7 +359,7 @@ public class CliBParser {
 		} catch (final RuntimeException e) {
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(new PrologTermOutput(err, false), new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
 			} else {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
