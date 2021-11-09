@@ -1,21 +1,14 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.Start;
-import util.Ast2String;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+
 public class OpPatternTest {
-	BParser parser;
-
-	@Before
-	public void setUp() throws Exception {
-		parser = new BParser();
-	}
-
 	@Test
 	public void testNoArgs() throws BCompoundException {
 		checkParser("no arguments", "operation1", "operation1");
@@ -43,11 +36,7 @@ public class OpPatternTest {
 
 	private void checkParser(final String description, final String oppattern,
 			final String expected) throws BCompoundException {
-		final Start ast = parser.parse(BParser.OPERATION_PATTERN_PREFIX
-				+ oppattern, false);
-		final Ast2String ast2String = new Ast2String();
-		ast.apply(ast2String);
-		final String parsed = ast2String.toString();
+		final String parsed = Helpers.getTreeAsString(BParser.OPERATION_PATTERN_PREFIX + oppattern);
 		assertEquals(description, "Start(AOppatternParseUnit(" + expected
 				+ "))", parsed);
 	}

@@ -66,8 +66,6 @@ public class AnswerTest {
 		final String testString = "yes('.'(=('X','.'(op(initialise_machine([]),0,[],root),[])),[]))";
 		final Start rootNode = ProBResultParser.parse(testString);
 
-		/* Review: Using System.out.println is ok, this is a test only */
-		System.out.println(testString); // NOPMD by fabian on 8/13/07 12:48 PM
 		// new RootNode(new SableAST(rootNode),
 		// new HashMap<SetElementItem, String>());
 
@@ -80,8 +78,6 @@ public class AnswerTest {
 
 		final Start rootNode = ProBResultParser.parse(testString);
 
-		/* Review: Using System.out.println is ok, this is a test only */
-		System.out.println(testString); // NOPMD by fabian on 8/13/07 12:48 PM
 		// new RootNode(new SableAST(rootNode),
 		// new HashMap<SetElementItem, String>());
 
@@ -96,8 +92,6 @@ public class AnswerTest {
 		final String testString = "yes('.'(=('X','.'(op(add(fd(3,'Name'),fd(1,'Code')),11,[],0),'.'(op(add(fd(3,'Name'),fd(2,'Code')),12,[],0),'.'(op(lookup(fd(1,'Name')),7,'.'(fd(1,'Code'),[]),0),'.'(op(lookup(fd(2,'Name')),7,'.'(fd(1,'Code'),[]),0),'.'(op(update(fd(1,'Name'),fd(1,'Code')),7,[],0),'.'(op(update(fd(1,'Name'),fd(2,'Code')),13,[],0),'.'(op(update(fd(2,'Name'),fd(1,'Code')),7,[],0),'.'(op(update(fd(2,'Name'),fd(2,'Code')),8,[],0),[]))))))))),[]))";
 		final Start rootNode = ProBResultParser.parse(testString);
 
-		/* Review: Using System.out.println is ok, this is a test only */
-		System.out.println(testString); // NOPMD by fabian on 8/13/07 12:48 PM
 		// new RootNode(new SableAST(rootNode),
 		// new HashMap<SetElementItem, String>());
 
@@ -112,8 +106,6 @@ public class AnswerTest {
 		final Start rootNode = ProBResultParser.parse(testString);
 		// ProBResultParser.setUseVerboseOutput(false);
 
-		/* Review: Using System.out.println is ok, this is a test only */
-		System.out.println(testString); // NOPMD by fabian on 8/13/07 12:48 PM
 		// new RootNode(new SableAST(rootNode),
 		// new HashMap<SetElementItem, String>());
 

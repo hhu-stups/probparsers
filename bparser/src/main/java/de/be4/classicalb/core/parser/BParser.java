@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -25,8 +22,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.analysis.transforming.DescriptionCleaningTranslator;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
@@ -45,12 +40,7 @@ import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.classicalb.core.parser.util.DebugPrinter;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.parser.visualisation.ASTDisplay;
-import de.be4.classicalb.core.parser.visualisation.ASTPrinter;
-import de.prob.prolog.output.StructuredPrologOutput;
-import de.prob.prolog.term.PrologTerm;
 
 public class BParser {
 
@@ -109,38 +99,6 @@ public class BParser {
 
 	public IDefinitionFileProvider getContentProvider() {
 		return contentProvider;
-	}
-
-	public static void printASTasProlog(final PrintStream out, final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-					throws BCompoundException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
-				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
-			    // TO DO: precise position info flag
-		rml.printAsProlog(new PrintWriter(out));
-	}
-
-	private static String getASTasFastProlog(final BParser parser, final File bfile, final Start tree,
-			final ParsingBehaviour parsingBehaviour, IDefinitionFileProvider contentProvider)
-					throws BCompoundException {
-		final RecursiveMachineLoader rml = new RecursiveMachineLoader(bfile.getParent(), contentProvider,
-				parsingBehaviour);
-		rml.loadAllMachines(bfile, tree, parser.getDefinitions());
-		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
-		rml.printAsProlog(structuredPrologOutput);
-		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
-		StructuredPrologOutput output = new StructuredPrologOutput();
-
-		output.openList();
-		for (PrologTerm term : sentences) {
-			output.printTerm(term);
-		}
-		output.closeList();
-		output.fullstop();
-
-		FastReadTransformer transformer = new FastReadTransformer(output);
-		return transformer.write();
 	}
 
 	/**
@@ -206,29 +164,33 @@ public class BParser {
 		return parser.parse(input, false, new NoContentProvider());
 	}
 
+	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
+		final String theFormula = prefix + "\n" + input;
+		try {
+			return this.parse(theFormula, false, new NoContentProvider());
+		} catch (BCompoundException e) {
+			throw e.withLinesOneOff();
+		}
+	}
+
 	public Start parseFormula(final String input) throws BCompoundException {
-		final String theFormula = FORMULA_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, FORMULA_PREFIX);
 	}
 
 	public Start parseExpression(final String input) throws BCompoundException {
-		final String theFormula = EXPRESSION_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX);
 	}
 
 	public Start parseSubstitution(final String input) throws BCompoundException {
-		final String theFormula = SUBSTITUTION_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX);
 	}
 
 	public Start parseTransition(final String input) throws BCompoundException {
-		final String theFormula = OPERATION_PATTERN_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX);
 	}
 
 	public Start parsePredicate(final String input) throws BCompoundException {
-		final String theFormula = PREDICATE_PREFIX + "\n" + input;
-		return this.parse(theFormula, false, new NoContentProvider());
+		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
 	}
 
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
@@ -356,10 +318,10 @@ public class BParser {
 			throws BCompoundException {
 		final Reader reader = new StringReader(input);
 		try {
-			// PreParsing
-			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
-
 			/*
+			 * Pre-parsing: find and parse any referenced definition files (.def)
+			 * and determine the types of all definitions.
+			 * 
 			 * The definition types are used in the lexer in order to replace an
 			 * identifier token by a definition call token. This is required if
 			 * the definition is a predicate because an identifier can not be
@@ -367,9 +329,9 @@ public class BParser {
 			 * would yield to a parse error. The lexer will replace the
 			 * identifier token "def" by a TDefLiteralPredicate which will be
 			 * excepted by the parser
-			 *
 			 */
-			defTypes.addAll(definitions.getTypes());
+			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
+
 			/*
 			 * Main parser
 			 */
@@ -513,124 +475,7 @@ public class BParser {
 		this.parseOptions = options;
 	}
 
-	public int fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
-			final PrintStream err) {
-
-		try {
-
-			// Properties hashes = new Properties();
-
-			// if (parsingBehaviour.getOutputFile() != null) {
-			// if (hashesStillValid(parsingBehaviour.getOutputFile())){
-			// return 0;
-			// }
-			// }
-
-			final long start = System.currentTimeMillis();
-			final Start tree = parseFile(bfile, parsingBehaviour.isVerbose());
-			final long end = System.currentTimeMillis();
-
-			if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
-				out.println("% Time for parsing: " + (end - start) + " ms");
-			}
-
-			if (parsingBehaviour.isPrintAST()) { // -ast flag in CliBParser
-				ASTPrinter sw = new ASTPrinter(out);
-				tree.apply(sw);
-			}
-			if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
-			    if (parsingBehaviour.isVerbose()) {
-				    System.out.println("Pretty printing " + bfile + " in B format:");
-				}
-				PrettyPrinter pp = new PrettyPrinter();
-				tree.apply(pp);
-				System.out.println(pp.getPrettyPrint());
-			}
-			
-			
-
-			if (parsingBehaviour.isDisplayGraphically()) { // -ui flag in CliBParser
-				tree.apply(new ASTDisplay());
-			}
-
-			final long start2 = System.currentTimeMillis();
-
-
-			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-				// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
-				String fp = getASTasFastProlog(this, bfile, tree, parsingBehaviour, contentProvider);
-				out.println(fp);
-			} else if (parsingBehaviour.isPrologOutput()) { // -prolog flag in CliBParser
-				printASTasProlog(out, this, bfile, tree, parsingBehaviour, contentProvider);
-			}
-
-			final long end2 = System.currentTimeMillis();
-
-			if (parsingBehaviour.isPrintTime()) {
-				out.println("% Time for Prolog output: " + (end2 - start2) + " ms");
-				out.println("% Used memory : " + 
-				           (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
-				out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
-			}
-		} catch (final IOException e) {
-			if (parsingBehaviour.isPrologOutput() ||
-					parsingBehaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e);
-			} else {
-				err.println();
-				err.println("Error reading input file: " + e.getLocalizedMessage());
-			}
-			return -2;
-		} catch (final BCompoundException e) {
-			if (parsingBehaviour.isPrologOutput() ||
-					parsingBehaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e, parsingBehaviour.isUseIndention(), false);
-				// PrologExceptionPrinter.printException(err, e);
-			} else {
-				err.println();
-				err.println("Error parsing input file: " + e.getLocalizedMessage());
-			}
-			return -3;
-		}
-		return 0;
-	}
-
-	@SuppressWarnings("unused")
-	private boolean hashesStillValid(final File outputFile) {
-		// File dir = outputFile.getParentFile();
-		// Properties hashValues = readHashValues(outputFile, dir);
-		// Set<Entry<Object, Object>> entrySet = hashValues.entrySet();
-		// for (Entry<Object, Object> entry : entrySet) {
-		// String file = (String) entry.getKey();
-		// String hash = (String) entry.getValue();
-		// File f = new File(dir + File.separator + file);
-		// try {
-		// if (!(f.exists() || FileDigest.sha(f).equals(hash)))
-		// return false;
-		// } catch (Exception e) {
-		// return false;
-		// }
-		// }
-		return false;
-	}
-
 	public void setDirectory(final File directory) {
 		this.directory = directory;
 	}
-
-	// private Properties readHashValues(final File target, final File dir) {
-	// String name = target.getName();
-	// Properties p = new Properties();
-	// String hashfile = name + ".hashes";
-	// File hf = new File(dir.getAbsoluteFile() + File.separator + hashfile);
-	// if (!hf.exists())
-	// return p;
-	// try {
-	// p.load(new BufferedInputStream(new FileInputStream(hf)));
-	// } catch (Exception e) {
-	// // ignore
-	// }
-	// return p;
-	// }
-
 }

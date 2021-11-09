@@ -1,17 +1,10 @@
 package de.be4.classicalb.core.parser.definitions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
-import util.Helpers;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -24,6 +17,14 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.util.Utils;
+
+import org.junit.Test;
+
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class DefinitionFilesTest implements IFileContentProvider {
 
@@ -107,15 +108,10 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	 * test circles references between def files
 	 */
 	@Test
-	public void testCircleReference() throws Exception {
+	public void testCircleReference() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile3\"\nEND";
 		final BParser parser = new BParser("testcase");
-		try {
-			parser.parse(testMachine, false, this);
-			fail("Expected PreParseException missing");
-		} catch (final BCompoundException e) {
-			assertTrue(e.getCause() instanceof PreParseException);
-		}
+		Helpers.assertThrowsCompound(PreParseException.class, () -> parser.parse(testMachine, false, this));
 	}
 
 	/*
@@ -155,13 +151,9 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	@Test
 	public void testNotExistingFile() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile\"; def1 == xx\nEND";
-		try {
-			new BParser("testcase").parse(testMachine, false,
-					new PlainFileContentProvider());
-			fail("Expected exception was not thrown");
-		} catch (final BCompoundException e) {
-			// EXPECTED
-		}
+		assertThrows(BCompoundException.class, () ->
+			new BParser("testcase").parse(testMachine, false, new PlainFileContentProvider())
+		);
 	}
 
 	@Test
@@ -190,10 +182,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testErrorInDefinitions() throws IOException, BCompoundException {
 		String file = "./definitions/errors/DefinitionErrorPosition.mch";
 		// file contains DEFINITIONS aa == 1 + + END
-		String result = Helpers.fullParsing(file);
-		System.out.println(result);
-		assertTrue(result.startsWith("parse_exception("));
-		assertTrue(result.contains("pos(2,23,"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.parseFile(file));
+		Helpers.assertParseErrorLocation(e, 2, 23, 2, 23);
 		// now contains Invalid combination of symbols: PLUS PLUS is not allowed. '
 	}
 
@@ -201,10 +191,8 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testErrorInIncludedDefinitionFile() throws IOException,
 			BCompoundException {
 		String file = "./definitions/errors/MachineWithErrorInIncludedDefinitionFile.mch";
-		String result = Helpers.fullParsing(file);
-		System.out.println(result);
-		assertTrue(result.startsWith("parse_exception("));
-		assertTrue(result.contains("pos(3,1,"));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.parseFile(file));
+		Helpers.assertParseErrorLocation(e, 3, 1, 3, 1);
 		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 

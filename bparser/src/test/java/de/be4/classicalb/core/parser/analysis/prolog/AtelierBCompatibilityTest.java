@@ -1,28 +1,19 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.File;
-import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
-import java.net.URISyntaxException;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.Start;
+import util.Helpers;
 
 public class AtelierBCompatibilityTest {
 
 	@Test
-	public void testSysExtension() throws IOException, BCompoundException, URISyntaxException {
+	public void testSysExtension() throws IOException, BCompoundException {
 		String PATH = "atelierb/sys_extension/";
 		String file = PATH + "main.sys";
-		File f = new File(this.getClass().getClassLoader().getResource(file).toURI());
-		BParser bparser = new BParser();
-		Start ast = bparser.parseFile(f, false);
-		assertNotNull(ast);
-		RecursiveMachineLoader rml = new RecursiveMachineLoader(f.getParent(),
-				bparser.getContentProvider());
-		rml.loadAllMachines(f, ast, bparser.getDefinitions());
+		Helpers.parseFile(file);
 	}
 }

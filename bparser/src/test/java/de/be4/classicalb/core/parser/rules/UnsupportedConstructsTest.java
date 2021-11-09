@@ -1,33 +1,33 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static org.junit.Assert.*;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
-import static de.be4.classicalb.core.parser.rules.RulesUtil.*;
+
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
 
 public class UnsupportedConstructsTest {
 
 	@Test
-	public void testANYIsNotAllowed() throws Exception {
+	public void testANYIsNotAllowed() {
 		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY ANY x WHERE x : 1..10 THEN skip END END END";
-		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("'The ANY substitution is not allowed in a RULES_MACHINE.'"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("The ANY substitution is not allowed in a RULES_MACHINE.", e.getMessage());
 	}
 
 	@Test
-	public void testBecomesElementOfIsNotAllowed() throws Exception {
+	public void testBecomesElementOfIsNotAllowed() {
 		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY VAR x IN x :: {1,2} END END END";
-		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("'The BecomesElementOf substitution (a,b:(P)) is not allowed in a RULES_MACHINE.'"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("The BecomesElementOf substitution (a,b:(P)) is not allowed in a RULES_MACHINE.", e.getMessage());
 	}
 
 	@Test
-	public void testDeferredSetsAreNotAllowed() throws Exception {
+	public void testDeferredSetsAreNotAllowed() {
 		final String testMachine = "RULES_MACHINE test SETS D END";
-		String result = getRulesProjectAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("'Deferred sets are not allowed in a RULES_MACHINE.'"));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Deferred sets are not allowed in a RULES_MACHINE.", e.getMessage());
 	}
 }

@@ -3,8 +3,6 @@ package de.be4.classicalb.core.parser.rules;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 
 import java.io.File;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +19,8 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -33,7 +31,6 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesProject {
 	private File mainFile;
@@ -44,21 +41,12 @@ public class RulesProject {
 	private final List<BException> bExceptionList = new ArrayList<>();
 	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
-	protected final NodeIdAssignment nodeIdAssignment = new NodeIdAssignment();
+	protected final INodeIds nodeIdAssignment = new NodeFileNumbers();
 	private List<File> filesLoaded = new ArrayList<>(); // rules machine files
 														// and definitions files
 	private HashMap<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
 	private HashMap<String, String> operationReplacementMap = new HashMap<>();
-
-	public static int parseProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintStream out,
-			final PrintStream err) {
-		RulesProject project = new RulesProject();
-		project.setParsingBehaviour(parsingBehaviour);
-		project.parseProject(mainFile);
-		project.checkAndTranslateProject();
-		return project.printPrologOutput(out, err);
-	}
 
 	public RulesProject() {
 		// use the provided setter methods to parameterize the rules project
@@ -642,20 +630,6 @@ public class RulesProject {
 		return !this.bExceptionList.isEmpty();
 	}
 
-	public int printPrologOutput(final PrintStream out, final PrintStream err) {
-		if (!this.bExceptionList.isEmpty()) {
-			BCompoundException comp = new BCompoundException(bExceptionList);
-			PrologExceptionPrinter.printException(err, comp, parsingBehaviour.isUseIndention(), false);
-			return -2;
-		} else {
-			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
-			printProjectAsPrologTerm(pout);
-			pout.flush();
-			return 0;
-		}
-
-	}
-
 	public void printProjectAsPrologTerm(final IPrologTermOutput pout) {
 		// parser version
 		pout.openTerm("parser_version");
@@ -675,11 +649,8 @@ public class RulesProject {
 		pout.closeTerm();
 		pout.fullstop();
 
-		final NodeIdAssignment tempNodeIdAssignment = parsingBehaviour.isAddLineNumbers() ? this.nodeIdAssignment
-				: new NodeIdAssignment();
-
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, tempNodeIdAssignment);
+			iModel.printAsProlog(pout, this.nodeIdAssignment);
 		}
 	}
 

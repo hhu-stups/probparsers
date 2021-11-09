@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class BCompoundException extends Exception {
@@ -28,5 +29,11 @@ public class BCompoundException extends Exception {
 	@Override
 	public synchronized Throwable getCause() {
 		return this.exceptions.get(0).getCause();
+	}
+
+	public BCompoundException withLinesOneOff() {
+		return new BCompoundException(this.getBExceptions().stream()
+			.map(BException::withLinesOneOff)
+			.collect(Collectors.toList()));
 	}
 }

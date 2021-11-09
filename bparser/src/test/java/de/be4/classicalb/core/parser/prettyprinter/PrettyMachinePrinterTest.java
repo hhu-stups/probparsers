@@ -59,7 +59,5 @@ public class PrettyMachinePrinterTest {
 		assertFalse(result1.isEmpty());
 		assertFalse(result2.isEmpty());
 		assertEquals(result1, result2);
-
-		System.out.println(result1);
 	}
 }

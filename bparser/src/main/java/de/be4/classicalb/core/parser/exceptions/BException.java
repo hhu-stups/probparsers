@@ -3,9 +3,11 @@ package de.be4.classicalb.core.parser.exceptions;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
@@ -17,9 +19,14 @@ public class BException extends Exception {
 	private final String filename;
 	private final List<Location> locations = new ArrayList<>();
 
-	public BException(final String filename, final String message, final Throwable cause) {
+	public BException(final String filename, final List<Location> locations, final String message, final Throwable cause) {
 		super(message, cause);
 		this.filename = filename;
+		this.locations.addAll(locations);
+	}
+
+	public BException(final String filename, final String message, final Throwable cause) {
+		this(filename, Collections.emptyList(), message, cause);
 	}
 
 	public BException(String filename, LexerException e) {
@@ -81,6 +88,17 @@ public class BException extends Exception {
 
 	public String getFilename() {
 		return filename;
+	}
+
+	public BException withLinesOneOff() {
+		if (this.getLocations().isEmpty()) {
+			return this;
+		}
+
+		final List<Location> offsetLocations = this.getLocations().stream()
+			.map(Location::withLineOneOff)
+			.collect(Collectors.toList());
+		return new BException(this.getFilename(), offsetLocations, this.getMessage(), this);
 	}
 
 	public static final class Location implements Serializable {
@@ -166,6 +184,10 @@ public class BException extends Exception {
 			}
 
 			return sb.toString();
+		}
+
+		public Location withLineOneOff() {
+			return new Location(this.getFilename(), this.getStartLine() - 1, this.getStartColumn(), this.getEndLine() - 1, this.getEndColumn());
 		}
 	}
 }

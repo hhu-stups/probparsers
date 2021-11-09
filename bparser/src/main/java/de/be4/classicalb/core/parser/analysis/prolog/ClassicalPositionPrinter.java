@@ -15,7 +15,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	private IPrologTermOutput pout;
 
 	// to look up the identifier of each node
-	public final NodeIdAssignment nodeIds;
+	private final INodeIds nodeIds;
 
 	private boolean printSourcePositions = false;
 	private boolean compactPositions = false;
@@ -25,11 +25,11 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 
 	private static final int NO_LINE_OR_COLUMN_VALUE = 0;
 
-	public ClassicalPositionPrinter(final NodeIdAssignment nodeIds) {
+	public ClassicalPositionPrinter(final INodeIds nodeIds) {
 		this.nodeIds = nodeIds;
 	}
 
-	public ClassicalPositionPrinter(final NodeIdAssignment nodeIds, int lineOffset, int columnOffset) {
+	public ClassicalPositionPrinter(final INodeIds nodeIds, int lineOffset, int columnOffset) {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
 		this.columnOffset = columnOffset;
@@ -50,59 +50,67 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.columnOffset = columnOffset;
 	}
 
-    private static boolean uselessPositionInfo (final Node node) {
-        // return true for those nodes which do not require a position info
-        if (node instanceof AIfElsifSubstitution) { // if_elsif infos not used in ProB
-           return true;
-        } else if (node instanceof ASelectWhenSubstitution) { // select_when infos not used in ProB
-           return true;
-        }
-        return false;
-    }
-    
+	private static boolean uselessPositionInfo (final Node node) {
+		// return true for those nodes which do not require a position info
+		if (node instanceof AIfElsifSubstitution) { // if_elsif infos not used in ProB
+			return true;
+		} else if (node instanceof ASelectWhenSubstitution) { // select_when infos not used in ProB
+			return true;
+		}
+		return false;
+	}
+
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
-		if (id == null) {
-			pout.printAtom("none");
-		} else if (uselessPositionInfo(node)) {
-		   pout.printNumber(id);
+		if (!printSourcePositions || uselessPositionInfo(node)) {
+			// only print the id
+			if (id == null) {
+				pout.printAtom("none");
+			} else {
+				pout.printNumber(id);
+			}
 		} else {
-			if (printSourcePositions) { // print Prolog 
-			   int fileNr = nodeIds.lookupFileNumber(node);
-			   int startLine = getStartLine(node);
-			   int endLine = getEndLine(node);
-			   if (! compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
-					pout.openTerm("pos", true);
-					pout.printNumber(id);
+			// print full source positions
+			int fileNr = nodeIds.lookupFileNumber(node);
+			if (id == null && fileNr == -1 && node.getStartPos() == null && node.getEndPos() == null) {
+				// Workaround for errors about overridden main machine name when loading rules projects.
+				// The translated AST has no file numbers associated with it,
+				// so probcli incorrectly thinks that it comes from a non-main file.
+				// See e. g. probcli test 1831 or any of the rules tests in ProB 2.
+				// TODO Change rules machine translation to associate the generated AST with the correct file, or adjust the check in probcli?
+				pout.printAtom("none");
+				return;
+			}
+			int startLine = getStartLine(node);
+			int endLine = getEndLine(node);
+			if (!compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
+				pout.openTerm("pos", true);
+				pout.printNumber(id == null ? -1 : id);
+				pout.printNumber(fileNr);
+				pout.printNumber(startLine);
+				pout.printNumber(getStartColumn(node));
+				pout.printNumber(endLine);
+			} else { // new terms with no UniqueID and with less infos if possible
+				if (fileNr == 1 && startLine == endLine) {
+					pout.openTerm("p3", true);
+					pout.printNumber(startLine);
+					pout.printNumber(getStartColumn(node));
+					// we could also provide one case where fileNr=1 and startLine !== endLine
+				} else if (startLine == endLine) {
+					pout.openTerm("p4", true);
+					pout.printNumber(fileNr);
+					pout.printNumber(startLine);
+					pout.printNumber(getStartColumn(node));
+				} else {
+					pout.openTerm("p5", true);
 					pout.printNumber(fileNr);
 					pout.printNumber(startLine);
 					pout.printNumber(getStartColumn(node));
 					pout.printNumber(endLine);
-				} else { // new terms with no UniqueID and with less infos if possible
-				    if (fileNr==1 && startLine==endLine){
-						pout.openTerm("p3", true);
-						pout.printNumber(startLine);
-						pout.printNumber(getStartColumn(node));
-					// we could also provide one case where fileNr=1 and startLine !== endLine
-					} else if (startLine==endLine) {
-						pout.openTerm("p4", true);
-						pout.printNumber(fileNr);
-						pout.printNumber(startLine);
-						pout.printNumber(getStartColumn(node));
-				    } else {
-						pout.openTerm("p5", true);
-						pout.printNumber(fileNr);
-						pout.printNumber(startLine);
-						pout.printNumber(getStartColumn(node));
-						pout.printNumber(endLine);
-					}
 				}
-				pout.printNumber(getEndColumn(node));
-				pout.closeTerm();
-			} else {
-				// only print the id
-				pout.printNumber(id);
 			}
+			pout.printNumber(getEndColumn(node));
+			pout.closeTerm();
 		}
 	}
 

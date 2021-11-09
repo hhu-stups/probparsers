@@ -179,10 +179,6 @@ public class SourcePositionsTest {
 	}
 
 	private Start getAst(final String testMachine) throws BCompoundException {
-		// System.out.println("Testing \"" + testMachine + "\"");
-		final Start startNode = parser.parse(testMachine, false);
-
-		// startNode.apply(new ASTPrinter());
-		return startNode;
+		return parser.parse(testMachine, false);
 	}
 }

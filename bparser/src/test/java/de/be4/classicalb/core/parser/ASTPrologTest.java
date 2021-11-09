@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -54,21 +56,21 @@ public class ASTPrologTest {
 		remove_restrictions = false;
 	}
 
-	private String printAST(final Node node) {
+	private String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
-		NodeIdAssignment nodeids = new NodeIdAssignment();
-		node.apply(nodeids);
 		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 		node.apply(prolog);
 		swriter.flush();
-		System.out.println(swriter.toString());
 		return swriter.toString();
 	}
 
 	private void checkAST(final int counter, final String expected, final Node ast) {
-		assertEquals(insertNumbers(counter, expected), printAST(ast));
+		final NodeIdAssignment nodeids = new NodeIdAssignment();
+		ast.apply(nodeids);
+		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
+		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
 	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
@@ -115,17 +117,15 @@ public class ASTPrologTest {
 		return buf.toString();
 	}
 
+	private static String insertNonePositions(final String string) {
+		return string.replaceAll("[$%]", "none");
+	}
+
 	@Test
 	public void testMachine() throws BCompoundException {
 		String m = "MACHINE name" + "  OPERATIONS op=skip END";
-		String expected = "abstract_machine(1,machine(2),machine_header(3,name,[]),[operations(4,[operation(5,identifier(5,op),[],[],skip(6))])])";// todo:
-																																					// warum
-																																					// taucht
-																																					// hier
-																																					// die
-																																					// 5
-																																					// zweimal
-																																					// auf?
+		// todo: warum taucht hier die 5 zweimal auf?
+		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(%,op),[],[],skip($))])])";
 		checkProlog(1, m, expected);
 	}
 
@@ -155,7 +155,7 @@ public class ASTPrologTest {
 
 	@Test
 	public void testEmptyString() throws BCompoundException {
-		checkExpression("\"test\"+\"\"", "add(2,string(3,test),string(4,''))");
+		checkExpression("\"test\"+\"\"", "add($,string($,test),string($,''))");
 	}
 
 	@Test
@@ -313,21 +313,7 @@ public class ASTPrologTest {
 
 		AFreetypesMachineClause clause = new AFreetypesMachineClause(Arrays.<PFreetype>asList(freetype));
 
-		final StringWriter swriter = new StringWriter();
-		NodeIdAssignment nodeids = new NodeIdAssignment();
-		clause.apply(nodeids);
-		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
-		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
-		ASTProlog prolog = new ASTProlog(pout, pprinter);
-
-		clause.apply(prolog);
-
-		String code = swriter.toString();
-		assertFalse(code.isEmpty());
-		assertEquals(
-				"freetypes(0,[freetype(1,'T',[constructor(2,multi,pow_subset(3,integer_set(4))),constructor(5,single,integer_set(6))])])",
-				code);
-
+		checkAST(0, "freetypes($,[freetype($,'T',[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}
 
 }

@@ -1,28 +1,28 @@
 package de.be4.classicalb.core.parser.prolog;
 
+import java.io.IOException;
+
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
 import util.Helpers;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class StringTest {
 
 	@Test
-	public void testFile() {
+	public void testFile() throws IOException, BCompoundException {
 		String file = "strings/StringIncludingQuotes.mch";
-		String result = Helpers.fullParsing(file);
-		System.out.println(result);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("'a\"b'"));
 	}
 
 	@Test
-	public void testString() {
+	public void testString() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES \"a\\\"b\" = \"a\" END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("'a\"b'"));
 	}
@@ -30,87 +30,64 @@ public class StringTest {
 	@Test
 	public void testNewlineInSingleLineString() {
 		final String testMachine = "MACHINE Test PROPERTIES k = \" \n \" END";
-		System.out.println(testMachine);
-		try {
-			Helpers.getMachineAsPrologTerm(testMachine);
-			fail("Should raise a parser exception");
-		} catch (RuntimeException e) {
-			BCompoundException cause = (BCompoundException) e.getCause();
-			String message = cause.getFirstException().getMessage();
-			assertTrue(message.contains("Unknown token: \""));
-			System.out.println(message);
-		}
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		String message = e.getFirstException().getMessage();
+		assertTrue(message.contains("Unknown token: \""));
 	}
 
 	@Test
-	public void testDoubleBackslash() {
+	public void testDoubleBackslash() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\ ''' = ''' \\\\ ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("[properties(4,equal(5,string(6,' \\\\ '),string(7,' \\\\ ')))]"));
+		assertTrue(result.contains("[properties(none,equal(none,string(none,' \\\\ '),string(none,' \\\\ ')))]"));
 	}
 
 	@Test
-	public void testNewline() {
+	public void testNewline() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\n ''' = ''' \n ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("[properties(4,equal(5,string(6,' \\n '),string(7,' \\n ')))]"));
+		assertTrue(result.contains("[properties(none,equal(none,string(none,' \\n '),string(none,' \\n ')))]"));
 	}
 
 	@Test
-	public void testTab() {
+	public void testTab() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\t ''' = ''' \t ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("string(6,' \\11\\ '),string(7,' \\11\\ '))"));
+		assertTrue(result.contains("string(none,' \\11\\ '),string(none,' \\11\\ '))"));
 	}
 
 	@Test
-	public void testCarriageReturn() {
+	public void testCarriageReturn() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\r ''' = ''' \r ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("equal(5,string(6,' \\15\\ '),string(7,' \\15\\ '))"));
+		assertTrue(result.contains("equal(none,string(none,' \\15\\ '),string(none,' \\15\\ '))"));
 	}
 
 	@Test
-	public void testSignleQuote() {
+	public void testSignleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\' ''' = ''' ' ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("equal(5,string(6,' \\' '),string(7,' \\' '))"));
+		assertTrue(result.contains("equal(none,string(none,' \\' '),string(none,' \\' '))"));
 	}
 
 	@Test
-	public void testDoubleQuote() {
+	public void testDoubleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\\" ''' = ''' \" ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
-		assertTrue(result.contains("equal(5,string(6,' \" '),string(7,' \" '))"));
+		assertTrue(result.contains("equal(none,string(none,' \" '),string(none,' \" '))"));
 	}
 
 	@Test
-	public void testMultiLineString() {
+	public void testMultiLineString() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a\" ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("' adfa \"a\" '"));
 	}
 
 	@Test
-	public void testMultiLineString2() {
+	public void testMultiLineString2() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a ''' END";
-		System.out.println(testMachine);
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		System.out.println(result);
 		assertTrue(result.contains("' adfa \"a '"));
 	}
 }

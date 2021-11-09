@@ -1,132 +1,64 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 public class RulesUtil {
-
-	public static String getRulesProjectAsPrologTerm(final String content) {
-		RulesProject rulesProject = new RulesProject();
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		rulesProject.setParsingBehaviour(pb);
-		rulesProject.parseRulesMachines(content, new String[] {});
-		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (bExceptionList.isEmpty()) {
-			IModel model = bModels.get(bModels.size() - 2);
-			PrettyPrinter pp = new PrettyPrinter();
-			model.getStart().apply(pp);
-			System.out.println(pp.getPrettyPrint());
+	public static String getParsedProjectAsPrologTerm(final RulesProject project) throws BCompoundException {
+		project.checkAndTranslateProject();
+		if (project.hasErrors()) {
+			throw new BCompoundException(project.getBExceptionList());
 		}
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		rulesProject.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
+		project.printProjectAsPrologTerm(pout);
+		pout.flush();
+		return pout.toString();
 	}
 
-	public static String getRulesMachineAsBMachine(File file) {
+	public static String getRulesProjectAsPrologTerm(final String content) throws BCompoundException {
 		RulesProject rulesProject = new RulesProject();
-		rulesProject.parseProject(file);
-		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (!bExceptionList.isEmpty()) {
-			throw new RuntimeException(bExceptionList.get(0));
-		}
-		IModel model = bModels.get(bModels.size() - 2);
-		PrettyPrinter pp = new PrettyPrinter();
-		model.getStart().apply(pp);
-		return pp.getPrettyPrint();
+		rulesProject.parseRulesMachines(content);
+		return getParsedProjectAsPrologTerm(rulesProject);
 	}
 
-	public static String getRulesMachineAsBMachine(final String content) {
-		RulesProject rulesProject = new RulesProject();
-		rulesProject.parseRulesMachines(content, new String[] {});
-		rulesProject.checkAndTranslateProject();
-		List<IModel> bModels = rulesProject.getBModels();
-		List<BException> bExceptionList = rulesProject.getBExceptionList();
-		if (!bExceptionList.isEmpty()) {
-			throw new RuntimeException(bExceptionList.get(0));
-		}
-		IModel model = bModels.get(bModels.size() - 2);
-		PrettyPrinter pp = new PrettyPrinter();
-		model.getStart().apply(pp);
-		return pp.getPrettyPrint();
-	}
-
-	public static String getFileAsPrologTerm(final String file) {
+	public static String getFileAsPrologTerm(final String file) throws BCompoundException {
 		return getFileAsPrologTerm(file, false);
 	}
 
-	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) {
+	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) throws BCompoundException {
 		File file;
 		try {
-			file = new File(RulesUtil.class.getClassLoader().getResource(filename).toURI());
+			file = new File(RulesUtil.class.getResource("/rules/" + filename).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 		ParsingBehaviour pb = new ParsingBehaviour();
 		pb.setAddLineNumbers(addLineNumbers);
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		RulesProject.parseProject(file, pb, new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final RulesProject project = new RulesProject();
+		project.setParsingBehaviour(pb);
+		project.parseProject(file);
+		return getParsedProjectAsPrologTerm(project);
 	}
 
-	public static String getRulesMachineAsPrologTerm(final String content) {
+	public static String getRulesMachineAsPrologTerm(final String content) throws BCompoundException {
 		RulesParseUnit unit = new RulesParseUnit();
 		unit.setMachineAsString(content);
-		ParsingBehaviour pb = new ParsingBehaviour();
-		pb.setAddLineNumbers(false);
-		unit.setParsingBehaviour(pb);
 		unit.parse();
 		unit.translate();
+		if (unit.hasError()) {
+			throw unit.getCompoundException();
+		}
 
-		OutputStream output = new OutputStream() {
-			private StringBuilder string = new StringBuilder();
-
-			@Override
-			public void write(int b) throws IOException {
-				this.string.append((char) b);
-			}
-
-			public String toString() {
-				return this.string.toString();
-			}
-		};
-		unit.printPrologOutput(new PrintStream(output), new PrintStream(output));
-		return output.toString();
+		final PrologTermStringOutput pout = new PrologTermStringOutput();
+		unit.printAsProlog(pout, new NodeFileNumbers());
+		pout.flush();
+		return pout.toString();
 	}
 
 }

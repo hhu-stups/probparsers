@@ -1,58 +1,33 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Random;
-
-import org.junit.Test;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
-import de.be4.classicalb.core.parser.grammars.RulesGrammar;
-import de.be4.classicalb.core.parser.node.Start;
-import util.Ast2String;
+
+import org.junit.Test;
+
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class StringLiteralNotClosedTest {
 
 	@Test
 	public void testStringLiteralNotClosedShortString() {
 		final String testMachine = "MACHINE Test CONSTANTS the_string PROPERTIES the_string = \"not closed END";
-		try {
-			getTreeAsString(testMachine);
-			fail("Exception did not occur");
-		} catch (BCompoundException e) {
-			assertEquals("[1,59] Unknown token: \"not closed END", e.getMessage());
-		}
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getTreeAsString(testMachine));
+		assertEquals("[1,59] Unknown token: \"not closed END", e.getMessage());
 	}
 
 	@Test
 	public void testStringLiteralNotClosedLongString() {
 		final String testMachine = "MACHINE Test CONSTANTS the_string PROPERTIES the_string = \"not closed"
 				+ randomString(100) + "END";
-		try {
-			getTreeAsString(testMachine);
-			fail("Exception did not occur");
-		} catch (BCompoundException e) {
-			System.out.println(e.getCause());
-			assertTrue(e.getCause() instanceof PreParseException);
-			assertTrue(e.getLocalizedMessage().contains("Unknown token:"));
-		}
-	}
-
-	private String getTreeAsString(final String testMachine) throws BCompoundException {
-		// System.out.println("Parsing \"" + testMachine + "\"");
-		final BParser parser = new BParser("testcase");
-		parser.getOptions().setGrammar(RulesGrammar.getInstance());
-		final Start startNode = parser.parse(testMachine, false);
-
-		// startNode.apply(new ASTPrinter());
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		// System.out.println(string);
-		return string;
+		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getTreeAsString(testMachine));
+		assertTrue(e.getLocalizedMessage().contains("Unknown token:"));
 	}
 
 	String randomString(final int length) {

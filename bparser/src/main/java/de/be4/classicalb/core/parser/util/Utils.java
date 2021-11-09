@@ -160,16 +160,17 @@ public final class Utils {
 	}
 	
 	/**
-	 * Remove surrounding double quotes from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
+	 * Remove surrounding quote characters from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
 	 * 
 	 * @param literal the string from which to remove the quotes
+	 * @param quote the quote character to remove
 	 * @return the string without quotes
 	 * @throws IllegalArgumentException if the literal is not a double-quoted string
 	 */
-	public static String removeSurroundingQuotes(final String literal) {
-		/// "foo" gets translated to foo
-		if (literal.length() < 2 || literal.charAt(0) != '"' || literal.charAt(literal.length()-1) != '"') {
-			throw new IllegalArgumentException("removeSurroundingQuotes argument must be a double-quoted string");
+	public static String removeSurroundingQuotes(final String literal, final char quote) {
+		// e. g. if quote = '"', then "foo" gets translated to foo
+		if (literal.length() < 2 || literal.charAt(0) != quote || literal.charAt(literal.length()-1) != quote) {
+			throw new IllegalArgumentException(String.format("removeSurroundingQuotes argument must be a quoted string: %c...%c", quote, quote));
 		}
 		return literal.substring(1, literal.length() - 1);
 	}

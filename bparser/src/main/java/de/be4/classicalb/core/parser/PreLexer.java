@@ -33,7 +33,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	
-    protected Token getToken() throws IOException, LexerException {
+	protected Token getToken() throws IOException, LexerException {
 		try {
 			return super.getToken();
 		} catch (LexerException e) {
@@ -41,16 +41,16 @@ public class PreLexer extends Lexer {
 			// printState();
 			String msg = e.getMessage();
 			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
-			   String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
-			   if(last.equals("="))
-				  throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
-			   else
-				  throw new LexerException(msg + " in DEFINITIONS clause");
+				String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
+				if(last.equals("="))
+					throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
+				else
+					throw new LexerException(msg + " in DEFINITIONS clause");
 			} else {
-			   throw e;
+				throw e;
 			}
 		}
-    }
+	}
 
 	@Override
 	protected void filter() throws LexerException, IOException {
@@ -64,15 +64,15 @@ public class PreLexer extends Lexer {
 	
 	// small debugging utility:
 	private void printState() {
-	    if (state.equals(State.DEFINITIONS_RHS)) System.out.println("DEFINITIONS_RHS");
-	    if (state.equals(State.COMMENT)) System.out.println("State.COMMENT");
-	    if (state.equals(State.DEFINITIONS)) System.out.println("DEFINITIONS");
-	    if (state.equals(State.NO_DEFINITIONS)) System.out.println("NO_DEFINITIONS");
-	    if (state.equals(State.MULTILINE_STRING_STATE)) System.out.println("MULTILINE_STRING_STATE");
-	    if (state.equals(State.NORMAL)) System.out.println("NORMAL");
-	    if (token != null) {
-	      System.out.println("Token = " + token + " at line = " + token.getLine() + ", col = " + token.getPos());
-	    }
+		if (state.equals(State.DEFINITIONS_RHS)) System.out.println("DEFINITIONS_RHS");
+		if (state.equals(State.COMMENT)) System.out.println("State.COMMENT");
+		if (state.equals(State.DEFINITIONS)) System.out.println("DEFINITIONS");
+		if (state.equals(State.NO_DEFINITIONS)) System.out.println("NO_DEFINITIONS");
+		if (state.equals(State.MULTILINE_STRING_STATE)) System.out.println("MULTILINE_STRING_STATE");
+		if (state.equals(State.NORMAL)) System.out.println("NORMAL");
+		if (token != null) {
+			System.out.println("Token = " + token + " at line = " + token.getLine() + ", col = " + token.getPos());
+		}
 	}
 
 	private void collectRhs() throws LexerException, IOException {

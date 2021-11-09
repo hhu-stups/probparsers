@@ -10,7 +10,6 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.lexer.Lexer.State;
 import de.be4.classicalb.core.parser.node.*;
 
 public class BLexer extends Lexer {
@@ -198,15 +197,15 @@ public class BLexer extends Lexer {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 			if (funOpClass == TConvertIntFloor.class) {
-			   opName = new String("floor");
+				opName = new String("floor");
 			} else if( funOpClass == TConvertIntCeiling.class) {
-			   opName = new String("ceiling");
+				opName = new String("ceiling");
 			} else if( funOpClass == TConvertReal.class) {
-			   opName = new String("real");
+				opName = new String("real");
 			} else if( funOpClass == TBoolCast.class) {
-			   opName = new String("bool");
-			} 
-		    String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
+				opName = new String("bool");
+			}
+			String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
 			addInvalid(funOpClass, TRightBrace.class, Errmsg);
 			addInvalid(funOpClass, TRightBracket.class, Errmsg);
@@ -216,13 +215,13 @@ public class BLexer extends Lexer {
 			addInvalid(funOpClass, TElse.class, Errmsg);
 			addInvalid(funOpClass, TEnd.class, Errmsg);
 			for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
-			     addInvalid(funOpClass, binOpTokenClass, Errmsg);
+				addInvalid(funOpClass, binOpTokenClass, Errmsg);
 			}
 			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
 				addInvalid(funOpClass,clauseTokenClass, Errmsg);
 			}
 			
-		    String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
+			String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
 			addInvalid(TAny.class,funOpClass, Errmsg2);
 			addInvalid(TConstants.class,funOpClass, Errmsg2);
 			addInvalid(TAbstractConstants.class,funOpClass, Errmsg2);
@@ -437,7 +436,7 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void collectComment() throws LexerException, IOException {
+	private void collectComment() throws LexerException {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
 			final String text = token.getText();

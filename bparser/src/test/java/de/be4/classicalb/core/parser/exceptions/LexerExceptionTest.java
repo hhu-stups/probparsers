@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.exceptions;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,22 +8,16 @@ import util.Helpers;
 public class LexerExceptionTest {
 
 	@Test
-	public void testLexerException() throws Exception {
-		final String result = Helpers.fullParsing("exceptions/LexerStringError.mch");
-		assertTrue(result.contains("LexerStringError.mch"));
-		assertTrue(result.contains("[3,12]"));
+	public void testLexerException() {
+		final BCompoundException e = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/LexerStringError.mch"));
+		Helpers.assertParseErrorLocation(e, 3, 12, 3, 12);
+		Assert.assertTrue(e.getFirstException().getLocations().get(0).getFilename().contains("LexerStringError.mch"));
 	}
 
 
 	@Test
-	public void testLexerThrowsExceptionAndProvidesPositionInfo() throws Exception {
-		try {
-			Helpers.parseFile("exceptions/IfAndPredicates.mch");
-		}
-		catch (BCompoundException b){
-			Assert.assertNotNull(b.getBExceptions().get(0));
-			Assert.assertEquals(1, b.getBExceptions().get(0).getLocations().size());
-		}
-
+	public void testLexerThrowsExceptionAndProvidesPositionInfo() {
+		final BCompoundException b = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/IfAndPredicates.mch"));
+		Helpers.assertParseErrorLocation(b, 18, 18, 18, 18);
 	}
 }

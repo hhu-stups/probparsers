@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.node.ADescriptionExpression;
 import de.be4.classicalb.core.parser.node.ADescriptionPredicate;
 import de.be4.classicalb.core.parser.node.ADescriptionSet;
@@ -9,7 +9,7 @@ import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 /**
  * Cleans up the text contents of description pragma nodes {@link TPragmaFreeText} by removing the end of comment symbols and any whitespace surrounding the description.
  */
-public final class DescriptionCleaningTranslator extends DepthFirstAdapter {
+public final class DescriptionCleaningTranslator extends OptimizedTraversingAdapter {
 	public DescriptionCleaningTranslator() {
 		super();
 	}

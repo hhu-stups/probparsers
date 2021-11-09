@@ -1,8 +1,6 @@
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.parserbase.ProBParseException;
@@ -58,14 +56,10 @@ public class ClassicalBParser implements ProBParserBase {
 	}
 
 	private void printAst(final IPrologTermOutput pto, Start ast, final boolean wrap, final String wrapper) {
-		NodeIdAssignment na = new NodeIdAssignment();
-		ast.apply(na);
-		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
-		final ASTProlog prologPrinter = new ASTProlog(pto, pprinter);
 		if (wrap) {
 			pto.openTerm(wrapper);
 		}
-		ast.apply(prologPrinter);
+		ASTProlog.printFormula(ast, pto);
 		if (wrap) {
 			pto.closeTerm();
 		}

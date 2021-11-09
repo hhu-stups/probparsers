@@ -7,7 +7,7 @@ import java.util.Map;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
@@ -86,7 +86,7 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
  * @author Fabian
  * 
  */
-public class OpSubstitutions extends DepthFirstAdapter {
+public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 	private final IDefinitions definitions;
 	private final Map<String, Integer> scopedVariables = new HashMap<>();

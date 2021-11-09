@@ -2,8 +2,6 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +13,13 @@ import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
-import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
 
 public class RulesParseUnit implements IModel {
 	private String machineName;
@@ -154,23 +150,8 @@ public class RulesParseUnit implements IModel {
 		}
 	}
 
-	public void printPrologOutput(final PrintStream out, final PrintStream err) {
-		if (this.bCompoundException != null) {
-			this.printExceptionAsProlog(err);
-		} else {
-			final IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(out), false);
-			this.printAsProlog(pout, new NodeIdAssignment());
-			pout.flush();
-		}
-
-	}
-
-	public void printExceptionAsProlog(final PrintStream err) {
-		PrologExceptionPrinter.printException(err, bCompoundException, parsingBehaviour.isUseIndention(), false);
-	}
-
 	@Override
-	public void printAsProlog(final IPrologTermOutput pout, NodeIdAssignment nodeIdMapping) {
+	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),

@@ -1,13 +1,16 @@
 package de.be4.classicalb.core.parser.languageextension;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SyntaxExtensionTest {
 
@@ -25,10 +28,9 @@ public class SyntaxExtensionTest {
 	}
 
 	@Test
-	public void testFile() throws IOException, BException {
+	public void testFile() throws IOException, BCompoundException {
 		String file = "strings/MultiLineString.mch";
-		String result = Helpers.fullParsing(file);
-		System.out.println(result);
+		String result = Helpers.parseFile(file);
 		assertTrue(result.contains("'\\n\\'\\na\\n\\'\\'\\'\\n'"));
 	}
 
@@ -58,7 +60,6 @@ public class SyntaxExtensionTest {
 	public void testLetExpression() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES\n LET x BE x = 1 IN x + 1 END = 2 END";
 		final String result = Helpers.getTreeAsString(testMachine);
-		System.out.println(result);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[APropertiesMachineClause(AEqualPredicate(ALetExpressionExpression(AIdentifierExpression([x])AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(1))AAddExpression(AIdentifierExpression([x]),AIntegerExpression(1))),AIntegerExpression(2)))]))",
 				result);
@@ -68,7 +69,6 @@ public class SyntaxExtensionTest {
 	public void testIfThenElsePredicate() throws Exception {
 		final String testMachine = "MACHINE Test PROPERTIES IF 1=1 THEN 2=2 ELSE 3=3 END END";
 		final String result = Helpers.getTreeAsString(testMachine);
-		System.out.println(result);
 		assertEquals(
 				"Start(AAbstractMachineParseUnit(AMachineHeader([Test],[]),[APropertiesMachineClause(AConjunctPredicate(AImplicationPredicate(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)),AEqualPredicate(AIntegerExpression(2),AIntegerExpression(2))),AImplicationPredicate(ANegationPredicate(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1))),AEqualPredicate(AIntegerExpression(3),AIntegerExpression(3)))))]))",
 				result);

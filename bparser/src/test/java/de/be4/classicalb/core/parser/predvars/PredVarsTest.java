@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import util.Ast2String;
+import util.Helpers;
 
 public class PredVarsTest {
 
@@ -20,8 +21,8 @@ public class PredVarsTest {
 	public void testAandB() throws Exception {
 		final String testMachine = "#FORMULA A & B";
 		String res = "#PREDICATE (A=TRUE) & (B=TRUE)";
-		final String result1 = getTreeAsString(testMachine);
-		final String result2 = getTreeAsStringOrg(res);
+		final String result1 = getTreeAsStringEparse(testMachine);
+		final String result2 = Helpers.getTreeAsString(res);
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertEquals(result1, result2);
@@ -31,8 +32,8 @@ public class PredVarsTest {
 	public void testSemiAandB() throws Exception {
 		final String testMachine = "#FORMULA A<3 & B";
 		String res = "#PREDICATE (A<3) & (B=TRUE)";
-		final String result1 = getTreeAsString(testMachine);
-		final String result2 = getTreeAsStringOrg(res);
+		final String result1 = getTreeAsStringEparse(testMachine);
+		final String result2 = Helpers.getTreeAsString(res);
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertEquals(result1, result2);
@@ -42,8 +43,8 @@ public class PredVarsTest {
 	public void testPred() throws Exception {
 		final String testMachine = "#FORMULA A<3 & B>9";
 		String res = "#PREDICATE (A<3) & (B>9)";
-		final String result1 = getTreeAsString(testMachine);
-		final String result2 = getTreeAsStringOrg(res);
+		final String result1 = getTreeAsStringEparse(testMachine);
+		final String result2 = Helpers.getTreeAsString(res);
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertEquals(result1, result2);
@@ -53,14 +54,14 @@ public class PredVarsTest {
 	public void testImpl() throws Exception {
 		final String testMachine = "#FORMULA A & (B>9 => C) & D";
 		String res = "#PREDICATE (A=TRUE) & (B>9 => C=TRUE) & (D=TRUE)";
-		final String result1 = getTreeAsString(testMachine);
-		final String result2 = getTreeAsStringOrg(res);
+		final String result1 = getTreeAsStringEparse(testMachine);
+		final String result2 = Helpers.getTreeAsString(res);
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertEquals(result1, result2);
 	}
 
-	private String getTreeAsString(final String testMachine) throws BCompoundException,
+	private String getTreeAsStringEparse(final String testMachine) throws BCompoundException,
 			LexerException, IOException {
 		final BParser parser = new BParser("testcase");
 		Start ast = parser.eparse(testMachine, new Definitions());
@@ -69,15 +70,4 @@ public class PredVarsTest {
 		final String string = ast2String.toString();
 		return string;
 	}
-
-	private String getTreeAsStringOrg(final String testMachine)
-			throws BCompoundException {
-		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		final String string = ast2String.toString();
-		return string;
-	}
-
 }

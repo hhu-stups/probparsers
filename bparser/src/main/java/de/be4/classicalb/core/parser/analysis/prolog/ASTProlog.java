@@ -59,9 +59,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * 
 	 */
 	public static void printFormula(Start start, final IPrologTermOutput pout) {
-		NodeIdAssignment na = new NodeIdAssignment();
-		start.apply(na);
-		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(na, -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers(), -1, 0);
 		ASTProlog printer = new ASTProlog(pout, pprinter);
 		start.apply(printer);
 	}
@@ -138,14 +136,12 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * <code>[term1, ..., termN]</code>)
 	 * 
 	 * @param nodes
-	 *            A list of nodes, never <code>null</code>. The list may be
-	 *            empty. The list does not use generics, because subclasses of
-	 *            <code>Node</code> are used, too.
+	 *            A list of nodes, never <code>null</code>. The list may be empty.
 	 */
-	private void printAsList(@SuppressWarnings("rawtypes") final List nodes) {
+	private void printAsList(final List<? extends Node> nodes) {
 		pout.openList();
-		for (Object elem : nodes) {
-			((Node) elem).apply(this);
+		for (Node elem : nodes) {
+			elem.apply(this);
 		}
 		pout.closeList();
 	}
@@ -159,7 +155,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * @param list
 	 *            Like in {@link #printAsList(List)}
 	 */
-	private void printOCAsList(final Node node, @SuppressWarnings("rawtypes") final List list) {
+	private void printOCAsList(final Node node, final List<? extends Node> list) {
 		open(node);
 		printAsList(list);
 		close(node);

@@ -11,6 +11,10 @@ import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
 
+// writes Prolog terms in SICStus (undocumented) fastrw format
+// generates same output as fast_write(Stream,Term) after use_module(library(fastrw)).
+// and can be read using fast_read(Stream,Term)
+
 public class FastReadTransformer {
 
 	private static final String EMPTY_MSG = "Cannot FastRead empty sentences.";

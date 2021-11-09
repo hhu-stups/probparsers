@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.ParseOptions;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
@@ -53,7 +53,7 @@ import de.be4.classicalb.core.parser.node.Start;
  * @author Fabian
  * 
  */
-public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
+public class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final Set<Node> nonIdentifiers = new HashSet<>();
 	private ParseOptions options;
@@ -217,7 +217,7 @@ public class IdentListCheck extends DepthFirstAdapter implements SemanticCheck {
 				|| (!options.isRestrictPrimedIdentifiers() && expression instanceof APrimedIdentifierExpression);
 	}
 
-	class AssignCheck extends DepthFirstAdapter {
+	class AssignCheck extends OptimizedTraversingAdapter {
 		final Set<Node> nonIdentifiers = new HashSet<>();
 
 		@Override

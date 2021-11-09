@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
+import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -93,7 +93,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void assignIdsToNodes(NodeIdAssignment nodeIdMapping, List<File> machineFilesLoaded) {
+	public void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded) {
 		throw new UnsupportedOperationException();
 	}
 

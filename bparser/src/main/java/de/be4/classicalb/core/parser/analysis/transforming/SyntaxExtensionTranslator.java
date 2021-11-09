@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
@@ -10,6 +10,7 @@ import de.be4.classicalb.core.parser.node.AMultilineStringExpression;
 import de.be4.classicalb.core.parser.node.ANegationPredicate;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.THexLiteral;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
@@ -18,7 +19,7 @@ import java.math.BigInteger;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
-public class SyntaxExtensionTranslator extends DepthFirstAdapter {
+public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
 		// IF P THE P2 ELSE P3 END
@@ -50,18 +51,22 @@ public class SyntaxExtensionTranslator extends DepthFirstAdapter {
 
 
 	@Override
-	public void caseAStringExpression(AStringExpression node) {
-	// fix the fact that String content does not contain the two quotes "..." as content
-		TStringLiteral content = node.getContent();
-		String text = content.getText();
-		TStringLiteral tStringLiteral =
-			// for normal string literals we also get the surrounding quotes " as part of the token
-			// these need to be removed and the escaping codes dealt with
-			new TStringLiteral(Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text)), content.getLine(), content.getPos());
-		AStringExpression stringNode = new AStringExpression(tStringLiteral);
-		stringNode.setStartPos(node.getStartPos());
-		stringNode.setEndPos(node.getEndPos());
-		node.replaceBy(stringNode);
+	public void caseTStringLiteral(TStringLiteral node) {
+		// Remove the surrounding quotes "..." from the string token content
+		// and process backslash escape sequences.
+		final String text = node.getText();
+		final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '"'));
+		node.replaceBy(new TStringLiteral(unescapedText, node.getLine(), node.getPos()));
+	}
+	
+	@Override
+	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
+		final String text = node.getText();
+		// Unquote and unescape backquoted identifiers
+		if (text.startsWith("`") && text.endsWith("`")) {
+			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
+			node.replaceBy(new TIdentifierLiteral(unescapedText, node.getLine(), node.getPos()));
+		}
 	}
 	
 	@Override
