@@ -13,11 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.APackageParseUnit;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
+import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -73,6 +77,35 @@ public final class Utils {
 			string = idName.toString();
 		}
 		return string.trim();
+	}
+	
+	/**
+	 * Check whether the given identifier is a valid plain B identifier
+	 * that does not need to be quoted.
+	 * 
+	 * @param identifier the string to check
+	 * @return whether {@code identifier} is a plain B identifier
+	 */
+	public static boolean isPlainBIdentifier(final String identifier) {
+		// Try to parse the identifier string
+		// and check if it results in a single identifier expression
+		// with the same name as was passed in.
+		// FIXME This is a bit inefficient, because it uses the full parser.
+		// We can't use just the lexer,
+		// because some keywords (such as "floor") are lexed as identifier literals
+		// and only later recognized as keywords/operators by the parser.
+		final Start ast;
+		try {
+			ast = new BParser().parseExpression(identifier);
+		} catch (final BCompoundException ignored) {
+			return false;
+		}
+		final PExpression expr = ((AExpressionParseUnit)ast.getPParseUnit()).getExpression();
+		if (!(expr instanceof AIdentifierExpression)) {
+			return false;
+		}
+		final List<TIdentifierLiteral> parsedId = ((AIdentifierExpression)expr).getIdentifier();
+		return parsedId.size() == 1 && identifier.equals(parsedId.get(0).getText());
 	}
 
 	public static boolean isCompleteMachine(final Start rootNode) {
