@@ -158,7 +158,7 @@ public class PrettyPrinterTest {
 			"`([{}])`",
 			"`([{`",
 			"`/*`",
-			"`a.b.c`",
+			"`MACHINE`.`REFINEMENT`.`IMPLEMENTATION`",
 			"`a\\\\b\\nc`",
 			};
 
