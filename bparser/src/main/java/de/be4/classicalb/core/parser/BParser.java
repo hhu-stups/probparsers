@@ -31,6 +31,7 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
@@ -430,8 +431,12 @@ public class BParser {
 	private void applyAstTransformations(final Start rootNode) throws CheckException {
 		// default transformations
 		OpSubstitutions.transform(rootNode, getDefinitions());
-		rootNode.apply(new SyntaxExtensionTranslator());
-		rootNode.apply(new DescriptionCleaningTranslator());
+		try {
+			rootNode.apply(new SyntaxExtensionTranslator());
+			rootNode.apply(new DescriptionCleaningTranslator());
+		} catch (VisitorException e) {
+			throw e.getException();
+		}
 		// more AST transformations?
 
 	}
