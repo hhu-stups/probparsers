@@ -195,8 +195,7 @@ public class RecursiveMachineLoader {
 							List<Ancestor> ancestors, List<String> paths) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
-				final String directoryString = machineRef.getDirectoryPath() != null ? machineRef.getDirectoryPath() : parentMachineDirectory.getAbsolutePath();
-				return new FileSearchPathProvider(directoryString, machineRef.getName() + suffix, paths).resolve();
+				return new FileSearchPathProvider(parentMachineDirectory.getAbsolutePath(), machineRef.getName() + suffix, paths).resolve();
 			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one

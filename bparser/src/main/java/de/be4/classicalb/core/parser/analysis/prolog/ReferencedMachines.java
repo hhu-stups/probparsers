@@ -56,7 +56,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	private final Node start;
 	private final boolean isMachineNameMustMatchFileName;
 	private final List<String> pathList = new ArrayList<>();
-	private final HashMap<String, String> filePathTable = new HashMap<>();
 	private String machineName;
 	private String packageName;
 	private File rootDirectory;
@@ -279,9 +278,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 			}
 
-			if (this.filePathTable.containsKey(name)) {
-				machineReference.setDirectoryPath(filePathTable.get(name));
-			}
 			referncesTable.put(name, machineReference);
 			siblings.put(name, machineReference);
 		} else {
@@ -349,8 +345,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			File path = findPath(name);
 			siblings.put(name, new MachineReference(name, siblingNode, path.getPath()));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path.getPath()));
-			filePathTable.put(name, path.getPath());
-
 		} catch (CheckException | BCompoundException e) {
 			siblings.put(name, new MachineReference(name, siblingNode));
 			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
@@ -398,12 +392,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 				String name = getIdentifier(identifier.getIdentifier());
-				final MachineReference machineReference = new MachineReference(name, identifier);
-
-				if (this.filePathTable.containsKey(name)) {
-					machineReference.setDirectoryPath(filePathTable.get(name));
-				}
-
 
 				try {
 					File path = findPath(name);

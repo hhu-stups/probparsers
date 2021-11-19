@@ -10,7 +10,6 @@ public class MachineReference {
 	private final String name;
 	private final Node node;
 	private String filePath;
-	private String directoryPath;
 
 	public MachineReference(String name, Node node) {
 		this.name = name;
@@ -54,13 +53,4 @@ public class MachineReference {
 	public String toString() {
 		return this.name;
 	}
-
-	public void setDirectoryPath(String directoryPath) {
-		this.directoryPath = directoryPath;
-	}
-
-	public String getDirectoryPath() {
-		return this.directoryPath;
-	}
-
 }
