@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,11 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
@@ -268,16 +264,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		} else if (node instanceof AMachineReference) {
 			final AMachineReference refNode = (AMachineReference)node;
 			final String name = getIdentifier(refNode.getMachineName());
-			MachineReference machineReference;
-			try {
-				String file = findPath(name).getAbsolutePath();
-				machineReference = new MachineReference(name, refNode, file);
-
-			} catch (BCompoundException | CheckException e) {
-				machineReference = new MachineReference(name, refNode);
-
-			}
-
+			final MachineReference machineReference = new MachineReference(name, refNode);
 			referncesTable.put(name, machineReference);
 			siblings.put(name, machineReference);
 		} else {
@@ -336,23 +323,11 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		MachineReference ref = new MachineReference(name, node.getRefMachine());
-		MachineReference sibling = new MachineReference(name, node);
 		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-		try {
-			File path = findPath(name);
-			siblings.put(name, new MachineReference(name, siblingNode, path.getPath()));
-			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path.getPath()));
-		} catch (CheckException | BCompoundException e) {
-			siblings.put(name, new MachineReference(name, siblingNode));
-			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
-
-		}
-
-
-
+		siblings.put(name, new MachineReference(name, siblingNode));
+		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -368,17 +343,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-
-		try {
-			String path = findPath(name).getPath();
-			siblings.put(name, new MachineReference(name, siblingNode, path));
-			referncesTable.put(name, new MachineReference(name, node.getRefMachine(), path));
-
-		} catch (CheckException | BCompoundException e) {
-			siblings.put(name, new MachineReference(name, siblingNode));
-			referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
-
-		}
+		siblings.put(name, new MachineReference(name, siblingNode));
+		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -392,19 +358,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 				String name = getIdentifier(identifier.getIdentifier());
-
-				try {
-					File path = findPath(name);
-					MachineReference test = new MachineReference(name, identifier, path.getPath());
-					referncesTable.put(name, test);
-					siblings.put(name, new MachineReference(name, machineExpression.parent(), path.getPath()));
-
-				} catch (CheckException | BCompoundException e) {
-					referncesTable.put(name, new MachineReference(name, identifier));
-					siblings.put(name, new MachineReference(name, machineExpression.parent()));
-
-				}
-
+				referncesTable.put(name, new MachineReference(name, identifier));
+				siblings.put(name, new MachineReference(name, machineExpression.parent()));
 
 			} else if (machineExpression instanceof AFileExpression) {
 				final AFileExpression fileNode = (AFileExpression) machineExpression;
@@ -426,40 +381,5 @@ public class ReferencedMachines extends MachineClauseAdapter {
 				throw new AssertionError("Not supported class: " + machineExpression.getClass());
 			}
 		}
-	}
-
-	private static final String[] SUFFICES = new String[] { ".ref", ".mch", ".sys", ".imp" };
-
-	private File findPath(String name) throws BCompoundException {
-		final List<String> suffixs = Arrays.asList(SUFFICES);
-
-		final List <FileSearchPathProvider> preapedProvider = suffixs.stream()
-				.map(suffix ->
-						new FileSearchPathProvider(mainFile.getParent(), name + suffix, new ArrayList<>()))
-				.collect(Collectors.toList());
-
-		int i = 0;
-		File sideResult = null;
-		File result = null;
-		while(i < preapedProvider.size() && sideResult == null ){
-			try{
-				sideResult = preapedProvider.get(i).resolve();
-			} catch (IOException e) {
-				// Result was empty
-			}
-			if(sideResult!=null){
-				result = sideResult;
-			}
-			i++;
-		}
-
-
-
-		if(result == null){
-			throw new BCompoundException(new BException(name, "File " + "name was not found", null));
-		}
-
-
-		return result;
 	}
 }

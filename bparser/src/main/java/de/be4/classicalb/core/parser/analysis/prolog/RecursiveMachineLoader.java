@@ -264,7 +264,7 @@ public class RecursiveMachineLoader {
 			this.main = name;
 		}
 
-		checkForCycles(ancestors, name, refMachines);
+		checkForCycles(ancestors, machineFile, name, refMachines);
 
 
 		final HashMap<String, MachineReference> siblingTable = refMachines.getSiblingsTable();
@@ -315,15 +315,15 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, String currentFileName, ReferencedMachines refMachines ) throws BCompoundException {
+	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
 		final List<MachineReference> siblingList = refMachines.getSiblings();
 		for (MachineReference sibling : siblingList) {
 
 			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(currentFileName, sibling));
+			tempAncestors.add(new Ancestor(currentMachineName, sibling));
 
 			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, tempAncestors, new Ancestor(currentFileName, sibling));
+				checkSiblings(ancestor, currentMachineFile, tempAncestors, new Ancestor(currentMachineName, sibling));
 			}
 
 
@@ -331,7 +331,7 @@ public class RecursiveMachineLoader {
 
 	}
 
-	private void checkSiblings(Ancestor current, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
+	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
 		final String name = current.getName();
 		final String closeTheCycle = sibling.getMachineReference().getName();
 
@@ -352,8 +352,13 @@ public class RecursiveMachineLoader {
 					.map(Ancestor::toString)
 					.reduce(ancestors.get(0).getName(), (state, ancestor) -> state + ancestor) ;
 
-
-			String path = sibling.getMachineReference().getPath();
+			String path;
+			try {
+				// TODO Avoid duplicate file lookup here, and instead do only one lookup that is used both when parsing and when reporting cycles
+				path = lookupFile(currentMachineFile.getParentFile(), sibling.getMachineReference(), Collections.emptyList(), Collections.emptyList()).toString();
+			} catch (CheckException e) {
+				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
+			}
 
 			if (node instanceof AMachineReference) {
 				resultException = new BException(path,
