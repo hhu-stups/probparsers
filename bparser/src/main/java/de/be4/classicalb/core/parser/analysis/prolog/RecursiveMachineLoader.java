@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -340,17 +339,18 @@ public class RecursiveMachineLoader {
 			final Node node = current.getMachineReference().getNode();
 			BException resultException = null;
 
-			// In case the cycle starts some where in the middle of the list
-			// There is definitely such an ancestor so we can access with get(0)
-			int pos = ancestors.indexOf(ancestors.stream().filter(ancestor -> ancestor.getName().equals(closeTheCycle)).collect(Collectors.toList()).get(0));
-			final List<Ancestor> shortenedList =
-					ancestors.stream()
-							.filter(ancestor -> ancestors.indexOf(ancestor) >= pos)
-							.collect(Collectors.toList());
-
-			String dependency = shortenedList.stream()
-					.map(Ancestor::toString)
-					.reduce(ancestors.get(0).getName(), (state, ancestor) -> state + ancestor) ;
+			final StringBuilder dependency = new StringBuilder();
+			boolean foundStartOfCycle = false;
+			for (final Ancestor ancestor : ancestors) {
+				// In case the cycle starts some where in the middle of the list
+				if (ancestor.getName().equals(closeTheCycle)) {
+					foundStartOfCycle = true;
+					dependency.append(ancestor.getName());
+				}
+				if (foundStartOfCycle) {
+					dependency.append(ancestor);
+				}
+			}
 
 			String path;
 			try {
