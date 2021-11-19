@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -125,11 +124,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	}
 
 	public List<MachineReference> getReferences() {
-		ArrayList<MachineReference> list = new ArrayList<>();
-		for (Entry<String, MachineReference> entry : referencesTable.entrySet()) {
-			list.add(entry.getValue());
-		}
-		return list;
+		return new ArrayList<>(this.referencesTable.values());
 	}
 
 	@Override
