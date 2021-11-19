@@ -1,18 +1,32 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import de.be4.classicalb.core.parser.*;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.*;
-import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
+import de.be4.classicalb.core.parser.IDefinitionFileProvider;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.IFileContentProvider;
+import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.PDefinition;
+import de.be4.classicalb.core.parser.node.Start;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 
 /**
@@ -378,7 +392,7 @@ public class RecursiveMachineLoader {
 		return machineFilesLoaded;
 	}
 
-	private static class DefInjector extends DepthFirstAdapter {
+	private static class DefInjector extends MachineClauseAdapter {
 		private final IDefinitions definitions;
 
 		public DefInjector(final IDefinitions definitions) {
@@ -394,42 +408,5 @@ public class RecursiveMachineLoader {
 				defList.add(def);
 			}
 		}
-
-		// IGNORE most machine parts
-		@Override
-		public void caseAConstantsMachineClause(final AConstantsMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAVariablesMachineClause(final AVariablesMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAPropertiesMachineClause(final APropertiesMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAInvariantMachineClause(final AInvariantMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAAssertionsMachineClause(final AAssertionsMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAInitialisationMachineClause(final AInitialisationMachineClause node) {
-			// skip
-		}
-
-		@Override
-		public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
-			// skip
-		}
-
 	}
 }
