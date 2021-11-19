@@ -1,38 +1,46 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.exceptions.*;
-import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
+import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
+import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AImportPackage;
-import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
-import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
-import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
+import de.be4.classicalb.core.parser.node.AImportsMachineClause;
+import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.APackageParseUnit;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
+import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PImportPackage;
+import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -43,7 +51,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  * {@link #getSetOfReferencedMachines()}.
  * 
  */
-public class ReferencedMachines extends DepthFirstAdapter {
+public class ReferencedMachines extends MachineClauseAdapter {
 	private final File mainFile;
 	private final Node start;
 	private final boolean isMachineNameMustMatchFileName;
@@ -241,33 +249,33 @@ public class ReferencedMachines extends DepthFirstAdapter {
 	}
 
 	/**
-	 * INCLUDES, EXTENDS, IMPORTS
+	 * INCLUDES, EXTENDS, IMPORTS, REFERENCES
 	 */
-	@Override
-	public void caseAMachineReference(AMachineReference node) {
-		String name = getIdentifier(node.getMachineName());
-		if (node.parent() instanceof AFileMachineReference) {
-			final AFileMachineReference fileNode = (AFileMachineReference) node.parent();
+	private void addMachineReference(final PMachineReference node) {
+		if (node instanceof AFileMachineReference) {
+			final AFileMachineReference fileNode = (AFileMachineReference)node;
+			final AMachineReference refNode = (AMachineReference)fileNode.getReference();
+			final String name = getIdentifier(refNode.getMachineName());
 			String file = fileNode.getFile().getText().replaceAll("\"", "");
 
 			MachineReference ref;
 			try {
-				ref = new MachineReference(name, node, file);
+				ref = new MachineReference(name, refNode, file);
 				referncesTable.put(name, ref);
 				siblings.put(name, ref);
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
-
-		} else {
-
+		} else if (node instanceof AMachineReference) {
+			final AMachineReference refNode = (AMachineReference)node;
+			final String name = getIdentifier(refNode.getMachineName());
 			MachineReference machineReference;
 			try {
 				String file = findPath(name).getAbsolutePath();
-				machineReference = new MachineReference(name, node, file);
+				machineReference = new MachineReference(name, refNode, file);
 
 			} catch (BCompoundException | CheckException e) {
-				machineReference = new MachineReference(name, node);
+				machineReference = new MachineReference(name, refNode);
 
 			}
 
@@ -276,10 +284,29 @@ public class ReferencedMachines extends DepthFirstAdapter {
 			}
 			referncesTable.put(name, machineReference);
 			siblings.put(name, machineReference);
-
-
-
+		} else {
+			throw new AssertionError("Unhandled machine reference type: " + node.getClass());
 		}
+	}
+
+	@Override
+	public void caseAIncludesMachineClause(final AIncludesMachineClause node) {
+		node.getMachineReferences().forEach(this::addMachineReference);
+	}
+
+	@Override
+	public void caseAExtendsMachineClause(final AExtendsMachineClause node) {
+		node.getMachineReferences().forEach(this::addMachineReference);
+	}
+
+	@Override
+	public void caseAImportsMachineClause(final AImportsMachineClause node) {
+		node.getMachineReferences().forEach(this::addMachineReference);
+	}
+
+	@Override
+	public void caseAReferencesMachineClause(final AReferencesMachineClause node) {
+		node.getMachineReferences().forEach(this::addMachineReference);
 	}
 
 	private File getFileStartingAtRootDirectory(String[] array) {
@@ -446,46 +473,5 @@ public class ReferencedMachines extends DepthFirstAdapter {
 
 
 		return result;
-	}
-
-
-	/***************************************************************************
-	 * exclude large sections of a machine without machine references by doing
-	 * nothing
-	 */
-
-	@Override
-	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseALocalOperationsMachineClause(ALocalOperationsMachineClause node) {
-		// skip
 	}
 }
