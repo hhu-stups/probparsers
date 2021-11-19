@@ -6,19 +6,19 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
 
 public class MachineReference {
-
+	private final ReferenceType type;
 	private final String name;
 	private final Node node;
 	private String filePath;
 
-	public MachineReference(String name, Node node) {
+	public MachineReference(ReferenceType type, String name, Node node) {
+		this.type = type;
 		this.name = name;
 		this.node = node;
 	}
 
-	public MachineReference(String name, Node node, String path) throws CheckException {
-		this.name = name;
-		this.node = node;
+	public MachineReference(ReferenceType type, String name, Node node, String path) throws CheckException {
+		this(type, name, node);
 		this.filePath = path;
 
 
@@ -35,6 +35,10 @@ public class MachineReference {
 						node);
 			}
 		}
+	}
+
+	public ReferenceType getType() {
+		return this.type;
 	}
 
 	public String getName() {

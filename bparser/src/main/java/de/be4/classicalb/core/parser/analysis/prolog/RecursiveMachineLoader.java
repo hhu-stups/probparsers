@@ -335,10 +335,6 @@ public class RecursiveMachineLoader {
 		final String closeTheCycle = sibling.getMachineReference().getName();
 
 		if (name.equals(closeTheCycle)) {
-
-			final Node node = current.getMachineReference().getNode();
-			BException resultException = null;
-
 			final StringBuilder dependency = new StringBuilder();
 			boolean foundStartOfCycle = false;
 			for (final Ancestor ancestor : ancestors) {
@@ -360,27 +356,8 @@ public class RecursiveMachineLoader {
 				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
 			}
 
-			if (node instanceof AMachineReference) {
-				resultException = new BException(path,
-						new CheckException("Cycle in imports/includes/extends statement: " + dependency, node));
-			}
-			if (node instanceof ASeesMachineClause) {
-				resultException = new BException(path,
-						new CheckException("Cycle in sees machine clause statement: " + dependency, node));
-			}
-			if (node instanceof AUsesMachineClause) {
-				resultException = new BException(path,
-						new CheckException("Cycle in uses machine clause statement: " + dependency, node));
-			}
-			if (node instanceof AImplementationMachineParseUnit) {
-				resultException = new BException(path,
-						new CheckException("Cycle in implementation: " + dependency, node));
-			}
-			if (node instanceof ARefinementMachineParseUnit) {
-				resultException = new BException(path,
-						new CheckException("Cycle in refinement: " + dependency, node));
-			}
-			throw new BCompoundException(resultException);
+			final Node node = current.getMachineReference().getNode();
+			throw new BCompoundException(new BException(path, new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
 		}
 	}
 

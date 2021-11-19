@@ -246,7 +246,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	/**
 	 * INCLUDES, EXTENDS, IMPORTS, REFERENCES
 	 */
-	private void addMachineReference(final PMachineReference node) {
+	private void addMachineReference(final ReferenceType type, final PMachineReference node) {
 		if (node instanceof AFileMachineReference) {
 			final AFileMachineReference fileNode = (AFileMachineReference)node;
 			final AMachineReference refNode = (AMachineReference)fileNode.getReference();
@@ -255,7 +255,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 			MachineReference ref;
 			try {
-				ref = new MachineReference(name, refNode, file);
+				ref = new MachineReference(type, name, refNode, file);
 				referncesTable.put(name, ref);
 				siblings.put(name, ref);
 			} catch (CheckException e) {
@@ -264,7 +264,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		} else if (node instanceof AMachineReference) {
 			final AMachineReference refNode = (AMachineReference)node;
 			final String name = getIdentifier(refNode.getMachineName());
-			final MachineReference machineReference = new MachineReference(name, refNode);
+			final MachineReference machineReference = new MachineReference(type, name, refNode);
 			referncesTable.put(name, machineReference);
 			siblings.put(name, machineReference);
 		} else {
@@ -274,22 +274,22 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 	@Override
 	public void caseAIncludesMachineClause(final AIncludesMachineClause node) {
-		node.getMachineReferences().forEach(this::addMachineReference);
+		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.INCLUDES, refNode));
 	}
 
 	@Override
 	public void caseAExtendsMachineClause(final AExtendsMachineClause node) {
-		node.getMachineReferences().forEach(this::addMachineReference);
+		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.EXTENDS, refNode));
 	}
 
 	@Override
 	public void caseAImportsMachineClause(final AImportsMachineClause node) {
-		node.getMachineReferences().forEach(this::addMachineReference);
+		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.IMPORTS, refNode));
 	}
 
 	@Override
 	public void caseAReferencesMachineClause(final AReferencesMachineClause node) {
-		node.getMachineReferences().forEach(this::addMachineReference);
+		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.REFERENCES, refNode));
 	}
 
 	private File getFileStartingAtRootDirectory(String[] array) {
@@ -309,13 +309,13 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	@Override
 	public void caseASeesMachineClause(ASeesMachineClause node) {
 
-		registerMachineNames(node.getMachineNames());
+		registerMachineNames(ReferenceType.SEES, node.getMachineNames());
 	}
 
 	@Override
 	public void caseAUsesMachineClause(AUsesMachineClause node) {
 
-		registerMachineNames(node.getMachineNames());
+		registerMachineNames(ReferenceType.USES, node.getMachineNames());
 	}
 
 	// REFINES
@@ -326,8 +326,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-		siblings.put(name, new MachineReference(name, siblingNode));
-		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+		siblings.put(name, new MachineReference(ReferenceType.REFINES, name, siblingNode));
+		referncesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -343,23 +343,23 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
 		siblingNode.setStartPos(node.getRefMachine().getStartPos());
 		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-		siblings.put(name, new MachineReference(name, siblingNode));
-		referncesTable.put(name, new MachineReference(name, node.getRefMachine()));
+		siblings.put(name, new MachineReference(ReferenceType.REFINES, name, siblingNode));
+		referncesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
 		}
 	}
 
-	private void registerMachineNames(List<PExpression> referencedMachineList) {
+	private void registerMachineNames(ReferenceType type, List<PExpression> referencedMachineList) {
 		for (PExpression machineExpression : referencedMachineList) {
 
 			if (machineExpression instanceof AIdentifierExpression) {
 
 				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 				String name = getIdentifier(identifier.getIdentifier());
-				referncesTable.put(name, new MachineReference(name, identifier));
-				siblings.put(name, new MachineReference(name, machineExpression.parent()));
+				referncesTable.put(name, new MachineReference(type, name, identifier));
+				siblings.put(name, new MachineReference(type, name, machineExpression.parent()));
 
 			} else if (machineExpression instanceof AFileExpression) {
 				final AFileExpression fileNode = (AFileExpression) machineExpression;
@@ -368,9 +368,9 @@ public class ReferencedMachines extends MachineClauseAdapter {
 				String name = getIdentifier(identifier.getIdentifier());
 				MachineReference machineReference;
 				try {
-					machineReference = new MachineReference(name, identifier, file);
+					machineReference = new MachineReference(type, name, identifier, file);
 					referncesTable.put(name, machineReference);
-					siblings.put(name, new MachineReference(name, machineExpression.parent(), file));
+					siblings.put(name, new MachineReference(type, name, machineExpression.parent(), file));
 
 
 				} catch (CheckException e) {
