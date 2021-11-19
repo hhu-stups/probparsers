@@ -272,24 +272,28 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		}
 	}
 
+	private void addMachineReferences(final ReferenceType type, final List<? extends PMachineReference> references) {
+		references.forEach(ref -> this.addMachineReference(type, ref));
+	}
+
 	@Override
 	public void caseAIncludesMachineClause(final AIncludesMachineClause node) {
-		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.INCLUDES, refNode));
+		this.addMachineReferences(ReferenceType.INCLUDES, node.getMachineReferences());
 	}
 
 	@Override
 	public void caseAExtendsMachineClause(final AExtendsMachineClause node) {
-		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.EXTENDS, refNode));
+		this.addMachineReferences(ReferenceType.EXTENDS, node.getMachineReferences());
 	}
 
 	@Override
 	public void caseAImportsMachineClause(final AImportsMachineClause node) {
-		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.IMPORTS, refNode));
+		this.addMachineReferences(ReferenceType.IMPORTS, node.getMachineReferences());
 	}
 
 	@Override
 	public void caseAReferencesMachineClause(final AReferencesMachineClause node) {
-		node.getMachineReferences().forEach(refNode -> addMachineReference(ReferenceType.REFERENCES, refNode));
+		this.addMachineReferences(ReferenceType.REFERENCES, node.getMachineReferences());
 	}
 
 	private File getFileStartingAtRootDirectory(String[] array) {
@@ -351,35 +355,36 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		}
 	}
 
-	private void registerMachineNames(ReferenceType type, List<PExpression> referencedMachineList) {
-		for (PExpression machineExpression : referencedMachineList) {
+	private void registerMachineName(ReferenceType type, PExpression machineExpression) {
+		if (machineExpression instanceof AIdentifierExpression) {
 
-			if (machineExpression instanceof AIdentifierExpression) {
+			AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
+			String name = getIdentifier(identifier.getIdentifier());
+			referncesTable.put(name, new MachineReference(type, name, identifier));
+			siblings.put(name, new MachineReference(type, name, machineExpression.parent()));
 
-				AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
-				String name = getIdentifier(identifier.getIdentifier());
-				referncesTable.put(name, new MachineReference(type, name, identifier));
-				siblings.put(name, new MachineReference(type, name, machineExpression.parent()));
-
-			} else if (machineExpression instanceof AFileExpression) {
-				final AFileExpression fileNode = (AFileExpression) machineExpression;
-				final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
-				String file = fileNode.getContent().getText().replaceAll("\"", "");
-				String name = getIdentifier(identifier.getIdentifier());
-				MachineReference machineReference;
-				try {
-					machineReference = new MachineReference(type, name, identifier, file);
-					referncesTable.put(name, machineReference);
-					siblings.put(name, new MachineReference(type, name, machineExpression.parent(), file));
+		} else if (machineExpression instanceof AFileExpression) {
+			final AFileExpression fileNode = (AFileExpression) machineExpression;
+			final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
+			String file = fileNode.getContent().getText().replaceAll("\"", "");
+			String name = getIdentifier(identifier.getIdentifier());
+			MachineReference machineReference;
+			try {
+				machineReference = new MachineReference(type, name, identifier, file);
+				referncesTable.put(name, machineReference);
+				siblings.put(name, new MachineReference(type, name, machineExpression.parent(), file));
 
 
-				} catch (CheckException e) {
-					throw new VisitorException(e);
-				}
-
-			} else {
-				throw new AssertionError("Not supported class: " + machineExpression.getClass());
+			} catch (CheckException e) {
+				throw new VisitorException(e);
 			}
+
+		} else {
+			throw new AssertionError("Not supported class: " + machineExpression.getClass());
 		}
+	}
+	
+	private void registerMachineNames(ReferenceType type, List<PExpression> referencedMachineList) {
+		referencedMachineList.forEach(expr -> this.registerMachineName(type, expr));
 	}
 }
