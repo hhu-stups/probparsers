@@ -265,16 +265,12 @@ public class RecursiveMachineLoader {
 
 		checkForCycles(ancestors, machineFile, name, refMachines);
 
-
-		final HashMap<String, MachineReference> siblingTable = refMachines.getSiblingsTable();
-
-
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
 
 			try {
 				final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
-				newAncestors.add(new Ancestor(name, siblingTable.get(refMachine.getName())));
+				newAncestors.add(new Ancestor(name, refMachine));
 				final String filePragma = refMachine.getPath();
 				File file;
 				if (filePragma == null) {
@@ -315,14 +311,13 @@ public class RecursiveMachineLoader {
 	}
 
 	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
-		final List<MachineReference> siblingList = refMachines.getSiblings();
-		for (MachineReference sibling : siblingList) {
+		for (MachineReference machineReference : refMachines.getReferences()) {
 
 			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(currentMachineName, sibling));
+			tempAncestors.add(new Ancestor(currentMachineName, machineReference));
 
 			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, currentMachineFile, tempAncestors, new Ancestor(currentMachineName, sibling));
+				checkSiblings(ancestor, currentMachineFile, tempAncestors, new Ancestor(currentMachineName, machineReference));
 			}
 
 

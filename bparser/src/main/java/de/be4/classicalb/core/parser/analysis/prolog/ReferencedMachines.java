@@ -56,7 +56,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	private String packageName;
 	private File rootDirectory;
 	private final LinkedHashMap<String, MachineReference> referncesTable;
-	private final LinkedHashMap<String, MachineReference> siblings;
 
 	/**
 	 * Searches the syntax tree of a machine for references to external
@@ -77,7 +76,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		this.mainFile = machineFile;
 		this.start = node;
 		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
-		this.siblings = new LinkedHashMap<>();
 	}
 
 	public void findReferencedMachines() throws BException {
@@ -126,22 +124,9 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		return new HashMap<>(referncesTable);
 	}
 
-	public HashMap<String, MachineReference> getSiblingsTable(){
-		return new HashMap<>(siblings);
-	}
-
 	public List<MachineReference> getReferences() {
 		ArrayList<MachineReference> list = new ArrayList<>();
 		for (Entry<String, MachineReference> entry : referncesTable.entrySet()) {
-			list.add(entry.getValue());
-		}
-		return list;
-	}
-
-	public List<MachineReference> getSiblings() {
-		ArrayList<MachineReference> list = new ArrayList<>();
-
-		for (Entry<String, MachineReference> entry : siblings.entrySet()) {
 			list.add(entry.getValue());
 		}
 		return list;
@@ -257,7 +242,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			try {
 				ref = new MachineReference(type, name, refNode, file);
 				referncesTable.put(name, ref);
-				siblings.put(name, ref);
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
@@ -266,7 +250,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			final String name = getIdentifier(refNode.getMachineName());
 			final MachineReference machineReference = new MachineReference(type, name, refNode);
 			referncesTable.put(name, machineReference);
-			siblings.put(name, machineReference);
 		} else {
 			throw new AssertionError("Unhandled machine reference type: " + node.getClass());
 		}
@@ -327,10 +310,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		final ARefinementMachineParseUnit siblingNode = (ARefinementMachineParseUnit) node.clone();
-		siblingNode.setStartPos(node.getRefMachine().getStartPos());
-		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-		siblings.put(name, new MachineReference(ReferenceType.REFINES, name, siblingNode));
 		referncesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
@@ -344,10 +323,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		final AImplementationMachineParseUnit siblingNode = (AImplementationMachineParseUnit) node.clone();
-		siblingNode.setStartPos(node.getRefMachine().getStartPos());
-		siblingNode.setEndPos(node.getRefMachine().getEndPos());
-		siblings.put(name, new MachineReference(ReferenceType.REFINES, name, siblingNode));
 		referncesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
@@ -361,8 +336,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
 			String name = getIdentifier(identifier.getIdentifier());
 			referncesTable.put(name, new MachineReference(type, name, identifier));
-			siblings.put(name, new MachineReference(type, name, machineExpression.parent()));
-
 		} else if (machineExpression instanceof AFileExpression) {
 			final AFileExpression fileNode = (AFileExpression) machineExpression;
 			final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
@@ -372,9 +345,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			try {
 				machineReference = new MachineReference(type, name, identifier, file);
 				referncesTable.put(name, machineReference);
-				siblings.put(name, new MachineReference(type, name, machineExpression.parent(), file));
-
-
 			} catch (CheckException e) {
 				throw new VisitorException(e);
 			}
