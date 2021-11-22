@@ -4,6 +4,7 @@ import java.io.File;
 
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.util.Utils;
 
 public class MachineReference {
 	private final ReferenceType type;
@@ -23,8 +24,7 @@ public class MachineReference {
 
 
 		File file = new File(path);
-		String fileName = file.getName();
-		String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+		String baseName = Utils.getFileWithoutExtension(file.getName());
 		if (!baseName.equals(name)) {
 			throw new CheckException(
 					"Declared name in file pragma does not match with the name of the machine referenced: " + name
