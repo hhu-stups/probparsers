@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
@@ -69,11 +68,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	}
 
 	public List<RulesMachineReference> getReferences() {
-		ArrayList<RulesMachineReference> list = new ArrayList<>();
-		for (Entry<String, RulesMachineReference> entry : referencesTable.entrySet()) {
-			list.add(entry.getValue());
-		}
-		return list;
+		return new ArrayList<>(referencesTable.values());
 	}
 
 	@Override
