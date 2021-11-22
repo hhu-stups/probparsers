@@ -39,11 +39,11 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	private String machineName;
 	private String packageName;
 	private File rootDirectory;
-	private final LinkedHashMap<String, RulesMachineReference> referncesTable;
+	private final LinkedHashMap<String, RulesMachineReference> referencesTable;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 
 	public RulesMachineReferencesFinder(File machineFile, Node node) {
-		this.referncesTable = new LinkedHashMap<>();
+		this.referencesTable = new LinkedHashMap<>();
 		this.mainFile = machineFile;
 		this.start = node;
 	}
@@ -70,7 +70,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	public List<RulesMachineReference> getReferences() {
 		ArrayList<RulesMachineReference> list = new ArrayList<>();
-		for (Entry<String, RulesMachineReference> entry : referncesTable.entrySet()) {
+		for (Entry<String, RulesMachineReference> entry : referencesTable.entrySet()) {
 			list.add(entry.getValue());
 		}
 		return list;
@@ -205,7 +205,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		try {
 			final File file = lookupFile(mainFile.getParentFile(), name, mchRef);
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name, mchRef);
-			referncesTable.put(name, rulesMachineReference);
+			referencesTable.put(name, rulesMachineReference);
 		} catch (CheckException e) {
 			errorList.add(e);
 		}
@@ -237,7 +237,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		} else {
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name,
 					fileNode.getReference());
-			referncesTable.put(name, rulesMachineReference);
+			referencesTable.put(name, rulesMachineReference);
 			return;
 		}
 
