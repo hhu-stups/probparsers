@@ -192,6 +192,10 @@ public final class Utils {
 		return content.replaceAll("\r\n", "\n");
 	}
 	
+	public static boolean isQuoted(final String string, final char quote) {
+		return string.length() >= 2 && string.charAt(0) == quote && string.charAt(string.length()-1) == quote;
+	}
+	
 	/**
 	 * Remove surrounding quote characters from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
 	 * 
@@ -202,7 +206,7 @@ public final class Utils {
 	 */
 	public static String removeSurroundingQuotes(final String literal, final char quote) {
 		// e. g. if quote = '"', then "foo" gets translated to foo
-		if (literal.length() < 2 || literal.charAt(0) != quote || literal.charAt(literal.length()-1) != quote) {
+		if (!isQuoted(literal, quote)) {
 			throw new IllegalArgumentException(String.format("removeSurroundingQuotes argument must be a quoted string: %c...%c", quote, quote));
 		}
 		return literal.substring(1, literal.length() - 1);

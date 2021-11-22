@@ -124,8 +124,8 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
 		final String text = packageTerminal.getText();
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			this.packageName = text.replaceAll("\"", "");
+		if (Utils.isQuoted(text, '"')) {
+			this.packageName = Utils.removeSurroundingQuotes(text, '"');
 		} else {
 			this.packageName = text;
 		}
@@ -154,8 +154,8 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
 		String text = packageTerminal.getText();
 		// "foo.bar" or foo.bar
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			text = text.replaceAll("\"", "");
+		if (Utils.isQuoted(text, '"')) {
+			text = Utils.removeSurroundingQuotes(text, '"');
 		}
 		final String[] packageNameArray = text.split("\\.");
 		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
@@ -212,7 +212,10 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	}
 
 	private void registerMachineByFilePragma(AFileMachineReference fileNode) {
-		final String filePath = fileNode.getFile().getText().replaceAll("\"", "");
+		String filePath = fileNode.getFile().getText();
+		if (Utils.isQuoted(filePath, '"')) {
+			filePath = Utils.removeSurroundingQuotes(filePath, '"');
+		}
 		final AMachineReference ref = (AMachineReference) fileNode.getReference();
 		final String name = ref.getMachineName().get(0).getText();
 		File file = null;

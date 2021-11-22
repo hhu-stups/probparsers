@@ -180,8 +180,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
 		final String text = packageTerminal.getText();
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			this.packageName = text.replaceAll("\"", "");
+		if (Utils.isQuoted(text, '"')) {
+			this.packageName = Utils.removeSurroundingQuotes(text, '"');
 		} else {
 			this.packageName = text;
 		}
@@ -209,8 +209,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
 		String text = packageTerminal.getText();
 		// "foo.bar" or foo.bar
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			text = text.replaceAll("\"", "");
+		if (Utils.isQuoted(text, '"')) {
+			text = Utils.removeSurroundingQuotes(text, '"');
 		}
 		final String[] packageNameArray = text.split("\\.");
 		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
@@ -231,7 +231,10 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			final AFileMachineReference fileNode = (AFileMachineReference)node;
 			final AMachineReference refNode = (AMachineReference)fileNode.getReference();
 			final String name = getIdentifier(refNode.getMachineName());
-			String file = fileNode.getFile().getText().replaceAll("\"", "");
+			String file = fileNode.getFile().getText();
+			if (Utils.isQuoted(file, '"')) {
+				file = Utils.removeSurroundingQuotes(file, '"');
+			}
 
 			MachineReference ref;
 			try {
@@ -334,7 +337,10 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		} else if (machineExpression instanceof AFileExpression) {
 			final AFileExpression fileNode = (AFileExpression) machineExpression;
 			final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
-			String file = fileNode.getContent().getText().replaceAll("\"", "");
+			String file = fileNode.getContent().getText();
+			if (Utils.isQuoted(file, '"')) {
+				file = Utils.removeSurroundingQuotes(file, '"');
+			}
 			String name = getIdentifier(identifier.getIdentifier());
 			MachineReference machineReference;
 			try {
