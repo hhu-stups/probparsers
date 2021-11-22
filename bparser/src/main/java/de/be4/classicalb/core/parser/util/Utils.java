@@ -159,15 +159,13 @@ public final class Utils {
 	}
 
 	public static String getFileWithoutExtension(String f) {
-		String res = null;
 		int i = f.lastIndexOf('.');
 		if (i > 0 && i < f.length() - 1) {
-			res = f.substring(0, i);
+			return f.substring(0, i);
 		} else {
 			// there is no file name extension
-			res = f;
+			return f;
 		}
-		return res;
 	}
 
 	public static final String readFile(final File filePath) throws IOException {
