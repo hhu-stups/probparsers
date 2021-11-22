@@ -225,15 +225,16 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
 		final String name = getIdentifier(ids);
-		if (path == null) {
-			return new MachineReference(type, name, node);
-		} else {
-			try {
-				return new MachineReference(type, name, node, path);
-			} catch (CheckException e) {
-				throw new VisitorException(e);
+		if (path != null) {
+			final String baseName = Utils.getFileWithoutExtension(new File(path).getName());
+			if (!baseName.equals(name)) {
+				throw new VisitorException(new CheckException(
+					"Declared name in file pragma does not match with the name of the machine referenced: " + name + " vs. " + baseName + path,
+					node
+				));
 			}
 		}
+		return new MachineReference(type, name, node, path);
 	}
 
 	private void addMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
