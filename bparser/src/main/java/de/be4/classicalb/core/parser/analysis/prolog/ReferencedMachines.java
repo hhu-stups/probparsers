@@ -223,6 +223,24 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		return packageNameArray;
 	}
 
+	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
+		final String name = getIdentifier(ids);
+		if (path == null) {
+			return new MachineReference(type, name, node);
+		} else {
+			try {
+				return new MachineReference(type, name, node, path);
+			} catch (CheckException e) {
+				throw new VisitorException(e);
+			}
+		}
+	}
+
+	private void addMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
+		final MachineReference ref = makeMachineReference(type, ids, node, path);
+		this.referencesTable.put(ref.getName(), ref);
+	}
+
 	/**
 	 * INCLUDES, EXTENDS, IMPORTS, REFERENCES
 	 */
@@ -230,24 +248,14 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		if (node instanceof AFileMachineReference) {
 			final AFileMachineReference fileNode = (AFileMachineReference)node;
 			final AMachineReference refNode = (AMachineReference)fileNode.getReference();
-			final String name = getIdentifier(refNode.getMachineName());
 			String file = fileNode.getFile().getText();
 			if (Utils.isQuoted(file, '"')) {
 				file = Utils.removeSurroundingQuotes(file, '"');
 			}
-
-			MachineReference ref;
-			try {
-				ref = new MachineReference(type, name, refNode, file);
-				referencesTable.put(name, ref);
-			} catch (CheckException e) {
-				throw new VisitorException(e);
-			}
+			addMachineReference(type, refNode.getMachineName(), refNode, file);
 		} else if (node instanceof AMachineReference) {
 			final AMachineReference refNode = (AMachineReference)node;
-			final String name = getIdentifier(refNode.getMachineName());
-			final MachineReference machineReference = new MachineReference(type, name, refNode);
-			referencesTable.put(name, machineReference);
+			addMachineReference(type, refNode.getMachineName(), refNode, null);
 		} else {
 			throw new AssertionError("Unhandled machine reference type: " + node.getClass());
 		}
@@ -285,7 +293,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		return f;
 	}
 
-	private String getIdentifier(LinkedList<TIdentifierLiteral> list) {
+	private static String getIdentifier(LinkedList<TIdentifierLiteral> list) {
 		if (list.size() > 2) {
 			// We no longer allow multiple dots inside machine references.
 			// The Atelier B reference manual says that at most one dot is allowed in a machine reference,
@@ -340,10 +348,8 @@ public class ReferencedMachines extends MachineClauseAdapter {
 
 	private void registerMachineName(ReferenceType type, PExpression machineExpression) {
 		if (machineExpression instanceof AIdentifierExpression) {
-
 			AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
-			String name = getIdentifier(identifier.getIdentifier());
-			referencesTable.put(name, new MachineReference(type, name, identifier));
+			addMachineReference(type, identifier.getIdentifier(), identifier, null);
 		} else if (machineExpression instanceof AFileExpression) {
 			final AFileExpression fileNode = (AFileExpression) machineExpression;
 			final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
@@ -351,15 +357,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 			if (Utils.isQuoted(file, '"')) {
 				file = Utils.removeSurroundingQuotes(file, '"');
 			}
-			String name = getIdentifier(identifier.getIdentifier());
-			MachineReference machineReference;
-			try {
-				machineReference = new MachineReference(type, name, identifier, file);
-				referencesTable.put(name, machineReference);
-			} catch (CheckException e) {
-				throw new VisitorException(e);
-			}
-
+			addMachineReference(type, identifier.getIdentifier(), fileNode, file);
 		} else {
 			throw new AssertionError("Not supported class: " + machineExpression.getClass());
 		}
