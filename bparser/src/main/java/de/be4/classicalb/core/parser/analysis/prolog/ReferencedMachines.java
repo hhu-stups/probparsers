@@ -224,7 +224,25 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	}
 
 	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
-		final String name = getIdentifier(ids);
+		final String name;
+		final String renamedName;
+		if (ids.size() == 1) {
+			name = ids.get(0).getText();
+			renamedName = null;
+		} else if (ids.size() == 2) {
+			name = ids.get(1).getText();
+			renamedName = ids.get(0).getText();
+		} else {
+			// We no longer allow multiple dots inside machine references.
+			// The Atelier B reference manual says that at most one dot is allowed in a machine reference,
+			// and it's not clear how multiple should be interpreted.
+			// ProB previously allowed this and considered all dots except the last one to be part of the renamed machine identifier.
+			// For example, "A.B.C.D" was considered a reference to the machine "D", renamed to "A.B.C".
+			// This was probably just an oversight though,
+			// and it seems that no machines rely on this behavior.
+			throw new VisitorException(new CheckException("A machine reference cannot contain more than one dot in the machine identifier", ids.get(2)));
+		}
+
 		if (path != null) {
 			final String baseName = Utils.getFileWithoutExtension(new File(path).getName());
 			if (!baseName.equals(name)) {
@@ -234,7 +252,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 				));
 			}
 		}
-		return new MachineReference(type, name, node, path);
+		return new MachineReference(type, name, renamedName, node, path);
 	}
 
 	private void addMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
@@ -294,20 +312,6 @@ public class ReferencedMachines extends MachineClauseAdapter {
 		return f;
 	}
 
-	private static String getIdentifier(LinkedList<TIdentifierLiteral> list) {
-		if (list.size() > 2) {
-			// We no longer allow multiple dots inside machine references.
-			// The Atelier B reference manual says that at most one dot is allowed in a machine reference,
-			// and it's not clear how multiple should be interpreted.
-			// ProB previously allowed this and considered all dots except the last one to be part of the renamed machine identifier.
-			// For example, "A.B.C.D" was considered a reference to the machine "D", renamed to "A.B.C".
-			// This was probably just an oversight though,
-			// and it seems that no machines rely on this behavior.
-			throw new VisitorException(new CheckException("A machine reference cannot contain more than one dot in the machine identifier", list.get(2)));
-		}
-		return list.getLast().getText();
-	}
-
 	// SEES and USES
 
 	@Override
@@ -327,7 +331,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		referencesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
+		referencesTable.put(name, new MachineReference(ReferenceType.REFINES, name, null, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
@@ -340,7 +344,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
-		referencesTable.put(name, new MachineReference(ReferenceType.REFINES, name, node.getRefMachine()));
+		referencesTable.put(name, new MachineReference(ReferenceType.REFINES, name, null, node.getRefMachine()));
 
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
