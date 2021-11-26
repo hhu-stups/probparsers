@@ -75,12 +75,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	 */
 	public static ReferencedMachines findReferencedMachines(final Path machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
 		final MachineReferencesFinder referenceFinder = new MachineReferencesFinder(machineFile, machineNameMustMatchFileName);
-		String fileName;
-		try {
-			fileName = machineFile.toRealPath().toString();
-		} catch (IOException e) {
-			throw new BException(machineFile.toAbsolutePath().toString(), e);
-		}
+		final String fileName = machineFile.toAbsolutePath().toString();
 		try {
 			node.apply(referenceFinder);
 		} catch (VisitorException e) {
