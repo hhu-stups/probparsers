@@ -48,6 +48,7 @@ public class RecursiveMachineLoader {
 	private final File rootDirectory;
 	private final INodeIds nodeIds;
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
+	private final Map<String, ReferencedMachines> machineReferenceInfo = new TreeMap<>();
 	private final Map<String, File> parsedFiles = new TreeMap<>();
 	private final List<File> machineFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
@@ -280,6 +281,8 @@ public class RecursiveMachineLoader {
 			parsedFiles.put(name, machineFile);
 		}
 
+		machineReferenceInfo.put(name, refMachines);
+
 		if (isMain) {
 			this.main = name;
 		}
@@ -389,6 +392,10 @@ public class RecursiveMachineLoader {
 
 	public Map<String, Start> getParsedMachines() {
 		return parsedMachines;
+	}
+
+	public Map<String, ReferencedMachines> getMachineReferenceInfo() {
+		return Collections.unmodifiableMap(this.machineReferenceInfo);
 	}
 
 	public Map<String, File> getParsedFiles() {
