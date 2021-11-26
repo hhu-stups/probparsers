@@ -44,7 +44,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  * {@link #getSetOfReferencedMachines()}.
  * 
  */
-public class ReferencedMachines extends MachineClauseAdapter {
+class MachineReferenceFinder extends MachineClauseAdapter {
 	private final File mainFile;
 	private final Node start;
 	private final boolean isMachineNameMustMatchFileName;
@@ -68,7 +68,7 @@ public class ReferencedMachines extends MachineClauseAdapter {
 	 * @param isMachineNameMustMatchFileName
 	 *            indicates if the corresponding check will be performed or not
 	 */
-	public ReferencedMachines(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
+	public MachineReferenceFinder(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
 		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.start = node;

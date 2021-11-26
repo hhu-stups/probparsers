@@ -233,7 +233,7 @@ public class RecursiveMachineLoader {
 			throws BCompoundException {
 
 
-		ReferencedMachines refMachines = new ReferencedMachines(machineFile, currentAst,
+		MachineReferenceFinder refMachines = new MachineReferenceFinder(machineFile, currentAst,
 				!isMain || parsingBehaviour.isMachineNameMustMatchFileName());
 
 
@@ -324,7 +324,7 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
+	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, MachineReferenceFinder refMachines ) throws BCompoundException {
 		for (MachineReference machineReference : refMachines.getReferences()) {
 
 			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
