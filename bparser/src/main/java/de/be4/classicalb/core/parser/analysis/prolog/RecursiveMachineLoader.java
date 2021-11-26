@@ -231,19 +231,15 @@ public class RecursiveMachineLoader {
 	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
 			final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
-
-
-		MachineReferenceFinder refMachines = new MachineReferenceFinder(machineFile, currentAst,
-				!isMain || parsingBehaviour.isMachineNameMustMatchFileName());
-
-
+		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
+		final ReferencedMachines refMachines;
 		try {
-			refMachines.findReferencedMachines();
+			refMachines = MachineReferenceFinder.findReferencedMachines(machineFile, currentAst, machineNameMustMatchFileName);
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
 
-		String name = refMachines.getName();
+		String name = refMachines.getMachineName();
 		if (name == null) {
 			/*
 			 * the parsed file is a definition file, hence the name of the
@@ -324,7 +320,7 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, MachineReferenceFinder refMachines ) throws BCompoundException {
+	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
 		for (MachineReference machineReference : refMachines.getReferences()) {
 
 			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);

@@ -3,12 +3,9 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -40,19 +37,22 @@ import de.be4.classicalb.core.parser.util.Utils;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method
- * {@link #getSetOfReferencedMachines()}.
- * 
+ * Use this class by calling the static method {@link #findReferencedMachines(File, Node, boolean)}.
  */
-class MachineReferenceFinder extends MachineClauseAdapter {
+final class MachineReferenceFinder extends MachineClauseAdapter {
 	private final File mainFile;
-	private final Node start;
 	private final boolean isMachineNameMustMatchFileName;
 	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
 	private String packageName;
 	private File rootDirectory;
 	private final List<MachineReference> references;
+
+	private MachineReferenceFinder(File machineFile, boolean isMachineNameMustMatchFileName) {
+		this.references = new ArrayList<>();
+		this.mainFile = machineFile;
+		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
+	}
 
 	/**
 	 * Searches the syntax tree of a machine for references to external
@@ -65,62 +65,26 @@ class MachineReferenceFinder extends MachineClauseAdapter {
 	 * @param node
 	 *            the root node of the machine's syntax tree, never
 	 *            <code>null</code>
-	 * @param isMachineNameMustMatchFileName
+	 * @param machineNameMustMatchFileName
 	 *            indicates if the corresponding check will be performed or not
+	 * @return information about other machines referenced from the given machine
 	 */
-	public MachineReferenceFinder(File machineFile, Node node, boolean isMachineNameMustMatchFileName) {
-		this.references = new ArrayList<>();
-		this.mainFile = machineFile;
-		this.start = node;
-		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
-	}
-
-	public void findReferencedMachines() throws BException {
+	public static ReferencedMachines findReferencedMachines(final File machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
+		final MachineReferenceFinder referenceFinder = new MachineReferenceFinder(machineFile, machineNameMustMatchFileName);
 		String fileName;
 		try {
-			fileName = mainFile.getCanonicalPath();
+			fileName = machineFile.getCanonicalPath();
 		} catch (IOException e) {
-			throw new BException(mainFile.getAbsolutePath(), e);
+			throw new BException(machineFile.getAbsolutePath(), e);
 		}
 		try {
-			this.start.apply(this);
+			node.apply(referenceFinder);
 		} catch (VisitorException e) {
 			throw new BException(fileName, e.getException());
 		}catch(VisitorIOException e) {
 			throw new BException(fileName, e.getException());
 		}
-	}
-
-	/**
-	 * Returns all referenced machine names in the given machine
-	 * 
-	 * @return a set of machine names, never <code>null</code>
-	 */
-	public Set<String> getSetOfReferencedMachines() {
-		return this.references.stream()
-			.map(MachineReference::getName)
-			.collect(Collectors.toSet());
-	}
-
-	public List<String> getPathList() {
-		return this.pathList;
-	}
-
-
-	/**
-	 * 
-	 * @return the name of the machine, <code>null</code> if no name was found
-	 */
-	public String getName() {
-		return machineName;
-	}
-
-	public String getPackage() {
-		return packageName;
-	}
-
-	public List<MachineReference> getReferences() {
-		return Collections.unmodifiableList(this.references);
+		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.references, referenceFinder.packageName, referenceFinder.pathList);
 	}
 
 	@Override
