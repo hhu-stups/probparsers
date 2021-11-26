@@ -3,7 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
@@ -32,11 +32,11 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 	private String machineName;
 	private PackageName packageName;
 	private File rootDirectory;
-	private final LinkedHashMap<String, RulesMachineReference> referencesTable;
+	private final List<RulesMachineReference> references;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 
 	public RulesMachineReferencesFinder(File machineFile, Node node) {
-		this.referencesTable = new LinkedHashMap<>();
+		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.start = node;
 	}
@@ -62,7 +62,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 	}
 
 	public List<RulesMachineReference> getReferences() {
-		return new ArrayList<>(referencesTable.values());
+		return Collections.unmodifiableList(this.references);
 	}
 
 	@Override
@@ -173,7 +173,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		try {
 			final File file = lookupFile(mainFile.getParentFile(), name, mchRef);
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name, mchRef);
-			referencesTable.put(name, rulesMachineReference);
+			references.add(rulesMachineReference);
 		} catch (CheckException e) {
 			errorList.add(e);
 		}
@@ -205,7 +205,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		} else {
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name,
 					fileNode.getReference());
-			referencesTable.put(name, rulesMachineReference);
+			references.add(rulesMachineReference);
 			return;
 		}
 
