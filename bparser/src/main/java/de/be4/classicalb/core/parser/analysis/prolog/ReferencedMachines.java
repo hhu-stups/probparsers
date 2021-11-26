@@ -12,13 +12,15 @@ import java.util.Map;
  */
 public final class ReferencedMachines {
 	private final String machineName;
+	private final MachineType type;
 	private final List<MachineReference> references;
 	private final PackageName packageName;
 	private final Path rootPackageDirectory;
 	private final Map<PackageName, Path> importedPackages;
 	
-	public ReferencedMachines(final String machineName, final List<MachineReference> references, final PackageName packageName, final Path rootPackageDirectory, final Map<PackageName, Path> importedPackages) {
+	public ReferencedMachines(final String machineName, final MachineType type, final List<MachineReference> references, final PackageName packageName, final Path rootPackageDirectory, final Map<PackageName, Path> importedPackages) {
 		this.machineName = machineName;
+		this.type = type;
 		this.references = references;
 		this.packageName = packageName;
 		this.rootPackageDirectory = rootPackageDirectory;
@@ -33,6 +35,15 @@ public final class ReferencedMachines {
 	 */
 	public String getMachineName() {
 		return this.machineName;
+	}
+	
+	/**
+	 * Get the type of this machine.
+	 * 
+	 * @return type of this machine
+	 */
+	public MachineType getType() {
+		return this.type;
 	}
 	
 	/**

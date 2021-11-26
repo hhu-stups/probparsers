@@ -15,6 +15,8 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
+import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.ADefinitionFileParseUnit;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
@@ -33,6 +35,7 @@ import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PImportPackage;
+import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
@@ -46,6 +49,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Path mainFile;
 	private final boolean isMachineNameMustMatchFileName;
 	private String machineName;
+	private MachineType machineType;
 	private PackageName packageName;
 	private Path rootDirectory;
 	private final Map<PackageName, Path> importedPackages;
@@ -83,7 +87,12 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		}catch(VisitorIOException e) {
 			throw new BException(fileName, e.getException());
 		}
-		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.references, referenceFinder.packageName, referenceFinder.rootDirectory, referenceFinder.importedPackages);
+		
+		if (referenceFinder.machineType == null) {
+			throw new BException(fileName, "Could not determine the machine's type. Parse unit class: " + node.getClass(), null);
+		}
+		
+		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.machineType, referenceFinder.references, referenceFinder.packageName, referenceFinder.rootDirectory, referenceFinder.importedPackages);
 	}
 
 	@Override
@@ -249,9 +258,20 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		registerMachineNames(ReferenceType.USES, node.getMachineNames());
 	}
 
+	// Abstract machine (.mch)
+	@Override
+	public void caseAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
+		this.machineType = MachineType.ABSTRACT_MACHINE;
+		node.getHeader().apply(this);
+		for (final PMachineClause mclause : node.getMachineClauses()) {
+			mclause.apply(this);
+		}
+	}
+
 	// REFINES in REFINEMENT machine (.ref)
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
+		this.machineType = MachineType.REFINEMENT;
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
 		references.add(new MachineReference(ReferenceType.REFINES, name, null, node.getRefMachine()));
@@ -265,6 +285,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	// REFINES in IMPLEMENTATION machine (.imp)
 	@Override
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
+		this.machineType = MachineType.IMPLEMENTATION;
 		node.getHeader().apply(this);
 		String name = node.getRefMachine().getText();
 		references.add(new MachineReference(ReferenceType.REFINES, name, null, node.getRefMachine()));
@@ -272,6 +293,12 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		for (Node mclause : node.getMachineClauses()) {
 			mclause.apply(this);
 		}
+	}
+
+	// DEFINITIONS in standalone definition file (.def)
+	@Override
+	public void caseADefinitionFileParseUnit(final ADefinitionFileParseUnit node) {
+		this.machineType = MachineType.DEFINITION_FILE;
 	}
 
 	private void registerMachineName(ReferenceType type, PExpression machineExpression) {

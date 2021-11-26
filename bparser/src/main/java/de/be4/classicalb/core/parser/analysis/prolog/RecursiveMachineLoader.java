@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -247,16 +248,19 @@ public class RecursiveMachineLoader {
 		}
 
 		String name = refMachines.getMachineName();
-		if (name == null) {
-			/*
-			 * the parsed file is a definition file, hence the name of the
-			 * machine is null
-			 */
-			if (isMain)
-				name = "DEFINITION_FILE";
-			else
+		if (refMachines.getType() == MachineType.DEFINITION_FILE) {
+			assert name == null;
+			if (!isMain) {
 				throw new BCompoundException(new BException(machineFile.getName(),
 						"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'", null));
+			}
+			// Definition files can be loaded standalone.
+			// In this case we need to set a dummy machine name,
+			// because definition files don't contain a name in the source code.
+			// TODO Perhaps MachineReferenceFinder should instead extract the file name of the .def file?
+			name = "DEFINITION_FILE";
+		} else {
+			Objects.requireNonNull(name, "name");
 		}
 
 		machineFilesLoaded.add(machineFile);
