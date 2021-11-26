@@ -11,10 +11,10 @@ import java.util.List;
 public final class ReferencedMachines {
 	private final String machineName;
 	private final List<MachineReference> references;
-	private final String packageName;
+	private final PackageName packageName;
 	private final List<String> pathList;
 	
-	public ReferencedMachines(final String machineName, final List<MachineReference> references, final String packageName, final List<String> pathList) {
+	public ReferencedMachines(final String machineName, final List<MachineReference> references, final PackageName packageName, final List<String> pathList) {
 		this.machineName = machineName;
 		this.references = references;
 		this.packageName = packageName;
@@ -47,7 +47,7 @@ public final class ReferencedMachines {
 	 * 
 	 * @return name of the package in which this machine is located
 	 */
-	public String getPackageName() {
+	public PackageName getPackageName() {
 		return this.packageName;
 	}
 	

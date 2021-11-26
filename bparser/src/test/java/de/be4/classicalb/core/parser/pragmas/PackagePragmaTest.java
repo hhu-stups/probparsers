@@ -39,7 +39,7 @@ public class PackagePragmaTest {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "InvalidImport.mch";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
-		assertEquals("Invalid package pragma: foo.*.M2", e.getMessage());
+		assertEquals("Invalid package name foo.*.M2: name part * is not a valid package identifier", e.getMessage());
 	}
 
 	@Test

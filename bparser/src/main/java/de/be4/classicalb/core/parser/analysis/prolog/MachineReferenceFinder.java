@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -44,7 +43,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	private final boolean isMachineNameMustMatchFileName;
 	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
-	private String packageName;
+	private PackageName packageName;
 	private File rootDirectory;
 	private final List<MachineReference> references;
 
@@ -119,8 +118,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 
 	@Override
 	public void caseAImportPackage(AImportPackage node) {
-		final String[] packageArray = determinePackage(node.getPackage(), node);
-		final File pathFile = getFileStartingAtRootDirectory(packageArray);
+		final File pathFile = getPackageName(node.getPackage(), node).getFile(this.rootDirectory);
 		final String path = pathFile.getAbsolutePath();
 		if (pathFile.exists()) {
 			if (!pathFile.isDirectory()) {
@@ -139,48 +137,26 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
-		final String text = packageTerminal.getText();
-		if (Utils.isQuoted(text, '"')) {
-			this.packageName = Utils.removeSurroundingQuotes(text, '"');
-		} else {
-			this.packageName = text;
-		}
-		final String[] packageNameArray = determinePackage(packageTerminal, node);
-		File dir;
+		this.packageName = getPackageName(packageTerminal, node);
+		final File packageDir;
 		try {
-			dir = mainFile.getCanonicalFile();
+			packageDir = mainFile.getCanonicalFile().getParentFile();
 		} catch (IOException e) {
 			throw new VisitorIOException(e);
 		}
-		for (int i = packageNameArray.length - 1; i >= 0; i--) {
-			final String name1 = packageNameArray[i];
-			dir = dir.getParentFile();
-			final String name2 = dir.getName();
-			if (!name1.equals(name2)) {
-				throw new VisitorException(new CheckException(
-						String.format("Package declaration '%s' does not match the folder structure: %s vs %s",
-								this.packageName, name1, name2),
-						node));
-			}
+		try {
+			rootDirectory = this.packageName.determineRootDirectory(packageDir);
+		} catch (IllegalArgumentException e) {
+			throw new VisitorException(new CheckException(e.getMessage(), node, e));
 		}
-		rootDirectory = dir.getParentFile();
 	}
 
-	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
-		String text = packageTerminal.getText();
-		// "foo.bar" or foo.bar
-		if (Utils.isQuoted(text, '"')) {
-			text = Utils.removeSurroundingQuotes(text, '"');
+	private static PackageName getPackageName(final TPragmaIdOrString packageTerminal, final Node node) {
+		try {
+			return PackageName.fromPossiblyQuotedName(packageTerminal.getText());
+		} catch (IllegalArgumentException e) {
+			throw new VisitorException(new CheckException(e.getMessage(), node, e));
 		}
-		final String[] packageNameArray = text.split("\\.");
-		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
-		for (int i = 0; i < packageNameArray.length; i++) {
-			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
-			if (!matches) {
-				throw new VisitorException(new CheckException("Invalid package pragma: " + text, node));
-			}
-		}
-		return packageNameArray;
 	}
 
 	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
@@ -257,14 +233,6 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	@Override
 	public void caseAReferencesMachineClause(final AReferencesMachineClause node) {
 		this.addMachineReferences(ReferenceType.REFERENCES, node.getMachineReferences());
-	}
-
-	private File getFileStartingAtRootDirectory(String[] array) {
-		File f = rootDirectory;
-		for (String folder : array) {
-			f = new File(f, folder);
-		}
-		return f;
 	}
 
 	// SEES and USES

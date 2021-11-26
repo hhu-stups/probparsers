@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.prolog.PackageName;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -36,7 +36,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	private final Node start;
 	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
-	private String packageName;
+	private PackageName packageName;
 	private File rootDirectory;
 	private final LinkedHashMap<String, RulesMachineReference> referencesTable;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
@@ -100,8 +100,13 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	@Override
 	public void caseAImportPackage(AImportPackage node) {
-		final String[] packageArray = determinePackage(node.getPackage(), node);
-		final File pathFile = getFileStartingAtRootDirectory(packageArray);
+		final File pathFile;
+		try {
+			pathFile = getPackageName(node.getPackage(), node).getFile(this.rootDirectory);
+		} catch (CheckException e) {
+			errorList.add(e);
+			return;
+		}
 		final String path = pathFile.getAbsolutePath();
 		if (!pathFile.exists()) {
 			errorList.add(
@@ -118,58 +123,32 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
-		final String text = packageTerminal.getText();
-		if (Utils.isQuoted(text, '"')) {
-			this.packageName = Utils.removeSurroundingQuotes(text, '"');
-		} else {
-			this.packageName = text;
-		}
-		final String[] packageNameArray = determinePackage(packageTerminal, node);
-		File dir = null;
 		try {
-			dir = mainFile.getCanonicalFile();
+			this.packageName = getPackageName(packageTerminal, node);
+		} catch (CheckException e) {
+			errorList.add(e);
+			return;
+		}
+		final File packageDir;
+		try {
+			packageDir = mainFile.getCanonicalFile().getParentFile();
 		} catch (IOException e) {
 			errorList.add(new CheckException(e.getMessage(), (Node) null, e));
 			return;
 		}
-		for (int i = packageNameArray.length - 1; i >= 0; i--) {
-			final String name1 = packageNameArray[i];
-			dir = dir.getParentFile();
-			final String name2 = dir.getName();
-			if (!name1.equals(name2)) {
-				errorList.add(new CheckException(
-						String.format("Package declaration '%s' does not match the folder structure: '%s' vs '%s'",
-								this.packageName, name1, name2),
-						node));
-			}
+		try {
+			rootDirectory = this.packageName.determineRootDirectory(packageDir);
+		} catch (IllegalArgumentException e) {
+			errorList.add(new CheckException(e.getMessage(), node, e));
 		}
-		rootDirectory = dir.getParentFile();
 	}
 
-	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
-		String text = packageTerminal.getText();
-		// "foo.bar" or foo.bar
-		if (Utils.isQuoted(text, '"')) {
-			text = Utils.removeSurroundingQuotes(text, '"');
+	private static PackageName getPackageName(final TPragmaIdOrString packageTerminal, final Node node) throws CheckException {
+		try {
+			return PackageName.fromPossiblyQuotedName(packageTerminal.getText());
+		} catch (IllegalArgumentException e) {
+			throw new CheckException(e.getMessage(), node, e);
 		}
-		final String[] packageNameArray = text.split("\\.");
-		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
-		for (int i = 0; i < packageNameArray.length; i++) {
-			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
-			if (!matches) {
-				errorList.add(new CheckException(
-						String.format("Invalid folder name '%s' in package declaration.", text), node));
-			}
-		}
-		return packageNameArray;
-	}
-
-	private File getFileStartingAtRootDirectory(String[] array) {
-		File f = rootDirectory;
-		for (String folder : array) {
-			f = new File(f, folder);
-		}
-		return f;
 	}
 
 	// REFERENCES foo, bar
