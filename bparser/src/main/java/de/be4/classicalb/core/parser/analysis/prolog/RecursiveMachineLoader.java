@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
@@ -205,9 +207,12 @@ public class RecursiveMachineLoader {
 	 * @throws CheckException if the file cannot be found
 	 */
 	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef,
-							List<Ancestor> ancestors, List<String> paths) throws CheckException {
+							List<Ancestor> ancestors, Collection<File> importedDirs) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
+				final List<String> paths = importedDirs.stream()
+					.map(File::getAbsolutePath)
+					.collect(Collectors.toList());
 				return new FileSearchPathProvider(parentMachineDirectory.getAbsolutePath(), machineRef.getName() + suffix, paths).resolve();
 			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
@@ -284,7 +289,7 @@ public class RecursiveMachineLoader {
 				final String filePragma = refMachine.getPath();
 				File file;
 				if (filePragma == null) {
-					file = lookupFile(directory, refMachine, newAncestors, refMachines.getPathList());
+					file = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
 				} else {
 					File p = new File(filePragma);
 					if (p.isAbsolute()) {

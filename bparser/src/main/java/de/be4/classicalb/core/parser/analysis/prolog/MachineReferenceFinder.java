@@ -3,8 +3,10 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -41,16 +43,17 @@ import de.be4.classicalb.core.parser.util.Utils;
 final class MachineReferenceFinder extends MachineClauseAdapter {
 	private final File mainFile;
 	private final boolean isMachineNameMustMatchFileName;
-	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
 	private PackageName packageName;
 	private File rootDirectory;
+	private final Map<PackageName, File> importedPackages;
 	private final List<MachineReference> references;
 
 	private MachineReferenceFinder(File machineFile, boolean isMachineNameMustMatchFileName) {
 		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
+		this.importedPackages = new LinkedHashMap<>();
 	}
 
 	/**
@@ -83,7 +86,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 		}catch(VisitorIOException e) {
 			throw new BException(fileName, e.getException());
 		}
-		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.references, referenceFinder.packageName, referenceFinder.pathList);
+		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.references, referenceFinder.packageName, referenceFinder.rootDirectory, referenceFinder.importedPackages);
 	}
 
 	@Override
@@ -118,10 +121,10 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 
 	@Override
 	public void caseAImportPackage(AImportPackage node) {
-		final File pathFile = getPackageName(node.getPackage(), node).getFile(this.rootDirectory);
-		final String path = pathFile.getAbsolutePath();
-		if (pathFile.exists()) {
-			if (!pathFile.isDirectory()) {
+		final PackageName importedPackage = getPackageName(node.getPackage(), node);
+		final File path = importedPackage.getFile(this.rootDirectory);
+		if (path.exists()) {
+			if (!path.isDirectory()) {
 				throw new VisitorException(
 						new CheckException(String.format("Imported package is not a directory: %s", path), node));
 			}
@@ -129,11 +132,11 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 			throw new VisitorException(
 					new CheckException(String.format("Imported package does not exist: %s", path), node));
 		}
-		if (this.pathList.contains(path)) {
+		if (this.importedPackages.containsKey(importedPackage)) {
 			throw new VisitorException(new CheckException(
 					String.format("Duplicate import statement: %s", node.getPackage().getText()), node));
 		}
-		this.pathList.add(path);
+		this.importedPackages.put(importedPackage, path);
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
