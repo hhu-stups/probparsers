@@ -254,7 +254,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		registerMachineNames(ReferenceType.USES, node.getMachineNames());
 	}
 
-	// REFINES
+	// REFINES in REFINEMENT machine (.ref)
 	@Override
 	public void caseARefinementMachineParseUnit(ARefinementMachineParseUnit node) {
 		node.getHeader().apply(this);
@@ -267,7 +267,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		}
 	}
 
-	// IMPLEMENTS
+	// REFINES in IMPLEMENTATION machine (.imp)
 	@Override
 	public void caseAImplementationMachineParseUnit(AImplementationMachineParseUnit node) {
 		node.getHeader().apply(this);
