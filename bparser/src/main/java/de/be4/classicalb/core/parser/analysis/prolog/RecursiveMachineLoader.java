@@ -241,7 +241,7 @@ public class RecursiveMachineLoader {
 		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
 		final ReferencedMachines refMachines;
 		try {
-			refMachines = MachineReferenceFinder.findReferencedMachines(machineFile.toPath(), currentAst, machineNameMustMatchFileName);
+			refMachines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), currentAst, machineNameMustMatchFileName);
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}

@@ -42,7 +42,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  * This class finds all references to external machines in a machine definition.
  * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
  */
-final class MachineReferenceFinder extends MachineClauseAdapter {
+final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Path mainFile;
 	private final boolean isMachineNameMustMatchFileName;
 	private String machineName;
@@ -51,7 +51,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	private final Map<PackageName, Path> importedPackages;
 	private final List<MachineReference> references;
 
-	private MachineReferenceFinder(Path machineFile, boolean isMachineNameMustMatchFileName) {
+	private MachineReferencesFinder(Path machineFile, boolean isMachineNameMustMatchFileName) {
 		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
@@ -74,7 +74,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	 * @return information about other machines referenced from the given machine
 	 */
 	public static ReferencedMachines findReferencedMachines(final Path machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
-		final MachineReferenceFinder referenceFinder = new MachineReferenceFinder(machineFile, machineNameMustMatchFileName);
+		final MachineReferencesFinder referenceFinder = new MachineReferencesFinder(machineFile, machineNameMustMatchFileName);
 		String fileName;
 		try {
 			fileName = machineFile.toRealPath().toString();
