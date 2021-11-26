@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -207,11 +208,12 @@ public class RecursiveMachineLoader {
 	 * @throws CheckException if the file cannot be found
 	 */
 	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef,
-							List<Ancestor> ancestors, Collection<File> importedDirs) throws CheckException {
+							List<Ancestor> ancestors, Collection<Path> importedDirs) throws CheckException {
 		for (final String suffix : SUFFICES) {
 			try {
 				final List<String> paths = importedDirs.stream()
-					.map(File::getAbsolutePath)
+					.map(Path::toAbsolutePath)
+					.map(Path::toString)
 					.collect(Collectors.toList());
 				return new FileSearchPathProvider(parentMachineDirectory.getAbsolutePath(), machineRef.getName() + suffix, paths).resolve();
 			} catch (IOException e) {
@@ -239,7 +241,7 @@ public class RecursiveMachineLoader {
 		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
 		final ReferencedMachines refMachines;
 		try {
-			refMachines = MachineReferenceFinder.findReferencedMachines(machineFile, currentAst, machineNameMustMatchFileName);
+			refMachines = MachineReferenceFinder.findReferencedMachines(machineFile.toPath(), currentAst, machineNameMustMatchFileName);
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}

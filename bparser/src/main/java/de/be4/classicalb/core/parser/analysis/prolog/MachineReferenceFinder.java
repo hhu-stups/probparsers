@@ -1,7 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -38,18 +40,18 @@ import de.be4.classicalb.core.parser.util.Utils;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #findReferencedMachines(File, Node, boolean)}.
+ * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
  */
 final class MachineReferenceFinder extends MachineClauseAdapter {
-	private final File mainFile;
+	private final Path mainFile;
 	private final boolean isMachineNameMustMatchFileName;
 	private String machineName;
 	private PackageName packageName;
-	private File rootDirectory;
-	private final Map<PackageName, File> importedPackages;
+	private Path rootDirectory;
+	private final Map<PackageName, Path> importedPackages;
 	private final List<MachineReference> references;
 
-	private MachineReferenceFinder(File machineFile, boolean isMachineNameMustMatchFileName) {
+	private MachineReferenceFinder(Path machineFile, boolean isMachineNameMustMatchFileName) {
 		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
@@ -71,13 +73,13 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	 *            indicates if the corresponding check will be performed or not
 	 * @return information about other machines referenced from the given machine
 	 */
-	public static ReferencedMachines findReferencedMachines(final File machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
+	public static ReferencedMachines findReferencedMachines(final Path machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
 		final MachineReferenceFinder referenceFinder = new MachineReferenceFinder(machineFile, machineNameMustMatchFileName);
 		String fileName;
 		try {
-			fileName = machineFile.getCanonicalPath();
+			fileName = machineFile.toRealPath().toString();
 		} catch (IOException e) {
-			throw new BException(machineFile.getAbsolutePath(), e);
+			throw new BException(machineFile.toAbsolutePath().toString(), e);
 		}
 		try {
 			node.apply(referenceFinder);
@@ -97,7 +99,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 			throw new VisitorException(new CheckException("Machine name cannot contain dots", node.getName().get(1)));
 		}
 		machineName = Utils.getTIdentifierListAsString(node.getName());
-		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getName());
+		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getFileName().toString());
 		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
 			CheckException ch = new CheckException(
 					String.format("Machine name does not match the file name: '%s' vs '%s'", machineName,
@@ -122,9 +124,9 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 	@Override
 	public void caseAImportPackage(AImportPackage node) {
 		final PackageName importedPackage = getPackageName(node.getPackage(), node);
-		final File path = importedPackage.getFile(this.rootDirectory);
-		if (path.exists()) {
-			if (!path.isDirectory()) {
+		final Path path = importedPackage.getPath(this.rootDirectory);
+		if (Files.exists(path)) {
+			if (!Files.isDirectory(path)) {
 				throw new VisitorException(
 						new CheckException(String.format("Imported package is not a directory: %s", path), node));
 			}
@@ -141,9 +143,9 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
 		this.packageName = getPackageName(packageTerminal, node);
-		final File packageDir;
+		final Path packageDir;
 		try {
-			packageDir = mainFile.getCanonicalFile().getParentFile();
+			packageDir = mainFile.toRealPath().getParent();
 		} catch (IOException e) {
 			throw new VisitorIOException(e);
 		}
@@ -183,7 +185,7 @@ final class MachineReferenceFinder extends MachineClauseAdapter {
 		}
 
 		if (path != null) {
-			final String baseName = Utils.getFileWithoutExtension(new File(path).getName());
+			final String baseName = Utils.getFileWithoutExtension(Paths.get(path).getFileName().toString());
 			if (!baseName.equals(name)) {
 				throw new VisitorException(new CheckException(
 					"Declared name in file pragma does not match with the name of the machine referenced: " + name + " vs. " + baseName + path,

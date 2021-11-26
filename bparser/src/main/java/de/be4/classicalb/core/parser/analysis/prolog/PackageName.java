@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,26 +103,44 @@ public final class PackageName {
 	}
 	
 	/**
+	 * Get the path of this package based on the given root directory.
+	 * 
+	 * @param rootDirectory file path of the root package
+	 * @return file path of this package based on the root directory
+	 */
+	public Path getPath(final Path rootDirectory) {
+		Path path = rootDirectory;
+		for (final String part : this.getNameParts()) {
+			path = path.resolve(part);
+		}
+		return path;
+	}
+	
+	/**
 	 * Determine the directory of the root package based on this package name and its directory path.
 	 * 
 	 * @param packageDirectory directory path of this package
 	 * @return directory of the root package
 	 * @throws IllegalArgumentException if this package name doesn't match the given directory path
 	 */
-	public File determineRootDirectory(final File packageDirectory) {
-		File dir = packageDirectory;
+	public Path determineRootDirectory(final Path packageDirectory) {
+		Path dir = packageDirectory;
 		for (int i = this.getNameParts().size() - 1; i >= 0; i--) {
 			final String name1 = this.getNameParts().get(i);
-			final String name2 = dir.getName();
+			final String name2 = dir.getFileName().toString();
 			if (!name1.equals(name2)) {
 				throw new IllegalArgumentException(String.format(
 					"Package declaration '%s' does not match the folder structure: %s vs %s",
 					this.getName(), name1, name2
 				));
 			}
-			dir = dir.getParentFile();
+			dir = dir.getParent();
 		}
 		return dir;
+	}
+	
+	public File determineRootDirectory(final File packageDirectory) {
+		return this.determineRootDirectory(packageDirectory.toPath()).toFile();
 	}
 	
 	@Override

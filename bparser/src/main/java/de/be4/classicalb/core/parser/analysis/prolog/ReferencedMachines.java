@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +14,10 @@ public final class ReferencedMachines {
 	private final String machineName;
 	private final List<MachineReference> references;
 	private final PackageName packageName;
-	private final File rootPackageDirectory;
-	private final Map<PackageName, File> importedPackages;
+	private final Path rootPackageDirectory;
+	private final Map<PackageName, Path> importedPackages;
 	
-	public ReferencedMachines(final String machineName, final List<MachineReference> references, final PackageName packageName, final File rootPackageDirectory, final Map<PackageName, File> importedPackages) {
+	public ReferencedMachines(final String machineName, final List<MachineReference> references, final PackageName packageName, final Path rootPackageDirectory, final Map<PackageName, Path> importedPackages) {
 		this.machineName = machineName;
 		this.references = references;
 		this.packageName = packageName;
@@ -61,7 +61,7 @@ public final class ReferencedMachines {
 	 * 
 	 * @return directory of the root package
 	 */
-	public File getRootPackageDirectory() {
+	public Path getRootPackageDirectory() {
 		return this.rootPackageDirectory;
 	}
 	
@@ -70,7 +70,7 @@ public final class ReferencedMachines {
 	 * 
 	 * @return names and paths of all imported packages
 	 */
-	public Map<PackageName, File> getImportedPackages() {
+	public Map<PackageName, Path> getImportedPackages() {
 		return Collections.unmodifiableMap(this.importedPackages);
 	}
 }
