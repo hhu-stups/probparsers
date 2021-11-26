@@ -28,7 +28,6 @@ public class RulesParseUnit implements IModel {
 	private String content;
 	private File machineFile;
 	private BCompoundException bCompoundException;
-	private boolean debugOuput;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private BParser bParser;
 	private Start start;
@@ -98,7 +97,7 @@ public class RulesParseUnit implements IModel {
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
-			start = bParser.parse(content, debugOuput, new CachingDefinitionFileProvider());
+			start = bParser.parse(content, false, new CachingDefinitionFileProvider());
 			refFinder = new RulesMachineReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();
 
