@@ -7,22 +7,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.analysis.prolog.PackageName;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AImportPackage;
-import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
-import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.APackageParseUnit;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PImportPackage;
@@ -30,7 +24,7 @@ import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class RulesMachineReferencesFinder extends DepthFirstAdapter {
+public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 
 	private final File mainFile;
 	private final Node start;
@@ -232,40 +226,4 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		}
 		throw new CheckException(String.format("Machine not found: '%s'", name), node);
 	}
-
-	/***************************************************************************
-	 * exclude large sections of a machine without machine references by doing
-	 * nothing
-	 */
-
-	@Override
-	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
-		// skip
-	}
-
 }
