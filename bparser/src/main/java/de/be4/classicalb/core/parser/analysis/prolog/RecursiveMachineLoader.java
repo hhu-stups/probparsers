@@ -406,6 +406,10 @@ public class RecursiveMachineLoader {
 		return machineFilesLoaded;
 	}
 
+	public String getMainMachineName() {
+		return main;
+	}
+
 	private static class DefInjector extends MachineClauseAdapter {
 		private final IDefinitions definitions;
 
