@@ -228,6 +228,7 @@ Tokens
   {normal} assign = ':' eq | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
   {normal} semicolon = ';';
   {normal} less = lt;
+  {normal} ring = 0x2218; // circ or forward composition from Event-B, normally not allowed by Atelier-B
   {normal} less_greater = lt white_space* gt; // for empty sequence
   {normal} overwrite_relation = lt plus | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
   {normal} set_relation = lt minus gt | 0x2194;
@@ -839,6 +840,7 @@ expression_x125 {-> expression} = [expr]:expression_p160 {-> expr.expression};
 expression_p160 {-> expression} =
   {overwrite} [left]:expression_p160 overwrite_relation [right]:expression_x160 {-> New expression.overwrite(left.expression, right.expression)} |
   {direct_product} [left]:expression_p160 direct_product [right]:expression_x160 {-> New expression.direct_product(left.expression, right.expression)} |
+  {ring} [left]:expression_p160 ring [right]:expression_x160 {-> New expression.ring(left.expression, right.expression)} |
   {concat} [left]:expression_p160 concat_sequence [right]:expression_x160 {-> New expression.concat(left.expression, right.expression)} |
   {domain_restriction} [left]:expression_p160 domain_restriction [right]:expression_x160 {-> New expression.domain_restriction(left.expression, right.expression)} |
   {domain_subtraction} [left]:expression_p160 domain_subtraction [right]:expression_x160 {-> New expression.domain_subtraction(left.expression, right.expression)} |
