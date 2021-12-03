@@ -3,27 +3,20 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
+import de.be4.classicalb.core.parser.analysis.prolog.PackageName;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AConstraintsMachineClause;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
 import de.be4.classicalb.core.parser.node.AImportPackage;
-import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
-import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.APackageParseUnit;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PImportPackage;
@@ -31,19 +24,19 @@ import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
-public class RulesMachineReferencesFinder extends DepthFirstAdapter {
+public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 
 	private final File mainFile;
 	private final Node start;
 	private final List<String> pathList = new ArrayList<>();
 	private String machineName;
-	private String packageName;
+	private PackageName packageName;
 	private File rootDirectory;
-	private final LinkedHashMap<String, RulesMachineReference> referncesTable;
+	private final List<RulesMachineReference> references;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 
 	public RulesMachineReferencesFinder(File machineFile, Node node) {
-		this.referncesTable = new LinkedHashMap<>();
+		this.references = new ArrayList<>();
 		this.mainFile = machineFile;
 		this.start = node;
 	}
@@ -69,11 +62,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	}
 
 	public List<RulesMachineReference> getReferences() {
-		ArrayList<RulesMachineReference> list = new ArrayList<>();
-		for (Entry<String, RulesMachineReference> entry : referncesTable.entrySet()) {
-			list.add(entry.getValue());
-		}
-		return list;
+		return Collections.unmodifiableList(this.references);
 	}
 
 	@Override
@@ -105,8 +94,13 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 
 	@Override
 	public void caseAImportPackage(AImportPackage node) {
-		final String[] packageArray = determinePackage(node.getPackage(), node);
-		final File pathFile = getFileStartingAtRootDirectory(packageArray);
+		final File pathFile;
+		try {
+			pathFile = getPackageName(node.getPackage(), node).getFile(this.rootDirectory);
+		} catch (CheckException e) {
+			errorList.add(e);
+			return;
+		}
 		final String path = pathFile.getAbsolutePath();
 		if (!pathFile.exists()) {
 			errorList.add(
@@ -123,58 +117,32 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 	}
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
-		final String text = packageTerminal.getText();
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			this.packageName = text.replaceAll("\"", "");
-		} else {
-			this.packageName = text;
-		}
-		final String[] packageNameArray = determinePackage(packageTerminal, node);
-		File dir = null;
 		try {
-			dir = mainFile.getCanonicalFile();
+			this.packageName = getPackageName(packageTerminal, node);
+		} catch (CheckException e) {
+			errorList.add(e);
+			return;
+		}
+		final File packageDir;
+		try {
+			packageDir = mainFile.getCanonicalFile().getParentFile();
 		} catch (IOException e) {
 			errorList.add(new CheckException(e.getMessage(), (Node) null, e));
 			return;
 		}
-		for (int i = packageNameArray.length - 1; i >= 0; i--) {
-			final String name1 = packageNameArray[i];
-			dir = dir.getParentFile();
-			final String name2 = dir.getName();
-			if (!name1.equals(name2)) {
-				errorList.add(new CheckException(
-						String.format("Package declaration '%s' does not match the folder structure: '%s' vs '%s'",
-								this.packageName, name1, name2),
-						node));
-			}
+		try {
+			rootDirectory = this.packageName.determineRootDirectory(packageDir);
+		} catch (IllegalArgumentException e) {
+			errorList.add(new CheckException(e.getMessage(), node, e));
 		}
-		rootDirectory = dir.getParentFile();
 	}
 
-	private String[] determinePackage(final TPragmaIdOrString packageTerminal, final Node node) {
-		String text = packageTerminal.getText();
-		// "foo.bar" or foo.bar
-		if ((text.startsWith("\"") && text.endsWith("\""))) {
-			text = text.replaceAll("\"", "");
+	private static PackageName getPackageName(final TPragmaIdOrString packageTerminal, final Node node) throws CheckException {
+		try {
+			return PackageName.fromPossiblyQuotedName(packageTerminal.getText());
+		} catch (IllegalArgumentException e) {
+			throw new CheckException(e.getMessage(), node, e);
 		}
-		final String[] packageNameArray = text.split("\\.");
-		final Pattern VALID_IDENTIFIER = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]*)");
-		for (int i = 0; i < packageNameArray.length; i++) {
-			boolean matches = VALID_IDENTIFIER.matcher(packageNameArray[i]).matches();
-			if (!matches) {
-				errorList.add(new CheckException(
-						String.format("Invalid folder name '%s' in package declaration.", text), node));
-			}
-		}
-		return packageNameArray;
-	}
-
-	private File getFileStartingAtRootDirectory(String[] array) {
-		File f = rootDirectory;
-		for (String folder : array) {
-			f = new File(f, folder);
-		}
-		return f;
 	}
 
 	// REFERENCES foo, bar
@@ -205,14 +173,17 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		try {
 			final File file = lookupFile(mainFile.getParentFile(), name, mchRef);
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name, mchRef);
-			referncesTable.put(name, rulesMachineReference);
+			references.add(rulesMachineReference);
 		} catch (CheckException e) {
 			errorList.add(e);
 		}
 	}
 
 	private void registerMachineByFilePragma(AFileMachineReference fileNode) {
-		final String filePath = fileNode.getFile().getText().replaceAll("\"", "");
+		String filePath = fileNode.getFile().getText();
+		if (Utils.isQuoted(filePath, '"')) {
+			filePath = Utils.removeSurroundingQuotes(filePath, '"');
+		}
 		final AMachineReference ref = (AMachineReference) fileNode.getReference();
 		final String name = ref.getMachineName().get(0).getText();
 		File file = null;
@@ -234,7 +205,7 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		} else {
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name,
 					fileNode.getReference());
-			referncesTable.put(name, rulesMachineReference);
+			references.add(rulesMachineReference);
 			return;
 		}
 
@@ -255,40 +226,4 @@ public class RulesMachineReferencesFinder extends DepthFirstAdapter {
 		}
 		throw new CheckException(String.format("Machine not found: '%s'", name), node);
 	}
-
-	/***************************************************************************
-	 * exclude large sections of a machine without machine references by doing
-	 * nothing
-	 */
-
-	@Override
-	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAOperationsMachineClause(AOperationsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
-		// skip
-	}
-
-	@Override
-	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
-		// skip
-	}
-
 }

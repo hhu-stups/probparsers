@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
@@ -16,6 +18,8 @@ import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 
@@ -64,6 +68,10 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		final String text = node.getText();
 		// Unquote and unescape backquoted identifiers
 		if (text.startsWith("`") && text.endsWith("`")) {
+			if (text.indexOf('.') != -1) {
+				final String fixed = Arrays.stream(text.split("\\.")).collect(Collectors.joining("`.`"));
+				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, node));
+			}
 			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
 			node.replaceBy(new TIdentifierLiteral(unescapedText, node.getLine(), node.getPos()));
 		}

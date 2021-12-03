@@ -169,7 +169,7 @@ public class ASTPrologTest {
 	public void testExpressions() throws BCompoundException {
 		checkExpression("SIGMA x,y.(x:NAT & y:INT | x+y)",
 				"general_sum($,[identifier($,x),identifier($,y)],"
-						+ "conjunct($,member($,identifier($,x),nat_set($)),member($,identifier($,y),int_set($))),"
+						+ "conjunct($,[member($,identifier($,x),nat_set($)),member($,identifier($,y),int_set($))]),"
 						+ "add($,identifier($,x),identifier($,y)))");
 	}
 
@@ -189,7 +189,7 @@ public class ASTPrologTest {
 				+ "expression_definition($,dbl,[identifier($,a)],mult_or_cart($,mult_or_cart($,integer($,2),identifier($,x)),identifier($,a))),"
 				+ "substitution_definition($,ax,[identifier($,a)],assign($,[identifier($,x)],[identifier($,a)]))]),"
 				+ "variables($,[identifier($,x)]),"
-				+ "invariant($,conjunct($,definition($,'INV',[]),definition($,lt,[integer($,7)]))),"
+				+ "invariant($,conjunct($,[definition($,'INV',[]),definition($,lt,[integer($,7)])])),"
 				+ "initialisation($,assign($,[identifier($,x)],[definition($,dbl,[integer($,3)])])),"
 				+ "operations($,[operation($,identifier(%,op1),[],[],definition($,ax,[integer($,6)]))])])";
 		checkProlog(1, m, expected);

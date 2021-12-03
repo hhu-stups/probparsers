@@ -252,7 +252,7 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testInvalidPackagePragma2() {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/InvalidPackagePragma2.rmch"));
-		assertTrue(e.getMessage().contains("Invalid folder name"));
+		assertTrue(e.getMessage().contains("Invalid package name"));
 	}
 
 	@Test

@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -507,6 +508,28 @@ public class ASTProlog extends DepthFirstAdapter {
 	
 
 	// predicate
+
+	@Override
+	public void caseAConjunctPredicate(final AConjunctPredicate node) {
+		open(node);
+		
+		final Deque<PPredicate> conjunctPreds = new LinkedList<>();
+		AConjunctPredicate currentNode = node;
+		while (currentNode.getLeft() instanceof AConjunctPredicate) {
+			conjunctPreds.addFirst(currentNode.getRight());
+			currentNode = (AConjunctPredicate)currentNode.getLeft();
+		}
+		conjunctPreds.addFirst(currentNode.getRight());
+		conjunctPreds.addFirst(currentNode.getLeft());
+		
+		pout.openList();
+		for (final PPredicate pred : conjunctPreds) {
+			pred.apply(this);
+		}
+		pout.closeList();
+		
+		close(node);
+	}
 
 	@Override
 	public void caseAForallPredicate(final AForallPredicate node) {

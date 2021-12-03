@@ -1170,7 +1170,14 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		sb.append(node.getText());
+		final String identifier = node.getText();
+		if (Utils.isPlainBIdentifier(identifier)) {
+			sb.append(identifier);
+		} else {
+			sb.append('`');
+			sb.append(Utils.escapeStringContents(identifier));
+			sb.append('`');
+		}
 	}
 
 	@Override

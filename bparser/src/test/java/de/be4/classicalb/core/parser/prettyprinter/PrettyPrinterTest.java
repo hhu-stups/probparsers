@@ -151,6 +151,15 @@ public class PrettyPrinterTest {
 			"bool((A=TRUE or B=TRUE) & (C=TRUE => (D=TRUE <=> E=TRUE)))",
 			"LET x,y BE x=1 & y=2 IN x+y END",
 			"bool(LET x,y BE x=1 & y=2 IN x+y=3 END)",
+			"`MACHINE`",
+			"`or`",
+			"`floor`",
+			"`identifier with spaces`",
+			"`([{}])`",
+			"`([{`",
+			"`/*`",
+			"`MACHINE`.`REFINEMENT`.`IMPLEMENTATION`",
+			"`a\\\\b\\nc`",
 			};
 
 	private static final String PREFIX = "#EXPRESSION ";
