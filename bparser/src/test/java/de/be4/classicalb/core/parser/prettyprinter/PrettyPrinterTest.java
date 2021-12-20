@@ -155,7 +155,6 @@ public class PrettyPrinterTest {
 			"(a**b)**c",
 			"a+(b+c)",
 			"A\\(B\\C)",
-			"(A**B)**C",
 			"a-(b-c)",
 			"a+(b*c)",
 			"dom({((1,2),3), ((2,4),5), ((23,45),23)})",
