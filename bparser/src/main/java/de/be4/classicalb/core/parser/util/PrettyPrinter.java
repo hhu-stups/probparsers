@@ -550,7 +550,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append(" END");
 	}
 
-	public void leftParAssoc(final Node node, final Node right) {
+	private void leftParAssoc(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		// we do not insert parentheses when priority is the same
@@ -559,7 +559,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void rightParAssoc(final Node node, final Node right) {
+	private void rightParAssoc(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight < priorityNode) {
@@ -567,7 +567,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void leftPar(final Node node, final Node right) {
+	private void leftPar(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
@@ -575,7 +575,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void rightPar(final Node node, final Node right) {
+	private void rightPar(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
@@ -583,7 +583,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+	private void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
 		leftParAssoc(node, left);
 		left.apply(this);
 		rightParAssoc(node, left);
@@ -595,7 +595,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		rightPar(node, right);
 	}
 
-	public void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+	private void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
 		leftPar(node, left);
 		left.apply(this);
 		rightPar(node, left);
