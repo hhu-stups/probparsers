@@ -803,7 +803,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
 		sb.append("-");
+		leftParAssoc(node, node.getExpression());
 		node.getExpression().apply(this);
+		rightParAssoc(node, node.getExpression());
 	}
 
 	@Override
