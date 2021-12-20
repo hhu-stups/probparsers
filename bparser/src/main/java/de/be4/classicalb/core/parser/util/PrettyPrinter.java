@@ -54,6 +54,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AUnaryMinusExpression.class, 210);
 		prio.put(AReverseExpression.class, 230);
 		prio.put(AImageExpression.class, 231);
+		prio.put(ARecordFieldExpression.class, 231);
+		prio.put(AFunctionExpression.class, 231);
 		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
@@ -806,13 +808,17 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAReverseExpression(final AReverseExpression node) {
+		leftPar(node, node.getExpression());
 		node.getExpression().apply(this);
+		rightPar(node, node.getExpression());
 		sb.append("~");
 	}
 
 	@Override
 	public void caseAImageExpression(final AImageExpression node) {
+		leftParAssoc(node, node.getLeft());
 		node.getLeft().apply(this);
+		rightParAssoc(node, node.getLeft());
 		sb.append("[");
 		node.getRight().apply(this);
 		sb.append("]");
@@ -1434,7 +1440,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAFunctionExpression(final AFunctionExpression node) {
+		leftParAssoc(node, node.getIdentifier());
 		node.getIdentifier().apply(this);
+		rightParAssoc(node, node.getIdentifier());
 		printParameterList(node.getParameters());
 	}
 
@@ -1461,9 +1469,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARecordFieldExpression(final ARecordFieldExpression node) {
-		node.getRecord().apply(this);
-		sb.append("'");
-		node.getIdentifier().apply(this);
+		applyLeftAssociative(node.getRecord(), node, node.getIdentifier(), "'");
 	}
 
 	@Override
