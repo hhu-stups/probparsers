@@ -8,11 +8,6 @@ variables:
   GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
   DEBIAN_FRONTEND: noninteractive
 
-cache:
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update

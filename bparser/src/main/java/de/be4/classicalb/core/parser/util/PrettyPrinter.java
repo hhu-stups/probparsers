@@ -54,6 +54,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AUnaryMinusExpression.class, 210);
 		prio.put(AReverseExpression.class, 230);
 		prio.put(AImageExpression.class, 231);
+		prio.put(ARecordFieldExpression.class, 231);
+		prio.put(AFunctionExpression.class, 231);
 		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
@@ -550,7 +552,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append(" END");
 	}
 
-	public void leftParAssoc(final Node node, final Node right) {
+	private void leftParAssoc(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		// we do not insert parentheses when priority is the same
@@ -559,7 +561,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void rightParAssoc(final Node node, final Node right) {
+	private void rightParAssoc(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight < priorityNode) {
@@ -567,7 +569,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void leftPar(final Node node, final Node right) {
+	private void leftPar(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
@@ -575,7 +577,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void rightPar(final Node node, final Node right) {
+	private void rightPar(final Node node, final Node right) {
 		Integer priorityNode = OPERATOR_PRIORITIES.get(node.getClass());
 		Integer priorityRight = OPERATOR_PRIORITIES.get(right.getClass());
 		if (priorityNode != null && priorityRight != null && priorityRight <= priorityNode) {
@@ -583,7 +585,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		}
 	}
 
-	public void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+	private void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
 		leftParAssoc(node, left);
 		left.apply(this);
 		rightParAssoc(node, left);
@@ -595,7 +597,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		rightPar(node, right);
 	}
 
-	public void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+	private void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
 		leftPar(node, left);
 		left.apply(this);
 		rightPar(node, left);
@@ -801,18 +803,24 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
 		sb.append("-");
+		leftParAssoc(node, node.getExpression());
 		node.getExpression().apply(this);
+		rightParAssoc(node, node.getExpression());
 	}
 
 	@Override
 	public void caseAReverseExpression(final AReverseExpression node) {
+		leftPar(node, node.getExpression());
 		node.getExpression().apply(this);
+		rightPar(node, node.getExpression());
 		sb.append("~");
 	}
 
 	@Override
 	public void caseAImageExpression(final AImageExpression node) {
+		leftParAssoc(node, node.getLeft());
 		node.getLeft().apply(this);
+		rightParAssoc(node, node.getLeft());
 		sb.append("[");
 		node.getRight().apply(this);
 		sb.append("]");
@@ -1434,7 +1442,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAFunctionExpression(final AFunctionExpression node) {
+		leftParAssoc(node, node.getIdentifier());
 		node.getIdentifier().apply(this);
+		rightParAssoc(node, node.getIdentifier());
 		printParameterList(node.getParameters());
 	}
 
@@ -1461,9 +1471,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARecordFieldExpression(final ARecordFieldExpression node) {
-		node.getRecord().apply(this);
-		sb.append("'");
-		node.getIdentifier().apply(this);
+		applyLeftAssociative(node.getRecord(), node, node.getIdentifier(), "'");
 	}
 
 	@Override

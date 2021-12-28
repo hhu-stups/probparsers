@@ -4,7 +4,7 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.31'
+project.version = '2.9.32'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
@@ -15,7 +15,7 @@ wrapper {
 }
 
 ext {
-    sableCCVersion = '3.3.0'
+    sableCCVersion = '3.3.2'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
