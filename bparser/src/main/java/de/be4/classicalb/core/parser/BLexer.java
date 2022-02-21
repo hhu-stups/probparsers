@@ -84,7 +84,7 @@ public class BLexer extends Lexer {
 		addInvalid(TLeftBrace.class, TRightBracket.class, "Closing brace is missing.");
 		addInvalid(TLeftBracket.class, TEnd.class, "Closing bracket is missing.");
 		addInvalid(TLeftBracket.class, TRightPar.class, "Closing bracket is missing.");
-		addInvalid(TLeftBracket.class, TRightBracket.class, "Closing bracket is missing.");
+		addInvalid(TLeftBracket.class, TRightBrace.class, "Closing bracket is missing.");
 		// there could be more invalid combinations  BEGIN },  BEGIN ) ...
 		
 		// add some rules for the binary infix logical operators:
