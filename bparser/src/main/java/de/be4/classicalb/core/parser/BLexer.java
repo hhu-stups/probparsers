@@ -69,7 +69,23 @@ public class BLexer extends Lexer {
 			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
 			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
+		
+			addInvalid(TLeftPar.class, clauseTokenClass, "Closing parenthesis is missing.");
+			addInvalid(TLeftBrace.class, clauseTokenClass, "Closing brace is missing.");
+			addInvalid(TLeftBracket.class, clauseTokenClass, "Closing bracket is missing.");
+		    //	addInvalid(TBegin.class, clauseTokenClass, "Closing END is missing."); // does not seem to work
 		}
+		
+		addInvalid(TLeftPar.class, TEnd.class, "Closing parenthesis is missing.");
+		addInvalid(TLeftPar.class, TRightBrace.class, "Closing parenthesis is missing."); // ( }
+		addInvalid(TLeftPar.class, TRightBracket.class, "Closing parenthesis is missing.");
+		addInvalid(TLeftBrace.class, TEnd.class, "Closing brace is missing.");
+		addInvalid(TLeftBrace.class, TRightPar.class, "Closing brace is missing.");
+		addInvalid(TLeftBrace.class, TRightBracket.class, "Closing brace is missing.");
+		addInvalid(TLeftBracket.class, TEnd.class, "Closing bracket is missing.");
+		addInvalid(TLeftBracket.class, TRightPar.class, "Closing bracket is missing.");
+		addInvalid(TLeftBracket.class, TRightBracket.class, "Closing bracket is missing.");
+		// there could be more invalid combinations  BEGIN },  BEGIN ) ...
 		
 		// add some rules for the binary infix logical operators:
 		binOpTokenClasses.add(TConjunction.class);
@@ -234,6 +250,7 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
+		// BEGIN END also should not be empty
 		
 		addInvalid(TComma.class, TRightPar.class, "Missing expression after comma.");
 		addInvalid(TComma.class, TRightBrace.class, "Missing expression after comma.");
