@@ -73,7 +73,7 @@ public class BLexer extends Lexer {
 			addInvalid(TLeftPar.class, clauseTokenClass, "Closing parenthesis is missing.");
 			addInvalid(TLeftBrace.class, clauseTokenClass, "Closing brace is missing.");
 			addInvalid(TLeftBracket.class, clauseTokenClass, "Closing bracket is missing.");
-		    //	addInvalid(TBegin.class, clauseTokenClass, "Closing END is missing."); // does not seem to work
+		    addInvalid(TBegin.class, clauseTokenClass, "Closing END is missing."); // does not seem to work
 		}
 		
 		addInvalid(TLeftPar.class, TEnd.class, "Closing parenthesis is missing.");
@@ -85,7 +85,9 @@ public class BLexer extends Lexer {
 		addInvalid(TLeftBracket.class, TEnd.class, "Closing bracket is missing.");
 		addInvalid(TLeftBracket.class, TRightPar.class, "Closing bracket is missing.");
 		addInvalid(TLeftBracket.class, TRightBrace.class, "Closing bracket is missing.");
-		// there could be more invalid combinations  BEGIN },  BEGIN ) ...
+		addInvalid(TBegin.class, TRightPar.class, "Closing END is missing.");
+		addInvalid(TBegin.class, TRightBrace.class, "Closing END is missing.");
+		addInvalid(TBegin.class, TRightBracket.class, "Closing END is missing.");
 		
 		// add some rules for the binary infix logical operators:
 		binOpTokenClasses.add(TConjunction.class);
@@ -250,7 +252,23 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
-		// BEGIN END also should not be empty
+		addInvalid(TBegin.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TIf.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TIf.class, TThen.class, "Block must contain statements.");
+		addInvalid(TThen.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TThen.class, TElse.class, "Block must contain statements.");
+		addInvalid(TThen.class, TElsif.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TElse.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TElsif.class, "Block must contain statements.");
+		addInvalid(TElse.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TSelect.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TSelect.class, TThen.class, "Block must contain statements.");
+		addInvalid(TChoice.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TChoice.class, TOr.class, "Block must contain statements.");
+		addInvalid(TOr.class, TEnd.class, "Block must contain statements.");
+		// more combination: CASE, WHILE
+		
 		
 		addInvalid(TComma.class, TRightPar.class, "Missing expression after comma.");
 		addInvalid(TComma.class, TRightBrace.class, "Missing expression after comma.");
