@@ -61,7 +61,7 @@ If you have made changes to any of the parsers, please run the test suites using
 
 ## Bugs
 
-Please report bugs and feature requests on our [bug tracker](https://probjira.atlassian.net/projects/PARSERLIB/issues).
+Please report bugs and feature requests on our [bug tracker](https://github.com/hhu-stups/prob-issues/issues).
 
 ## Contributors
 
