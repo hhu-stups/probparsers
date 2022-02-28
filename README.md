@@ -14,7 +14,7 @@ This is an umbrella project for the following parsers and libraries used by ProB
 * prologlib: Library to construct and manipulate well-formed Prolog terms.
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
 * answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
-* eventbalg: **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
+* eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
 
 ## Using
 
