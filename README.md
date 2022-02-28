@@ -8,13 +8,13 @@ This is an umbrella project for the following parsers and libraries used by ProB
 * ltlparser: Parser for LTL formulas. The parser delegates formulas in `{ }` to a formalism specific parser, e.g. to the classical B parser. Also contains a parser for CTL.
 * parserbase: Library for uniform access to the formal language parsers. This is used to allow embedding different languages into LTL formulas.
 * unicode: Lexer that transforms Event-B expressions and predicates between ASCII, Unicode and LaTeX syntax.
-* typechecker: TODO
 * eventbstruct: Parser for the Camille structural syntax.
 * theorymapping: Parser for theory mapping files (translation of Event-B operators to Prolog predicates).
 * prologlib: Library to construct and manipulate well-formed Prolog terms.
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
 * answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
 * eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
+* typechecker: Java-based classical B typechecker. **No longer built or published - last release is 2.9.32.** If you have a project that needs this library, complain to @dgelessus (or just re-add this subproject in settings.gradle). Note that **this is not the normal ProB typechecker** - that is part of prob_prolog and is completely separate from this code.
 
 ## Using
 
