@@ -48,6 +48,9 @@ public class CliBParser {
 
 	private static final String CLI_SWITCH_VERBOSE = "-v";
 	private static final String CLI_SWITCH_VERSION = "-version";
+	private static final String CLI_SWITCH_HELP = "-h";
+	private static final String CLI_SWITCH_HELP2 = "-help";
+	private static final String CLI_SWITCH_HELP3 = "--help";
 	private static final String CLI_SWITCH_TIME = "-time";
 	private static final String CLI_SWITCH_PP = "-pp";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
@@ -67,7 +70,14 @@ public class CliBParser {
 		// System.in.read();
 		// System.out.println("Starting");
 		final ConsoleOptions options = createConsoleOptions(args);
-
+		
+		if (options.isOptionSet(CLI_SWITCH_HELP) ||
+		           options.isOptionSet(CLI_SWITCH_HELP2) ||
+		           options.isOptionSet(CLI_SWITCH_HELP3)) {
+			options.printUsage(System.err);
+			System.exit(-1);
+		}
+		
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
 			System.out.println(String.format("Version:    %s", BParser.getVersion()));
 			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
@@ -471,7 +481,10 @@ public class CliBParser {
 		// TO DO: add option for less precise position infos
 		options.addOption(CLI_SWITCH_PROLOG_LINES, "Put line numbers into prolog terms");
 		options.addOption(CLI_SWITCH_OUTPUT, "Specify output file", 1);
-		options.addOption(CLI_SWITCH_VERSION, "Print the parser version and exit.");
+		options.addOption(CLI_SWITCH_VERSION, "Print the parser version and exit");
+		options.addOption(CLI_SWITCH_HELP, "Print the parser help and exit");
+		options.addOption(CLI_SWITCH_HELP2, "Print the parser help and exit");
+		options.addOption(CLI_SWITCH_HELP3, "Print the parser help and exit");
 		options.addOption(CLI_SWITCH_COMPACT_POSITIONS, "Use new more compact Prolog position terms");
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
