@@ -206,6 +206,11 @@ public class CliBParser {
 				// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
 				if (returnValue == 0) {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
+				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
+				   System.out.println("Erasing file contents of " + outFile);
+				   final PrintWriter out2 = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
+				   out2.println("% VM Error occurred");
+				   out2.close();
 				}
 				break;
 			case formula:
@@ -382,12 +387,13 @@ public class CliBParser {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -4;
-		} catch (final StackOverflowError e) {  // inherits from VirtualMachineError
+		} catch (final StackOverflowError e) {  // inherits from VirtualMachineError, Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				System.out.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError: "+ e.getMessage()  // message seems empty
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage()  // message seems empty
 				, e)));
+				//e.printStackTrace(System.out); may produce itself a stack overflow??
 			} else {
 				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
 			}
