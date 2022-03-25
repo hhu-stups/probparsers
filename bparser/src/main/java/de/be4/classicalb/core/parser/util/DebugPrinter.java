@@ -13,6 +13,7 @@ public class DebugPrinter {
 	public static void println(String message) {
 		out.print("*** Debug: ");
 		out.println(message);
+		// out.flush(); // default flushes after newline
 	}
 
 	public static void print(String message) {

@@ -384,8 +384,11 @@ public class CliBParser {
 		final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
 		final long endParseMain = System.currentTimeMillis();
 
-		if (parsingBehaviour.isPrintTime()) { // -time flag in CliBParser
+		if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) { // -time flag in CliBParser
 			out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
+		}
+		if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
+			System.out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
 		}
 
 		if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
@@ -403,24 +406,31 @@ public class CliBParser {
 			final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
 			final long endParseRecursive = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime()) {
+			if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
 				out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
+			}
+			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
+			     System.out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
 			}
 
 			final long startOutput = System.currentTimeMillis();
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+			    System.out.println("Generating fastrw ");
 				printASTasFastProlog(out, rml);
 			} else { // -prolog flag in CliBParser
 				rml.printAsProlog(out);
 			}
 			final long endOutput = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime()) {
+			if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
 				out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
+			}
+			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
+				System.out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
 			}
 		}
 
-		if (parsingBehaviour.isPrintTime()) {
+		if (parsingBehaviour.isPrintTime()  && !parsingBehaviour.isFastPrologOutput()) {
 			out.println("% Used memory : " + 
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
 			out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
