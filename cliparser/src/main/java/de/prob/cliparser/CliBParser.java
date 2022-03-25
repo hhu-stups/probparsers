@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.lang.StackOverflowError;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.FastReadTransformer;
@@ -164,6 +165,10 @@ public class CliBParser {
 				command = EPreplCommands.halt;
 			} else {
 				command = EPreplCommands.valueOf(line);
+			}
+			
+			if (behaviour.isVerbose()) {
+			   System.out.println("Received PREPL command: " + command);
 			}
 
 			switch (command) {
@@ -344,6 +349,9 @@ public class CliBParser {
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintWriter out, final PrintWriter err, final File bfile) {
 		try {
+		    if (behaviour.isVerbose()) {
+		       System.out.println("Parsing file: " + bfile);
+		    }
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
@@ -374,6 +382,16 @@ public class CliBParser {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -4;
+		} catch (final StackOverflowError e) {  // inherits from VirtualMachineError
+			if (behaviour.isPrologOutput() ||
+				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+				System.out.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError: "+ e.getMessage()  // message seems empty
+				, e)));
+			} else {
+				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+			}
+			return -5;
 		}
 	}
 
@@ -450,6 +468,8 @@ public class CliBParser {
 	fast_read(S,ParserVersionTerm),
 	fast_read(S,FilesTerm), ... until end_of_file
 	close(S)
+	
+	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
 	private static void printASTasFastProlog(final PrintWriter out, final RecursiveMachineLoader rml) {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
