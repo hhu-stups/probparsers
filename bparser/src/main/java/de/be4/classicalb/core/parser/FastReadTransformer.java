@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ListIterator;
 
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.CompoundPrologTerm;
@@ -57,14 +58,11 @@ public class FastReadTransformer {
 	}
 
 	private void write(ListPrologTerm lp) {
-		if (lp.isEmpty())
-			sb.append(']');
-		else {
+        for(ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();){
 			sb.append('[');
-			fastwrite(lp.head());
-			ListPrologTerm tail = lp.tail();
-			write(tail);
-		}
+			fastwrite(i.next());
+        }
+		sb.append(']');
 	}
 
 	private void write(VariablePrologTerm vp) {
