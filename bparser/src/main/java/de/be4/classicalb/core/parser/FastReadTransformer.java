@@ -43,21 +43,20 @@ public class FastReadTransformer {
 	private void fastwrite(PrologTerm term) {
 		if (term instanceof IntegerPrologTerm) {
 			IntegerPrologTerm intTerm = (IntegerPrologTerm) term;
-			write(intTerm);
-		}
-		if (term instanceof CompoundPrologTerm) {
-			write(term);
-		}
-		if (term instanceof VariablePrologTerm) {
-			write((VariablePrologTerm) term);
-		}
-		if (term instanceof ListPrologTerm) {
-			ListPrologTerm list = (ListPrologTerm) term;
-			write(list);
+			writeInteger(intTerm);
+		} else if (term instanceof CompoundPrologTerm) {
+			writeCompound(term);
+		} else if (term instanceof ListPrologTerm) {
+			//ListPrologTerm list = (ListPrologTerm) term; writeList(list);
+			writeList( (ListPrologTerm) term);
+		} else if (term instanceof VariablePrologTerm) {
+			writeVariable((VariablePrologTerm) term);
+		} else {
+			throw new IllegalArgumentException("Illegal Prolog term for fastwrite"); 
 		}
 	}
 
-	private void write(ListPrologTerm lp) {
+	private void writeList(ListPrologTerm lp) {
         for(ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();){
 			sb.append('[');
 			fastwrite(i.next());
@@ -65,14 +64,14 @@ public class FastReadTransformer {
 		sb.append(']');
 	}
 
-	private void write(VariablePrologTerm vp) {
+	private void writeVariable(VariablePrologTerm vp) {
 		String name = getRenamedVariable(vp.getName());
 		sb.append("_");
 		sb.append(name);
 		sb.append(ZERO);
 	}
 
-	private void write(IntegerPrologTerm ip) {
+	private void writeInteger(IntegerPrologTerm ip) {
 		sb.append("I");
 		sb.append(ip.getValue());
 		sb.append(ZERO);
@@ -86,7 +85,7 @@ public class FastReadTransformer {
 		return varnums.get(name);
 	}
 
-	private void write(PrologTerm cp) {
+	private void writeCompound(PrologTerm cp) {
 		if (cp.isAtom()) {
 			sb.append("A");
 			sb.append(cp.getFunctor());
