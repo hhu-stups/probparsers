@@ -19,7 +19,7 @@ import java.lang.StackOverflowError;
 import java.lang.VirtualMachineError;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.FastReadTransformer;
+import de.be4.classicalb.core.parser.FastReadWriter;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -450,7 +450,7 @@ public class CliBParser {
 
 			final long startOutput = System.currentTimeMillis();
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-			    System.out.println("Generating fastrw ");
+			    System.out.println("Generating fastrw binary output");
 				printASTasFastProlog(out, rml);
 			} else { // -prolog flag in CliBParser
 				rml.printAsProlog(out);
@@ -493,14 +493,23 @@ public class CliBParser {
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
 
+		FastReadWriter fwriter = new FastReadWriter(out);
+		
 		for (PrologTerm term : sentences) {
+			fwriter.fastwrite(term);
+		}
+	}
+	/* old version with transformer, 
+	   seems slightly faster even though it builds up unnecessary intermediate term
+			for (PrologTerm term : sentences) {
 			StructuredPrologOutput output = new StructuredPrologOutput();
 			output.printTerm(term);
 			output.fullstop();
 			FastReadTransformer transformer = new FastReadTransformer(output);
 			out.print(transformer.write());
-		}
-	}
+	*/
+			
+			
 
 	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintWriter out) throws BCompoundException {
 		RulesProject project = new RulesProject();

@@ -60,13 +60,13 @@ public class FastReadWriter {
 
 	private void writeVariable(VariablePrologTerm vp) {
 		String name = getRenamedVariable(vp.getName());
-		out.print("_");
+		out.print('_');
 		out.print(name);
 		out.print(ZERO);
 	}
 
 	private void writeInteger(IntegerPrologTerm ip) {
-		out.print("I");
+		out.print('I');
 		out.print(ip.getValue());
 		out.print(ZERO);
 	}
@@ -81,11 +81,11 @@ public class FastReadWriter {
 
 	private void writeCompound(PrologTerm cp) {
 		if (cp.isAtom()) {
-			out.print("A");
+			out.print('A');
 			out.print(cp.getFunctor());
 			out.print(ZERO);
 		} else {
-			out.print("S");
+			out.print('S');
 			out.print(cp.getFunctor());
 			out.print(ZERO);
 			out.print((char) cp.getArity());
