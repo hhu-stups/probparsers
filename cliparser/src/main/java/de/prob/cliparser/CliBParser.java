@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.lang.StackOverflowError;
+import java.lang.VirtualMachineError;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.FastReadTransformer;
@@ -398,6 +399,16 @@ public class CliBParser {
 				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
 			}
 			return -5;
+		} catch (final VirtualMachineError e) {  // inherits from  Throwable
+			if (behaviour.isPrologOutput() ||
+				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
+				System.out.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage()  // message seems empty
+				, e)));
+			} else {
+				err.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+			}
+			return -6;
 		}
 	}
 
