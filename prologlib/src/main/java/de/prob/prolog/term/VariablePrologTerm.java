@@ -19,7 +19,7 @@ public final class VariablePrologTerm extends PrologTerm {
 	private final String name;
 
 	public VariablePrologTerm(final String name) {
-		super();
+		//super();
 		if (name == null)
 			throw new IllegalArgumentException(
 					"Name of variable must not be null");

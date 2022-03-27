@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -13,7 +13,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a Prolog integer.
  * 
- * @author plagge
+ * @author plagge, modifications by leuschel
  */
 public final class IntegerPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;
@@ -21,7 +21,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 	private final BigInteger value;
 
 	public IntegerPrologTerm(final BigInteger value) {
-		super(); // super(value.toString());
+		// super(value.toString());
 		this.value = value;
 	}
 
@@ -30,7 +30,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 	}
 	
 	public IntegerPrologTerm(final byte[] arr) {
-		super(); // super(new BigInteger(arr).toString());
+		// super(new BigInteger(arr).toString());
 		this.value = new BigInteger(arr);
 	}
 

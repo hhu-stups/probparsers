@@ -25,19 +25,19 @@ public abstract class PrologTerm implements Serializable {
 	private static final long serialVersionUID = 7974875342517963149L;
 
 	// protected final String functor;
-	protected final PrologTerm[] arguments;
+	//protected final PrologTerm[] arguments;
 
-	public PrologTerm(//final String functor, 
-	                  final PrologTerm... arguments) {
+	//public PrologTerm(//final String functor, 
+	//                  final PrologTerm... arguments) {
 		//if (functor == null)
 		//	throw new IllegalArgumentException("Functor must not be null");
 		//this.functor = functor;
-		if (arguments == null || arguments.length == 0) {
-			this.arguments = null;
-		} else {
-			this.arguments = arguments;
-		}
-	}
+		//if (arguments == null || arguments.length == 0) {
+		//	this.arguments = null;
+		//} else {
+		//	this.arguments = arguments;
+		//}
+	//}
 
 	public boolean isTerm() {
 		return false;
@@ -79,7 +79,8 @@ public abstract class PrologTerm implements Serializable {
 	}
 
 	public int getArity() {
-		return arguments == null ? 0 : arguments.length;
+		return 0;
+		//return arguments == null ? 0 : arguments.length;
 	}
 
 	/**
@@ -90,10 +91,11 @@ public abstract class PrologTerm implements Serializable {
 	 * @return the PrologTerm
 	 */
 	public PrologTerm getArgument(final int index) {
-		if (arguments == null)
-			throw new IndexOutOfBoundsException("Atom has no arguments");
-		else
-			return arguments[index - 1];
+	    throw new IndexOutOfBoundsException("Atom has no arguments");
+		//if (arguments == null)
+		//	throw new IndexOutOfBoundsException("Atom has no arguments");
+		//else
+		//	return arguments[index - 1];
 	}
 
 	public static String atomicString(final PrologTerm term) {

@@ -20,11 +20,17 @@ public final class CompoundPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = 4825557199378803498L;
 	
 	protected final String functor;
+	protected final PrologTerm[] arguments;
 
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {
-		super(arguments);
+		//super(arguments);
 		this.functor = functor;
+		if (arguments == null || arguments.length == 0) {
+			this.arguments = null;
+		} else {
+			this.arguments = arguments;
+		}
 		if (functor == null)
 		 	throw new IllegalArgumentException("Functor of CompoundPrologTerm must not be null");
 	}
@@ -39,6 +45,11 @@ public final class CompoundPrologTerm extends PrologTerm {
 	}
 	
 	@Override
+	public int getArity() {
+		return arguments == null ? 0 : arguments.length;
+	}
+	
+	@Override
 	public boolean isAtom() {
 		return arguments == null;
 	}
@@ -46,6 +57,14 @@ public final class CompoundPrologTerm extends PrologTerm {
 	@Override
 	public boolean isTerm() {
 		return true;
+	}
+	
+	@Override
+	public PrologTerm getArgument(final int index) {
+		if (arguments == null)
+			throw new IndexOutOfBoundsException("Atom " + functor + " has no arguments");
+		else
+			return arguments[index - 1];
 	}
 
 	@Override

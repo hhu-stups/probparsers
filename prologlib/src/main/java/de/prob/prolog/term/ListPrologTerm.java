@@ -27,8 +27,9 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 
 	private final PrologTerm[] elements;
 
-	private final int start;
+	private final int start; // TODO: check if we need these attributes?? We are wasting space
 	private final int end;
+	
 
 	public ListPrologTerm(final PrologTerm... elements) {
 		// Note: this super call is not entirely correct, it does not match the structure of Prolog lists properly.
@@ -37,7 +38,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
 		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
 		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
-		super(elements); // super(elements.length == 0 ? "[]" : ".", elements);
+		// super(elements.length == 0 ? "[]" : ".", elements);
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
@@ -47,8 +48,8 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return EMPTY_LIST;
 	}
 
-	public ListPrologTerm(int start, int end, ListPrologTerm org) {
-		super(); // super(org.getFunctor());
+	public ListPrologTerm(int start, int end, ListPrologTerm org) { // TODO: check who is calling this constructor
+		//super(); // super(org.getFunctor());
 		this.start = start;
 		this.end = end;
 		this.elements = org.elements;
@@ -57,6 +58,11 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	@Override
 	public String getFunctor() {
 		return (elements.length == 0 ? "[]" : ".");
+	}
+	
+	@Override
+	public int getArity() {
+		return end;
 	}
 
 	@Override
@@ -69,6 +75,15 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	public boolean isList() {
 		return true;
 	}
+	
+	@Override
+	public PrologTerm getArgument(final int index) {
+		if (elements == null)
+			throw new IndexOutOfBoundsException("List has no arguments");
+		else
+			return elements[index + start - 1];
+	}
+	
 
 	public int size() {
 		return end - start;
