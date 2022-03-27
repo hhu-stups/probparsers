@@ -19,19 +19,27 @@ public final class IntegerPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;
 
 	private final BigInteger value;
+	private final long ivalue; // holds the integer if value==null
+	// ideally we should create two instance classes, one for long
+   //  and one for BigInteger;  
 
 	public IntegerPrologTerm(final BigInteger value) {
 		// super(value.toString());
+		// TODO: we could check longValueExact and catch ArithmeticException
 		this.value = value;
+		this.ivalue = -1;
 	}
 
 	public IntegerPrologTerm(final long value) {
-		this(BigInteger.valueOf(value));
+		//this(BigInteger.valueOf(value));
+		this.value = null; // BigInteger is not required
+		this.ivalue = value;
 	}
 	
 	public IntegerPrologTerm(final byte[] arr) {
 		// super(new BigInteger(arr).toString());
 		this.value = new BigInteger(arr);
+		this.ivalue = -1;
 	}
 
 	@Override
@@ -41,16 +49,25 @@ public final class IntegerPrologTerm extends PrologTerm {
 	
 	@Override
 	public String getFunctor() {
-		return value.toString();
+	    if (value==null)
+	      return Long.toString(ivalue);
+	    else
+		  return value.toString();
 	}
 
 	public BigInteger getValue() {
-		return value;
+		if (value==null)
+	      return BigInteger.valueOf(ivalue);
+	    else
+	      return value;
 	}
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
-		pto.printNumber(value);
+		if (value==null)
+	      pto.printNumber(ivalue);
+	    else
+	      pto.printNumber(value);
 	}
 
 	@Override
@@ -59,7 +76,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 		if (this == other) {
 			isEqual = true;
 		} else if (other != null && other instanceof IntegerPrologTerm) {
-			isEqual = this.value.equals(((IntegerPrologTerm) other).value);
+			isEqual = this.getValue().equals(((IntegerPrologTerm) other).getValue());
 		} else {
 			isEqual = false;
 		}
@@ -68,7 +85,10 @@ public final class IntegerPrologTerm extends PrologTerm {
 
 	@Override
 	public int hashCode() {
-		return value.hashCode() * 11 + 4;
+		if (value==null)
+	      return Long.hashCode(ivalue) * 11 + 4;
+	    else
+	      return value.hashCode() * 11 + 4;
 	}
 
 }
