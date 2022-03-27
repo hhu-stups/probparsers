@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -14,14 +14,17 @@ import de.prob.prolog.output.IPrologTermOutput;
  * Represents a prolog term that consists of a functor and an (optional) list of
  * arguments. If no arguments are given, the term is an atom.
  * 
- * @author plagge
+ * @author plagge, modifications by leuschel
  */
 public final class CompoundPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = 4825557199378803498L;
+	
+	protected final String functor;
 
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {
-		super(functor,arguments);
+		super(arguments);
+		this.functor = functor;
 		if (functor == null)
 		 	throw new IllegalArgumentException("Functor of CompoundPrologTerm must not be null");
 	}
@@ -30,6 +33,11 @@ public final class CompoundPrologTerm extends PrologTerm {
 		this(atom, (PrologTerm[]) null);
 	}
 
+	@Override
+	public String getFunctor() {
+		return functor;
+	}
+	
 	@Override
 	public boolean isAtom() {
 		return arguments == null;
@@ -56,10 +64,12 @@ public final class CompoundPrologTerm extends PrologTerm {
 		boolean isEqual;
 		if (this == other) {
 			isEqual = true;
-		} else if (other != null && other instanceof PrologTerm) {
-			PrologTerm cother = (PrologTerm) other;
+		} else if (other != null && other instanceof CompoundPrologTerm) {
+			CompoundPrologTerm cother = (CompoundPrologTerm) other;
 			isEqual = functor.equals(cother.functor)
-					&& Arrays.equals(arguments, cother.arguments);
+					&& Arrays.equals(arguments, cother.arguments); 
+			// Note: this will not consider the atom "[]" to be equal to the empty list
+			// But then: comparing longer lists with equivalent compound terms would require quite a bit of code
 		} else {
 			isEqual = false;
 		}

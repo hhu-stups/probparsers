@@ -21,7 +21,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 	private final BigInteger value;
 
 	public IntegerPrologTerm(final BigInteger value) {
-		super(null); // super(value.toString());
+		super(); // super(value.toString());
 		this.value = value;
 	}
 
@@ -30,7 +30,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 	}
 	
 	public IntegerPrologTerm(final byte[] arr) {
-		super(new BigInteger(arr).toString());
+		super(); // super(new BigInteger(arr).toString());
 		this.value = new BigInteger(arr);
 	}
 

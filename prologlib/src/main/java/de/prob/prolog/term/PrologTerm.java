@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -18,20 +18,20 @@ import de.prob.prolog.output.PrologTermOutput;
 /**
  * This is the abstract base class for Prolog terms
  * 
- * @author plagge
+ * @author plagge, modifications by leuschel
  */
 public abstract class PrologTerm implements Serializable {
 
 	private static final long serialVersionUID = 7974875342517963149L;
 
-	protected final String functor;
+	// protected final String functor;
 	protected final PrologTerm[] arguments;
 
-	public PrologTerm(final String functor, 
+	public PrologTerm(//final String functor, 
 	                  final PrologTerm... arguments) {
 		//if (functor == null)
 		//	throw new IllegalArgumentException("Functor must not be null");
-		this.functor = functor;
+		//this.functor = functor;
 		if (arguments == null || arguments.length == 0) {
 			this.arguments = null;
 		} else {
@@ -74,7 +74,8 @@ public abstract class PrologTerm implements Serializable {
 	}
 
 	public String getFunctor() {
-		return functor;
+	   // throw new IllegalArgumentException("Functor is null");
+		return "";
 	}
 
 	public int getArity() {

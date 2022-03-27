@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -11,7 +11,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a Prolog variable.
  * 
- * @author plagge
+ * @author plagge, modifications by leuschel
  */
 public final class VariablePrologTerm extends PrologTerm {
 	private static final long serialVersionUID = 7637808382619765929L;
@@ -19,13 +19,18 @@ public final class VariablePrologTerm extends PrologTerm {
 	private final String name;
 
 	public VariablePrologTerm(final String name) {
-		super(name);
+		super();
 		if (name == null)
 			throw new IllegalArgumentException(
 					"Name of variable must not be null");
 		this.name = name;
 	}
 
+	@Override
+	public String getFunctor() {
+		return name;
+	}
+	
 	@Override
 	public boolean isVariable() {
 		return true;

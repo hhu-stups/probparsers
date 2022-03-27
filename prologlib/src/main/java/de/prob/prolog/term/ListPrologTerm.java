@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -17,7 +17,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a Prolog list.
  *
- * @author plagge
+ * @author plagge, modifications by leuschel
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
 
@@ -37,7 +37,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
 		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
 		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
-		super(null,elements); // super(elements.length == 0 ? "[]" : ".", elements);
+		super(elements); // super(elements.length == 0 ? "[]" : ".", elements);
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
@@ -48,7 +48,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public ListPrologTerm(int start, int end, ListPrologTerm org) {
-		super(null); // super(org.getFunctor());
+		super(); // super(org.getFunctor());
 		this.start = start;
 		this.end = end;
 		this.elements = org.elements;
