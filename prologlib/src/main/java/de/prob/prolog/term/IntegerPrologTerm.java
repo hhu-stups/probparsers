@@ -21,7 +21,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 	private final BigInteger value;
 
 	public IntegerPrologTerm(final BigInteger value) {
-		super(value.toString());
+		super(null); // super(value.toString());
 		this.value = value;
 	}
 
@@ -37,6 +37,11 @@ public final class IntegerPrologTerm extends PrologTerm {
 	@Override
 	public boolean isNumber() {
 		return true;
+	}
+	
+	@Override
+	public String getFunctor() {
+		return value.toString();
 	}
 
 	public BigInteger getValue() {

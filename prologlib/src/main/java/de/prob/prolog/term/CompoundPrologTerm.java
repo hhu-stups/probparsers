@@ -22,6 +22,8 @@ public final class CompoundPrologTerm extends PrologTerm {
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {
 		super(functor,arguments);
+		if (functor == null)
+		 	throw new IllegalArgumentException("Functor of CompoundPrologTerm must not be null");
 	}
 
 	public CompoundPrologTerm(final String atom) {

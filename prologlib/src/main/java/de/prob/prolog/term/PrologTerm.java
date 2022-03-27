@@ -27,9 +27,10 @@ public abstract class PrologTerm implements Serializable {
 	protected final String functor;
 	protected final PrologTerm[] arguments;
 
-	public PrologTerm(final String functor, final PrologTerm... arguments) {
-		if (functor == null)
-			throw new IllegalArgumentException("Functor must not be null");
+	public PrologTerm(final String functor, 
+	                  final PrologTerm... arguments) {
+		//if (functor == null)
+		//	throw new IllegalArgumentException("Functor must not be null");
 		this.functor = functor;
 		if (arguments == null || arguments.length == 0) {
 			this.arguments = null;

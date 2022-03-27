@@ -37,7 +37,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
 		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
 		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
-		super(elements.length == 0 ? "[]" : ".", elements);
+		super(null,elements); // super(elements.length == 0 ? "[]" : ".", elements);
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
@@ -48,10 +48,15 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public ListPrologTerm(int start, int end, ListPrologTerm org) {
-		super(org.getFunctor());
+		super(null); // super(org.getFunctor());
 		this.start = start;
 		this.end = end;
 		this.elements = org.elements;
+	}
+	
+	@Override
+	public String getFunctor() {
+		return (elements.length == 0 ? "[]" : ".");
 	}
 
 	@Override
