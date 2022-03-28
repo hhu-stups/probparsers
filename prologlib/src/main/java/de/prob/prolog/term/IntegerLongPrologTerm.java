@@ -13,8 +13,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a Prolog integer which can be represented as long.
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
- * 
- * @author plagge, modifications by leuschel
  */
 public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;
@@ -27,7 +25,7 @@ public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
 	
 	@Override
 	public String getFunctor() {
-	    return Long.toString(ivalue);
+		return Long.toString(ivalue);
 	}
 	
 	@Override
@@ -47,7 +45,7 @@ public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
 
 	@Override
 	public int hashCode() {
-	      return Long.hashCode(ivalue) * 11 + 4;
+		return Long.hashCode(ivalue) * 11 + 4;
 	}
 
 }

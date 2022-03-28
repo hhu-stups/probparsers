@@ -71,7 +71,7 @@ public abstract class PrologTerm implements Serializable {
 	}
 
 	public String getFunctor() {
-	   // throw new IllegalArgumentException("Functor is null");
+		// throw new IllegalArgumentException("Functor is null");
 		return "";
 	}
 

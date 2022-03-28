@@ -13,8 +13,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a Prolog integer which can be represented as long.
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
- * 
- * @author plagge, modifications by leuschel
  */
 public abstract class AIntegerPrologTerm extends PrologTerm {
 
