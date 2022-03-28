@@ -13,26 +13,26 @@ import de.prob.prolog.output.PrologTermStringOutput;
 public class ListPrologTermTest {
 	@Test(expected = IllegalStateException.class)
 	public void tailTestEmpty() {
-		ListPrologTerm l = new ListPrologTerm(new PrologTerm[0]);
+		ListPrologTerm l = new ListPrologTerm();
 		l.tail(); // throws exception
 	}
 
 	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void headTestEmpty() {
-		ListPrologTerm l = new ListPrologTerm(new PrologTerm[0]);
+		ListPrologTerm l = new ListPrologTerm();
 		l.head();// throws exception
 	}
 
 	@Test
 	public void tailTest2() {
-		ListPrologTerm l = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42) });
+		ListPrologTerm l = new ListPrologTerm(new IntegerPrologTerm(42));
 		ListPrologTerm tail = l.tail();
 		assertTrue(tail.isEmpty());
 	}
 
 	@Test
 	public void tailTest3() {
-		ListPrologTerm l = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
+		ListPrologTerm l = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
 		ListPrologTerm tail = l.tail();
 		assertFalse(tail.isEmpty());
 		assertTrue(tail.tail().isEmpty());
@@ -40,15 +40,14 @@ public class ListPrologTermTest {
 
 	@Test
 	public void initTest1() {
-		ListPrologTerm t1 = new ListPrologTerm(new PrologTerm[0]);
+		ListPrologTerm t1 = new ListPrologTerm();
 		ListPrologTerm t2 = new ListPrologTerm();
 		assertEquals(t1, t2);
 	}
 
 	@Test
 	public void initTest2() {
-		ListPrologTerm t1 = new ListPrologTerm(
-				new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5) });
+		ListPrologTerm t1 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
 		ListPrologTerm t2 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
 		assertEquals(t1, t2);
 	}
@@ -149,8 +148,7 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testLastIndexOf() {
-		ListPrologTerm t1 = new ListPrologTerm(new PrologTerm[] { new IntegerPrologTerm(42), new IntegerPrologTerm(5),
-				new IntegerPrologTerm(5), new IntegerPrologTerm(6) });
+		ListPrologTerm t1 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5), new IntegerPrologTerm(5), new IntegerPrologTerm(6));
 		assertEquals(2, t1.lastIndexOf(new IntegerPrologTerm(5)));
 	}
 
