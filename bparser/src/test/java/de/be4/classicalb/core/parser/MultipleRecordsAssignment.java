@@ -30,7 +30,7 @@ public class MultipleRecordsAssignment {
 
 	@Test
 	public void moreContext() throws BCompoundException {
-		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() +  " out := xx'aa'bb";
+		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() + " out := xx'aa'bb";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("machine(parallel(none,[assign(none,[record_field(none,record_field(none,identifier(none,xx)," +
 				"identifier(none,aa)),identifier(none,bb))],[integer(none,5)]),assign(none,[identifier(none,out)],[" +

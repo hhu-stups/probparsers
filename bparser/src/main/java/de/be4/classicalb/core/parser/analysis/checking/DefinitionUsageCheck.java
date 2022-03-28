@@ -51,10 +51,7 @@ public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements 
 		final int expected = definitions.getParameterCount(literal);
 
 		if (paramCount != expected) {
-			exceptions.add(new CheckException("Number of parameters (" + paramCount + 
-			               ") doesn't match declaration of definition " + literal + " (" + expected + ")", node));
-
-
+			exceptions.add(new CheckException("Number of parameters (" + paramCount + ") doesn't match declaration of definition " + literal + " (" + expected + ")", node));
 		}
 	}
 

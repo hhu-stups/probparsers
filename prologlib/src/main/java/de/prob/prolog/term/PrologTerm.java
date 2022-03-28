@@ -27,8 +27,7 @@ public abstract class PrologTerm implements Serializable {
 	// protected final String functor;
 	//protected final PrologTerm[] arguments;
 
-	//public PrologTerm(//final String functor, 
-	//                  final PrologTerm... arguments) {
+	//public PrologTerm(final String functor, final PrologTerm... arguments) {
 		//if (functor == null)
 		//	throw new IllegalArgumentException("Functor must not be null");
 		//this.functor = functor;
@@ -91,7 +90,7 @@ public abstract class PrologTerm implements Serializable {
 	 * @return the PrologTerm
 	 */
 	public PrologTerm getArgument(final int index) {
-	    throw new IndexOutOfBoundsException("Atom has no arguments");
+		throw new IndexOutOfBoundsException("Atom has no arguments");
 		//if (arguments == null)
 		//	throw new IndexOutOfBoundsException("Atom has no arguments");
 		//else

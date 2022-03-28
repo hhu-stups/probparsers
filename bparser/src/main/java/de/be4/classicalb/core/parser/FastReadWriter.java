@@ -30,8 +30,8 @@ public class FastReadWriter {
 
 
 	public void fastwrite(PrologTerm term) {
-	     out.print('D');
-	     writeTerm(term);
+		out.print('D');
+		writeTerm(term);
 	}
 
 	public void writeTerm(PrologTerm term) {
@@ -51,10 +51,10 @@ public class FastReadWriter {
 	}
 
 	private void writeList(ListPrologTerm lp) {
-        for(ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();){
+		for (ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();) {
 			out.print('[');
 			writeTerm(i.next());
-        }
+		}
 		out.print(']');
 	}
 

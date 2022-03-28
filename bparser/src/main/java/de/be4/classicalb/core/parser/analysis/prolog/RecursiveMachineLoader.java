@@ -56,8 +56,7 @@ public class RecursiveMachineLoader {
 	private String main;
 
 
-	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider,
-								  ParsingBehaviour parsingBehaviour) throws BCompoundException {
+	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		this.parsingBehaviour = parsingBehaviour;
 		this.rootDirectory = directory == null ? new File(".") : new File(directory);
 
@@ -167,8 +166,7 @@ public class RecursiveMachineLoader {
 
 	public void printAsProlog(final IPrologTermOutput pout) {
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
-		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),
-		                                 parsingBehaviour.isCompactPrologPositions());
+		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(), parsingBehaviour.isCompactPrologPositions());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 
 		// parser version

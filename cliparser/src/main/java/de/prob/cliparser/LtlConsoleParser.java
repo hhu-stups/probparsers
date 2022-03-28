@@ -192,14 +192,13 @@ public class LtlConsoleParser {
 				if ("none".equals(lang)) {
 					sub = UNPARSED_PARSER_BASE;
 				} else if ("B".equals(lang)) {
-				    BParser bparser = new BParser();
-			        if (context!=null) {
-			          bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
-			        }
+					BParser bparser = new BParser();
+					if (context!=null) {
+						bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
+					}
 					sub = new ClassicalBParser(bparser);
 				} else
-					throw new IllegalArgumentException("Unknown language "
-							+ lang);
+					throw new IllegalArgumentException("Unknown language " + lang);
 				sublangs[i] = sub;
 			}
 			if (sublangs.length == 1) {

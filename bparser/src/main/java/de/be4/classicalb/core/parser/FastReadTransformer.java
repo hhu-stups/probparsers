@@ -57,10 +57,10 @@ public class FastReadTransformer {
 	}
 
 	private void writeList(ListPrologTerm lp) {
-        for(ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();){
+		for (ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();) {
 			sb.append('[');
 			fastwrite(i.next());
-        }
+		}
 		sb.append(']');
 	}
 
