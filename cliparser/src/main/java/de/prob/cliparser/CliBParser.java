@@ -15,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.lang.StackOverflowError;
-import java.lang.VirtualMachineError;
+import java.util.Collections;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.FastReadWriter;
@@ -196,12 +195,12 @@ public class CliBParser {
 			case machine:
 				String filename = in.readLine();
 				String outFile = in.readLine();
-				final PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
 				final File bfile = new File(filename);
-
-				int returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
+				final int returnValue;
+				try (final PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)))) {
+					returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
+				}
 				context = new MockedDefinitions();
-				out.close();
 
 				// Notify probcli that the call finished successfully.
 				// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
@@ -209,9 +208,7 @@ public class CliBParser {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
 				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
 					System.out.println("Erasing file contents of " + outFile);
-					final PrintWriter out2 = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
-					out2.println("% VM Error occurred");
-					out2.close();
+					Files.write(Paths.get(outFile), Collections.singletonList("% VM Error occurred"));
 				}
 				break;
 			case formula:
