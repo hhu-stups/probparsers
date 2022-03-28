@@ -98,7 +98,11 @@ public class Helpers {
 	 */
 	public static <T extends Throwable> T assertThrowsCompound(final Class<T> wrappedExceptionType, final ThrowingRunnable runnable) {
 		final BCompoundException e = Assert.assertThrows(BCompoundException.class, runnable);
-		Assert.assertNotNull("BCompoundException is missing a cause", e);
+		if (e.getCause() == null) {
+			throw new AssertionError("BCompoundException is missing a cause", e);
+		} else if (!wrappedExceptionType.isInstance(e.getCause())) {
+			throw new AssertionError("Expected BCompoundException cause to be " + wrappedExceptionType + ", but got " + e.getCause().getClass(), e);
+		}
 		return wrappedExceptionType.cast(e.getCause());
 	}
 
