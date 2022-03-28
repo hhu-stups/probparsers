@@ -11,7 +11,7 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "7.2"
+    gradleVersion = "7.4.1"
 }
 
 ext {
