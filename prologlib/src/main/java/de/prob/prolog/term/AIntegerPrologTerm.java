@@ -8,8 +8,6 @@ package de.prob.prolog.term;
 
 import java.math.BigInteger;
 
-import de.prob.prolog.output.IPrologTermOutput;
-
 /**
  * Represents a Prolog integer which can be represented as long.
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
@@ -20,12 +18,8 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 	public boolean isNumber() {
 		return true;
 	}
-	
 
-	public BigInteger getValue() {
-			throw new IllegalArgumentException("getValue not implemented ");
-	}
-
+	public abstract BigInteger getValue();
 
 	@Override
 	public boolean equals(final Object other) {

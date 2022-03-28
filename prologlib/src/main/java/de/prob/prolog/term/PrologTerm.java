@@ -70,10 +70,7 @@ public abstract class PrologTerm implements Serializable {
 		return sWriter.toString();
 	}
 
-	public String getFunctor() {
-		// throw new IllegalArgumentException("Functor is null");
-		return "";
-	}
+	public abstract String getFunctor();
 
 	public int getArity() {
 		return 0;
