@@ -7,7 +7,6 @@
 package de.prob.prolog.term;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +17,7 @@ import de.prob.prolog.output.PrologTermOutput;
 /**
  * This is the abstract base class for Prolog terms
  */
-public abstract class PrologTerm implements Serializable {
-
-	private static final long serialVersionUID = 7974875342517963149L;
-
+public abstract class PrologTerm {
 	// protected final String functor;
 	//protected final PrologTerm[] arguments;
 

@@ -15,8 +15,6 @@ import de.prob.prolog.output.IPrologTermOutput;
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
  */
 public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
-	private static final long serialVersionUID = -485207706557171193L;
-
 	protected final long ivalue; // holds the integer 
 
 	public IntegerLongPrologTerm(final long value) {

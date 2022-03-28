@@ -14,8 +14,6 @@ import de.prob.prolog.output.IPrologTermOutput;
  * Represents a Prolog integer.
  */
 public final class IntegerPrologTerm extends AIntegerPrologTerm {
-	private static final long serialVersionUID = -485207706557171193L;
-
 	private final BigInteger value;
 	private final long ivalue; // holds the integer if value==null
 	// ideally we should create two instance classes, one for long and one for BigInteger

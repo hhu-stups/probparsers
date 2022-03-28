@@ -15,8 +15,6 @@ import de.prob.prolog.output.IPrologTermOutput;
  * arguments. If no arguments are given, the term is an atom.
  */
 public final class CompoundPrologTerm extends PrologTerm {
-	private static final long serialVersionUID = 4825557199378803498L;
-	
 	protected final String functor;
 	protected final PrologTerm[] arguments;
 

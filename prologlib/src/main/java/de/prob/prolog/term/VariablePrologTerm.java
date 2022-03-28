@@ -12,8 +12,6 @@ import de.prob.prolog.output.IPrologTermOutput;
  * Represents a Prolog variable.
  */
 public final class VariablePrologTerm extends PrologTerm {
-	private static final long serialVersionUID = 7637808382619765929L;
-
 	private final String name;
 
 	public VariablePrologTerm(final String name) {

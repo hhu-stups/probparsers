@@ -19,9 +19,6 @@ import de.prob.prolog.output.IPrologTermOutput;
  * Represents a Prolog list.
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
-
-	private static final long serialVersionUID = -629922806578121593L;
-
 	private static final ListPrologTerm EMPTY_LIST = new ListPrologTerm();
 
 	private final PrologTerm[] elements;
