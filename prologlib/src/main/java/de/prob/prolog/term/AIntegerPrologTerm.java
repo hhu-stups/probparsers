@@ -23,15 +23,12 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 
 	@Override
 	public boolean equals(final Object other) {
-		boolean isEqual;
 		if (this == other) {
-			isEqual = true;
-		} else if (other != null && other instanceof AIntegerPrologTerm) {
-			isEqual = this.getValue().equals(((AIntegerPrologTerm) other).getValue());
-		} else {
-			isEqual = false;
+			return true;
+		} else if (!(other instanceof AIntegerPrologTerm)) {
+			return false;
 		}
-		return isEqual;
+		return this.getValue().equals(((AIntegerPrologTerm) other).getValue());
 	}
 
 

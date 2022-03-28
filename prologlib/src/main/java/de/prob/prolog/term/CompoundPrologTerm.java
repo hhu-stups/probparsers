@@ -76,19 +76,16 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	@Override
 	public boolean equals(final Object other) {
-		boolean isEqual;
 		if (this == other) {
-			isEqual = true;
-		} else if (other != null && other instanceof CompoundPrologTerm) {
-			CompoundPrologTerm cother = (CompoundPrologTerm) other;
-			isEqual = functor.equals(cother.functor)
-					&& Arrays.equals(arguments, cother.arguments); 
+			return true;
+		} else if (!(other instanceof CompoundPrologTerm)) {
 			// Note: this will not consider the atom "[]" to be equal to the empty list
 			// But then: comparing longer lists with equivalent compound terms would require quite a bit of code
-		} else {
-			isEqual = false;
+			return false;
 		}
-		return isEqual;
+		CompoundPrologTerm cother = (CompoundPrologTerm) other;
+		return functor.equals(cother.functor)
+			&& Arrays.equals(arguments, cother.arguments);
 	}
 
 	@Override

@@ -43,15 +43,12 @@ public final class VariablePrologTerm extends PrologTerm {
 
 	@Override
 	public boolean equals(final Object other) {
-		boolean isEqual;
 		if (this == other) {
-			isEqual = true;
-		} else if (other != null && other instanceof VariablePrologTerm) {
-			isEqual = name.equals(((VariablePrologTerm) other).name);
-		} else {
-			isEqual = false;
+			return true;
+		} else if (other == null || !(other instanceof VariablePrologTerm)) {
+			return false;
 		}
-		return isEqual;
+		return name.equals(((VariablePrologTerm)other).name);
 	}
 
 	@Override
