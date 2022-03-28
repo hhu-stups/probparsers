@@ -15,8 +15,8 @@ import de.prob.prolog.output.IPrologTermOutput;
  * arguments. If no arguments are given, the term is an atom.
  */
 public final class CompoundPrologTerm extends PrologTerm {
-	protected final String functor;
-	protected final PrologTerm[] arguments;
+	private final String functor;
+	private final PrologTerm[] arguments;
 
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {

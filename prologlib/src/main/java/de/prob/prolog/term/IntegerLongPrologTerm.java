@@ -15,7 +15,7 @@ import de.prob.prolog.output.IPrologTermOutput;
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
  */
 public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
-	protected final long ivalue; // holds the integer 
+	private final long ivalue; // holds the integer 
 
 	public IntegerLongPrologTerm(final long value) {
 		this.ivalue = value;
