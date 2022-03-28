@@ -41,6 +41,10 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		this.end = end;
 	}
 
+	public ListPrologTerm(final Collection<? extends PrologTerm> elements) {
+		this(elements.toArray(new PrologTerm[0]));
+	}
+
 	public static ListPrologTerm emptyList() {
 		return EMPTY_LIST;
 	}
