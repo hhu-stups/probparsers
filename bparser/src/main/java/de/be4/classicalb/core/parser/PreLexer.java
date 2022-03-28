@@ -19,6 +19,8 @@ import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
 import de.be4.classicalb.core.preparser.node.Token;
+import de.be4.classicalb.core.preparser.node.TSomeValue;
+import de.be4.classicalb.core.preparser.node.TSomething;
 
 public class PreLexer extends Lexer {
 
@@ -38,10 +40,18 @@ public class PreLexer extends Lexer {
 		try {
 			//return super.getToken();
 			final Token token = super.getToken();
+			// System.out.println("Token: " + token);
              if (token instanceof TIdentifierLiteral || 
-                 token instanceof TSemicolon) {
+                 token instanceof TSemicolon
+                 ) {
                  token.setText(token.getText().intern());
-             }
+             } else if ( (token instanceof TSomeValue)
+		              || (token instanceof TSomething)
+		          ) {
+                token.setText(""); // we don't need this; 
+                // somehow the ignored token attribute of SableCC does not seem to work
+               // return null;
+              }
              return token;
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());

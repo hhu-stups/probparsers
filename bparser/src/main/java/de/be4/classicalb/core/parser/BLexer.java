@@ -28,6 +28,7 @@ public class BLexer extends Lexer {
 	public void setLexerPreparse(){
 		parse_definition = true; 
 	}
+	
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -417,9 +418,19 @@ public class BLexer extends Lexer {
 		    // || (token instanceof TIntegerLiteral)  // this may depend on the application
 		    // || (token instanceof TStringLiteral)  // ditto; could be useful if strings and integers are reused
         ) {
-                 // intern Identifiers, ... to share String representation
-                 token.setText(token.getText().intern());
+            // intern Identifiers, ... to share String representation
+            token.setText(token.getText().intern());
+        } else if (   (token instanceof TWhiteSpace)
+		           || (token instanceof TComment)
+		           || (token instanceof TCommentBody)
+		           || (token instanceof TCommentEnd)
+		           || (token instanceof TLineComment)
+		          ) {
+             token.setText(""); // we don't need this
+            // somehow the ignored token attribute of SableCC does not seem to work
         }
+        
+        
              
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
