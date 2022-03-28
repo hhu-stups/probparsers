@@ -411,6 +411,16 @@ public class BLexer extends Lexer {
 			token instanceof TUnrecognisedPragma) {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
+		
+		if ((token instanceof TIdentifierLiteral) // this definitely makes sense
+		    || (token instanceof TMaplet)
+		    // || (token instanceof TIntegerLiteral)  // this may depend on the application
+		    // || (token instanceof TStringLiteral)  // ditto; could be useful if strings and integers are reused
+        ) {
+                 // intern Identifiers, ... to share String representation
+                 token.setText(token.getText().intern());
+        }
+             
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError();
