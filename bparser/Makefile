@@ -25,6 +25,8 @@ extref:
 	gradle test --tests de.be4.classicalb.core.parser.languageextension.RefinedOperationTest --info
 msgs:
 	gradle test --tests de.be4.classicalb.core.parser.ErrorMessagesTest  --info
+slnc:
+	gradle test --tests de.be4.classicalb.core.parser.StringLiteralNotClosedTest  --info
 
 count:
 	@echo "Line count for Java files:"
