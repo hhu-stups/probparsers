@@ -94,11 +94,12 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 			return elements[index + start - 1];
 	}
 	
-
+	@Override
 	public int size() {
 		return end - start;
 	}
 
+	@Override
 	public PrologTerm get(final int index) {
 		int i = index + start;
 		if (i >= end)
@@ -138,22 +139,27 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return Arrays.hashCode(elements) + start * 13 + end;
 	}
 
+	@Override
 	public Iterator<PrologTerm> iterator() {
 		return listIterator();
 	}
 
+	@Override
 	public boolean add(final PrologTerm o) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean addAll(final Collection<? extends PrologTerm> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void clear() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean contains(final Object o) {
 		for (int i = start; i < end; i++) {
 			if (elements[i].equals(o))
@@ -162,6 +168,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return false;
 	}
 
+	@Override
 	public boolean containsAll(final Collection<?> c) {
 		boolean contained = true;
 		for (Object o : c) {
@@ -170,28 +177,34 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return contained;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return size() == 0;
 	}
 
+	@Override
 	public boolean remove(final Object o) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean removeAll(final Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean retainAll(final Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Object[] toArray() {
 		Object[] res = new Object[size()];
 		System.arraycopy(elements, start, res, 0, size());
 		return res;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T[] toArray(T[] a) {
 		int size = size();
@@ -205,14 +218,17 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return a;
 	}
 
-	public void add(final int arg0, final PrologTerm arg1) {
+	@Override
+	public void add(final int index, final PrologTerm element) {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean addAll(final int arg0, final Collection<? extends PrologTerm> arg1) {
+	@Override
+	public boolean addAll(final int index, final Collection<? extends PrologTerm> c) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public int indexOf(final Object object) {
 		for (int i = start; i < end; i++) {
 			if (elements[i].equals(object))
@@ -221,6 +237,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return -1;
 	}
 
+	@Override
 	public int lastIndexOf(final Object object) {
 		for (int i = end - 1; i >= start; i--) {
 			if (elements[i].equals(object))
@@ -229,10 +246,12 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return -1;
 	}
 
+	@Override
 	public ListIterator<PrologTerm> listIterator() {
 		return new PrologTermListIterator(elements, start, end);
 	}
 
+	@Override
 	public ListIterator<PrologTerm> listIterator(final int index) {
 		if (index < 0 || index > this.size()) {
 			throw new IndexOutOfBoundsException();
@@ -240,14 +259,17 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return new PrologTermListIterator(elements, start + index, end);
 	}
 
-	public PrologTerm remove(final int arg0) {
+	@Override
+	public PrologTerm remove(final int index) {
 		throw new UnsupportedOperationException();
 	}
 
-	public PrologTerm set(final int arg0, final PrologTerm arg1) {
+	@Override
+	public PrologTerm set(final int index, final PrologTerm element) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public ListPrologTerm subList(int fromIndex, int toIndex) {
 		if (fromIndex < 0 || toIndex > this.size() || fromIndex > toIndex) {
 			throw new IndexOutOfBoundsException();
