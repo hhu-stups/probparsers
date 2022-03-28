@@ -200,7 +200,9 @@ Tokens
      string_literal |
      [all_chars - double_quotation]
      )
-    | layout_char*;  // make token as large as possible to avoid creating too many TSomething objects
+    | (layout_char |
+       ',' | '{' | '}' | '-' | '>'
+       ) *;  // make token as large as possible to avoid creating too many TSomething objects
 
 
 /*******************************************************************
