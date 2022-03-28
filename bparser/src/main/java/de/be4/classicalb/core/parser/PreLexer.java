@@ -10,6 +10,7 @@ import de.be4.classicalb.core.preparser.node.TBeginNesting;
 import de.be4.classicalb.core.preparser.node.TComment;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
+import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
@@ -35,7 +36,13 @@ public class PreLexer extends Lexer {
 	
 	protected Token getToken() throws IOException, LexerException {
 		try {
-			return super.getToken();
+			//return super.getToken();
+			final Token token = super.getToken();
+             if (token instanceof TIdentifierLiteral || 
+                 token instanceof TSemicolon) {
+                 token.setText(token.getText().intern());
+             }
+             return token;
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());
 			// printState();
