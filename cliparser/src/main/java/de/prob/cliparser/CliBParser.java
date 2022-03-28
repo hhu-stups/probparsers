@@ -418,10 +418,7 @@ public class CliBParser {
 		final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
 		final long endParseMain = System.currentTimeMillis();
 
-		if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) { // -time flag in CliBParser
-			out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
-		}
-		if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
+		if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) { // -time flag in CliBParser
 			System.out.println("% Time for parsing of main file: " + (endParseMain - startParseMain) + " ms");
 		}
 
@@ -440,9 +437,6 @@ public class CliBParser {
 			final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
 			final long endParseRecursive = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
-				out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
-			}
 			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
 				System.out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
 			}
@@ -456,18 +450,15 @@ public class CliBParser {
 			}
 			final long endOutput = System.currentTimeMillis();
 
-			if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
-				out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
-			}
 			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
 				System.out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
 			}
 		}
 
 		if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
-			out.println("% Used memory : " + 
+			System.out.println("% Used memory : " + 
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
-			out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
+			System.out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
 		}
 	}
 
