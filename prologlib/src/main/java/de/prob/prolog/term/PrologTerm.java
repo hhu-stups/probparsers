@@ -6,13 +6,11 @@
 
 package de.prob.prolog.term;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 /**
  * This is the abstract base class for Prolog terms
@@ -60,10 +58,9 @@ public abstract class PrologTerm {
 
 	@Override
 	public String toString() {
-		StringWriter sWriter = new StringWriter();
-		PrologTermOutput pto = new PrologTermOutput(new PrintWriter(sWriter), false);
+		PrologTermStringOutput pto = new PrologTermStringOutput();
 		toTermOutput(pto);
-		return sWriter.toString();
+		return pto.toString();
 	}
 
 	public abstract String getFunctor();
