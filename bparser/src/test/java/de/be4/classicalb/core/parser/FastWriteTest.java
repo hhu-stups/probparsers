@@ -1,7 +1,8 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
@@ -97,14 +98,35 @@ public class FastWriteTest {
 		check(expected);
 	}
 	
+	@Test
+	public void testLargeCompound() {
+		spo.openTerm("large");
+		// SICStus max_arity is 255, which is also the maximum possible in the fastrw format.
+		for (int i = 0; i < 255; i++) {
+			spo.openList();
+			spo.closeList();
+		}
+		spo.closeTerm();
+		spo.fullstop();
+		// Append 255 ']' characters at the end:
+		final String expected = "DSlarge\0\377" + new String(new char[255]).replace('\0', ']');
+		check(expected);
+	}
+	
 	private void check(String expected) {
 		assert spo.getSentences().size() == 1;
 		final PrologTerm term = spo.getSentences().get(0);
-		final StringWriter sw = new StringWriter();
-		try (final PrintWriter pw = new PrintWriter(sw)) {
-			new FastReadWriter(pw).fastwrite(term);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			new FastReadWriter(out).fastwrite(term);
+		} catch (IOException e) {
+			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
 		}
-		Assert.assertEquals(expected, sw.toString());
+		// Do the comparison using strings in ISO 8859-1.
+		// This is functionally identical to comparing raw byte arrays,
+		// but gives more readable errors when there is a mismatch,
+		// because fastrw data is mostly valid ASCII.
+		Assert.assertEquals(expected, new String(out.toByteArray(), StandardCharsets.ISO_8859_1));
 	}
 
 }

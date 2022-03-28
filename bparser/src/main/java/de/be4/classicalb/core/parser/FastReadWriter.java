@@ -1,38 +1,40 @@
 package de.be4.classicalb.core.parser;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.ListIterator;
-import java.io.PrintWriter;
+import java.util.Map;
 
+import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.IntegerLongPrologTerm;
-import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
 
-// In contrast to FastReadTransformer this class writes directly to an output file
-// and thus avoiding building intermediate terms
+// In contrast to FastReadTransformer this class writes directly to an output stream
+// instead of buffering the output data in memory first.
 // writes Prolog terms in SICStus (undocumented) fastrw format
 // generates same output as fast_write(Stream,Term) after use_module(library(fastrw)).
 // and can be read using fast_read(Stream,Term)
 
 public class FastReadWriter {
 	private final Map<String, String> varnums = new HashMap<String, String>();
-	private final PrintWriter out;
+	private final OutputStream out;
 
-	public FastReadWriter(PrintWriter out) {
+	public FastReadWriter(OutputStream out) {
 		this.out = out;
 	}
 
 
-	public void fastwrite(PrologTerm term) {
-		out.print('D');
+	public void fastwrite(PrologTerm term) throws IOException {
+		out.write('D');
 		writeTerm(term);
 	}
 
-	public void writeTerm(PrologTerm term) {
+	public void writeTerm(PrologTerm term) throws IOException {
 		if (term instanceof IntegerLongPrologTerm) {
 			IntegerLongPrologTerm intTerm = (IntegerLongPrologTerm) term;
 			writeLongInteger(intTerm);
@@ -51,31 +53,31 @@ public class FastReadWriter {
 		}
 	}
 
-	private void writeList(ListPrologTerm lp) {
+	private void writeList(ListPrologTerm lp) throws IOException {
 		for (ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();) {
-			out.print('[');
+			out.write('[');
 			writeTerm(i.next());
 		}
-		out.print(']');
+		out.write(']');
 	}
 
-	private void writeVariable(VariablePrologTerm vp) {
+	private void writeVariable(VariablePrologTerm vp) throws IOException {
 		String name = getRenamedVariable(vp.getName());
-		out.print('_');
-		out.print(name);
-		out.print('\0');
+		out.write('_');
+		writeText(name);
+		out.write(0);
 	}
 
-	private void writeInteger(AIntegerPrologTerm ip) {
-		out.print('I');
-		out.print(ip.getValue());
-		out.print('\0');
+	private void writeInteger(AIntegerPrologTerm ip) throws IOException {
+		out.write('I');
+		writeText(ip.getValue().toString());
+		out.write(0);
 	}
 	
-	private void writeLongInteger(IntegerLongPrologTerm ip) {
-		out.print('I');
-		out.print(ip.longValueExact());
-		out.print('\0');
+	private void writeLongInteger(IntegerLongPrologTerm ip) throws IOException {
+		out.write('I');
+		writeText(String.valueOf(ip.longValueExact()));
+		out.write(0);
 	}
 
 	private String getRenamedVariable(String name) {
@@ -86,16 +88,16 @@ public class FastReadWriter {
 		return varnums.get(name);
 	}
 
-	private void writeCompound(PrologTerm cp) {
+	private void writeCompound(PrologTerm cp) throws IOException {
 		if (cp.isAtom()) {
-			out.print('A');
-			out.print(cp.getFunctor());
-			out.print('\0');
+			out.write('A');
+			writeText(cp.getFunctor());
+			out.write(0);
 		} else {
-			out.print('S');
-			out.print(cp.getFunctor());
-			out.print('\0');
-			out.print((char) cp.getArity());
+			out.write('S');
+			writeText(cp.getFunctor());
+			out.write(0);
+			out.write(cp.getArity());
 			for (int i = 1; i <= cp.getArity(); i++) {
 				PrologTerm argument = cp.getArgument(i);
 				writeTerm(argument);
@@ -105,4 +107,7 @@ public class FastReadWriter {
 		}
 	}
 
+	private void writeText(final String text) throws IOException {
+		out.write(text.getBytes(StandardCharsets.UTF_8));
+	}
 }

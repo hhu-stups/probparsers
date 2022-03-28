@@ -1,11 +1,14 @@
 package de.prob.cliparser;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -93,12 +96,12 @@ public class CliBParser {
 
 		final ParsingBehaviour behaviour = new ParsingBehaviour();
 
-		PrintWriter out;
+		final OutputStream out;
 		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
 
 			try {
-				out = new PrintWriter(Files.newBufferedWriter(Paths.get(filename)));
+				out = new FileOutputStream(filename);
 			} catch (final FileNotFoundException e) {
 				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
 					PrologExceptionPrinter.printException(System.err, e);
@@ -109,7 +112,7 @@ public class CliBParser {
 				return; // Unreachable, but needed
 			}
 		} else {
-			out = new PrintWriter(System.out);
+			out = System.out;
 		}
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
@@ -197,7 +200,7 @@ public class CliBParser {
 				String outFile = in.readLine();
 				final File bfile = new File(filename);
 				final int returnValue;
-				try (final PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)))) {
+				try (final OutputStream out = new FileOutputStream(outFile)) {
 					returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
 				}
 				context = new MockedDefinitions();
@@ -349,7 +352,7 @@ public class CliBParser {
 		socketWriter.flush();
 	}
 
-	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintWriter out, final PrintWriter err, final File bfile) {
+	private static int doFileParsing(final ParsingBehaviour behaviour, final OutputStream out, final PrintWriter err, final File bfile) {
 		try {
 			if (behaviour.isVerbose()) {
 				System.out.println("Parsing file: " + bfile);
@@ -408,7 +411,12 @@ public class CliBParser {
 		}
 	}
 
-	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final PrintWriter out) throws IOException, BCompoundException {
+	private static IPrologTermOutput prologTermOutputForStream(final OutputStream out) {
+		final PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+		return new PrologTermOutput(writer, false);
+	}
+
+	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws IOException, BCompoundException {
 		final BParser parser = new BParser(bfile.getAbsolutePath());
 
 		final long startParseMain = System.currentTimeMillis();
@@ -443,7 +451,9 @@ public class CliBParser {
 				System.out.println("Generating fastrw binary output");
 				printASTasFastProlog(out, rml);
 			} else { // -prolog flag in CliBParser
-				rml.printAsProlog(out);
+				final IPrologTermOutput pout = prologTermOutputForStream(out);
+				rml.printAsProlog(pout);
+				pout.flush();
 			}
 			final long endOutput = System.currentTimeMillis();
 
@@ -475,16 +485,19 @@ public class CliBParser {
 	
 	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
-	private static void printASTasFastProlog(final PrintWriter out, final RecursiveMachineLoader rml) {
+	private static void printASTasFastProlog(final OutputStream out, final RecursiveMachineLoader rml) throws IOException {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		rml.printAsProlog(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
 
-		FastReadWriter fwriter = new FastReadWriter(out);
+		final BufferedOutputStream bufOut = new BufferedOutputStream(out);
+		FastReadWriter fwriter = new FastReadWriter(bufOut);
 		
 		for (PrologTerm term : sentences) {
 			fwriter.fastwrite(term);
 		}
+		
+		bufOut.flush();
 	}
 	/* old version with transformer, seems slightly faster even though it builds up unnecessary intermediate term
 			for (PrologTerm term : sentences) {
@@ -497,7 +510,7 @@ public class CliBParser {
 			
 			
 
-	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final PrintWriter out) throws BCompoundException {
+	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws BCompoundException {
 		RulesProject project = new RulesProject();
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
@@ -507,7 +520,7 @@ public class CliBParser {
 			throw new BCompoundException(project.getBExceptionList());
 		}
 
-		final IPrologTermOutput pout = new PrologTermOutput(out, false);
+		final IPrologTermOutput pout = prologTermOutputForStream(out);
 		project.printProjectAsPrologTerm(pout);
 		pout.flush();
 	}
