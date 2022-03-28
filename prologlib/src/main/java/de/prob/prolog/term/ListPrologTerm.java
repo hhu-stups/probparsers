@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
 import de.prob.prolog.output.IPrologTermOutput;
 
@@ -36,6 +37,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	private ListPrologTerm(final PrologTerm[] elements, final int start, final int end) {
+		assert start >= 0 && start <= end && end <= elements.length;
 		this.elements = elements;
 		this.start = start;
 		this.end = end;
@@ -121,9 +123,17 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !(other instanceof ListPrologTerm))
+		if (!(other instanceof List<?>)) {
 			return false;
-		return Arrays.equals(elements, ((ListPrologTerm) other).elements);
+		}
+		int i = this.start;
+		for (final Object o : (List<?>)other) {
+			if (i >= this.end || !Objects.equals(this.elements[i], o)) {
+				return false;
+			}
+			i++;
+		}
+		return i == this.end;
 	}
 
 	@Override
@@ -227,7 +237,10 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public ListIterator<PrologTerm> listIterator(final int index) {
-		return new PrologTermListIterator(elements, index, end);
+		if (index < 0 || index > this.size()) {
+			throw new IndexOutOfBoundsException();
+		}
+		return new PrologTermListIterator(elements, start + index, end);
 	}
 
 	public PrologTerm remove(final int arg0) {
@@ -238,8 +251,11 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		throw new UnsupportedOperationException();
 	}
 
-	public ListPrologTerm subList(int start, int end) {
-		return new ListPrologTerm(this.elements, start, end);
+	public ListPrologTerm subList(int fromIndex, int toIndex) {
+		if (fromIndex < 0 || toIndex > this.size() || fromIndex > toIndex) {
+			throw new IndexOutOfBoundsException();
+		}
+		return new ListPrologTerm(this.elements, this.start + fromIndex, this.start + toIndex);
 	}
 
 	public ListPrologTerm tail() {

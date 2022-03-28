@@ -2,6 +2,7 @@ package de.prob.prolog.term;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ListIterator;
@@ -144,6 +145,21 @@ public class ListPrologTermTest {
 		assertEquals("1", PrologTerm.atomicString(term2.head()));
 		ListPrologTerm term3 = term2.tail();
 		assertEquals("2", PrologTerm.atomicString(term3.head()));
+	}
+
+	@Test
+	public void testMultiSubList() {
+		final ListPrologTerm list = new ListPrologTerm(createFixture(10));
+		final ListPrologTerm subList = list.subList(1, 4);
+		assertEquals(3, subList.size());
+		assertEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3")), subList);
+		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3"), new CompoundPrologTerm("4")), subList);
+		assertNotEquals(subList, new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2")));
+		final ListPrologTerm subSubList = subList.subList(1, 2);
+		assertEquals(1, subSubList.size());
+		assertEquals(new ListPrologTerm(new CompoundPrologTerm("2")), subSubList);
+		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("2"), new CompoundPrologTerm("3")), subSubList);
+		assertNotEquals(new ListPrologTerm(), subSubList);
 	}
 
 	@Test
