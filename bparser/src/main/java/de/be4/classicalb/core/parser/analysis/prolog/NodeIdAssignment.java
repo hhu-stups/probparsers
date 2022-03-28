@@ -11,8 +11,6 @@ import de.be4.classicalb.core.parser.node.Node;
  * This class implements functionality to assign identifiers to all nodes in a
  * syntax tree. Multiple syntax trees can be used with one instance of this
  * class to guarantee unique identifiers.
- * 
- * @author plagge
  */
 public class NodeIdAssignment extends DepthFirstAdapter implements INodeIds {
 	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();

@@ -12,8 +12,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog integer.
- * 
- * @author plagge, modifications by leuschel
  */
 public final class IntegerPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;

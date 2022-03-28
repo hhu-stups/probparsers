@@ -15,10 +15,6 @@ import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 
-/**
- * @author plagge
- * 
- */
 final class PrologGeneratorHelper {
 	private final IPrologTermOutput pto;
 	private final String currentStateID;

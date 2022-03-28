@@ -23,10 +23,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
 
-/**
- * @author plagge
- * 
- */
 public class LtlConsoleParser {
 
 	private static final UnparsedParserBase UNPARSED_PARSER_BASE = new UnparsedParserBase(

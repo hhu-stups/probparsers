@@ -12,8 +12,6 @@ import de.be4.classicalb.core.parser.node.Start;
 /**
  * Semantic check for expressions that can only be used in the prover, not
  * standard B machines
- * 
- * @author plagge
  */
 public class ProverExpressionsCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 

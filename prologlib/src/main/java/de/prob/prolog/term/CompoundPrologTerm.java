@@ -13,8 +13,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a prolog term that consists of a functor and an (optional) list of
  * arguments. If no arguments are given, the term is an atom.
- * 
- * @author plagge, modifications by leuschel
  */
 public final class CompoundPrologTerm extends PrologTerm {
 	private static final long serialVersionUID = 4825557199378803498L;

@@ -10,7 +10,6 @@ import de.prob.prolog.term.PrologTerm;
  * accessed.
  * 
  * @see CompoundPrologTerm
- * @author plagge
  */
 public class PrologTermMatch extends PrologMatch {
 	private final String functor;

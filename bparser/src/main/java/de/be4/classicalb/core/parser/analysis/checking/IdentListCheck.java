@@ -49,9 +49,6 @@ import de.be4.classicalb.core.parser.node.Start;
  * result list of an {@link AOperationCallSubstitution} only contain
  * {@link AIdentifierExpression} or {@link AFunctionExpression} nodes.
  * </p>
- * 
- * @author Fabian
- * 
  */
 public class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 

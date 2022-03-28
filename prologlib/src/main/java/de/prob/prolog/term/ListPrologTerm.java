@@ -16,8 +16,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog list.
- *
- * @author plagge, modifications by leuschel
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
 

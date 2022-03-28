@@ -7,8 +7,6 @@ import de.prob.prolog.term.VariablePrologTerm;
 
 /**
  * Matches a Prolog variable.
- * 
- * @author plagge
  */
 public class PrologVariableMatch extends PrologMatch {
 	private final String varName;

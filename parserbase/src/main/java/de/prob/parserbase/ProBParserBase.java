@@ -5,8 +5,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * This interface describes the basic functionality of parsers for specific
  * formalisms.
- * 
- * @author plagge
  */
 public interface ProBParserBase {
 	/**

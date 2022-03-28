@@ -16,8 +16,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * This class defines the output of a B machine as a prolog term.
- * 
- * @author plagge
  */
 public class ASTProlog extends DepthFirstAdapter {
 	// The tables SUM_TYPE and SIMPLE_NAME are used to translate the Java class

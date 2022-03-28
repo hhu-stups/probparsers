@@ -8,8 +8,6 @@ import de.be4.classicalb.core.parser.node.Start;
 
 /**
  * A common subclass for semantic checks
- * 
- * @author plagge
  */
 public interface SemanticCheck {
 	void setOptions(ParseOptions options);

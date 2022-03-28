@@ -24,9 +24,6 @@ import de.be4.classicalb.core.parser.node.*;
  * </ul>
  * <p>
  * An example of usage is the class <code>Ast2String</code> in test project.
- * 
- * @author Fabian
- * 
  */
 @Deprecated
 public class ExtendedDFAdapter extends DepthFirstAdapter {

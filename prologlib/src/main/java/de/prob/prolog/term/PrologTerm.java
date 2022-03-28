@@ -17,8 +17,6 @@ import de.prob.prolog.output.PrologTermOutput;
 
 /**
  * This is the abstract base class for Prolog terms
- * 
- * @author plagge, modifications by leuschel
  */
 public abstract class PrologTerm implements Serializable {
 

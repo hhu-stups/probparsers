@@ -15,9 +15,6 @@ import de.prob.prolog.output.PrologTermOutput;
  * 
  * Ugly, but the alternative would have been Prolog-References in the exception
  * definitions.
- * 
- * @author plagge
- * 
  */
 public final class PrologExceptionPrinter {
 	private PrologExceptionPrinter() {

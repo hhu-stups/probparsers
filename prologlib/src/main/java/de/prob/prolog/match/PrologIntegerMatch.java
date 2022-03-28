@@ -8,8 +8,6 @@ import de.prob.prolog.term.PrologTerm;
 
 /**
  * Matches an integer, provides the found integer as BigInt
- * 
- * @author plagge
  */
 public class PrologIntegerMatch extends PrologMatch {
 	private final BigInteger integer;
