@@ -24,7 +24,6 @@ public class FastReadTransformer {
 
 	private static final String EMPTY_MSG = "Cannot FastRead empty sentences.";
 	private static final String MULTI_MSG = "Cannot FastRead multiple sentences.";
-	public final static char ZERO = (char) 0;
 	private final StringBuilder sb = new StringBuilder("D");
 	private final Map<String, String> varnums = new HashMap<String, String>();
 	private final StructuredPrologOutput spo;
@@ -72,13 +71,13 @@ public class FastReadTransformer {
 		String name = getRenamedVariable(vp.getName());
 		sb.append("_");
 		sb.append(name);
-		sb.append(ZERO);
+		sb.append('\0');
 	}
 
 	private void writeInteger(AIntegerPrologTerm ip) {
 		sb.append("I");
 		sb.append(ip.getValue());
-		sb.append(ZERO);
+		sb.append('\0');
 	}
 
 	private String getRenamedVariable(String name) {
@@ -93,11 +92,11 @@ public class FastReadTransformer {
 		if (cp.isAtom()) {
 			sb.append("A");
 			sb.append(cp.getFunctor());
-			sb.append(ZERO);
+			sb.append('\0');
 		} else {
 			sb.append("S");
 			sb.append(cp.getFunctor());
-			sb.append(ZERO);
+			sb.append('\0');
 			sb.append((char) cp.getArity());
 			for (int i = 1; i <= cp.getArity(); i++) {
 				PrologTerm argument = cp.getArgument(i);

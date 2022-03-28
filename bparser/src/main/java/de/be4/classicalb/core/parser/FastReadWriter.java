@@ -19,8 +19,6 @@ import de.prob.prolog.term.VariablePrologTerm;
 // and can be read using fast_read(Stream,Term)
 
 public class FastReadWriter {
-
-	public final static char ZERO = (char) 0;
 	private final Map<String, String> varnums = new HashMap<String, String>();
 	private final PrintWriter out;
 
@@ -65,19 +63,19 @@ public class FastReadWriter {
 		String name = getRenamedVariable(vp.getName());
 		out.print('_');
 		out.print(name);
-		out.print(ZERO);
+		out.print('\0');
 	}
 
 	private void writeInteger(AIntegerPrologTerm ip) {
 		out.print('I');
 		out.print(ip.getValue());
-		out.print(ZERO);
+		out.print('\0');
 	}
 	
 	private void writeLongInteger(IntegerLongPrologTerm ip) {
 		out.print('I');
 		out.print(ip.longValueExact());
-		out.print(ZERO);
+		out.print('\0');
 	}
 
 	private String getRenamedVariable(String name) {
@@ -92,11 +90,11 @@ public class FastReadWriter {
 		if (cp.isAtom()) {
 			out.print('A');
 			out.print(cp.getFunctor());
-			out.print(ZERO);
+			out.print('\0');
 		} else {
 			out.print('S');
 			out.print(cp.getFunctor());
-			out.print(ZERO);
+			out.print('\0');
 			out.print((char) cp.getArity());
 			for (int i = 1; i <= cp.getArity(); i++) {
 				PrologTerm argument = cp.getArgument(i);

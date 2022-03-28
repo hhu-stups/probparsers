@@ -10,16 +10,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class FastWriteTest {
-	private static final char ZERO = 0;
-	private static final char ONE = 1;
-
 	private StructuredPrologOutput spo = new StructuredPrologOutput();
 	
 	@Test
 	public void testSingleNumber() {
 		spo.printNumber(42);
 		spo.fullstop();
-		String expected = "DI42" + ZERO;
+		String expected = "DI42\0";
 		check(expected);
 	}
 
@@ -28,7 +25,7 @@ public class FastWriteTest {
 	public void testSingleAtom1() {
 		spo.openTerm("a").closeTerm();
 		spo.fullstop();
-		String expected = "DAa" + ZERO;
+		String expected = "DAa\0";
 		check(expected);
 	}
 
@@ -36,7 +33,7 @@ public class FastWriteTest {
 	public void testSingleAtom3() {
 		spo.openTerm("C").closeTerm();
 		spo.fullstop();
-		String expected = "DAC" + ZERO;
+		String expected = "DAC\0";
 		check(expected);
 	}
 
@@ -44,7 +41,7 @@ public class FastWriteTest {
 	public void testSimpleFunctor2() {
 		spo.openTerm("C").printAtom("a").closeTerm();
 		spo.fullstop();
-		String expected ="DSC" + ZERO+(char)1+"Aa"+ZERO; 
+		String expected ="DSC\0\1Aa\0"; 
 		check(expected);
 	}
 
@@ -52,7 +49,7 @@ public class FastWriteTest {
 	public void testSingleVariable() {
 		spo.printVariable("Foo");
 		spo.fullstop();
-		String expected = "D_0" + ZERO;
+		String expected = "D_0\0";
 		check(expected);
 	}
 
@@ -60,7 +57,7 @@ public class FastWriteTest {
 	public void testSimpleFunctor() { // a(b)
 		spo.openTerm("a").printAtom("b").closeTerm();
 		spo.fullstop();
-		String expected = "DSa" + ZERO + ONE + "Ab" + ZERO;
+		String expected = "DSa\0\1Ab\0";
 		check(expected);
 	}
 
@@ -68,7 +65,7 @@ public class FastWriteTest {
 	public void testSingleAtom2() {
 		spo.printAtom("a");
 		spo.fullstop();
-		String expected = "DAa" + ZERO;
+		String expected = "DAa\0";
 		check(expected);
 	}
 
@@ -84,7 +81,7 @@ public class FastWriteTest {
 	public void testOneAtomList() {
 		spo.openList().printAtom("C").closeList();
 		spo.fullstop();
-		String expected = "D[AC" + ZERO + "]";
+		String expected = "D[AC\0]";
 		check(expected);
 	}
 
@@ -96,7 +93,7 @@ public class FastWriteTest {
 		spo.openList().openList().printAtom("w").closeList().closeList();
 		spo.closeList().closeTerm();
 		spo.fullstop();
-		String expected = "DSa" + ZERO + ONE + "[AG" + ZERO + "[Sf" + ZERO + ONE + "][[[Aw" + ZERO + "]]]";
+		String expected = "DSa\0\1[AG\0[Sf\0\1][[[Aw\0]]]";
 		check(expected);
 	}
 	
