@@ -16,6 +16,10 @@ import de.prob.prolog.term.VariablePrologTerm;
 // generates same output as fast_write(Stream,Term) after use_module(library(fastrw)).
 // and can be read using fast_read(Stream,Term)
 
+/**
+ * @deprecated Use {@link FastReadWriter} instead, which does not store the entire output buffer in memory.
+ */
+@Deprecated
 public class FastReadTransformer {
 
 	private static final String EMPTY_MSG = "Cannot FastRead empty sentences.";

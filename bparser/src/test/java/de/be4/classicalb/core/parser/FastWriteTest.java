@@ -1,13 +1,17 @@
 package de.be4.classicalb.core.parser;
 
-import static de.be4.classicalb.core.parser.FastReadTransformer.ZERO;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.term.PrologTerm;
 
-public class FastReadTransformerTest {
+import org.junit.Assert;
+import org.junit.Test;
+
+public class FastWriteTest {
+	private static final char ZERO = 0;
+	private static final char ONE = 1;
 
 	private StructuredPrologOutput spo = new StructuredPrologOutput();
 	
@@ -56,7 +60,7 @@ public class FastReadTransformerTest {
 	public void testSimpleFunctor() { // a(b)
 		spo.openTerm("a").printAtom("b").closeTerm();
 		spo.fullstop();
-		String expected = "DSa" + ZERO + ((char) 1) + "Ab" + ZERO;
+		String expected = "DSa" + ZERO + ONE + "Ab" + ZERO;
 		check(expected);
 	}
 
@@ -83,10 +87,27 @@ public class FastReadTransformerTest {
 		String expected = "D[AC" + ZERO + "]";
 		check(expected);
 	}
+
+	@Test
+	public void testComplex() { // a(['G',f([]),[[w]]]).
+		spo.openTerm("a").openList();
+		spo.printAtom("G");
+		spo.openTerm("f").openList().closeList().closeTerm();
+		spo.openList().openList().printAtom("w").closeList().closeList();
+		spo.closeList().closeTerm();
+		spo.fullstop();
+		String expected = "DSa" + ZERO + ONE + "[AG" + ZERO + "[Sf" + ZERO + ONE + "][[[Aw" + ZERO + "]]]";
+		check(expected);
+	}
 	
 	private void check(String expected) {
-		String actual = new FastReadTransformer(spo).write();
-		assertEquals(expected, actual);
+		assert spo.getSentences().size() == 1;
+		final PrologTerm term = spo.getSentences().get(0);
+		final StringWriter sw = new StringWriter();
+		try (final PrintWriter pw = new PrintWriter(sw)) {
+			new FastReadWriter(pw).fastwrite(term);
+		}
+		Assert.assertEquals(expected, sw.toString());
 	}
 
 }
