@@ -130,6 +130,8 @@ Helpers
   values = 'VALUES';
   variables = 'VARIABLES';
 
+  safe_to_skip = ',' | '{' | '}' | '-' | '>'; // safe to skip in normal mode
+
 
 /*******************************************************************
  * States                                                          *
@@ -194,14 +196,23 @@ Tokens
 
   white_space = layout_char+;
 
-  {normal} something =
-    (letter (letter | digit | underscore)* |
-     digit ( digit )* |
-     string_literal |
-     [all_chars - double_quotation]
+  {normal} some_value =
+    (letter (letter | digit | underscore)* | // identifier
+     digit ( digit )* |  // regular integer
+     string_literal  | // "string"
+     '{'
      )
     | (layout_char |
-       ',' | '{' | '}' | '-' | '>'
+       digit |
+       // string_literal |  // otherwise testStringLiteralNotClosedLongString fails ?
+       safe_to_skip
+       ) *;  // detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
+
+
+  {normal} something =
+    [all_chars - double_quotation] // could be backslash !
+    | (layout_char |
+       safe_to_skip
        ) *;  // make token as large as possible to avoid creating too many TSomething objects
 
 
@@ -209,7 +220,8 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-  white_space, other_clause_begin, end_machine, something,
+  white_space, other_clause_begin, end_machine,
+  some_value, something,
   comment, comment_content, comment_end, line_comment,
   multiline_string_start, multiline_string_end, multiline_string_content;
 
