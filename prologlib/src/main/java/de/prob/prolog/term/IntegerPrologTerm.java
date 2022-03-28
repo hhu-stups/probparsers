@@ -55,6 +55,27 @@ public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	}
 
 	@Override
+	public long longValueExact() {
+		if (value == null) {
+			return this.ivalue;
+		} else {
+			return this.value.longValueExact();
+		}
+	}
+	
+	@Override
+	public int intValueExact() {
+		if (value == null) {
+			if (this.ivalue > Integer.MAX_VALUE || this.ivalue < Integer.MIN_VALUE) {
+				throw new ArithmeticException("IntegerPrologTerm value out of int range");
+			}
+			return (int)this.ivalue;
+		} else {
+			return this.value.intValueExact();
+		}
+	}
+	
+	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
 		if (value==null)
 			pto.printNumber(ivalue);

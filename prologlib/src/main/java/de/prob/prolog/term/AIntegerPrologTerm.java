@@ -21,6 +21,24 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 
 	public abstract BigInteger getValue();
 
+	/**
+	 * Get this integer's value as a {@code long},
+	 * checking for overflows.
+	 * 
+	 * @return this integer's value as a {@code long}
+	 * @throws ArithmeticException if the value cannot be represented as a {@code long}
+	 */
+	public abstract long longValueExact();
+
+	/**
+	 * Get this integer's value as an {@code int},
+	 * checking for overflows.
+	 *
+	 * @return this integer's value as an {@code int}
+	 * @throws ArithmeticException if the value cannot be represented as a {@code int}
+	 */
+	public abstract int intValueExact();
+
 	@Override
 	public boolean equals(final Object other) {
 		if (this == other) {

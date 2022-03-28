@@ -1,13 +1,11 @@
 package de.be4.classicalb.core.parser;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ListIterator;
 import java.io.PrintWriter;
 
 import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
 import de.prob.prolog.term.IntegerLongPrologTerm;
 import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
@@ -78,7 +76,7 @@ public class FastReadWriter {
 	
 	private void writeLongInteger(IntegerLongPrologTerm ip) {
 		out.print('I');
-		out.print(ip.getLongValue());
+		out.print(ip.longValueExact());
 		out.print(ZERO);
 	}
 

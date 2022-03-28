@@ -31,10 +31,18 @@ public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
 		return BigInteger.valueOf(ivalue);
 	}
 	
-	public long getLongValue() {
+	@Override
+	public long longValueExact() {
 		return ivalue;
 	}
 
+	@Override
+	public int intValueExact() {
+		if (this.ivalue > Integer.MAX_VALUE || this.ivalue < Integer.MIN_VALUE) {
+			throw new ArithmeticException("IntegerLongPrologTerm value out of int range");
+		}
+		return (int)this.ivalue;
+	}
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
