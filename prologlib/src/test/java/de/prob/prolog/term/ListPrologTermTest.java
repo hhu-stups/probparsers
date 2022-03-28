@@ -57,7 +57,7 @@ public class ListPrologTermTest {
 	public void testLength() {
 		ListPrologTerm t2 = new ListPrologTerm(createFixture(10));
 		assertEquals(10, t2.size());
-		ListPrologTerm t1 = new ListPrologTerm(1, 4, t2);
+		ListPrologTerm t1 = t2.subList(1, 4);
 		assertEquals(3, t1.size());
 	}
 
@@ -65,7 +65,7 @@ public class ListPrologTermTest {
 	public void testGet() {
 		ListPrologTerm t1 = new ListPrologTerm(createFixture(10));
 		assertEquals("4", getAsString(t1, 4));
-		ListPrologTerm t2 = new ListPrologTerm(1, 5, t1);
+		ListPrologTerm t2 = t1.subList(1, 5);
 		assertEquals("2", getAsString(t2, 1));
 		assertEquals("4", getAsString(t2, 3));
 	}
@@ -74,13 +74,13 @@ public class ListPrologTermTest {
 	public void testGetOutOfBounds() {
 		ListPrologTerm t1 = new ListPrologTerm(createFixture(10));
 		assertEquals("4", getAsString(t1, 4));
-		ListPrologTerm t2 = new ListPrologTerm(1, 5, t1);
+		ListPrologTerm t2 = t1.subList(1, 5);
 		t2.get(7); // raise exception
 	}
 
 	@Test
 	public void testToTermOutput() {
-		ListPrologTerm term = new ListPrologTerm(1, 5, new ListPrologTerm(createFixture(10)));
+		ListPrologTerm term = new ListPrologTerm(createFixture(10)).subList(1, 5);
 		PrologTermStringOutput output = new PrologTermStringOutput();
 		term.toTermOutput(output);
 		assertEquals("['1','2','3','4']", output.toString());
@@ -88,7 +88,7 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testIterator() {
-		ListPrologTerm term = new ListPrologTerm(1, 3, new ListPrologTerm(createFixture(10)));
+		ListPrologTerm term = new ListPrologTerm(createFixture(10)).subList(1, 3);
 		ListIterator<PrologTerm> i = term.listIterator();
 		assertFalse(i.hasPrevious());
 		assertEquals(-1, i.previousIndex());

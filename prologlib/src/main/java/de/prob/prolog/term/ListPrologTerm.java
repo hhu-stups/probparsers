@@ -35,12 +35,21 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		this.end = elements.length;
 	}
 
+	private ListPrologTerm(final PrologTerm[] elements, final int start, final int end) {
+		this.elements = elements;
+		this.start = start;
+		this.end = end;
+	}
+
 	public static ListPrologTerm emptyList() {
 		return EMPTY_LIST;
 	}
 
-	public ListPrologTerm(int start, int end, ListPrologTerm org) { // TODO: check who is calling this constructor
-		//super(); // super(org.getFunctor());
+	/**
+	 * @deprecated Use {@link #subList(int, int)} instead.
+	 */
+	@Deprecated
+	public ListPrologTerm(int start, int end, ListPrologTerm org) {
 		this.start = start;
 		this.end = end;
 		this.elements = org.elements;
@@ -225,8 +234,8 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		throw new UnsupportedOperationException();
 	}
 
-	public List<PrologTerm> subList(int start, int end) {
-		return new ListPrologTerm(start, end, this);
+	public ListPrologTerm subList(int start, int end) {
+		return new ListPrologTerm(this.elements, start, end);
 	}
 
 	public ListPrologTerm tail() {
@@ -234,7 +243,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 			throw new IllegalStateException("Cannot call tail on an empty list");
 		if (size() == 1)
 			return EMPTY_LIST;
-		return new ListPrologTerm(start + 1, end, this);
+		return new ListPrologTerm(this.elements, start + 1, end);
 	}
 
 	public PrologTerm head() {
