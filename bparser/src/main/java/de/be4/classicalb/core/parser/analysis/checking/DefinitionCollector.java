@@ -27,9 +27,6 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * {@link de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition}
  * nodes, i.e. the declarations which were found by the main parser to store
  * them into an instance of {@link Definitions}.
- * 
- * @author Fabian
- * 
  */
 public class DefinitionCollector extends MachineClauseAdapter {
 

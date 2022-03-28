@@ -7,8 +7,6 @@ import de.prob.prolog.output.PrologTermOutput;
 /**
  * PositionPrinters are used to determine the source position of an AST node and
  * to print that information as a Prolog term.
- * 
- * @author plagge
  */
 public interface PositionPrinter {
 	/**

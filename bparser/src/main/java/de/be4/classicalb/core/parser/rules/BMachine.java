@@ -96,8 +96,7 @@ public class BMachine implements IModel {
 	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
-		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(),
-		                                 parsingBehaviour.isCompactPrologPositions());
+		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(), parsingBehaviour.isCompactPrologPositions());
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		
 		pout.openTerm("machine");

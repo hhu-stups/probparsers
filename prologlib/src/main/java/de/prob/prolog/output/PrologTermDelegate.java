@@ -4,10 +4,6 @@ import java.math.BigInteger;
 
 import de.prob.prolog.term.PrologTerm;
 
-/**
- * @author plagge
- * 
- */
 public class PrologTermDelegate implements IPrologTermOutput {
 	protected final IPrologTermOutput pto;
 

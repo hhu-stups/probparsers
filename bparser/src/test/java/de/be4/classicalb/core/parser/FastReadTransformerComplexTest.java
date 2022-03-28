@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import de.prob.prolog.output.StructuredPrologOutput;
 
-public class FastReadTransformerComplexTest  {
+public class FastReadTransformerComplexTest {
 
 	private static final char O = (char) 1;
 	private static final char Z = (char) 0;

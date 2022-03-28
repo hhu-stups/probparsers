@@ -10,8 +10,6 @@ import de.prob.prolog.term.PrologTerm;
  * terms. It is a kind of unification.
  * 
  * This base class matches every {@link PrologTerm}.
- * 
- * @author plagge
  */
 public class PrologMatch {
 	private final String name;

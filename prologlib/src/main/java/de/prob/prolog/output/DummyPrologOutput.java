@@ -6,8 +6,6 @@ import de.prob.prolog.term.PrologTerm;
 
 /**
  * An implementation of {@link IPrologTermOutput} that does nothing.
- * 
- * @author plagge
  */
 public class DummyPrologOutput implements IPrologTermOutput {
 	public static final DummyPrologOutput DUMMY = new DummyPrologOutput();

@@ -33,8 +33,6 @@ import de.prob.prolog.term.VariablePrologTerm;
 
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
- * 
- * @author plagge
  */
 public class PrologTermGenerator {
 	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];

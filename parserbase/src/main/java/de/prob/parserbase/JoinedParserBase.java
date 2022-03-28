@@ -3,10 +3,6 @@ package de.prob.parserbase;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
 
-/**
- * @author plagge
- * 
- */
 public class JoinedParserBase implements ProBParserBase {
 	private final ProBParserBaseAdapter[] parsers;
 

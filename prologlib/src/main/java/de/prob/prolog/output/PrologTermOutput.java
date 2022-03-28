@@ -9,8 +9,6 @@ import de.prob.prolog.term.PrologTerm;
 
 /**
  * Helper class to generate Prolog terms.
- * 
- * @author Daniel Plagge
  */
 public class PrologTermOutput implements IPrologTermOutput {
 	private final static char[] VALID_CHARS = validChars();

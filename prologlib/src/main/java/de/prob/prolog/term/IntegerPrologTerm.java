@@ -12,16 +12,13 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog integer.
- * 
- * @author plagge, modifications by leuschel
  */
 public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;
 
 	private final BigInteger value;
 	private final long ivalue; // holds the integer if value==null
-	// ideally we should create two instance classes, one for long
-   //  and one for BigInteger;  
+	// ideally we should create two instance classes, one for long and one for BigInteger
 
 	public IntegerPrologTerm(final BigInteger value) {
 		// super(value.toString());
@@ -45,35 +42,35 @@ public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	
 	@Override
 	public String getFunctor() {
-	    if (value==null)
-	      return Long.toString(ivalue);
-	    else
-		  return value.toString();
+		if (value==null)
+			return Long.toString(ivalue);
+		else
+			return value.toString();
 	}
 
 	@Override
 	public BigInteger getValue() {
 		if (value==null)
-	      return BigInteger.valueOf(ivalue);
-	    else
-	      return value;
+			return BigInteger.valueOf(ivalue);
+		else
+			return value;
 	}
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
 		if (value==null)
-	      pto.printNumber(ivalue);
-	    else
-	      pto.printNumber(value);
+			pto.printNumber(ivalue);
+		else
+			pto.printNumber(value);
 	}
 
 
 	@Override
 	public int hashCode() {
 		if (value==null)
-	      return Long.hashCode(ivalue) * 11 + 4;
-	    else
-	      return value.hashCode() * 11 + 4;
+			return Long.hashCode(ivalue) * 11 + 4;
+		else
+			return value.hashCode() * 11 + 4;
 	}
 
 }

@@ -74,8 +74,8 @@ public class CliBParser {
 		final ConsoleOptions options = createConsoleOptions(args);
 		
 		if (options.isOptionSet(CLI_SWITCH_HELP) ||
-		           options.isOptionSet(CLI_SWITCH_HELP2) ||
-		           options.isOptionSet(CLI_SWITCH_HELP3)) {
+				options.isOptionSet(CLI_SWITCH_HELP2) ||
+				options.isOptionSet(CLI_SWITCH_HELP3)) {
 			options.printUsage(System.err);
 			System.exit(-1);
 		}
@@ -169,7 +169,7 @@ public class CliBParser {
 			}
 			
 			if (behaviour.isVerbose()) {
-			   System.out.println("Received PREPL command: " + command);
+				System.out.println("Received PREPL command: " + command);
 			}
 
 			switch (command) {
@@ -208,10 +208,10 @@ public class CliBParser {
 				if (returnValue == 0) {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
 				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
-				   System.out.println("Erasing file contents of " + outFile);
-				   final PrintWriter out2 = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
-				   out2.println("% VM Error occurred");
-				   out2.close();
+					System.out.println("Erasing file contents of " + outFile);
+					final PrintWriter out2 = new PrintWriter(Files.newBufferedWriter(Paths.get(outFile)));
+					out2.println("% VM Error occurred");
+					out2.close();
 				}
 				break;
 			case formula:
@@ -315,8 +315,7 @@ public class CliBParser {
 			}
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds, -1, 0);
-			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(),
-			                                 behaviour.isCompactPrologPositions());
+			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(), behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(pout, pprinter);
 
 			start.apply(printer);
@@ -355,9 +354,9 @@ public class CliBParser {
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final PrintWriter out, final PrintWriter err, final File bfile) {
 		try {
-		    if (behaviour.isVerbose()) {
-		       System.out.println("Parsing file: " + bfile);
-		    }
+			if (behaviour.isVerbose()) {
+				System.out.println("Parsing file: " + bfile);
+			}
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
@@ -388,22 +387,22 @@ public class CliBParser {
 				err.println("Error reading input file: " + e.getLocalizedMessage());
 			}
 			return -4;
-		} catch (final StackOverflowError e) {  // inherits from VirtualMachineError, Throwable
+		} catch (final StackOverflowError e) { // inherits from VirtualMachineError, Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				System.out.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage()  // message seems empty
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage() // message seems empty
 				, e)));
 				//e.printStackTrace(System.out); may produce itself a stack overflow??
 			} else {
 				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
 			}
 			return -5;
-		} catch (final VirtualMachineError e) {  // inherits from  Throwable
+		} catch (final VirtualMachineError e) { // inherits from Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				System.out.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage()  // message seems empty
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage() // message seems empty
 				, e)));
 			} else {
 				err.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
@@ -445,12 +444,12 @@ public class CliBParser {
 				out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
 			}
 			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
-			     System.out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
+				System.out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
 			}
 
 			final long startOutput = System.currentTimeMillis();
 			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-			    System.out.println("Generating fastrw binary output");
+				System.out.println("Generating fastrw binary output");
 				printASTasFastProlog(out, rml);
 			} else { // -prolog flag in CliBParser
 				rml.printAsProlog(out);
@@ -465,7 +464,7 @@ public class CliBParser {
 			}
 		}
 
-		if (parsingBehaviour.isPrintTime()  && !parsingBehaviour.isFastPrologOutput()) {
+		if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
 			out.println("% Used memory : " + 
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
 			out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
@@ -499,8 +498,7 @@ public class CliBParser {
 			fwriter.fastwrite(term);
 		}
 	}
-	/* old version with transformer, 
-	   seems slightly faster even though it builds up unnecessary intermediate term
+	/* old version with transformer, seems slightly faster even though it builds up unnecessary intermediate term
 			for (PrologTerm term : sentences) {
 			StructuredPrologOutput output = new StructuredPrologOutput();
 			output.printTerm(term);

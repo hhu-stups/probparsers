@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import de.prob.prolog.output.StructuredPrologOutput;
 
-public class FastReadTransformerTest  {
+public class FastReadTransformerTest {
 
 	private StructuredPrologOutput spo = new StructuredPrologOutput();
 	

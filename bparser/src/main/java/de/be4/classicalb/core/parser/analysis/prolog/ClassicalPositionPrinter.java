@@ -7,9 +7,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.be4.classicalb.core.parser.node.AIfElsifSubstitution;
 import de.be4.classicalb.core.parser.node.ASelectWhenSubstitution;
 
-/**
- * @author Daniel Plagge
- */
 public class ClassicalPositionPrinter implements PositionPrinter {
 
 	private IPrologTermOutput pout;

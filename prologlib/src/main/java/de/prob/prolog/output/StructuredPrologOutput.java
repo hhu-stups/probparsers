@@ -13,10 +13,6 @@ import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
 
-/**
- * @author plagge
- * 
- */
 public class StructuredPrologOutput implements IPrologTermOutput {
 	private final Collection<PrologTerm> sentences = new ArrayList<PrologTerm>();
 

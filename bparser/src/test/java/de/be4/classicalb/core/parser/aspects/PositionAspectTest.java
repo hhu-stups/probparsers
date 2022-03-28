@@ -14,7 +14,7 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
-public class PositionAspectTest  {
+public class PositionAspectTest {
 
 	@Test
 	public void testNodeSubclassOfPositionedNode() throws Exception {

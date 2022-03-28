@@ -16,8 +16,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog list.
- *
- * @author plagge, modifications by leuschel
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
 
@@ -32,28 +30,37 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	
 
 	public ListPrologTerm(final PrologTerm... elements) {
-		// Note: this super call is not entirely correct, it does not match the structure of Prolog lists properly.
-		// A Prolog list is either the atom [] or a term of the form .(Head, Tail), where Tail is another list.
-		// However, we incorrectly use the list's elements as the arguments of the list term, which creates a "flat" list rather than a linked list.
-		// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
-		// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
-		// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
-		// super(elements.length == 0 ? "[]" : ".", elements);
 		this.elements = elements;
 		this.start = 0;
 		this.end = elements.length;
+	}
+
+	private ListPrologTerm(final PrologTerm[] elements, final int start, final int end) {
+		this.elements = elements;
+		this.start = start;
+		this.end = end;
 	}
 
 	public static ListPrologTerm emptyList() {
 		return EMPTY_LIST;
 	}
 
-	public ListPrologTerm(int start, int end, ListPrologTerm org) { // TODO: check who is calling this constructor
-		//super(); // super(org.getFunctor());
+	/**
+	 * @deprecated Use {@link #subList(int, int)} instead.
+	 */
+	@Deprecated
+	public ListPrologTerm(int start, int end, ListPrologTerm org) {
 		this.start = start;
 		this.end = end;
 		this.elements = org.elements;
 	}
+	
+	// Note: this functor and arity are not entirely correct, they don't match the structure of Prolog lists properly.
+	// A Prolog list is either the atom [] or a term of the form .(Head, Tail), where Tail is another list.
+	// However, we incorrectly use the list's elements as the arguments of the list term, which creates a "flat" list rather than a linked list.
+	// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
+	// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
+	// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using this somewhat incorrect structure.
 	
 	@Override
 	public String getFunctor() {
@@ -227,8 +234,8 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		throw new UnsupportedOperationException();
 	}
 
-	public List<PrologTerm> subList(int start, int end) {
-		return new ListPrologTerm(start, end, this);
+	public ListPrologTerm subList(int start, int end) {
+		return new ListPrologTerm(this.elements, start, end);
 	}
 
 	public ListPrologTerm tail() {
@@ -236,7 +243,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 			throw new IllegalStateException("Cannot call tail on an empty list");
 		if (size() == 1)
 			return EMPTY_LIST;
-		return new ListPrologTerm(start + 1, end, this);
+		return new ListPrologTerm(this.elements, start + 1, end);
 	}
 
 	public PrologTerm head() {
