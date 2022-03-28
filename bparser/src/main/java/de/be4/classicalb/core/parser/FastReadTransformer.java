@@ -7,7 +7,7 @@ import java.util.ListIterator;
 
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
+import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
@@ -41,8 +41,8 @@ public class FastReadTransformer {
 	}
 
 	private void fastwrite(PrologTerm term) {
-		if (term instanceof IntegerPrologTerm) {
-			IntegerPrologTerm intTerm = (IntegerPrologTerm) term;
+		if (term instanceof AIntegerPrologTerm) {
+			AIntegerPrologTerm intTerm = (AIntegerPrologTerm) term;
 			writeInteger(intTerm);
 		} else if (term instanceof CompoundPrologTerm) {
 			writeCompound(term);
@@ -71,7 +71,7 @@ public class FastReadTransformer {
 		sb.append(ZERO);
 	}
 
-	private void writeInteger(IntegerPrologTerm ip) {
+	private void writeInteger(AIntegerPrologTerm ip) {
 		sb.append("I");
 		sb.append(ip.getValue());
 		sb.append(ZERO);

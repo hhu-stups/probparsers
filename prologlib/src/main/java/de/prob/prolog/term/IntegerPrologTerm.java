@@ -15,7 +15,7 @@ import de.prob.prolog.output.IPrologTermOutput;
  * 
  * @author plagge, modifications by leuschel
  */
-public final class IntegerPrologTerm extends PrologTerm {
+public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	private static final long serialVersionUID = -485207706557171193L;
 
 	private final BigInteger value;
@@ -42,10 +42,6 @@ public final class IntegerPrologTerm extends PrologTerm {
 		this.ivalue = -1;
 	}
 
-	@Override
-	public boolean isNumber() {
-		return true;
-	}
 	
 	@Override
 	public String getFunctor() {
@@ -55,6 +51,7 @@ public final class IntegerPrologTerm extends PrologTerm {
 		  return value.toString();
 	}
 
+	@Override
 	public BigInteger getValue() {
 		if (value==null)
 	      return BigInteger.valueOf(ivalue);
@@ -70,18 +67,6 @@ public final class IntegerPrologTerm extends PrologTerm {
 	      pto.printNumber(value);
 	}
 
-	@Override
-	public boolean equals(final Object other) {
-		boolean isEqual;
-		if (this == other) {
-			isEqual = true;
-		} else if (other != null && other instanceof IntegerPrologTerm) {
-			isEqual = this.getValue().equals(((IntegerPrologTerm) other).getValue());
-		} else {
-			isEqual = false;
-		}
-		return isEqual;
-	}
 
 	@Override
 	public int hashCode() {

@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 
 import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.IntegerPrologTerm;
+import de.prob.prolog.term.IntegerLongPrologTerm;
+import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
@@ -35,8 +37,11 @@ public class FastReadWriter {
 	}
 
 	public void writeTerm(PrologTerm term) {
-		if (term instanceof IntegerPrologTerm) {
-			IntegerPrologTerm intTerm = (IntegerPrologTerm) term;
+		if (term instanceof IntegerLongPrologTerm) {
+			IntegerLongPrologTerm intTerm = (IntegerLongPrologTerm) term;
+			writeLongInteger(intTerm);
+		}else if (term instanceof AIntegerPrologTerm) {
+			AIntegerPrologTerm intTerm = (AIntegerPrologTerm) term;
 			writeInteger(intTerm);
 		} else if (term instanceof CompoundPrologTerm) {
 			writeCompound(term);
@@ -65,9 +70,15 @@ public class FastReadWriter {
 		out.print(ZERO);
 	}
 
-	private void writeInteger(IntegerPrologTerm ip) {
+	private void writeInteger(AIntegerPrologTerm ip) {
 		out.print('I');
 		out.print(ip.getValue());
+		out.print(ZERO);
+	}
+	
+	private void writeLongInteger(IntegerLongPrologTerm ip) {
+		out.print('I');
+		out.print(ip.getLongValue());
 		out.print(ZERO);
 	}
 

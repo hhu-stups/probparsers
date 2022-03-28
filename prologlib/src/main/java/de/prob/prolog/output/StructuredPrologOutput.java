@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.IntegerPrologTerm;
+import de.prob.prolog.term.IntegerLongPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
@@ -95,7 +96,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public IPrologTermOutput printNumber(final long number) {
-		addArgument(new IntegerPrologTerm(number));
+		addArgument(new IntegerLongPrologTerm(number));
 		return this;
 	}
 

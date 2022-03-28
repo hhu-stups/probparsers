@@ -3,7 +3,7 @@ package de.prob.prolog.match;
 import java.math.BigInteger;
 import java.util.Map;
 
-import de.prob.prolog.term.IntegerPrologTerm;
+import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 
 /**
@@ -48,9 +48,9 @@ public class PrologIntegerMatch extends PrologMatch {
 	@Override
 	protected boolean isMatch(final PrologTerm term,
 			final Map<String, PrologTerm> hits) {
-		boolean match = term instanceof IntegerPrologTerm;
+		boolean match = term instanceof AIntegerPrologTerm;
 		if (match && integer != null) {
-			match = integer.equals(((IntegerPrologTerm) term).getValue());
+			match = integer.equals(((AIntegerPrologTerm) term).getValue());
 		}
 		return match;
 	}
