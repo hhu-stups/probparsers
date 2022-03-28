@@ -204,14 +204,16 @@ Tokens
      )
     | (layout_char |
        digit |
-       // string_literal |  // otherwise testStringLiteralNotClosedLongString fails ?
+       // string_literal |  // otherwise testStringLiteralNotClosedLongString fails with Pushback buffer overflow
+         // the problem is that we cannot put string_literal in a * without having to pushback
+         // the entire string contents in case the string is not closed
        safe_to_skip
        ) *;  // detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
 
 
   {normal} something =
-    [all_chars - double_quotation] // could be backslash !
-    | (layout_char |
+     [[all_chars - double_quotation] - layout_char] // could be backslash !
+      (layout_char |
        safe_to_skip
        ) *;  // make token as large as possible to avoid creating too many TSomething objects
 
