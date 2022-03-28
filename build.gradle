@@ -15,7 +15,7 @@ wrapper {
 }
 
 ext {
-    sableCCVersion = '3.3.2'
+    sableCCVersion = '3.3.3-SNAPSHOT'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
