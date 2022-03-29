@@ -50,6 +50,7 @@ public class PreLexer extends Lexer {
 		          ) {
                 // token.setText(" "); // we don't need this; 
                 // somehow the ignored token attribute of SableCC does not seem to work
+                // we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
                  return null;
             }
             return token;

@@ -423,7 +423,9 @@ public class BLexer extends Lexer {
 		          ) {
                 //token.setText(" "); // we don't need this; 
                 // somehow the ignored token attribute of SableCC does not seem to work
-                 return null;
+                if(parseOptions == null || parseOptions.isIgnoreUselessTokens())
+                    return null;
+          // The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
           // TODO: check if we can also ignore TComment, TCommentBody, ...
              }
              return token;
