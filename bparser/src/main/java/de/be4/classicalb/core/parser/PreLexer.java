@@ -41,19 +41,21 @@ public class PreLexer extends Lexer {
 			//return super.getToken();
 			final Token token = super.getToken();
 			// System.out.println("Token: " + token);
-             if (token instanceof TIdentifierLiteral || 
-                 token instanceof TSemicolon
-                 ) {
-                 token.setText(token.getText().intern());
-             } else if ( (token instanceof TSomeValue)
-		              || (token instanceof TSomething)
-		          ) {
-                // token.setText(" "); // we don't need this; 
-                // somehow the ignored token attribute of SableCC does not seem to work
-                // we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
-                 return null;
-            }
-            return token;
+			if (
+				token instanceof TIdentifierLiteral
+				|| token instanceof TSemicolon
+			) {
+				token.setText(token.getText().intern());
+			} else if (
+				token instanceof TSomeValue
+				|| token instanceof TSomething
+			) {
+				// token.setText(" "); // we don't need this; 
+				// somehow the ignored token attribute of SableCC does not seem to work
+				// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
+				return null;
+			}
+			return token;
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());
 			// printState();
