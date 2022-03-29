@@ -355,6 +355,8 @@ public class BLexer extends Lexer {
 	private Token lastToken;
 
 	private void findSyntaxError() throws LexerException {
+	    if (token == null)
+	       return;
 		if (token instanceof TWhiteSpace || token instanceof TLineComment ||
 			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
@@ -400,37 +402,45 @@ public class BLexer extends Lexer {
 	}
 
 	private void applyGrammarExtension() {
-		if (parseOptions != null && this.parseOptions.getGrammar().containsAlternativeDefinitionForToken(token)) {
+		if (parseOptions != null && token != null && 
+		    this.parseOptions.getGrammar().containsAlternativeDefinitionForToken(token)) {
 			token = this.parseOptions.getGrammar().createNewToken(token);
 		}
 	}
 
 	@Override
+	protected Token getToken() throws IOException, LexerException {
+			//return super.getToken();
+			final Token token = super.getToken();
+			// System.out.println("Token: " + token);
+             if (token instanceof TIdentifierLiteral || 
+                 token instanceof TMaplet
+                 ) {
+                 token.setText(token.getText().intern());
+             } else if (  (token instanceof TWhiteSpace) 
+		             // ||   (token instanceof TComment)
+		             // || (token instanceof TLineComment)
+		          ) {
+                //token.setText(" "); // we don't need this; 
+                // somehow the ignored token attribute of SableCC does not seem to work
+                 return null;
+          // TODO: check if we can also ignore TComment, TCommentBody, ...
+             }
+             return token;
+	}
+
+
+
+	@Override
 	protected void filter() throws LexerException, IOException {
+	    
 		// System.out.println("State = " + state + " token = " + token);
+		if (token==null)
+		  return;
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
-		
-		if ((token instanceof TIdentifierLiteral) // this definitely makes sense
-		    || (token instanceof TMaplet)
-		    // || (token instanceof TIntegerLiteral)  // this may depend on the application
-		    // || (token instanceof TStringLiteral)  // ditto; could be useful if strings and integers are reused
-        ) {
-            // intern Identifiers, ... to share String representation
-            token.setText(token.getText().intern());
-        } else if (   (token instanceof TWhiteSpace)
-		           || (token instanceof TComment)
-		           || (token instanceof TCommentBody)
-		           || (token instanceof TCommentEnd)
-		           || (token instanceof TLineComment)
-		          ) {
-             token.setText(""); // we don't need this
-            // somehow the ignored token attribute of SableCC does not seem to work
-        }
-        
-        
              
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
