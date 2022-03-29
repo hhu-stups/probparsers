@@ -410,39 +410,11 @@ public class BLexer extends Lexer {
 	}
 
 	@Override
-	protected Token getToken() throws IOException, LexerException {
-		//return super.getToken();
-		final Token token = super.getToken();
-		// System.out.println("Token: " + token);
-		if (
-			token instanceof TIdentifierLiteral
-			|| token instanceof TMaplet
-		) {
-			token.setText(token.getText().intern());
-		} else if (
-			token instanceof TWhiteSpace 
-			// || token instanceof TComment
-			// || token instanceof TLineComment
-		) {
-			//token.setText(" "); // we don't need this; 
-			// somehow the ignored token attribute of SableCC does not seem to work
-			if (parseOptions == null || parseOptions.isIgnoreUselessTokens()) {
-				return null;
-			}
-			// The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
-			// TODO: check if we can also ignore TComment, TCommentBody, ...
-		}
-		return token;
-	}
-
-
-
-	@Override
 	protected void filter() throws LexerException, IOException {
 		// System.out.println("State = " + state + " token = " + token);
-		if (token==null) {
-			return;
-		}
+
+		optimizeToken();
+
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
@@ -458,7 +430,7 @@ public class BLexer extends Lexer {
 			collectComment();
 		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
-		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
+		} else if (state.equals(State.SHEBANG) && token != null && token.getLine() != 1) {
 			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
 
@@ -530,6 +502,25 @@ public class BLexer extends Lexer {
 				state = State.NORMAL;
 
 			} else {
+				token = null;
+			}
+		}
+	}
+
+	private void optimizeToken() {
+		if (
+			token instanceof TIdentifierLiteral
+			|| token instanceof TMaplet
+		) {
+			token.setText(token.getText().intern());
+		} else if (
+			token instanceof TWhiteSpace
+			// || token instanceof TComment
+			// || token instanceof TLineComment
+		) {
+			// The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
+			// TODO: check if we can also ignore TComment, TCommentBody, ...
+			if (parseOptions == null || parseOptions.isIgnoreUselessTokens()) {
 				token = null;
 			}
 		}

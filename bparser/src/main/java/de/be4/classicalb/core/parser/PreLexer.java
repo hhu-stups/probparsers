@@ -38,24 +38,11 @@ public class PreLexer extends Lexer {
 	
 	protected Token getToken() throws IOException, LexerException {
 		try {
-			//return super.getToken();
-			final Token token = super.getToken();
-			// System.out.println("Token: " + token);
-			if (
-				token instanceof TIdentifierLiteral
-				|| token instanceof TSemicolon
-			) {
-				token.setText(token.getText().intern());
-			} else if (
-				token instanceof TSomeValue
-				|| token instanceof TSomething
-			) {
-				// token.setText(" "); // we don't need this; 
-				// somehow the ignored token attribute of SableCC does not seem to work
-				// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
-				return null;
-			}
-			return token;
+			// Please don't put any token processing code here!
+			// Use the filter method instead (see below).
+			// The only code that needs to be here is for processing the exception,
+			// which cannot be done with filter.
+			return super.getToken();
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());
 			// printState();
@@ -76,6 +63,7 @@ public class PreLexer extends Lexer {
 	protected void filter() throws LexerException, IOException {
 		checkComment();
 		checkMultiLineString();
+		optimizeToken();
 
 		if (token != null) {
 			collectRhs();
@@ -203,4 +191,18 @@ public class PreLexer extends Lexer {
 		}
 	}
 	
+	private void optimizeToken() {
+		if (
+			token instanceof TIdentifierLiteral
+			|| token instanceof TSemicolon
+		) {
+			token.setText(token.getText().intern());
+		} else if (
+			token instanceof TSomeValue
+			|| token instanceof TSomething
+		) {
+			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
+			token = null;
+		}
+	}
 }
