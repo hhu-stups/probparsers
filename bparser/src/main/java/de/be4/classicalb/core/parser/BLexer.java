@@ -434,7 +434,7 @@ public class BLexer extends Lexer {
              
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
-			findSyntaxError();
+			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.COMMENT)) {
 			collectComment();
 		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
