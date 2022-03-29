@@ -48,11 +48,11 @@ public class PreLexer extends Lexer {
              } else if ( (token instanceof TSomeValue)
 		              || (token instanceof TSomething)
 		          ) {
-                token.setText(""); // we don't need this; 
+                // token.setText(" "); // we don't need this; 
                 // somehow the ignored token attribute of SableCC does not seem to work
-               // return null;
-              }
-             return token;
+                 return null;
+            }
+            return token;
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());
 			// printState();
