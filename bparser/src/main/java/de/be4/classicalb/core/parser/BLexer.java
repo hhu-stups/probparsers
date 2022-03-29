@@ -516,7 +516,7 @@ public class BLexer extends Lexer {
 		} else if (
 			token instanceof TWhiteSpace
 			// || token instanceof TComment
-			// || token instanceof TLineComment
+			// || token instanceof TLineComment // definitions.DefinitionsErrorsTest fails if we do this
 		) {
 			// The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
 			// TODO: check if we can also ignore TComment, TCommentBody, ...

@@ -200,6 +200,7 @@ public class PreLexer extends Lexer {
 		} else if (
 			token instanceof TSomeValue
 			|| token instanceof TSomething
+			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
 		) {
 			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
 			token = null;
