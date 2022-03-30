@@ -19,6 +19,8 @@ Helpers
 
   lf = 10;
   cr = 13;
+  tab = 8;
+  space = 32;
 
   line_break = [lf + cr];
 
@@ -130,7 +132,7 @@ Helpers
   values = 'VALUES';
   variables = 'VARIABLES';
 
-  safe_to_skip = ',' | '{' | '}' | '-' | '>'; // safe to skip in normal mode
+  safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':'; // safe to skip in normal mode
 
 
 /*******************************************************************
@@ -197,18 +199,22 @@ Tokens
   white_space = layout_char+;
 
   {normal} some_value =
-    (letter (letter | digit | underscore)* | // identifier
-     digit ( digit )* |  // regular integer
-     string_literal  | // "string"
-     '{'
-     )
-    | (layout_char |
-       digit |
+    (letter (letter | digit | underscore)*)
+     // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS
+     | // identifier
+    ( ( digit ( digit )* |  // regular integer
+        string_literal  | // "string"
+       '{'
+      )
+      ( layout_char |
+        digit |
        // string_literal |  // otherwise testStringLiteralNotClosedLongString fails with Pushback buffer overflow
          // the problem is that we cannot put string_literal in a * without having to pushback
          // the entire string contents in case the string is not closed
        safe_to_skip
-       ) *;  // detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
+       ) *
+       // detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
+    );
 
 
   {normal} something =
