@@ -21,6 +21,7 @@ import de.be4.classicalb.core.preparser.node.TSemicolon;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.node.TSomeValue;
 import de.be4.classicalb.core.preparser.node.TSomething;
+//import de.be4.classicalb.core.preparser.node.TCommentContent;
 
 public class PreLexer extends Lexer {
 
@@ -200,6 +201,7 @@ public class PreLexer extends Lexer {
 		} else if (
 			token instanceof TSomeValue
 			|| token instanceof TSomething
+			// || token instanceof TCommentContent // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
 			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
 		) {
 			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
