@@ -144,8 +144,8 @@ public class CliBParser {
 			System.exit(returnValue);
 		}
 	}
-
-	private static void runPRepl(final ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
+	
+	private static void runPRepl(ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
@@ -170,9 +170,7 @@ public class CliBParser {
 				command = EPreplCommands.valueOf(line);
 			}
 			
-			if (behaviour.isVerbose()) {
-				System.out.println("Received PREPL command: " + command);
-			}
+			behaviour.debug_print("Received PREPL command: " + command);
 
 			switch (command) {
 			case version:
@@ -198,7 +196,7 @@ public class CliBParser {
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
 			    String newFVal = in.readLine();
-			    System.out.println("Setting fastprolog to "+newFVal);
+			    behaviour.debug_print("Setting fastprolog to "+newFVal);
 			    behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 				break;
 			case compactpos:
@@ -372,9 +370,7 @@ public class CliBParser {
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final OutputStream out, final PrintWriter err, final File bfile) {
 		try {
-			if (behaviour.isVerbose()) {
-				System.out.println("Parsing file: " + bfile);
-			}
+			behaviour.debug_print("Parsing file: " + bfile);
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
@@ -446,9 +442,8 @@ public class CliBParser {
 		}
 
 		if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
-			if (parsingBehaviour.isVerbose()) {
-				System.out.println("Pretty printing " + bfile + " in B format:");
-			}
+			parsingBehaviour.debug_print("Pretty printing " + bfile + " in B format:");
+			
 			PrettyPrinter pp = new PrettyPrinter();
 			tree.apply(pp);
 			System.out.println(pp.getPrettyPrint());
