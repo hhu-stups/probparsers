@@ -175,6 +175,7 @@ public class PreLexer extends Lexer {
 	}
 
 	private void checkComment() {
+	    // switch to special COMMENT state and back
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.COMMENT;
@@ -185,6 +186,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() {
+	    // switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING_STATE;

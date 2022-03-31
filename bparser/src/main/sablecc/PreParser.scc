@@ -145,6 +145,7 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
+  start, // special initial state in which we accept #PREDICATE, ...
   normal,
   definitions,
   definitions_rhs,
@@ -158,18 +159,19 @@ States
  *******************************************************************/
 
 Tokens
-  {normal, definitions, definitions_rhs} comment = comment_start; // switch to comment state is done in PreLexer.java
+  {start->normal, normal, definitions, definitions_rhs} comment = comment_start; // switch to comment state is done in PreLexer.java
   {comment} comment_end = comment_end; // switch back to previous state is done in PreLexer.java
   {comment} comment_content = all_chars [[[all_chars - '*'] - '/'] - line_break]*;
 
-  {normal, definitions_rhs} multiline_string_start = triple_quote;
+  {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
   {multiline_string_state} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
   {multiline_string_state} multiline_string_content = multiline_string_literal;
 
-  {normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
+  {start -> normal, normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 
-  {normal -> definitions} definitions = 'DEFINITIONS';
-  {normal, definitions -> normal, definitions_rhs} other_clause_begin =
+  {start -> definitions, normal -> definitions} definitions = 'DEFINITIONS';
+
+  {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
     machine |
     abstract_constants | abstract_variables | assertions | concrete_constants |
     concrete_variables | constants | constraints | implementation |
@@ -177,10 +179,10 @@ Tokens
     operations | promotes | properties | refines | refinement | extends |
     sees | sets | uses | values | variables;
 
-  {normal, definitions -> normal} end_machine = end;
+  {start -> normal, normal, definitions -> normal} end_machine = end;
 
-  {normal} kw_definitions = '#DEFINITIONS';
-  {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
+  {start} kw_definitions = '#DEFINITIONS';
+  {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
   {no_definitions} no_def_something = all_chars*;
 
   {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
@@ -204,7 +206,7 @@ Tokens
 
   {definitions, definitions_rhs} white_space = layout_char+;
 
-  {normal} some_value = // could actually be renamed to some_identifier
+  {start -> normal, normal} some_value = // could actually be renamed to some_identifier
     (letter (letter | digit | underscore)*)
      // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS token
     |
@@ -218,7 +220,7 @@ Tokens
   // something could in principle match more than line_comment, but as we match only safe characters
   // we will not miss start of DEFINITIONS or '/' or '"' or ''' or ` (backquote) or machine clause
   // we ar thus safe to skip over any char that is not a letter, a / or a " or '
-  {normal} something =
+  {start -> normal, normal} something =
      //[[all_chars - double_quotation] - layout_char] // could be backslash !
      ( [all_chars - double_quotation] // could be backslash !
        | string_literal
