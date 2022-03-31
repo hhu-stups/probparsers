@@ -62,12 +62,14 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+	    //printState();
 		checkComment();
 		checkMultiLineString();
 		optimizeToken();
 
 		if (token != null) {
 			collectRhs();
+			// System.out.println("+ TOKEN KEPT");
 		}
 	}
 	

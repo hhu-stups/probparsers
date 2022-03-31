@@ -132,7 +132,13 @@ Helpers
   values = 'VALUES';
   variables = 'VARIABLES';
 
-  safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':'; // safe to skip in normal mode
+  back_quote = '`';
+  all_chars_without_back_quote_newline_slash = [[[all_chars - back_quote] - line_break] - '\'];
+  quoted_identifier_literal = back_quote (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* back_quote; // backquote to generate identifiers with special symbols or which clash with keywords
+
+
+  safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':' |
+                 '<' | '.' | '|' | '(' | ')' | '[' | ']' | '%'; // safe to skip in normal mode
 
 
 /*******************************************************************
@@ -174,7 +180,7 @@ Tokens
   {normal, definitions -> normal} end_machine = end;
 
   {normal} kw_definitions = '#DEFINITIONS';
-  {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ;
+  {normal -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
   {no_definitions} no_def_something = all_chars*;
 
   {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
@@ -196,31 +202,32 @@ Tokens
   {definition_file} filename = all_chars_without_quote_and_newline*;
   //{definitions} filename= string_literal;
 
-  white_space = layout_char+;
+  {definitions, definitions_rhs} white_space = layout_char+;
 
-  {normal} some_value =
+  {normal} some_value = // could actually be renamed to some_identifier
     (letter (letter | digit | underscore)*)
-     // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS
-     | // identifier
-    ( ( digit ( digit )* |  // regular integer
-        string_literal  | // "string"
-       '{'
-      )
-      ( layout_char |
-        digit |
-       // string_literal |  // otherwise testStringLiteralNotClosedLongString fails with Pushback buffer overflow
-         // the problem is that we cannot put string_literal in a * without having to pushback
-         // the entire string contents in case the string is not closed
-       safe_to_skip
-       ) *
-       // detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
-    );
+     // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS token
+    |
+    ('#' letter (letter)* (tab|space)* '.')  // something like #DEFINITIONS followed by a .
+     // not perfect rule; does not allow new line or comments; ideally we should only accept kw_.... at beginning
+   ;
 
+  // we want to detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
 
+  // other transition rules in normal mode we need to be careful about: line_comment_start
+  // something could in principle match more than line_comment, but as we match only safe characters
+  // we will not miss start of DEFINITIONS or '/' or '"' or ''' or ` (backquote) or machine clause
+  // we ar thus safe to skip over any char that is not a letter, a / or a " or '
   {normal} something =
-     [[all_chars - double_quotation] - layout_char] // could be backslash !
+     //[[all_chars - double_quotation] - layout_char] // could be backslash !
+     ( [all_chars - double_quotation] // could be backslash !
+       | string_literal
+       | quoted_identifier_literal
+      )
       (layout_char |
+       digit |
        safe_to_skip
+       // string_literal |  // otherwise testStringLiteralNotClosedLongString fails with Pushback buffer overflow
        ) *;  // make token as large as possible to avoid creating too many TSomething objects
 
 
