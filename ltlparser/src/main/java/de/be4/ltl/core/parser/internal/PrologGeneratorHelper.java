@@ -9,6 +9,7 @@ import de.be4.ltl.core.parser.node.ADetLtl;
 import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
+import de.be4.ltl.core.parser.node.AUnchangedLtl;
 import de.be4.ltl.core.parser.node.PActions;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
@@ -47,9 +48,23 @@ final class PrologGeneratorHelper {
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
+		    // if the formalism does not support predicates
 			throw createAdapterException(token, e);
 		}
 		pto.closeTerm();
+	}
+
+	public void caseUnparsedExpression(final UniversalToken token) {
+		//pto.openTerm("ae"); // from the context it is clear in the AST that we expect an expression
+		try {
+			specParser.parseExpression(pto, token.getText(), true);
+		} catch (ProBParseException e) {
+			throw createAdapterException(token, e);
+		} catch (UnsupportedOperationException e) {
+		    // if the formalism does not support expressions
+			throw createAdapterException(token, e);
+		}
+		//pto.closeTerm();
 	}
 
 	public void enabled(final UniversalToken token) {
@@ -59,17 +74,9 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-
-	public void dlk_tp_char(final UniversalToken token) {
-		pto.openTerm("tp");
-		pto.openTerm("action");
-		parseTransitionPredicate(token);
-		pto.closeTerm();
-		pto.closeTerm();		
-	}
 	
 	public void available(final UniversalToken token) {
-		pto.openTerm("ap");
+		pto.openTerm("ap"); // atomic property
 		pto.openTerm("available");
 		parseTransitionPredicate(token);
 		pto.closeTerm();
@@ -159,6 +166,19 @@ final class PrologGeneratorHelper {
 
 		node.getLtl().apply(gen);
 
+		pto.closeTerm();
+		
+	}
+
+	public void unchangedTerm(AUnchangedLtl node, PrologGenerator gen) {
+		
+		pto.openTerm("action");
+		pto.openTerm("unchanged");
+		
+		final UniversalToken token = UniversalToken.createToken(node.getExpression());
+		this.caseUnparsedExpression(token);
+
+		pto.closeTerm();
 		pto.closeTerm();
 		
 	}

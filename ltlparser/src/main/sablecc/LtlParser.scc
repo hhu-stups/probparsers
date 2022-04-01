@@ -75,10 +75,11 @@ Tokens
   {atomic} atomic_proposition_end = r_cur;
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket]; // TODO: does to check that parens/bracket match!
+  {action} action_end = [r_paren + r_bracket]; // TODO: check that parens/bracket match!
   {action} action_begin = [l_paren + l_bracket];
   {action} tp_char = ([0 .. 0xffff]);
 
+  {ltl} unchanged = 'unchanged' | 'UNCHANGED';
   {ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
   {ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 
@@ -92,7 +93,7 @@ Tokens
   {ltl} equivalent = '<=>' | 0x21d4 | 'equivalent';
   {ltl} and = '&' | 0x2227 | 'and';  // TO DO: allow Spin syntax?
   {ltl} or = 'or' | 0x2228 | '||';
-  {ltl} not = 'not' | 0x00ac;
+  {ltl} not = 'not' | 0x00ac; // conflict with forall | '!';
 
   /* LTL temporal operators */
   {ltl} until =     'U' | 'until' | 'stronguntil';
@@ -169,6 +170,7 @@ Productions
     {yesterday} yesterday ltl_formula4 {-> New ltl.yesterday(ltl_formula4.ltl)} |
     {enabled} enabled {-> New ltl.enabled(enabled)} |
     {available} available {-> New ltl.available(available)} |
+    {unchanged} unchanged l_par atomic_proposition_begin r_par {-> New ltl.unchanged(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
     {sink} sink {-> New ltl.sink()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
@@ -246,6 +248,7 @@ Abstract Syntax Tree
    {yesterday} ltl |
    {enabled} [operation]:enabled |
    {available} [operation]:available |
+   {unchanged} [expression]:atomic_proposition_begin |
    {weak_fair} [operation]:weak_fair |
    {strong_fair} [operation]:strong_fair |
    {action} [operation]:l_sq |
