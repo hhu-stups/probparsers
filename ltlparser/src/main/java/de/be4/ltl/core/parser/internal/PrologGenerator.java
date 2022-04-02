@@ -19,6 +19,9 @@ import de.be4.ltl.core.parser.node.AAvailableLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
 import de.be4.ltl.core.parser.node.AUnchangedLtl;
+import de.be4.ltl.core.parser.node.AChangedLtl;
+import de.be4.ltl.core.parser.node.ADecreasingLtl;
+import de.be4.ltl.core.parser.node.AIncreasingLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
@@ -148,6 +151,21 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void caseAUnchangedLtl(AUnchangedLtl node)
 	{
 		helper.unchangedTerm(node, this);
+	}
+	@Override
+	public void caseAChangedLtl(AChangedLtl node)
+	{
+		helper.changedTerm(node, this);
+	}
+	@Override
+	public void caseADecreasingLtl(ADecreasingLtl node)
+	{
+		helper.decreasingTerm(node, this);
+	}
+	@Override
+	public void caseAIncreasingLtl(AIncreasingLtl node)
+	{
+		helper.increasingTerm(node, this);
 	}
 
 

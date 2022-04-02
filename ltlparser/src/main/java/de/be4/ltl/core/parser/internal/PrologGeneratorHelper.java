@@ -10,6 +10,9 @@ import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
 import de.be4.ltl.core.parser.node.AUnchangedLtl;
+import de.be4.ltl.core.parser.node.AChangedLtl;
+import de.be4.ltl.core.parser.node.ADecreasingLtl;
+import de.be4.ltl.core.parser.node.AIncreasingLtl;
 import de.be4.ltl.core.parser.node.PActions;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
@@ -171,16 +174,43 @@ final class PrologGeneratorHelper {
 	}
 
 	public void unchangedTerm(AUnchangedLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
-		pto.openTerm("unchanged");
-		
+		pto.openTerm("change_expr");
+		pto.printAtom("eq");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
 		this.caseUnparsedExpression(token);
-
 		pto.closeTerm();
 		pto.closeTerm();
+	}
+	public void changedTerm(AChangedLtl node, PrologGenerator gen) {
 		
+		pto.openTerm("action");
+		pto.openTerm("change_expr");
+		pto.printAtom("neq");
+		final UniversalToken token = UniversalToken.createToken(node.getExpression());
+		this.caseUnparsedExpression(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+	public void decreasingTerm(ADecreasingLtl node, PrologGenerator gen) {
+		
+		pto.openTerm("action");
+		pto.openTerm("change_expr");
+		pto.printAtom("gt");
+		final UniversalToken token = UniversalToken.createToken(node.getExpression());
+		this.caseUnparsedExpression(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+	public void increasingTerm(AIncreasingLtl node, PrologGenerator gen) {
+		
+		pto.openTerm("action");
+		pto.openTerm("change_expr");
+		pto.printAtom("lt");
+		final UniversalToken token = UniversalToken.createToken(node.getExpression());
+		this.caseUnparsedExpression(token);
+		pto.closeTerm();
+		pto.closeTerm();
 	}
 
 	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {

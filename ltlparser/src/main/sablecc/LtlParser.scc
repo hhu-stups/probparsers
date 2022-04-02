@@ -79,7 +79,10 @@ Tokens
   {action} action_begin = [l_paren + l_bracket];
   {action} tp_char = ([0 .. 0xffff]);
 
-  {ltl} unchanged = 'unchanged' | 'UNCHANGED';
+  {ltl} unchanged = 'unchanged' | 'UNCHANGED'; // upper-case for TLA+ like feel
+  {ltl} changed = 'changed';
+  {ltl} decreasing = 'decreasing';
+  {ltl} increasing = 'increasing';
   {ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
   {ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 
@@ -171,6 +174,9 @@ Productions
     {enabled} enabled {-> New ltl.enabled(enabled)} |
     {available} available {-> New ltl.available(available)} |
     {unchanged} unchanged l_par atomic_proposition_begin r_par {-> New ltl.unchanged(atomic_proposition_begin)} |
+    {changed} changed l_par atomic_proposition_begin r_par {-> New ltl.changed(atomic_proposition_begin)} |
+    {decreasing} decreasing l_par atomic_proposition_begin r_par {-> New ltl.decreasing(atomic_proposition_begin)} |
+    {increasing} increasing l_par atomic_proposition_begin r_par {-> New ltl.increasing(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
     {sink} sink {-> New ltl.sink()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
@@ -249,6 +255,9 @@ Abstract Syntax Tree
    {enabled} [operation]:enabled |
    {available} [operation]:available |
    {unchanged} [expression]:atomic_proposition_begin |
+   {changed} [expression]:atomic_proposition_begin |
+   {decreasing} [expression]:atomic_proposition_begin |
+   {increasing} [expression]:atomic_proposition_begin |
    {weak_fair} [operation]:weak_fair |
    {strong_fair} [operation]:strong_fair |
    {action} [operation]:l_sq |
