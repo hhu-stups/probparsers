@@ -22,6 +22,7 @@ import de.be4.ltl.core.parser.node.AUnchangedLtl;
 import de.be4.ltl.core.parser.node.AChangedLtl;
 import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.AIncreasingLtl;
+import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
@@ -167,6 +168,12 @@ public class PrologGenerator extends DepthFirstAdapter {
 	{
 		helper.increasingTerm(node, this);
 	}
+	@Override
+	public void caseABeforeAfterLtl(ABeforeAfterLtl node)
+	{
+		helper.before_afterTerm(node, this);
+	}
+
 
 
 	@Override

@@ -83,6 +83,8 @@ Tokens
   {ltl} changed = 'changed';
   {ltl} decreasing = 'decreasing';
   {ltl} increasing = 'increasing';
+  {ltl} before_after = 'before_after' | 'BA';
+
   {ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
   {ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
 
@@ -177,6 +179,7 @@ Productions
     {changed} changed l_par atomic_proposition_begin r_par {-> New ltl.changed(atomic_proposition_begin)} |
     {decreasing} decreasing l_par atomic_proposition_begin r_par {-> New ltl.decreasing(atomic_proposition_begin)} |
     {increasing} increasing l_par atomic_proposition_begin r_par {-> New ltl.increasing(atomic_proposition_begin)} |
+    {before_after} before_after l_par atomic_proposition_begin r_par {-> New ltl.before_after(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
     {sink} sink {-> New ltl.sink()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
@@ -258,6 +261,7 @@ Abstract Syntax Tree
    {changed} [expression]:atomic_proposition_begin |
    {decreasing} [expression]:atomic_proposition_begin |
    {increasing} [expression]:atomic_proposition_begin |
+   {before_after} [predicate]:atomic_proposition_begin |
    {weak_fair} [operation]:weak_fair |
    {strong_fair} [operation]:strong_fair |
    {action} [operation]:l_sq |

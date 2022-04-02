@@ -13,6 +13,7 @@ import de.be4.ltl.core.parser.node.AUnchangedLtl;
 import de.be4.ltl.core.parser.node.AChangedLtl;
 import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.AIncreasingLtl;
+import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
 import de.be4.ltl.core.parser.node.PActions;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
@@ -55,6 +56,19 @@ final class PrologGeneratorHelper {
 			throw createAdapterException(token, e);
 		}
 		pto.closeTerm();
+	}
+
+	public void caseUnparsedPredicate(final UniversalToken token) {
+		// pto.openTerm("ap");
+		try {
+			specParser.parsePredicate(pto, token.getText(), true);
+		} catch (ProBParseException e) {
+			throw createAdapterException(token, e);
+		} catch (UnsupportedOperationException e) {
+		    // if the formalism does not support predicates
+			throw createAdapterException(token, e);
+		}
+        //pto.closeTerm();
 	}
 
 	public void caseUnparsedExpression(final UniversalToken token) {
@@ -209,6 +223,15 @@ final class PrologGeneratorHelper {
 		pto.printAtom("lt");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
 		this.caseUnparsedExpression(token);
+		pto.closeTerm();
+		pto.closeTerm();
+	}
+	public void before_afterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
+		
+		pto.openTerm("action");
+		pto.openTerm("before_after");
+		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
+		this.caseUnparsedPredicate(token);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
