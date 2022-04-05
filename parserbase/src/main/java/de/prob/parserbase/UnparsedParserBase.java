@@ -5,8 +5,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * An implementation of the ProB Parser Base that returns everything as unparsed
  * atoms.
- * 
- * @author plagge
  */
 public class UnparsedParserBase implements ProBParserBase {
 	private final String expr, pred, trans;

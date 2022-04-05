@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 
- * @author plagge
- */
 public class ConsoleOptions {
 
 	private String intro = null;

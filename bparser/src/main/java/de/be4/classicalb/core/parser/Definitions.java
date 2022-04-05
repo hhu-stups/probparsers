@@ -173,8 +173,7 @@ public class Definitions extends IDefinitions {
 		}
 	}
 
-	public  void addDefinitions(IDefinitions defs) throws PreParseException
-	{
+	public void addDefinitions(IDefinitions defs) throws PreParseException {
 		for (String def: defs.getDefinitionNames()) {
 			if (containsDefinition(def)) {
 				if(getFile(def)!=defs.getFile(def)) {

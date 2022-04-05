@@ -14,10 +14,6 @@ import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.node.Start;
 import util.PositionTester;
 
-/**
- * @author bendisposto
- *
- */
 @RunWith(PolySuite.class)
 public class ParsableMachineTest extends AbstractParseMachineTest {
 

@@ -82,9 +82,6 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
  * The visitor keeps track of scoped variables to ensure, that no node of a
  * scoped variable is replaced.
  * </p>
- * 
- * @author Fabian
- * 
  */
 public class OpSubstitutions extends OptimizedTraversingAdapter {
 

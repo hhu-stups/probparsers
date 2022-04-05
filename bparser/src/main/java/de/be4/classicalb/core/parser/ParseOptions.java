@@ -28,6 +28,11 @@ public class ParseOptions {
 	*/
 	private boolean ignoreCheckingValidCombinations = false;
 	
+	/*
+	* if true the lexer will ignore certain tokens (typically ignored tokens)
+	*/
+	private boolean ignoreUselessTokens = true;
+	
 	private IGrammar grammar = new DefaultGrammar();
 
 	public boolean isRestrictProverExpressions() {
@@ -68,5 +73,13 @@ public class ParseOptions {
 
 	public void setIgnoreCheckingValidCombinations(boolean ignoreCheckingValidCombinations) {
 		this.ignoreCheckingValidCombinations = ignoreCheckingValidCombinations;
+	}
+
+	public boolean isIgnoreUselessTokens() {
+		return ignoreUselessTokens;
+	}
+
+	public void setIgnoreUselessTokens(boolean ignoreUselessTokens) {
+		this.ignoreUselessTokens = ignoreUselessTokens;
 	}
 }

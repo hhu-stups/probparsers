@@ -7,8 +7,6 @@ package de.prob.parser;
  * 
  * The class {@link ISimplifiedROMap} provides a simple wrapper class to use a
  * {@link java.util.Map} as a {@link ISimplifiedROMap}.
- * 
- * @author plagge
  */
 public interface ISimplifiedROMap<K, V> {
 	V get(K key);

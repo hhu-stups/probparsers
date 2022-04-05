@@ -8,8 +8,6 @@ import de.prob.prolog.term.PrologTerm;
 /**
  * Matches on a list with optional given length, provides direct access to the
  * list.
- * 
- * @author plagge
  */
 public class PrologListMatch extends PrologMatch {
 	private final Integer size;

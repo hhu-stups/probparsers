@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Visitor that checks if all AST nodes contain the position information.
- * @author bendisposto
  */
 public class PositionTester extends DepthFirstAdapter {
 	@Override

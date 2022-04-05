@@ -22,9 +22,6 @@ import de.be4.classicalb.core.parser.util.Utils;
  * 
  * All violations of checks are collected in <code>exceptions</code> and can be
  * retrieved by {@link #getCheckExceptions()}.
- * 
- * @author Fabian
- * 
  */
 public class ClausesCheck implements SemanticCheck {
 	private static final Set<Class<? extends Node>> MACHINE_FORBIDDEN_CLAUSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(

@@ -2,8 +2,6 @@ package de.be4.ltl.core.parser.internal;
 
 /**
  * A common class for LTL and CTL tokens
- * 
- * @author plagge
  */
 public final class UniversalToken {
 	private final String text;

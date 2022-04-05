@@ -7,5 +7,9 @@ public enum EPreplCommands {
 	definition, resetdefinitions,
 	ltl, ctl,
 	version, gitsha, shortversion,
-	extendedformula;
+	extendedformula,
+	
+	// new commands to change parsingBehaviour, analog to command-line switches		
+	verbose,
+	fastprolog, compactpos, checkname, lineno;
 }

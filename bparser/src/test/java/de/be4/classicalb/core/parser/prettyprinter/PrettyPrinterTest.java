@@ -225,6 +225,7 @@ public class PrettyPrinterTest {
 			"`/*`",
 			"`MACHINE`.`REFINEMENT`.`IMPLEMENTATION`",
 			"`a\\\\b\\nc`",
+			"NAT +-> (ID <-> ID)",
 			};
 
 	private static final String PREFIX = "#EXPRESSION ";

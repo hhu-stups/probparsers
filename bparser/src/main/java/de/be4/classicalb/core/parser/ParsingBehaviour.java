@@ -2,13 +2,13 @@ package de.be4.classicalb.core.parser;
 
 public class ParsingBehaviour {
 	// Flags are set, e.g., in CliBParser.java
-	private boolean prologOutput = false;       // -prolog flag in CliBParser
-	private boolean addLineNumbers = false;     // -lineno flag in CliBParser
-	private boolean verbose = false; //verbose mode includes debug prints, -v flag in CliBParser
-	private boolean printTime = false;          // -time flag in CliBParser
-	private boolean prettyPrintB = false;           // -pp flag in CliBParser
-	private boolean fastPrologOutput = false;   // -fastprolog flag in CliBParser
-	private boolean compactPositions = true;     // false means use old style pos/5 positions
+	private boolean prologOutput = false; // -prolog flag in CliBParser
+	private boolean addLineNumbers = false; // -lineno flag in CliBParser
+	private boolean verbose = false; // verbose mode includes debug prints, -v flag in CliBParser
+	private boolean printTime = false; // -time flag in CliBParser
+	private boolean prettyPrintB = false; // -pp flag in CliBParser
+	private boolean fastPrologOutput = false; // -fastprolog flag in CliBParser
+	private boolean compactPositions = true; // false means use old style pos/5 positions
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
 	
 
@@ -34,6 +34,12 @@ public class ParsingBehaviour {
 
 	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;
+	}
+	
+	public void debug_print(final String msg) {
+	    if (verbose) {
+	       System.out.println(msg);
+	    }
 	}
 
 	public boolean isPrintTime() {

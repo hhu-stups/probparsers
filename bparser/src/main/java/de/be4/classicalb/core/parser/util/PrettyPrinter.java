@@ -19,6 +19,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		prio.put(AConjunctPredicate.class, 40);
 		prio.put(AEquivalencePredicate.class, 60);
 		prio.put(ARelationsExpression.class, 125);
+		prio.put(APartialFunctionExpression.class, 125);
 		prio.put(ATotalFunctionExpression.class, 125);
 		prio.put(APartialInjectionExpression.class, 125);
 		prio.put(ATotalInjectionExpression.class, 125);

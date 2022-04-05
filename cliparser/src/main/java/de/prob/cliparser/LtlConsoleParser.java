@@ -23,10 +23,6 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
 
-/**
- * @author plagge
- * 
- */
 public class LtlConsoleParser {
 
 	private static final UnparsedParserBase UNPARSED_PARSER_BASE = new UnparsedParserBase(
@@ -192,14 +188,13 @@ public class LtlConsoleParser {
 				if ("none".equals(lang)) {
 					sub = UNPARSED_PARSER_BASE;
 				} else if ("B".equals(lang)) {
-				    BParser bparser = new BParser();
-			        if (context!=null) {
-			          bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
-			        }
+					BParser bparser = new BParser();
+					if (context!=null) {
+						bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
+					}
 					sub = new ClassicalBParser(bparser);
 				} else
-					throw new IllegalArgumentException("Unknown language "
-							+ lang);
+					throw new IllegalArgumentException("Unknown language " + lang);
 				sublangs[i] = sub;
 			}
 			if (sublangs.length == 1) {

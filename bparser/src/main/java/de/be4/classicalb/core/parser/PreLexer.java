@@ -10,6 +10,7 @@ import de.be4.classicalb.core.preparser.node.TBeginNesting;
 import de.be4.classicalb.core.preparser.node.TComment;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
+import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
@@ -18,6 +19,9 @@ import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
 import de.be4.classicalb.core.preparser.node.Token;
+import de.be4.classicalb.core.preparser.node.TSomeValue;
+import de.be4.classicalb.core.preparser.node.TSomething;
+//import de.be4.classicalb.core.preparser.node.TCommentContent;
 
 public class PreLexer extends Lexer {
 
@@ -35,6 +39,10 @@ public class PreLexer extends Lexer {
 	
 	protected Token getToken() throws IOException, LexerException {
 		try {
+			// Please don't put any token processing code here!
+			// Use the filter method instead (see below).
+			// The only code that needs to be here is for processing the exception,
+			// which cannot be done with filter.
 			return super.getToken();
 		} catch (LexerException e) {
 			//System.out.println("Exception: " + e.toString());
@@ -54,11 +62,14 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
+	    //printState();
 		checkComment();
 		checkMultiLineString();
+		optimizeToken();
 
 		if (token != null) {
 			collectRhs();
+			// System.out.println("+ TOKEN KEPT");
 		}
 	}
 	
@@ -164,6 +175,7 @@ public class PreLexer extends Lexer {
 	}
 
 	private void checkComment() {
+	    // switch to special COMMENT state and back
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.COMMENT;
@@ -174,6 +186,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() {
+	    // switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING_STATE;
@@ -183,4 +196,20 @@ public class PreLexer extends Lexer {
 		}
 	}
 	
+	private void optimizeToken() {
+		if (
+			token instanceof TIdentifierLiteral
+			|| token instanceof TSemicolon
+		) {
+			token.setText(token.getText().intern());
+		} else if (
+			token instanceof TSomeValue
+			|| token instanceof TSomething
+			// || token instanceof TCommentContent // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
+			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
+		) {
+			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
+			token = null;
+		}
+	}
 }

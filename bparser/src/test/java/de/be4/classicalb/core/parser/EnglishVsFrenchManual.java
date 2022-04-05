@@ -13,8 +13,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
  * The English manual of AtelierB (version 1.8.6) has wrong priorities. This
  * test case tries to exploit differences between the correct French version and
  * the incorrect English.
- * 
- * @author plagge
  */
 public class EnglishVsFrenchManual {
 

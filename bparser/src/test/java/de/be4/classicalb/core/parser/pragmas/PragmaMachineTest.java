@@ -16,10 +16,6 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Start;
 import util.PositionTester;
 
-/**
- * @author bendisposto
- *
- */
 @RunWith(PolySuite.class)
 public class PragmaMachineTest extends AbstractParseMachineTest {
 

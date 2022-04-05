@@ -1,42 +1,34 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
 
 package de.prob.prolog.term;
 
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 /**
  * This is the abstract base class for Prolog terms
- * 
- * @author plagge
  */
-public abstract class PrologTerm implements Serializable {
+public abstract class PrologTerm {
+	// protected final String functor;
+	//protected final PrologTerm[] arguments;
 
-	private static final long serialVersionUID = 7974875342517963149L;
-
-	protected final String functor;
-	protected final PrologTerm[] arguments;
-
-	public PrologTerm(final String functor, final PrologTerm... arguments) {
-		if (functor == null)
-			throw new IllegalArgumentException("Functor must not be null");
-		this.functor = functor;
-		if (arguments == null || arguments.length == 0) {
-			this.arguments = null;
-		} else {
-			this.arguments = arguments;
-		}
-	}
+	//public PrologTerm(final String functor, final PrologTerm... arguments) {
+		//if (functor == null)
+		//	throw new IllegalArgumentException("Functor must not be null");
+		//this.functor = functor;
+		//if (arguments == null || arguments.length == 0) {
+		//	this.arguments = null;
+		//} else {
+		//	this.arguments = arguments;
+		//}
+	//}
 
 	public boolean isTerm() {
 		return false;
@@ -66,18 +58,16 @@ public abstract class PrologTerm implements Serializable {
 
 	@Override
 	public String toString() {
-		StringWriter sWriter = new StringWriter();
-		PrologTermOutput pto = new PrologTermOutput(new PrintWriter(sWriter), false);
+		PrologTermStringOutput pto = new PrologTermStringOutput();
 		toTermOutput(pto);
-		return sWriter.toString();
+		return pto.toString();
 	}
 
-	public String getFunctor() {
-		return functor;
-	}
+	public abstract String getFunctor();
 
 	public int getArity() {
-		return arguments == null ? 0 : arguments.length;
+		return 0;
+		//return arguments == null ? 0 : arguments.length;
 	}
 
 	/**
@@ -88,10 +78,11 @@ public abstract class PrologTerm implements Serializable {
 	 * @return the PrologTerm
 	 */
 	public PrologTerm getArgument(final int index) {
-		if (arguments == null)
-			throw new IndexOutOfBoundsException("Atom has no arguments");
-		else
-			return arguments[index - 1];
+		throw new IndexOutOfBoundsException("Atom has no arguments");
+		//if (arguments == null)
+		//	throw new IndexOutOfBoundsException("Atom has no arguments");
+		//else
+		//	return arguments[index - 1];
 	}
 
 	public static String atomicString(final PrologTerm term) {

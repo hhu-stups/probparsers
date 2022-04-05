@@ -1,5 +1,5 @@
 /*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
+ * (c) 2009-2022 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, Heinrich
  * Heine Universitaet Duesseldorf This software is licenced under EPL 1.0
  * (http://www.eclipse.org/org/documents/epl-v10.html)
  * */
@@ -13,21 +13,38 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * Represents a prolog term that consists of a functor and an (optional) list of
  * arguments. If no arguments are given, the term is an atom.
- * 
- * @author plagge
  */
 public final class CompoundPrologTerm extends PrologTerm {
-	private static final long serialVersionUID = 4825557199378803498L;
+	private final String functor;
+	private final PrologTerm[] arguments;
 
 	public CompoundPrologTerm(final String functor,
 			final PrologTerm... arguments) {
-		super(functor,arguments);
+		//super(arguments);
+		this.functor = functor;
+		if (arguments == null || arguments.length == 0) {
+			this.arguments = null;
+		} else {
+			this.arguments = arguments;
+		}
+		if (functor == null)
+		 	throw new IllegalArgumentException("Functor of CompoundPrologTerm must not be null");
 	}
 
 	public CompoundPrologTerm(final String atom) {
 		this(atom, (PrologTerm[]) null);
 	}
 
+	@Override
+	public String getFunctor() {
+		return functor;
+	}
+	
+	@Override
+	public int getArity() {
+		return arguments == null ? 0 : arguments.length;
+	}
+	
 	@Override
 	public boolean isAtom() {
 		return arguments == null;
@@ -36,6 +53,14 @@ public final class CompoundPrologTerm extends PrologTerm {
 	@Override
 	public boolean isTerm() {
 		return true;
+	}
+	
+	@Override
+	public PrologTerm getArgument(final int index) {
+		if (arguments == null)
+			throw new IndexOutOfBoundsException("Atom " + functor + " has no arguments");
+		else
+			return arguments[index - 1];
 	}
 
 	@Override
@@ -51,17 +76,16 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	@Override
 	public boolean equals(final Object other) {
-		boolean isEqual;
 		if (this == other) {
-			isEqual = true;
-		} else if (other != null && other instanceof PrologTerm) {
-			PrologTerm cother = (PrologTerm) other;
-			isEqual = functor.equals(cother.functor)
-					&& Arrays.equals(arguments, cother.arguments);
-		} else {
-			isEqual = false;
+			return true;
+		} else if (!(other instanceof CompoundPrologTerm)) {
+			// Note: this will not consider the atom "[]" to be equal to the empty list
+			// But then: comparing longer lists with equivalent compound terms would require quite a bit of code
+			return false;
 		}
-		return isEqual;
+		CompoundPrologTerm cother = (CompoundPrologTerm) other;
+		return functor.equals(cother.functor)
+			&& Arrays.equals(arguments, cother.arguments);
 	}
 
 	@Override

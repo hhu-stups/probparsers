@@ -28,6 +28,7 @@ public class BLexer extends Lexer {
 	public void setLexerPreparse(){
 		parse_definition = true; 
 	}
+	
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -69,7 +70,25 @@ public class BLexer extends Lexer {
 			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
 			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
+		
+			addInvalid(TLeftPar.class, clauseTokenClass, "Closing parenthesis is missing.");
+			addInvalid(TLeftBrace.class, clauseTokenClass, "Closing brace is missing.");
+			addInvalid(TLeftBracket.class, clauseTokenClass, "Closing bracket is missing.");
+			addInvalid(TBegin.class, clauseTokenClass, "Closing END is missing."); // does not seem to work
 		}
+		
+		addInvalid(TLeftPar.class, TEnd.class, "Closing parenthesis is missing.");
+		addInvalid(TLeftPar.class, TRightBrace.class, "Closing parenthesis is missing."); // ( }
+		addInvalid(TLeftPar.class, TRightBracket.class, "Closing parenthesis is missing.");
+		addInvalid(TLeftBrace.class, TEnd.class, "Closing brace is missing.");
+		addInvalid(TLeftBrace.class, TRightPar.class, "Closing brace is missing.");
+		addInvalid(TLeftBrace.class, TRightBracket.class, "Closing brace is missing.");
+		addInvalid(TLeftBracket.class, TEnd.class, "Closing bracket is missing.");
+		addInvalid(TLeftBracket.class, TRightPar.class, "Closing bracket is missing.");
+		addInvalid(TLeftBracket.class, TRightBrace.class, "Closing bracket is missing.");
+		addInvalid(TBegin.class, TRightPar.class, "Closing END is missing.");
+		addInvalid(TBegin.class, TRightBrace.class, "Closing END is missing.");
+		addInvalid(TBegin.class, TRightBracket.class, "Closing END is missing.");
 		
 		// add some rules for the binary infix logical operators:
 		binOpTokenClasses.add(TConjunction.class);
@@ -82,7 +101,7 @@ public class BLexer extends Lexer {
 			// cover cases like: BINARY_LOGICAL_OPERATOR /*@desc txt */
 			addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put *after* a predicate, not *before* it.");
 			// cover cases like:  /*@label txt */ BINARY_LOGICAL_OPERATOR
-			addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not *after* it.");
+			addInvalid(TPragmaLabel.class, binOpTokenClass, "A label pragma must be put *before* a predicate, not *after* it.");
 		}
 		
 		// now treat rules that apply to binary infix logical and binary expression operators
@@ -106,19 +125,19 @@ public class BLexer extends Lexer {
 				addInvalid(binOpTokenClass,clauseTokenClass,"Argument to binary operator is missing.");
 				addInvalid(clauseTokenClass,binOpTokenClass,"Argument to binary operator is missing.");
 			}
-			addInvalid(binOpTokenClass, TEnd.class,   "Argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TElse.class,  "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TEnd.class, "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TElse.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TElsif.class, "Argument to binary operator is missing.");
-			addInvalid(binOpTokenClass, TThen.class,  "Argument to binary operator is missing.");
+			addInvalid(binOpTokenClass, TThen.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TRightPar.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TRightBrace.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TRightBracket.class, "Argument to binary operator is missing.");
 			addInvalid(binOpTokenClass, TSemicolon.class,"Argument to binary operator is missing.");
-			addInvalid(TLeftPar.class, binOpTokenClass,  "Argument to binary operator is missing.");
+			addInvalid(TLeftPar.class, binOpTokenClass, "Argument to binary operator is missing.");
 			addInvalid(TSemicolon.class, binOpTokenClass,"Argument to binary operator is missing.");
 			
 			// cover cases like:  /*@symbolic */ BINARY_OPERATOR
-			addInvalid(TPragmaSymbolic.class, binOpTokenClass,  "A symbolic pragma must be put *before* a set comprehension or lambda.");
+			addInvalid(TPragmaSymbolic.class, binOpTokenClass, "A symbolic pragma must be put *before* a set comprehension or lambda.");
 		}
 		
 		// now treat rules for only binary infix expression operators
@@ -126,8 +145,8 @@ public class BLexer extends Lexer {
 		AddBinExprOperators();
 		
 		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
-			addInvalid(TPragmaLabel.class, binOpTokenClass,  "A label pragma must be put *before* a predicate, not inside it.");
-			addInvalid(binOpTokenClass, TPragmaLabel.class,  "A label pragma must be put before a *predicate*, it cannot be put before expressions.");
+			addInvalid(TPragmaLabel.class, binOpTokenClass, "A label pragma must be put *before* a predicate, not inside it.");
+			addInvalid(binOpTokenClass, TPragmaLabel.class, "A label pragma must be put before a *predicate*, it cannot be put before expressions.");
 			addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
 			
 			String opName = binOpTokenClass.getSimpleName().substring(1).toUpperCase();
@@ -234,6 +253,23 @@ public class BLexer extends Lexer {
 		
 		// Other rules:
 		addInvalid(TLeftPar.class, TRightPar.class, "Parentheses must contain arguments.");
+		addInvalid(TBegin.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TIf.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TIf.class, TThen.class, "Block must contain statements.");
+		addInvalid(TThen.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TThen.class, TElse.class, "Block must contain statements.");
+		addInvalid(TThen.class, TElsif.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TElse.class, "Block must contain statements.");
+		addInvalid(TElsif.class, TElsif.class, "Block must contain statements.");
+		addInvalid(TElse.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TSelect.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TSelect.class, TThen.class, "Block must contain statements.");
+		addInvalid(TChoice.class, TEnd.class, "Block must contain statements.");
+		addInvalid(TChoice.class, TOr.class, "Block must contain statements.");
+		addInvalid(TOr.class, TEnd.class, "Block must contain statements.");
+		// more combination: CASE, WHILE
+		
 		
 		addInvalid(TComma.class, TRightPar.class, "Missing expression after comma.");
 		addInvalid(TComma.class, TRightBrace.class, "Missing expression after comma.");
@@ -244,8 +280,8 @@ public class BLexer extends Lexer {
 		
 		addInvalid(TComma.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
 		addInvalid(TSemicolon.class, TPragmaDescription.class, "A description pragma must be put *after* a predicate or identifier.");
-		addInvalid(TPragmaLabel.class, TComma.class,  "A label pragma must be put *before* a predicate.");
-		addInvalid(TPragmaLabel.class, TSemicolon.class,  "A label pragma must be put *before* a predicate.");
+		addInvalid(TPragmaLabel.class, TComma.class, "A label pragma must be put *before* a predicate.");
+		addInvalid(TPragmaLabel.class, TSemicolon.class, "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
 		
@@ -255,12 +291,10 @@ public class BLexer extends Lexer {
 		literalTokenClasses.add(TRealLiteral.class);
 		literalTokenClasses.add(THexLiteral.class);
 		for (Class<? extends Token> litClass : literalTokenClasses) {
-		    addInvalid(TIdentifierLiteral.class, litClass,
-		         "Missing operator or separator between identifier and literal.");
-		    addInvalid(litClass,TIdentifierLiteral.class,
-		         "Missing operator or separator between literal and identifier.");
+			addInvalid(TIdentifierLiteral.class, litClass, "Missing operator or separator between identifier and literal.");
+			addInvalid(litClass,TIdentifierLiteral.class, "Missing operator or separator between literal and identifier.");
 			for (Class<? extends Token> litClass2 : literalTokenClasses) {
-					 addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
+				addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
 			}
 		}
 		// addInvalid(TIdentifierLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between identifier and identifier.");
@@ -321,6 +355,9 @@ public class BLexer extends Lexer {
 	private Token lastToken;
 
 	private void findSyntaxError() throws LexerException {
+		if (token == null) {
+			return;
+		}
 		if (token instanceof TWhiteSpace || token instanceof TLineComment ||
 			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
@@ -366,7 +403,8 @@ public class BLexer extends Lexer {
 	}
 
 	private void applyGrammarExtension() {
-		if (parseOptions != null && this.parseOptions.getGrammar().containsAlternativeDefinitionForToken(token)) {
+		if (parseOptions != null && token != null && 
+			this.parseOptions.getGrammar().containsAlternativeDefinitionForToken(token)) {
 			token = this.parseOptions.getGrammar().createNewToken(token);
 		}
 	}
@@ -374,13 +412,17 @@ public class BLexer extends Lexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
 		// System.out.println("State = " + state + " token = " + token);
+
+		optimizeToken();
+
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
+
 		if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
-			findSyntaxError();
+			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.COMMENT)) {
 			collectComment();
 		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
@@ -388,7 +430,7 @@ public class BLexer extends Lexer {
 			collectComment();
 		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
-		} else if (state.equals(State.SHEBANG) && token.getLine() != 1) {
+		} else if (state.equals(State.SHEBANG) && token != null && token.getLine() != 1) {
 			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
 
@@ -460,6 +502,25 @@ public class BLexer extends Lexer {
 				state = State.NORMAL;
 
 			} else {
+				token = null;
+			}
+		}
+	}
+
+	private void optimizeToken() {
+		if (
+			token instanceof TIdentifierLiteral
+			|| token instanceof TMaplet
+		) {
+			token.setText(token.getText().intern());
+		} else if (
+			token instanceof TWhiteSpace
+			// || token instanceof TComment
+			// || token instanceof TLineComment // definitions.DefinitionsErrorsTest fails if we do this
+		) {
+			// The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
+			// TODO: check if we can also ignore TComment, TCommentBody, ...
+			if (parseOptions == null || parseOptions.isIgnoreUselessTokens()) {
 				token = null;
 			}
 		}

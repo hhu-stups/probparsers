@@ -4,18 +4,18 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.9.32'
+project.version = '2.9.33'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "7.2"
+    gradleVersion = "7.4.1"
 }
 
 ext {
-    sableCCVersion = '3.3.2'
+    sableCCVersion = '3.3.3-SNAPSHOT'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
