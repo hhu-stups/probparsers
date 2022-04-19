@@ -18,12 +18,12 @@ public class NodeCloner extends DepthFirstAdapter {
 		sourceNode.apply(nodeIdSetter);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T extends Node> T cloneNode(T node) {
 		NodeCloner cloner = new NodeCloner(node);
-		Node copy = (Node) node.clone();
+		@SuppressWarnings("unchecked")
+		T copy = (T)node.clone();
 		copy.apply(cloner);
-		return (T) copy;
+		return copy;
 	}
 
 	@Override
