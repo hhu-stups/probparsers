@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.hhu.stups.sablecc.patch.PositionedNode;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class BException extends Exception {
 
@@ -46,7 +47,10 @@ public class BException extends Exception {
 	public BException(String filename, BParseException e) {
 		this(filename, e.getMessage(), e);
 		if (e.getToken() != null) {
-			locations.add(Location.fromNode(filename, e.getToken()));
+			final Location location = Location.fromNode(filename, e.getToken());
+			if (location != null) {
+				locations.add(location);
+			}
 		}
 	}
 
@@ -63,7 +67,12 @@ public class BException extends Exception {
 				locations.add(location);
 			}
 		} else {
-			e.getTokensList().forEach(token -> locations.add(Location.fromNode(filename, token)));
+			e.getTokensList().forEach(token -> {
+				final Location location = Location.fromNode(filename, token);
+				if (location != null) {
+					locations.add(location);
+				}
+			});
 		}
 	}
 
@@ -73,7 +82,10 @@ public class BException extends Exception {
 		//this.filename = filename;
 		//this.cause = e.getCause();
 		for (Node node : e.getNodesList()) {
-			locations.add(Location.fromNode(filename, node));
+			final Location location = Location.fromNode(filename, node);
+			if (location != null) {
+				locations.add(location);
+			}
 		}
 	}
 
@@ -124,12 +136,24 @@ public class BException extends Exception {
 		}
 
 		private static Location fromNode(final String filename, final PositionedNode node) {
+			// Extra checks to handle null locations safely.
+			// This *should* not be needed normally,
+			// because all nodes from SableCC have position info,
+			// but it's better to be safe and avoid NPEs in error handling code.
+			final SourcePosition startPos = node.getStartPos();
+			if (startPos == null) {
+				return null;
+			}
+			SourcePosition endPos = node.getEndPos();
+			if (endPos == null) {
+				endPos = startPos;
+			}
 			return new Location(
 				filename,
-				node.getStartPos().getLine(),
-				node.getStartPos().getPos(),
-				node.getEndPos().getLine(),
-				node.getEndPos().getPos()
+				startPos.getLine(),
+				startPos.getPos(),
+				endPos.getLine(),
+				endPos.getPos()
 			);
 		}
 
