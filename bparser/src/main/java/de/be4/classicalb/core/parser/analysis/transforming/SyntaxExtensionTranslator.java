@@ -21,19 +21,16 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
-
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
 		// IF P THE P2 ELSE P3 END
 		// will be translated into
 		// (p => p2) & (not(p) => p3)
-		AImplicationPredicate imp1 = new AImplicationPredicate(cloneNode(node.getCondition()),
-				cloneNode(node.getThen()));
+		AImplicationPredicate imp1 = new AImplicationPredicate(node.getCondition().clone(), node.getThen().clone());
 		AImplicationPredicate imp2 = new AImplicationPredicate(
-				new ANegationPredicate(cloneNode(node.getCondition())),
-				cloneNode(node.getElse()));
+				new ANegationPredicate(node.getCondition().clone()),
+				node.getElse().clone());
 		AConjunctPredicate con = new AConjunctPredicate(imp1, imp2);
 		con.setStartPos(node.getStartPos());
 		con.setEndPos(node.getEndPos());

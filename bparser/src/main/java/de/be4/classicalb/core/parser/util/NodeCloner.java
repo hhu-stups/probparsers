@@ -6,6 +6,10 @@ import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.Node;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+/**
+ * @deprecated Use {@link Node#clone()} instead, which now copies position info.
+ */
+@Deprecated
 public class NodeCloner extends DepthFirstAdapter {
 	NodePositionCollector nodeIdSetter;
 	Node sourceNode;
@@ -18,11 +22,13 @@ public class NodeCloner extends DepthFirstAdapter {
 		sourceNode.apply(nodeIdSetter);
 	}
 
+	/**
+	 * @deprecated Use {@link Node#clone()} instead, which now copies position info.
+	 */
+	@Deprecated
 	public static <T extends Node> T cloneNode(T node) {
-		NodeCloner cloner = new NodeCloner(node);
 		@SuppressWarnings("unchecked")
-		T copy = (T)node.clone();
-		copy.apply(cloner);
+		final T copy = (T)node.clone();
 		return copy;
 	}
 

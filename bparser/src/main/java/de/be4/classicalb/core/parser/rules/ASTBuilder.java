@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,14 +66,14 @@ public final class ASTBuilder {
 
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add(cloneNode(pExpression));
+		list.add(pExpression.clone());
 		return createPositinedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
 		final ArrayList<PExpression> list = new ArrayList<>();
 		for (PExpression pExpression : pExpressions) {
-			list.add(cloneNode(pExpression));
+			list.add(pExpression.clone());
 		}
 		return new ASetExtensionExpression(list);
 	}
@@ -86,7 +84,7 @@ public final class ASTBuilder {
 		}
 		final ArrayList<PExpression> list = new ArrayList<>();
 		for (PExpression pExpression : pExpressions) {
-			list.add(cloneNode(pExpression));
+			list.add(pExpression.clone());
 		}
 		return new ACoupleExpression(list);
 	}
@@ -114,7 +112,7 @@ public final class ASTBuilder {
 
 	public static AIdentifierExpression createRuleIdentifier(TIdentifierLiteral ruleLiteral) {
 		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add(cloneNode((ruleLiteral)));
+		list.add(ruleLiteral.clone());
 		return new AIdentifierExpression(list);
 	}
 
@@ -130,7 +128,7 @@ public final class ASTBuilder {
 		final List<PExpression> list = new ArrayList<>();
 		for (int i = 0; i < pExpressions.length; i++) {
 			PExpression oldNode = pExpressions[i];
-			PExpression node = cloneNode(pExpressions[i]);
+			PExpression node = pExpressions[i].clone();
 			node.setStartPos(oldNode.getStartPos());
 			node.setEndPos(oldNode.getEndPos());
 			list.add(node);
@@ -176,7 +174,7 @@ public final class ASTBuilder {
 	}
 
 	public static AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
-		TIdentifierLiteral e = NodeCloner.cloneNode(old);
+		TIdentifierLiteral e = old.clone();
 		AIdentifierExpression aIdentifier = createAIdentifierExpression(e);
 		final AEqualPredicate equal = new AEqualPredicate(aIdentifier,
 				new AStringExpression(new TStringLiteral(value)));
