@@ -32,7 +32,6 @@ import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public final class ASTBuilder {

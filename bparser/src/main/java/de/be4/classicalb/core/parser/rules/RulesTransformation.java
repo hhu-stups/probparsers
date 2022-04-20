@@ -16,7 +16,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
-import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class RulesTransformation extends DepthFirstAdapter {
