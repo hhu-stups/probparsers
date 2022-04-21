@@ -168,6 +168,10 @@ public class EventBParser {
 		return new EventBParseException(token, message);
 	}
 
+	/**
+	 * @deprecated Please use the {@link PositionedNode} methods to get position information instead. All SableCC-generated nodes and tokens extend this class.
+	 */
+	@Deprecated
 	public SourcePositions getSourcePositions() {
 		return sourcePositions;
 	}
