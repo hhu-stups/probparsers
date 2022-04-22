@@ -463,7 +463,7 @@ public class PreParser {
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
-		final de.be4.classicalb.core.parser.parser.Parser parser = new SabbleCCBParser(lexer);
+		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
 		return parser.parse();
 	}
 

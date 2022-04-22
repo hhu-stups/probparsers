@@ -338,7 +338,7 @@ public class BParser {
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
 			lexer.setParseOptions(parseOptions);
-			SabbleCCBParser parser = new SabbleCCBParser(lexer);
+			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<BException> bExceptionList = new ArrayList<>();
 
