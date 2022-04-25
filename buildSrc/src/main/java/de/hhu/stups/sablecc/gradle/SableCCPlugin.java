@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.gradle.api.NonNullApi;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.file.Directory;
 import org.gradle.api.internal.tasks.DefaultSourceSet;
 import org.gradle.api.plugins.JavaPlugin;
@@ -59,9 +60,14 @@ public class SableCCPlugin implements Plugin<Project> {
 				task.setDestinationResourcesDir(outputResourcesDirectory);
 			});
 			
-			// Make compileJava and processResources depend on generateSableCCSource.
+			// Make compileJava, processResources, and sourcesJar depend on generateSableCCSource.
 			project.getTasks().named(sourceSet.getCompileJavaTaskName(), task -> task.dependsOn(sableCCTaskName));
 			project.getTasks().named(sourceSet.getProcessResourcesTaskName(), task -> task.dependsOn(sableCCTaskName));
+			try {
+				project.getTasks().named(sourceSet.getSourcesJarTaskName(), task -> task.dependsOn(sableCCTaskName));
+			} catch (UnknownTaskException ignored) {
+				// No sourcesJar task defined, so no need to add a dependency.
+			}
 		});
 	}
 }
