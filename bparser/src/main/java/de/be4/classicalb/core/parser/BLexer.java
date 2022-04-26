@@ -358,7 +358,7 @@ public class BLexer extends Lexer {
 		if (token == null) {
 			return;
 		}
-		if (token instanceof TWhiteSpace || token instanceof TLineComment ||
+		if (token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment ||
 			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
 		} else if (lastToken == null) {
@@ -420,7 +420,13 @@ public class BLexer extends Lexer {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
 
-		if (state.equals(State.NORMAL)) {
+		if (token instanceof TCommentEnd) {
+			commentBuffer.append(token.getText());
+			comment.setText(commentBuffer.toString());
+			token = comment;
+			comment = null;
+			commentBuffer = null;
+		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.COMMENT)) {
@@ -489,22 +495,11 @@ public class BLexer extends Lexer {
 		if (comment == null) {
 			commentBuffer = new StringBuilder(token.getText());
 			comment = token;
-			token = null;
 		} else {
 			commentBuffer.append(token.getText());
-
-			// end of comment reached?
-			if (token instanceof TCommentEnd) {
-				comment.setText(commentBuffer.toString());
-				token = comment;
-				comment = null;
-				commentBuffer = null;
-				state = State.NORMAL;
-
-			} else {
-				token = null;
-			}
+			assert !(token instanceof TCommentEnd); // end of comment now handled in filter
 		}
+		token = null;
 	}
 
 	private void optimizeToken() {
