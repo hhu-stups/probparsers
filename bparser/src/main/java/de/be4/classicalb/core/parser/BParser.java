@@ -346,7 +346,7 @@ public class BParser {
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
 			 */
-			final DefinitionCollector collector = new DefinitionCollector(defTypes, this.definitions);
+			final DefinitionCollector collector = new DefinitionCollector(this.definitions);
 			collector.collectDefinitions(rootNode);
 			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
 			for (CheckException checkException : definitionsCollectorExceptions) {
