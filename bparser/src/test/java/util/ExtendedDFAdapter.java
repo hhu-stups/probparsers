@@ -259,10 +259,10 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseASeesMachineClause(final ASeesMachineClause node) {
 		inASeesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node.getMachineNames());
+			final List<PMachineReferenceNoParams> copy = new ArrayList<PMachineReferenceNoParams>(node.getMachineNames());
 			beginList(node);
-			for (final Iterator< PExpression>iterator = copy.iterator(); iterator.hasNext();) {
-				final PExpression e = iterator.next();
+			for (final Iterator< PMachineReferenceNoParams>iterator = copy.iterator(); iterator.hasNext();) {
+				final PMachineReferenceNoParams e = iterator.next();
 				e.apply(this);
 
 				if (iterator.hasNext()) {
@@ -278,10 +278,10 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAPromotesMachineClause(final APromotesMachineClause node) {
 		inAPromotesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node.getOperationNames());
+			final List<POperationReference> copy = new ArrayList<POperationReference>(node.getOperationNames());
 			beginList(node);
-			for (final Iterator< PExpression>iterator = copy.iterator(); iterator.hasNext();) {
-				final PExpression e = iterator.next();
+			for (final Iterator< POperationReference>iterator = copy.iterator(); iterator.hasNext();) {
+				final POperationReference e = iterator.next();
 				e.apply(this);
 
 				if (iterator.hasNext()) {
@@ -297,10 +297,10 @@ public class ExtendedDFAdapter extends DepthFirstAdapter {
 	public void caseAUsesMachineClause(final AUsesMachineClause node) {
 		inAUsesMachineClause(node);
 		{
-			final List<PExpression> copy = new ArrayList<PExpression>(node.getMachineNames());
+			final List<PMachineReferenceNoParams> copy = new ArrayList<PMachineReferenceNoParams>(node.getMachineNames());
 			beginList(node);
-			for (final Iterator< PExpression>iterator = copy.iterator(); iterator.hasNext();) {
-				final PExpression e = iterator.next();
+			for (final Iterator< PMachineReferenceNoParams>iterator = copy.iterator(); iterator.hasNext();) {
+				final PMachineReferenceNoParams e = iterator.next();
 				e.apply(this);
 
 				if (iterator.hasNext()) {

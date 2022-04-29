@@ -18,25 +18,25 @@ import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ADefinitionFileParseUnit;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
-import de.be4.classicalb.core.parser.node.AFileExpression;
 import de.be4.classicalb.core.parser.node.AFileMachineReference;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.AFileMachineReferenceNoParams;
 import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AImportPackage;
 import de.be4.classicalb.core.parser.node.AImportsMachineClause;
 import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineReference;
+import de.be4.classicalb.core.parser.node.AMachineReferenceNoParams;
 import de.be4.classicalb.core.parser.node.APackageParseUnit;
 import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
 import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ASeesMachineClause;
 import de.be4.classicalb.core.parser.node.AUsesMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PImportPackage;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
+import de.be4.classicalb.core.parser.node.PMachineReferenceNoParams;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -201,7 +201,8 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	}
 
 	/**
-	 * INCLUDES, EXTENDS, IMPORTS, REFERENCES
+	 * For INCLUDES, EXTENDS, IMPORTS, REFERENCES.
+	 * Keep this in sync with {@link #addMachineReferenceNoParams(ReferenceType, PMachineReferenceNoParams)} below!
 	 */
 	private void addMachineReference(final ReferenceType type, final PMachineReference node) {
 		if (node instanceof AFileMachineReference) {
@@ -244,18 +245,40 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		this.addMachineReferences(ReferenceType.REFERENCES, node.getMachineReferences());
 	}
 
-	// SEES and USES
+	/**
+	 * For SEES and USES.
+	 * Keep this in sync with {@link #addMachineReference(ReferenceType, PMachineReference)} above!
+	 */
+	private void addMachineReferenceNoParams(final ReferenceType type, final PMachineReferenceNoParams node) {
+		if (node instanceof AFileMachineReferenceNoParams) {
+			final AFileMachineReferenceNoParams fileNode = (AFileMachineReferenceNoParams)node;
+			final AMachineReferenceNoParams refNode = (AMachineReferenceNoParams)fileNode.getReference();
+			String file = fileNode.getFile().getText();
+			if (Utils.isQuoted(file, '"')) {
+				file = Utils.removeSurroundingQuotes(file, '"');
+			}
+			this.references.add(makeMachineReference(type, refNode.getMachineName(), refNode, file));
+		} else if (node instanceof AMachineReferenceNoParams) {
+			final AMachineReferenceNoParams refNode = (AMachineReferenceNoParams)node;
+			this.references.add(makeMachineReference(type, refNode.getMachineName(), refNode, null));
+		} else {
+			throw new AssertionError("Unhandled machine reference type: " + node.getClass());
+		}
+	}
+
+	private void addMachineReferencesNoParams(final ReferenceType type, final List<? extends PMachineReferenceNoParams> references) {
+		references.forEach(ref -> this.addMachineReferenceNoParams(type, ref));
+	}
+
 
 	@Override
 	public void caseASeesMachineClause(ASeesMachineClause node) {
-
-		registerMachineNames(ReferenceType.SEES, node.getMachineNames());
+		this.addMachineReferencesNoParams(ReferenceType.SEES, node.getMachineNames());
 	}
 
 	@Override
 	public void caseAUsesMachineClause(AUsesMachineClause node) {
-
-		registerMachineNames(ReferenceType.USES, node.getMachineNames());
+		this.addMachineReferencesNoParams(ReferenceType.USES, node.getMachineNames());
 	}
 
 	// Abstract machine (.mch)
@@ -299,26 +322,5 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	@Override
 	public void caseADefinitionFileParseUnit(final ADefinitionFileParseUnit node) {
 		this.machineType = MachineType.DEFINITION_FILE;
-	}
-
-	private void registerMachineName(ReferenceType type, PExpression machineExpression) {
-		if (machineExpression instanceof AIdentifierExpression) {
-			AIdentifierExpression identifier = (AIdentifierExpression) machineExpression;
-			this.references.add(makeMachineReference(type, identifier.getIdentifier(), identifier, null));
-		} else if (machineExpression instanceof AFileExpression) {
-			final AFileExpression fileNode = (AFileExpression) machineExpression;
-			final AIdentifierExpression identifier = (AIdentifierExpression) fileNode.getIdentifier();
-			String file = fileNode.getContent().getText();
-			if (Utils.isQuoted(file, '"')) {
-				file = Utils.removeSurroundingQuotes(file, '"');
-			}
-			this.references.add(makeMachineReference(type, identifier.getIdentifier(), fileNode, file));
-		} else {
-			throw new AssertionError("Not supported class: " + machineExpression.getClass());
-		}
-	}
-	
-	private void registerMachineNames(ReferenceType type, List<PExpression> referencedMachineList) {
-		referencedMachineList.forEach(expr -> this.registerMachineName(type, expr));
 	}
 }

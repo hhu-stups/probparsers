@@ -428,11 +428,31 @@ public class ASTProlog extends DepthFirstAdapter {
 	// machine reference
 
 	@Override
+	public void caseAMachineReferenceNoParams(final AMachineReferenceNoParams node) {
+		// Keep this functor for compatibility with previous versions
+		// (SEES/USES names were previously parsed as identifier expressions).
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getMachineName());
+		pout.closeTerm();
+	}
+
+	@Override
 	public void caseAMachineReference(final AMachineReference node) {
 		open(node);
 		printIdentifier(node.getMachineName());
 		printAsList(node.getParameters());
 		close(node);
+	}
+
+	@Override
+	public void caseAOperationReference(final AOperationReference node) {
+		// Keep this functor for compatibility with previous versions
+		// (PROMOTES names were previously parsed as identifier expressions).
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getOperationName());
+		pout.closeTerm();
 	}
 
 	// definition
@@ -1062,9 +1082,9 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAFileExpression(AFileExpression node) {
-		node.getIdentifier().apply(this);
-		// node.getContent().apply(this);
+	public void caseAFileMachineReferenceNoParams(AFileMachineReferenceNoParams node) {
+		node.getReference().apply(this);
+		// node.getFile().apply(this);
 	}
 
 	@Override

@@ -381,10 +381,7 @@ public class BParser {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
-			if (msg == null) {
-				msg = e.getLocalizedMessage();
-			}
+			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
 		} catch (BException e) {
@@ -408,13 +405,6 @@ public class BParser {
 		} else {
 			return fileName;
 		}
-	}
-
-	private String getImprovedErrorMessageBasedOnTheErrorToken(Token token) {
-		if (token instanceof TPragmaFile) {
-			return "A file pragma (/*@file ...*/) is not allowed here";
-		}
-		return null;
 	}
 
 	private DefinitionTypes preParsing(final boolean debugOutput, final Reader reader,
