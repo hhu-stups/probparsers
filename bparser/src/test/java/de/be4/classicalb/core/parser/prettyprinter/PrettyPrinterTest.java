@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import util.Ast2String;
+import util.Helpers;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
@@ -247,8 +247,8 @@ public class PrettyPrinterTest {
 		PrettyPrinter prettyprinter2 = new PrettyPrinter();
 
 		parse2.apply(prettyprinter2);
-		assertEquals(Ast2String.getTreeAsString(parse),
-				Ast2String.getTreeAsString(parse2));
+		assertEquals(Helpers.getTreeAsPrologTerm(parse),
+				Helpers.getTreeAsPrologTerm(parse2));
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());
 	}
 

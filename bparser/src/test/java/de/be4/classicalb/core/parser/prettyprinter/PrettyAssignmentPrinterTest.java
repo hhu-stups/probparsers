@@ -62,8 +62,8 @@ public class PrettyAssignmentPrinterTest {
 		PrettyPrinter prettyprinter2 = new PrettyPrinter();
 
 		parse2.apply(prettyprinter2);
-		assertEquals(Ast2String.getTreeAsString(parse),
-				Ast2String.getTreeAsString(parse2));
+		assertEquals(Helpers.getTreeAsPrologTerm(parse),
+				Helpers.getTreeAsPrologTerm(parse2));
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());
 	}
 

@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
-import util.Ast2String;
+import util.Helpers;
 import util.PolySuite;
 import util.PolySuite.Config;
 import util.PolySuite.Configuration;
@@ -61,8 +61,8 @@ public class PrettyPredicatePrinterTest {
 		PrettyPrinter prettyprinter2 = new PrettyPrinter();
 
 		parse2.apply(prettyprinter2);
-		assertEquals(Ast2String.getTreeAsString(parse),
-				Ast2String.getTreeAsString(parse2));
+		assertEquals(Helpers.getTreeAsPrologTerm(parse),
+				Helpers.getTreeAsPrologTerm(parse2));
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());
 	}
 

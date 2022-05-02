@@ -68,8 +68,12 @@ public class Helpers {
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
 		Start start = parser.parse(input, false);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getTreeAsPrologTerm(final Start ast) {
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		printAsProlog(start, pout);
+		printAsProlog(ast, pout);
 		return pout.toString();
 	}
 

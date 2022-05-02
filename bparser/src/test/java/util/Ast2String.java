@@ -63,10 +63,4 @@ public class Ast2String extends ExtendedDFAdapter {
 		node.getEOF().apply(this);
 		outStart(node);
 	}
-
-	public static String getTreeAsString(final Start startNode) {
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		return ast2String.toString();
-	}
 }
