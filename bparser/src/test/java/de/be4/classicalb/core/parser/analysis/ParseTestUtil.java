@@ -7,11 +7,11 @@ import util.Helpers;
 
 public class ParseTestUtil {
 	public static String parsePred(final String input) throws BCompoundException {
-		return Helpers.getTreeAsString(BParser.PREDICATE_PREFIX + " " + input);
+		return Helpers.getTreeAsPrologTerm(new BParser().parsePredicate(input));
 	}
 
 	public static String parseExpr(final String input) throws BCompoundException {
-		return Helpers.getTreeAsString(BParser.EXPRESSION_PREFIX + " " + input);
+		return Helpers.getTreeAsPrologTerm(new BParser().parseExpression(input));
 	}
 
 	public static String createTripleExpr(final String op1, final String op2) {
