@@ -41,34 +41,34 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void testShebang() throws Exception {
+	public void testShebang() throws BCompoundException {
 		final String testMachine = "#! /Users/leuschel/git_root/prob_prolog/probcli \n MACHINE SheBang \n END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertNotNull(result);
 	}
 
 	@Test(expected = BCompoundException.class)
-	public void testWrongPositionedShebang() throws Exception {
+	public void testWrongPositionedShebang() throws BCompoundException {
 		final String testMachine = "\n#! /Users/leuschel/git_root/prob_prolog/probcli \n MACHINE SheBang \n END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void testWhiteSpaces() throws Exception {
+	public void testWhiteSpaces() throws BCompoundException {
 		final String testMachine = "MACHINE \tSimplyStructure END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
-		assertEquals("Start(AAbstractMachineParseUnit(AMachineHeader([SimplyStructure],[]),[]))", result);
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,'SimplyStructure',[]),[])).", result);
 	}
 
 	@Test
-	public void testIncludesClause() throws Exception {
+	public void testIncludesClause() throws BCompoundException {
 		final String testMachine = "MACHINE SimplyStructure INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd)) END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([SimplyStructure],[]),[AIncludesMachineClause([AMachineReference([MachineA],[]),AMachineReference([MachineB],[AIdentifierExpression([aa]),AIdentifierExpression([bb]),AMaxIntExpression(),AFunctionExpression(AIdentifierExpression([cc]),[AIdentifierExpression([dd])])])])]))",
+				"machine(abstract_machine(none,machine(none),machine_header(none,'SimplyStructure',[]),[includes(none,[machine_reference(none,'MachineA',[]),machine_reference(none,'MachineB',[identifier(none,aa),identifier(none,bb),max_int(none),function(none,identifier(none,cc),[identifier(none,dd)])])])])).",
 				result);
 	}
 
@@ -117,27 +117,27 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void testClause2() throws Exception {
+	public void testClause2() throws BCompoundException {
 		final String testMachine = "#MACHINECLAUSE VARIABLES xx, Ab, cD";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(AMachineClauseParseUnit(AVariablesMachineClause([AIdentifierExpression([xx]),AIdentifierExpression([Ab]),AIdentifierExpression([cD])])))",
+				"machine(variables(none,[identifier(none,xx),identifier(none,'Ab'),identifier(none,cD)])).",
 				result);
 
 		final String testMachine2 = "#MACHINECLAUSE ABSTRACT_VARIABLES xx, Ab, cD";
-		final String result2 = Helpers.getTreeAsString(testMachine2);
+		final String result2 = Helpers.getMachineAsPrologTerm(testMachine2);
 
 		assertEquals(result, result2);
 	}
 
 	@Test
-	public void testClause3() throws Exception {
+	public void testClause3() throws BCompoundException {
 		final String testMachine = "#MACHINECLAUSE INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd))";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(AMachineClauseParseUnit(AIncludesMachineClause([AMachineReference([MachineA],[]),AMachineReference([MachineB],[AIdentifierExpression([aa]),AIdentifierExpression([bb]),AMaxIntExpression(),AFunctionExpression(AIdentifierExpression([cc]),[AIdentifierExpression([dd])])])])))",
+				"machine(includes(none,[machine_reference(none,'MachineA',[]),machine_reference(none,'MachineB',[identifier(none,aa),identifier(none,bb),max_int(none),function(none,identifier(none,cc),[identifier(none,dd)])])])).",
 				result);
 	}
 
@@ -155,25 +155,25 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void testRefinement1() throws Exception {
+	public void testRefinement1() throws BCompoundException {
 		final String emptyMachine = "REFINEMENT RefinementMachine \nREFINES Machine \nEND";
-		final String result = Helpers.getTreeAsString(emptyMachine);
+		final String result = Helpers.getMachineAsPrologTerm(emptyMachine);
 
-		assertEquals("Start(ARefinementMachineParseUnit(AMachineHeader([RefinementMachine],[]),Machine,[]))", result);
+		assertEquals("machine(refinement_machine(none,machine_header(none,'RefinementMachine',[]),'Machine',[])).", result);
 	}
 
 	@Test
-	public void testImplementation1() throws Exception {
+	public void testImplementation1() throws BCompoundException {
 		final String emptyMachine = "IMPLEMENTATION ImplMachine \nREFINES Machine \nEND";
-		final String result = Helpers.getTreeAsString(emptyMachine);
+		final String result = Helpers.getMachineAsPrologTerm(emptyMachine);
 
-		assertEquals("Start(AImplementationMachineParseUnit(AMachineHeader([ImplMachine],[]),Machine,[]))", result);
+		assertEquals("machine(implementation_machine(none,machine_header(none,'ImplMachine',[]),'Machine',[])).", result);
 	}
 
 	@Test
 	public void testUnclosedComment() {
 		final String emptyMachine = "MACHINE ClassicalB\n SETS pp ; qq\n /* CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
-		final BLexerException ex = Helpers.assertThrowsCompound(BLexerException.class, () -> Helpers.getTreeAsString(emptyMachine));
+		final BLexerException ex = Helpers.assertThrowsCompound(BLexerException.class, () -> Helpers.getMachineAsPrologTerm(emptyMachine));
 		// checking the start position of the comment
 		assertEquals(3, ex.getLastLine());
 		assertEquals(2, ex.getLastPos());
@@ -181,29 +181,29 @@ public class StructuralTest {
 	}
 
 	@Test
-	public void testList1() throws Exception {
+	public void testList1() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION IF 1=1 THEN skip ELSIF 1=2 THEN skip ELSIF 1=3 THEN skip END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AIfSubstitution(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)),ASkipSubstitution(),[AIfElsifSubstitution(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(2)),ASkipSubstitution()),AIfElsifSubstitution(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(3)),ASkipSubstitution())],)))",
+				"machine(if(none,equal(none,integer(none,1),integer(none,1)),skip(none),[if_elsif(none,equal(none,integer(none,1),integer(none,2)),skip(none)),if_elsif(none,equal(none,integer(none,1),integer(none,3)),skip(none))],skip(none))).",
 				result);
 	}
 
 	@Test
-	public void testList2() throws Exception {
+	public void testList2() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION a, b := 1, 2";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AAssignSubstitution([AIdentifierExpression([a]),AIdentifierExpression([b])],[AIntegerExpression(1),AIntegerExpression(2)])))",
+				"machine(assign(none,[identifier(none,a),identifier(none,b)],[integer(none,1),integer(none,2)])).",
 				result);
 	}
 
 	@Test
 	public void checkForMissingSemicolon() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n  BAR= BEGIN r := xx END\nEND";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(s));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(s));
 		Node node = e.getNodesList().get(0);
 		assertEquals(4, node.getStartPos().getLine());
 		assertEquals(3, node.getStartPos().getPos());
@@ -213,7 +213,7 @@ public class StructuralTest {
 	@Test
 	public void checkForInvalidSemicolon() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip END\n;\nEND";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(s));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(s));
 		Node node = e.getNodesList().get(0);
 		assertEquals(4, node.getStartPos().getLine());
 		assertEquals(1, node.getStartPos().getPos());
@@ -223,7 +223,7 @@ public class StructuralTest {
 	@Test
 	public void checkForInvalidSemicolonBeforeEnd() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip\n; END\nEND";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(s));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(s));
 		Node node = e.getNodesList().get(0);
 		assertEquals(4, node.getStartPos().getLine());
 		assertEquals(1, node.getStartPos().getPos());
@@ -233,7 +233,7 @@ public class StructuralTest {
 	@Test
 	public void checkForInvalidSemicolonBeforeEnd2() {
 		String s = "MACHINE MissingSemicolon\nOPERATIONS\n Foo=BEGIN skip;skip\n; END\nEND";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(s));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(s));
 		Node node = e.getNodesList().get(0);
 		assertEquals(4, node.getStartPos().getLine());
 		assertEquals(1, node.getStartPos().getPos());
@@ -244,23 +244,23 @@ public class StructuralTest {
 	public void testRepeatingClauses() {
 		final String testMachine = "MACHINE TestMachineX\n" + "VARIABLES a,b,c\n" + "CONSTANTS X,Y,Z\n"
 				+ "VARIABLES x,y,z\n" + "END";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(testMachine));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertEquals(2, e.getNodesList().size());
 	}
 
 	@Test
 	public void testMissingProperties() {
 		final String testMachine = "MACHINE TestMachineX\n" + "CONSTANTS X,Y,Z\n" + "END";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getTreeAsString(testMachine));
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertEquals(1, e.getNodesList().size());
 		assertEquals("Clause(s) missing: PROPERTIES", e.getMessage());
 	}
 
 	@Test
-	public void testHexLiterals() throws Exception {
+	public void testHexLiterals() throws BCompoundException {
 		final String testMachine = "#EXPRESSION 0x12";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
-		assertEquals("Start(AExpressionParseUnit(AIntegerExpression(18)))", result);
+		assertEquals("machine(integer(none,18)).", result);
 	}
 }
