@@ -12,20 +12,20 @@ public class LetExpressionTest {
 	@Test
 	public void testSingleIdentifierLetExpression() throws BCompoundException {
 		final String testMachine = "#EXPRESSION (LET x BE x = 5 IN x+1 END)";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(AExpressionParseUnit(ALetExpressionExpression(AIdentifierExpression([x])AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5))AAddExpression(AIdentifierExpression([x]),AIntegerExpression(1)))))",
+				"machine(let_expression(none,[identifier(none,x)],equal(none,identifier(none,x),integer(none,5)),add(none,identifier(none,x),integer(none,1)))).",
 				result);
 	}
 
 	@Test
 	public void testMultipleIdentifiersLetExpression() throws BCompoundException {
 		final String testMachine = "#EXPRESSION (LET x, y BE x = 5 & y = 7 IN x+y END)";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(AExpressionParseUnit(ALetExpressionExpression(AIdentifierExpression([x])AIdentifierExpression([y])AConjunctPredicate(AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5)),AEqualPredicate(AIdentifierExpression([y]),AIntegerExpression(7)))AAddExpression(AIdentifierExpression([x]),AIdentifierExpression([y])))))",
+				"machine(let_expression(none,[identifier(none,x),identifier(none,y)],conjunct(none,[equal(none,identifier(none,x),integer(none,5)),equal(none,identifier(none,y),integer(none,7))]),add(none,identifier(none,x),identifier(none,y)))).",
 				result);
 	}
 }

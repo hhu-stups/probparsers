@@ -12,10 +12,10 @@ public class LetPredicateTest {
 	@Test
 	public void testSingleIdentifierLetPredicate() throws BCompoundException {
 		final String testMachine = "#PREDICATE (LET x BE x = 5 IN x < 7 END)";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(APredicateParseUnit(ALetPredicatePredicate(AIdentifierExpression([x])AEqualPredicate(AIdentifierExpression([x]),AIntegerExpression(5))ALessPredicate(AIdentifierExpression([x]),AIntegerExpression(7)))))",
+				"machine(let_predicate(none,[identifier(none,x)],equal(none,identifier(none,x),integer(none,5)),less(none,identifier(none,x),integer(none,7)))).",
 				result);
 	}
 }

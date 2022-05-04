@@ -18,11 +18,11 @@ public class PragmaTest {
 	}
 
 	@Test
-	public void testLabelIncludingMinusSymbol() throws Exception {
+	public void testLabelIncludingMinusSymbol() throws BCompoundException {
 		final String testMachine = "MACHINE test ASSERTIONS /*@label foo-bar*/ 1=1 END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([test],[]),[AAssertionsMachineClause([ALabelPredicate(foo-bar,AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)))])]))",
+				"machine(abstract_machine(none,machine(none),machine_header(none,test,[]),[assertions(none,[label(none,'foo-bar',equal(none,integer(none,1),integer(none,1)))])])).",
 				result);
 	}
 
