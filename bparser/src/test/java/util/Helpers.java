@@ -22,16 +22,6 @@ import org.junit.Assert;
 import org.junit.function.ThrowingRunnable;
 
 public class Helpers {
-
-	public static String getTreeAsString(final String testMachine) throws BCompoundException {
-		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
-
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		return ast2String.toString();
-	}
-
 	public static String getPrettyPrint(final String testMachine) {
 		final BParser parser = new BParser("testcase");
 		Start startNode;
