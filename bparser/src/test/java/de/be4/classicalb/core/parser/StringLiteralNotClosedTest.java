@@ -18,7 +18,7 @@ public class StringLiteralNotClosedTest {
 	@Test
 	public void testStringLiteralNotClosedShortString() {
 		final String testMachine = "MACHINE Test CONSTANTS the_string PROPERTIES the_string = \"not closed END";
-		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getTreeAsString(testMachine));
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertEquals("[1,59] Unknown token: \"not closed END", e.getMessage());
 	}
 
@@ -30,7 +30,7 @@ public class StringLiteralNotClosedTest {
 				+ "== DEFINITIONS a=== MACHINE <<> ~`DEFINITIONS` ''  "
 				+ "12345678999911112334234234345236245634563456345635463465345634563456345346534563546 "
 			    + "END";
-		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getTreeAsString(testMachine));
+		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		// System.out.println("Exception = " + e.getLocalizedMessage());
 		assertTrue(e.getLocalizedMessage(),e.getLocalizedMessage().contains("Unknown token:"));
 	}
