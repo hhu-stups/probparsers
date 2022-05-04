@@ -1,18 +1,18 @@
 package de.be4.classicalb.core.parser.prettyprinter;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
-import util.*;
-import util.PolySuite.Config;
-import util.PolySuite.Configuration;
 
-@RunWith(PolySuite.class)
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
 public class PrettyAssignmentPrinterTest {
 
 	private static final String PREFIX = "#SUBSTITUTION ";
@@ -51,6 +51,11 @@ public class PrettyAssignmentPrinterTest {
 		this.theString = theString;
 	}
 
+	@Parameterized.Parameters(name = "{0}")
+	public static String[] data() {
+		return tests;
+	}
+
 	@Test
 	public void testExpression() throws Exception {
 		Start parse = BParser.parse(PREFIX + theString);
@@ -66,27 +71,4 @@ public class PrettyAssignmentPrinterTest {
 				Helpers.getTreeAsPrologTerm(parse2));
 		assertEquals(prettyPrint, prettyprinter2.getPrettyPrint());
 	}
-
-	@Config
-	public static Configuration getConfig() {
-
-		return new Configuration() {
-
-			@Override
-			public int size() {
-				return tests.length;
-			}
-
-			@Override
-			public String getTestValue(int index) {
-				return tests[index];
-			}
-
-			@Override
-			public String getTestName(int index) {
-				return tests[index];
-			}
-		};
-	}
-
 }

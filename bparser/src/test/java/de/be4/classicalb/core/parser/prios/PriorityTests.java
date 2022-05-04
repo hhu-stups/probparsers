@@ -1,67 +1,43 @@
 package de.be4.classicalb.core.parser.prios;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.*;
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import util.PolySuite;
-import util.PolySuite.Config;
-import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
-@RunWith(PolySuite.class)
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
 public class PriorityTests {
 	final BinaryOperator lower, higher;
 
-	public PriorityTests(Tuple t) {
-		lower = t.getOp1();
-		higher = t.getOp2();
+	public PriorityTests(final BinaryOperator lower, final BinaryOperator higher) {
+		this.lower = lower;
+		this.higher = higher;
 	}
 
-	// @Override
-	// public String getName() {
-	// return "Testing priority between " + lower.getPriority() + " and "
-	// + higher.getPriority() + ": " + lower.getSymbol() + " vs "
-	// + higher.getSymbol();
-	// }
-
-	@Config
-	public static Configuration getConfig() {
+	@Parameterized.Parameters(name = "{0}, {1}")
+	public static List<BinaryOperator[]> getConfig() {
 		List<BinaryOperator> binOps = BinaryOperator.OPS;
-		final List<Tuple> ops = new ArrayList<Tuple>(binOps.size()
-				* binOps.size());
+		final List<BinaryOperator[]> ops = new ArrayList<>(binOps.size() * binOps.size());
 
 		for (BinaryOperator op1 : binOps) {
 			for (BinaryOperator op2 : binOps) {
-				if (op1.getPriority() < op2.getPriority())
-					ops.add(new Tuple(op1, op2, op1.getAssociativity()));
+				if (op1.getPriority() < op2.getPriority()) {
+					ops.add(new BinaryOperator[] {op1, op2});
+				}
 			}
 		}
 
-		return new Configuration() {
-			public int size() {
-				return ops.size();
-			}
-
-			public Tuple getTestValue(int index) {
-				Tuple operators = ops.get(index);
-				return operators;
-			}
-
-			public String getTestName(int index) {
-				Tuple t = ops.get(index);
-				BinaryOperator left = t.getOp1();
-				BinaryOperator right = t.getOp2();
-				return "Priority for " + left.getName() + " / "
-						+ right.getName() + "(" + left.getSymbol() + " "
-						+ right.getSymbol() + ")";
-			}
-		};
+		return ops;
 	}
 
 	@Test
