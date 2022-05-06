@@ -46,28 +46,28 @@ final class PrologGeneratorHelper {
 	}
 	
 	private void parsePredicateToken(final UniversalToken token) throws ProBParseException {
-		    //System.out.println("Parsing LTL Unparsed (Atomic Proposition) Token with specParser: " + token.getText() + " at " + token.getLine() + ":" + token.getColumn());
-		    // TODO: pass column and line offset to specParser more explicitly rather than using this hack
-		    // the hack relies on the fact that whitespaces and newlines are whitespace in the specParser's language
-		    String offset = "";
-		    if(token.getLine()>1) {
-		        offset = "\n".repeat(token.getLine()-1); // TODO: check \n also works on Windows
-		    }
-		    // note: the UniversalToken starts with the curly brace before the actual text, so we do not subtract 1
-		    if(token.getColumn()>0) {
-		        offset = " ".repeat(token.getColumn());
-		    }
-		    specParser.parsePredicate(pto, offset+token.getText(), true);
+		//System.out.println("Parsing LTL Unparsed (Atomic Proposition) Token with specParser: " + token.getText() + " at " + token.getLine() + ":" + token.getColumn());
+		// TODO: pass column and line offset to specParser more explicitly rather than using this hack
+		// the hack relies on the fact that whitespaces and newlines are whitespace in the specParser's language
+		String offset = "";
+		if(token.getLine()>1) {
+			offset = "\n".repeat(token.getLine()-1); // TODO: check \n also works on Windows
+		}
+		// note: the UniversalToken starts with the curly brace before the actual text, so we do not subtract 1
+		if(token.getColumn()>0) {
+			offset = " ".repeat(token.getColumn());
+		}
+		specParser.parsePredicate(pto, offset+token.getText(), true);
 	}
 
 	public void caseUnparsed(final UniversalToken token) {
 		pto.openTerm("ap");
 		try {
-		    parsePredicateToken(token);
+			parsePredicateToken(token);
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support predicates
+			// if the formalism does not support predicates
 			throw createAdapterException(token, e);
 		}
 		pto.closeTerm();
@@ -80,10 +80,10 @@ final class PrologGeneratorHelper {
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support predicates
+			// if the formalism does not support predicates
 			throw createAdapterException(token, e);
 		}
-        //pto.closeTerm();
+		//pto.closeTerm();
 	}
 
 	public void caseUnparsedExpression(final UniversalToken token) {
@@ -93,7 +93,7 @@ final class PrologGeneratorHelper {
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support expressions
+			// if the formalism does not support expressions
 			throw createAdapterException(token, e);
 		}
 		//pto.closeTerm();

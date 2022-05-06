@@ -195,21 +195,21 @@ public class CliBParser {
 				break;
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
-			    String newFVal = in.readLine();
-			    behaviour.debug_print("Setting fastprolog to "+newFVal);
-			    behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
+				String newFVal = in.readLine();
+				behaviour.debug_print("Setting fastprolog to "+newFVal);
+				behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 				break;
 			case compactpos:
-			    behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
+				behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
 				break;
 			case verbose:
-			    behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
+				behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
 				break;
 			case checkname:
-			    behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
+				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
 				break;
 			case lineno:
-			    behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
+				behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
 				break;
 			case machine:
 				String filename = in.readLine();
