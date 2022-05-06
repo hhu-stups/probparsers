@@ -49,15 +49,16 @@ final class PrologGeneratorHelper {
 		//System.out.println("Parsing LTL Unparsed (Atomic Proposition) Token with specParser: " + token.getText() + " at " + token.getLine() + ":" + token.getColumn());
 		// TODO: pass column and line offset to specParser more explicitly rather than using this hack
 		// the hack relies on the fact that whitespaces and newlines are whitespace in the specParser's language
-		String offset = "";
-		if(token.getLine()>1) {
-			offset = "\n".repeat(token.getLine()-1); // TODO: check \n also works on Windows
+		StringBuilder code = new StringBuilder();
+		for (int i = 1; i < token.getLine(); i++) {
+			code.append('\n'); // TODO: check \n also works on Windows
 		}
 		// note: the UniversalToken starts with the curly brace before the actual text, so we do not subtract 1
-		if(token.getColumn()>0) {
-			offset = " ".repeat(token.getColumn());
+		for (int i = 0; i < token.getColumn(); i++) {
+			code.append(' ');
 		}
-		specParser.parsePredicate(pto, offset+token.getText(), true);
+		code.append(token.getText());
+		specParser.parsePredicate(pto, code.toString(), true);
 	}
 
 	public void caseUnparsed(final UniversalToken token) {
