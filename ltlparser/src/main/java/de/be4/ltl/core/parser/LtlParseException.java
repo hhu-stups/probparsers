@@ -20,6 +20,16 @@ public class LtlParseException extends Exception {
 		this.token = token;
 	}
 
+	public LtlParseException(final UniversalToken token, final Throwable cause) {
+		super(cause);
+		this.token = token;
+	}
+
+	public LtlParseException(final UniversalToken token, final String message, final Throwable cause) {
+		super(message, cause);
+		this.token = token;
+	}
+
 	public String getTokenString() {
 		return token == null ? null : token.getText();
 	}

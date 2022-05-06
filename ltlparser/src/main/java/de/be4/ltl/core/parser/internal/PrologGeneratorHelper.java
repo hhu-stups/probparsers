@@ -168,8 +168,7 @@ final class PrologGeneratorHelper {
 
 	private LtlAdapterException createAdapterException(
 			final UniversalToken token, final Throwable orig) {
-		final LtlParseException ex = new LtlParseException(token,
-				orig.getMessage());
+		final LtlParseException ex = new LtlParseException(token, orig);
 		return new LtlAdapterException(ex);
 	}
 
