@@ -366,16 +366,16 @@ public class BLexer extends Lexer {
 		if (token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment ||
 			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
-		} else if (lastToken == null) {
-			lastToken = token;
-			return;
 		}
-		Class<? extends Token> lastTokenClass = lastToken.getClass();
-		Class<? extends Token> tokenClass = token.getClass();
 
-		if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
-			checkForInvalidCombinations(lastTokenClass, tokenClass);
-			// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
+		if (lastToken != null) {
+			Class<? extends Token> lastTokenClass = lastToken.getClass();
+			Class<? extends Token> tokenClass = token.getClass();
+			
+			if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
+				checkForInvalidCombinations(lastTokenClass, tokenClass);
+				// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
+			}
 		}
 
 		lastToken = token;
