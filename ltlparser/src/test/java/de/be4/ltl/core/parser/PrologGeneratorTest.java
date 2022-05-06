@@ -637,15 +637,28 @@ public class PrologGeneratorTest {
 		private void parse(final IPrologTermOutput pto, final String text,
 				final boolean wrap, final String wrapper)
 				throws ProBParseException {
+			int startOffset = -1;
 			for (int i = 0; i < text.length(); i++) {
 				final char ch = text.charAt(i);
+				if (startOffset == -1) {
+					// Skip leading whitespace automatically added by PrologGeneratorHelper.parsePredicateToken
+					if (Character.isSpaceChar(ch)) {
+						continue;
+					} else {
+						startOffset = i;
+					}
+				}
 				if (!Character.isLowerCase(ch) && "()[]{}".indexOf(ch) == -1)
 					throw new ProBParseException("syntax error");
 			}
+			if (startOffset == -1) {
+				startOffset = 0;
+			}
+
 			if (wrap) {
 				pto.openTerm(wrapper);
 			}
-			pto.printAtom(text);
+			pto.printAtom(text.substring(startOffset));
 			if (wrap) {
 				pto.closeTerm();
 			}
