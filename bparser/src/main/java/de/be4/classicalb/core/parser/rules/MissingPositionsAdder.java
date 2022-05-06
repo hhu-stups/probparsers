@@ -15,6 +15,7 @@ public class MissingPositionsAdder extends DepthFirstAdapter {
 		start.apply(missingPositionsInjector);
 	}
 
+	@Override
 	public void defaultIn(Node node) {
 		SourcePosition startPos = node.getStartPos();
 		if (startPos == null) {

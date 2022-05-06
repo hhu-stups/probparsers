@@ -23,6 +23,7 @@ public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements 
 		this.definitions = definitions;
 	}
 
+	@Override
 	public void runChecks(final Start rootNode) {
 		// only need to check complete machines
 		if (!Utils.isCompleteMachine(rootNode)) {
@@ -55,6 +56,7 @@ public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements 
 		}
 	}
 
+	@Override
 	public void setOptions(ParseOptions options) {
 		// ignore options
 	}

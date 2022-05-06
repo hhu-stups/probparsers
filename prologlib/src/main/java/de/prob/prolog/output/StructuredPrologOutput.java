@@ -24,6 +24,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	private String currentFunctor = null;
 	private int currentArguments = 0;
 
+	@Override
 	public IPrologTermOutput closeList() {
 		PrologTerm[] elements = getArguments();
 		popFromStack();
@@ -31,6 +32,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput closeTerm() {
 		PrologTerm[] elements = getArguments();
 		final String functor = currentFunctor;
@@ -39,15 +41,18 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput emptyList() {
 		addArgument(ListPrologTerm.emptyList());
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput flush() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput fullstop() {
 		if (termStack.size() != 1)
 			throw new IllegalArgumentException("term stacksize is not 1");
@@ -58,6 +63,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput openList() {
 		pushOnStack();
 		currentFunctor = null;
@@ -65,6 +71,7 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput openTerm(final String functor) {
 		pushOnStack();
 		currentFunctor = functor;
@@ -72,16 +79,19 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput openTerm(final String functor,
 			final boolean ignoreIndention) {
 		return openTerm(functor);
 	}
 
+	@Override
 	public IPrologTermOutput printAtom(final String content) {
 		addArgument(new CompoundPrologTerm(content));
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printAtomOrNumber(final String content) {
 		try {
 			printNumber(Long.parseLong(content));
@@ -91,25 +101,30 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printNumber(final long number) {
 		addArgument(new IntegerLongPrologTerm(number));
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
 		addArgument(new IntegerPrologTerm(number));
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printString(final String content) {
 		return printAtom(content);
 	}
 
+	@Override
 	public IPrologTermOutput printVariable(final String var) {
 		addArgument(new VariablePrologTerm(var));
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printTerm(final PrologTerm term) {
 		addArgument(term);
 		return this;

@@ -53,6 +53,7 @@ public class BMachine implements IModel {
 		this.machineName = name;
 	}
 
+	@Override
 	public Start getStart() {
 		return this.start;
 	}
@@ -94,6 +95,7 @@ public class BMachine implements IModel {
 		return new ArrayList<>();
 	}
 
+	@Override
 	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);

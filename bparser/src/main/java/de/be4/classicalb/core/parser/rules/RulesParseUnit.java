@@ -52,6 +52,7 @@ public class RulesParseUnit implements IModel {
 		return this.start;
 	}
 
+	@Override
 	public String getPath() {
 		if (this.machineFile != null) {
 			return this.machineFile.getAbsolutePath();

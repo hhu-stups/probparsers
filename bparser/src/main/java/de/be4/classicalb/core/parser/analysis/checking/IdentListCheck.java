@@ -77,6 +77,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	 * @param rootNode
 	 *            the start node of the AST
 	 */
+	@Override
 	public void runChecks(final Start rootNode) {
 		nonIdentifiers.clear();
 
@@ -238,6 +239,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 		}
 	}
 
+	@Override
 	public void setOptions(ParseOptions options) {
 		this.options = options;
 	}

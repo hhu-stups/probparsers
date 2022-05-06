@@ -26,6 +26,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 		super(specParser);
 	}
 
+	@Override
 	protected Start parseFormula(final String formula)
 			throws LtlParseException, IOException {
 		StringReader reader = new StringReader(formula);

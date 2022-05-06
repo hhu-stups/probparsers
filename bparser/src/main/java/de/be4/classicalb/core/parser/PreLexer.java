@@ -36,7 +36,7 @@ public class PreLexer extends Lexer {
 		super(in);
 	}
 	
-	
+	@Override
 	protected Token getToken() throws IOException, LexerException {
 		try {
 			// Please don't put any token processing code here!

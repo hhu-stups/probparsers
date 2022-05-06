@@ -13,62 +13,77 @@ public class DummyPrologOutput implements IPrologTermOutput {
 	private DummyPrologOutput() {
 	}
 
+	@Override
 	public IPrologTermOutput closeList() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput closeTerm() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput emptyList() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput flush() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput fullstop() {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput openList() {
 		return this;
 	}
 
-	public IPrologTermOutput openTerm(final String arg0) {
+	@Override
+	public IPrologTermOutput openTerm(final String functor) {
 		return this;
 	}
 
-	public IPrologTermOutput openTerm(final String arg0, final boolean arg1) {
+	@Override
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndention) {
 		return this;
 	}
 
-	public IPrologTermOutput printAtom(final String arg0) {
+	@Override
+	public IPrologTermOutput printAtom(final String content) {
 		return this;
 	}
 
-	public IPrologTermOutput printAtomOrNumber(final String arg0) {
+	@Override
+	public IPrologTermOutput printAtomOrNumber(final String content) {
 		return this;
 	}
 
-	public IPrologTermOutput printNumber(final long arg0) {
+	@Override
+	public IPrologTermOutput printNumber(final long number) {
 		return this;
 	}
 
-	public IPrologTermOutput printNumber(final BigInteger arg0) {
+	@Override
+	public IPrologTermOutput printNumber(final BigInteger number) {
 		return this;
 	}
 
-	public IPrologTermOutput printString(final String arg0) {
+	@Override
+	public IPrologTermOutput printString(final String content) {
 		return this;
 	}
 
-	public IPrologTermOutput printVariable(final String arg0) {
+	@Override
+	public IPrologTermOutput printVariable(final String var) {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printTerm(final PrologTerm term) {
 		return this;
 	}

@@ -19,6 +19,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 		return Utils.readFile(file);
 	}
 
+	@Override
 	public File getFile(final File directory, final String filename) throws IOException {
 		FileSearchPathProvider provider;
 		if (directory == null) {

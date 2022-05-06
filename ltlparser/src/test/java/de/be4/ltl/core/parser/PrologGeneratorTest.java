@@ -609,12 +609,14 @@ public class PrologGeneratorTest {
 			this.suppTransPred = suppTransPred;
 		}
 
+		@Override
 		public void parseExpression(final IPrologTermOutput pto,
 				final String expression, final boolean wrap)
 				throws ProBParseException, UnsupportedOperationException {
 			throw new UnsupportedOperationException("no dummy expressions");
 		}
 
+		@Override
 		public void parsePredicate(final IPrologTermOutput pto,
 				final String predicate, final boolean wrap)
 				throws ProBParseException, UnsupportedOperationException {
@@ -624,6 +626,7 @@ public class PrologGeneratorTest {
 				throw new UnsupportedOperationException("no dummy predicates");
 		}
 
+		@Override
 		public void parseTransitionPredicate(final IPrologTermOutput pto,
 				final String transPredicate, final boolean wrap)
 				throws ProBParseException, UnsupportedOperationException {

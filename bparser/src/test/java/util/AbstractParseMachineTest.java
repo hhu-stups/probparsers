@@ -10,6 +10,7 @@ public abstract class AbstractParseMachineTest {
 	private static final class MachineFilenameFilter implements FilenameFilter {
 		private static final String[] MACHINE_SUFFIX = { ".mch", ".imp", ".ref", ".def" };
 
+		@Override
 		public boolean accept(final File dir, final String name) {
 			for (int i = 0; i < MACHINE_SUFFIX.length; i++) {
 				if (name.endsWith(MACHINE_SUFFIX[i])) {

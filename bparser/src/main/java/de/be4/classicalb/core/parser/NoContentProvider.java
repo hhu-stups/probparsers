@@ -11,6 +11,7 @@ public class NoContentProvider implements IFileContentProvider {
 		throw new IOException("Loading of file content not supported.");
 	}
 
+	@Override
 	public File getFile(final File directory, String fileName) {
 		return null;
 	}

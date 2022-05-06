@@ -57,6 +57,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		return false;
 	}
 
+	@Override
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
 		if (!printSourcePositions || uselessPositionInfo(node)) {
@@ -143,6 +144,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		}
 	}
 
+	@Override
 	public void setPrologTermOutput(final IPrologTermOutput pout) {
 		this.pout = pout;
 	}

@@ -311,6 +311,7 @@ public class PreParser {
 		 * there type
 		 */
 		Collections.sort(list, new Comparator<Token>() {
+			@Override
 			public int compare(final Token o1, final Token o2) {
 				if (o1.getLine() == o2.getLine()) {
 					if (o1.getPos() == o2.getPos())

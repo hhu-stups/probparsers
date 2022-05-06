@@ -202,11 +202,13 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		int getContentCounter = 0;
 		private final Map<String, IDefinitions> store = new HashMap<String, IDefinitions>();
 
+		@Override
 		public IDefinitions getDefinitions(final String filename) {
 			getStoredCounter++;
 			return store.get(filename);
 		}
 
+		@Override
 		public void storeDefinition(final String filename,
 				final IDefinitions definitions) {
 			storeCounter++;

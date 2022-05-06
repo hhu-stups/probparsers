@@ -573,6 +573,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
+	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -583,6 +584,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	// expression
 
+	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
