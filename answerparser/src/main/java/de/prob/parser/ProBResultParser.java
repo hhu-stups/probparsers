@@ -23,9 +23,7 @@ public final class ProBResultParser {
 				"not intended for instantiation");
 	}
 
-	public static Start parse(final String prologAnswer)
-			throws ResultParserException {
-
+	public static Start parse(final String prologAnswer) {
 		if (prologAnswer.length() == 0)
 			throw new ResultParserException("Received empty Result", null);
 

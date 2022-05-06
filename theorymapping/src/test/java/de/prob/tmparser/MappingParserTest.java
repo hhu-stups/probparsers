@@ -10,7 +10,7 @@ import org.junit.Test;
 public class MappingParserTest {
 
 	@Test
-	public void testNo() throws TheoryMappingException, IOException {
+	public void testNo() throws IOException {
 		final OperatorMapping om1 = new OperatorMapping("SUMPRODUCT", "SUM",
 				TMOperatorType.INTERNAL, "SIGMA");
 		final OperatorMapping om2 = new OperatorMapping("SUMPRODUCT",

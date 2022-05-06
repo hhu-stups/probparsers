@@ -13,23 +13,21 @@ public class ProBParserBaseAdapter {
 	}
 
 	public PrologTerm parseExpression(final String expression,
-			final boolean wrap) throws ProBParseException,
-			UnsupportedOperationException {
+			final boolean wrap) throws ProBParseException {
 		final StructuredPrologOutput pto = new StructuredPrologOutput();
 		base.parseExpression(pto, expression, wrap);
 		return getSingleTerm(pto);
 	}
 
 	public PrologTerm parsePredicate(final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		final StructuredPrologOutput pto = new StructuredPrologOutput();
 		base.parsePredicate(pto, predicate, wrap);
 		return getSingleTerm(pto);
 	}
 
 	public PrologTerm parseTransitionPredicate(final String transPredicate,
-			final boolean wrap) throws ProBParseException,
-			UnsupportedOperationException {
+			final boolean wrap) throws ProBParseException {
 		final StructuredPrologOutput pto = new StructuredPrologOutput();
 		base.parseTransitionPredicate(pto, transPredicate, wrap);
 		return getSingleTerm(pto);

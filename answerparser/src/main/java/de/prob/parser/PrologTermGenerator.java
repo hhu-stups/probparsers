@@ -37,8 +37,7 @@ import de.prob.prolog.term.VariablePrologTerm;
 public class PrologTermGenerator {
 	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];
 
-	public static PrologTerm toPrologTerm(final Start node)
-			throws ResultParserException {
+	public static PrologTerm toPrologTerm(final Start node) {
 		PResult topnode = node.getPResult();
 		PrologTerm term = null;
 		if (topnode instanceof AYesResult) {
@@ -62,7 +61,7 @@ public class PrologTermGenerator {
 	}
 
 	public static PrologTerm toPrologTermMustNotFail(final String query,
-			final Start node) throws ResultParserException {
+			final Start node) {
 		PrologTerm term = toPrologTerm(node);
 		if (term == null) {
 			final String message = "Prolog query unexpectedly failed: " + query;

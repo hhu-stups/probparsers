@@ -23,7 +23,7 @@ public interface ProBParserBase {
 	 *             if the formalism does not support expressions
 	 */
 	void parseExpression(IPrologTermOutput pto, String expression, boolean wrap)
-			throws ProBParseException, UnsupportedOperationException;
+			throws ProBParseException;
 
 	/**
 	 * Parses a string that should contain a predicate.
@@ -41,7 +41,7 @@ public interface ProBParserBase {
 	 *             if the formalism does not support predicates
 	 */
 	void parsePredicate(IPrologTermOutput pto, String predicate, boolean wrap)
-			throws ProBParseException, UnsupportedOperationException;
+			throws ProBParseException;
 
 	/**
 	 * Parses a string that should contain a predicate over a transition between
@@ -60,6 +60,5 @@ public interface ProBParserBase {
 	 *             if the formalism does not support predicates on transitions
 	 */
 	void parseTransitionPredicate(IPrologTermOutput pto, String transPredicate,
-			boolean wrap) throws ProBParseException,
-			UnsupportedOperationException;
+			boolean wrap) throws ProBParseException;
 }

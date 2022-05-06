@@ -25,14 +25,13 @@ import de.prob.prolog.term.VariablePrologTerm;
  */
 public class BindingGenerator {
 
-	public static Map<String, PrologTerm> createBinding(final Start ast)
-			throws ResultParserException {
+	public static Map<String, PrologTerm> createBinding(final Start ast) {
 		PrologTerm term = PrologTermGenerator.toPrologTerm(ast);
 		return createBinding(term);
 	}
 
 	public static Map<String, PrologTerm> createBindingMustNotFail(
-			final String query, final Start ast) throws ResultParserException {
+			final String query, final Start ast) {
 		PrologTerm term = PrologTermGenerator.toPrologTermMustNotFail(query,
 				ast);
 		return createBinding(term);
@@ -86,12 +85,11 @@ public class BindingGenerator {
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term,
-			final String functor, final int arity) throws ResultParserException {
+			final String functor, final int arity) {
 		return checkSignature(checkComponentType(term), functor, arity);
 	}
 
-	private static CompoundPrologTerm checkComponentType(final PrologTerm term)
-			throws ResultParserException {
+	private static CompoundPrologTerm checkComponentType(final PrologTerm term) {
 		if (!(term instanceof CompoundPrologTerm)) {
 			final String message = "Expected CompoundPrologTerm, but got "
 					+ term.getClass().getSimpleName();
@@ -101,7 +99,7 @@ public class BindingGenerator {
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term,
-			final int arity) throws ResultParserException {
+			final int arity) {
 		if ((term instanceof CompoundPrologTerm))
 			return checkArity((CompoundPrologTerm) term, arity);
 		final String message = "Expected CompoundPrologTerm, but got "
@@ -111,29 +109,27 @@ public class BindingGenerator {
 
 	public static CompoundPrologTerm getCompoundTerm(
 			final Map<String, PrologTerm> bindings, final String name,
-			final String functor, final int arity) throws ResultParserException {
+			final String functor, final int arity) {
 		final PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getCompoundTerm(prologTerm, functor, arity);
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(
 			final Map<String, PrologTerm> bindings, final String name,
-			final int arity) throws ResultParserException {
+			final int arity) {
 		final PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getCompoundTerm(prologTerm, arity);
 	}
 
 	private static CompoundPrologTerm checkSignature(
-			final CompoundPrologTerm term, final String functor, final int arity)
-			throws ResultParserException {
+			final CompoundPrologTerm term, final String functor, final int arity) {
 		checkArity(term, arity);
 		checkFunctor(term, functor);
 		return term;
 	}
 
 	private static CompoundPrologTerm checkFunctor(
-			final CompoundPrologTerm term, final String functor)
-			throws ResultParserException {
+			final CompoundPrologTerm term, final String functor) {
 		if (!term.getFunctor().equals(functor)) {
 			final String message = "Expected " + term + " to have functor "
 					+ functor + ", but got " + term.getFunctor();
@@ -143,7 +139,7 @@ public class BindingGenerator {
 	}
 
 	private static CompoundPrologTerm checkArity(final CompoundPrologTerm term,
-			final int arity) throws ResultParserException {
+			final int arity) {
 		if (term.getArity() != arity) {
 			final String message = "Expected " + term + " to have an arity "
 					+ arity + ", but got " + term.getArity();
@@ -152,8 +148,7 @@ public class BindingGenerator {
 		return term;
 	}
 
-	public static ListPrologTerm getList(final PrologTerm term)
-			throws ResultParserException {
+	public static ListPrologTerm getList(final PrologTerm term) {
 		if (term instanceof ListPrologTerm)
 			return (ListPrologTerm) term;
 		final String message = "Expected ListPrologTerm, but got "
@@ -162,21 +157,19 @@ public class BindingGenerator {
 	}
 
 	public static ListPrologTerm getList(
-			final Map<String, PrologTerm> bindings, final String name)
-			throws ResultParserException {
+			final Map<String, PrologTerm> bindings, final String name) {
 		PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getList(prologTerm);
 	}
 
 	public static ListPrologTerm getList(
 			final ISimplifiedROMap<String, PrologTerm> bindings,
-			final String name) throws ResultParserException {
+			final String name) {
 		PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getList(prologTerm);
 	}
 
-	public static IntegerPrologTerm getInteger(final PrologTerm term)
-			throws ResultParserException {
+	public static IntegerPrologTerm getInteger(final PrologTerm term) {
 		if (term instanceof IntegerPrologTerm)
 			return (IntegerPrologTerm) term;
 		final String message = "Expected ListPrologTerm, but got "
@@ -185,14 +178,12 @@ public class BindingGenerator {
 	}
 
 	public static IntegerPrologTerm getInteger(
-			final Map<String, PrologTerm> bindings, final String name)
-			throws ResultParserException {
+			final Map<String, PrologTerm> bindings, final String name) {
 		PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getInteger(prologTerm);
 	}
 
-	public static VariablePrologTerm getVariable(final PrologTerm term)
-			throws ResultParserException {
+	public static VariablePrologTerm getVariable(final PrologTerm term) {
 		if (term instanceof VariablePrologTerm)
 			return (VariablePrologTerm) term;
 		final String message = "Expected ListPrologTerm, but got "
@@ -201,15 +192,13 @@ public class BindingGenerator {
 	}
 
 	public static VariablePrologTerm getVariable(
-			final Map<String, PrologTerm> bindings, final String name)
-			throws ResultParserException {
+			final Map<String, PrologTerm> bindings, final String name) {
 		PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getVariable(prologTerm);
 	}
 
 	private static PrologTerm getFromBindings(
-			final Map<String, PrologTerm> bindings, final String name)
-			throws ResultParserException {
+			final Map<String, PrologTerm> bindings, final String name) {
 		PrologTerm prologTerm = bindings.get(name);
 		if (prologTerm == null) {
 			final String message = "Cannot extract " + name
@@ -221,7 +210,7 @@ public class BindingGenerator {
 
 	private static PrologTerm getFromBindings(
 			final ISimplifiedROMap<String, PrologTerm> bindings,
-			final String name) throws ResultParserException {
+			final String name) {
 		PrologTerm prologTerm = bindings.get(name);
 		if (prologTerm == null) {
 			final String message = "Cannot extract " + name

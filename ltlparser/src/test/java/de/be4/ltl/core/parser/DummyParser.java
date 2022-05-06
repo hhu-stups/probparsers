@@ -15,14 +15,14 @@ class DummyParser implements ProBParserBase {
 	@Override
 	public void parseExpression(final IPrologTermOutput pto,
 			final String expression, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		throw new UnsupportedOperationException("no dummy expressions");
 	}
 
 	@Override
 	public void parsePredicate(final IPrologTermOutput pto,
 			final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		if (suppPred) {
 			parse(pto, predicate, wrap, "dpred");
 		} else
@@ -32,7 +32,7 @@ class DummyParser implements ProBParserBase {
 	@Override
 	public void parseTransitionPredicate(final IPrologTermOutput pto,
 			final String transPredicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		if (suppTransPred) {
 			parse(pto, transPredicate, wrap, "dtrans");
 		} else

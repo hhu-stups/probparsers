@@ -19,21 +19,21 @@ public class UnparsedParserBase implements ProBParserBase {
 	@Override
 	public void parseExpression(final IPrologTermOutput pto,
 			final String expression, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		parse(pto, expression, wrap, expr, "expression");
 	}
 
 	@Override
 	public void parsePredicate(final IPrologTermOutput pto,
 			final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		parse(pto, predicate, wrap, pred, "predicate");
 	}
 
 	@Override
 	public void parseTransitionPredicate(final IPrologTermOutput pto,
 			final String transPredicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		parse(pto, transPredicate, wrap, trans, "transition predicate");
 	}
 
