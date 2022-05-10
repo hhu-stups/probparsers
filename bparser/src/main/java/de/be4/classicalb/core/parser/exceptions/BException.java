@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -102,6 +103,11 @@ public class BException extends Exception {
 		return filename;
 	}
 
+	/**
+	 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
+	 *
+	 * @return a copy of this exception with all line numbers decremented by one
+	 */
 	public BException withLinesOneOff() {
 		if (this.getLocations().isEmpty()) {
 			return this;
@@ -210,6 +216,11 @@ public class BException extends Exception {
 			return sb.toString();
 		}
 
+		/**
+		 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
+		 * 
+		 * @return a copy of this position with all line numbers decremented by one
+		 */
 		public Location withLineOneOff() {
 			return new Location(this.getFilename(), this.getStartLine() - 1, this.getStartColumn(), this.getEndLine() - 1, this.getEndColumn());
 		}

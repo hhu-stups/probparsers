@@ -44,27 +44,11 @@ final class PrologGeneratorHelper {
 	public void defaultOut() {
 		pto.closeTerm();
 	}
-	
-	private void parsePredicateToken(final UniversalToken token) throws ProBParseException {
-		//System.out.println("Parsing LTL Unparsed (Atomic Proposition) Token with specParser: " + token.getText() + " at " + token.getLine() + ":" + token.getColumn());
-		// TODO: pass column and line offset to specParser more explicitly rather than using this hack
-		// the hack relies on the fact that whitespaces and newlines are whitespace in the specParser's language
-		StringBuilder code = new StringBuilder();
-		for (int i = 1; i < token.getLine(); i++) {
-			code.append('\n'); // TODO: check \n also works on Windows
-		}
-		// note: the UniversalToken starts with the curly brace before the actual text, so we do not subtract 1
-		for (int i = 0; i < token.getColumn(); i++) {
-			code.append(' ');
-		}
-		code.append(token.getText());
-		specParser.parsePredicate(pto, code.toString(), true);
-	}
 
 	public void caseUnparsed(final UniversalToken token) {
 		pto.openTerm("ap");
 		try {
-			parsePredicateToken(token);
+			specParser.parsePredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
@@ -77,7 +61,7 @@ final class PrologGeneratorHelper {
 	public void caseUnparsedPredicate(final UniversalToken token) {
 		// pto.openTerm("ap");
 		try {
-			parsePredicateToken(token);
+			specParser.parsePredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
@@ -90,7 +74,7 @@ final class PrologGeneratorHelper {
 	public void caseUnparsedExpression(final UniversalToken token) {
 		//pto.openTerm("ae"); // from the context it is clear in the AST that we expect an expression
 		try {
-			specParser.parseExpression(pto, token.getText(), true);
+			specParser.parseExpression(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
@@ -134,7 +118,7 @@ final class PrologGeneratorHelper {
 
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
-			specParser.parseTransitionPredicate(pto, token.getText(), true);
+			specParser.parseTransitionPredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {

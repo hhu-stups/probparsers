@@ -60,7 +60,7 @@ public final class PrologExceptionPrinter {
 	 *     (use {@link PrologTermOutput} if you really need indentation).
 	 *     The {@code lineOneOff} parameter should no longer be needed in most cases
 	 *     ({@link BParser} methods that internally add a kind prefix now return correct error locations)
-	 *     and if necessary can be replaced with {@link BCompoundException#withLinesOneOff()}.
+	 *     and if necessary can be replaced with {@link BParser#setStartPosition(int, int)} or {@link BCompoundException#withLinesOneOff()}.
 	 */
 	@Deprecated
 	public static void printException(final OutputStream out, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {
@@ -91,7 +91,7 @@ public final class PrologExceptionPrinter {
 	 * @deprecated The {@code useIndentation} parameter has no effect anymore.
 	 *     The {@code lineOneOff} parameter should no longer be needed in most cases
 	 *     ({@link BParser} methods that internally add a kind prefix now return correct error locations)
-	 *     and if necessary can be replaced with {@link BCompoundException#withLinesOneOff()}.
+	 *     and if necessary can be replaced with {@link BParser#setStartPosition(int, int)} or {@link BCompoundException#withLinesOneOff()}.
 	 */
 	@Deprecated
 	public static void printException(final IPrologTermOutput pto, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {

@@ -74,6 +74,9 @@ public class BParser {
 	private final String fileName;
 	private File directory;
 
+	private int startLine;
+	private int startColumn;
+
 	private IDefinitionFileProvider contentProvider;
 
 	public static String getVersion() {
@@ -89,13 +92,31 @@ public class BParser {
 	}
 
 	public BParser(final String fileName) {
-		this.fileName = fileName;
-		this.parseOptions = new ParseOptions();
+		this(fileName, new ParseOptions());
 	}
 
 	public BParser(final String fileName, ParseOptions parseOptions) {
 		this.fileName = fileName;
 		this.parseOptions = parseOptions;
+
+		this.startLine = 1;
+		this.startColumn = 1;
+	}
+
+	/**
+	 * Pretend that the code being parsed starts at a different position than the start of the file (line 1, column 1).
+	 * This is useful when the code being parsed is actually part of a larger input,
+	 * for example embedded B predicates inside an LTL formula.
+	 * The line and column numbers may also be less than 1,
+	 * which is useful when the code has an artificial prefix
+	 * that shouldn't be counted as part of the actual input.
+	 * 
+	 * @param line the new starting line number (1-based)
+	 * @param column the new starting column number (1-based)
+	 */
+	public void setStartPosition(final int line, final int column) {
+		this.startLine = line;
+		this.startColumn = column;
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -166,11 +187,15 @@ public class BParser {
 	}
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
-		final String theFormula = prefix + "\n" + input;
+		final String theFormula = prefix + " " + input;
+		final int oldStartColumn = this.startColumn;
 		try {
+			// Decrease the start column by the size of the implicitly added prefix
+			// so that the actual user input starts at the desired position.
+			this.startColumn -= prefix.length() + 1;
 			return this.parse(theFormula, false, new NoContentProvider());
-		} catch (BCompoundException e) {
-			throw e.withLinesOneOff();
+		} finally {
+			this.startColumn = oldStartColumn;
 		}
 	}
 
@@ -337,6 +362,7 @@ public class BParser {
 			 * Main parser
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
+			lexer.setPosition(this.startLine, this.startColumn);
 			lexer.setParseOptions(parseOptions);
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
@@ -413,6 +439,7 @@ public class BParser {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		preParser.setDebugOutput(debugOutput);
+		preParser.setStartPosition(this.startLine, this.startColumn);
 		preParser.parse();
 		reader.reset();
 		return preParser.getDefinitionTypes();

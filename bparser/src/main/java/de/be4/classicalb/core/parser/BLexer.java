@@ -357,6 +357,11 @@ public class BLexer extends Lexer {
 		this(in, null);
 	}
 
+	public void setPosition(final int line, final int column) {
+		this.line = line - 1;
+		this.pos = column - 1;
+	}
+
 	private Token lastToken;
 
 	private void findSyntaxError() throws LexerException {

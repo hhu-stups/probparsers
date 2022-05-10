@@ -58,7 +58,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * 
 	 */
 	public static void printFormula(Start start, final IPrologTermOutput pout) {
-		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers(), -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers());
+		pprinter.setPrintSourcePositions(true, false); // TODO Any reason not to enable compact positions?
 		ASTProlog printer = new ASTProlog(pout, pprinter);
 		start.apply(printer);
 	}

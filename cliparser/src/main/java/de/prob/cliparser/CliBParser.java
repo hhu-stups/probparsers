@@ -311,6 +311,10 @@ public class CliBParser {
 
 		try {
 			BParser parser = new BParser();
+			// Reduce starting line number by one
+			// so that the line with a #FORMULA, etc. prefix isn't counted
+			// and the actual formula is counted as line 1.
+			parser.setStartPosition(0, 1);
 			parser.setDefinitions(context);
 			Start start;
 			if (extended) {
@@ -330,7 +334,7 @@ public class CliBParser {
 				nodeIds = na;
 			}
 
-			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds, -1, 0);
+			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
 			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(), behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(pout, pprinter);
 
@@ -344,7 +348,7 @@ public class CliBParser {
 			// print("EXCEPTION NullPointerException" + System.lineSeparator());
 			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(pout, e.withLinesOneOff());
+			PrologExceptionPrinter.printException(pout, e);
 		} catch (LexerException e) {
 			pout.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
 		} catch (IOException e) {

@@ -53,6 +53,9 @@ public class PreParser {
 	private final String modelFileName;
 	private final File directory;
 
+	private int startLine;
+	private int startColumn;
+
 	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
 			final List<String> doneDefFiles, final String modelFileName, final File directory,
 			ParseOptions parseOptions, IDefinitions definitions) {
@@ -65,14 +68,23 @@ public class PreParser {
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
 		definitionTypes.addAll(definitions.getTypes());
+
+		this.startLine = 1;
+		this.startColumn = 1;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
 		this.debugOutput = debugOutput;
 	}
 
+	public void setStartPosition(final int line, final int column) {
+		this.startLine = line;
+		this.startColumn = column;
+	}
+
 	public void parse() throws PreParseException, IOException, BException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
+		preLexer.setPosition(this.startLine, this.startColumn);
 
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;

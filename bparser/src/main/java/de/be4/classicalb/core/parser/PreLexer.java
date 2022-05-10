@@ -35,6 +35,11 @@ public class PreLexer extends Lexer {
 	public PreLexer(final PushbackReader in) {
 		super(in);
 	}
+
+	public void setPosition(final int line, final int column) {
+		this.line = line - 1;
+		this.pos = column - 1;
+	}
 	
 	@Override
 	protected Token getToken() throws IOException, LexerException {
