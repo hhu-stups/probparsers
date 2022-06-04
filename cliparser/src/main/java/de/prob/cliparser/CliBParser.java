@@ -90,6 +90,8 @@ public class CliBParser {
 
 		final String[] arguments = options.getRemainingOptions();
 		if (!options.isOptionSet(CLI_SWITCH_PREPL) && arguments.length != 1) {
+			System.err.println("\nYou have not provided a file to parse (nor specified the -prepl option).\n");
+			System.err.println("Here is how to use the parser:");
 			options.printUsage(System.err);
 			System.exit(-1);
 		}
