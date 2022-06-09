@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.transforming.DescriptionCleaningTranslator;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -36,7 +35,6 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TPragmaFile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -450,7 +448,6 @@ public class BParser {
 		OpSubstitutions.transform(rootNode, getDefinitions());
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
-			rootNode.apply(new DescriptionCleaningTranslator());
 		} catch (VisitorException e) {
 			throw e.getException();
 		}

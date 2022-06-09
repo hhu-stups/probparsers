@@ -1,9 +1,16 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.ADescriptionExpression;
+import de.be4.classicalb.core.parser.node.ADescriptionPredicate;
+import de.be4.classicalb.core.parser.node.ADescriptionSet;
 import de.be4.classicalb.core.parser.node.AHexIntegerExpression;
 import de.be4.classicalb.core.parser.node.AIfPredicatePredicate;
 import de.be4.classicalb.core.parser.node.AImplicationPredicate;
@@ -15,11 +22,9 @@ import de.be4.classicalb.core.parser.node.THexLiteral;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	@Override
@@ -88,5 +93,37 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		intNode.setStartPos(node.getStartPos());
 		intNode.setEndPos(node.getEndPos());
 		node.replaceBy(intNode);
+	}
+	
+	private static String cleanDescriptionText(final String descriptionText) {
+		String formatted = descriptionText;
+		if (descriptionText.endsWith("*/")) {
+			formatted = formatted.substring(0, formatted.length() - 2);
+		}
+		return formatted.trim();
+	}
+	
+	/**
+	 * Cleans up the text contents of description pragma nodes by removing the end of comment symbols and any whitespace surrounding the description.
+	 * 
+	 * @param node the description pragma node to clean
+	 */
+	private static void cleanDescriptionNode(final TPragmaFreeText node) {
+		node.setText(cleanDescriptionText(node.getText()));
+	}
+	
+	@Override
+	public void inADescriptionSet(final ADescriptionSet node) {
+		cleanDescriptionNode(node.getPragmaFreeText());
+	}
+	
+	@Override
+	public void inADescriptionPredicate(final ADescriptionPredicate node) {
+		cleanDescriptionNode(node.getContent());
+	}
+	
+	@Override
+	public void inADescriptionExpression(final ADescriptionExpression node) {
+		cleanDescriptionNode(node.getContent());
 	}
 }
