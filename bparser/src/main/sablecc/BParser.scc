@@ -338,10 +338,7 @@ Tokens
   {normal} union = '\/' | 0x222a;
   {normal} restrict_tail_sequence = '\|/' | 0x2193;
   {normal} concat_sequence = '^' | 0x2312;
-  {normal} arity = 'arity';
-  {normal} bin = 'bin';
   {normal} bool_cast = 'bool';
-  {normal} btree = 'btree';
   {normal} card = 'card';
   {normal} convert_int_floor = 'floor';
   {normal} convert_int_ceiling = 'ceiling';
@@ -349,51 +346,36 @@ Tokens
   {normal} closure = 'closure';
   {normal} closure1 = 'closure1'; // add 'closure' 0x8321 ?
   {normal} conc = 'conc';
-  {normal} const = 'const';
   {normal} dom = 'dom';
-  {normal} father = 'father';
   {normal} first = 'first';
   {normal} fnc = 'fnc';
   {normal} front = 'front';
   {normal} id = 'id';
-  {normal} infix = 'infix';
   {normal} generalized_inter = 'inter';
   {normal} iseq = 'iseq';
   {normal} iseq1 = 'iseq1'; // add 'iseq'0x8321 ?
   {normal} iterate = 'iterate';
   {normal} last = 'last';
-  {normal} left = 'left';
   {normal} max = 'max';
   {normal} min = 'min';
-  {normal} mirror = 'mirror';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
   {normal} logical_or = 'or' | 0x2228;
   {normal} perm = 'perm';
-  {normal} postfix = 'postfix';
   {normal} pred = 'pred';
-  {normal} prefix = 'prefix';
   {normal} prj1 = 'prj1';
   {normal} prj2 = 'prj2';
-  {normal} rank = 'rank';
   {normal} ran = 'ran';
   {normal} rec = 'rec';
   {normal} rel = 'rel';
   {normal} rev = 'rev';
-  {normal} right = 'right';
   {normal} seq = 'seq';
   {normal} seq1 = 'seq1'; // add | 'seq'0x8321 ?
-  {normal} sizet = 'sizet';
   {normal} size = 'size';
   {normal} skip = 'skip';
-  {normal} sons = 'sons';
-  {normal} son = 'son';
   {normal} struct = 'struct';
-  {normal} subtree = 'subtree';
   {normal} succ = 'succ';
   {normal} tail = 'tail';
-  {normal} top = 'top';
-  {normal} tree = 'tree';
   {normal} generalized_union = 'union';
   {normal} empty_set = 0x2205;
   {normal} left_brace = '{';
@@ -971,25 +953,6 @@ expression_keyword {-> expression} =
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
-  {tree} tree left_par [expression]:expression_in_par right_par {-> New expression.tree(expression.expression)} |
-  {btree} btree left_par [expression]:expression_in_par right_par {-> New expression.btree(expression.expression)} |
-  {const} const left_par [expr1]:expression_in_par comma [expr2]:expression_in_par right_par {-> New expression.const(expr1.expression, expr2.expression)} |
-  {top} top left_par [expression]:expression_in_par right_par {-> New expression.top(expression.expression)} |
-  {sons} sons left_par [expression]:expression_in_par right_par {-> New expression.sons(expression.expression)} |
-  {prefix} prefix left_par [expression]:expression_in_par right_par {-> New expression.prefix(expression.expression)} |
-  {postfix} postfix left_par [expression]:expression_in_par right_par {-> New expression.postfix(expression.expression)} |
-  {sizet} sizet left_par [expression]:expression_in_par right_par {-> New expression.sizet(expression.expression)} |
-  {mirror} mirror left_par [expression]:expression_in_par right_par {-> New expression.mirror(expression.expression)} |
-  {rank} rank left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.rank(expression1.expression, expression2.expression)} |
-  {father} father left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.father(expression1.expression, expression2.expression)} |
-  {son} son left_par [expression1]:expression_in_par [comma1]:comma [expression2]:expression_in_par [comma2]:comma [expression3]:expression_in_par right_par {-> New expression.son(expression1.expression, expression2.expression, expression3.expression)} |
-  {subtree} subtree left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.subtree(expression1.expression, expression2.expression)} |
-  {arity} arity left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.arity(expression1.expression, expression2.expression)} |
-  {bin1} bin left_par [expression]:expression_in_par right_par {-> New expression.bin(expression.expression, Null, Null)} |
-  {bin2} bin left_par [expression1]:expression_in_par [comma1]:comma [expression2]:expression_in_par [comma2]:comma [expression3]:expression_in_par right_par {-> New expression.bin(expression1.expression, expression2.expression, expression3.expression)} |
-  {left} left left_par [expression]:expression_in_par right_par {-> New expression.left(expression.expression)} |
-  {right} right left_par [expression]:expression_in_par right_par {-> New expression.right(expression.expression)} |
-  {infix} infix left_par [expression]:expression_in_par right_par {-> New expression.infix(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
   {record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |

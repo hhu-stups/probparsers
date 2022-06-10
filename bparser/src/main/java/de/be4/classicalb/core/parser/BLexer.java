@@ -190,27 +190,6 @@ public class BLexer extends Lexer {
 		funOpKeywordTokenClasses.add(TLast.class);
 		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
 		funOpKeywordTokenClasses.add(TConc.class);
-		// tree operators:
-		funOpKeywordTokenClasses.add(TTree.class);
-		funOpKeywordTokenClasses.add(TConst.class);
-		funOpKeywordTokenClasses.add(TTop.class);
-		funOpKeywordTokenClasses.add(TSons.class);
-		funOpKeywordTokenClasses.add(TPrefix.class);
-		funOpKeywordTokenClasses.add(TPostfix.class);
-		funOpKeywordTokenClasses.add(TSizet.class);
-		funOpKeywordTokenClasses.add(TMirror.class);
-		// tree node operators:
-		funOpKeywordTokenClasses.add(TRank.class);
-		funOpKeywordTokenClasses.add(TFather.class);
-		funOpKeywordTokenClasses.add(TSon.class);
-		funOpKeywordTokenClasses.add(TSubtree.class);
-		funOpKeywordTokenClasses.add(TArity.class);
-		// binary tree operators:
-		funOpKeywordTokenClasses.add(TBtree.class);
-		funOpKeywordTokenClasses.add(TBin.class);
-		funOpKeywordTokenClasses.add(TLeft.class);
-		funOpKeywordTokenClasses.add(TRight.class);
-		funOpKeywordTokenClasses.add(TInfix.class);
 		
 		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
