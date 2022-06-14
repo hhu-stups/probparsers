@@ -288,6 +288,16 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
+	public IPrologTermOutput printNumber(final double number) {
+		synchronized (out) {
+			printCommaIfNeeded();
+			out.print(number);
+			comma_needed = true;
+		}
+		return this;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

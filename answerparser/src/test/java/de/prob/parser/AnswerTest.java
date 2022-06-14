@@ -119,4 +119,9 @@ public class AnswerTest {
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
+	@Test
+	public void testFloats() {
+		final Start rootNode = ProBResultParser.parse("yes(x(1,2.0,3e4,5.6e7,8e+9,-1,-2.0,-3e4,-5.6e7,-8e-9))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
 }

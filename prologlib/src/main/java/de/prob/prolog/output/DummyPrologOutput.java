@@ -74,6 +74,11 @@ public class DummyPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
+	public IPrologTermOutput printNumber(final double number) {
+		return this;
+	}
+
+	@Override
 	public IPrologTermOutput printString(final String content) {
 		return this;
 	}

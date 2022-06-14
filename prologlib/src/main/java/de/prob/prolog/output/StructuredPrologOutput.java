@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Stack;
 
 import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.FloatPrologTerm;
 import de.prob.prolog.term.IntegerPrologTerm;
 import de.prob.prolog.term.IntegerLongPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
@@ -110,6 +111,12 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
 		addArgument(new IntegerPrologTerm(number));
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput printNumber(final double number) {
+		addArgument(new FloatPrologTerm(number));
 		return this;
 	}
 

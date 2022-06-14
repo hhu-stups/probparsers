@@ -85,6 +85,12 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	}
 
 	@Override
+	public IPrologTermOutput printNumber(final double number) {
+		pto.printNumber(number);
+		return this;
+	}
+
+	@Override
 	public IPrologTermOutput printString(final String content) {
 		pto.printString(content);
 		return this;

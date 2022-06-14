@@ -114,7 +114,7 @@ Tokens
   {normal} l_sq = l_sq;
   {normal} r_sq = r_sq;
 
-  {normal} number = digit* | '-' digit+;
+  {normal} number = '-'? digit+ ('.' digit+)? (['E' + 'e'] ['+' + '-']? digit+)?;
   {normal} name = word | '{' '}' | solo_char | l_sq r_sq | quoted_name | symbol;
   {normal} variable = underline alpha* | capital_letter alpha*;
 
