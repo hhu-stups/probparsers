@@ -85,8 +85,17 @@ public abstract class PrologTerm {
 		//	return arguments[index - 1];
 	}
 
+    // this should actually have been called atomString; we should rename this to atomGetString
 	public static String atomicString(final PrologTerm term) {
 		if (term.isAtom())
+			return term.getFunctor();
+		else
+			throw new IllegalArgumentException("Expected a Prolog atom, but was " + term.toString());
+	}
+	
+	// a variation of the above which also accepts numbers
+	public static String atomicGetString(final PrologTerm term) {
+		if (term.isAtom() || term.isNumber())
 			return term.getFunctor();
 		else
 			throw new IllegalArgumentException("Expected an atomic Prolog term, but was " + term.toString());
