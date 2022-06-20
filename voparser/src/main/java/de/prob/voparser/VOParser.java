@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class VOParser {
 
-	private final Map<String, VOType> tasks;
+	private final Map<String, VTType> tasks;
 
 	private final VOScopeChecker scopeChecker;
 
@@ -48,7 +48,7 @@ public class VOParser {
 		return ast;
 	}
 
-	public void registerTask(String id, VOType type) {
+	public void registerTask(String id, VTType type) {
 		tasks.put(id, type);
 	}
 
@@ -71,7 +71,7 @@ public class VOParser {
 		typeChecker.typeCheck(start);
 	}
 
-	public Map<String, VOType> getTasks() {
+	public Map<String, VTType> getTasks() {
 		return tasks;
 	}
 }
