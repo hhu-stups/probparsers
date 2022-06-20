@@ -1,4 +1,4 @@
-Package de.be4.vo.expression.parser;
+Package de.prob.voparser;
 
 /*******************************************************************
  * Helpers                                                         *
