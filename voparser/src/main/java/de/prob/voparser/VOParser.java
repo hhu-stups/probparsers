@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class VOParser {
 
-	private final Map<String, String> tasks;
+	private final Map<String, VOType> tasks;
 
 	private final VOScopeChecker scopeChecker;
 
@@ -48,15 +48,13 @@ public class VOParser {
 		return ast;
 	}
 
-	public void registerTask(String id, String type) {
+	public void registerTask(String id, VOType type) {
 		tasks.put(id, type);
 	}
 
 	public void deregisterTask(String id) {
 		tasks.remove(id);
 	}
-
-	// TODO: Implement semantic checks
 
 	public void semanticCheck(String formula) throws VOParseException {
 		scopeCheck(formula);
@@ -73,7 +71,7 @@ public class VOParser {
 		typeChecker.typeCheck(start);
 	}
 
-	public Map<String, String> getTasks() {
+	public Map<String, VOType> getTasks() {
 		return tasks;
 	}
 }
