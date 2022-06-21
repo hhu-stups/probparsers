@@ -76,9 +76,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitAndExpression(AAndVo node, PersistentHashSet animatorState) {
-		PersistentHashSet startAnimatorState = modifiedAnimatorState;
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), startAnimatorState);
-		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), startAnimatorState);
+		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
+		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
 		PersistentHashSet resultAnimatorState = (PersistentHashSet) INTERSECTION.invoke(leftAnimatorState, rightAnimatorState);
 		resultAnimatorState = (PersistentHashSet) resultAnimatorState.disjoin(AnimatorState.TRACE);
 		return resultAnimatorState;
@@ -90,9 +89,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitOrExpression(AOrVo node, PersistentHashSet animatorState) {
-		PersistentHashSet startAnimatorState = modifiedAnimatorState;
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), startAnimatorState);
-		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), startAnimatorState);
+		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
+		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
 		PersistentHashSet resultAnimatorState = (PersistentHashSet) INTERSECTION.invoke(leftAnimatorState, rightAnimatorState);
 		resultAnimatorState = (PersistentHashSet) resultAnimatorState.disjoin(AnimatorState.STATE_SPACE);
 		return resultAnimatorState;
@@ -131,8 +129,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitSequentialExpression(ASequentialVo node, PersistentHashSet animatorState) {
-		PersistentHashSet startAnimatorState = modifiedAnimatorState;
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), startAnimatorState);
+		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
 		return visitVOExpression(node.getRight(), leftAnimatorState);
 	}
 
