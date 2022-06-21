@@ -39,11 +39,11 @@ public class VOParser {
 		try {
 			ast = p.parse();
 		} catch (ParserException e) {
-			throw new VOParseException("Parsing VO formula failed", VOParseException.ErrorType.PARSING);
+			throw new VOParseException("Parsing VO formula failed: " + e.getRealMsg(), VOParseException.ErrorType.PARSING);
 		} catch (IOException e) {
 			throw new VOParseException("Parsing VO formula failed", VOParseException.ErrorType.PARSING);
 		} catch (LexerException e) {
-			throw new VOParseException("Parsing VO formula failed", VOParseException.ErrorType.PARSING);
+			throw new VOParseException("Parsing VO formula failed: " + e.getMessage(), VOParseException.ErrorType.PARSING);
 		}
 		return ast;
 	}

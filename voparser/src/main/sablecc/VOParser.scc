@@ -80,7 +80,8 @@ Productions
     vo_formula4 {-> vo_formula4.vo};
 
   vo_formula4 {-> vo} =
-    {not} not vo_formula5 {-> New vo.not(vo_formula5.vo) };
+    {not} not vo_formula5 {-> New vo.not(vo_formula5.vo) } |
+    vo_formula5 {-> vo_formula5.vo};
 
   vo_formula5 {-> vo} =
     {identifier} identifier_literal {-> New vo.identifier(identifier_literal)} |
