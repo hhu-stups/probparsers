@@ -66,8 +66,9 @@ public class VOTypeChecker extends DepthFirstAdapter {
 			return visitImpliesExpression((AImpliesVo) node, animatorState);
 		} else if(node instanceof ASequentialVo) {
 			return visitSequentialExpression((ASequentialVo) node, animatorState);
+		} else {
+			throw new RuntimeException("Node type unknown: " + node.getClass());
 		}
-		return animatorState;
 	}
 
 	@Override
