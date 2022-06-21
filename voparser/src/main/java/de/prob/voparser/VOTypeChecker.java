@@ -52,7 +52,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitVOExpression(Node node, PersistentHashSet animatorState) {
-		if (node instanceof TIdentifierLiteral) {
+		if (node instanceof AIdentifierVo) {
 			return visitIdentifierNode((AIdentifierVo) node, animatorState);
 		} else if (node instanceof AAndVo) {
 			return visitAndExpression((AAndVo) node, animatorState);
