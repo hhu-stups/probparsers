@@ -1,10 +1,7 @@
 package de.prob.voparser;
 
 
-import clojure.java.api.Clojure;
-import clojure.lang.IFn;
-import clojure.lang.PersistentHashSet;
-import clojure.lang.RT;
+import com.github.krukow.clj_lang.PersistentHashSet;
 import de.prob.voparser.analysis.DepthFirstAdapter;
 import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AEquivalentVo;
@@ -18,29 +15,16 @@ import de.prob.voparser.node.Start;
 
 public class VOTypeChecker extends DepthFirstAdapter {
 
-	private static final IFn INTERSECTION;
-
-	private static final IFn UNION;
-
-	private static final IFn DIFFERENCE;
-
-	static {
-		RT.var("clojure.core", "require").invoke(Clojure.read("clojure.set"));
-		INTERSECTION = RT.var("clojure.set", "intersection");
-		UNION = RT.var("clojure.set", "union");
-		DIFFERENCE = RT.var("clojure.set", "difference");
-	}
-
 	private final VOParser voParser;
 
 	private boolean error;
 
-	private PersistentHashSet modifiedAnimatorState;
+	private PersistentHashSet<AnimatorState> modifiedAnimatorState;
 
 	public VOTypeChecker(VOParser voParser) {
 		this.voParser = voParser;
 		this.error = false;
-		this.modifiedAnimatorState = (PersistentHashSet) ((PersistentHashSet) PersistentHashSet.EMPTY.cons(AnimatorState.TRACE)).cons(AnimatorState.STATE_SPACE);
+		this.modifiedAnimatorState = PersistentHashSet.create(AnimatorState.STATE_SPACE, AnimatorState.TRACE);
 	}
 
 	public void typeCheck(Start start) throws VOParseException {
@@ -50,7 +34,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private PersistentHashSet visitVOExpression(Node node, PersistentHashSet animatorState) {
+	private PersistentHashSet<AnimatorState> visitVOExpression(Node node, PersistentHashSet<AnimatorState> animatorState) {
 		if (node instanceof AIdentifierVo) {
 			return visitIdentifierNode((AIdentifierVo) node, animatorState);
 		} else if (node instanceof AAndVo) {
@@ -75,11 +59,16 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitAndExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitAndExpression(AAndVo node, PersistentHashSet animatorState) {
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
-		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
-		PersistentHashSet resultAnimatorState = (PersistentHashSet) INTERSECTION.invoke(leftAnimatorState, rightAnimatorState);
-		resultAnimatorState = (PersistentHashSet) resultAnimatorState.disjoin(AnimatorState.TRACE);
+	private PersistentHashSet<AnimatorState> visitAndExpression(AAndVo node, PersistentHashSet<AnimatorState> animatorState) {
+		PersistentHashSet<AnimatorState> leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
+		PersistentHashSet<AnimatorState> rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
+		PersistentHashSet<AnimatorState> resultAnimatorState = leftAnimatorState;
+		for(AnimatorState state : leftAnimatorState) {
+			if(!rightAnimatorState.contains(state)) {
+				resultAnimatorState.remove(state);
+			}
+		}
+		resultAnimatorState = resultAnimatorState.disjoin(AnimatorState.TRACE);
 		return resultAnimatorState;
 	}
 
@@ -88,11 +77,16 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitOrExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitOrExpression(AOrVo node, PersistentHashSet animatorState) {
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
-		PersistentHashSet rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
-		PersistentHashSet resultAnimatorState = (PersistentHashSet) INTERSECTION.invoke(leftAnimatorState, rightAnimatorState);
-		resultAnimatorState = (PersistentHashSet) resultAnimatorState.disjoin(AnimatorState.STATE_SPACE);
+	private PersistentHashSet<AnimatorState> visitOrExpression(AOrVo node, PersistentHashSet<AnimatorState> animatorState) {
+		PersistentHashSet<AnimatorState> leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
+		PersistentHashSet<AnimatorState> rightAnimatorState = visitVOExpression(node.getRight(), animatorState);
+		PersistentHashSet<AnimatorState> resultAnimatorState = leftAnimatorState;
+		for(AnimatorState state : leftAnimatorState) {
+			if(!rightAnimatorState.contains(state)) {
+				resultAnimatorState.remove(state);
+			}
+		}
+		resultAnimatorState = resultAnimatorState.disjoin(AnimatorState.STATE_SPACE);
 		return resultAnimatorState;
 	}
 
@@ -101,7 +95,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitNotExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitNotExpression(ANotVo node, PersistentHashSet animatorState) {
+	private PersistentHashSet<AnimatorState> visitNotExpression(ANotVo node, PersistentHashSet<AnimatorState> animatorState) {
 		return visitVOExpression(node.getVo(), animatorState);
 	}
 
@@ -110,7 +104,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitImpliesExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitImpliesExpression(AImpliesVo node, PersistentHashSet animatorState) {
+	private PersistentHashSet<AnimatorState> visitImpliesExpression(AImpliesVo node, PersistentHashSet<AnimatorState> animatorState) {
 		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
 		return visitVOExpression(new AOrVo(new ANotVo(node.getLeft().clone()), node.getRight().clone()), animatorState);
 	}
@@ -120,7 +114,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitEquivalentExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitEquivalentExpression(AEquivalentVo node, PersistentHashSet animatorState) {
+	private PersistentHashSet<AnimatorState> visitEquivalentExpression(AEquivalentVo node, PersistentHashSet<AnimatorState> animatorState) {
 		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
 		return visitVOExpression(new AAndVo(new AImpliesVo(node.getLeft().clone(), node.getRight().clone()), new AImpliesVo(node.getRight().clone(), node.getLeft().clone())), animatorState);
 	}
@@ -130,8 +124,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		modifiedAnimatorState = visitSequentialExpression(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitSequentialExpression(ASequentialVo node, PersistentHashSet animatorState) {
-		PersistentHashSet leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
+	private PersistentHashSet<AnimatorState> visitSequentialExpression(ASequentialVo node, PersistentHashSet<AnimatorState> animatorState) {
+		PersistentHashSet<AnimatorState> leftAnimatorState = visitVOExpression(node.getLeft(), animatorState);
 		return visitVOExpression(node.getRight(), leftAnimatorState);
 	}
 
@@ -141,17 +135,17 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 
-	private PersistentHashSet visitIdentifierNode(AIdentifierVo node, PersistentHashSet animatorState) {
+	private PersistentHashSet<AnimatorState> visitIdentifierNode(AIdentifierVo node, PersistentHashSet<AnimatorState> animatorState) {
 		VTType type = voParser.getTasks().get(node.getIdentifierLiteral().getText());
-		PersistentHashSet newAnimatorState = animatorState;
+		PersistentHashSet<AnimatorState> newAnimatorState = animatorState;
 		boolean valid = true;
 		switch (type) {
 			case RELOAD:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.TRACE);
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.STATE_SPACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.STATE_SPACE);
 				break;
 			case RESET:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.TRACE);
+				newAnimatorState =   newAnimatorState.cons(AnimatorState.TRACE);
 				break;
 			case TRACE_REPLAY:
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
@@ -169,24 +163,24 @@ public class VOTypeChecker extends DepthFirstAdapter {
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
 				break;
 			case MODEL_CHECKING_GOAL:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
 				break;
 			case MODEL_CHECKING_INV:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.disjoin(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.disjoin(AnimatorState.TRACE);
 				break;
 			case MODEL_CHECKING_INV_COMPLETE:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.disjoin(AnimatorState.TRACE);
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.STATE_SPACE);
+				newAnimatorState = newAnimatorState.disjoin(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.STATE_SPACE);
 				break;
 			case LTL_MODEL_CHECKING:
-				newAnimatorState = (PersistentHashSet) newAnimatorState.disjoin(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.disjoin(AnimatorState.TRACE);
 				break;
 			case LTL_CURRENT:
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
 				break;
 			case LTL_CURRENT_GOAL:
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
-				newAnimatorState = (PersistentHashSet) newAnimatorState.cons(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
 				break;
 		}
 		if(!valid) {
