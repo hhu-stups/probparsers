@@ -15,7 +15,6 @@ import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.ASequentialVo;
 import de.prob.voparser.node.Node;
 import de.prob.voparser.node.Start;
-import de.prob.voparser.node.TIdentifierLiteral;
 
 public class VOTypeChecker extends DepthFirstAdapter {
 
