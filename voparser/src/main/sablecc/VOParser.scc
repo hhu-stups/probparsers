@@ -97,4 +97,5 @@ Abstract Syntax Tree
    {and} [left]:vo [right]:vo |
    {or} [left]:vo [right]:vo |
    {not} vo |
-   {sequential} [left]:vo [right]:vo;
+   {sequential} [left]:vo [right]:vo |
+   {identifier} identifier;
