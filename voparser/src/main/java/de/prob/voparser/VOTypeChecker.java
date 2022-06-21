@@ -8,6 +8,7 @@ import clojure.lang.RT;
 import de.prob.voparser.analysis.DepthFirstAdapter;
 import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AEquivalentVo;
+import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.AImpliesVo;
 import de.prob.voparser.node.ANotVo;
 import de.prob.voparser.node.AOrVo;
@@ -52,7 +53,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 
 	private PersistentHashSet visitVOExpression(Node node, PersistentHashSet animatorState) {
 		if (node instanceof TIdentifierLiteral) {
-			return visitIdentifierNode((TIdentifierLiteral) node, animatorState);
+			return visitIdentifierNode((AIdentifierVo) node, animatorState);
 		} else if (node instanceof AAndVo) {
 			return visitAndExpression((AAndVo) node, animatorState);
 		} else if(node instanceof AOrVo) {
@@ -136,12 +137,13 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseTIdentifierLiteral(TIdentifierLiteral node) {
+	public void caseAIdentifierVo(AIdentifierVo node) {
 		modifiedAnimatorState = visitIdentifierNode(node, modifiedAnimatorState);
 	}
 
-	private PersistentHashSet visitIdentifierNode(TIdentifierLiteral node, PersistentHashSet animatorState) {
-		VTType type = voParser.getTasks().get(node.getText());
+
+	private PersistentHashSet visitIdentifierNode(AIdentifierVo node, PersistentHashSet animatorState) {
+		VTType type = voParser.getTasks().get(node.getIdentifierLiteral().getText());
 		PersistentHashSet newAnimatorState = animatorState;
 		boolean valid = true;
 		switch (type) {

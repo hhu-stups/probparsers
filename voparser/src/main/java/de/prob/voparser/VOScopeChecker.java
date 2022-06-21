@@ -1,6 +1,7 @@
 package de.prob.voparser;
 
 import de.prob.voparser.analysis.DepthFirstAdapter;
+import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.Start;
 import de.prob.voparser.node.TIdentifierLiteral;
 
@@ -24,9 +25,10 @@ public class VOScopeChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseTIdentifierLiteral(TIdentifierLiteral node) {
-		if (!voParser.getTasks().containsKey(node.getText())) {
+	public void caseAIdentifierVo(AIdentifierVo node) {
+		if (!voParser.getTasks().containsKey(node.getIdentifierLiteral().getText())) {
 			error = true;
 		}
 	}
+
 }
