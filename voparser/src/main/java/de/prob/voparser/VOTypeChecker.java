@@ -145,7 +145,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 				newAnimatorState = newAnimatorState.cons(AnimatorState.STATE_SPACE);
 				break;
 			case RESET:
-				newAnimatorState =   newAnimatorState.cons(AnimatorState.TRACE);
+				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
 				break;
 			case TRACE_REPLAY:
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
