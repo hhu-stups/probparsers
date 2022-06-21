@@ -83,6 +83,7 @@ Productions
     {not} not vo_formula5 {-> New vo.not(vo_formula5.vo) };
 
   vo_formula5 {-> vo} =
+    {identifier} identifier_literal {-> New vo.identifier(identifier_literal)} |
     {par} l_par vo_formula r_par {-> vo_formula.vo};
 
 /*******************************************************************
