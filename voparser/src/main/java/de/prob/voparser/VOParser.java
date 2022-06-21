@@ -61,12 +61,12 @@ public class VOParser {
 		typeCheck(formula);
 	}
 
-	private void scopeCheck(String formula) throws VOParseException {
+	public void scopeCheck(String formula) throws VOParseException {
 		Start start = parseFormula(formula);
 		scopeChecker.scopeCheck(start);
 	}
 
-	private void typeCheck(String formula) throws VOParseException {
+	public void typeCheck(String formula) throws VOParseException {
 		Start start = parseFormula(formula);
 		typeChecker.typeCheck(start);
 	}
