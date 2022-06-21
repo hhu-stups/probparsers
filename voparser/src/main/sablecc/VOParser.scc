@@ -98,4 +98,4 @@ Abstract Syntax Tree
    {or} [left]:vo [right]:vo |
    {not} vo |
    {sequential} [left]:vo [right]:vo |
-   {identifier} identifier;
+   {identifier} identifier_literal;
