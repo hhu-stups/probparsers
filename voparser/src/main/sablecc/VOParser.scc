@@ -63,7 +63,7 @@ Ignored Tokens
 Productions
 
   vo_formula {-> vo} =
-    {equivalent} [left]:vo_formula1 equivalent [right]:vo_formula1 {-> New vo.equivalent(left.vo, right.vo)} |
+    {equivalent} [left]:vo_formula equivalent [right]:vo_formula1 {-> New vo.equivalent(left.vo, right.vo)} |
     vo_formula1 {-> vo_formula1.vo};
 
   vo_formula1 {-> vo} =
@@ -80,7 +80,9 @@ Productions
     vo_formula4 {-> vo_formula4.vo};
 
   vo_formula4 {-> vo} =
-    {not} not vo_formula4 {-> New vo.not(vo_formula4.vo) } |
+    {not} not vo_formula5 {-> New vo.not(vo_formula5.vo) };
+
+  vo_formula5 {-> vo} =
     {par} l_par vo_formula r_par {-> vo_formula.vo};
 
 /*******************************************************************
