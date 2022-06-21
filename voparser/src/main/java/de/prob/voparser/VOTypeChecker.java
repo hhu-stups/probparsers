@@ -40,7 +40,7 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	public VOTypeChecker(VOParser voParser) {
 		this.voParser = voParser;
 		this.error = false;
-		this.modifiedAnimatorState = PersistentHashSet.EMPTY;
+		this.modifiedAnimatorState = (PersistentHashSet) ((PersistentHashSet) PersistentHashSet.EMPTY.cons(AnimatorState.TRACE)).cons(AnimatorState.STATE_SPACE);
 	}
 
 	public void typeCheck(Start start) throws VOParseException {
@@ -111,7 +111,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitImpliesExpression(AImpliesVo node, PersistentHashSet animatorState) {
-		return visitVOExpression(new AOrVo(new ANotVo(node.getLeft()), node.getRight()), animatorState);
+		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
+		return visitVOExpression(new AOrVo(new ANotVo(node.getLeft().clone()), node.getRight().clone()), animatorState);
 	}
 
 	@Override
@@ -120,7 +121,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 	}
 
 	private PersistentHashSet visitEquivalentExpression(AEquivalentVo node, PersistentHashSet animatorState) {
-		return visitVOExpression(new AAndVo(new AImpliesVo(node.getLeft(), node.getRight()), new AImpliesVo(node.getRight(), node.getLeft())), animatorState);
+		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
+		return visitVOExpression(new AAndVo(new AImpliesVo(node.getLeft().clone(), node.getRight().clone()), new AImpliesVo(node.getRight().clone(), node.getLeft().clone())), animatorState);
 	}
 
 	@Override
