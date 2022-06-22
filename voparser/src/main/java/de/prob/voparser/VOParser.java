@@ -56,6 +56,11 @@ public class VOParser {
 		tasks.remove(id);
 	}
 
+	public void semanticCheck(Start ast) throws VOParseException {
+		scopeChecker.scopeCheck(ast);
+		typeChecker.typeCheck(ast);
+	}
+
 	public void semanticCheck(String formula) throws VOParseException {
 		scopeCheck(formula);
 		typeCheck(formula);
