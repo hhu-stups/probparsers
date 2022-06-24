@@ -3,7 +3,6 @@ package de.prob.voparser;
 import de.prob.voparser.analysis.DepthFirstAdapter;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.Start;
-import de.prob.voparser.node.TIdentifierLiteral;
 
 
 public class VOScopeChecker extends DepthFirstAdapter {
