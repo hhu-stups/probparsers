@@ -25,29 +25,23 @@ Helpers
   identifier_literal = (letter | underscore) (letter | underscore | digit | dot | comma)*;
 
 /*******************************************************************
- * States                                                          *
- *******************************************************************/
-States
-  vo;
-
-/*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 Tokens
-  {vo} l_par = l_paren;
-  {vo} r_par = r_paren;
+  l_par = l_paren;
+  r_par = r_paren;
 
   /* Boolean Operators */
-  {vo} implies = '=>' | 0x21d2 | 'implies';
-  {vo} equivalent = '<=>' | 0x21d4 | 'equivalent';
-  {vo} and = '&' | 0x2227 | 'and';
-  {vo} or = 'or' | 0x2228 | '||';
-  {vo} not = 'not' | 0x00ac;
+  implies = '=>' | 0x21d2 | 'implies';
+  equivalent = '<=>' | 0x21d4 | 'equivalent';
+  and = '&' | 0x2227 | 'and';
+  or = 'or' | 0x2228 | '||';
+  not = 'not' | 0x00ac;
 
   /* Sequential Operator*/
-  {vo} sequential = ';';
+  sequential = ';';
 
-  {vo} identifier_literal = identifier_literal;
+  identifier_literal = identifier_literal;
 
   white_space = white_space;
 
