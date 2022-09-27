@@ -13,23 +13,23 @@ public class VOTypeCheckingTest {
 	@Test
 	public void testAtomic() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_PROP);
+		voParser.registerTask("MC1", VTType.CHECKING_PROP);
 		voParser.typeCheck("MC1");
 	}
 
 	@Test
 	public void testSequential() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_PROP);
+		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
+		voParser.registerTask("MC2", VTType.CHECKING_PROP);
 		voParser.typeCheck("MC1;MC2");
 	}
 
 	@Test(expected =  VOParseException.class)
 	public void testSequential2() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_GOAL);
+		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
+		voParser.registerTask("MC2", VTType.SEARCHING_GOAL);
 		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
 		voParser.typeCheck("(MC1 & MC2);TR1");
 	}
@@ -37,7 +37,7 @@ public class VOTypeCheckingTest {
 	@Test
 	public void testAnd() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
+		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
 		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
 		voParser.typeCheck("MC1 & TR1");
 	}
@@ -45,7 +45,7 @@ public class VOTypeCheckingTest {
 	@Test
 	public void testOr() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
+		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
 		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
 		voParser.typeCheck("MC1 or TR1");
 	}
