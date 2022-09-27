@@ -4,10 +4,7 @@ package de.prob.voparser;
 import com.github.krukow.clj_lang.PersistentHashSet;
 import de.prob.voparser.analysis.DepthFirstAdapter;
 import de.prob.voparser.node.AAndVo;
-import de.prob.voparser.node.AEquivalentVo;
 import de.prob.voparser.node.AIdentifierVo;
-import de.prob.voparser.node.AImpliesVo;
-import de.prob.voparser.node.ANotVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.ASequentialVo;
 import de.prob.voparser.node.Node;
@@ -41,12 +38,6 @@ public class VOTypeChecker extends DepthFirstAdapter {
 			return visitAndExpression((AAndVo) node, animatorState);
 		} else if(node instanceof AOrVo) {
 			return visitOrExpression((AOrVo) node, animatorState);
-		} else if(node instanceof ANotVo) {
-			return visitNotExpression((ANotVo) node, animatorState);
-		} else if(node instanceof AEquivalentVo) {
-			return visitEquivalentExpression((AEquivalentVo) node, animatorState);
-		} else if(node instanceof AImpliesVo) {
-			return visitImpliesExpression((AImpliesVo) node, animatorState);
 		} else if(node instanceof ASequentialVo) {
 			return visitSequentialExpression((ASequentialVo) node, animatorState);
 		} else {
@@ -88,35 +79,6 @@ public class VOTypeChecker extends DepthFirstAdapter {
 		}
 		resultAnimatorState = resultAnimatorState.disjoin(AnimatorState.STATE_SPACE);
 		return resultAnimatorState;
-	}
-
-	@Override
-	public void caseANotVo(ANotVo node) {
-		modifiedAnimatorState = visitNotExpression(node, modifiedAnimatorState);
-	}
-
-	private PersistentHashSet<AnimatorState> visitNotExpression(ANotVo node, PersistentHashSet<AnimatorState> animatorState) {
-		return visitVOExpression(node.getVo(), animatorState);
-	}
-
-	@Override
-	public void caseAImpliesVo(AImpliesVo node) {
-		modifiedAnimatorState = visitImpliesExpression(node, modifiedAnimatorState);
-	}
-
-	private PersistentHashSet<AnimatorState> visitImpliesExpression(AImpliesVo node, PersistentHashSet<AnimatorState> animatorState) {
-		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
-		return visitVOExpression(new AOrVo(new ANotVo(node.getLeft().clone()), node.getRight().clone()), animatorState);
-	}
-
-	@Override
-	public void caseAEquivalentVo(AEquivalentVo node) {
-		modifiedAnimatorState = visitEquivalentExpression(node, modifiedAnimatorState);
-	}
-
-	private PersistentHashSet<AnimatorState> visitEquivalentExpression(AEquivalentVo node, PersistentHashSet<AnimatorState> animatorState) {
-		// Remark: left and right node must be cloned before creating a new AST node from them. Somehow, SableCC sometimes sets AST node to null. This is avoided by the clone.
-		return visitVOExpression(new AAndVo(new AImpliesVo(node.getLeft().clone(), node.getRight().clone()), new AImpliesVo(node.getRight().clone(), node.getLeft().clone())), animatorState);
 	}
 
 	@Override
