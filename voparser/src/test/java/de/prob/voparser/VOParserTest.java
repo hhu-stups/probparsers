@@ -35,24 +35,6 @@ public class VOParserTest {
 	}
 
 	@Test
-	public void testNot() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.parseFormula("not TR1");
-	}
-
-	@Test
-	public void testImplies() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.parseFormula("MC1 => MC2");
-	}
-
-	@Test
-	public void testEquivalent() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.parseFormula("MC1 <=> MC2");
-	}
-
-	@Test
 	public void testDot() throws VOParseException {
 		VOParser voParser = new VOParser();
 		voParser.parseFormula("MC.1");

@@ -13,7 +13,7 @@ public class VOTypeCheckingTest {
 	@Test
 	public void testAtomic() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
+		voParser.registerTask("MC1", VTType.MODEL_CHECKING_PROP);
 		voParser.typeCheck("MC1");
 	}
 
@@ -21,7 +21,7 @@ public class VOTypeCheckingTest {
 	public void testSequential() throws VOParseException {
 		VOParser voParser = new VOParser();
 		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_INV);
+		voParser.registerTask("MC2", VTType.MODEL_CHECKING_PROP);
 		voParser.typeCheck("MC1;MC2");
 	}
 
@@ -48,29 +48,6 @@ public class VOTypeCheckingTest {
 		voParser.registerTask("MC1", VTType.MODEL_CHECKING_GOAL);
 		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
 		voParser.typeCheck("MC1 or TR1");
-	}
-
-	@Test
-	public void testNot() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
-		voParser.typeCheck("not TR1");
-	}
-
-	@Test
-	public void testImplies() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_INV);
-		voParser.typeCheck("MC1 => MC2");
-	}
-
-	@Test
-	public void testEquivalent() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_INV);
-		voParser.typeCheck("MC1 <=> MC2");
 	}
 
 }

@@ -32,11 +32,8 @@ Tokens
   r_par = r_paren;
 
   /* Boolean Operators */
-  implies = '=>' | 0x21d2 | 'implies';
-  equivalent = '<=>' | 0x21d4 | 'equivalent';
   and = '&' | 0x2227 | 'and';
   or = 'or' | 0x2228 | '||';
-  not = 'not' | 0x00ac;
 
   /* Sequential Operator*/
   sequential = ';';
@@ -57,27 +54,15 @@ Ignored Tokens
 Productions
 
   vo_formula {-> vo} =
-    {equivalent} [left]:vo_formula equivalent [right]:vo_formula1 {-> New vo.equivalent(left.vo, right.vo)} |
+    {and} [left]:vo_formula and [right]:vo_formula1 {-> New vo.and(left.vo, right.vo)} |
+    {or} [left]:vo_formula or [right]:vo_formula1 {-> New vo.or(left.vo, right.vo)} |
     vo_formula1 {-> vo_formula1.vo};
 
   vo_formula1 {-> vo} =
-    {implication} [left]:vo_formula1 implies [right]:vo_formula2 {-> New vo.implies(left.vo, right.vo)} |
+    {sequential} [left]:vo_formula1 sequential [right]:vo_formula2 {-> New vo.sequential(left.vo, right.vo)} |
     vo_formula2 {-> vo_formula2.vo};
 
   vo_formula2 {-> vo} =
-    {and} [left]:vo_formula2 and [right]:vo_formula3 {-> New vo.and(left.vo, right.vo)} |
-    {or} [left]:vo_formula2 or [right]:vo_formula3 {-> New vo.or(left.vo, right.vo)} |
-    vo_formula3 {-> vo_formula3.vo};
-
-  vo_formula3 {-> vo} =
-    {sequential} [left]:vo_formula3 sequential [right]:vo_formula4 {-> New vo.sequential(left.vo, right.vo)} |
-    vo_formula4 {-> vo_formula4.vo};
-
-  vo_formula4 {-> vo} =
-    {not} not vo_formula5 {-> New vo.not(vo_formula5.vo) } |
-    vo_formula5 {-> vo_formula5.vo};
-
-  vo_formula5 {-> vo} =
     {identifier} identifier_literal {-> New vo.identifier(identifier_literal)} |
     {par} l_par vo_formula r_par {-> vo_formula.vo};
 
@@ -87,10 +72,7 @@ Productions
 
 Abstract Syntax Tree
   vo =
-   {implies} [left]:vo [right]:vo |
-   {equivalent} [left]:vo [right]:vo |
    {and} [left]:vo [right]:vo |
    {or} [left]:vo [right]:vo |
-   {not} vo |
    {sequential} [left]:vo [right]:vo |
    {identifier} identifier_literal;

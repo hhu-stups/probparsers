@@ -13,7 +13,7 @@ public class VOScopingTest {
 	@Test
 	public void testAtomic() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
+		voParser.registerTask("MC1", VTType.MODEL_CHECKING_PROP);
 		voParser.scopeCheck("MC1");
 	}
 
@@ -49,32 +49,9 @@ public class VOScopingTest {
 	}
 
 	@Test
-	public void testNot() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
-		voParser.scopeCheck("not TR1");
-	}
-
-	@Test
-	public void testImplies() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_INV);
-		voParser.scopeCheck("MC1 => MC2");
-	}
-
-	@Test
-	public void testEquivalent() throws VOParseException {
-		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.MODEL_CHECKING_INV);
-		voParser.registerTask("MC2", VTType.MODEL_CHECKING_INV);
-		voParser.scopeCheck("MC1 <=> MC2");
-	}
-
-	@Test
 	public void testDot() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1.1", VTType.MODEL_CHECKING_INV);
+		voParser.registerTask("MC1.1", VTType.MODEL_CHECKING_PROP);
 		voParser.scopeCheck("MC1.1");
 	}
 
