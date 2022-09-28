@@ -41,6 +41,16 @@ public class VOScopingTest {
 	}
 
 	@Test
+	public void testAnd2() throws VOParseException {
+		VOParser voParser = new VOParser();
+		voParser.registerTask("MC1.1", VTType.TRACE);
+		voParser.registerTask("TR1.1", VTType.TRACE);
+		voParser.registerTask("MC2.1", VTType.TRACE);
+		voParser.registerTask("TR2.1", VTType.TRACE);
+		voParser.scopeCheck("(MC1.1; TR1.1) & (MC2.1; TR2.1)");
+	}
+
+	@Test
 	public void testOr() throws VOParseException {
 		VOParser voParser = new VOParser();
 		voParser.registerTask("MC1", VTType.TRACE);
