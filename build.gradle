@@ -1,21 +1,26 @@
+plugins {
+    // SableCC plugin is only applied in the subprojects that actually need it.
+    id("de.hhu.stups.sablecc").version("1.0.0").apply(false)
+}
+
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.12.0'
+project.version = '2.12.1'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "7.4.1"
+    gradleVersion = "7.4.2"
 }
 
 ext {
-    sableCCVersion = '3.3.3'
+    sableCCVersion = '3.4.0'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
@@ -47,9 +52,6 @@ subprojects {
     
     tasks.withType(Javadoc) {
         options.encoding = SOURCE_ENCODING
-        // Workaround for https://github.com/gradle/gradle/issues/5630
-        // See https://stackoverflow.com/a/52797107
-        options.addStringOption("sourcepath", "")
     }
 
     configurations.all {

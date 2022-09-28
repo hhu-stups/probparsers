@@ -64,16 +64,16 @@ public class ListPrologTermTest {
 	@Test
 	public void testGet() {
 		ListPrologTerm t1 = new ListPrologTerm(createFixture(10));
-		assertEquals("4", PrologTerm.atomicString(t1.get(4)));
+		assertEquals("4", t1.get(4).atomToString());
 		ListPrologTerm t2 = t1.subList(1, 5);
-		assertEquals("2", PrologTerm.atomicString(t2.get(1)));
-		assertEquals("4", PrologTerm.atomicString(t2.get(3)));
+		assertEquals("2", t2.get(1).atomToString());
+		assertEquals("4", t2.get(3).atomToString());
 	}
 
 	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testGetOutOfBounds() {
 		ListPrologTerm t1 = new ListPrologTerm(createFixture(10));
-		assertEquals("4", PrologTerm.atomicString(t1.get(4)));
+		assertEquals("4", t1.get(4).atomToString());
 		ListPrologTerm t2 = t1.subList(1, 5);
 		t2.get(7); // raise exception
 	}
@@ -93,13 +93,13 @@ public class ListPrologTermTest {
 		assertFalse(i.hasPrevious());
 		assertEquals(-1, i.previousIndex());
 		assertEquals(0, i.nextIndex());
-		assertEquals("1", PrologTerm.atomicString(i.next()));
-		assertEquals("2", PrologTerm.atomicString(i.next()));
+		assertEquals("1", i.next().atomToString());
+		assertEquals("2", i.next().atomToString());
 		assertFalse(i.hasNext());
 		assertTrue(i.hasPrevious());
 		assertEquals(2, i.nextIndex());
-		assertEquals("2", PrologTerm.atomicString(i.previous()));
-		assertEquals("1", PrologTerm.atomicString(i.previous()));
+		assertEquals("2", i.previous().atomToString());
+		assertEquals("1", i.previous().atomToString());
 		assertTrue(i.hasNext());
 	}
 
@@ -122,7 +122,7 @@ public class ListPrologTermTest {
 		assertEquals(-1, i.previousIndex());
 		assertEquals(0, i.nextIndex());
 		PrologTerm next = i.next();
-		assertEquals("foo", PrologTerm.atomicString(next));
+		assertEquals("foo", next.atomToString());
 		PrologTerm previous = i.previous();
 		assertEquals(previous, next);
 	}
@@ -133,18 +133,18 @@ public class ListPrologTermTest {
 		PrologTerm h1 = term.head();
 		PrologTerm h2 = term.tail().head();
 		PrologTerm h3 = term.tail().tail().head();
-		assertEquals("0", PrologTerm.atomicString(h1));
-		assertEquals("1", PrologTerm.atomicString(h2));
-		assertEquals("2", PrologTerm.atomicString(h3));
+		assertEquals("0", h1.atomToString());
+		assertEquals("1", h2.atomToString());
+		assertEquals("2", h3.atomToString());
 	}
 
 	@Test
 	public void testMultiTail2() {
 		ListPrologTerm term = new ListPrologTerm(createFixture(3));
 		ListPrologTerm term2 = term.tail();
-		assertEquals("1", PrologTerm.atomicString(term2.head()));
+		assertEquals("1", term2.head().atomToString());
 		ListPrologTerm term3 = term2.tail();
-		assertEquals("2", PrologTerm.atomicString(term3.head()));
+		assertEquals("2", term3.head().atomToString());
 	}
 
 	@Test

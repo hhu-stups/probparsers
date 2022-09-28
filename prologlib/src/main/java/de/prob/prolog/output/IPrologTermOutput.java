@@ -95,6 +95,15 @@ public interface IPrologTermOutput {
 	IPrologTermOutput printNumber(final BigInteger number);
 
 	/**
+	 * Print a number.
+	 * 
+	 * @param number
+	 *            the number to print
+	 * @return the IPrologTermOutput
+	 */
+	IPrologTermOutput printNumber(final double number);
+
+	/**
 	 * Start a new list. All following terms (atoms, numbers, etc.) until the
 	 * next call of {@link #closeList()} are put into the list. All opened lists
 	 * should be closed. Basically this method prints the opening bracket.

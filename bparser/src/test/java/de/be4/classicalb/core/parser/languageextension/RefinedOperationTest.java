@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import util.Helpers;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class RefinedOperationTest {
@@ -14,7 +15,7 @@ public class RefinedOperationTest {
 	public void testRefKeyword() throws Exception {
 		final String testMachine = "MACHINE Test OPERATIONS foo ref fooA = skip END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[operations(none,[refined_operation(none,identifier(none,foo),[],[],fooA,skip(none))])]))."));
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[operations(none,[refined_operation(none,identifier(none,foo),[],[],fooA,skip(none))])])).", result);
 	}
 	
 	@Test

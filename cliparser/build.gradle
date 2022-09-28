@@ -1,3 +1,4 @@
+apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -7,6 +8,10 @@ dependencies {
     implementation project(":prologlib")
     implementation project(":parserbase")
     implementation project(":ltlparser")
+}
+
+application {
+    mainClass = "de.prob.cliparser.CliBParser"
 }
 
 rootProject.setupTestReport(project, [])

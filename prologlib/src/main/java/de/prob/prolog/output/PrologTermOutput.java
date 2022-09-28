@@ -120,25 +120,13 @@ public class PrologTermOutput implements IPrologTermOutput {
 			return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#openTerm
-	 * (java.lang.String)
-	 */
+	@Override
 	public IPrologTermOutput openTerm(final String functor) {
 		openTerm(functor, false);
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#openTerm
-	 * (java.lang.String, boolean)
-	 */
+	@Override
 	public IPrologTermOutput openTerm(final String functor,
 			final boolean ignoreIndention) {
 		termCount++;
@@ -166,13 +154,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#closeTerm
-	 * ()
-	 */
+	@Override
 	public IPrologTermOutput closeTerm() {
 		termCount--;
 		if (termCount < 0)
@@ -191,13 +173,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#printAtom
-	 * (java.lang.String)
-	 */
+	@Override
 	public IPrologTermOutput printAtom(final String content) {
 		synchronized (out) {
 			printCommaIfNeeded();
@@ -213,12 +189,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seede.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#
-	 * printAtomOrNumber(java.lang.String)
-	 */
+	@Override
 	public IPrologTermOutput printAtomOrNumber(final String content) {
 		synchronized (out) {
 			try {
@@ -230,13 +201,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#printString
-	 * (java.lang.String)
-	 */
+	@Override
 	public IPrologTermOutput printString(final String content) {
 		synchronized (out) {
 			printCommaIfNeeded();
@@ -248,13 +213,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#printNumber
-	 * (long)
-	 */
+	@Override
 	public IPrologTermOutput printNumber(final long number) {
 		synchronized (out) {
 			printCommaIfNeeded();
@@ -264,13 +223,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#printNumber
-	 * (java.math.BigInteger)
-	 */
+	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
 		synchronized (out) {
 			printCommaIfNeeded();
@@ -280,13 +233,17 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#openList
-	 * ()
-	 */
+	@Override
+	public IPrologTermOutput printNumber(final double number) {
+		synchronized (out) {
+			printCommaIfNeeded();
+			out.print(number);
+			comma_needed = true;
+		}
+		return this;
+	}
+
+	@Override
 	public IPrologTermOutput openList() {
 		synchronized (out) {
 			listCount++;
@@ -298,13 +255,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#closeList
-	 * ()
-	 */
+	@Override
 	public IPrologTermOutput closeList() {
 		synchronized (out) {
 			listCount--;
@@ -318,13 +269,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#emptyList
-	 * ()
-	 */
+	@Override
 	public IPrologTermOutput emptyList() {
 		synchronized (out) {
 			printCommaIfNeeded();
@@ -334,13 +279,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#printVariable
-	 * (java.lang.String)
-	 */
+	@Override
 	public IPrologTermOutput printVariable(final String var) {
 		printCommaIfNeeded();
 		checkVariable(var);
@@ -364,12 +303,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 					"Invalid name for Prolog variable '" + var + "'");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#flush()
-	 */
+	@Override
 	public IPrologTermOutput flush() {
 		out.flush();
 		return this;
@@ -386,13 +320,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.be4.classicalb.core.parser.analysis.prolog.IPrologTermOutput#fullstop
-	 * ()
-	 */
+	@Override
 	public IPrologTermOutput fullstop() {
 		if (listCount != 0)
 			throw new IllegalStateException(
@@ -407,6 +335,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
+	@Override
 	public IPrologTermOutput printTerm(final PrologTerm term) {
 		term.toTermOutput(this);
 		return this;

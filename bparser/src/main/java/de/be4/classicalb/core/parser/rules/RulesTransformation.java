@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static de.be4.classicalb.core.parser.util.NodeCloner.cloneNode;
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -17,7 +16,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
-import de.be4.classicalb.core.parser.util.NodeCloner;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class RulesTransformation extends DepthFirstAdapter {
@@ -247,17 +245,17 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 				// renaming the operation
 				final TIdentifierLiteral first = compOperation.getReplacesIdentifier().getIdentifier().getFirst();
-				operationNameList.add(cloneNode(first));
-				nameIdentifier = cloneNode(compOperation.getReplacesIdentifier());
+				operationNameList.add(first.clone());
+				nameIdentifier = compOperation.getReplacesIdentifier().clone();
 			} else {
-				operationNameList.add(cloneNode(node.getName()));
+				operationNameList.add(node.getName().clone());
 				// TODO refactor
-				nameIdentifier = cloneNode(new AIdentifierExpression(operationNameList));
+				nameIdentifier = new AIdentifierExpression(operationNameList).clone();
 			}
 			operation.setOpName(operationNameList);
 		}
 
-		AEqualPredicate grd1 = new AEqualPredicate(cloneNode(nameIdentifier),
+		AEqualPredicate grd1 = new AEqualPredicate(nameIdentifier.clone(),
 				new AStringExpression(new TStringLiteral(COMPUTATION_NOT_EXECUTED)));
 		ASelectSubstitution select = new ASelectSubstitution();
 		{
@@ -271,7 +269,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// substitution
 			final ArrayList<PExpression> varList = new ArrayList<>();
 			final ArrayList<PExpression> exprList = new ArrayList<>();
-			varList.add(cloneNode(nameIdentifier));
+			varList.add(nameIdentifier.clone());
 			exprList.add(new AStringExpression(new TStringLiteral(COMPUTATION_EXECUTED)));
 			AAssignSubstitution assign = new AAssignSubstitution(varList, exprList);
 			select.setThen(new ASequenceSubstitution(createSubstitutionList(node.getBody(), assign)));
@@ -282,7 +280,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(operation);
 
 		// create variables in VARIABLES clause
-		variablesList.add(cloneNode(nameIdentifier));
+		variablesList.add(nameIdentifier.clone());
 
 		/*-
 		 * create predicate in INVARIANT
@@ -293,20 +291,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(createStringExpression(COMPUTATION_NOT_EXECUTED));
 		list.add(createStringExpression(COMPUTATION_DISABLED));
 		final ASetExtensionExpression set = new ASetExtensionExpression(list);
-		final AMemberPredicate member = new AMemberPredicate(cloneNode(nameIdentifier), set);
+		final AMemberPredicate member = new AMemberPredicate(nameIdentifier.clone(), set);
 
 		invariantList.add(member);
 
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression(NodeCloner.cloneNode(compOperation.getActivationPredicate()),
+			value = new AIfThenElseExpression(compOperation.getActivationPredicate().clone(),
 					createStringExpression(COMPUTATION_NOT_EXECUTED), new LinkedList<PExpression>(),
 					createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
 		}
 		// create substitution in INITIALISATION clause
-		final AAssignSubstitution initSub = new AAssignSubstitution(createExpressionList(cloneNode(nameIdentifier)),
+		final AAssignSubstitution initSub = new AAssignSubstitution(createExpressionList(nameIdentifier.clone()),
 				createExpressionList(value));
 		initialisationList.add(initSub);
 	}
@@ -337,7 +335,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		AOperation operation = new AOperation();
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
-		nameList.add(cloneNode(node.getRuleName()));
+		nameList.add(node.getRuleName().clone());
 		operation.setOpName(nameList);
 
 		// SELECT ruleName /= "NOT_CHECKED" & $COUNTEREXAMPLE : POW(STRING) THEN
@@ -415,7 +413,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		 */
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
-			value = new AIfThenElseExpression(NodeCloner.cloneNode(currentRule.getActivationPredicate()),
+			value = new AIfThenElseExpression(currentRule.getActivationPredicate().clone(),
 					createStringExpression(RULE_NOT_CHECKED), new LinkedList<PExpression>(),
 					createStringExpression(RULE_DISABLED));
 
@@ -556,7 +554,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
-		final TIdentifierLiteral computationIdentifierLiteral = cloneNode(this.currentComputationIdentifier);
+		final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
 		PPredicate compExecuted = new AEqualPredicate(createAIdentifierExpression(computationIdentifierLiteral),
 				createStringExpression(COMPUTATION_EXECUTED));
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
@@ -592,7 +590,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createPositinedNode(new AMultOrCartExpression(
 						new ASetExtensionExpression(createExpressionList(
 								new AIntegerExpression(new TIntegerLiteral(Integer.toString(errorIndex))))),
-						cloneNode(setOfCounterexamples)), setOfCounterexamples));
+						setOfCounterexamples.clone()), setOfCounterexamples));
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 				createExpressionList(union));
 		if (conditionalFail) {
@@ -753,7 +751,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet())),
-				createExpressionList(cloneNode(node.getSet())));
+				createExpressionList(node.getSet().clone()));
 		final PSubstitution assignCVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localLoopCounter)),
 				createExpressionList(new ACardExpression(createIdentifier(localSetVariableName, node.getSet()))));
@@ -784,7 +782,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		whileSub.setDoSubst(varSub2);
 		List<PExpression> varIdList = new ArrayList<>();
 		for (PExpression pExpression : node.getIdentifiers()) {
-			varIdList.add(cloneNode(pExpression));
+			varIdList.add(pExpression.clone());
 		}
 		varSub2.setIdentifiers(varIdList);
 
@@ -795,13 +793,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 			// <code> x,y :: {CHOOSE(set)}; </code>
 			List<PExpression> assignIdList = new ArrayList<>();
 			for (PExpression pExpression : node.getIdentifiers()) {
-				assignIdList.add(cloneNode(pExpression));
+				assignIdList.add(pExpression.clone());
 			}
 			assignSub = new ABecomesElementOfSubstitution(assignIdList,
 					new ASetExtensionExpression(createExpressionList(chooseCall)));
 		} else {
 			// <code> x := CHOOSE(set); </code>
-			assignSub = new AAssignSubstitution(createExpressionList(cloneNode(node.getIdentifiers().get(0))),
+			assignSub = new AAssignSubstitution(createExpressionList(node.getIdentifiers().get(0).clone()),
 					createExpressionList(chooseCall));
 		}
 
@@ -810,11 +808,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (varIdList.size() >= 2) {
 			List<PExpression> ids = new ArrayList<>();
 			for (PExpression pExpression : node.getIdentifiers()) {
-				ids.add(cloneNode(pExpression));
+				ids.add(pExpression.clone());
 			}
 			element = createNestedCouple(ids);
 		} else {
-			element = cloneNode(node.getIdentifiers().get(0));
+			element = node.getIdentifiers().get(0).clone();
 		}
 
 		// <code> G_Set \ {CHOOSE(G_Set)} </code>
@@ -885,14 +883,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		{
 			final List<PExpression> list = new ArrayList<>();
 			for (PExpression id : identifiers) {
-				PExpression clonedId = cloneNode(id);
+				PExpression clonedId = id.clone();
 				list.add(clonedId);
 			}
 			set.setIdentifiers(list);
 			PPredicate condition = null;
-			final PPredicate where = cloneNode(wherePredicate);
+			final PPredicate where = wherePredicate.clone();
 			if (expectPredicate != null) {
-				final PPredicate expect = cloneNode(expectPredicate);
+				final PPredicate expect = expectPredicate.clone();
 				condition = new AConjunctPredicate(where, new ANegationPredicate(expect));
 			} else {
 				condition = where;
@@ -926,9 +924,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
 			for (PExpression id : identifiers) {
-				PExpression clonedId = cloneNode(id);
+				PExpression clonedId = id.clone();
 				list.add(clonedId);
-				PExpression clonedId2 = cloneNode(id);
+				PExpression clonedId2 = id.clone();
 				list2.add(clonedId2);
 			}
 			final AExistsPredicate exists = new AExistsPredicate();

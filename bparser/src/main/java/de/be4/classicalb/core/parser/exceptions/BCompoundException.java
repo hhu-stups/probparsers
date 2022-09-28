@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.be4.classicalb.core.parser.BParser;
+
 @SuppressWarnings("serial")
 public class BCompoundException extends Exception {
 	private final List<BException> exceptions = new ArrayList<>();
@@ -31,6 +33,11 @@ public class BCompoundException extends Exception {
 		return this.exceptions.get(0).getCause();
 	}
 
+	/**
+	 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
+	 *
+	 * @return a copy of this exception with all line numbers decremented by one
+	 */
 	public BCompoundException withLinesOneOff() {
 		return new BCompoundException(this.getBExceptions().stream()
 			.map(BException::withLinesOneOff)

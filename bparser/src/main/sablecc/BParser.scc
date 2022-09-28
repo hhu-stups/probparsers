@@ -176,16 +176,16 @@ Tokens
   {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal;
 
   // content of description pragma
-  {description} pragma_free_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
+  {description} pragma_free_text = [all_chars - ['*' + '/']]*;
 
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
   // the pragma_ignore state is like description but all tokens are ignored
-  {pragma_ignore} pragma_ignored_text = [all_chars - ['*' + '/']]*; // return to state 'normal' is done in Lexer
+  {pragma_ignore} pragma_ignored_text = [all_chars - ['*' + '/']]*;
 
   {section->comment, normal -> comment} comment = comment_start;
-  {comment,description,pragma_ignore} comment_end = comment_end; // return to state 'normal' is done in Lexer
+  {comment->normal,description->normal,pragma_ignore->normal} comment_end = comment_end;
   {comment} comment_body = [all_chars - ['*' + '/']]*;
 
   {comment,description,pragma_ignore} star = '*';
@@ -338,10 +338,7 @@ Tokens
   {normal} union = '\/' | 0x222a;
   {normal} restrict_tail_sequence = '\|/' | 0x2193;
   {normal} concat_sequence = '^' | 0x2312;
-  {normal} arity = 'arity';
-  {normal} bin = 'bin';
   {normal} bool_cast = 'bool';
-  {normal} btree = 'btree';
   {normal} card = 'card';
   {normal} convert_int_floor = 'floor';
   {normal} convert_int_ceiling = 'ceiling';
@@ -349,51 +346,36 @@ Tokens
   {normal} closure = 'closure';
   {normal} closure1 = 'closure1'; // add 'closure' 0x8321 ?
   {normal} conc = 'conc';
-  {normal} const = 'const';
   {normal} dom = 'dom';
-  {normal} father = 'father';
   {normal} first = 'first';
   {normal} fnc = 'fnc';
   {normal} front = 'front';
   {normal} id = 'id';
-  {normal} infix = 'infix';
   {normal} generalized_inter = 'inter';
   {normal} iseq = 'iseq';
   {normal} iseq1 = 'iseq1'; // add 'iseq'0x8321 ?
   {normal} iterate = 'iterate';
   {normal} last = 'last';
-  {normal} left = 'left';
   {normal} max = 'max';
   {normal} min = 'min';
-  {normal} mirror = 'mirror';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
   {normal} logical_or = 'or' | 0x2228;
   {normal} perm = 'perm';
-  {normal} postfix = 'postfix';
   {normal} pred = 'pred';
-  {normal} prefix = 'prefix';
   {normal} prj1 = 'prj1';
   {normal} prj2 = 'prj2';
-  {normal} rank = 'rank';
   {normal} ran = 'ran';
   {normal} rec = 'rec';
   {normal} rel = 'rel';
   {normal} rev = 'rev';
-  {normal} right = 'right';
   {normal} seq = 'seq';
   {normal} seq1 = 'seq1'; // add | 'seq'0x8321 ?
-  {normal} sizet = 'sizet';
   {normal} size = 'size';
   {normal} skip = 'skip';
-  {normal} sons = 'sons';
-  {normal} son = 'son';
   {normal} struct = 'struct';
-  {normal} subtree = 'subtree';
   {normal} succ = 'succ';
   {normal} tail = 'tail';
-  {normal} top = 'top';
-  {normal} tree = 'tree';
   {normal} generalized_union = 'union';
   {normal} empty_set = 0x2205;
   {normal} left_brace = '{';
@@ -606,13 +588,13 @@ definition_x {-> definition} =
 
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]};
 
-sees_clause {-> machine_clause} = sees [machine_names]:composed_identifier_list {-> New machine_clause.sees([machine_names.expression])};
+sees_clause {-> machine_clause} = sees [machine_names]:machine_reference_no_params_list {-> New machine_clause.sees([machine_names.machine_reference_no_params])};
 
 references_clause {-> machine_clause} = kw_references [machine_references]:machine_ref_list {-> New machine_clause.references([machine_references.machine_reference])};
 
-promotes_clause {-> machine_clause} = promotes [machine_names]:composed_identifier_list {-> New machine_clause.promotes([machine_names.expression])};
+promotes_clause {-> machine_clause} = promotes [operation_names]:operation_reference_list {-> New machine_clause.promotes([operation_names.operation_reference])};
 
-uses_clause {-> machine_clause} = uses [machine_names]:composed_identifier_list {-> New machine_clause.uses([machine_names.expression])};
+uses_clause {-> machine_clause} = uses [machine_names]:machine_reference_no_params_list {-> New machine_clause.uses([machine_names.machine_reference_no_params])};
 
 includes_clause {-> machine_clause} = includes [machine_references]:machine_ref_list {-> New machine_clause.includes([machine_references.machine_reference])};
 
@@ -631,6 +613,23 @@ machine_reference {-> machine_reference} =
 
 machine_reference2 {-> machine_reference} =
   {simple} [machine_name]:composed_identifier [parameters]:machine_params? {-> New machine_reference([machine_name.identifier_literal], [parameters.expression])};
+
+machine_reference_no_params_list {-> machine_reference_no_params*} =
+  {single} [ref]:machine_reference_no_params {-> [ref.machine_reference_no_params]} |
+  {multi} [rest]:machine_reference_no_params_list comma [last]:machine_reference_no_params {-> [rest.machine_reference_no_params, last.machine_reference_no_params]};
+
+machine_reference_no_params {-> machine_reference_no_params} =
+  {simple} [ref]:machine_reference_no_params2 {-> ref.machine_reference_no_params} |
+  {file} [ref]:machine_reference_no_params2 pragma_file [file]:pragma_id_or_string {-> New machine_reference_no_params.file(ref.machine_reference_no_params, file)};
+
+machine_reference_no_params2 {-> machine_reference_no_params} =
+  {simple} [machine_name]:composed_identifier {-> New machine_reference_no_params([machine_name.identifier_literal])};
+
+operation_reference_list {-> operation_reference*} =
+  {single} [ref]:operation_reference {-> [ref.operation_reference]} |
+  {multi} [rest]:operation_reference_list comma [last]:operation_reference {-> [rest.operation_reference, last.operation_reference]};
+
+operation_reference {-> operation_reference} = [operation_name]:composed_identifier {-> New operation_reference([operation_name.identifier_literal])};
 
 variables_clause {-> machine_clause} =
   {abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
@@ -954,25 +953,6 @@ expression_keyword {-> expression} =
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
-  {tree} tree left_par [expression]:expression_in_par right_par {-> New expression.tree(expression.expression)} |
-  {btree} btree left_par [expression]:expression_in_par right_par {-> New expression.btree(expression.expression)} |
-  {const} const left_par [expr1]:expression_in_par comma [expr2]:expression_in_par right_par {-> New expression.const(expr1.expression, expr2.expression)} |
-  {top} top left_par [expression]:expression_in_par right_par {-> New expression.top(expression.expression)} |
-  {sons} sons left_par [expression]:expression_in_par right_par {-> New expression.sons(expression.expression)} |
-  {prefix} prefix left_par [expression]:expression_in_par right_par {-> New expression.prefix(expression.expression)} |
-  {postfix} postfix left_par [expression]:expression_in_par right_par {-> New expression.postfix(expression.expression)} |
-  {sizet} sizet left_par [expression]:expression_in_par right_par {-> New expression.sizet(expression.expression)} |
-  {mirror} mirror left_par [expression]:expression_in_par right_par {-> New expression.mirror(expression.expression)} |
-  {rank} rank left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.rank(expression1.expression, expression2.expression)} |
-  {father} father left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.father(expression1.expression, expression2.expression)} |
-  {son} son left_par [expression1]:expression_in_par [comma1]:comma [expression2]:expression_in_par [comma2]:comma [expression3]:expression_in_par right_par {-> New expression.son(expression1.expression, expression2.expression, expression3.expression)} |
-  {subtree} subtree left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.subtree(expression1.expression, expression2.expression)} |
-  {arity} arity left_par [expression1]:expression_in_par comma [expression2]:expression_in_par right_par {-> New expression.arity(expression1.expression, expression2.expression)} |
-  {bin1} bin left_par [expression]:expression_in_par right_par {-> New expression.bin(expression.expression, Null, Null)} |
-  {bin2} bin left_par [expression1]:expression_in_par [comma1]:comma [expression2]:expression_in_par [comma2]:comma [expression3]:expression_in_par right_par {-> New expression.bin(expression1.expression, expression2.expression, expression3.expression)} |
-  {left} left left_par [expression]:expression_in_par right_par {-> New expression.left(expression.expression)} |
-  {right} right left_par [expression]:expression_in_par right_par {-> New expression.right(expression.expression)} |
-  {infix} infix left_par [expression]:expression_in_par right_par {-> New expression.infix(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
   {record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
@@ -1126,17 +1106,6 @@ composed_identifier {-> identifier_literal*} =
   {multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]};
   // To do: maybe the only place where we do not want to also admit the second kind of dot '·' (generated by Rodin for quantifiers)
 
-composed_identifier_list {-> expression*} =
-  {single} [identifier]:composed_identifier_file_pragma_expression {-> [identifier.expression]} |
-  {multi} [rest]:composed_identifier_list comma [identifier]:composed_identifier_file_pragma_expression {-> [rest.expression, identifier.expression]};
-
-composed_identifier_file_pragma_expression {-> expression} =
-  {normal}[identifier]:composed_identifier_expression {-> identifier.expression } |
-  {file} [identifier]:composed_identifier_expression pragma_file [file]:pragma_id_or_string {-> New expression.file(identifier.expression, file)};
-
-composed_identifier_expression {-> expression} =
-  {normal}[identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} ;
-
 identifier_list {-> expression*} =
   {single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
   {multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]};
@@ -1151,7 +1120,7 @@ record_or_else {-> expression} =
   {else} [else]:identifier_or_function {-> else.expression};
 
 identifier_or_function {-> expression} =
-  {single} [name]:composed_identifier_expression {-> name.expression} |
+  {single} [name]:composed_identifier {-> New expression.identifier([name.identifier_literal])} |
   {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
 
 normal_identifier_expression {-> expression} =
@@ -1234,9 +1203,9 @@ model_clause =
 
 machine_clause =
   {definitions} [definitions]:definition* |
-  {sees} [machine_names]:expression* |
-  {promotes} [operation_names]:expression* |
-  {uses} [machine_names]:expression* |
+  {sees} [machine_names]:machine_reference_no_params* |
+  {promotes} [operation_names]:operation_reference* |
+  {uses} [machine_names]:machine_reference_no_params* |
   {includes} [machine_references]:machine_reference* |
   {extends} [machine_references]:machine_reference* |
   {imports} [machine_references]:machine_reference* |
@@ -1262,6 +1231,12 @@ machine_clause =
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |
   {file} [reference]:machine_reference [file]:pragma_id_or_string;
+
+machine_reference_no_params =
+  [machine_name]:identifier_literal* |
+  {file} [reference]:machine_reference_no_params [file]:pragma_id_or_string;
+
+operation_reference = [operation_name]:identifier_literal*;
 
 expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
 predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate;
@@ -1341,7 +1316,6 @@ predicate =
 
 /* Expressions */
 expression =
-  {file} [identifier]:expression [content]:pragma_id_or_string | // file pragma
   {description} [content]:pragma_free_text [expression]:expression |
   {identifier} [identifier]:identifier_literal* |
   {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |

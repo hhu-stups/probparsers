@@ -5,6 +5,7 @@ Package de.prob.core.theorymapping;
  *******************************************************************/
 Helpers
   space = ' ' | '\t' | 10 | 13;
+  underscore = '_';
 
   cbr_open = '{';
   cbr_close = '}';
@@ -30,7 +31,7 @@ Tokens
   opname = quote nonquote+ quote;
   symbol_open = cbr_open;
   symbol_close = cbr_close;
-  internal_spec = alphanum*;
+  internal_spec = alpha (alphanum | underscore)*;
 
 /*******************************************************************
  * Ignored Tokens                                                  *

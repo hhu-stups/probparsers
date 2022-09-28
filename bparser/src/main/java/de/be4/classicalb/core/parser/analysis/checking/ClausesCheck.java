@@ -75,6 +75,7 @@ public class ClausesCheck implements SemanticCheck {
 	 * </ul>
 	 * 
 	 */
+	@Override
 	public void runChecks(final Start rootNode) {
 		// only need to check complete machines
 		if (!Utils.isCompleteMachine(rootNode)) {
@@ -238,6 +239,7 @@ public class ClausesCheck implements SemanticCheck {
 		}
 	}
 
+	@Override
 	public void setOptions(ParseOptions options) {
 		// ignore options
 	}

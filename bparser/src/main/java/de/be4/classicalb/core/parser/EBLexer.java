@@ -23,7 +23,7 @@ public class EBLexer extends BLexer {
 	private Map<String, Boolean> v = null;
 
 	public EBLexer(String theFormula, BigInteger b, List<String> ids, DefinitionTypes defTypes) {
-		super(new PushbackReader(new StringReader(theFormula), 99), defTypes, theFormula.length());
+		super(new PushbackReader(new StringReader(theFormula), 99), defTypes);
 		v = constructMap(b, ids);
 	}
 

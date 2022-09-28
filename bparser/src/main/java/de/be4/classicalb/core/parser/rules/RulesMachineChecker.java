@@ -903,10 +903,12 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
+	@Override
 	public void inAWhileSubstitution(AWhileSubstitution node) {
 		loopNodes.add(node);
 	}
 
+	@Override
 	public void outAWhileSubstitution(AWhileSubstitution node) {
 		loopNodes.remove(node);
 	}

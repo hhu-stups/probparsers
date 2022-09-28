@@ -19,6 +19,7 @@ import de.be4.classicalb.core.parser.node.AIncludesMachineClause;
 import de.be4.classicalb.core.parser.node.AMachineHeader;
 import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
 import de.be4.classicalb.core.parser.node.AMachineReference;
+import de.be4.classicalb.core.parser.node.AOperationReference;
 import de.be4.classicalb.core.parser.node.APromotesMachineClause;
 import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
@@ -26,6 +27,7 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
+import de.be4.classicalb.core.parser.node.POperationReference;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -51,6 +53,7 @@ public class BMachine implements IModel {
 		this.machineName = name;
 	}
 
+	@Override
 	public Start getStart() {
 		return this.start;
 	}
@@ -71,12 +74,11 @@ public class BMachine implements IModel {
 
 	public void addPromotesClause(List<String> operationList) {
 		APromotesMachineClause promotes = new APromotesMachineClause();
-		List<PExpression> opList = new ArrayList<>();
+		List<POperationReference> opList = new ArrayList<>();
 		for (String name : operationList) {
 			List<TIdentifierLiteral> idList = new ArrayList<>();
 			idList.add(new TIdentifierLiteral(name));
-			AIdentifierExpression idExpr = new AIdentifierExpression(idList);
-			opList.add(idExpr);
+			opList.add(new AOperationReference(idList));
 		}
 		promotes.setOperationNames(opList);
 		this.parseUnit.getMachineClauses().add(promotes);
@@ -93,6 +95,7 @@ public class BMachine implements IModel {
 		return new ArrayList<>();
 	}
 
+	@Override
 	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);

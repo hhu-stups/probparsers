@@ -19,8 +19,7 @@ public class PackagePragmaTest {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M1.mch";
 		String result = Helpers.parseFile(file);
-		assertTrue(result.contains(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'M1',[]),[sees(none,[identifier(none,'M2')])]))."));
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,'M1',[]),[sees(none,[identifier(none,'M2')])])).", Helpers.getFirstMachineTerm(result));
 
 	}
 
@@ -29,8 +28,7 @@ public class PackagePragmaTest {
 		String PATH = "pragmas/importPackagePragma/foo/";
 		String file = PATH + "M11.mch";
 		String result = Helpers.parseFile(file);
-		assertTrue(result.contains(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'M11',[]),[sees(none,[identifier(none,'M2')])]))."));
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,'M11',[]),[sees(none,[identifier(none,'M2')])])).", Helpers.getFirstMachineTerm(result));
 
 	}
 

@@ -58,7 +58,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * 
 	 */
 	public static void printFormula(Start start, final IPrologTermOutput pout) {
-		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers(), -1, 0);
+		ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(new NodeFileNumbers());
+		pprinter.setPrintSourcePositions(true, false); // TODO Any reason not to enable compact positions?
 		ASTProlog printer = new ASTProlog(pout, pprinter);
 		start.apply(printer);
 	}
@@ -428,11 +429,31 @@ public class ASTProlog extends DepthFirstAdapter {
 	// machine reference
 
 	@Override
+	public void caseAMachineReferenceNoParams(final AMachineReferenceNoParams node) {
+		// Keep this functor for compatibility with previous versions
+		// (SEES/USES names were previously parsed as identifier expressions).
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getMachineName());
+		pout.closeTerm();
+	}
+
+	@Override
 	public void caseAMachineReference(final AMachineReference node) {
 		open(node);
 		printIdentifier(node.getMachineName());
 		printAsList(node.getParameters());
 		close(node);
+	}
+
+	@Override
+	public void caseAOperationReference(final AOperationReference node) {
+		// Keep this functor for compatibility with previous versions
+		// (PROMOTES names were previously parsed as identifier expressions).
+		pout.openTerm("identifier");
+		printPosition(node);
+		printIdentifier(node.getOperationName());
+		pout.closeTerm();
 	}
 
 	// definition
@@ -553,6 +574,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
+	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -563,6 +585,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	// expression
 
+	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -1062,9 +1085,9 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAFileExpression(AFileExpression node) {
-		node.getIdentifier().apply(this);
-		// node.getContent().apply(this);
+	public void caseAFileMachineReferenceNoParams(AFileMachineReferenceNoParams node) {
+		node.getReference().apply(this);
+		// node.getFile().apply(this);
 	}
 
 	@Override

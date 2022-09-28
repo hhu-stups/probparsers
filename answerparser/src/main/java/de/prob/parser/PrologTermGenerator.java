@@ -26,6 +26,7 @@ import de.prob.core.sablecc.node.PResult;
 import de.prob.core.sablecc.node.PTerm;
 import de.prob.core.sablecc.node.Start;
 import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.FloatPrologTerm;
 import de.prob.prolog.term.IntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
@@ -37,8 +38,7 @@ import de.prob.prolog.term.VariablePrologTerm;
 public class PrologTermGenerator {
 	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];
 
-	public static PrologTerm toPrologTerm(final Start node)
-			throws ResultParserException {
+	public static PrologTerm toPrologTerm(final Start node) {
 		PResult topnode = node.getPResult();
 		PrologTerm term = null;
 		if (topnode instanceof AYesResult) {
@@ -62,7 +62,7 @@ public class PrologTermGenerator {
 	}
 
 	public static PrologTerm toPrologTermMustNotFail(final String query,
-			final Start node) throws ResultParserException {
+			final Start node) {
 		PrologTerm term = toPrologTerm(node);
 		if (term == null) {
 			final String message = "Prolog query unexpectedly failed: " + query;
@@ -75,7 +75,11 @@ public class PrologTermGenerator {
 		PrologTerm term;
 		if (node instanceof ANumberTerm) {
 			String text = ((ANumberTerm) node).getNumber().getText();
-			term = new IntegerPrologTerm(new BigInteger(text));
+			if (text.indexOf('.') != -1 || text.indexOf('e') != -1 || text.indexOf('E') != -1) {
+				term = new FloatPrologTerm(Double.parseDouble(text));
+			} else {
+				term = new IntegerPrologTerm(new BigInteger(text));
+			}
 		} else if (node instanceof AAtomTerm) {
 			String text = ((AAtomTerm) node).getName().getText();
 			if ("[]".equals(text)) {

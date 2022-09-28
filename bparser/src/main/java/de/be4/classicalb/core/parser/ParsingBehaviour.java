@@ -37,9 +37,9 @@ public class ParsingBehaviour {
 	}
 	
 	public void debug_print(final String msg) {
-	    if (verbose) {
-	       System.out.println(msg);
-	    }
+		if (verbose) {
+			System.out.println(msg);
+		}
 	}
 
 	public boolean isPrintTime() {

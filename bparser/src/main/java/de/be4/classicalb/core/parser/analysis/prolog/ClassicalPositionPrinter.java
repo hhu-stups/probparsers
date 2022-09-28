@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.node.Node;
 import de.prob.prolog.output.IPrologTermOutput;
 
@@ -26,6 +27,9 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.nodeIds = nodeIds;
 	}
 
+	/**
+	 * This constructor shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
+	 */
 	public ClassicalPositionPrinter(final INodeIds nodeIds, int lineOffset, int columnOffset) {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
@@ -57,6 +61,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		return false;
 	}
 
+	@Override
 	public void printPosition(final Node node) {
 		final Integer id = nodeIds.lookup(node);
 		if (!printSourcePositions || uselessPositionInfo(node)) {
@@ -143,6 +148,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		}
 	}
 
+	@Override
 	public void setPrologTermOutput(final IPrologTermOutput pout) {
 		this.pout = pout;
 	}

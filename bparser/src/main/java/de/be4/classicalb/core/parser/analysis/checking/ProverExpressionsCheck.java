@@ -18,12 +18,14 @@ public class ProverExpressionsCheck extends OptimizedTraversingAdapter implement
 	private ParseOptions options;
 	private final List<CheckException> exceptions = new ArrayList<>();
 
+	@Override
 	public void runChecks(Start rootNode) {
 		if (options.isRestrictProverExpressions()) {
 			rootNode.apply(this);
 		}
 	}
 
+	@Override
 	public void setOptions(ParseOptions options) {
 		this.options = options;
 	}

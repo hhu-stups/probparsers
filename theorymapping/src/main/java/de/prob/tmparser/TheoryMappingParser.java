@@ -15,15 +15,13 @@ import de.prob.tmparser.internal.MappingVisitor;
 
 public class TheoryMappingParser {
 	static public Collection<OperatorMapping> parseTheoryMapping(
-			String theoryName, String filename) throws TheoryMappingException,
-			IOException {
+			String theoryName, String filename) throws IOException {
 		final Reader input = new FileReader(filename);
 		return parseTheoryMapping(theoryName, input);
 	}
 
 	static public Collection<OperatorMapping> parseTheoryMapping(
-			String theoryName, Reader input) throws TheoryMappingException,
-			IOException {
+			String theoryName, Reader input) throws IOException {
 		Start ast;
 		try {
 			ast = parse(input);

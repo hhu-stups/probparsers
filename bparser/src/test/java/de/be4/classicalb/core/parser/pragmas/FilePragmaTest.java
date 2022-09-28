@@ -24,8 +24,7 @@ public class FilePragmaTest {
 	@Test
 	public void testInvalidUseOfFilePragma() {
 		final String testMachine = "MACHINE foo CONSTANTS a PROPERTIES a /*@file \"foo1/foo2.mch\" */  END";
-		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getMessage().contains("A file pragma"));
+		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 	}
 
 	@Test(expected = BCompoundException.class)

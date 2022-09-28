@@ -1,19 +1,20 @@
 package de.be4.classicalb.core.parser.prios;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.*;
-import static org.junit.Assert.*;
-
 import java.util.List;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import util.PolySuite;
-import util.PolySuite.Config;
-import util.PolySuite.Configuration;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import static org.junit.Assert.assertTrue;
 
-@RunWith(PolySuite.class)
+@RunWith(Parameterized.class)
 public class OneBinopAssoziativityTests {
 	private final String op1;
 	private final String op2;
@@ -30,25 +31,9 @@ public class OneBinopAssoziativityTests {
 		this.associativity = associativity;
 	}
 
-	@Config
-	public static Configuration getConfig() {
-		final List<BinaryOperator> binOps = BinaryOperator.OPS;
-		return new Configuration() {
-			public int size() {
-				return binOps.size();
-			}
-
-			public BinaryOperator getTestValue(int index) {
-				BinaryOperator operator = binOps.get(index);
-				return operator;
-			}
-
-			public String getTestName(int index) {
-				BinaryOperator operator = binOps.get(index);
-				return "Assoziativity for " + operator.getName() + "("
-						+ operator.getSymbol() + ")";
-			}
-		};
+	@Parameterized.Parameters(name = "{0}")
+	public static List<BinaryOperator> data() {
+		return BinaryOperator.OPS;
 	}
 
 	@Test

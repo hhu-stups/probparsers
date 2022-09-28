@@ -13,28 +13,28 @@ import static org.junit.Assert.assertThrows;
 public class SubstitutionTest {
 
 	@Test
-	public void testParallelAssignWithComposedId() throws Exception {
+	public void testParallelAssignWithComposedId() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION xx.yy, aa.bb := 5, 3";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AAssignSubstitution([AIdentifierExpression([xx,yy]),AIdentifierExpression([aa,bb])],[AIntegerExpression(5),AIntegerExpression(3)])))",
+				"machine(assign(none,[identifier(none,'xx.yy'),identifier(none,'aa.bb')],[integer(none,5),integer(none,3)])).",
 				result);
 	}
 
 	@Test
-	public void testSimultaneousSubstitution() throws Exception {
+	public void testSimultaneousSubstitution() throws BCompoundException {
 		final String testMachine = "MACHINE test OPERATIONS foo = skip || skip END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertEquals(
-				"Start(AAbstractMachineParseUnit(AMachineHeader([test],[]),[AOperationsMachineClause([AOperation([],[foo],[],AParallelSubstitution([ASkipSubstitution(),ASkipSubstitution()]))])]))",
+				"machine(abstract_machine(none,machine(none),machine_header(none,test,[]),[operations(none,[operation(none,identifier(none,foo),[],[],parallel(none,[skip(none),skip(none)]))])])).",
 				result);
 	}
 
 	@Test
 	public void testParallelAssignWithNonIdentifier() {
 		final String testMachine = "#SUBSTITUTION xx,yy,5  := 5, 3, zz";
-		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getTreeAsString(testMachine));
+		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		// final CheckException cause = (CheckException) e.getCause();
 		// assertEquals(1, e.getNodes().length);
 		// assertNotNull(e.getNodes()[0]);
@@ -43,89 +43,89 @@ public class SubstitutionTest {
 	@Test
 	public void testRenamedIdentifierInAnySubstitution() {
 		final String testMachine = "#SUBSTITUTION ANY x.y WHERE x.y = 1 THEN skip END ";
-		assertThrows(BCompoundException.class, () -> Helpers.getTreeAsString(testMachine));
+		assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 	}
 
 	@Test
-	public void testInvalidIdentifierListInAnySubstitution() throws BCompoundException {
+	public void testInvalidIdentifierListInAnySubstitution() {
 		final String testMachine = "#SUBSTITUTION ANY (x|->y) WHERE x = 1 & y = 1 THEN skip END ";
-		assertThrows(BCompoundException.class, () -> Helpers.getTreeAsString(testMachine));
+		assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 	}
 
 	@Test
-	public void testPreconditionBool() throws Exception {
+	public void testPreconditionBool() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION PRE 1=1 THEN skip END";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(APreconditionSubstitution(AEqualPredicate(AIntegerExpression(1),AIntegerExpression(1)),ASkipSubstitution())))",
+				"machine(precondition(none,equal(none,integer(none,1),integer(none,1)),skip(none))).",
 				result);
 	}
 
 	@Test
-	public void testParallelList() throws Exception {
+	public void testParallelList() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION skip || a:=b || x";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AParallelSubstitution([ASkipSubstitution(),AAssignSubstitution([AIdentifierExpression([a])],[AIdentifierExpression([b])]),AOpSubstitution(AIdentifierExpression([x]),[])])))",
+				"machine(parallel(none,[skip(none),assign(none,[identifier(none,a)],[identifier(none,b)]),operation_call(none,identifier(none,x),[],[])])).",
 				result);
 	}
 
 	@Test
-	public void testSequenceList() throws Exception {
+	public void testSequenceList() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION skip ; x ; y";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
+				"machine(sequence(none,[skip(none),operation_call(none,identifier(none,x),[],[]),operation_call(none,identifier(none,y),[],[])])).",
 				result);
 	}
 
 	@Test
-	public void testParallelAndSequence() throws Exception {
+	public void testParallelAndSequence() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION skip || x ; y";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([AParallelSubstitution([ASkipSubstitution(),AOpSubstitution(AIdentifierExpression([x]),[])]),AOpSubstitution(AIdentifierExpression([y]),[])])))",
+				"machine(sequence(none,[parallel(none,[skip(none),operation_call(none,identifier(none,x),[],[])]),operation_call(none,identifier(none,y),[],[])])).",
 				result);
 	}
 
 	@Test
-	public void testOperation1() throws Exception {
+	public void testOperation1() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION op1;op2(x)";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(ASequenceSubstitution([AOpSubstitution(AIdentifierExpression([op1]),[]),AOpSubstitution(AIdentifierExpression([op2]),[AIdentifierExpression([x])])])))",
+				"machine(sequence(none,[operation_call(none,identifier(none,op1),[],[]),operation_call(none,identifier(none,op2),[],[identifier(none,x)])])).",
 				result);
 	}
 
 	@Test
-	public void testOperation2() throws Exception {
+	public void testOperation2() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION function(x)(y)";
-		Helpers.getTreeAsString(testMachine);
+		Helpers.getMachineAsPrologTerm(testMachine);
 	}
 
 	@Test
-	public void testFunctionSubstitution() throws Exception {
+	public void testFunctionSubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION\nf(x) := y";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AAssignSubstitution([AFunctionExpression(AIdentifierExpression([f]),[AIdentifierExpression([x])])],[AIdentifierExpression([y])])))",
+				"machine(assign(none,[function(none,identifier(none,f),[identifier(none,x)])],[identifier(none,y)])).",
 				result);
 
 	}
 
 	@Test
-	public void testMultiFunctionSubstitution() throws Exception {
+	public void testMultiFunctionSubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION f(x),g(y),h := a,b,c";
-		final String result = Helpers.getTreeAsString(testMachine);
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"Start(ASubstitutionParseUnit(AAssignSubstitution([AFunctionExpression(AIdentifierExpression([f]),[AIdentifierExpression([x])]),AFunctionExpression(AIdentifierExpression([g]),[AIdentifierExpression([y])]),AIdentifierExpression([h])],[AIdentifierExpression([a]),AIdentifierExpression([b]),AIdentifierExpression([c])])))",
+				"machine(assign(none,[function(none,identifier(none,f),[identifier(none,x)]),function(none,identifier(none,g),[identifier(none,y)]),identifier(none,h)],[identifier(none,a),identifier(none,b),identifier(none,c)])).",
 				result);
 
 	}

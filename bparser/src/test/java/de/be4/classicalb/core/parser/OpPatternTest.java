@@ -11,13 +11,13 @@ import static org.junit.Assert.assertEquals;
 public class OpPatternTest {
 	@Test
 	public void testNoArgs() throws BCompoundException {
-		checkParser("no arguments", "operation1", "operation1");
+		checkParser("no arguments", "operation1", "oppattern(none,operation1,[])");
 	}
 
 	@Test
 	public void testSimpleArgument() throws BCompoundException {
 		checkParser("simple argument", "operation1(5)",
-				"operation1ADefArgpattern(AIntegerExpression(5))");
+				"oppattern(none,operation1,[def(none,integer(none,5))])");
 	}
 
 	@Test
@@ -25,19 +25,18 @@ public class OpPatternTest {
 		checkParser(
 				"simple argument",
 				"operation1(5,7)",
-				"operation1ADefArgpattern(AIntegerExpression(5))ADefArgpattern(AIntegerExpression(7))");
+				"oppattern(none,operation1,[def(none,integer(none,5)),def(none,integer(none,7))])");
 	}
 
 	@Test
 	public void testEmptyArguments() throws BCompoundException {
 		checkParser("simple argument", "operation1(5,_)",
-				"operation1ADefArgpattern(AIntegerExpression(5))AUndefArgpattern()");
+				"oppattern(none,operation1,[def(none,integer(none,5)),undef(none)])");
 	}
 
 	private void checkParser(final String description, final String oppattern,
 			final String expected) throws BCompoundException {
-		final String parsed = Helpers.getTreeAsString(BParser.OPERATION_PATTERN_PREFIX + oppattern);
-		assertEquals(description, "Start(AOppatternParseUnit(" + expected
-				+ "))", parsed);
+		final String parsed = Helpers.getMachineAsPrologTerm(BParser.OPERATION_PATTERN_PREFIX + oppattern);
+		assertEquals(description, "machine(" + expected + ").", parsed);
 	}
 }

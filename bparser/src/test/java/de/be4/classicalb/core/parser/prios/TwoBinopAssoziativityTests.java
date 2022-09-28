@@ -1,64 +1,47 @@
 package de.be4.classicalb.core.parser.prios;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.*;
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import util.PolySuite;
-import util.PolySuite.Config;
-import util.PolySuite.Configuration;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
-@RunWith(PolySuite.class)
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
+import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(Parameterized.class)
 public class TwoBinopAssoziativityTests {
 	private final BinaryOperator op1;
 	private final BinaryOperator op2;
 	private EAssoc assoc;
 
-	public TwoBinopAssoziativityTests(Tuple t) {
-		this.op1 = t.getOp1();
-		this.op2 = t.getOp2();
-		this.assoc = t.getAssoc();
+	public TwoBinopAssoziativityTests(final BinaryOperator op1, final BinaryOperator op2, final EAssoc assoc) {
+		this.op1 = op1;
+		this.op2 = op2;
+		this.assoc = assoc;
 	}
 
-	@Config
-	public static Configuration getConfig() {
+	@Parameterized.Parameters(name = "{0}, {1}")
+	public static List<Object[]> getConfig() {
 		List<BinaryOperator> binOps = BinaryOperator.OPS;
-		final List<Tuple> ops = new ArrayList<Tuple>(binOps.size()
-				* binOps.size());
+		final List<Object[]> ops = new ArrayList<>(binOps.size() * binOps.size());
 
 		for (BinaryOperator op1 : binOps) {
 			for (BinaryOperator op2 : binOps) {
 				if (op1.getPriority() == op2.getPriority()
-						&& op1.getAssociativity() == op2.getAssociativity())
-					ops.add(new Tuple(op1, op2, op1.getAssociativity()));
+						&& op1.getAssociativity() == op2.getAssociativity()) {
+					ops.add(new Object[] {op1, op2, op1.getAssociativity()});
+				}
 			}
 		}
 
-		return new Configuration() {
-			public int size() {
-				return ops.size();
-			}
-
-			public Tuple getTestValue(int index) {
-				Tuple operators = ops.get(index);
-				return operators;
-			}
-
-			public String getTestName(int index) {
-				Tuple t = ops.get(index);
-				BinaryOperator left = t.getOp1();
-				BinaryOperator right = t.getOp2();
-				return "Assoziativity for " + left.getName() + " / "
-						+ right.getName() + "(" + left.getSymbol() + " "
-						+ right.getSymbol() + ")";
-			}
-		};
+		return ops;
 	}
 
 	@Test

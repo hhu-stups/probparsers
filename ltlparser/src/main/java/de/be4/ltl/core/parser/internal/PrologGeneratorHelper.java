@@ -48,11 +48,11 @@ final class PrologGeneratorHelper {
 	public void caseUnparsed(final UniversalToken token) {
 		pto.openTerm("ap");
 		try {
-			specParser.parsePredicate(pto, token.getText(), true);
+			specParser.parsePredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support predicates
+			// if the formalism does not support predicates
 			throw createAdapterException(token, e);
 		}
 		pto.closeTerm();
@@ -61,24 +61,24 @@ final class PrologGeneratorHelper {
 	public void caseUnparsedPredicate(final UniversalToken token) {
 		// pto.openTerm("ap");
 		try {
-			specParser.parsePredicate(pto, token.getText(), true);
+			specParser.parsePredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support predicates
+			// if the formalism does not support predicates
 			throw createAdapterException(token, e);
 		}
-        //pto.closeTerm();
+		//pto.closeTerm();
 	}
 
 	public void caseUnparsedExpression(final UniversalToken token) {
 		//pto.openTerm("ae"); // from the context it is clear in the AST that we expect an expression
 		try {
-			specParser.parseExpression(pto, token.getText(), true);
+			specParser.parseExpression(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
-		    // if the formalism does not support expressions
+			// if the formalism does not support expressions
 			throw createAdapterException(token, e);
 		}
 		//pto.closeTerm();
@@ -118,7 +118,7 @@ final class PrologGeneratorHelper {
 
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
-			specParser.parseTransitionPredicate(pto, token.getText(), true);
+			specParser.parseTransitionPredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
@@ -152,8 +152,7 @@ final class PrologGeneratorHelper {
 
 	private LtlAdapterException createAdapterException(
 			final UniversalToken token, final Throwable orig) {
-		final LtlParseException ex = new LtlParseException(token,
-				orig.getMessage());
+		final LtlParseException ex = new LtlParseException(token, orig);
 		return new LtlAdapterException(ex);
 	}
 

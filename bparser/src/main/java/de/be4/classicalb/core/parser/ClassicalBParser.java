@@ -23,8 +23,14 @@ public class ClassicalBParser implements ProBParserBase {
 	}
 
 	@Override
-	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap)
+	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap) throws ProBParseException {
+		this.parseExpression(pto, expression, wrap, 1, 1);
+	}
+
+	@Override
+	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap, int startLine, int startColumn)
 			throws ProBParseException {
+		bparser.setStartPosition(startLine, startColumn);
 		try {
 			Start ast = bparser.parseExpression(expression);
 			printAst(pto, ast, wrap, WRAPPER_EXPR);
@@ -34,8 +40,14 @@ public class ClassicalBParser implements ProBParserBase {
 	}
 
 	@Override
-	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap)
+	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap) throws ProBParseException {
+		this.parsePredicate(pto, predicate, wrap, 1, 1);
+	}
+
+	@Override
+	public void parsePredicate(final IPrologTermOutput pto, final String predicate, final boolean wrap, int startLine, int startColumn)
 			throws ProBParseException {
+		bparser.setStartPosition(startLine, startColumn);
 		try {
 			Start ast = bparser.parsePredicate(predicate);
 			printAst(pto, ast, wrap, WRAPPER_PRED);
@@ -45,8 +57,14 @@ public class ClassicalBParser implements ProBParserBase {
 	}
 
 	@Override
-	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap)
+	public void parseTransitionPredicate(final IPrologTermOutput pto, final String transPredicate, final boolean wrap) throws ProBParseException {
+		this.parseTransitionPredicate(pto, transPredicate, wrap, 1, 1);
+	}
+
+	@Override
+	public void parseTransitionPredicate(final IPrologTermOutput pto, final String trans, final boolean wrap, int startLine, int startColumn)
 			throws ProBParseException {
+		bparser.setStartPosition(startLine, startColumn);
 		try {
 			Start ast = bparser.parseTransition(trans);
 			printAst(pto, ast, wrap, WRAPPER_TRANS);

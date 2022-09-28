@@ -53,6 +53,9 @@ public class PreParser {
 	private final String modelFileName;
 	private final File directory;
 
+	private int startLine;
+	private int startColumn;
+
 	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
 			final List<String> doneDefFiles, final String modelFileName, final File directory,
 			ParseOptions parseOptions, IDefinitions definitions) {
@@ -65,14 +68,23 @@ public class PreParser {
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
 		definitionTypes.addAll(definitions.getTypes());
+
+		this.startLine = 1;
+		this.startColumn = 1;
 	}
 
 	public void setDebugOutput(final boolean debugOutput) {
 		this.debugOutput = debugOutput;
 	}
 
+	public void setStartPosition(final int line, final int column) {
+		this.startLine = line;
+		this.startColumn = column;
+	}
+
 	public void parse() throws PreParseException, IOException, BException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
+		preLexer.setPosition(this.startLine, this.startColumn);
 
 		final Parser preParser = new Parser(preLexer);
 		Start rootNode = null;
@@ -311,6 +323,7 @@ public class PreParser {
 		 * there type
 		 */
 		Collections.sort(list, new Comparator<Token>() {
+			@Override
 			public int compare(final Token o1, final Token o2) {
 				if (o1.getLine() == o2.getLine()) {
 					if (o1.getPos() == o2.getPos())
@@ -463,7 +476,7 @@ public class PreParser {
 		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
 		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
-		final de.be4.classicalb.core.parser.parser.Parser parser = new SabbleCCBParser(lexer);
+		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
 		return parser.parse();
 	}
 

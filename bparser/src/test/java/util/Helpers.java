@@ -22,16 +22,6 @@ import org.junit.Assert;
 import org.junit.function.ThrowingRunnable;
 
 public class Helpers {
-
-	public static String getTreeAsString(final String testMachine) throws BCompoundException {
-		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
-
-		final Ast2String ast2String = new Ast2String();
-		startNode.apply(ast2String);
-		return ast2String.toString();
-	}
-
 	public static String getPrettyPrint(final String testMachine) {
 		final BParser parser = new BParser("testcase");
 		Start startNode;
@@ -43,6 +33,23 @@ public class Helpers {
 		PrettyPrinter pp = new PrettyPrinter();
 		startNode.apply(pp);
 		return pp.getPrettyPrint();
+	}
+
+	/**
+	 * Clean up line separators in a Prolog term string,
+	 * so that it can be compared more easily using {@link Assert#assertEquals(Object, Object)} and similar methods.
+	 * 
+	 * @param term the Prolog term string to postprocess
+	 * @return {@code term} with line separators cleaned
+	 */
+	private static String postprocessPrologTerm(final String term) {
+		// Convert native line separators to \n
+		String termConv = term.replace(System.lineSeparator(), "\n");
+		// Remove trailing line separator (if any)
+		if (termConv.endsWith("\n")) {
+			termConv = termConv.substring(0, termConv.length() - 1);
+		}
+		return termConv;
 	}
 
 	public static String parseFile(String filename) throws IOException, BCompoundException {
@@ -62,15 +69,19 @@ public class Helpers {
 		final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFile(machineFile, parsingBehaviour);
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		rml.printAsProlog(pout);
-		return pout.toString();
+		return postprocessPrologTerm(pout.toString());
 	}
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
 		Start start = parser.parse(input, false);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getTreeAsPrologTerm(final Start ast) {
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
-		printAsProlog(start, pout);
-		return pout.toString();
+		printAsProlog(ast, pout);
+		return postprocessPrologTerm(pout.toString());
 	}
 
 	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
@@ -84,6 +95,22 @@ public class Helpers {
 		pout.closeTerm();
 		pout.fullstop();
 		pout.flush();
+	}
+
+	/**
+	 * Get the first {@code machine} term from a sequence of Prolog terms.
+	 * 
+	 * @param terms a sequence of Prolog terms in string form
+	 * @return the first {@code machine} term
+	 * @throws AssertionError if {@code terms} didn't contain any machine terms
+	 */
+	public static String getFirstMachineTerm(final String terms) {
+		for (final String line : terms.split("\n")) {
+			if (line.startsWith("machine(")) {
+				return line;
+			}
+		}
+		throw new AssertionError("No machine term found in string: " + terms);
 	}
 
 	/**

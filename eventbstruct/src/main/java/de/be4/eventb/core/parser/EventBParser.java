@@ -168,7 +168,13 @@ public class EventBParser {
 		return new EventBParseException(token, message);
 	}
 
+	// Deprecated, but do not remove yet! Camille still uses this method to get position info for errors (as of April 2022).
+	/**
+	 * @deprecated Please use the {@link PositionedNode} methods to get position information instead. All SableCC-generated nodes and tokens extend this class.
+	 */
+	@Deprecated
 	public SourcePositions getSourcePositions() {
+		// Deprecated, but do not remove yet! Camille still uses this method to get position info for errors (as of April 2022).
 		return sourcePositions;
 	}
 }

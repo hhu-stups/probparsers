@@ -173,6 +173,7 @@ public class Definitions extends IDefinitions {
 		}
 	}
 
+	@Override
 	public void addDefinitions(IDefinitions defs) throws PreParseException {
 		for (String def: defs.getDefinitionNames()) {
 			if (containsDefinition(def)) {

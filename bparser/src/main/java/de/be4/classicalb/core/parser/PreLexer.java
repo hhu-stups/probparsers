@@ -35,8 +35,13 @@ public class PreLexer extends Lexer {
 	public PreLexer(final PushbackReader in) {
 		super(in);
 	}
+
+	public void setPosition(final int line, final int column) {
+		this.line = line - 1;
+		this.pos = column - 1;
+	}
 	
-	
+	@Override
 	protected Token getToken() throws IOException, LexerException {
 		try {
 			// Please don't put any token processing code here!
@@ -62,7 +67,7 @@ public class PreLexer extends Lexer {
 
 	@Override
 	protected void filter() throws LexerException, IOException {
-	    //printState();
+		//printState();
 		checkComment();
 		checkMultiLineString();
 		optimizeToken();
@@ -175,7 +180,7 @@ public class PreLexer extends Lexer {
 	}
 
 	private void checkComment() {
-	    // switch to special COMMENT state and back
+		// switch to special COMMENT state and back
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.COMMENT;
@@ -186,7 +191,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() {
-	    // switch to special multiline_string_state state and back
+		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING_STATE;

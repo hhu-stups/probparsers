@@ -15,10 +15,12 @@ public class CachingDefinitionFileProvider extends PlainFileContentProvider
 		super();
 	}
 
+	@Override
 	public IDefinitions getDefinitions(final String filename) {
 		return store.get(filename);
 	}
 
+	@Override
 	public void storeDefinition(final String filename,
 			final IDefinitions definitions) {
 		store.put(filename, definitions);

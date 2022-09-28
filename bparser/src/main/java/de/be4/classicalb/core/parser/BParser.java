@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
-import de.be4.classicalb.core.parser.analysis.transforming.DescriptionCleaningTranslator;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -36,7 +35,6 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TPragmaFile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -74,6 +72,9 @@ public class BParser {
 	private final String fileName;
 	private File directory;
 
+	private int startLine;
+	private int startColumn;
+
 	private IDefinitionFileProvider contentProvider;
 
 	public static String getVersion() {
@@ -89,13 +90,31 @@ public class BParser {
 	}
 
 	public BParser(final String fileName) {
-		this.fileName = fileName;
-		this.parseOptions = new ParseOptions();
+		this(fileName, new ParseOptions());
 	}
 
 	public BParser(final String fileName, ParseOptions parseOptions) {
 		this.fileName = fileName;
 		this.parseOptions = parseOptions;
+
+		this.startLine = 1;
+		this.startColumn = 1;
+	}
+
+	/**
+	 * Pretend that the code being parsed starts at a different position than the start of the file (line 1, column 1).
+	 * This is useful when the code being parsed is actually part of a larger input,
+	 * for example embedded B predicates inside an LTL formula.
+	 * The line and column numbers may also be less than 1,
+	 * which is useful when the code has an artificial prefix
+	 * that shouldn't be counted as part of the actual input.
+	 * 
+	 * @param line the new starting line number (1-based)
+	 * @param column the new starting column number (1-based)
+	 */
+	public void setStartPosition(final int line, final int column) {
+		this.startLine = line;
+		this.startColumn = column;
 	}
 
 	public IDefinitionFileProvider getContentProvider() {
@@ -166,11 +185,15 @@ public class BParser {
 	}
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
-		final String theFormula = prefix + "\n" + input;
+		final String theFormula = prefix + " " + input;
+		final int oldStartColumn = this.startColumn;
 		try {
+			// Decrease the start column by the size of the implicitly added prefix
+			// so that the actual user input starts at the desired position.
+			this.startColumn -= prefix.length() + 1;
 			return this.parse(theFormula, false, new NoContentProvider());
-		} catch (BCompoundException e) {
-			throw e.withLinesOneOff();
+		} finally {
+			this.startColumn = oldStartColumn;
 		}
 	}
 
@@ -337,8 +360,9 @@ public class BParser {
 			 * Main parser
 			 */
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
+			lexer.setPosition(this.startLine, this.startColumn);
 			lexer.setParseOptions(parseOptions);
-			SabbleCCBParser parser = new SabbleCCBParser(lexer);
+			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 			final List<BException> bExceptionList = new ArrayList<>();
 
@@ -346,7 +370,7 @@ public class BParser {
 			 * Collect available definition declarations. Needs to be done now
 			 * cause they are needed by the following transformations.
 			 */
-			final DefinitionCollector collector = new DefinitionCollector(defTypes, this.definitions);
+			final DefinitionCollector collector = new DefinitionCollector(this.definitions);
 			collector.collectDefinitions(rootNode);
 			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
 			for (CheckException checkException : definitionsCollectorExceptions) {
@@ -381,10 +405,7 @@ public class BParser {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			String msg = getImprovedErrorMessageBasedOnTheErrorToken(token);
-			if (msg == null) {
-				msg = e.getLocalizedMessage();
-			}
+			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
 		} catch (BException e) {
@@ -410,19 +431,13 @@ public class BParser {
 		}
 	}
 
-	private String getImprovedErrorMessageBasedOnTheErrorToken(Token token) {
-		if (token instanceof TPragmaFile) {
-			return "A file pragma (/*@file ...*/) is not allowed here";
-		}
-		return null;
-	}
-
 	private DefinitionTypes preParsing(final boolean debugOutput, final Reader reader,
 			final IFileContentProvider contentProvider, File directory)
 					throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		preParser.setDebugOutput(debugOutput);
+		preParser.setStartPosition(this.startLine, this.startColumn);
 		preParser.parse();
 		reader.reset();
 		return preParser.getDefinitionTypes();
@@ -433,7 +448,6 @@ public class BParser {
 		OpSubstitutions.transform(rootNode, getDefinitions());
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
-			rootNode.apply(new DescriptionCleaningTranslator());
 		} catch (VisitorException e) {
 			throw e.getException();
 		}

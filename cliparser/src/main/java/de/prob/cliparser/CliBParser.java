@@ -90,6 +90,8 @@ public class CliBParser {
 
 		final String[] arguments = options.getRemainingOptions();
 		if (!options.isOptionSet(CLI_SWITCH_PREPL) && arguments.length != 1) {
+			System.err.println("\nYou have not provided a file to parse (nor specified the -prepl option).\n");
+			System.err.println("Here is how to use the parser:");
 			options.printUsage(System.err);
 			System.exit(-1);
 		}
@@ -195,21 +197,21 @@ public class CliBParser {
 				break;
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
-			    String newFVal = in.readLine();
-			    behaviour.debug_print("Setting fastprolog to "+newFVal);
-			    behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
+				String newFVal = in.readLine();
+				behaviour.debug_print("Setting fastprolog to "+newFVal);
+				behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 				break;
 			case compactpos:
-			    behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
+				behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
 				break;
 			case verbose:
-			    behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
+				behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
 				break;
 			case checkname:
-			    behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
+				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
 				break;
 			case lineno:
-			    behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
+				behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
 				break;
 			case machine:
 				String filename = in.readLine();
@@ -311,6 +313,10 @@ public class CliBParser {
 
 		try {
 			BParser parser = new BParser();
+			// Reduce starting line number by one
+			// so that the line with a #FORMULA, etc. prefix isn't counted
+			// and the actual formula is counted as line 1.
+			parser.setStartPosition(0, 1);
 			parser.setDefinitions(context);
 			Start start;
 			if (extended) {
@@ -330,7 +336,7 @@ public class CliBParser {
 				nodeIds = na;
 			}
 
-			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds, -1, 0);
+			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
 			pprinter.setPrintSourcePositions(behaviour.isAddLineNumbers(), behaviour.isCompactPrologPositions());
 			ASTProlog printer = new ASTProlog(pout, pprinter);
 
@@ -344,7 +350,7 @@ public class CliBParser {
 			// print("EXCEPTION NullPointerException" + System.lineSeparator());
 			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
-			PrologExceptionPrinter.printException(pout, e.withLinesOneOff());
+			PrologExceptionPrinter.printException(pout, e);
 		} catch (LexerException e) {
 			pout.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
 		} catch (IOException e) {

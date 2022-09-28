@@ -20,21 +20,23 @@ public class JoinedParserBase implements ProBParserBase {
 		}
 	}
 
+	@Override
 	public void parseExpression(final IPrologTermOutput pto,
 			final String expression, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		parse(Type.EXPR, pto, expression, wrap);
 	}
 
+	@Override
 	public void parsePredicate(final IPrologTermOutput pto,
 			final String predicate, final boolean wrap)
-			throws ProBParseException, UnsupportedOperationException {
+			throws ProBParseException {
 		parse(Type.PRED, pto, predicate, wrap);
 	}
 
+	@Override
 	public void parseTransitionPredicate(final IPrologTermOutput pto,
-			final String trans, final boolean wrap) throws ProBParseException,
-			UnsupportedOperationException {
+			final String trans, final boolean wrap) throws ProBParseException {
 		parse(Type.TRANS, pto, trans, wrap);
 	}
 

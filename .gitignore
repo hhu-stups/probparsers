@@ -13,3 +13,5 @@ build/
 
 # Junk from tests
 *.prob
+
+.DS_store

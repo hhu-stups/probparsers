@@ -190,27 +190,6 @@ public class BLexer extends Lexer {
 		funOpKeywordTokenClasses.add(TLast.class);
 		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
 		funOpKeywordTokenClasses.add(TConc.class);
-		// tree operators:
-		funOpKeywordTokenClasses.add(TTree.class);
-		funOpKeywordTokenClasses.add(TConst.class);
-		funOpKeywordTokenClasses.add(TTop.class);
-		funOpKeywordTokenClasses.add(TSons.class);
-		funOpKeywordTokenClasses.add(TPrefix.class);
-		funOpKeywordTokenClasses.add(TPostfix.class);
-		funOpKeywordTokenClasses.add(TSizet.class);
-		funOpKeywordTokenClasses.add(TMirror.class);
-		// tree node operators:
-		funOpKeywordTokenClasses.add(TRank.class);
-		funOpKeywordTokenClasses.add(TFather.class);
-		funOpKeywordTokenClasses.add(TSon.class);
-		funOpKeywordTokenClasses.add(TSubtree.class);
-		funOpKeywordTokenClasses.add(TArity.class);
-		// binary tree operators:
-		funOpKeywordTokenClasses.add(TBtree.class);
-		funOpKeywordTokenClasses.add(TBin.class);
-		funOpKeywordTokenClasses.add(TLeft.class);
-		funOpKeywordTokenClasses.add(TRight.class);
-		funOpKeywordTokenClasses.add(TInfix.class);
 		
 		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
@@ -339,17 +318,27 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
+	/**
+	 * @deprecated Use {@link #BLexer(PushbackReader, DefinitionTypes)} instead.
+	 *     The {@code tokenCountPrediction} parameter has no effect.
+	 */
+	@Deprecated
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions, final int tokenCountPrediction) {
+		this(in, definitions);
+	}
+
+	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
 		this.definitions = definitions;
 	}
 
-	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
-		this(in, definitions, -1);
-	}
-
 	public BLexer(final PushbackReader in) {
 		this(in, null);
+	}
+
+	public void setPosition(final int line, final int column) {
+		this.line = line - 1;
+		this.pos = column - 1;
 	}
 
 	private Token lastToken;
@@ -358,19 +347,19 @@ public class BLexer extends Lexer {
 		if (token == null) {
 			return;
 		}
-		if (token instanceof TWhiteSpace || token instanceof TLineComment ||
+		if (token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment ||
 			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
-		} else if (lastToken == null) {
-			lastToken = token;
-			return;
 		}
-		Class<? extends Token> lastTokenClass = lastToken.getClass();
-		Class<? extends Token> tokenClass = token.getClass();
 
-		if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
-			checkForInvalidCombinations(lastTokenClass, tokenClass);
-			// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
+		if (lastToken != null) {
+			Class<? extends Token> lastTokenClass = lastToken.getClass();
+			Class<? extends Token> tokenClass = token.getClass();
+			
+			if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
+				checkForInvalidCombinations(lastTokenClass, tokenClass);
+				// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
+			}
 		}
 
 		lastToken = token;
@@ -420,7 +409,13 @@ public class BLexer extends Lexer {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
 
-		if (state.equals(State.NORMAL)) {
+		if (token instanceof TCommentEnd) {
+			commentBuffer.append(token.getText());
+			comment.setText(commentBuffer.toString());
+			token = comment;
+			comment = null;
+			commentBuffer = null;
+		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.COMMENT)) {
@@ -489,22 +484,11 @@ public class BLexer extends Lexer {
 		if (comment == null) {
 			commentBuffer = new StringBuilder(token.getText());
 			comment = token;
-			token = null;
 		} else {
 			commentBuffer.append(token.getText());
-
-			// end of comment reached?
-			if (token instanceof TCommentEnd) {
-				comment.setText(commentBuffer.toString());
-				token = comment;
-				comment = null;
-				commentBuffer = null;
-				state = State.NORMAL;
-
-			} else {
-				token = null;
-			}
+			assert !(token instanceof TCommentEnd); // end of comment now handled in filter
 		}
+		token = null;
 	}
 
 	private void optimizeToken() {
