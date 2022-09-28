@@ -20,31 +20,31 @@ public class VOScopingTest {
 	@Test
 	public void testSequential() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
-		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
+		voParser.registerTask("MC1", VTType.TRACE);
+		voParser.registerTask("TR1", VTType.TRACE);
 		voParser.scopeCheck("MC1;TR1");
 	}
 
 	@Test(expected = VOParseException.class)
 	public void testSequentialError() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
+		voParser.registerTask("MC1", VTType.TRACE);
 		voParser.scopeCheck("MC1;TR1");
 	}
 
 	@Test
 	public void testAnd() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
-		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
+		voParser.registerTask("MC1", VTType.TRACE);
+		voParser.registerTask("TR1", VTType.TRACE);
 		voParser.scopeCheck("MC1 & TR1");
 	}
 
 	@Test
 	public void testOr() throws VOParseException {
 		VOParser voParser = new VOParser();
-		voParser.registerTask("MC1", VTType.SEARCHING_GOAL);
-		voParser.registerTask("TR1", VTType.TRACE_REPLAY);
+		voParser.registerTask("MC1", VTType.TRACE);
+		voParser.registerTask("TR1", VTType.TRACE);
 		voParser.scopeCheck("MC1 or TR1");
 	}
 

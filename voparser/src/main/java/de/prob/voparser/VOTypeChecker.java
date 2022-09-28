@@ -109,23 +109,11 @@ public class VOTypeChecker extends DepthFirstAdapter {
 			case RESET:
 				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
 				break;
-			case TRACE_REPLAY:
+			case TRACE:
 				valid = newAnimatorState.contains(AnimatorState.TRACE);
 				break;
-			case STATE_SPACE_VISUALIZATION:
+			case STATE_SPACE:
 				valid = newAnimatorState.contains(AnimatorState.STATE_SPACE);
-				break;
-			case TRACE_VISUALIZATION:
-				valid = newAnimatorState.contains(AnimatorState.TRACE);
-				break;
-			case STATE_SPACE_COVERAGE:
-				valid = newAnimatorState.contains(AnimatorState.STATE_SPACE);
-				break;
-			case TRACE_COVERAGE:
-				valid = newAnimatorState.contains(AnimatorState.TRACE);
-				break;
-			case SEARCHING_GOAL:
-				newAnimatorState = newAnimatorState.cons(AnimatorState.TRACE);
 				break;
 			case CHECKING_PROP:
 				newAnimatorState = newAnimatorState.disjoin(AnimatorState.TRACE);
@@ -133,6 +121,8 @@ public class VOTypeChecker extends DepthFirstAdapter {
 			case EXPLORING_STATE_SPACE:
 				newAnimatorState = newAnimatorState.disjoin(AnimatorState.TRACE);
 				newAnimatorState = newAnimatorState.cons(AnimatorState.STATE_SPACE);
+				break;
+			default:
 				break;
 		}
 		if(!valid) {
