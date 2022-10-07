@@ -163,7 +163,7 @@ public class BParser {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
-		return parse(content, verbose, contentProvider);
+		return parse(content, verbose, true, contentProvider);
 	}
 
 	/**
@@ -181,7 +181,7 @@ public class BParser {
 	 */
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
-		return parser.parse(input, false, new NoContentProvider());
+		return parser.parse(input, false, true, new NoContentProvider());
 	}
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
@@ -191,7 +191,9 @@ public class BParser {
 			// Decrease the start column by the size of the implicitly added prefix
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
-			return this.parse(theFormula, false, new NoContentProvider());
+			return this.parse(theFormula, false, 
+			                  false, // pre-parsing is not required; there can be no DEFINITIONS inside
+			                  new NoContentProvider());
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
@@ -282,7 +284,17 @@ public class BParser {
 	 *             if the B machine cannot be parsed
 	 */
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
-		return parse(input, debugOutput, new NoContentProvider());
+		return parse(input, debugOutput, true, new NoContentProvider());
+	}
+	
+	public Start parse(final String input, final boolean debugOutput, 
+	                   final boolean preparseNecessary) throws BCompoundException {
+		return parse(input, debugOutput, preparseNecessary, new NoContentProvider());
+	}
+	
+	public Start parse(final String input, final boolean debugOutput, 
+	                   final IFileContentProvider contentProvider) throws BCompoundException {
+	     return parse(input, debugOutput, true, contentProvider)  ;                 
 	}
 
 	/**
@@ -292,6 +304,8 @@ public class BParser {
 	 *            The {@link String} to be parsed
 	 * @param debugOutput
 	 *            output debug messages on standard out?
+	 * @param preparseNecessary
+	 *            should pre-parsing be performed to detect DEFINITION types
 	 * @param contentProvider
 	 *            A {@link IFileContentProvider} that is able to load content of
 	 *            referenced files during the parsing process. The content
@@ -338,7 +352,10 @@ public class BParser {
 	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
 	 */
-	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider)
+	public Start parse(final String input,
+	                   final boolean debugOutput,
+	                   final boolean preparseNecessary,
+	                   final IFileContentProvider contentProvider)
 			throws BCompoundException {
 		final Reader reader = new StringReader(input);
 		try {
@@ -354,7 +371,10 @@ public class BParser {
 			 * identifier token "def" by a TDefLiteralPredicate which will be
 			 * excepted by the parser
 			 */
-			final DefinitionTypes defTypes = preParsing(debugOutput, reader, contentProvider, directory);
+			 
+			final DefinitionTypes defTypes = ( preparseNecessary
+			          ? preParsing(debugOutput, reader, contentProvider, directory)
+			          : new DefinitionTypes() ); // return empty list
 
 			/*
 			 * Main parser

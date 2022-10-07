@@ -308,7 +308,8 @@ public class CliBParser {
 		pout.flush();
 	}
 
-	private static void parseFormulaInternal(String theFormula, IDefinitions context, final ParsingBehaviour behaviour, final boolean extended) {
+	private static void parseFormulaInternal(String theFormula, IDefinitions context, 
+	                                         final ParsingBehaviour behaviour, final boolean extended) {
 		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 
 		try {
@@ -322,7 +323,7 @@ public class CliBParser {
 			if (extended) {
 				start = parser.eparse(theFormula, context);
 			} else {
-				start = parser.parse(theFormula, false); // debugOutput=false
+				start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
 			}
 
 			// In the compact position format, node IDs are not used,
