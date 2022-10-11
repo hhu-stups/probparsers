@@ -184,6 +184,22 @@ public class CliBParser {
 			case gitsha:
 				print(BParser.getGitSha() + System.lineSeparator());
 				break;
+			case commandsupported:
+				// Check if the given command is supported by this version of the parser.
+				String commandToCheck = in.readLine();
+				try {
+					EPreplCommands.valueOf(commandToCheck);
+				} catch (IllegalArgumentException ignored) {
+					print("false." + System.lineSeparator());
+					break;
+				}
+				print("true." + System.lineSeparator());
+				break;
+			case featuresupported:
+				// Check if the given feature is supported by this version of the parser.
+				// There are no features defined yet, but we already support this command for future-proofing.
+				print("false." + System.lineSeparator());
+				break;
 			case definition:
 				// sending a new DEFINITION to the parser
 				String name = in.readLine();

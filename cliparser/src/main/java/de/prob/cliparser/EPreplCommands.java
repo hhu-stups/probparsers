@@ -4,6 +4,8 @@ public enum EPreplCommands {
 	version,
 	shortversion,
 	gitsha,
+	commandsupported,
+	featuresupported,
 	definition,
 	resetdefinitions,
 	fastprolog,
