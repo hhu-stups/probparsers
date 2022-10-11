@@ -8,6 +8,8 @@ public enum EPreplCommands {
 	featuresupported,
 	definition,
 	resetdefinitions,
+	getoption,
+	setoption,
 	fastprolog,
 	compactpos,
 	verbose,
