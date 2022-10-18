@@ -17,7 +17,7 @@ public class BLexer extends Lexer {
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
 	
-	private boolean parse_definition=false;
+	private boolean parse_definition=false; // a flag to indicate when the lexer is used to parse Definitions
 
 	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
@@ -25,6 +25,7 @@ public class BLexer extends Lexer {
 	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> literalTokenClasses = new HashSet<>();
 	
+	// called by PreParser
 	public void setLexerPreparse(){
 		parse_definition = true; 
 	}
@@ -448,14 +449,14 @@ public class BLexer extends Lexer {
 			 */
 			if (type != null) {
 				switch (type) {
-				case Predicate:
+				case Predicate: // generate def_literal_substitution token
 					final Token predToken = new TDefLiteralPredicate(token.getText());
 					predToken.setLine(token.getLine());
 					predToken.setPos(token.getPos());
 					token = predToken;
 					break;
 
-				case Substitution:
+				case Substitution:  // generate def_literal_predicate token
 					final Token substToken = new TDefLiteralSubstitution(token.getText());
 					substToken.setLine(token.getLine());
 					substToken.setPos(token.getPos());

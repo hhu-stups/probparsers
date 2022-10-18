@@ -147,6 +147,48 @@ public class CliBParser {
 		}
 	}
 	
+	private static String getNamedOption(ParsingBehaviour behaviour, String name) {
+		switch (name) {
+			case "addLineNumbers":
+				return String.valueOf(behaviour.isAddLineNumbers());
+			case "verbose":
+				return String.valueOf(behaviour.isVerbose());
+			case "fastPrologOutput":
+				return String.valueOf(behaviour.isFastPrologOutput());
+			case "compactPrologPositions":
+				return String.valueOf(behaviour.isCompactPrologPositions());
+			case "machineNameMustMatchFileName":
+				return String.valueOf(behaviour.isMachineNameMustMatchFileName());
+			default:
+				// Unknown/unsupported option
+				return null;
+		}
+	}
+	
+	private static boolean setNamedOption(ParsingBehaviour behaviour, String name, String value) {
+		switch (name) {
+			case "addLineNumbers":
+				behaviour.setAddLineNumbers(Boolean.parseBoolean(value));
+				break;
+			case "verbose":
+				behaviour.setVerbose(Boolean.parseBoolean(value));
+				break;
+			case "fastPrologOutput":
+				behaviour.setFastPrologOutput(Boolean.parseBoolean(value));
+				break;
+			case "compactPrologPositions":
+				behaviour.setCompactPrologPositions(Boolean.parseBoolean(value));
+				break;
+			case "machineNameMustMatchFileName":
+				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
+				break;
+			default:
+				// Unknown/unsupported option
+				return false;
+		}
+		return true;
+	}
+	
 	private static void runPRepl(ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
@@ -184,6 +226,22 @@ public class CliBParser {
 			case gitsha:
 				print(BParser.getGitSha() + System.lineSeparator());
 				break;
+			case commandsupported:
+				// Check if the given command is supported by this version of the parser.
+				String commandToCheck = in.readLine();
+				try {
+					EPreplCommands.valueOf(commandToCheck);
+				} catch (IllegalArgumentException ignored) {
+					print("false." + System.lineSeparator());
+					break;
+				}
+				print("true." + System.lineSeparator());
+				break;
+			case featuresupported:
+				// Check if the given feature is supported by this version of the parser.
+				// There are no features defined yet, but we already support this command for future-proofing.
+				print("false." + System.lineSeparator());
+				break;
 			case definition:
 				// sending a new DEFINITION to the parser
 				String name = in.readLine();
@@ -194,6 +252,41 @@ public class CliBParser {
 			case resetdefinitions:
 				// remove all DEFINITIONS 
 				context = new MockedDefinitions();
+				break;
+			case getoption:
+				// Generic command for getting the current value of an option.
+				// Fails safely for unknown/unsupported options.
+				String getOptionName = in.readLine();
+				String getOptionValue = getNamedOption(behaviour, getOptionName);
+				final PrologTermOutput getOptionOut = new PrologTermOutput(socketWriter);
+				if (getOptionValue != null) {
+					getOptionOut.openTerm("value");
+					getOptionOut.printAtom(getNamedOption(behaviour, getOptionName));
+					getOptionOut.closeTerm();
+				} else {
+					getOptionOut.printAtom("unsupported");
+				}
+				getOptionOut.fullstop();
+				getOptionOut.flush();
+				break;
+			case setoption:
+				// Generic command for changing parser options.
+				// Fails safely for unknown/unsupported options.
+				// Replaces the single-option commands below.
+				String setOptionName = in.readLine();
+				String setOptionValue = in.readLine();
+				String setOptionPrevValue = getNamedOption(behaviour, setOptionName);
+				boolean ok = setNamedOption(behaviour, setOptionName, setOptionValue);
+				final PrologTermOutput setOptionOut = new PrologTermOutput(socketWriter);
+				if (ok) {
+					setOptionOut.openTerm("prev_value");
+					setOptionOut.printAtom(setOptionPrevValue);
+					setOptionOut.closeTerm();
+				} else {
+					setOptionOut.printAtom("unsupported");
+				}
+				setOptionOut.fullstop();
+				setOptionOut.flush();
 				break;
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
@@ -308,7 +401,8 @@ public class CliBParser {
 		pout.flush();
 	}
 
-	private static void parseFormulaInternal(String theFormula, IDefinitions context, final ParsingBehaviour behaviour, final boolean extended) {
+	private static void parseFormulaInternal(String theFormula, IDefinitions context, 
+	                                         final ParsingBehaviour behaviour, final boolean extended) {
 		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 
 		try {
@@ -322,7 +416,7 @@ public class CliBParser {
 			if (extended) {
 				start = parser.eparse(theFormula, context);
 			} else {
-				start = parser.parse(theFormula, false); // debugOutput=false
+				start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
 			}
 
 			// In the compact position format, node IDs are not used,
