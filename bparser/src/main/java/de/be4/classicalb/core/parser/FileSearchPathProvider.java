@@ -61,6 +61,6 @@ public class FileSearchPathProvider implements Iterable<File> {
 				return f.getCanonicalFile();
 			}
 		}
-		throw new FileNotFoundException("did not found: " + fileName );
+		throw new FileNotFoundException("did not find: " + fileName );
 	}
 }
