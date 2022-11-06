@@ -94,16 +94,16 @@ Tokens
   {actions} action_char = ([0 .. 0xffff]);
 
   /* Boolean Operators */
-  {ltl} implies = '=>' | 0x21d2 | 'implies';
-  {ltl} equivalent = '<=>' | 0x21d4 | 'equivalent';
-  {ltl} and = '&' | 0x2227 | 'and';  // TO DO: allow Spin syntax?
-  {ltl} or = 'or' | 0x2228 | '||';
+  {ltl} implies = '=>' | 0x21d2 | 'implies' | '->';  // we also allow Spin syntax ->
+  {ltl} equivalent = '<=>' | 0x21d4 | 'equivalent' | '<->'; // we also allow Spin syntax <->
+  {ltl} and = '&' | 0x2227 | 'and' | '&&';  // we also allow Spin syntax &&
+  {ltl} or = 'or' | 0x2228 | '||'; // we also allow spin syntax ||
   {ltl} not = 'not' | 0x00ac; // conflict with forall | '!';
 
   /* LTL temporal operators */
   {ltl} until =     'U' | 'until' | 'stronguntil';
   {ltl} weakuntil = 'W' | 'weakuntil';
-  {ltl} release =   'R' | 'release';
+  {ltl} release =   'R' | 'release'; // Spin syntax is V for release ?
 
   {ltl} globally = 'G' | 'globally'   | 'always' | 0x25a1; // Unicode White Square; TODO support ASCII '[]'
   {ltl} finally =  'F' | 'eventually' | 'finally' | '<>' | 0x22c4; // Unicode Diamond Operator
