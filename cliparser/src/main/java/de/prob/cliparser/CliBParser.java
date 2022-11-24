@@ -159,6 +159,10 @@ public class CliBParser {
 				return String.valueOf(behaviour.isCompactPrologPositions());
 			case "machineNameMustMatchFileName":
 				return String.valueOf(behaviour.isMachineNameMustMatchFileName());
+			case "startLineNumber":
+				return String.valueOf(behaviour.getStartLineNumber());
+			case "startColumnNumber":
+				return String.valueOf(behaviour.getStartColumnNumber());
 			default:
 				// Unknown/unsupported option
 				return null;
@@ -181,6 +185,12 @@ public class CliBParser {
 				break;
 			case "machineNameMustMatchFileName":
 				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
+				break;
+			case "startLineNumber":
+				behaviour.setStartLineNumber(Integer.parseInt(value));
+				break;
+			case "startColumnNumber":
+				behaviour.setStartColumnNumber(Integer.parseInt(value));
 				break;
 			default:
 				// Unknown/unsupported option
@@ -410,7 +420,7 @@ public class CliBParser {
 			// Reduce starting line number by one
 			// so that the line with a #FORMULA, etc. prefix isn't counted
 			// and the actual formula is counted as line 1.
-			parser.setStartPosition(0, 1);
+			parser.setStartPosition(behaviour.getStartLineNumber()-1, behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
 			Start start;
 			if (extended) {

@@ -10,6 +10,8 @@ public class ParsingBehaviour {
 	private boolean fastPrologOutput = false; // -fastprolog flag in CliBParser
 	private boolean compactPositions = true; // false means use old style pos/5 positions
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
+	private int startLineNumber = 1;
+	private int startColumnNumber = 1;
 	
 
 	public boolean isPrologOutput() {
@@ -81,4 +83,19 @@ public class ParsingBehaviour {
 		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
 	}
 
+	public int getStartLineNumber() {
+		return this.startLineNumber;
+	}
+
+	public void setStartLineNumber(int startLineNumber) {
+		this.startLineNumber = startLineNumber;
+	}
+
+	public int getStartColumnNumber() {
+		return this.startColumnNumber;
+	}
+
+	public void setStartColumnNumber(int startColumnNumber) {
+		this.startColumnNumber = startColumnNumber;
+	}
 }
