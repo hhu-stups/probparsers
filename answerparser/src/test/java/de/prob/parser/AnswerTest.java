@@ -9,17 +9,12 @@ import de.prob.core.sablecc.node.Start;
 public class AnswerTest {
 	private static final String PARSETREE_WAS_NULL = "Parsetree was null";
 
-	// executeOperation(1).
-	// no
 	@Test
 	public void testNo() {
 		final String testString = "no";
 		final Start rootNode = ProBResultParser.parse(testString);
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
-
-	// executeOperationNr(1).
-	// yes([])
 
 	@Test
 	public void testYes() {
@@ -42,7 +37,6 @@ public class AnswerTest {
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
-	// yes('.'(=('CurID',root),[]))
 	@Test
 	public void testGetANumber() {
 		final String testString = "yes('.'(=('CurId',root),[]))";
@@ -50,7 +44,6 @@ public class AnswerTest {
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
-	// yes('.'(=('CurID',-1),[]))
 	@Test
 	public void testGetNegativeNumber() {
 		final String testString = "yes('.'(=('CurId',-1),[]))";
@@ -58,57 +51,31 @@ public class AnswerTest {
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
-	// computeOperationsForState(root,X).
-	// yes('.'(=('X','.'(op(initialise_machine([]),0,[]),[])),[]))
-
 	@Test
 	public void testOperation() {
 		final String testString = "yes('.'(=('X','.'(op(initialise_machine([]),0,[],root),[])),[]))";
 		final Start rootNode = ProBResultParser.parse(testString);
-
-		// new RootNode(new SableAST(rootNode),
-		// new HashMap<SetElementItem, String>());
-
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
 	@Test
 	public void testOperation3() {
 		final String testString = "yes('.'(=('PLOps','.'(op(initialise_machine,1,[],root),[])),[]))";
-
 		final Start rootNode = ProBResultParser.parse(testString);
-
-		// new RootNode(new SableAST(rootNode),
-		// new HashMap<SetElementItem, String>());
-
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
-
-	// computeOperationsForState(7,X).
-	// yes('.'(=('X','.'(op(add(fd(3,'Name'),fd(1,'Code')),11,[]),'.'(op(add(fd(3,'Name'),fd(2,'Code')),12,[]),'.'(op(lookup(fd(1,'Name')),7,'.'(fd(1,'Code'),[])),'.'(op(lookup(fd(2,'Name')),7,'.'(fd(1,'Code'),[])),'.'(op(update(fd(1,'Name'),fd(1,'Code')),7,[]),'.'(op(update(fd(1,'Name'),fd(2,'Code')),13,[]),'.'(op(update(fd(2,'Name'),fd(1,'Code')),7,[]),'.'(op(update(fd(2,'Name'),fd(2,'Code')),8,[]),[]))))))))),[]))
 
 	@Test
 	public void testOperation2() {
 		final String testString = "yes('.'(=('X','.'(op(add(fd(3,'Name'),fd(1,'Code')),11,[],0),'.'(op(add(fd(3,'Name'),fd(2,'Code')),12,[],0),'.'(op(lookup(fd(1,'Name')),7,'.'(fd(1,'Code'),[]),0),'.'(op(lookup(fd(2,'Name')),7,'.'(fd(1,'Code'),[]),0),'.'(op(update(fd(1,'Name'),fd(1,'Code')),7,[],0),'.'(op(update(fd(1,'Name'),fd(2,'Code')),13,[],0),'.'(op(update(fd(2,'Name'),fd(1,'Code')),7,[],0),'.'(op(update(fd(2,'Name'),fd(2,'Code')),8,[],0),[]))))))))),[]))";
 		final Start rootNode = ProBResultParser.parse(testString);
-
-		// new RootNode(new SableAST(rootNode),
-		// new HashMap<SetElementItem, String>());
-
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
-	// yes('.'(=('PLOps','.'(op(addConf(term(bool(0)),int(1),fd(1,'CONF')),12,[],11),'.'(op(addConf(term(bool(0)),int(1),fd(2,'CONF')),13,[],11),'.'(op(addConf(term(bool(0)),int(1),fd(3,'CONF')),14,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(1,'CONF')),15,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(2,'CONF')),16,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(3,'CONF')),17,[],11),'.'(op(healthy(fd(1,'CONF')),18,[],11),'.'(op(healthy(fd(2,'CONF')),18,[],11),'.'(op(healthy(fd(3,'CONF')),18,[],11),[])))))))))),[]))
 	@Test
 	public void testOperation4() {
 		final String testString = "yes('.'(=('PLOps','.'(op(addConf(term(bool(0)),int(1),fd(1,'CONF')),12,[],11),'.'(op(addConf(term(bool(0)),int(1),fd(2,'CONF')),13,[],11),'.'(op(addConf(term(bool(0)),int(1),fd(3,'CONF')),14,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(1,'CONF')),15,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(2,'CONF')),16,[],11),'.'(op(addConf(term(bool(1)),int(1),fd(3,'CONF')),17,[],11),'.'(op(healthy(fd(1,'CONF')),18,[],11),'.'(op(healthy(fd(2,'CONF')),18,[],11),'.'(op(healthy(fd(3,'CONF')),18,[],11),[])))))))))),[]))";
-		// ProBResultParser.setUseVerboseOutput(true);
 		final Start rootNode = ProBResultParser.parse(testString);
-		// ProBResultParser.setUseVerboseOutput(false);
-
-		// new RootNode(new SableAST(rootNode),
-		// new HashMap<SetElementItem, String>());
-
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
