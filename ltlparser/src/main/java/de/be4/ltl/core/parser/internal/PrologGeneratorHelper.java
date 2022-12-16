@@ -138,6 +138,12 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void det_output() {
+		pto.openTerm("ap");
+		pto.printAtom("det_output");
+		pto.closeTerm();
+	}
+
 	public void state_error() {
 		pto.openTerm("ap");
 		pto.printAtom("state_error");

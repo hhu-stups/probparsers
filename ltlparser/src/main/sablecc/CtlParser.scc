@@ -38,6 +38,7 @@ Tokens
   {ctl} false = 'false';
   {ctl} sink ='sink';
   {ctl} goal ='goal';
+  {ctl} det_output ='det_output';
   {ctl} state_error ='error';
   {ctl} deadlock ='deadlock';
   {ctl} current = 'current';
@@ -114,6 +115,7 @@ Productions
     {action} l_sq {-> New ctl.action(l_sq)} |
     {sink} sink {-> New ctl.sink()} |
     {goal} goal {-> New ctl.goal()} |
+    {det_output} det_output {-> New ctl.det_output()} |
     {error} state_error {-> New ctl.error()} |
     {deadlock} deadlock {-> New ctl.deadlock()} |
     {current} current {-> New ctl.current()};
@@ -140,6 +142,7 @@ Abstract Syntax Tree
     {enabled} [operation]:enabled |
     {sink} |
     {goal} |
+    {det_output} |
     {error} |
     {deadlock} |
     {current} |

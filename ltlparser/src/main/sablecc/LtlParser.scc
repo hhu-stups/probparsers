@@ -62,6 +62,7 @@ Tokens
   {ltl -> actions} ctrl = ctrl_action_start;
   {ltl} sink ='sink';
   {ltl} goal ='goal';
+  {ltl} det_output ='det_output';
   {ltl} state_error ='error';
   {ltl} deadlock ='deadlock';
   {ltl} current = 'current';
@@ -185,6 +186,7 @@ Productions
     {action} l_sq {-> New ltl.action(l_sq)} |
     {sink} sink {-> New ltl.sink()} |
     {goal} goal {-> New ltl.goal()} |
+    {det_output} det_output {-> New ltl.det_output()} |
     {error} state_error {-> New ltl.error()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
     {current} current {-> New ltl.current()} |
@@ -272,6 +274,7 @@ Abstract Syntax Tree
    {unparsed} [predicate]:atomic_proposition_begin |
    {sink} |
    {goal} |
+   {det_output} |
    {error} |
    {deadlock} |
    {current} |
