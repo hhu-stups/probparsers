@@ -61,6 +61,8 @@ Tokens
   {ltl -> actions} det = det_action_start;
   {ltl -> actions} ctrl = ctrl_action_start;
   {ltl} sink ='sink';
+  {ltl} goal ='goal';
+  {ltl} state_error ='error';
   {ltl} deadlock ='deadlock';
   {ltl} current = 'current';
   {ltl} l_par = l_paren;
@@ -182,6 +184,8 @@ Productions
     {before_after} before_after l_par atomic_proposition_begin r_par {-> New ltl.before_after(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
     {sink} sink {-> New ltl.sink()} |
+    {goal} goal {-> New ltl.goal()} |
+    {error} state_error {-> New ltl.error()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
     {current} current {-> New ltl.current()} |
     // #id.(unparsed => ltl_formula)
@@ -267,6 +271,8 @@ Abstract Syntax Tree
    {action} [operation]:l_sq |
    {unparsed} [predicate]:atomic_proposition_begin |
    {sink} |
+   {goal} |
+   {error} |
    {deadlock} |
    {current} |
    {true} |

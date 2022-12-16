@@ -132,6 +132,18 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void goal() {
+		pto.openTerm("ap");
+		pto.printAtom("goal");
+		pto.closeTerm();
+	}
+
+	public void state_error() {
+		pto.openTerm("ap");
+		pto.printAtom("state_error");
+		pto.closeTerm();
+	}
+
 	public void deadlock() {
 		pto.openTerm("ap");
 		pto.printAtom("deadlock");
