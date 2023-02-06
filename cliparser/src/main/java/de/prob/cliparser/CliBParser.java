@@ -159,6 +159,8 @@ public class CliBParser {
 				return String.valueOf(behaviour.isCompactPrologPositions());
 			case "machineNameMustMatchFileName":
 				return String.valueOf(behaviour.isMachineNameMustMatchFileName());
+			case "defaultFileNumber":
+				return String.valueOf(behaviour.getDefaultFileNumber());
 			case "startLineNumber":
 				return String.valueOf(behaviour.getStartLineNumber());
 			case "startColumnNumber":
@@ -185,6 +187,9 @@ public class CliBParser {
 				break;
 			case "machineNameMustMatchFileName":
 				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
+				break;
+			case "defaultFileNumber":
+				behaviour.setDefaultFileNumber(Integer.parseInt(value));
 				break;
 			case "startLineNumber":
 				behaviour.setStartLineNumber(Integer.parseInt(value));
@@ -434,9 +439,16 @@ public class CliBParser {
 			final INodeIds nodeIds;
 			if (behaviour.isCompactPrologPositions()) {
 				nodeIds = new NodeFileNumbers();
+				if (behaviour.getDefaultFileNumber() != -1) {
+					nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
+				}
 			} else {
 				final NodeIdAssignment na = new NodeIdAssignment();
-				start.apply(na);
+				if (behaviour.getDefaultFileNumber() == -1) {
+					start.apply(na);
+				} else {
+					na.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
+				}
 				nodeIds = na;
 			}
 
