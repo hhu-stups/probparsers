@@ -9,14 +9,14 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.12.2'
+project.version = '2.12.3'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 wrapper {
-    gradleVersion = "7.4.2"
+    gradleVersion = "7.6"
 }
 
 ext {

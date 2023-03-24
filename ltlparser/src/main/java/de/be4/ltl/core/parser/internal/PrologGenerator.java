@@ -25,6 +25,9 @@ import de.be4.ltl.core.parser.node.AIncreasingLtl;
 import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
+import de.be4.ltl.core.parser.node.AGoalLtl;
+import de.be4.ltl.core.parser.node.ADetOutputLtl;
+import de.be4.ltl.core.parser.node.AErrorLtl;
 import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
@@ -114,6 +117,21 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseASinkLtl(final ASinkLtl node) {
 		helper.sink();
+	}
+
+	@Override
+	public void caseAGoalLtl(final AGoalLtl node) {
+		helper.goal();
+	}
+
+	@Override
+	public void caseADetOutputLtl(final ADetOutputLtl node) {
+		helper.det_output();
+	}
+
+	@Override
+	public void caseAErrorLtl(final AErrorLtl node) {
+		helper.state_error();
 	}
 
 	@Override

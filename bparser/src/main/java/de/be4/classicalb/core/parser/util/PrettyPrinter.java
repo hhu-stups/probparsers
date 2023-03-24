@@ -537,9 +537,20 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		node.getCondition().apply(this);
 		sb.append(" THEN ");
 		node.getThen().apply(this);
+		for (PExpression e : node.getElsifs()) {
+			e.apply(this);
+		}
 		sb.append(" ELSE ");
 		node.getElse().apply(this);
 		sb.append(" END");
+	}
+
+	@Override
+	public void caseAIfElsifExprExpression(AIfElsifExprExpression node) {
+		sb.append(" ELSIF ");
+		node.getCondition().apply(this);
+		sb.append(" THEN ");
+		node.getThen().apply(this);
 	}
 
 	@Override

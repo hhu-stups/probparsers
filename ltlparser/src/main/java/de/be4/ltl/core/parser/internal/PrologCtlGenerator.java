@@ -13,6 +13,9 @@ import de.be4.ltl.core.ctlparser.node.ADeadlockCtl;
 import de.be4.ltl.core.ctlparser.node.AEnaCtl;
 import de.be4.ltl.core.ctlparser.node.AEnabledCtl;
 import de.be4.ltl.core.ctlparser.node.ASinkCtl;
+import de.be4.ltl.core.ctlparser.node.AGoalCtl;
+import de.be4.ltl.core.ctlparser.node.ADetOutputCtl;
+import de.be4.ltl.core.ctlparser.node.AErrorCtl;
 import de.be4.ltl.core.ctlparser.node.AUnparsedCtl;
 import de.be4.ltl.core.ctlparser.node.Node;
 import de.be4.ltl.core.ctlparser.node.Start;
@@ -65,6 +68,21 @@ public class PrologCtlGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseASinkCtl(final ASinkCtl node) {
 		helper.sink();
+	}
+
+	@Override
+	public void caseAGoalCtl(final AGoalCtl node) {
+		helper.goal();
+	}
+
+	@Override
+	public void caseADetOutputCtl(final ADetOutputCtl node) {
+		helper.det_output();
+	}
+
+	@Override
+	public void caseAErrorCtl(final AErrorCtl node) {
+		helper.state_error();
 	}
 
 	@Override

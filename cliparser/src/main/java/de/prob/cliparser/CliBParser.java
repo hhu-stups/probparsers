@@ -159,6 +159,12 @@ public class CliBParser {
 				return String.valueOf(behaviour.isCompactPrologPositions());
 			case "machineNameMustMatchFileName":
 				return String.valueOf(behaviour.isMachineNameMustMatchFileName());
+			case "defaultFileNumber":
+				return String.valueOf(behaviour.getDefaultFileNumber());
+			case "startLineNumber":
+				return String.valueOf(behaviour.getStartLineNumber());
+			case "startColumnNumber":
+				return String.valueOf(behaviour.getStartColumnNumber());
 			default:
 				// Unknown/unsupported option
 				return null;
@@ -181,6 +187,15 @@ public class CliBParser {
 				break;
 			case "machineNameMustMatchFileName":
 				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
+				break;
+			case "defaultFileNumber":
+				behaviour.setDefaultFileNumber(Integer.parseInt(value));
+				break;
+			case "startLineNumber":
+				behaviour.setStartLineNumber(Integer.parseInt(value));
+				break;
+			case "startColumnNumber":
+				behaviour.setStartColumnNumber(Integer.parseInt(value));
 				break;
 			default:
 				// Unknown/unsupported option
@@ -410,7 +425,7 @@ public class CliBParser {
 			// Reduce starting line number by one
 			// so that the line with a #FORMULA, etc. prefix isn't counted
 			// and the actual formula is counted as line 1.
-			parser.setStartPosition(0, 1);
+			parser.setStartPosition(behaviour.getStartLineNumber()-1, behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
 			Start start;
 			if (extended) {
@@ -424,9 +439,16 @@ public class CliBParser {
 			final INodeIds nodeIds;
 			if (behaviour.isCompactPrologPositions()) {
 				nodeIds = new NodeFileNumbers();
+				if (behaviour.getDefaultFileNumber() != -1) {
+					nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
+				}
 			} else {
 				final NodeIdAssignment na = new NodeIdAssignment();
-				start.apply(na);
+				if (behaviour.getDefaultFileNumber() == -1) {
+					start.apply(na);
+				} else {
+					na.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
+				}
 				nodeIds = na;
 			}
 

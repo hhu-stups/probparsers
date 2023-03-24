@@ -225,6 +225,14 @@ public class PrettyPrinterTest {
 			"`MACHINE`.`REFINEMENT`.`IMPLEMENTATION`",
 			"`a\\\\b\\nc`",
 			"NAT +-> (ID <-> ID)",
+			"IF x=1 THEN a ELSE d END",
+			"IF x=1 THEN a ELSIF x=2 THEN b ELSE d END",
+			"IF x=1 THEN a ELSIF x=2 THEN b ELSIF x=3 THEN c ELSE d END",
+			"IF x=1 THEN (IF y=1 THEN a ELSE b END) ELSE d END",
+			"IF x=1 THEN a ELSE (IF y=1 THEN d ELSE e END) END",
+			"IF x=1 THEN (IF y=1 THEN a ELSE b END) ELSIF x=2 THEN c ELSE d END",
+			"IF x=1 THEN a ELSIF x=2 THEN (IF y=1 THEN b ELSE c END) ELSE d END",
+			"IF x=1 THEN a ELSIF x=2 THEN b ELSE (IF y=1 THEN d ELSE e END) END",
 			};
 
 	private static final String PREFIX = "#EXPRESSION ";
