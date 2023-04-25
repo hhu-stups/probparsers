@@ -797,10 +797,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
+		assert node.getList().size() >= 2;
 		sb.append("(");
-		node.getList().get(0).apply(this);
-		sb.append(",");
-		node.getList().get(1).apply(this);
+		printCommaListCompact(node.getList());
 		sb.append(")");
 	}
 
