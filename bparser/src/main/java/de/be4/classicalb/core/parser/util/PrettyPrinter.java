@@ -332,6 +332,13 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseABlockSubstitution(final ABlockSubstitution node) {
+		sb.append("BEGIN\n");
+		node.getSubstitution().apply(this);
+		sb.append("\nEND");
+	}
+
+	@Override
 	public void caseASkipSubstitution(ASkipSubstitution node) {
 		sb.append("skip");
 	}
