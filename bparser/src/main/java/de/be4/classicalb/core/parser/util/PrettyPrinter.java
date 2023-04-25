@@ -60,9 +60,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
-	public PrettyPrinter() {}
-
 	private final StringBuilder sb = new StringBuilder();
+
+	public PrettyPrinter() {}
 
 	public String getPrettyPrint() {
 		return sb.toString();
