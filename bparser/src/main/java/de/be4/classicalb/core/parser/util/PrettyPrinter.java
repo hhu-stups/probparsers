@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PrettyPrinter extends DepthFirstAdapter {
 	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
@@ -60,9 +61,20 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
+	private IIdentifierRenaming renaming;
 	private final StringBuilder sb = new StringBuilder();
 
-	public PrettyPrinter() {}
+	public PrettyPrinter() {
+		this.renaming = IIdentifierRenaming.QUOTE_INVALID;
+	}
+
+	public IIdentifierRenaming getRenaming() {
+		return this.renaming;
+	}
+
+	public void setRenaming(IIdentifierRenaming renaming) {
+		this.renaming = Objects.requireNonNull(renaming, "renaming");
+	}
 
 	public String getPrettyPrint() {
 		return sb.toString();
@@ -1196,14 +1208,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		final String identifier = node.getText();
-		if (Utils.isPlainBIdentifier(identifier)) {
-			sb.append(identifier);
-		} else {
-			sb.append('`');
-			sb.append(Utils.escapeStringContents(identifier));
-			sb.append('`');
-		}
+		sb.append(this.renaming.renameIdentifier(node.getText()));
 	}
 
 	@Override
