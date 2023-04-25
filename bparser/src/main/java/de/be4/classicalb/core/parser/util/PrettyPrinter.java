@@ -186,7 +186,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-		sb.append(node.getName().getText());
+		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
@@ -194,7 +194,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
-		sb.append(node.getName().getText());
+		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
@@ -202,7 +202,7 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
-		sb.append(node.getName().getText());
+		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		sb.append(" == ");
 		node.getRhs().apply(this);
@@ -1212,6 +1212,16 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseTDefLiteralSubstitution(final TDefLiteralSubstitution node) {
+		sb.append(this.renaming.renameIdentifier(node.getText()));
+	}
+
+	@Override
+	public void caseTDefLiteralPredicate(final TDefLiteralPredicate node) {
+		sb.append(this.renaming.renameIdentifier(node.getText()));
+	}
+
+	@Override
 	public void caseAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
 		sb.append("UNION(");
 		printCommaListCompact(node.getIdentifiers());
@@ -1444,22 +1454,19 @@ public class PrettyPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseADefinitionExpression(final ADefinitionExpression node) {
-		String defLiteral = node.getDefLiteral().getText();
-		sb.append(defLiteral);
+		node.getDefLiteral().apply(this);
 		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
-		String defLiteral = node.getDefLiteral().getText();
-		sb.append(defLiteral);
+		node.getDefLiteral().apply(this);
 		printParameterList(node.getParameters());
 	}
 
 	@Override
 	public void caseADefinitionSubstitution(ADefinitionSubstitution node) {
-		String defLiteral = node.getDefLiteral().getText();
-		sb.append(defLiteral);
+		node.getDefLiteral().apply(this);
 		printParameterList(node.getParameters());
 	}
 
