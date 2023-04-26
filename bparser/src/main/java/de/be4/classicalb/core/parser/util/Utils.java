@@ -108,6 +108,40 @@ public final class Utils {
 		return parsedId.size() == 1 && identifier.equals(parsedId.get(0).getText());
 	}
 
+	/**
+	 * <p>
+	 * Check whether a definition name has some kind of special meaning to ProB.
+	 * A definition with such a name should be preserved in the AST even if it seems to be otherwise unused.
+	 * </p>
+	 * <p>
+	 * The name patterns for special definitions are <i>not</i> fixed or stable.
+	 * The exact names checked by this method <i>will</i> change in future releases
+	 * as new special definitions are added to ProB.
+	 * </p>
+	 * <p>
+	 * This method is currently not used by the B parser itself.
+	 * It is meant for use by other libraries, such as tla2bAST and tlc4b.
+	 * </p>
+	 * 
+	 * @param identifier the definition name to check
+	 * @return whether the given definition name has special meaning to ProB
+	 */
+	public static boolean isProBSpecialDefinitionName(String identifier) {
+		return "GOAL".equals(identifier)
+			|| "VISB_JSON_FILE".equals(identifier)
+			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
+			|| identifier.startsWith("ASSERT_CTL")
+			|| identifier.startsWith("ASSERT_LTL")
+			|| identifier.startsWith("CUSTOM_GRAPH_")
+			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
+			|| identifier.startsWith("HEURISTIC_FUNCTION")
+			|| identifier.startsWith("SCOPE")
+			|| identifier.startsWith("scope_")
+			|| identifier.startsWith("SET_PREF_")
+			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS
+		;
+	}
+
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
