@@ -135,6 +135,7 @@ Helpers
   // layout_char_with_ws = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   // pragma_identifier_literal = ([all_chars - [layout_char_with_ws + '*']]+ ('*' [all_chars - [layout_char_with_ws + '/']])?)* '*'?;
 
+
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
@@ -215,6 +216,8 @@ Tokens
   {normal} total_surjection = minus minus gt gt | 0x21a0;
   {normal} insert_start_sequence = minus gt | 0x21fe;
   {normal} dot = '.' | '·' | 0x22c5;
+  {normal} dot_eventb_comprehension = '•'; // is the bullet, Option-8 on US keyboards
+   // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
   {normal} interval = '..' | 0x2025;
   //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
@@ -796,11 +799,16 @@ predicate_atomic {-> predicate} =
   /* Now we continue with the real atomic predicates: */
   {bfalse} bfalse {-> New predicate.falsity()} |
   {truth_predicate} truth_predicate {-> New predicate.truth()} |
-  {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
-  {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
-  {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)} | // check in typechecker: predicate must be an implication predicate
-  {exists} exists [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)} |
-  {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])} |
+  {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate}
+  |
+  {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)}
+  |
+  {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
+  | // check in typechecker: predicate must be an implication predicate
+  {exists} exists [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top right_par {-> New predicate.exists([identifiers.expression], predicate.predicate)}
+  |
+  {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
+  |
   {identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
   {function} [literal]:predicate_identifier left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
   {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
@@ -920,15 +928,20 @@ expression_keyword {-> expression} =
   {general_intersection} generalized_inter left_par [expression]:expression_in_par right_par {-> New expression.general_intersection(expression.expression)} |
   {identity} id left_par [expression]:expression_in_par right_par {-> New expression.identity(expression.expression)} |
   {reflexive_closure} closure left_par [expression]:expression_in_par right_par {-> New expression.reflexive_closure(expression.expression)} |
-  {closure} closure1 left_par [expression]:expression_in_par right_par {-> New expression.closure(expression.expression)} |
+  {closure} closure1 left_par [expression]:expression_in_par right_par {-> New expression.closure(expression.expression)}
+  |
   {domain} dom left_par [expression]:expression_in_par right_par {-> New expression.domain(expression.expression)} |
-  {range} ran left_par [expression]:expression_in_par right_par {-> New expression.range(expression.expression)} |
+  {range} ran left_par [expression]:expression_in_par right_par {-> New expression.range(expression.expression)}
+  |
   {lambda} lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
-    {-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)} |
+    {-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)}
+  |
   {symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
-    {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
+    {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)}
+  |
   {trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
-  {trans_relation} rel left_par [expression]:expression_in_par right_par {-> New expression.trans_relation(expression.expression)} |
+  {trans_relation} rel left_par [expression]:expression_in_par right_par {-> New expression.trans_relation(expression.expression)}
+  |
   {seq} seq left_par [expression]:expression_in_par right_par {-> New expression.seq(expression.expression)} |
   {seq1} seq1 left_par [expression]:expression_in_par right_par {-> New expression.seq1(expression.expression)} |
   {iseq} iseq left_par [expression]:expression_in_par right_par {-> New expression.iseq(expression.expression)} |
@@ -944,13 +957,19 @@ expression_keyword {-> expression} =
   {rev} rev left_par [expression]:expression_in_par right_par {-> New expression.rev(expression.expression)} |
   {first_projection} prj1 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.first_projection(exp1.expression, exp2.expression)} |
   {second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
-  {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)} |
-  {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)} |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)} |
+  {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)}
+  |
+  {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}
+  |
+  {event_b_comprehension_set} left_brace [identifiers]:expression_list dot_eventb_comprehension [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
+  |
+  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
+  |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
-  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)} |
+  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}
+  |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
