@@ -959,7 +959,11 @@ expression_keyword {-> expression} =
   {rev} rev left_par [expression]:expression_in_par right_par {-> New expression.rev(expression.expression)}
   |
   {first_projection} prj1 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.first_projection(exp1.expression, exp2.expression)} |
-  {second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
+  {second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)}
+  | // now prj1/prj2 without typing arguments, e.g., prj1(1|->2) = 1
+  {first_projection_no_types} prj1 left_par [exp1]:expression_in_par right_par {-> New expression.function( New expression.event_b_first_projection_v2(), [exp1.expression])} |
+  {second_projection_no_types} prj2 left_par [exp1]:expression_in_par right_par {-> New expression.function( New expression.event_b_second_projection_v2(), [exp1.expression])}
+  | // prj1/prj2 fully without parameters such as in @prj1[{1|->2}]
   {event_b_first_projection} prj1_v2 {-> New expression.event_b_first_projection_v2()} |
   {event_b_second_projection} prj2_v2 {-> New expression.event_b_second_projection_v2()}
   |
