@@ -368,6 +368,8 @@ Tokens
   {normal} pred = 'pred';
   {normal} prj1 = 'prj1';
   {normal} prj2 = 'prj2';
+  {normal} prj1_v2 = '@prj1'; // prj1 one which requires no arguments, typechecker infers type
+  {normal} prj2_v2 = '@prj2'; // ditto; TODO: find better keyword or detect prj1/prj2 differently
   {normal} ran = 'ran';
   {normal} rec = 'rec';
   {normal} rel = 'rel';
@@ -954,9 +956,13 @@ expression_keyword {-> expression} =
   {last} last left_par [expression]:expression_in_par right_par {-> New expression.last(expression.expression)} |
   {front} front left_par [expression]:expression_in_par right_par {-> New expression.front(expression.expression)} |
   {tail} tail left_par [expression]:expression_in_par right_par {-> New expression.tail(expression.expression)} |
-  {rev} rev left_par [expression]:expression_in_par right_par {-> New expression.rev(expression.expression)} |
+  {rev} rev left_par [expression]:expression_in_par right_par {-> New expression.rev(expression.expression)}
+  |
   {first_projection} prj1 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.first_projection(exp1.expression, exp2.expression)} |
   {second_projection} prj2 left_par [exp1]:expression_in_par comma [exp2]:expression_in_par right_par {-> New expression.second_projection(exp1.expression, exp2.expression)} |
+  {event_b_first_projection} prj1_v2 {-> New expression.event_b_first_projection_v2()} |
+  {event_b_second_projection} prj2_v2 {-> New expression.event_b_second_projection_v2()}
+  |
   {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)}
   |
   {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}
