@@ -23,7 +23,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.12.3"
+final parserVersion = "2.12.4"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
@@ -32,6 +32,30 @@ dependencies {
 ```
 
 Depending on your needs, you may remove parsers from the list or include additional ones. If you use more than one parser, you **must** use the same version number for all of them! This is ensured in the above code by storing the parser version in a variable.
+
+You can also use the JAR probcliparser.jar built for ProB and distributed with ProB (inside its lib folder).
+Here is how to obtain help for using the command-line parser:
+```
+$ java -jar probcliparser.jar --help
+BParser (version 2.12.3, commit 99a64151f3bc82f987258619161831a8b9a7df01)
+usage: BParser [options] <BMachine file>
+
+Available options are:
+-v          Verbose output during lexing and parsing
+-time       Output time used for complete parsing process
+-pp         Pretty Print in B format on standard output
+-prolog     Show AST as Prolog term
+-lineno     Put line numbers into prolog terms
+-out        Specify output file
+-version    Print the parser version and exit
+-h          Print the parser help and exit
+-help       Print the parser help and exit
+--help      Print the parser help and exit
+-compactpos Use new more compact Prolog position terms
+-fastprolog Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
+-prepl      Enter parser-repl. Should only be used from inside ProB's Prolog Core.
+-checkname  The name of a machine have to match file name (except for the file name extension)
+```
 
 ## Building
 

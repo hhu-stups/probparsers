@@ -233,6 +233,18 @@ public class PrettyPrinterTest {
 			"IF x=1 THEN (IF y=1 THEN a ELSE b END) ELSIF x=2 THEN c ELSE d END",
 			"IF x=1 THEN a ELSIF x=2 THEN (IF y=1 THEN b ELSE c END) ELSE d END",
 			"IF x=1 THEN a ELSIF x=2 THEN b ELSE (IF y=1 THEN d ELSE e END) END",
+			"(1,2)",
+			"(1,2,3)",
+			"((1,2),3)",
+			"(1,(2,3))",
+			"(1,2,3,4)",
+			"((1,2),(3,4))",
+			"(1|->2)",
+			"(1|->2|->3)",
+			"((1|->2)|->3)",
+			"(1|->(2|->3))",
+			"(1|->2|->3|->4)",
+			"((1|->2)|->(3|->4))",
 			};
 
 	private static final String PREFIX = "#EXPRESSION ";

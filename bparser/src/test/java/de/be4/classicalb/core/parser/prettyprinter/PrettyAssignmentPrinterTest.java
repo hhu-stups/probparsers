@@ -43,7 +43,13 @@ public class PrettyAssignmentPrinterTest {
 			"SELECT P=9 THEN G:=3 WHEN u < 9 THEN s := u ELSE skip END",
 			"CASE t OF EITHER 1 THEN y:= 7 OR 2,3,4 THEN q := 9 END END",
 			"CASE t OF EITHER 1 THEN y:= 7 OR 2,3,4 THEN q := 9 ELSE a := 0 END END",
-			"WHILE x > 9 DO x := x - 1 INVARIANT x > 0 VARIANT x END" };
+			"WHILE x > 9 DO x := x - 1 INVARIANT x > 0 VARIANT x END",
+			"BEGIN skip END",
+			"BEGIN skip; x := 42 END",
+			"BEGIN skip; BEGIN x := 42 END END",
+			"BEGIN BEGIN skip END; x := 42 END",
+			"BEGIN BEGIN skip END; BEGIN x := 42 END END",
+	};
 
 	String theString;
 

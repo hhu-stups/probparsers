@@ -9,18 +9,14 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.12.3'
+project.version = '2.12.4'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
-wrapper {
-    gradleVersion = "7.6"
-}
-
 ext {
-    sableCCVersion = '3.4.0'
+    sableCCVersion = '3.4.1'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
@@ -32,9 +28,6 @@ subprojects {
     
     group = rootProject.group
     version = rootProject.version
-    
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
     
     repositories {
         mavenCentral()
@@ -59,10 +52,13 @@ subprojects {
     }
 
     dependencies {
-        testImplementation group: "junit", name: "junit", version: "4.13"
+        testImplementation group: "junit", name: "junit", version: "4.13.2"
     }
 
     java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+
         withSourcesJar()
         withJavadocJar()
     }
@@ -155,19 +151,5 @@ ext {
                 }
             }
         }
-    }
-}
-
-task deploy {
-    doLast {
-        throw new GradleException(
-            """\
-            The deploy task has been removed. Please use one of the following tasks instead, depending on what you want to do:
-            To build the parser jar files: ./gradlew assemble
-            To run the tests: ./gradlew check
-            To build and test the parser: ./gradlew build
-            To generate test coverage reports: ./gradlew check jacocoTestReport
-            """.stripIndent()
-        )
     }
 }
