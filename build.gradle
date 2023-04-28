@@ -15,10 +15,6 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
-wrapper {
-    gradleVersion = "7.6"
-}
-
 ext {
     sableCCVersion = '3.4.0'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
