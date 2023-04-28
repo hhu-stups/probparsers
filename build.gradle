@@ -1,6 +1,7 @@
 plugins {
     // SableCC plugin is only applied in the subprojects that actually need it.
     id("de.hhu.stups.sablecc").version("1.0.0").apply(false)
+    id 'org.graalvm.buildtools.native' version '0.9.21'
 }
 
 apply plugin: 'java-library'
@@ -25,7 +26,15 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    
+    apply plugin: 'org.graalvm.buildtools.native'
+
+    graalvmNative {
+        binaries.all {
+            resources.autodetect()
+        }
+        toolchainDetection = false
+    }
+
     group = rootProject.group
     version = rootProject.version
     
