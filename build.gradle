@@ -1,7 +1,8 @@
 plugins {
-    // SableCC plugin is only applied in the subprojects that actually need it.
+    // The plugins are declared as .apply(false) here
+    // and only applied in the subprojects that actually need them.
     id("de.hhu.stups.sablecc").version("1.0.0").apply(false)
-    id 'org.graalvm.buildtools.native' version '0.9.21'
+    id("org.graalvm.buildtools.native").version("0.9.21").apply(false)
 }
 
 apply plugin: 'java-library'
