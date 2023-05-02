@@ -30,9 +30,16 @@ subprojects {
     apply plugin: 'org.graalvm.buildtools.native'
 
     graalvmNative {
-        binaries.all {
-            resources.autodetect()
+        binaries{
+            all {
+                resources.autodetect()
+                // see https://build-native-java-apps.cc/expert-options/21/
+                // the stack size must be given in bytes
+                //override at runtime with -XX:StackSize=... 
+                buildArgs.add('-R:StackSize=8388608')
+            }
         }
+        
         toolchainDetection = false
     }
 
