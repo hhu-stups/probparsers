@@ -86,7 +86,7 @@ public class CliBParser {
 	 * This is necessary because of a bug with graalvm and musl: https://github.com/oracle/graal/issues/3398
 	 * workaround inspired by: https://github.com/babashka/babashka/issues/831
 	 */
-	public static void main(final String[] args) throws IOException {
+	public static void main(final String[] args) throws InterruptedException, IOException {
 		AtomicReference<IOException> maybeException = new AtomicReference<>(null);
 		Thread t = new Thread(()->{
 			try {
@@ -96,7 +96,7 @@ public class CliBParser {
 			}
 		});
 		t.start();
-		try{t.join();}catch(Exception e){}
+		t.join();
 		if(maybeException.get()!=null)throw maybeException.get();
 	}
 
