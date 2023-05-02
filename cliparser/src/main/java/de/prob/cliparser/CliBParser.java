@@ -82,9 +82,8 @@ public class CliBParser {
 
 	/**
 	 * Main method wrapper.
-	 * 
-	 * This is necessary because of a bug with graalvm and musl: https://github.com/oracle/graal/issues/3398
-	 * workaround inspired by: https://github.com/babashka/babashka/issues/831
+	 * This is necessary because of <a href="https://github.com/oracle/graal/issues/3398">a bug with graalvm and musl</a>.
+	 * Workaround inspired by: <a href="https://github.com/babashka/babashka/issues/831">babashka/babashka#831</a>
 	 */
 	public static void main(final String[] args) throws InterruptedException, IOException {
 		AtomicReference<IOException> maybeException = new AtomicReference<>(null);
