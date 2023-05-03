@@ -36,8 +36,8 @@ public class SubstitutionTest {
 		final String testMachine = "#SUBSTITUTION xx,yy,5  := 5, 3, zz";
 		final BParseException e = Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		// final CheckException cause = (CheckException) e.getCause();
-		// assertEquals(1, e.getNodes().length);
-		// assertNotNull(e.getNodes()[0]);
+		// assertEquals(1, e.getNodesList().size());
+		// assertNotNull(e.getNodesList().get(0));
 	}
 
 	@Test

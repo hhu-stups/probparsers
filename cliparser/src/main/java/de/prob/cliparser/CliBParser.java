@@ -678,16 +678,6 @@ public class CliBParser {
 		
 		bufOut.flush();
 	}
-	/* old version with transformer, seems slightly faster even though it builds up unnecessary intermediate term
-			for (PrologTerm term : sentences) {
-			StructuredPrologOutput output = new StructuredPrologOutput();
-			output.printTerm(term);
-			output.fullstop();
-			FastReadTransformer transformer = new FastReadTransformer(output);
-			out.print(transformer.write());
-	*/
-			
-			
 
 	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws BCompoundException {
 		RulesProject project = new RulesProject();

@@ -319,15 +319,6 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
-	/**
-	 * @deprecated Use {@link #BLexer(PushbackReader, DefinitionTypes)} instead.
-	 *     The {@code tokenCountPrediction} parameter has no effect.
-	 */
-	@Deprecated
-	public BLexer(final PushbackReader in, final DefinitionTypes definitions, final int tokenCountPrediction) {
-		this(in, definitions);
-	}
-
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
 		this.definitions = definitions;
