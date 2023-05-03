@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser.util;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.AnalysisAdapter;
 import de.be4.classicalb.core.parser.node.*;
 
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class PrettyPrinter extends DepthFirstAdapter {
+public class PrettyPrinter extends AnalysisAdapter {
 	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
 	static {
 		final Map<Class<? extends Node>, Integer> prio = new HashMap<>();
@@ -119,6 +119,11 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseStart(final Start node) {
+		node.getPParseUnit().apply(this);
+	}
+
+	@Override
 	public void caseAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		node.getVariant().apply(this);
 		sb.append(" ");
@@ -154,6 +159,26 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			e.apply(this);
 		}
 		sb.append("END");
+	}
+
+	@Override
+	public void caseADefinitionFileParseUnit(final ADefinitionFileParseUnit node) {
+		node.getDefinitionsClauses().apply(this);
+	}
+
+	@Override
+	public void caseAPredicateParseUnit(final APredicateParseUnit node) {
+		node.getPredicate().apply(this);
+	}
+
+	@Override
+	public void caseAExpressionParseUnit(final AExpressionParseUnit node) {
+		node.getExpression().apply(this);
+	}
+
+	@Override
+	public void caseASubstitutionParseUnit(final ASubstitutionParseUnit node) {
+		node.getSubstitution().apply(this);
 	}
 
 	@Override
@@ -1505,6 +1530,11 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseADeferredSetSet(final ADeferredSetSet node) {
+		printDottedIdentifier(node.getIdentifier());
+	}
+
+	@Override
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
 		printDottedIdentifier(node.getIdentifier());
 		sb.append("={");
@@ -1512,4 +1542,8 @@ public class PrettyPrinter extends DepthFirstAdapter {
 		sb.append("}");
 	}
 
+	@Override
+	public void defaultCase(final Node node) {
+		throw new IllegalArgumentException("Node type not (yet) supported by PrettyPrinter: " + node.getClass());
+	}
 }
