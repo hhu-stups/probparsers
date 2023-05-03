@@ -16,6 +16,11 @@ This is an umbrella project for the following parsers and libraries used by ProB
 * eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
 * typechecker: Java-based classical B typechecker. **No longer built or published - last release is 2.9.32.** If you have a project that needs this library, complain to @dgelessus (or just re-add this subproject in settings.gradle). Note that **this is not the normal ProB typechecker** - that is part of prob_prolog and is completely separate from this code.
 
+The following subprojects were formerly part of this repo:
+
+* translator: Replaced by the [value-translator](https://github.com/hhu-stups/value-translator) project. The last release as part of probparsers was version 2.9.23.
+* voparser: Now maintained in the separate [vo_parser](https://gitlab.cs.uni-duesseldorf.de/general/stups/vo_parser) repository.
+
 ## Using
 
 Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups), Snapshots on [Sonatype Snapshots](https://oss.sonatype.org/content/repositories/snapshots/).
