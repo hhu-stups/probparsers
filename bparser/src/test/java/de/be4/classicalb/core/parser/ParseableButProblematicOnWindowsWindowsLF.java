@@ -13,13 +13,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import util.AbstractParseMachineTest;
+import util.Helpers;
 import util.PositionTester;
 
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Parameterized.class)
-public class ParseableButProblematicOnWindowsWindowsLF extends AbstractParseMachineTest {
+public class ParseableButProblematicOnWindowsWindowsLF {
 
 	private static final String PATH = "problematicOnWindows";
 
@@ -39,7 +39,7 @@ public class ParseableButProblematicOnWindowsWindowsLF extends AbstractParseMach
 
 	@Parameterized.Parameters(name = "{0}")
 	public static File[] data() throws IOException {
-		final File[] machines = getMachines(PATH);
+		final File[] machines = Helpers.getMachines(PATH);
 		final File[] unixMachines = new File[machines.length];
 
 		for (int i = 0; i < machines.length; i++) {

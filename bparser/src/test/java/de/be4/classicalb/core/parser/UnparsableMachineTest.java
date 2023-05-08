@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import util.AbstractParseMachineTest;
+import util.Helpers;
 
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Parameterized.class)
-public class UnparsableMachineTest extends AbstractParseMachineTest {
+public class UnparsableMachineTest {
 
 	private static final String PATH = "unparsable";
 
@@ -26,7 +26,7 @@ public class UnparsableMachineTest extends AbstractParseMachineTest {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static File[] data() {
-		return getMachines(PATH);
+		return Helpers.getMachines(PATH);
 	}
 
 	@Test(expected = BCompoundException.class)

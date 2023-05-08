@@ -9,13 +9,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import util.AbstractParseMachineTest;
+import util.Helpers;
 import util.PositionTester;
 
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Parameterized.class)
-public class ByteOrderMarkTests extends AbstractParseMachineTest {
+public class ByteOrderMarkTests {
 
 	private static final String PATH = "byteOrderMark";
 
@@ -27,7 +27,7 @@ public class ByteOrderMarkTests extends AbstractParseMachineTest {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static File[] data() {
-		return getMachines(PATH);
+		return Helpers.getMachines(PATH);
 	}
 
 	@Test
