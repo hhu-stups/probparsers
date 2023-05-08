@@ -18,6 +18,7 @@ import util.Helpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@Deprecated
 public class SatProblem {
 	@Test
 	public void compareSatPredAndPredVars() throws URISyntaxException, IOException, BCompoundException, LexerException {

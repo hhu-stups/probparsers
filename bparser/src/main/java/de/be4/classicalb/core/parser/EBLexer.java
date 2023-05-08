@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.node.TRightPar;
 import de.be4.classicalb.core.parser.node.TTrue;
 import de.hhu.stups.sablecc.patch.IToken;
 
+@Deprecated
 public class EBLexer extends BLexer {
 
 	// True means Expression

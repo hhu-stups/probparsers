@@ -8,6 +8,7 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.node.Start;
 
+@Deprecated
 public class PushbackBufferOverflows {
 	@Test
 	public void withoutPredVars() throws Exception {

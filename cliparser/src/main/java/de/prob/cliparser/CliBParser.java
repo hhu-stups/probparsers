@@ -35,7 +35,6 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
@@ -400,22 +399,6 @@ public class CliBParser {
 				theFormula = "#SUBSTITUTION\n" + in.readLine();
 				parseFormula(theFormula, context, behaviour);
 				break;
-			case extendedformula:
-				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedexpression:
-				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedpredicate:
-				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedsubstitution:
-				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
 			case ltl:
 				String extension = in.readLine();
 				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension,context);
@@ -460,8 +443,7 @@ public class CliBParser {
 		pout.flush();
 	}
 
-	private static void parseFormulaInternal(String theFormula, IDefinitions context, 
-	                                         final ParsingBehaviour behaviour, final boolean extended) {
+	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
 		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 
 		try {
@@ -471,12 +453,7 @@ public class CliBParser {
 			// and the actual formula is counted as line 1.
 			parser.setStartPosition(behaviour.getStartLineNumber()-1, behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
-			Start start;
-			if (extended) {
-				start = parser.eparse(theFormula, context);
-			} else {
-				start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
-			}
+			Start start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
 
 			// In the compact position format, node IDs are not used,
 			// so generate them only if the old non-compact format is requested.
@@ -511,22 +488,10 @@ public class CliBParser {
 			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(pout, e);
-		} catch (LexerException e) {
-			pout.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
-		} catch (IOException e) {
-			PrologExceptionPrinter.printException(pout, e);
 		}
 
 		pout.fullstop();
 		pout.flush();
-	}
-
-	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		parseFormulaInternal(theFormula, context, behaviour, true);
-	}
-
-	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		parseFormulaInternal(theFormula, context, behaviour, false);
 	}
 
 	private static void print(String output) {

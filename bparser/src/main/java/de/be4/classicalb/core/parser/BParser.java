@@ -219,6 +219,7 @@ public class BParser {
 		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
 	}
 
+	@Deprecated
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
 		final Reader reader = new StringReader(input);
 
