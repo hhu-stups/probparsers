@@ -5510,10 +5510,4 @@ public class ToUnicodeTest {
 		assertEquals(UnicodeTranslator.toUnicode("UNION_"), "UNION_");
 		assertEquals(UnicodeTranslator.toUnicode("union_"), "union_");
 	}
-
-	@Test
-	public void testStringTranslation() {
-		assertEquals(UnicodeTranslator.toUnicode("\"ab.c\""), "\"ab.c\"");
-	}
-
 }

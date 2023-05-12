@@ -34,6 +34,9 @@ Helpers
   sqbrackets = ['['+']'];
   space = [[' ' + 9] + [10 + 13]];
   double_quote = '"';
+  single_quote = 39;
+  triple_single_quote = single_quote single_quote single_quote;
+  back_quote = '`';
   // letter = [['a' .. 'z'] + ['A' .. 'Z']];
   small_letter = ['a'..'z'];
   capital_letter = ['A' .. 'Z'];
@@ -107,6 +110,8 @@ Helpers
 
 Tokens
   string = double_quote ([[0x0000 .. 0xffff] - [double_quote + '\']] | '\' [0x0000 .. 0xffff])* double_quote;
+  multiline_string = triple_single_quote (single_quote? single_quote? [[0x0000 .. 0xffff] - single_quote])* triple_single_quote;
+  quoted_identifier_literal = back_quote ([[0x0000 .. 0xffff] - [back_quote + '\']] | '\' [0x0000 .. 0xffff])* back_quote;
   typeof_open = '/*';
   typeof_close = '*/';
   truncated_set_size = '#' digit+;

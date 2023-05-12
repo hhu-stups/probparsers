@@ -5,6 +5,7 @@ import java.io.PushbackReader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
@@ -33,6 +34,7 @@ import de.prob.unicode.node.TExpn;
 import de.prob.unicode.node.TFcomp;
 import de.prob.unicode.node.TForall;
 import de.prob.unicode.node.TGeq;
+import de.prob.unicode.node.THexLiteral;
 import de.prob.unicode.node.TIdentifierLiteral;
 import de.prob.unicode.node.TIn;
 import de.prob.unicode.node.TInter;
@@ -49,12 +51,14 @@ import de.prob.unicode.node.TMapsto;
 import de.prob.unicode.node.TMid;
 import de.prob.unicode.node.TMinus;
 import de.prob.unicode.node.TMult;
+import de.prob.unicode.node.TMultilineString;
 import de.prob.unicode.node.TNat;
 import de.prob.unicode.node.TNat1;
 import de.prob.unicode.node.TNeq;
 import de.prob.unicode.node.TNotin;
 import de.prob.unicode.node.TNotsubset;
 import de.prob.unicode.node.TNotsubseteq;
+import de.prob.unicode.node.TNumber;
 import de.prob.unicode.node.TOftype;
 import de.prob.unicode.node.TOvl;
 import de.prob.unicode.node.TPfun;
@@ -64,16 +68,17 @@ import de.prob.unicode.node.TPow1;
 import de.prob.unicode.node.TPprod;
 import de.prob.unicode.node.TPsur;
 import de.prob.unicode.node.TQdot;
+import de.prob.unicode.node.TQuotedIdentifierLiteral;
 import de.prob.unicode.node.TRanres;
 import de.prob.unicode.node.TRansub;
 import de.prob.unicode.node.TRbrace;
+import de.prob.unicode.node.TRealLiteral;
 import de.prob.unicode.node.TRel;
 import de.prob.unicode.node.TSeparator;
 import de.prob.unicode.node.TSetminus;
 import de.prob.unicode.node.TSrel;
 import de.prob.unicode.node.TStrel;
 import de.prob.unicode.node.TString;
-import de.prob.unicode.node.TNumber;
 import de.prob.unicode.node.TSubset;
 import de.prob.unicode.node.TSubseteq;
 import de.prob.unicode.node.TTake;
@@ -88,8 +93,6 @@ import de.prob.unicode.node.TTypeofOpen;
 import de.prob.unicode.node.TUnion;
 import de.prob.unicode.node.TWhitespace;
 import de.prob.unicode.node.Token;
-import de.prob.unicode.node.TRealLiteral;
-import de.prob.unicode.node.THexLiteral;
 
 public class UnicodeTranslator {
 	enum Encoding {
@@ -201,6 +204,9 @@ public class UnicodeTranslator {
 		m.put(TTypeofClose.class, new Translation("*/", "*/", "*/"));
 	}
 
+	private static final Pattern LATEX_MATH_ESCAPE_WITH_BACKSLASH = Pattern.compile("[ #$%&_{}]");
+	private static final Pattern LATEX_MATH_TEXT_ESCAPE_WITH_BACKSLASH = Pattern.compile("[$\\_{}]");
+
 	public static void main(final String[] args) throws LexerException, IOException {
 		String input = args[0];
 		StringReader reader = new StringReader(input);
@@ -251,6 +257,17 @@ public class UnicodeTranslator {
 		return c == '\'' || (Character.isUnicodeIdentifierPart(c) && c != 'λ' && c != '·');
 	}
 
+	private static String latexMathEscape(String s) {
+		return LATEX_MATH_ESCAPE_WITH_BACKSLASH.matcher(s.replace("\\", "\\backslash")).replaceAll("\\\\$0")
+			.replace("^", "\\hat")
+			.replace("~", "{\\sim}")
+			.replace("`", "\\text{`}");
+	}
+
+	private static String latexMathTextEscape(String s) {
+		return LATEX_MATH_TEXT_ESCAPE_WITH_BACKSLASH.matcher(s).replaceAll("\\\\$0");
+	}
+
 	private static String translate(final String input, final Encoding target) {
 		if (input.isEmpty()) {
 			return "";
@@ -282,28 +299,28 @@ public class UnicodeTranslator {
 				final String translated;
 				if (t instanceof TSeparator) {
 					translated = t.getText();
-				} else if (t instanceof TString) {
+				} else if (t instanceof TString || t instanceof TMultilineString) {
 					if (target == Encoding.LATEX) {
-						translated = "\\text{" + t.getText() + "}";
+						translated = "\\text{" + latexMathTextEscape(t.getText()) + "}";
 					} else {
 						translated = t.getText();
 					}
 				} else if (t instanceof TTruncatedSetSize) {
 					if (target == Encoding.LATEX) {
-						translated = "\\" + t.getText();
+						translated = latexMathEscape(t.getText());
 					} else {
 						translated = t.getText();
 					}
-				} else if (t instanceof TIdentifierLiteral) {
+				} else if (t instanceof TIdentifierLiteral || t instanceof TQuotedIdentifierLiteral) {
 					if (target == Encoding.LATEX) {
-						translated = "\\mathit{" + t.getText().replace("_", "\\_") + "}";
+						translated = "\\mathit{" + latexMathEscape(t.getText()) + "}";
 					} else {
 						translated = t.getText();
 					}
 				} else if (t instanceof TAnyChar || t instanceof TNumber
 						|| t instanceof TRealLiteral || t instanceof THexLiteral) {
 					if (target == Encoding.LATEX) {
-						translated = t.getText().replace("_", "\\_");
+						translated = latexMathEscape(t.getText());
 					} else {
 						translated = t.getText();
 					}
