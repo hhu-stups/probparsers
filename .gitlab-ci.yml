@@ -24,7 +24,7 @@ before_script:
       - "*/build/test-results"
     reports:
       junit:
-        - testresults/*
+        - "*/build/test-results/*"
     when: always
 
 tests:jdk-8:
