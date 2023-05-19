@@ -41,7 +41,13 @@ public class PrettyPredicatePrinterTest {
 			"not(7=3)",
 			"!y.(y:DOM => !(x1,x2).(x1:DOM & x1<x2 & x2:DOM  => (Board(x1)(y) /= Board(x2)(y) &	Board(y)(x1) /= Board(y)(x2))))&!(s1,s2).(s1:SUBSQ & s2:SUBSQ => !(x1,y1,x2,y2).( (x1:s1 & x2:s1 & x1>=x2 & (x1=x2 => y1>y2) & y1:s2 & y2:s2 & (x1,y1) /= (x2,y2)) => Board(x1)(y1) /= Board(x2)(y2)))",
 			"!(i1,j1,i2,j2).(( i1>0 & i2>0 & j1<=n & j2 <= n & i1<j1 & i2<j2 & (i1,j1) /= (i2,j2) & i1<=i2 & (i1=i2 => j1<j2)) => (a(j1)-a(i1) /= a(j2)-a(i2)))",
-			"x+1:NAT" };
+			"x+1:NAT",
+			"1=1 /*@desc truth */",
+			"/*@label axm1 */ 1=1",
+			"[a := 1] a=1",
+			"btrue",
+			"bfalse",
+	};
 
 	String theString;
 
