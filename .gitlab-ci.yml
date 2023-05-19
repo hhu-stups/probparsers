@@ -22,6 +22,7 @@ before_script:
       - "*/build/jacocoHtml"
       - "*/build/reports"
       - "*/build/test-results"
+    when: always
 
 tests:jdk-8:
   extends: .tests
