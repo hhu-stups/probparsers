@@ -22,6 +22,9 @@ before_script:
       - "*/build/jacocoHtml"
       - "*/build/reports"
       - "*/build/test-results"
+    reports:
+      junit:
+        - testresults/*
     when: always
 
 tests:jdk-8:
