@@ -426,7 +426,6 @@ Tokens
   // grammar extensions
   // the following tokens are never recognized by the lexer because they declared below identifier_literal
   // keywords should be synchronized with RuleGrammar.java
-  {normal} kw_rules_machine = 'RULES_MACHINE';
   {normal} kw_rule = 'RULE';
   {normal} kw_substitution_operator = identifier_literal;
   {normal} kw_predicate_operator = identifier_literal;
