@@ -28,8 +28,9 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	}
 
 	/**
-	 * This constructor shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
+	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 	 */
+	@Deprecated
 	public ClassicalPositionPrinter(final INodeIds nodeIds, int lineOffset, int columnOffset) {
 		this.nodeIds = nodeIds;
 		this.lineOffset = lineOffset;
@@ -43,10 +44,18 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.compactPositions = compact;
 	}
 
+	/**
+	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
+	 */
+	@Deprecated
 	public void setLineOffset(int lineOffset) {
 		this.lineOffset = lineOffset;
 	}
 
+	/**
+	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
+	 */
+	@Deprecated
 	public void setColumnOffset(int columnOffset) {
 		this.columnOffset = columnOffset;
 	}

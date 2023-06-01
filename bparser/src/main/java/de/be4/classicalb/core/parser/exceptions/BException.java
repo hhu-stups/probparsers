@@ -104,10 +104,10 @@ public class BException extends Exception {
 	}
 
 	/**
-	 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
-	 *
 	 * @return a copy of this exception with all line numbers decremented by one
+	 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 	 */
+	@Deprecated
 	public BException withLinesOneOff() {
 		if (this.getLocations().isEmpty()) {
 			return this;
@@ -217,10 +217,10 @@ public class BException extends Exception {
 		}
 
 		/**
-		 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
-		 * 
 		 * @return a copy of this position with all line numbers decremented by one
+		 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 		 */
+		@Deprecated
 		public Location withLineOneOff() {
 			return new Location(this.getFilename(), this.getStartLine() - 1, this.getStartColumn(), this.getEndLine() - 1, this.getEndColumn());
 		}

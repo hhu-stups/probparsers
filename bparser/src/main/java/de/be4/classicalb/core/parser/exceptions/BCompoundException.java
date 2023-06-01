@@ -34,10 +34,10 @@ public class BCompoundException extends Exception {
 	}
 
 	/**
-	 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
-	 *
 	 * @return a copy of this exception with all line numbers decremented by one
+	 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 	 */
+	@Deprecated
 	public BCompoundException withLinesOneOff() {
 		return new BCompoundException(this.getBExceptions().stream()
 			.map(BException::withLinesOneOff)
