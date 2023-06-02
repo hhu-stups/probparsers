@@ -144,7 +144,6 @@ States
   normal,
   comment,
   multiline_string_state,
-  shebang,
   pragma,
   description,
   pragma_content,
@@ -155,9 +154,7 @@ States
  * Tokens                                                          *
  *******************************************************************/
 Tokens
-  {section->shebang, normal -> shebang, shebang} shebang = '#!';
-  {shebang -> normal} shebang_end = line_break;
-  {shebang} shebang_char = all_chars;
+  {section, normal} shebang = '#!' [all_chars - line_break]* line_break?;
 
   {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
@@ -451,7 +448,7 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-  shebang, shebang_char, shebang_end,
+  shebang,
   white_space,
   comment, comment_body, comment_end, pragma_start, pragma_end,
   unrecognised_pragma, pragma_ignored_text,

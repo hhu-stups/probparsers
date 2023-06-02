@@ -407,6 +407,8 @@ public class BLexer extends Lexer {
 			token = comment;
 			comment = null;
 			commentBuffer = null;
+		} else if (token instanceof TShebang && token.getLine() != 1) {
+			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
@@ -417,8 +419,6 @@ public class BLexer extends Lexer {
 			collectComment();
 		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
-		} else if (state.equals(State.SHEBANG) && token != null && token.getLine() != 1) {
-			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
 
 		if (token != null) {
