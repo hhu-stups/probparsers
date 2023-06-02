@@ -17,8 +17,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
-import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
@@ -481,9 +479,9 @@ public class BParser {
 	private List<CheckException> performSemanticChecks(final Start rootNode) {
 		final List<CheckException> list = new ArrayList<>();
 		@SuppressWarnings("deprecation")
-		SemanticCheck primedIdentifierCheck = new PrimedIdentifierCheck();
+		SemanticCheck primedIdentifierCheck = new de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck();
 		@SuppressWarnings("deprecation")
-		SemanticCheck proverExpressionsCheck = new ProverExpressionsCheck();
+		SemanticCheck proverExpressionsCheck = new de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), primedIdentifierCheck, proverExpressionsCheck, new RefinedOperationCheck() };
 		// apply more checks?
