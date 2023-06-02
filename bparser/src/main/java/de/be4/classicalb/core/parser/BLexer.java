@@ -412,12 +412,12 @@ public class BLexer extends Lexer {
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
-		} else if (state.equals(State.COMMENT)) {
+		} else if (state.equals(State.BLOCK_COMMENT)) {
 			collectComment();
-		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
+		} else if ((state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_UNKNOWN_CONTENT)) &&
 				!(token instanceof TPragmaDescription)) {
 			collectComment();
-		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
 		}
 

@@ -151,21 +151,21 @@ States
   definitions_rhs,
   definition_file,
   no_definitions,
-  comment,
-  multiline_string_state;
+  block_comment,
+  multiline_string;
 
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 
 Tokens
-  {start->normal, normal, definitions, definitions_rhs} comment = comment_start; // switch to comment state is done in PreLexer.java
-  {comment} comment_end = comment_end; // switch back to previous state is done in PreLexer.java
-  {comment} comment_content = all_chars [[[all_chars - '*'] - '/'] - line_break]*;
+  {start->normal, normal, definitions, definitions_rhs} comment = comment_start; // switch to block_comment state is done in PreLexer.java
+  {block_comment} comment_end = comment_end; // switch back to previous state is done in PreLexer.java
+  {block_comment} comment_content = all_chars [[[all_chars - '*'] - '/'] - line_break]*;
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
-  {multiline_string_state} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
-  {multiline_string_state} multiline_string_content = multiline_string_literal;
+  {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
+  {multiline_string} multiline_string_content = multiline_string_literal;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
 

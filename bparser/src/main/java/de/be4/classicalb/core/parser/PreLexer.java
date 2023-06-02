@@ -80,12 +80,7 @@ public class PreLexer extends Lexer {
 	
 	// small debugging utility:
 	private void printState() {
-		if (state.equals(State.DEFINITIONS_RHS)) System.out.println("DEFINITIONS_RHS");
-		if (state.equals(State.COMMENT)) System.out.println("State.COMMENT");
-		if (state.equals(State.DEFINITIONS)) System.out.println("DEFINITIONS");
-		if (state.equals(State.NO_DEFINITIONS)) System.out.println("NO_DEFINITIONS");
-		if (state.equals(State.MULTILINE_STRING_STATE)) System.out.println("MULTILINE_STRING_STATE");
-		if (state.equals(State.NORMAL)) System.out.println("NORMAL");
+		System.out.println(state);
 		if (token != null) {
 			System.out.println("Token = " + token + " at line = " + token.getLine() + ", col = " + token.getPos());
 		}
@@ -183,7 +178,7 @@ public class PreLexer extends Lexer {
 		// switch to special COMMENT state and back
 		if (token instanceof TComment) {
 			previousState = state;
-			state = State.COMMENT;
+			state = State.BLOCK_COMMENT;
 		} else if (token instanceof TCommentEnd) {
 			state = previousState;
 			previousState = null;
@@ -194,7 +189,7 @@ public class PreLexer extends Lexer {
 		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
-			state = State.MULTILINE_STRING_STATE;
+			state = State.MULTILINE_STRING;
 		} else if (token instanceof TMultilineStringEnd) {
 			state = previousState;
 			previousState = null;
