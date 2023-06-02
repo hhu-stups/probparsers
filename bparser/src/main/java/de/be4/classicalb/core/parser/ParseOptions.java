@@ -64,6 +64,7 @@ public class ParseOptions {
 	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
 	 *     i. e. this option will effectively always be {@code true}.
 	 */
+	@Deprecated
 	public boolean isRestrictPrimedIdentifiers() {
 		return restrictPrimedIdentifiers;
 	}
@@ -72,6 +73,7 @@ public class ParseOptions {
 	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
 	 *     i. e. this option will effectively always be {@code true}.
 	 */
+	@Deprecated
 	public void setRestrictPrimedIdentifiers(boolean restrictPrimedIdentifiers) {
 		this.restrictPrimedIdentifiers = restrictPrimedIdentifiers;
 	}
