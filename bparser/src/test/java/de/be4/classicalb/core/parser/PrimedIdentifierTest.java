@@ -32,6 +32,7 @@ public class PrimedIdentifierTest {
 		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 	}
 
+	@Deprecated
 	@Test(expected = BCompoundException.class)
 	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse() throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";

@@ -24,7 +24,11 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
  * 
  * If {@link ParseOptions#restrictPrimedIdentifiers} is <code>false</code>,
  * "x$i" can become any non-negative number.
+ * 
+ * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
+ *     making this check unnecessary.
  */
+@Deprecated
 public class PrimedIdentifierCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final List<CheckException> exceptions = new ArrayList<>();

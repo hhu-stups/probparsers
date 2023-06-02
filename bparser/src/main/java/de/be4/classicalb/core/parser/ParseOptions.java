@@ -19,6 +19,9 @@ public class ParseOptions {
 	 * The parser should accept a primed identifier ("x$0") only in becomeSuch
 	 * substitutions and there only with the integer 0. This option can be set
 	 * to false in order to parse PO files of AtelierB.
+	 * 
+	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
 	 */
 	private boolean restrictPrimedIdentifiers = true;
 	
@@ -57,10 +60,18 @@ public class ParseOptions {
 		this.restrictProverExpressions = restrictProverExpressions;
 	}
 
+	/**
+	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
+	 */
 	public boolean isRestrictPrimedIdentifiers() {
 		return restrictPrimedIdentifiers;
 	}
 
+	/**
+	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
+	 */
 	public void setRestrictPrimedIdentifiers(boolean restrictPrimedIdentifiers) {
 		this.restrictPrimedIdentifiers = restrictPrimedIdentifiers;
 	}

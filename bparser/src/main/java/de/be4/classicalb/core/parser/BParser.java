@@ -481,9 +481,11 @@ public class BParser {
 	private List<CheckException> performSemanticChecks(final Start rootNode) {
 		final List<CheckException> list = new ArrayList<>();
 		@SuppressWarnings("deprecation")
+		SemanticCheck primedIdentifierCheck = new PrimedIdentifierCheck();
+		@SuppressWarnings("deprecation")
 		SemanticCheck proverExpressionsCheck = new ProverExpressionsCheck();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
-				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), proverExpressionsCheck, new RefinedOperationCheck() };
+				new DefinitionUsageCheck(getDefinitions()), primedIdentifierCheck, proverExpressionsCheck, new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {

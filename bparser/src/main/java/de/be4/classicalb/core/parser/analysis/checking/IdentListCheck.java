@@ -210,6 +210,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private boolean isIdentifierExpression(final PExpression expression) {
 		return expression instanceof AIdentifierExpression
 				|| (!options.isRestrictPrimedIdentifiers() && expression instanceof APrimedIdentifierExpression);
