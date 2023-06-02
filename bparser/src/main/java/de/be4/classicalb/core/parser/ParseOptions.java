@@ -7,8 +7,12 @@ public class ParseOptions {
 
 	/*
 	 * The parser must not accept some expressions that are only relevant in PO
-	 * files. (E.g. bfalse or SET(x).(P) )
+	 * files. (E.g. SET(x).(P) )
+	 * 
+	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
 	 */
+	@Deprecated
 	private boolean restrictProverExpressions = true;
 
 	/*
@@ -35,10 +39,20 @@ public class ParseOptions {
 	
 	private IGrammar grammar = new DefaultGrammar();
 
+	/**
+	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
+	 */
+	@Deprecated
 	public boolean isRestrictProverExpressions() {
 		return restrictProverExpressions;
 	}
 
+	/**
+	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
+	 *     i. e. this option will effectively always be {@code true}.
+	 */
+	@Deprecated
 	public void setRestrictProverExpressions(boolean restrictProverExpressions) {
 		this.restrictProverExpressions = restrictProverExpressions;
 	}

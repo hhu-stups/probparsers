@@ -146,7 +146,6 @@ public class PredicatesTest {
 	public void testSubstitutionInPredicate() throws BCompoundException {
 		final String testMachine = "#PREDICATE (a>5) & [b:=a](b<10)";
 		final BParser parser = new BParser("testcase");
-		parser.getOptions().setRestrictProverExpressions(false);
 		final Start startNode = parser.parse(testMachine, false);
 		assertEquals(
 				"machine(conjunct(none,[greater(none,identifier(none,a),integer(none,5)),substitution(none,assign(none,[identifier(none,b)],[identifier(none,a)]),less(none,identifier(none,b),integer(none,10)))])).",

@@ -49,9 +49,11 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class ASTPrologTest {
+	@Deprecated
 	private boolean remove_restrictions;
 
 	@Before
+	@Deprecated
 	public void setUp() throws Exception {
 		remove_restrictions = false;
 	}
@@ -73,6 +75,7 @@ public class ASTPrologTest {
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
+	@SuppressWarnings("deprecation")
 	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		if (remove_restrictions) {
@@ -219,10 +222,10 @@ public class ASTPrologTest {
 
 	@Test
 	public void testBFalse() throws BCompoundException {
-		remove_restrictions = true;
 		checkPredicate("bfalse", "falsity($)");
 	}
 
+	@Deprecated
 	@Test
 	public void testProverSET() throws BCompoundException {
 		remove_restrictions = true;

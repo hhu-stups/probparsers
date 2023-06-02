@@ -325,6 +325,7 @@ public class ExpressionTest {
 		assertEquals(expected, standard);
 	}
 
+	@Deprecated
 	@Test
 	public void testProverComprehensionSets() throws BCompoundException {
 		final String testMachine = "#EXPRESSION SET(i).(i>0)";
