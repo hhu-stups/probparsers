@@ -19,12 +19,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
+import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
+import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -32,6 +35,8 @@ import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
+import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
+import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
@@ -40,6 +45,35 @@ import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
 
+/**
+ * <p>
+ * Pre-parsing: find and parse any referenced definition files (.def)
+ * and determine the types of all definitions.
+ * This is necessary because the parser handles expressions, predicates, and substitutions separately,
+ * so different token/node types are needed for definition identifiers depending on whether they are
+ * expressions ({@link TIdentifierLiteral}/{@link AIdentifierExpression}),
+ * predicates ({@link TDefLiteralPredicate}/{@link ADefinitionPredicate}),
+ * or substitutions ({@link TDefLiteralSubstitution}/{@link ADefinitionSubstitution}).
+ * The PreParser collects all needed type information into {@link DefinitionTypes},
+ * which is used by {@link BLexer} to convert all identifiers to the appropriate token/node types.
+ * </p>
+ * <p>
+ * This is an annoying mess and nobody wants it,
+ * but it's more or less necessary with the current parser architecture.
+ * We have already tried to avoid/remove this step,
+ * but haven't succeeded so far.
+ * If you try to remove the PreParser,
+ * please update the following counters afterwards:
+ * </p>
+ * <p>
+ * 1 person has tried 3 times to remove the PreParser.
+ * </p>
+ * 
+ * @see BLexer#replaceDefTokens()
+ * @see BParser#preParsing(boolean, boolean, Reader, IFileContentProvider, File)
+ * @see DefinitionCollector
+ * @see DefinitionPreCollector
+ */
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
