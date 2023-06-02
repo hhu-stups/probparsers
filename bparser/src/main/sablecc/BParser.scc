@@ -448,7 +448,6 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-  shebang,
   white_space,
   comment, comment_body, comment_end, pragma_start, pragma_end,
   unrecognised_pragma, pragma_ignored_text,
@@ -462,8 +461,8 @@ Ignored Tokens
 Productions
 
 parse_unit {-> parse_unit} =
-  {machine} P.machine {-> machine.parse_unit} |
-  {definition_file} [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
+  {machine} shebang? P.machine {-> machine.parse_unit} |
+  {definition_file} shebang? [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
   {predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
   {expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
   {predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
