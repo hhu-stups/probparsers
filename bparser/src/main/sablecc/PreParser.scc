@@ -151,6 +151,15 @@ States
   definitions_rhs,
   definition_file,
   no_definitions,
+  // Multiline constructs (block comments, multiline strings) have their own lexer states
+  // to provide better errors when the closing delimiter is missing.
+  // If e. g. block comments were parsed as a single token,
+  // then a long unclosed block comment would cause a pushback buffer overflow:
+  // the lexer first tries to lex the entire remaining text as a block comment,
+  // but once EOF is reached,
+  // it tries to backtrack all the way to the start of the comment.
+  // This is not an issue for line comments,
+  // because EOF is a valid line comment terminator.
   block_comment,
   multiline_string;
 
