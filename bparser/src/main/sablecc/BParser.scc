@@ -189,7 +189,7 @@ Tokens
   {block_comment,pragma_description_content} star = '*';
   {block_comment,pragma_description_content} slash = '/';
 
-  {section->multiline_string, normal->multiline_string} multiline_string_start = triple_quote;
+  {normal->multiline_string} multiline_string_start = triple_quote;
   {multiline_string->normal} multiline_string_end = triple_quote;
   {multiline_string} multiline_string_content = multiline_string_literal;
 
