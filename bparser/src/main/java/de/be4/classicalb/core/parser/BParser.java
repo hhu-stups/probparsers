@@ -190,8 +190,8 @@ public class BParser {
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
 			return this.parse(theFormula, false, 
-			                  false, // pre-parsing is not required; there can be no DEFINITIONS inside
-			                  new NoContentProvider());
+				false, // pre-parsing is not required; there can be no DEFINITIONS inside
+				new NoContentProvider());
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
@@ -286,14 +286,12 @@ public class BParser {
 		return parse(input, debugOutput, true, new NoContentProvider());
 	}
 	
-	public Start parse(final String input, final boolean debugOutput, 
-	                   final boolean preparseNecessary) throws BCompoundException {
+	public Start parse(final String input, final boolean debugOutput, final boolean preparseNecessary) throws BCompoundException {
 		return parse(input, debugOutput, preparseNecessary, new NoContentProvider());
 	}
 	
-	public Start parse(final String input, final boolean debugOutput, 
-	                   final IFileContentProvider contentProvider) throws BCompoundException {
-	     return parse(input, debugOutput, true, contentProvider)  ;                 
+	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider) throws BCompoundException {
+		return parse(input, debugOutput, true, contentProvider);
 	}
 
 	/**
@@ -351,11 +349,12 @@ public class BParser {
 	 *             we will list all occurrences in the exception.</li>
 	 *             </ul>
 	 */
-	public Start parse(final String input,
-	                   final boolean debugOutput,
-	                   final boolean preparseNecessary,
-	                   final IFileContentProvider contentProvider)
-			throws BCompoundException {
+	public Start parse(
+		final String input,
+		final boolean debugOutput,
+		final boolean preparseNecessary,
+		final IFileContentProvider contentProvider
+	) throws BCompoundException {
 		final Reader reader = new StringReader(input);
 		try {
 			/*
@@ -448,14 +447,17 @@ public class BParser {
 		}
 	}
 
-	private DefinitionTypes preParsing(final boolean debugOutput, final boolean preparseNecessary,
-	        final Reader reader,
-			final IFileContentProvider contentProvider, File directory)
-					throws IOException, PreParseException, BException, BCompoundException {
+	private DefinitionTypes preParsing(
+		final boolean debugOutput,
+		final boolean preparseNecessary,
+		final Reader reader,
+		final IFileContentProvider contentProvider,
+		File directory
+	) throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		if(preparseNecessary) {
-		    // scan for additional new definitions
+			// scan for additional new definitions
 			preParser.setDebugOutput(debugOutput);
 			preParser.setStartPosition(this.startLine, this.startColumn);
 			preParser.parse();
