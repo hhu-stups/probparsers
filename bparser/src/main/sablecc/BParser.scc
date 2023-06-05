@@ -172,7 +172,7 @@ Tokens
   {pragma_name->pragma_content} pragma_label = 'label';
   {pragma_name->pragma_content} pragma_file = 'file';
   {pragma_name->pragma_content} pragma_package = 'package';
-  {pragma_name->pragma_description_content} pragma_description = 'desc' | 'description' | 'pragma';
+  {pragma_name->pragma_description_content} pragma_description = 'desc';
   {pragma_name->pragma_content} pragma_import_package = 'import-package';
   {pragma_name->block_comment} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal;
 
