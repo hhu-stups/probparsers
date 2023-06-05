@@ -155,8 +155,7 @@ States
   multiline_string,
   pragma_name,
   pragma_description_content,
-  pragma_content,
-  pragma_package_content;
+  pragma_content;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -167,25 +166,21 @@ Tokens
   {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {section->pragma_name,normal->pragma_name} pragma_start = '/*@';
-  {pragma_name->normal,pragma_content->normal,pragma_package_content->normal} pragma_end = '*/';
+  {pragma_name->normal,pragma_content->normal} pragma_end = '*/';
   {pragma_name} pragma_generated = 'generated'; // we could enforce nothing follows it
   {pragma_name} pragma_symbolic = 'symbolic'; // ditto
   {pragma_name->pragma_content} pragma_label = 'label';
   {pragma_name->pragma_content} pragma_file = 'file';
-  {pragma_name->pragma_package_content} pragma_package = 'package';
+  {pragma_name->pragma_content} pragma_package = 'package';
   {pragma_name->pragma_description_content} pragma_description = 'desc' | 'description' | 'pragma';
-
-  // the state for contents of the package pragma; import-package can also stand as its own pragma
-  // in the grammwar below, import-package always follows a pragma_package
-  {pragma_package_content,pragma_name->pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
-
+  {pragma_name->pragma_content} pragma_import_package = 'import-package';
   {pragma_name->block_comment} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal;
 
   // content of description pragma
   {pragma_description_content} pragma_free_text = [all_chars - ['*' + '/']]*;
 
   // the pragma_content state collects attributes for label and file pragmas
-  {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
   {section->block_comment, normal -> block_comment} comment = comment_start;
   {block_comment->normal,pragma_description_content->normal} comment_end = comment_end;
