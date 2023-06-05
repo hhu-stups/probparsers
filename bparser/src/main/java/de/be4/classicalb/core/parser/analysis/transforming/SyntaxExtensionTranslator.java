@@ -159,7 +159,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	/**
 	 * Recognize calls to built-in functions that are not declared as keywords.
 	 * This allows using the keywords as regular identifiers
-	 * everywhere excpet the left side of a function call
+	 * everywhere except the left side of a function call
 	 * (and there they can be backquoted to suppress the built-in meaning).
 	 * This is helpful for rarely used keywords that are also common English words
 	 * (e. g. left, right, top).
