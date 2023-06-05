@@ -142,7 +142,13 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  section,
+  // Initial state in which the lexer recognizes only keywords that start a model.
+  // The internal keywords for special parsing modes (#EXPRESSION, etc. - see below)
+  // are recognized only in this start state.
+  // This avoids conflicts with the symbol # (existential quantification) in regular B syntax.
+  // After the first keyword has been lexed,
+  // the parser switches to the normal state and never returns to the start state.
+  start,
   normal,
   // Multiline constructs (block comments, pragmas, multiline strings) have their own lexer states
   // to provide better errors when the closing delimiter is missing.
@@ -162,19 +168,19 @@ States
  * Tokens                                                          *
  *******************************************************************/
 Tokens
-  {section, normal} shebang = '#!' [all_chars - line_break]* line_break?;
+  {start,normal} shebang = '#!' [all_chars - line_break]* line_break?;
 
-  {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
+  {start,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {pragma_content->normal,pragma_description_content->normal} pragma_end = '*/';
-  {section->pragma_content,normal->pragma_content} pragma_generated = pragma_prefix 'generated'; // we could enforce nothing follows it
-  {section->pragma_content,normal->pragma_content} pragma_symbolic = pragma_prefix 'symbolic'; // ditto
-  {section->pragma_content,normal->pragma_content} pragma_label = pragma_prefix 'label';
-  {section->pragma_content,normal->pragma_content} pragma_file = pragma_prefix 'file';
-  {section->pragma_content,normal->pragma_content} pragma_package = pragma_prefix 'package';
-  {section->pragma_description_content,normal->pragma_description_content} pragma_description = pragma_prefix 'desc';
-  {section->pragma_content,normal->pragma_content} pragma_import_package = pragma_prefix 'import-package';
-  {section->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix (string_literal | identifier_literal | pragma_identifier_literal);
+  {start->pragma_content,normal->pragma_content} pragma_generated = pragma_prefix 'generated'; // we could enforce nothing follows it
+  {start->pragma_content,normal->pragma_content} pragma_symbolic = pragma_prefix 'symbolic'; // ditto
+  {start->pragma_content,normal->pragma_content} pragma_label = pragma_prefix 'label';
+  {start->pragma_content,normal->pragma_content} pragma_file = pragma_prefix 'file';
+  {start->pragma_content,normal->pragma_content} pragma_package = pragma_prefix 'package';
+  {start->pragma_description_content,normal->pragma_description_content} pragma_description = pragma_prefix 'desc';
+  {start->pragma_content,normal->pragma_content} pragma_import_package = pragma_prefix 'import-package';
+  {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix (string_literal | identifier_literal | pragma_identifier_literal);
 
   // content of description pragma
   {pragma_description_content} pragma_free_text = comment_body;
@@ -182,7 +188,7 @@ Tokens
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
-  {section->block_comment, normal -> block_comment} comment = comment_start;
+  {start->block_comment, normal->block_comment} comment = comment_start;
   {block_comment->normal} comment_end = comment_end;
   {block_comment} comment_body = comment_body;
 
@@ -267,7 +273,7 @@ Tokens
   {normal} concrete_variables = 'CONCRETE_VARIABLES';
   {normal} constants = 'CONSTANTS';
   {normal} constraints = 'CONSTRAINTS';
-  {section->normal,normal} definitions = 'DEFINITIONS';
+  {start->normal,normal} definitions = 'DEFINITIONS';
   {normal} expressions = 'EXPRESSIONS';
   {normal} predicates = 'PREDICATES';
   {normal} do = 'DO';
@@ -280,7 +286,7 @@ Tokens
   {normal} fin = 'FIN';
   {normal} fin1 = 'FIN1'; // add 'FIN'0x8321 ?
   {normal} if = 'IF';
-  {section->normal,normal} implementation = 'IMPLEMENTATION';
+  {start->normal,normal} implementation = 'IMPLEMENTATION';
   {normal} imports = 'IMPORTS';
   {normal} in = 'IN';
   {normal} includes = 'INCLUDES';
@@ -293,9 +299,9 @@ Tokens
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
   {normal} local_operations = 'LOCAL_OPERATIONS';
-  {section->normal,normal} machine = 'MACHINE';
-  {section->normal,normal} model = 'MODEL';
-  {section->normal,normal} system = 'SYSTEM'; /* SYSTEM fuer Event-B */
+  {start->normal,normal} machine = 'MACHINE';
+  {start->normal,normal} model = 'MODEL';
+  {start->normal,normal} system = 'SYSTEM'; /* SYSTEM fuer Event-B */
   {normal} max_int = 'MAXINT';
   {normal} min_int = 'MININT';
   {normal} nat = 'NAT';
@@ -312,7 +318,7 @@ Tokens
   {normal} promotes = 'PROMOTES';
   {normal} properties = 'PROPERTIES';
   {normal} refines = 'REFINES';
-  {section->normal,normal} refinement = 'REFINEMENT';
+  {start->normal,normal} refinement = 'REFINEMENT';
   {normal} sees = 'SEES';
   {normal} select = 'SELECT';
   {normal} sets = 'SETS';
@@ -394,16 +400,16 @@ Tokens
 
   // keywords for special parsing modes;
   // these # keywords do not interfere with normal parsing
-  {section->normal} kw_expression = '#EXPRESSION';
-  {section->normal} kw_predicate = '#PREDICATE';
-  {section->normal} kw_formula = '#FORMULA';
-  {section->normal} kw_substitution = '#SUBSTITUTION';
-  {section->normal} kw_definition = '#DEFINITION';
-  {section->normal} kw_oppattern = '#OPPATTERN';
-  {section->normal} kw_machine_clause = '#MACHINECLAUSE';
+  {start->normal} kw_expression = '#EXPRESSION';
+  {start->normal} kw_predicate = '#PREDICATE';
+  {start->normal} kw_formula = '#FORMULA';
+  {start->normal} kw_substitution = '#SUBSTITUTION';
+  {start->normal} kw_definition = '#DEFINITION';
+  {start->normal} kw_oppattern = '#OPPATTERN';
+  {start->normal} kw_machine_clause = '#MACHINECLAUSE';
 
   {normal} truth_predicate = 'btrue' | 0x22A4; // truth, no longer accept #truth_predicate
-  {section->normal,normal} identifier_literal = identifier_literal;
+  {start->normal,normal} identifier_literal = identifier_literal;
   {normal} def_literal_substitution = '@#literal_substitution' letter*; // dummy tokens; not generated by lexing;
       // corresponding syntax nodes generated by Java code (by BLexer using Preparser definition list);
       // TODO: should we use unicode_letter? Parser works with definitions with unicode letters
