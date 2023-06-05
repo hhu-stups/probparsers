@@ -15,7 +15,7 @@ Helpers
 
   comment_start = '/*';
   comment_body = ([all_chars - '*'] | '*'+ [all_chars - ['*' + '/']])*;
-  comment_end = '*/';
+  comment_end = '*'+ '/';
 
   triple_quote = 39 39 39;
   single_quote = 39;
