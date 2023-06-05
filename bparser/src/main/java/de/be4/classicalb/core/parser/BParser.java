@@ -370,7 +370,7 @@ public class BParser {
 			 * excepted by the parser
 			 */
 			 
-			final DefinitionTypes defTypes = preParsing(debugOutput, preparseNecessary, reader, contentProvider, directory);
+			final DefinitionTypes defTypes = preParsing(debugOutput, preparseNecessary, reader, contentProvider);
 
 			/*
 			 * Main parser
@@ -451,8 +451,7 @@ public class BParser {
 		final boolean debugOutput,
 		final boolean preparseNecessary,
 		final Reader reader,
-		final IFileContentProvider contentProvider,
-		File directory
+		final IFileContentProvider contentProvider
 	) throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
