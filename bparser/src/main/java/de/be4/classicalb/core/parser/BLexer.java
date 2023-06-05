@@ -414,8 +414,7 @@ public class BLexer extends Lexer {
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.BLOCK_COMMENT)) {
 			collectComment();
-		} else if ((state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_UNKNOWN_CONTENT)) &&
-				!(token instanceof TPragmaDescription)) {
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) && !(token instanceof TPragmaDescription)) {
 			collectComment();
 		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
