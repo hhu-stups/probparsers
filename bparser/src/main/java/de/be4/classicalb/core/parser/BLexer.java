@@ -315,6 +315,7 @@ public class BLexer extends Lexer {
 	private ParseOptions parseOptions = null;
 
 	private Token comment = null;
+	private StringBuilder commentBuffer = null;
 
 	private final DefinitionTypes definitions;
 
@@ -403,20 +404,22 @@ public class BLexer extends Lexer {
 			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
 
-		if (token instanceof TShebang && token.getLine() != 1) {
+		if (token instanceof TCommentEnd) {
+			commentBuffer.append(token.getText());
+			comment.setText(commentBuffer.toString());
+			token = comment;
+			comment = null;
+			commentBuffer = null;
+		} else if (token instanceof TShebang && token.getLine() != 1) {
 			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
-		} else if (state.equals(State.BLOCK_COMMENT) || state.equals(State.PRAGMA_CONTENT) || state.equals(State.PRAGMA_DESCRIPTION_CONTENT)) {
-			if (comment == null) {
-				comment = token;
-			}
-
-			if (token instanceof EOF) {
-				throw new BLexerException(comment, "Comment not closed.", "", comment.getLine(), comment.getPos());
-			}
-
+		} else if (state.equals(State.BLOCK_COMMENT)) {
+			collectComment();
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) && !(token instanceof TPragmaDescription)) {
+			collectComment();
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
 		}
 
@@ -462,6 +465,24 @@ public class BLexer extends Lexer {
 				}
 			}
 		}
+	}
+
+	private void collectComment() throws LexerException {
+		if (token instanceof EOF) {
+			// make sure we don't loose this token, needed for error message
+			final String text = token.getText();
+			throw new BLexerException(comment, "Comment not closed.", text, comment.getLine(), comment.getPos());
+		}
+
+		// starting a new comment
+		if (comment == null) {
+			commentBuffer = new StringBuilder(token.getText());
+			comment = token;
+		} else {
+			commentBuffer.append(token.getText());
+			assert !(token instanceof TCommentEnd); // end of comment now handled in filter
+		}
+		token = null;
 	}
 
 	private void optimizeToken() {

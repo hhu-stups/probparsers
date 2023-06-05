@@ -117,13 +117,21 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		node.replaceBy(intNode);
 	}
 	
+	private static String cleanDescriptionText(final String descriptionText) {
+		String formatted = descriptionText;
+		if (descriptionText.endsWith("*/")) {
+			formatted = formatted.substring(0, formatted.length() - 2);
+		}
+		return formatted.trim();
+	}
+	
 	/**
-	 * Cleans up the text contents of description pragma nodes by removing any whitespace surrounding the description.
+	 * Cleans up the text contents of description pragma nodes by removing the end of comment symbols and any whitespace surrounding the description.
 	 * 
 	 * @param node the description pragma node to clean
 	 */
 	private static void cleanDescriptionNode(final TPragmaFreeText node) {
-		node.setText(node.getText().trim());
+		node.setText(cleanDescriptionText(node.getText()));
 	}
 	
 	@Override
