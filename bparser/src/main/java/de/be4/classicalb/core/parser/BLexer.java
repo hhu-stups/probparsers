@@ -340,7 +340,7 @@ public class BLexer extends Lexer {
 			return;
 		}
 		if (token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment ||
-			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
+			token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
 
