@@ -263,8 +263,6 @@ public class CliBParser {
 			line = in.readLine();
 
 			EPreplCommands command;
-			String theFormula;
-
 			if (line == null) {
 				// the prob instance has been terminated. exit gracefully
 				command = EPreplCommands.halt;
@@ -384,20 +382,11 @@ public class CliBParser {
 				}
 				break;
 			case formula:
-				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case expression:
-				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case predicate:
-				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case substitution:
-				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
+				String theFormula = in.readLine();
+				parseFormula(command, theFormula, context, behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -443,17 +432,33 @@ public class CliBParser {
 		pout.flush();
 	}
 
-	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
+	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
 		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 
 		try {
 			BParser parser = new BParser();
-			// Reduce starting line number by one
-			// so that the line with a #FORMULA, etc. prefix isn't counted
-			// and the actual formula is counted as line 1.
-			parser.setStartPosition(behaviour.getStartLineNumber()-1, behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
-			Start start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
+			Start start;
+			switch (command) {
+				case formula:
+					start = parser.parseFormula(theFormula);
+					break;
+
+				case expression:
+					start = parser.parseExpression(theFormula);
+					break;
+
+				case predicate:
+					start = parser.parsePredicate(theFormula);
+					break;
+
+				case substitution:
+					start = parser.parseSubstitution(theFormula);
+					break;
+
+				default:
+					throw new AssertionError("Unhandled parsing command: " + command);
+			}
 
 			// In the compact position format, node IDs are not used,
 			// so generate them only if the old non-compact format is requested.
