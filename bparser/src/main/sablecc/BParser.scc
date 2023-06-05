@@ -166,7 +166,7 @@ Tokens
 
   {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
-  {pragma_content->normal} pragma_end = '*/';
+  {pragma_content->normal,pragma_description_content->normal} pragma_end = '*/';
   {section->pragma_content,normal->pragma_content} pragma_generated = pragma_prefix 'generated'; // we could enforce nothing follows it
   {section->pragma_content,normal->pragma_content} pragma_symbolic = pragma_prefix 'symbolic'; // ditto
   {section->pragma_content,normal->pragma_content} pragma_label = pragma_prefix 'label';
@@ -183,7 +183,7 @@ Tokens
   {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
   {section->block_comment, normal -> block_comment} comment = comment_start;
-  {block_comment->normal,pragma_description_content->normal} comment_end = comment_end;
+  {block_comment->normal} comment_end = comment_end;
   {block_comment} comment_body = comment_body;
 
   {normal->multiline_string} multiline_string_start = triple_quote;
@@ -452,7 +452,7 @@ Tokens
  *******************************************************************/
 Ignored Tokens
   white_space,
-  comment, comment_body, comment_end, pragma_end,
+  comment, comment_body, comment_end,
   unrecognised_pragma,
   line_comment;
 
@@ -477,13 +477,13 @@ parse_unit {-> parse_unit} =
 
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
-  {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {package} pragma_package [package]:pragma_id_or_string [imports]:import_package_list? [parse_unit]:P.machine
+  {generated} pragma_generated pragma_end [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
+  {package} pragma_package [package]:pragma_id_or_string pragma_end [imports]:import_package_list? [parse_unit]:P.machine
     {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)};
 
 import_package_list {-> import_package*} =
-  {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package, New import_package(package_or_machine)]};
+  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [New import_package(package_or_machine)]} |
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [rest.import_package, New import_package(package_or_machine)]};
 
 
 machine_x {-> parse_unit} =
@@ -591,7 +591,7 @@ machine_ref_list {-> machine_reference*} =
 
 machine_reference {-> machine_reference} =
   {simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
-  {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
+  {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string pragma_end
     {-> New machine_reference.file(machine_reference.machine_reference, file)};
 
 machine_reference2 {-> machine_reference} =
@@ -603,7 +603,7 @@ machine_reference_no_params_list {-> machine_reference_no_params*} =
 
 machine_reference_no_params {-> machine_reference_no_params} =
   {simple} [ref]:machine_reference_no_params2 {-> ref.machine_reference_no_params} |
-  {file} [ref]:machine_reference_no_params2 pragma_file [file]:pragma_id_or_string {-> New machine_reference_no_params.file(ref.machine_reference_no_params, file)};
+  {file} [ref]:machine_reference_no_params2 pragma_file [file]:pragma_id_or_string pragma_end {-> New machine_reference_no_params.file(ref.machine_reference_no_params, file)};
 
 machine_reference_no_params2 {-> machine_reference_no_params} =
   {simple} [machine_name]:composed_identifier {-> New machine_reference_no_params([machine_name.identifier_literal])};
@@ -633,7 +633,7 @@ set_def_list {-> set*} =
   {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]};
 
 set {-> set} =
-  {description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
+  {description} [set]:set pragma_description [content]:pragma_free_text pragma_end {-> New set.description(content,set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
   {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
   {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
@@ -728,11 +728,11 @@ predicate_p40 {-> predicate} =
   {next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-  {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
+  {label} pragma_label [name]:pragma_id_or_string pragma_end [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
-  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
+  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text pragma_end {-> New predicate.description(content,predicate.predicate)} |
   {next_level} [pred]:predicate_x42 {-> pred.predicate};
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
@@ -805,7 +805,7 @@ predicate_atomic {-> predicate} =
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
-  {symbolic_composition} [left]:expression_in_par pragma_symbolic semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
+  {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
   {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
   {next_level} [expr]:expression_top {-> expr.expression};
 
@@ -924,9 +924,9 @@ expression_keyword {-> expression} =
   {lambda2} lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)}
   |
-  {symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
+  {symbolic_lambda} pragma_symbolic pragma_end lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
-  {symbolic_lambda2} pragma_symbolic lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
+  {symbolic_lambda2} pragma_symbolic pragma_end lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)}
   |
   {trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
@@ -961,12 +961,12 @@ expression_keyword {-> expression} =
   |
   {event_b_comprehension_set} left_brace [identifiers]:expression_list dot2 [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
   |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
+  {symbolic_comprehension_set} pragma_symbolic pragma_end left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
   |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_union2} quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
-  {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
-  {symbolic_quantified_union2} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)}
+  {symbolic_quantified_union} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+  {symbolic_quantified_union2} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)}
   |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
   |
@@ -1158,7 +1158,7 @@ quantified_variables_list {-> expression*} =
   {no_parentheses} [id]:identifier_list {-> [id.expression]};
 
 identifier_declaration_expression {-> expression} =
-  {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
+  {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text pragma_end {-> New expression.description(content,identifier.expression)}|
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
 identifier_expression {-> expression} =
