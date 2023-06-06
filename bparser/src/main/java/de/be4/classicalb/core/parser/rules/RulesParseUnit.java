@@ -88,13 +88,7 @@ public class RulesParseUnit implements IModel {
 			return;
 		}
 		try {
-			bParser = null;
-			if (machineFile != null) {
-				bParser = new BParser(machineFile.getPath());
-				bParser.setDirectory(machineFile.getParentFile());
-			} else {
-				bParser = new BParser();
-			}
+			bParser = new BParser(machineFile != null ? machineFile.getPath() : null);
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);

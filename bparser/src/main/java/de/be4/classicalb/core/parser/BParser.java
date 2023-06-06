@@ -68,7 +68,7 @@ public class BParser {
 	private List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
-	private File directory;
+	private File machineFile;
 
 	private int startLine;
 	private int startColumn;
@@ -156,7 +156,7 @@ public class BParser {
 	 */
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
 			throws IOException, BCompoundException {
-		this.directory = machineFile.getParentFile();
+		this.machineFile = machineFile;
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
@@ -470,6 +470,13 @@ public class BParser {
 		return parseMachine(input, new NoContentProvider());
 	}
 
+	private File getMachineFile() {
+		if (this.machineFile == null && this.fileName != null) {
+			this.machineFile = new File(this.fileName);
+		}
+		return this.machineFile;
+	}
+
 	public String getFileName() {
 		if (fileName == null) {
 			return null;
@@ -508,7 +515,9 @@ public class BParser {
 		final IFileContentProvider contentProvider
 	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
-				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
+			this.getMachineFile(),
+			contentProvider, doneDefFiles, parseOptions, this.definitions
+		);
 		// scan for additional new definitions
 		preParser.setStartPosition(this.startLine, this.startColumn);
 		preParser.parse();
@@ -569,9 +578,5 @@ public class BParser {
 
 	public void setParseOptions(ParseOptions options) {
 		this.parseOptions = options;
-	}
-
-	public void setDirectory(final File directory) {
-		this.directory = directory;
 	}
 }

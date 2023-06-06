@@ -76,25 +76,24 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
+	private final File modelFile;
 	private final DefinitionTypes definitionTypes;
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
 	private final List<String> doneDefFiles;
-	private final String modelFileName;
-	private final File directory;
 
 	private int startLine;
 	private int startColumn;
 
-	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
-			final List<String> doneDefFiles, final String modelFileName, final File directory,
+	public PreParser(PushbackReader pushbackReader, File modelFile,
+			IFileContentProvider contentProvider,
+			List<String> doneDefFiles,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
+		this.modelFile = modelFile;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
-		this.modelFileName = modelFileName;
-		this.directory = directory;
 		this.parseOptions = parseOptions;
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
@@ -178,12 +177,10 @@ public class PreParser {
 					definitions = cache.getDefinitions(fileName);
 				} else {
 					newDoneList.add(fileName);
+					File directory = modelFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
-					final BParser parser = new BParser(fileName, parseOptions);
 					final File file = contentProvider.getFile(directory, fileName);
-					if (file != null) {
-						parser.setDirectory(file.getParentFile());
-					}
+					final BParser parser = new BParser(file != null ? file.toString() : fileName, parseOptions);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
 					parser.parseMachine(content, contentProvider);
@@ -247,7 +244,7 @@ public class PreParser {
 			final Token defRhs = definitions.get(definition);
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
-				throw new PreParseException(definitionType.errorMessage + " in file: " + modelFileName);
+				throw new PreParseException(definitionType.errorMessage + " in file: " + modelFile);
 				// throw new BParseException(definitionType.errorToken,
 				// definitionType.errorMessage + " in file: "
 				// + modelFileName);
