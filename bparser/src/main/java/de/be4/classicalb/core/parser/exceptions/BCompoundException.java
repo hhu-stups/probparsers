@@ -6,6 +6,12 @@ import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 
+/**
+ * Wraps one or more {@link BException}s that occurred during the parsing process.
+ * This allows the parser to report all found errors at once and not just the first one.
+ * To get more information about the individual errors and their positions,
+ * use {@link #getBExceptions()} and inspect the {@link BException} objects.
+ */
 @SuppressWarnings("serial")
 public class BCompoundException extends Exception {
 	private final List<BException> exceptions = new ArrayList<>();
