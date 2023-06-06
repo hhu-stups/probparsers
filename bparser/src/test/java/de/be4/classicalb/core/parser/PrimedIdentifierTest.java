@@ -38,7 +38,7 @@ public class PrimedIdentifierTest {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setRestrictPrimedIdentifiers(false);
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 		// this mode is no longer supported
 	}
 

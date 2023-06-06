@@ -26,7 +26,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE SimplyStructure END";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 
 		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) startNode.getPParseUnit();
 
@@ -77,7 +77,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE SimplyStructure\nVARIABLES aa, b, Cc\nINVARIANT aa : NAT & b : NAT & Cc : NAT\nINITIALISATION aa:=1 || b:=2 || c:=3\nEND";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertNotNull(startNode);
 
 		// TODO more tests
@@ -88,7 +88,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE SimplyStructure\nCONSTANTS dd, e, Ff\nPROPERTIES dd : BOOL\nEND";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertNotNull(startNode);
 
 		// TODO more tests
@@ -99,7 +99,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE SimplyStructure SETS GGG; Hhh; JJ = {dada, dudu, TUTUT}; iII; kkk = {LLL} END";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertNotNull(startNode);
 
 		// TODO more tests
@@ -110,7 +110,7 @@ public class StructuralTest {
 		final String testMachine = "MACHINE SimplyStructure END";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertNotNull(startNode);
 
 		// TODO more tests
@@ -148,7 +148,7 @@ public class StructuralTest {
 				+ "SETS GGG; Hhh; JJ = {dada, dudu, TUTUT}; iII; kkk = {LLL}\nEND";
 
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertNotNull(startNode);
 
 		// TODO more tests

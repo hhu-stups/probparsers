@@ -25,8 +25,7 @@ public class DropHaskellRegressionTests {
 		BParser parser2 = new BParser(name);
 		
 		parser2.getDefinitions().addDefinitions(parser.getDefinitions());
-		Start parse = parser2.parse(BParser.FORMULA_PREFIX + " " + code, false,
-				parser.getContentProvider());
+		Start parse = parser2.parseFormula(code);
 		assertNotNull(parse);
 
 	}

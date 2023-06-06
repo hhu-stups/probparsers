@@ -44,7 +44,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testOneDefinitionFile() throws BCompoundException {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile\"; def1 == xx\nINVARIANT def2 = def3\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.parse(testMachine, true, this);
+		parser.parseMachine(testMachine, this);
 
 		final IDefinitions definitions = parser.getDefinitions();
 		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
@@ -69,7 +69,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRecursiveReference() throws Exception {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile1\"; def1 == xx; def02 == aa\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.parse(testMachine, false, this);
+		parser.parseMachine(testMachine, this);
 
 		final IDefinitions definitions = parser.getDefinitions();
 		final AExpressionDefinitionDefinition def1 = (AExpressionDefinitionDefinition) definitions
@@ -111,7 +111,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testCircleReference() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile3\"\nEND";
 		final BParser parser = new BParser("testcase");
-		Helpers.assertThrowsCompound(PreParseException.class, () -> parser.parse(testMachine, false, this));
+		Helpers.assertThrowsCompound(PreParseException.class, () -> parser.parseMachine(testMachine, this));
 	}
 
 	/*
@@ -121,7 +121,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testNonCircleReference() throws Exception {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile5\";\n\"DefFile6\"\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.parse(testMachine, false, this);
+		parser.parseMachine(testMachine, this);
 	}
 
 	/*
@@ -152,7 +152,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testNotExistingFile() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile\"; def1 == xx\nEND";
 		assertThrows(BCompoundException.class, () ->
-			new BParser("testcase").parse(testMachine, false, new PlainFileContentProvider())
+			new BParser("testcase").parseMachine(testMachine, new PlainFileContentProvider())
 		);
 	}
 
@@ -161,7 +161,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile1\"; \"DefFile2\"\nEND";
 		final BParser parser = new BParser("testcase");
 		final CountingDefinitionFileProvider provider = new CountingDefinitionFileProvider();
-		parser.parse(testMachine, false, provider);
+		parser.parseMachine(testMachine, provider);
 
 		assertEquals(4, provider.getStoredCounter);
 		assertEquals(2, provider.storeCounter);

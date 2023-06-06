@@ -122,7 +122,7 @@ public class BParser {
 	/**
 	 * Parses the input file.
 	 * 
-	 * @see #parse(String, boolean, IFileContentProvider)
+	 * @see #parseMachine(String)
 	 * @param machineFile
 	 *            the machine file to be parsed
 	 * @param verbose
@@ -141,7 +141,7 @@ public class BParser {
 	/**
 	 * Parses the input file.
 	 * 
-	 * @see #parse(String, boolean)
+	 * @see #parseMachine(String, IFileContentProvider)
 	 * @param machineFile
 	 *            the machine file to be parsed
 	 * @param verbose
@@ -161,7 +161,7 @@ public class BParser {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
-		return parse(content, verbose, true, contentProvider);
+		return parseMachine(content, contentProvider);
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class BParser {
 	 */
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
-		return parser.parse(input, false, true, new NoContentProvider());
+		return parser.parseMachine(input);
 	}
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
@@ -189,9 +189,7 @@ public class BParser {
 			// Decrease the start column by the size of the implicitly added prefix
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
-			return this.parse(theFormula, false, 
-				false, // pre-parsing is not required; there can be no DEFINITIONS inside
-				new NoContentProvider());
+			return this.parseWithoutPreParsing(new StringReader(theFormula));
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
@@ -266,41 +264,85 @@ public class BParser {
 		return ast;
 	}
 
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
 	/**
-	 * Like {@link #parse(String, boolean, IFileContentProvider)}, but with
+	 * Like {@link #parseMachine(String, IFileContentProvider)}, but with
 	 * {@link NoContentProvider} as last parameter, i.e., loading of referenced
 	 * files is not enabled.
 	 * 
-	 * Use {@link #parse(String, boolean, IFileContentProvider)} instead to be
+	 * Use {@link #parseMachine(String, IFileContentProvider)} instead to be
 	 * able to control loading of referenced files.
 	 * 
+	 * @deprecated Use {@link #parseMachine(String)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
 	 * @param input
 	 *            the B machine as input string
-	 * @param debugOutput
-	 *            print debug information
+	 * @param debugOutput ignored
 	 * @return the AST node
 	 * @throws BCompoundException
 	 *             if the B machine cannot be parsed
 	 */
+	@Deprecated
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
-		return parse(input, debugOutput, true, new NoContentProvider());
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
+		return parseMachine(input);
 	}
 	
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
+	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
+	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
+	 *     that are not complete B machines and thus don't require pre-parsing.
+	 * @param input B machine source code
+	 * @param debugOutput ignored
+	 * @param preparseNecessary should pre-parsing be performed to detect DEFINITION types
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	@Deprecated
 	public Start parse(final String input, final boolean debugOutput, final boolean preparseNecessary) throws BCompoundException {
 		return parse(input, debugOutput, preparseNecessary, new NoContentProvider());
 	}
 	
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
+	 * @param input B machine source code
+	 * @param debugOutput ignored
+	 * @param contentProvider A {@link IFileContentProvider} that is able to load content of referenced files during the parsing process.
+	 *     The content provider is used for referenced definition files for example.
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	@Deprecated
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider) throws BCompoundException {
-		return parse(input, debugOutput, true, contentProvider);
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
+		return parseMachine(input, contentProvider);
 	}
 
 	/**
 	 * Parses the input string.
 	 * 
+	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
+	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
+	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
+	 *     that are not complete B machines and thus don't require pre-parsing.
 	 * @param input
 	 *            The {@link String} to be parsed
-	 * @param debugOutput
-	 *            output debug messages on standard out?
+	 * @param debugOutput ignored
 	 * @param preparseNecessary
 	 *            should pre-parsing be performed to detect DEFINITION types
 	 * @param contentProvider
@@ -311,33 +353,23 @@ public class BParser {
 	 * @throws BCompoundException if the B code could not be parsed
 	 *     (see {@link BException} for details)
 	 */
+	@Deprecated
 	public Start parse(
 		final String input,
 		final boolean debugOutput,
 		final boolean preparseNecessary,
 		final IFileContentProvider contentProvider
 	) throws BCompoundException {
-		final Reader reader = new StringReader(input);
-		try {
-			/*
-			 * Pre-parsing: find and parse any referenced definition files (.def)
-			 * and determine the types of all definitions.
-			 * 
-			 * The definition types are used in the lexer in order to replace an
-			 * identifier token by a definition call token. This is required if
-			 * the definition is a predicate because an identifier can not be
-			 * parsed as a predicate. For example "... SELECT def THEN ... "
-			 * would yield to a parse error. The lexer will replace the
-			 * identifier token "def" by a TDefLiteralPredicate which will be
-			 * excepted by the parser
-			 */
-			DefinitionTypes defTypes;
-			if (preparseNecessary) {
-				defTypes = preParsing(debugOutput, reader, contentProvider);
-			} else {
-				defTypes = new DefinitionTypes(definitions.getTypes());
-			}
+		Reader reader = new StringReader(input);
+		if (preparseNecessary) {
+			return parseWithPreParsing(reader, contentProvider);
+		} else {
+			return parseWithoutPreParsing(reader);
+		}
+	}
 
+	private Start parseInternal(Reader reader, DefinitionTypes defTypes) throws BCompoundException {
+		try {
 			/*
 			 * Main parser
 			 */
@@ -383,8 +415,6 @@ public class BParser {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final IOException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
-		} catch (final PreParseException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final String msg = e.getLocalizedMessage();
@@ -393,6 +423,51 @@ public class BParser {
 		} catch (LexerException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		}
+	}
+
+	private Start parseWithPreParsing(Reader reader, IFileContentProvider provider) throws BCompoundException {
+		DefinitionTypes defTypes;
+		try {
+			defTypes = preParsing(reader, provider);
+		} catch (IOException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		} catch (PreParseException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		}
+		return parseInternal(reader, defTypes);
+	}
+
+	private Start parseWithoutPreParsing(Reader reader) throws BCompoundException {
+		return parseInternal(reader, new DefinitionTypes(definitions.getTypes()));
+	}
+
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @param input B machine source code
+	 * @param provider A {@link IFileContentProvider} that is able to load content of referenced files during the parsing process.
+	 *     The content provider is used for referenced definition files for example.
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	public Start parseMachine(String input, IFileContentProvider provider) throws BCompoundException {
+		return parseWithPreParsing(new StringReader(input), provider);
+	}
+
+	/**
+	 * Parses a complete B machine from a string.
+	 * Machines parsed using this method cannot reference other files.
+	 * Use {@link #parseFile(File, boolean)} to parse a machine file that might reference other files,
+	 * or {@link #parseMachine(String, IFileContentProvider)} if you really need to parse a string.
+	 * 
+	 * @param input B machine source code
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	public Start parseMachine(String input) throws BCompoundException {
+		return parseMachine(input, new NoContentProvider());
 	}
 
 	public String getFileName() {
@@ -411,15 +486,30 @@ public class BParser {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Pre-parsing: find and parse any referenced definition files (.def)
+	 * and determine the types of all definitions.
+	 * This step is only necessary when parsing a full machine,
+	 * not just a formula, substitution, etc.
+	 * </p>
+	 * <p>
+	 * The definition types are used in the lexer in order to replace an
+	 * identifier token by a definition call token. This is required if
+	 * the definition is a predicate because an identifier can not be
+	 * parsed as a predicate. For example "... SELECT def THEN ... "
+	 * would yield to a parse error. The lexer will replace the
+	 * identifier token "def" by a TDefLiteralPredicate which will be
+	 * excepted by the parser
+	 * </p>
+	 */
 	private DefinitionTypes preParsing(
-		final boolean debugOutput,
 		final Reader reader,
 		final IFileContentProvider contentProvider
 	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		// scan for additional new definitions
-		preParser.setDebugOutput(debugOutput);
 		preParser.setStartPosition(this.startLine, this.startColumn);
 		preParser.parse();
 		reader.reset();

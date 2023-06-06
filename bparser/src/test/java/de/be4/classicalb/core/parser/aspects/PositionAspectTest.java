@@ -20,7 +20,7 @@ public class PositionAspectTest {
 	public void testNodeSubclassOfPositionedNode() throws Exception {
 		final String testMachine = "#EXPRESSION 1+2";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 
 		assertTrue(startNode instanceof PositionedNode);
 	}
@@ -29,7 +29,7 @@ public class PositionAspectTest {
 	public void testHasGetMethods() throws Exception {
 		final String testMachine = "#EXPRESSION 1+2";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 
 		startNode.getStartPos();
 		startNode.getEndPos();
@@ -39,7 +39,7 @@ public class PositionAspectTest {
 	public void testSimpleNode() throws Exception {
 		final String testMachine = "#EXPRESSION x";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 		final PExpression expression = ((AExpressionParseUnit) startNode
 				.getPParseUnit()).getExpression();
 
@@ -59,7 +59,7 @@ public class PositionAspectTest {
 	public void testComposedNode() throws Exception {
 		final String testMachine = "#EXPRESSION x+1";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, true);
+		final Start startNode = parser.parseMachine(testMachine);
 
 		// test top node
 		final PExpression expression = ((AExpressionParseUnit) startNode

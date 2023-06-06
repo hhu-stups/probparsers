@@ -14,7 +14,7 @@ public class PushbackBufferOverflows {
 	public void withoutPredVars() throws Exception {
 		String source = "#PREDICATE procs : STRING +-> {\"waiting\",\"ready\"} & current : STRING & idle : {TRUE,FALSE} & idle = FALSE & procs /= { } & { \"waiting\" } /= { } & { \"waiting\" } /\\ ran(procs) = { } & { \"ready\" } = ran(procs)";
 		BParser parser = new BParser();
-		Start result = parser.parse(source, false);
+		Start result = parser.parseMachine(source);
 		assertNotNull(result);
 	}
 

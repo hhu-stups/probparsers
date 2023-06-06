@@ -81,7 +81,7 @@ public class ASTPrologTest {
 		if (remove_restrictions) {
 			parser.getOptions().setRestrictProverExpressions(false);
 		}
-		final Start startNode = parser.parse(bspec, false, new NoContentProvider());
+		final Start startNode = parser.parseMachine(bspec);
 		checkAST(counter, expected, startNode);
 	}
 

@@ -179,6 +179,6 @@ public class SourcePositionsTest {
 	}
 
 	private Start getAst(final String testMachine) throws BCompoundException {
-		return parser.parse(testMachine, false);
+		return parser.parseMachine(testMachine);
 	}
 }

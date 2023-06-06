@@ -69,15 +69,13 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * </p>
  * 
  * @see BLexer#replaceDefTokens()
- * @see BParser#preParsing(boolean, Reader, IFileContentProvider)
+ * @see BParser#preParsing(Reader, IFileContentProvider)
  * @see DefinitionCollector
  * @see DefinitionPreCollector
  */
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
-	private boolean debugOutput = false;
-
 	private final DefinitionTypes definitionTypes;
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
@@ -106,9 +104,12 @@ public class PreParser {
 		this.startColumn = 1;
 	}
 
-	public void setDebugOutput(final boolean debugOutput) {
-		this.debugOutput = debugOutput;
-	}
+	/**
+	 * @deprecated The debug output option does nothing.
+	 * @param debugOutput ignored
+	 */
+	@Deprecated
+	public void setDebugOutput(final boolean debugOutput) {}
 
 	public void setStartPosition(final int line, final int column) {
 		this.startLine = line;
@@ -185,7 +186,7 @@ public class PreParser {
 					}
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
-					parser.parse(content, debugOutput, contentProvider);
+					parser.parseMachine(content, contentProvider);
 					definitions = parser.getDefinitions();
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);
