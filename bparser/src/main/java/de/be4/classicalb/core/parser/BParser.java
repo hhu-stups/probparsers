@@ -390,8 +390,6 @@ public class BParser {
 			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
-		} catch (BException e) {
-			throw new BCompoundException(e);
 		} catch (LexerException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		}
@@ -417,7 +415,7 @@ public class BParser {
 		final boolean debugOutput,
 		final Reader reader,
 		final IFileContentProvider contentProvider
-	) throws IOException, PreParseException, BException, BCompoundException {
+	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
 		// scan for additional new definitions

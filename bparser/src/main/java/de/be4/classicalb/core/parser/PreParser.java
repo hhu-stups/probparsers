@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
@@ -116,7 +115,7 @@ public class PreParser {
 		this.startColumn = column;
 	}
 
-	public void parse() throws PreParseException, IOException, BException, BCompoundException {
+	public void parse() throws PreParseException, IOException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setPosition(this.startLine, this.startColumn);
 
@@ -150,7 +149,7 @@ public class PreParser {
 	}
 
 	private void evaluateDefinitionFiles(final List<Token> list)
-			throws PreParseException, BException, BCompoundException {
+			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
