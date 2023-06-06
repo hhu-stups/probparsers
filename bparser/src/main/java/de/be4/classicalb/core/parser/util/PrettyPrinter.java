@@ -271,12 +271,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAParseUnitDefinitionParseUnit(AParseUnitDefinitionParseUnit node) {
-		//sb.append("#DEFINITION ");
-		node.getDefinition().apply(this);
-	}
-
-	@Override
 	public void caseAImportPackage(AImportPackage node) {
 		sb.append("/*@import-package ");
 		node.getPackage().apply(this);
