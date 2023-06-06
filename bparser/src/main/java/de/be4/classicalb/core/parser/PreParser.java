@@ -70,7 +70,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * </p>
  * 
  * @see BLexer#replaceDefTokens()
- * @see BParser#preParsing(boolean, boolean, Reader, IFileContentProvider)
+ * @see BParser#preParsing(boolean, Reader, IFileContentProvider)
  * @see DefinitionCollector
  * @see DefinitionPreCollector
  */

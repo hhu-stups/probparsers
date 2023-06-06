@@ -369,8 +369,12 @@ public class BParser {
 			 * identifier token "def" by a TDefLiteralPredicate which will be
 			 * excepted by the parser
 			 */
-			 
-			final DefinitionTypes defTypes = preParsing(debugOutput, preparseNecessary, reader, contentProvider);
+			DefinitionTypes defTypes;
+			if (preparseNecessary) {
+				defTypes = preParsing(debugOutput, reader, contentProvider);
+			} else {
+				defTypes = new DefinitionTypes(definitions.getTypes());
+			}
 
 			/*
 			 * Main parser
@@ -449,19 +453,16 @@ public class BParser {
 
 	private DefinitionTypes preParsing(
 		final boolean debugOutput,
-		final boolean preparseNecessary,
 		final Reader reader,
 		final IFileContentProvider contentProvider
 	) throws IOException, PreParseException, BException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
-		if(preparseNecessary) {
-			// scan for additional new definitions
-			preParser.setDebugOutput(debugOutput);
-			preParser.setStartPosition(this.startLine, this.startColumn);
-			preParser.parse();
-			reader.reset();
-		}
+		// scan for additional new definitions
+		preParser.setDebugOutput(debugOutput);
+		preParser.setStartPosition(this.startLine, this.startColumn);
+		preParser.parse();
+		reader.reset();
 		return preParser.getDefinitionTypes();
 	}
 
