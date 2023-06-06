@@ -55,7 +55,7 @@ public class EBLexer extends BLexer {
 			ts.add(token);
 			toks.add(token);
 
-			TEqual t2 = new TEqual("=", l, p);
+			TEqual t2 = new TEqual(l, p);
 			ts.add(t2);
 			toks.add(t2);
 
