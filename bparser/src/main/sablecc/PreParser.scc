@@ -9,7 +9,6 @@ Helpers
 
   lf = 10;
   cr = 13;
-  tab = 8;
 
   line_break = [lf + cr];
 
@@ -178,7 +177,7 @@ Tokens
 
   {start -> normal, normal, definitions -> normal} end_machine = end;
 
-  {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
+  {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
   {no_definitions} no_def_something = all_chars*;
 
   {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
@@ -205,9 +204,6 @@ Tokens
   {start -> normal, normal} some_value = // could actually be renamed to some_identifier
     (letter (letter | digit | '_')*)
      // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS token
-    |
-    ('#' letter (letter)* (tab | ' ')* '.')  // something like #DEFINITIONS followed by a .
-     // not perfect rule; does not allow new line or comments; ideally we should only accept kw_.... at beginning
    ;
 
   // we want to detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
