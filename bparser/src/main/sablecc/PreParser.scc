@@ -178,7 +178,6 @@ Tokens
 
   {start -> normal, normal, definitions -> normal} end_machine = end;
 
-  {start} kw_definitions = '#DEFINITIONS';
   {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
   {no_definitions} no_def_something = all_chars*;
 
@@ -246,16 +245,8 @@ Productions
 
 parse_unit {-> parse_unit} =
   {defs_clause} [def_clause]:def_clause {-> New parse_unit.defs([def_clause.definition])} |
-  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
   {something} kw_prefix no_def_something {-> New parse_unit.no_defs()} |
   {nothing} {-> New parse_unit.no_defs()};
-
-/*
-parse_unit {-> parse_unit} =
-  {defs_clause} [def_clause]:def_clause? {-> New parse_unit.defs([def_clause.definition])} |
-  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
-  {no_defs} kw_prefix no_def_something {-> New parse_unit.no_defs()};
-*/
 
 def_clause {-> definition*} = definitions [list]:definition_list semicolon? {-> [list.definition]};
 
