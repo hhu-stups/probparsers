@@ -92,7 +92,6 @@ Helpers
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
 
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
-  comment_char = [[all_chars - '*'] - '/'];
 
   abstract_constants = 'ABSTRACT_CONSTANTS';
   abstract_variables = 'ABSTRACT_VARIABLES';
@@ -158,7 +157,8 @@ States
 Tokens
   {start->normal, normal, definitions, definitions_rhs} comment = '/*'; // switch to block_comment state is done in PreLexer.java
   {block_comment} comment_end = '*/'; // switch back to previous state is done in PreLexer.java
-  {block_comment} comment_content = all_chars [[[all_chars - '*'] - '/'] - line_break]*;
+  {block_comment} comment_body = [all_chars - '*']*;
+  {block_comment} star = '*';
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
@@ -236,7 +236,7 @@ Tokens
 Ignored Tokens
   white_space, other_clause_begin, end_machine,
   some_value, something,
-  comment, comment_content, comment_end, line_comment,
+  comment, comment_body, star, comment_end, line_comment,
   multiline_string_start, multiline_string_end, multiline_string_content;
 
 /*******************************************************************
