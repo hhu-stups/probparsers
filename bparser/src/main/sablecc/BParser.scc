@@ -5,16 +5,12 @@ Package de.be4.classicalb.core.parser;
  *******************************************************************/
 Helpers
   all_chars = [0 .. 0xffff];
-  underscore = '_';
-  double_quotation = '"';
-  back_quote = '`';
   lf = 10;
   cr = 13;
   unicode_line_seperator = 8232; // \x2028
   unicode_paragraph_seperator = 8233;
 
   comment_start = '/*';
-  comment_end = '*/';
 
   triple_quote = 39 39 39;
   single_quote = 39;
@@ -103,10 +99,10 @@ Helpers
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
 
-  //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break];
-  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break] - '\'];
+  //all_chars_without_quote_and_newline = [[all_chars - '"'] - line_break];
+  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break] - '\'];
   all_chars_without_newline = [all_chars - line_break];
-  string_literal = double_quotation (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
+  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
@@ -119,16 +115,16 @@ Helpers
   white_space = line_break | layout_char+;
 
 
-  all_chars_without_back_quote_newline_slash = [[[all_chars - back_quote] - line_break] - '\'];
-  quoted_identifier_literal = back_quote (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* back_quote; // backquote to generate identifiers with special symbols or which clash with keywords
+  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
+  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
 
 
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
-  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
+  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
   pragma_prefix = '/*@' layout_char*;
-  //pragma_identifier_literal = (letter | digit | underscore | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
+  //pragma_identifier_literal = (letter | digit | '_' | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
@@ -187,8 +183,8 @@ Tokens
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
-  {start->block_comment, normal->block_comment} comment = comment_start;
-  {block_comment->normal,pragma_description_content->normal} comment_end = comment_end;
+  {start->block_comment, normal->block_comment} comment = comment_start; // comment_start helper is a workaround to force SableCC to allow modifying text of comment tokens.
+  {block_comment->normal,pragma_description_content->normal} comment_end = '*/';
   {block_comment} comment_body = [all_chars - '*']*;
   {block_comment,pragma_description_content} star = '*';
 
@@ -419,7 +415,7 @@ Tokens
   {normal} real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
   {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral
 
-  {normal} underscore = underscore;
+  {normal} underscore = '_';
 
   {start,normal,pragma_content} white_space = white_space;
 

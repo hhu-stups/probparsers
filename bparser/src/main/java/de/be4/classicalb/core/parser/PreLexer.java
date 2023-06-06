@@ -197,10 +197,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void optimizeToken() {
-		if (
-			token instanceof TIdentifierLiteral
-			|| token instanceof TSemicolon
-		) {
+		if (token instanceof TIdentifierLiteral) {
 			token.setText(token.getText().intern());
 		} else if (
 			token instanceof TSomeValue
