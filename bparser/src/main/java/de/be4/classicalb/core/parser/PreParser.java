@@ -181,9 +181,10 @@ public class PreParser {
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(file != null ? file.toString() : fileName, parseOptions);
+					parser.setContentProvider(contentProvider);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
-					parser.parseMachine(content, contentProvider);
+					parser.parseMachine(content);
 					definitions = parser.getDefinitions();
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);

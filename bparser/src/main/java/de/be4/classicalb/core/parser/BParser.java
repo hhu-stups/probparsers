@@ -73,7 +73,7 @@ public class BParser {
 	private int startLine;
 	private int startColumn;
 
-	private IDefinitionFileProvider contentProvider;
+	private IFileContentProvider contentProvider;
 
 	public static String getVersion() {
 		return buildProperties.getProperty("version");
@@ -115,28 +115,29 @@ public class BParser {
 		this.startColumn = column;
 	}
 
-	public IDefinitionFileProvider getContentProvider() {
-		return contentProvider;
+	/**
+	 * Get the currently configured {@link IFileContentProvider} that will/has been used to get the content of referenced definition files.
+	 * If you don't use {@link #setContentProvider(IFileContentProvider)} to set one yourself,
+	 * then calling {@link #parseFile(File)} or {@link #parseMachine(String)} will set up a default {@link CachingDefinitionFileProvider}.
+	 * 
+	 * @return the currently configured file content provider,
+	 *     or {@code null} if none has been set yet (automatically or manually)
+	 */
+	public IFileContentProvider getContentProvider() {
+		return this.contentProvider;
 	}
 
 	/**
-	 * Parses the input file.
+	 * Set a custom {@link IFileContentProvider} to be used to get the content of referenced definition files.
+	 * If you don't call this method,
+	 * then calling {@link #parseFile(File)} or {@link #parseMachine(String)} will set up a default {@link CachingDefinitionFileProvider}.
+	 * A useful alternative is {@link NoContentProvider},
+	 * which disables reading of external definition files.
 	 * 
-	 * @param machineFile the machine file to be parsed
-	 * @param contentProvider used to get the content of files
-	 * @return the parsed AST
-	 * @throws BCompoundException if the file couldn't be read or parsed
-	 * @see #parseMachine(String, IFileContentProvider)
+	 * @param contentProvider used to get the content of referenced files
 	 */
-	public Start parseFile(File machineFile, IFileContentProvider contentProvider) throws BCompoundException {
-		this.machineFile = machineFile;
-		String content;
-		try {
-			content = Utils.readFile(machineFile);
-		} catch (IOException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
-		}
-		return parseMachine(content, contentProvider);
+	public void setContentProvider(IFileContentProvider contentProvider) {
+		this.contentProvider = contentProvider;
 	}
 
 	/**
@@ -148,10 +149,14 @@ public class BParser {
 	 * @see #parseMachine(String)
 	 */
 	public Start parseFile(File machineFile) throws BCompoundException {
-		if (this.contentProvider == null) {
-			this.contentProvider = new CachingDefinitionFileProvider();
+		this.machineFile = machineFile;
+		String content;
+		try {
+			content = Utils.readFile(machineFile);
+		} catch (IOException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
 		}
-		return parseFile(machineFile, this.contentProvider);
+		return parseMachine(content);
 	}
 
 	// Don't delete this deprecated method too soon!
@@ -184,8 +189,8 @@ public class BParser {
 	/**
 	 * Parses the input file.
 	 * 
-	 * @deprecated Use {@link #parseFile(File, IFileContentProvider)} instead.
-	 * @see #parseMachine(String, IFileContentProvider)
+	 * @deprecated Use {@link #parseFile(File)} and {@link #setContentProvider(IFileContentProvider)} instead.
+	 * @see #parseMachine(String)
 	 * @param machineFile
 	 *            the machine file to be parsed
 	 * @param verbose
@@ -208,7 +213,7 @@ public class BParser {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
-		return parseMachine(content, contentProvider);
+		return parseWithPreParsing(new StringReader(content), contentProvider);
 	}
 
 	/**
@@ -314,14 +319,13 @@ public class BParser {
 	// Don't delete this deprecated method too soon!
 	// It was one of the main parser APIs for a long time.
 	/**
-	 * Like {@link #parseMachine(String, IFileContentProvider)}, but with
+	 * Like {@link #parse(String, boolean, IFileContentProvider)}, but with
 	 * {@link NoContentProvider} as last parameter, i.e., loading of referenced
 	 * files is not enabled.
 	 * 
-	 * Use {@link #parseMachine(String, IFileContentProvider)} instead to be
-	 * able to control loading of referenced files.
-	 * 
 	 * @deprecated Use {@link #parseMachine(String)} instead.
+	 *     Note that this also enables loading of referenced files -
+	 *     use {@link #setContentProvider(IFileContentProvider)} to control this.
 	 *     The {@code debugOutput} parameter does nothing.
 	 * @param input
 	 *            the B machine as input string
@@ -334,13 +338,15 @@ public class BParser {
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
-		return parseMachine(input);
+		return parseWithPreParsing(new StringReader(input), new NoContentProvider());
 	}
 	
 	/**
 	 * Parses a complete B machine from a string.
 	 * 
-	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 * @deprecated Use {@link #parseMachine(String)} instead.
+	 *     Note that this also enables loading of referenced files -
+	 *     use {@link #setContentProvider(IFileContentProvider)} to control this.
 	 *     The {@code debugOutput} parameter does nothing.
 	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
 	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
@@ -362,7 +368,7 @@ public class BParser {
 	/**
 	 * Parses a complete B machine from a string.
 	 * 
-	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 * @deprecated Use {@link #parseMachine(String)} and {@link #setContentProvider(IFileContentProvider)} instead.
 	 *     The {@code debugOutput} parameter does nothing.
 	 * @param input B machine source code
 	 * @param debugOutput ignored
@@ -376,13 +382,13 @@ public class BParser {
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider) throws BCompoundException {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
-		return parseMachine(input, contentProvider);
+		return parseWithPreParsing(new StringReader(input), contentProvider);
 	}
 
 	/**
 	 * Parses the input string.
 	 * 
-	 * @deprecated Use {@link #parseMachine(String, IFileContentProvider)} instead.
+	 * @deprecated Use {@link #parseMachine(String)} and {@link #setContentProvider(IFileContentProvider)} instead.
 	 *     The {@code debugOutput} parameter does nothing.
 	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
 	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
@@ -492,29 +498,15 @@ public class BParser {
 	 * Parses a complete B machine from a string.
 	 * 
 	 * @param input B machine source code
-	 * @param provider A {@link IFileContentProvider} that is able to load content of referenced files during the parsing process.
-	 *     The content provider is used for referenced definition files for example.
-	 * @return the root node of the AST
-	 * @throws BCompoundException if the B code could not be parsed
-	 *     (see {@link BException} for details)
-	 */
-	public Start parseMachine(String input, IFileContentProvider provider) throws BCompoundException {
-		return parseWithPreParsing(new StringReader(input), provider);
-	}
-
-	/**
-	 * Parses a complete B machine from a string.
-	 * Machines parsed using this method cannot reference other files.
-	 * Use {@link #parseFile(File)} to parse a machine file that might reference other files,
-	 * or {@link #parseMachine(String, IFileContentProvider)} if you really need to parse a string.
-	 * 
-	 * @param input B machine source code
 	 * @return the root node of the AST
 	 * @throws BCompoundException if the B code could not be parsed
 	 *     (see {@link BException} for details)
 	 */
 	public Start parseMachine(String input) throws BCompoundException {
-		return parseMachine(input, new NoContentProvider());
+		if (this.contentProvider == null) {
+			this.contentProvider = new CachingDefinitionFileProvider();
+		}
+		return parseWithPreParsing(new StringReader(input), this.contentProvider);
 	}
 
 	private File getMachineFile() {
