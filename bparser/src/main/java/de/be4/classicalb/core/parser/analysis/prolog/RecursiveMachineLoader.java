@@ -29,6 +29,7 @@ import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -80,6 +81,10 @@ public class RecursiveMachineLoader {
 		this(path, contentProvider, new ParsingBehaviour());
 	}
 
+	private static void printLoadProgress(File machineFile) {
+		DebugPrinter.println("Parsing file '" + machineFile + "'");
+	}
+
 	/**
 	 * Recursively parse any files referenced by the given already parsed main machine.
 	 *
@@ -106,11 +111,13 @@ public class RecursiveMachineLoader {
 	 * @param contentProvider controls how files referenced by the main file are read
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException {
+		if (parsingBehaviour.isVerbose()) {
+			printLoadProgress(mainFile);
+		}
 		final BParser parser = new BParser(mainFile.toString());
-		final Start ast = parser.parseFile(mainFile, parsingBehaviour.isVerbose(), contentProvider);
+		final Start ast = parser.parseFile(mainFile, contentProvider);
 		return loadFromAst(parser, ast, parsingBehaviour, contentProvider);
 	}
 
@@ -122,9 +129,8 @@ public class RecursiveMachineLoader {
 	 * @param parsingBehaviour options controlling the behaviour of {@link RecursiveMachineLoader}
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		return loadFile(mainFile, parsingBehaviour, new CachingDefinitionFileProvider());
 	}
 
@@ -135,9 +141,8 @@ public class RecursiveMachineLoader {
 	 * @param mainFile the B machine file to parse
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile) throws BCompoundException {
 		return loadFile(mainFile, new ParsingBehaviour());
 	}
 
@@ -146,15 +151,16 @@ public class RecursiveMachineLoader {
 		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
 	}
 
-	private void loadMachine(final List<Ancestor> ancestors, final File machineFile)
-			throws BCompoundException, IOException {
-
+	private void loadMachine(final List<Ancestor> ancestors, final File machineFile) throws BCompoundException {
 		if (machineFilesLoaded.contains(machineFile)) {
 			return;
 		}
+		if (parsingBehaviour.isVerbose()) {
+			printLoadProgress(machineFile);
+		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		Start tree;
-		tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose(), contentProvider);
+		tree = parser.parseFile(machineFile, contentProvider);
 		recursivlyLoadMachine(machineFile, tree, ancestors, false,
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
@@ -314,13 +320,7 @@ public class RecursiveMachineLoader {
 
 				}
 				if (!getParsedMachines().containsKey(refMachine.getName())) {
-					try {
-						loadMachine(newAncestors, file);
-					} catch (IOException e) {
-						throw new BException(machineFile.getCanonicalPath(),
-								new CheckException(e.getMessage(), refMachine.getNode(), e));
-					}
-
+					loadMachine(newAncestors, file);
 				}
 			} catch (final BException e) {
 				throw new BCompoundException(e);

@@ -122,6 +122,44 @@ public class BParser {
 	/**
 	 * Parses the input file.
 	 * 
+	 * @param machineFile the machine file to be parsed
+	 * @param contentProvider used to get the content of files
+	 * @return the parsed AST
+	 * @throws BCompoundException if the file couldn't be read or parsed
+	 * @see #parseMachine(String, IFileContentProvider)
+	 */
+	public Start parseFile(File machineFile, IFileContentProvider contentProvider) throws BCompoundException {
+		this.machineFile = machineFile;
+		String content;
+		try {
+			content = Utils.readFile(machineFile);
+		} catch (IOException e) {
+			throw new BCompoundException(new BException(getFileName(), e));
+		}
+		return parseMachine(content, contentProvider);
+	}
+
+	/**
+	 * Parses the input file.
+	 * 
+	 * @param machineFile the machine file to be parsed
+	 * @return the parsed AST
+	 * @throws BCompoundException if the file couldn't be read or parsed
+	 * @see #parseMachine(String)
+	 */
+	public Start parseFile(File machineFile) throws BCompoundException {
+		if (this.contentProvider == null) {
+			this.contentProvider = new CachingDefinitionFileProvider();
+		}
+		return parseFile(machineFile, this.contentProvider);
+	}
+
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
+	/**
+	 * Parses the input file.
+	 * 
+	 * @deprecated Use {@link #parseFile(File)} instead.
 	 * @see #parseMachine(String)
 	 * @param machineFile
 	 *            the machine file to be parsed
@@ -133,14 +171,20 @@ public class BParser {
 	 * @throws BCompoundException
 	 *             if the file cannot be parsed
 	 */
+	@Deprecated
 	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
 
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
 	/**
 	 * Parses the input file.
 	 * 
+	 * @deprecated Use {@link #parseFile(File, IFileContentProvider)} instead.
 	 * @see #parseMachine(String, IFileContentProvider)
 	 * @param machineFile
 	 *            the machine file to be parsed
@@ -154,8 +198,11 @@ public class BParser {
 	 * @throws BCompoundException
 	 *             if the file cannot be parsed
 	 */
+	@Deprecated
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
 			throws IOException, BCompoundException {
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
 		this.machineFile = machineFile;
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
@@ -458,7 +505,7 @@ public class BParser {
 	/**
 	 * Parses a complete B machine from a string.
 	 * Machines parsed using this method cannot reference other files.
-	 * Use {@link #parseFile(File, boolean)} to parse a machine file that might reference other files,
+	 * Use {@link #parseFile(File)} to parse a machine file that might reference other files,
 	 * or {@link #parseMachine(String, IFileContentProvider)} if you really need to parse a string.
 	 * 
 	 * @param input B machine source code

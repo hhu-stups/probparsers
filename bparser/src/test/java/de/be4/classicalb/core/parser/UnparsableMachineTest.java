@@ -32,7 +32,7 @@ public class UnparsableMachineTest {
 	@Test(expected = BCompoundException.class)
 	public void testParsable() throws Exception {
 		final BParser parser = new BParser(machine.getName());
-		Start start = parser.parseFile(machine, false);
+		Start start = parser.parseFile(machine);
 		assertNotNull(start);
 	}
 }

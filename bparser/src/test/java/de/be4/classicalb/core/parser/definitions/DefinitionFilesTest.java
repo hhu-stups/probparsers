@@ -132,7 +132,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		final BParser parser = new BParser("testcase");
 		File machine = new File(
 				this.getClass().getClassLoader().getResource("parsable/DefinitionFileTest.mch").toURI());
-		parser.parseFile(machine, false);
+		parser.parseFile(machine);
 
 		final IDefinitions definitions = parser.getDefinitions();
 		final APredicateDefinitionDefinition def1 = (APredicateDefinitionDefinition) definitions
