@@ -98,8 +98,7 @@ public class RulesParseUnit implements IModel {
 
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
-			this.rulesMachineChecker = new RulesMachineChecker(machineFile, bParser.getFileName(), machineReferences,
-					start);
+			this.rulesMachineChecker = new RulesMachineChecker(machineFile, machineReferences, start);
 			rulesMachineChecker.runChecks();
 			this.operationList.addAll(rulesMachineChecker.getOperations());
 

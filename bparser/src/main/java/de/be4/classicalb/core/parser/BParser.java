@@ -152,7 +152,7 @@ public class BParser {
 		try {
 			content = Utils.readFile(machineFile);
 		} catch (IOException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFile.getPath(), e));
 		}
 		return parseMachine(content, machineFile);
 	}
@@ -418,7 +418,8 @@ public class BParser {
 		}
 	}
 
-	private Start parseInternal(Reader reader, DefinitionTypes defTypes) throws BCompoundException {
+	private Start parseInternal(Reader reader, File machineFile, DefinitionTypes defTypes) throws BCompoundException {
+		String machineFilePath = machineFile == null ? null : machineFile.getPath();
 		try {
 			/*
 			 * Main parser
@@ -438,20 +439,20 @@ public class BParser {
 			collector.collectDefinitions(rootNode);
 			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
 			for (CheckException checkException : definitionsCollectorExceptions) {
-				bExceptionList.add(new BException(getFileName(), checkException));
+				bExceptionList.add(new BException(machineFilePath, checkException));
 			}
 
 			// perfom AST transformations that can't be done by SableCC
 			try {
 				applyAstTransformations(rootNode);
 			} catch (CheckException e) {
-				throw new BCompoundException(new BException(getFileName(), e));
+				throw new BCompoundException(new BException(machineFilePath, e));
 			}
 
 			// perform some semantic checks which are not done in the parser
 			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
 			for (CheckException checkException : checkExceptions) {
-				bExceptionList.add(new BException(getFileName(), checkException));
+				bExceptionList.add(new BException(machineFilePath, checkException));
 			}
 			if (!bExceptionList.isEmpty()) {
 				throw new BCompoundException(bExceptionList);
@@ -460,35 +461,36 @@ public class BParser {
 			return rootNode;
 
 		} catch (final BLexerException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final BParseException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final IOException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
-			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
+			throw new BCompoundException(new BException(machineFilePath, new BParseException(token, msg, realMsg, e)));
 		} catch (LexerException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		}
 	}
 
 	private Start parseWithPreParsing(Reader reader, File machineFile, IFileContentProvider provider) throws BCompoundException {
+		String machineFilePath = machineFile == null ? null : machineFile.getPath();
 		DefinitionTypes defTypes;
 		try {
 			defTypes = preParsing(reader, machineFile, provider);
 		} catch (IOException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (PreParseException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		}
-		return parseInternal(reader, defTypes);
+		return parseInternal(reader, machineFile, defTypes);
 	}
 
 	private Start parseWithoutPreParsing(Reader reader) throws BCompoundException {
-		return parseInternal(reader, new DefinitionTypes(definitions.getTypes()));
+		return parseInternal(reader, null, new DefinitionTypes(definitions.getTypes()));
 	}
 
 	/**
