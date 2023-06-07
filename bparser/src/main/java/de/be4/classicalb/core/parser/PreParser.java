@@ -69,7 +69,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * </p>
  * 
  * @see BLexer#replaceDefTokens()
- * @see BParser#preParsing(Reader, IFileContentProvider)
+ * @see BParser#preParsing(Reader, File, IFileContentProvider)
  * @see DefinitionCollector
  * @see DefinitionPreCollector
  */
@@ -180,11 +180,11 @@ public class PreParser {
 					File directory = modelFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
-					final BParser parser = new BParser(file != null ? file.toString() : fileName, parseOptions);
+					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
-					parser.parseMachine(content);
+					parser.parseMachine(content, file);
 					definitions = parser.getDefinitions();
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);

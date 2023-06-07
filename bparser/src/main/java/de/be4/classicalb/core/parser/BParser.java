@@ -68,7 +68,6 @@ public class BParser {
 	private List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
-	private File machineFile;
 
 	private int startLine;
 	private int startColumn;
@@ -149,14 +148,13 @@ public class BParser {
 	 * @see #parseMachine(String)
 	 */
 	public Start parseFile(File machineFile) throws BCompoundException {
-		this.machineFile = machineFile;
 		String content;
 		try {
 			content = Utils.readFile(machineFile);
 		} catch (IOException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		}
-		return parseMachine(content);
+		return parseMachine(content, machineFile);
 	}
 
 	// Don't delete this deprecated method too soon!
@@ -208,12 +206,11 @@ public class BParser {
 			throws IOException, BCompoundException {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
-		this.machineFile = machineFile;
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
-		return parseWithPreParsing(new StringReader(content), contentProvider);
+		return parseWithPreParsing(new StringReader(content), machineFile, contentProvider);
 	}
 
 	/**
@@ -338,7 +335,7 @@ public class BParser {
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
-		return parseWithPreParsing(new StringReader(input), new NoContentProvider());
+		return parse(input, debugOutput, new NoContentProvider());
 	}
 	
 	/**
@@ -382,7 +379,7 @@ public class BParser {
 	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider) throws BCompoundException {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
-		return parseWithPreParsing(new StringReader(input), contentProvider);
+		return parseWithPreParsing(new StringReader(input), this.getMachineFile(), contentProvider);
 	}
 
 	/**
@@ -415,7 +412,7 @@ public class BParser {
 	) throws BCompoundException {
 		Reader reader = new StringReader(input);
 		if (preparseNecessary) {
-			return parseWithPreParsing(reader, contentProvider);
+			return parseWithPreParsing(reader, this.getMachineFile(), contentProvider);
 		} else {
 			return parseWithoutPreParsing(reader);
 		}
@@ -478,10 +475,10 @@ public class BParser {
 		}
 	}
 
-	private Start parseWithPreParsing(Reader reader, IFileContentProvider provider) throws BCompoundException {
+	private Start parseWithPreParsing(Reader reader, File machineFile, IFileContentProvider provider) throws BCompoundException {
 		DefinitionTypes defTypes;
 		try {
-			defTypes = preParsing(reader, provider);
+			defTypes = preParsing(reader, machineFile, provider);
 		} catch (IOException e) {
 			throw new BCompoundException(new BException(getFileName(), e));
 		} catch (PreParseException e) {
@@ -496,6 +493,25 @@ public class BParser {
 
 	/**
 	 * Parses a complete B machine from a string.
+	 * {@code machineFile} indicates what file (if any) the source code string belongs to.
+	 * This is used to resolve definition files and displayed in error messages.
+	 * 
+	 * @param input B machine source code
+	 * @param machineFile file that the source code belongs to,
+	 *     or {@code null} to use the file name passed to the {@link #BParser(String)} constructor
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	Start parseMachine(String input, File machineFile) throws BCompoundException {
+		if (this.contentProvider == null) {
+			this.contentProvider = new CachingDefinitionFileProvider();
+		}
+		return parseWithPreParsing(new StringReader(input), machineFile != null ? machineFile : this.getMachineFile(), this.contentProvider);
+	}
+
+	/**
+	 * Parses a complete B machine from a string.
 	 * 
 	 * @param input B machine source code
 	 * @return the root node of the AST
@@ -503,17 +519,15 @@ public class BParser {
 	 *     (see {@link BException} for details)
 	 */
 	public Start parseMachine(String input) throws BCompoundException {
-		if (this.contentProvider == null) {
-			this.contentProvider = new CachingDefinitionFileProvider();
-		}
-		return parseWithPreParsing(new StringReader(input), this.contentProvider);
+		return this.parseMachine(input, null);
 	}
 
 	private File getMachineFile() {
-		if (this.machineFile == null && this.fileName != null) {
-			this.machineFile = new File(this.fileName);
+		if (this.fileName == null) {
+			return null;
+		} else {
+			return new File(this.fileName);
 		}
-		return this.machineFile;
 	}
 
 	public String getFileName() {
@@ -551,10 +565,11 @@ public class BParser {
 	 */
 	private DefinitionTypes preParsing(
 		final Reader reader,
+		final File machineFile,
 		final IFileContentProvider contentProvider
 	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
-			this.getMachineFile(),
+			machineFile,
 			contentProvider, doneDefFiles, parseOptions, this.definitions
 		);
 		// scan for additional new definitions
