@@ -103,13 +103,6 @@ public class PreParser {
 		this.startColumn = 1;
 	}
 
-	/**
-	 * @deprecated The debug output option does nothing.
-	 * @param debugOutput ignored
-	 */
-	@Deprecated
-	public void setDebugOutput(final boolean debugOutput) {}
-
 	public void setStartPosition(final int line, final int column) {
 		this.startLine = line;
 		this.startColumn = column;
