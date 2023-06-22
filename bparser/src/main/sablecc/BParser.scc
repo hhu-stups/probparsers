@@ -438,12 +438,6 @@ Tokens
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
 
-  // Unused dummy tokens as workaround so that ProB 2 UI can be built unmodified with release and snapshot versions of the parser.
-  // Once ProB 2 UI is updated to parser version 2.12.5,
-  // remove these tokens from BLexerSyntaxHighlighting and then from here.
-  {pragma_content} pragma_start = 'pragma_start';
-  {pragma_content} pragma_ignored_text = 'pragma_ignored_text';
-
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
