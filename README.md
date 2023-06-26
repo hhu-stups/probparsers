@@ -62,6 +62,11 @@ Available options are:
 -checkname  The name of a machine have to match file name (except for the file name extension)
 ```
 
+You probably also want to set the path to the stdlib folder of ProB (containing files like LibraryStrings.def):
+```
+java -Dprob.stdlib=../stdlib/ -jar probcliparser.jar MyBMachine.mch
+```
+
 ## Building
 
 If you have made local modifications to the parser code and want to use the modified parser libraries in your project, you need to build the parser locally.
