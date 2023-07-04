@@ -839,17 +839,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAPredicateIdentifierPredicate(APredicateIdentifierPredicate node) {
-		node.getIdentifier().apply(this);
-	}
-
-	@Override
-	public void caseAPredicateFunctionPredicate(APredicateFunctionPredicate node) {
-		node.getIdentifier().apply(this);
-		printParameterList(node.getParameters());
-	}
-
-	@Override
 	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
 		sb.append("LET ");
 		printCommaListCompact(node.getIdentifiers());
@@ -2194,11 +2183,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	// Rules DSL grammar extension keywords
-
-	@Override
-	public void caseTPredicateIdentifier(TPredicateIdentifier node) {
-		sb.append(node.getText());
-	}
 
 	@Override
 	public void caseTKwSubstitutionOperator(TKwSubstitutionOperator node) {
