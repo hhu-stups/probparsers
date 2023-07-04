@@ -387,6 +387,23 @@ public class PreParser {
 		}
 	}
 
+	/**
+	 * Try to determine the abstract type of the right-hand side of a definition,
+	 * i. e. whether it's an expression, a predicate, or a substitution.
+	 * If the right-hand side references other definitions,
+	 * it may not be possible to determine this definition's type yet
+	 * if the types of the other definitions aren't known yet.
+	 * For such cases,
+	 * {@link #evaluateTypes(List, Map)} calls this method repeatedly until the type can be successfully determined.
+	 * 
+	 * @param definition the definition name token
+	 * @param rhsToken the right-hand side of the definition (as a single token, merged by the {@link PreLexer})
+	 * @param untypedDefinitions names of all definitions whose types haven't been determined yet
+	 * @return the type of the definition's right-hand side, or error information if the type cannot be determined yet
+	 *     (but it's expected that the type can be determined later, once some other definitions' types are known)
+	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
+	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
+	 */
 	private DefinitionType determineType(final Token definition, final Token rhsToken,
 			final Set<String> untypedDefinitions) throws PreParseException {
 
