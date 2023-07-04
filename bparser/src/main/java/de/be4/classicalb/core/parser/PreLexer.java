@@ -125,7 +125,10 @@ public class PreLexer extends Lexer {
 	}
 
 	private State getNextState() {
-		if (token instanceof TOtherClauseBegin || token instanceof EOF) {
+		// Recognize clause beginning tokens only outside nesting,
+		// because e. g. INVARIANT may also appear in a WHILE loop,
+		// where it shouldn't signal the end of the DEFINITIONS block.
+		if ((otherNestingLevel == 0 && token instanceof TOtherClauseBegin) || token instanceof EOF) {
 			return State.NORMAL;
 		}
 
