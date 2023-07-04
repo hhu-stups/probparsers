@@ -65,7 +65,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * please update the following counters afterwards:
  * </p>
  * <p>
- * 1 person has tried 3 times to remove the PreParser.
+ * 1 person has tried 4 times to remove the PreParser.
  * </p>
  * 
  * @see BLexer#replaceDefTokens()
