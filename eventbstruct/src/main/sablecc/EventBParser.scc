@@ -8,7 +8,6 @@ Helpers
   at = '@';
   lf = 10;
   cr = 13;
-  semicolon = ';';
   space = ' ';
   slash = '/';
   comment_start = slash slash;
@@ -23,7 +22,7 @@ Helpers
   line_break = [lf + cr];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   all_chars = [0 .. 0xffff];
-  all_formula_chars = [[[[[all_chars - layout_char] - line_break] - at] - slash] - semicolon];
+  all_formula_chars = [[[[all_chars - layout_char] - line_break] - at] - slash];
 
   unicode_letter =
     [0x0041..0x005a] | [0x0061..0x007a] | [0x00aa..0x00aa] | [0x00b5..0x00b5] |
@@ -119,7 +118,6 @@ Tokens
   {normal -> label, formula -> normal} at = at;
   {normal} comma = ',';
   {normal -> formula} colon = ':';
-  {normal, formula -> normal} semicolon = ';';
 
   {normal} equal = '=';
 
@@ -149,14 +147,6 @@ Tokens
   {normal, formula -> normal} where = 'where' | 'when';
   {normal, formula -> normal} with = 'with';
   {normal, formula -> normal} then = 'then' | 'begin';
-
-  {normal, formula -> normal} do = 'do';
-  {normal, formula -> normal} assert = 'assert';
-  {normal, formula -> normal} assign = 'assign';
-  {normal, formula -> normal} algorithm = 'algorithm';
-  {normal, formula -> normal} while = 'while';
-  {normal, formula -> normal} if = 'if';
-  {normal, formula -> normal} else = 'else';
 
   {normal} identifier_literal = identifier;
   {label} label = label;
@@ -197,8 +187,7 @@ machine {-> parse_unit} =
   [invariants]:invariants_clause?
   [variant]:variant_clause?
   [events]:events_clause?
-  [algorithm]:P.algorithm?
-  end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [variables.variable], [invariants.invariant], variant.variant, [events.event], [algorithm.algorithm])};
+  end {-> New parse_unit.machine([comment], name, [refines.identifier_literal], [sees.identifier_literal], [variables.variable], [invariants.invariant], variant.variant, [events.event])};
 
 refines_clause {-> identifier_literal*} = T.refines [first]:identifier_literal [rest]:refines_clause_tail* {-> [first, rest.identifier_literal]};
 refines_clause_tail {-> identifier_literal} = [name]:identifier_literal {-> name};
@@ -263,24 +252,6 @@ event_then {-> action*} = then [first]:action [rest]:event_then_tail* {-> [first
 event_then_tail {-> action} = [action]:action {-> action.action};
 action {-> action} = [label]:P.label [action]:formula [comment]:comment* {-> New action([comment], label.label, action)};
 
-algorithm {-> P.algorithm} = T.algorithm [block]:alg_block end {-> New algorithm([block.stmt])};
-
-alg_block {-> stmt*} =
-  {sequence} [first]:statement semicolon [second]:statement [rest]:stmt_tail? {-> [first.stmt, second.stmt, rest.stmt]} |
-  {next_level} statement {-> [statement.stmt]};
-
-statement {-> stmt} =
-  {assert} T.assert colon [predicate]:formula [comment]:comment* {-> New stmt.assert([comment],predicate)} |
-  {assign} [label]:P.label [action]:formula [comment]:comment* {-> New stmt.assign([comment], label.label, action)} |
-  {while} while colon [condition]:formula [comment]:comment* do [block]:alg_block end {-> New stmt.while([comment], condition, [block.stmt])} |
-  {if} T.if colon [condition]: formula [comment]:comment* then [normal]:alg_block [else]:if_else? end {-> New stmt.if([comment], condition, [normal.stmt], [else.stmt])};
-
-if_else {-> stmt*} = else [block]:alg_block {-> [block.stmt]};
-
-stmt_tail {-> stmt*} =
-  {single} semicolon [stmt]:statement {-> [stmt.stmt]} |
-  {multi} semicolon [first]:statement [rest]:statement {-> [first.stmt, rest.stmt]};
-
 /*
   Structure of a context file
 */
@@ -328,8 +299,7 @@ parse_unit =
     [variables]:variable*
     [invariants]:invariant*
     [variant]:P.variant?
-    [events]:P.event*
-    [algorithm]:P.algorithm* |
+    [events]:P.event* |
 
   {context}
     [comments]:comment*
@@ -375,10 +345,3 @@ guard =
 
 witness = [comments]:comment* [name]:label [predicate]:formula;
 action = [comments]:comment* [name]:label [action]:formula;
-
-algorithm = [block]:stmt* ;
-
-stmt = {assert} [comments]:comment* [predicate]:formula |
-  {assign} [comments]:comment* [name]:label [action]:formula |
-  {while} [comments]:comment* [condition]:formula [statements]:stmt* |
-  {if} [comments]:comment* [condition]:formula [then]:stmt* [else]:stmt*;
