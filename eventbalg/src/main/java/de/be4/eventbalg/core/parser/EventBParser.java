@@ -55,6 +55,10 @@ public class EventBParser {
 		return parse(builder.toString(), verbose);
 	}
 
+	public Start parseFile(File machine) throws IOException, BException {
+		return this.parseFile(machine, false);
+	}
+
 	/**
 	 * Parses the input string.
 	 * 
