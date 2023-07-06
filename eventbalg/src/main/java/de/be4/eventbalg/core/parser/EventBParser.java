@@ -148,6 +148,10 @@ public class EventBParser {
 		}
 	}
 
+	public Start parse(String input) throws BException {
+		return this.parse(input, false);
+	}
+
 	private EventBParseException createEventBParseException(final ParserException e) {
 		final Token token = e.getToken();
 		String message = e.getMessage();
