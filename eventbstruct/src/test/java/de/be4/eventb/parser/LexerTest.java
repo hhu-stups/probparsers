@@ -7,18 +7,17 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 import de.be4.eventb.core.parser.BException;
+import de.be4.eventb.core.parser.EventBParser;
 import de.be4.eventb.core.parser.node.AInvariant;
 import de.be4.eventb.core.parser.node.AMachineParseUnit;
 import de.be4.eventb.core.parser.node.AVariant;
 import de.be4.eventb.core.parser.node.PInvariant;
 import de.be4.eventb.core.parser.node.Start;
 
-public class LexerTest extends AbstractTest {
+public class LexerTest {
 	@Test
 	public void testStringLabeledElements() throws BException {
-		final Start rootNode = parseInput(
-				"machine Test invariants \n\t@inv1 asdf \n fdsa \n\t@inv2 qwer: \t rewq \nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine Test invariants \n\t@inv1 asdf \n fdsa \n\t@inv2 qwer: \t rewq \nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -41,8 +40,7 @@ public class LexerTest extends AbstractTest {
 
 	@Test
 	public void testStringVariant() throws BException {
-		final Start rootNode = parseInput("machine Test\nvariant y-x\nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine Test\nvariant y-x\nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
