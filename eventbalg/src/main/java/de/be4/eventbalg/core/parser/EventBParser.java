@@ -34,15 +34,11 @@ public class EventBParser {
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean)
-	 * @param machine
-	 *            the machine file
-	 * @param verbose
-	 *            print debug information
+	 * @param machine the machine file
+	 * @param verbose print debug information
 	 * @return the generated AST
-	 * @throws IOException
-	 *             if stream cannot be written to or closed
-	 * @throws BException
-	 *             if parsing fails
+	 * @throws IOException if stream cannot be written to or closed
+	 * @throws BException if parsing fails
 	 */
 	public Start parseFile(final File machine, final boolean verbose) throws IOException, BException {
 		final InputStreamReader inputStreamReader
@@ -99,8 +95,7 @@ public class EventBParser {
 	 *             single token is involved in the error. Otherwise a
 	 *             {@link SourcecodeRange} is provided, which can be used to
 	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).
-	 *             </li>
+	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
