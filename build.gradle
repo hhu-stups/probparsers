@@ -2,7 +2,7 @@ plugins {
     // The plugins are declared as .apply(false) here
     // and only applied in the subprojects that actually need them.
     id("de.hhu.stups.sablecc").version("1.0.0").apply(false)
-    id("org.graalvm.buildtools.native").version("0.9.21").apply(false)
+    id("org.graalvm.buildtools.native").version("0.9.21")
 }
 
 apply plugin: 'java-library'
@@ -23,6 +23,43 @@ ext {
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
 
+def nativeCompilePGO(String variant, Boolean optimize) {
+    tasks.register("nativeCompile${variant.capitalize()}", tasks.nativeCompile.getClass()) {
+        if (optimize) {
+            // optimized build
+            graalvmNative {
+                binaries {
+                    all {
+                        resources.autodetect()
+                        buildArgs.add('-R:StackSize=8388608')
+                        buildArgs.add('--pgo=default.iprof')
+                        buildArgs.add('-march=native')
+                    }
+                }
+                toolchainDetection = false
+            }
+        } else {
+            // instrumented build
+            graalvmNative {
+                binaries {
+                    all {
+                        resources.autodetect()
+                        buildArgs.add('-R:StackSize=8388608')
+                        buildArgs.add('--pgo-instrument')
+                    }
+                }
+                toolchainDetection = false
+            }
+        }
+    }
+}
+
+
+
+nativeCompilePGO("Instrumented",false)
+
+nativeCompilePGO("Optimized",true)
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
@@ -37,11 +74,30 @@ subprojects {
                 // the stack size must be given in bytes
                 //override at runtime with -XX:StackSize=... 
                 buildArgs.add('-R:StackSize=8388608')
+                
+                //buildArgs.add('--pgo-instrument')
             }
         }
         
         toolchainDetection = false
     }
+
+
+
+    task runInstrumentedVersion() {
+        dependsOn 'nativeCompileInstrumented'
+        doLast {
+            exec {
+                commandLine './cliparser/build/native/nativeCompile/cliparser', 'eurg', 'arg2'
+            }
+        }
+    }
+
+    tasks.register('nativeWithPGO') {
+        dependsOn 'nativeCompileInstrumented', 'runInstrumentedVersion', 'nativeCompileOptimized' 
+    }
+
+
 
     group = rootProject.group
     version = rootProject.version
