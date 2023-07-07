@@ -77,16 +77,11 @@ public class EventBParser {
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li>{@link EventBLexerException}: If any error occurs in the
-	 *             generated or customized lexer a {@link LexerException} is
-	 *             thrown. Usually the lexer classes just throw a
-	 *             {@link LexerException}. But this class unfortunately does not
-	 *             contain any explicit information about the sourcecode
-	 *             position where the error occured. Using aspect-oriented
-	 *             programming we intercept the throwing of these exceptions to
-	 *             replace them by our own exception. In our own exception we
-	 *             provide the sourcecode position of the last characters that
-	 *             were read from the input.</li>
+	 *             <li>{@link EventBLexerException}:
+	 *             Thrown if any error occurs in the generated or customized lexer.
+	 *             Unlike SableCC's standard {@link LexerException},
+	 *             our own exception provides the source code position
+	 *             of the last characters that were read from the input.</li>
 	 *             <li>{@link EventBParseException}: This exception is thrown in
 	 *             two situations. On the one hand if the parser throws a
 	 *             {@link ParserException} we convert it into a
@@ -116,20 +111,12 @@ public class EventBParser {
 			final Start rootNode = parser.parse();
 			final List<IToken> tokenList = lexer.getTokenList();
 
-			/*
-			 * Retrieving sourcecode positions which were found by ParserAspect
-			 */
 			final Map<PositionedNode, de.hhu.stups.sablecc.patch.SourcecodeRange> positions = parser.getMapping();
 
 			sourcePositions = new de.hhu.stups.sablecc.patch.SourcePositions(tokenList, positions);
 
 			return rootNode;
 		} catch (final LexerException e) {
-			/*
-			 * Actually it's supposed to be a EventBLexerException because the
-			 * aspect 'LexerAspect' replaces any LexerException to provide
-			 * sourcecode position information in the BLexerException.
-			 */
 			throw new BException(e);
 		} catch (final ParserException e) {
 			throw new BException(createEventBParseException(e));
