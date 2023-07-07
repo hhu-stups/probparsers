@@ -89,11 +89,6 @@ public class EventBParser {
 	 *             thrown if any error is found during the AST transformations
 	 *             after the parser has finished. We try to provide a token if a
 	 *             single token is involved in the error.</li>
-	 *             <li>{@link CheckException}: If any problem occurs while
-	 *             performing semantic checks, a {@link CheckException} is
-	 *             thrown. We provide one or more nodes that are involved in the
-	 *             problem. For example, if we find dublicate machine clauses,
-	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
 	 */
 	@SuppressWarnings("deprecation")

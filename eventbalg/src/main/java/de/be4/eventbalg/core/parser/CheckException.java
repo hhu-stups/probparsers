@@ -2,6 +2,10 @@ package de.be4.eventbalg.core.parser;
 
 import de.be4.eventbalg.core.parser.node.Node;
 
+/**
+ * @deprecated This exception was never used.
+ */
+@Deprecated
 @SuppressWarnings("serial")
 public class CheckException extends Exception {
 	private final Entry[] entries;
