@@ -19,14 +19,13 @@ import de.be4.eventbalg.core.parser.parser.Parser;
 import de.be4.eventbalg.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.IToken;
 import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 
 public class EventBParser {
 
 	public static final String MSG_COMMENT_PLACEMENT = "Comment can only be place behind the element they belong to. Please move the comment to an appropriate place!";
 
-	private SourcePositions sourcePositions;
+	@Deprecated
+	private de.hhu.stups.sablecc.patch.SourcePositions sourcePositions;
 
 	/**
 	 * Parses the input file.
@@ -94,10 +93,7 @@ public class EventBParser {
 	 *             {@link EventBParseException}. On the other hand it can be
 	 *             thrown if any error is found during the AST transformations
 	 *             after the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
+	 *             single token is involved in the error.</li>
 	 *             <li>{@link CheckException}: If any problem occurs while
 	 *             performing semantic checks, a {@link CheckException} is
 	 *             thrown. We provide one or more nodes that are involved in the
@@ -105,6 +101,7 @@ public class EventBParser {
 	 *             we will list all occurances in the exception.</li>
 	 *             </ul>
 	 */
+	@SuppressWarnings("deprecation")
 	public Start parse(final String input, final boolean debugOutput) throws BException {
 		final Reader reader = new StringReader(input);
 
@@ -122,9 +119,9 @@ public class EventBParser {
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			final Map<PositionedNode, SourcecodeRange> positions = parser.getMapping();
+			final Map<PositionedNode, de.hhu.stups.sablecc.patch.SourcecodeRange> positions = parser.getMapping();
 
-			sourcePositions = new SourcePositions(tokenList, positions);
+			sourcePositions = new de.hhu.stups.sablecc.patch.SourcePositions(tokenList, positions);
 
 			return rootNode;
 		} catch (final LexerException e) {
@@ -172,7 +169,7 @@ public class EventBParser {
 	 * @deprecated Please use the {@link PositionedNode} methods to get position information instead. All SableCC-generated nodes and tokens extend this class.
 	 */
 	@Deprecated
-	public SourcePositions getSourcePositions() {
+	public de.hhu.stups.sablecc.patch.SourcePositions getSourcePositions() {
 		return sourcePositions;
 	}
 }

@@ -2,21 +2,28 @@ package de.be4.eventbalg.core.parser;
 
 import de.be4.eventbalg.core.parser.node.Node;
 import de.be4.eventbalg.core.parser.node.Token;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 
 @SuppressWarnings("serial")
 public class EventBParseException extends RuntimeException {
 	private final Token token;
-	private final SourcecodeRange range;
+	@Deprecated
+	private final de.hhu.stups.sablecc.patch.SourcecodeRange range;
 
-	public EventBParseException(final Token token, final SourcecodeRange range, final String message) {
+	/**
+	 * @deprecated Use {@link #EventBParseException(Token, String)} instead.
+	 *     Source positions are now always stored in the token itself.
+	 */
+	@Deprecated
+	public EventBParseException(final Token token, final de.hhu.stups.sablecc.patch.SourcecodeRange range, final String message) {
 		super(message);
 		this.token = token;
 		this.range = range;
 	}
 
 	public EventBParseException(final Token token, final String message) {
-		this(token, null, message);
+		super(message);
+		this.token = token;
+		this.range = null;
 	}
 
 	/**
@@ -30,14 +37,16 @@ public class EventBParseException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the {@link SourcecodeRange} which is causing this exception. Will
+	 * Returns the {@link de.hhu.stups.sablecc.patch.SourcecodeRange} which is causing this exception. Will
 	 * be <code>null</code> in case of a real lexing or parsing exception cause
 	 * source code ranges for the {@link Node}s of the AST have not yet been
 	 * evaluated then.
 	 * 
 	 * @return the source code range of the node. May be <code>null</code>.
+	 * @deprecated Use the position information from {@link #getToken()} instead.
 	 */
-	public SourcecodeRange getRange() {
+	@Deprecated
+	public de.hhu.stups.sablecc.patch.SourcecodeRange getRange() {
 		return range;
 	}
 }
