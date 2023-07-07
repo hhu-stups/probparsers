@@ -17,9 +17,7 @@ import de.be4.eventb.core.parser.node.TComment;
 import de.be4.eventb.core.parser.node.Token;
 import de.be4.eventb.core.parser.parser.Parser;
 import de.be4.eventb.core.parser.parser.ParserException;
-import de.hhu.stups.sablecc.patch.IParser;
 import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.ITokenListContainer;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePositions;
 import de.hhu.stups.sablecc.patch.SourcecodeRange;
@@ -119,15 +117,14 @@ public class EventBParser {
 
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = ((ITokenListContainer) lexer).getTokenList();
+			final List<IToken> tokenList = lexer.getTokenList();
 
 			/*
 			 * Retrieving sourcecode positions which were found by ParserAspect
 			 */
-			final Map<PositionedNode, SourcecodeRange> positions = ((IParser) parser).getMapping();
+			final Map<PositionedNode, SourcecodeRange> positions = parser.getMapping();
 
 			sourcePositions = new SourcePositions(tokenList, positions);
-			parser = null;
 
 			return rootNode;
 		} catch (final LexerException e) {
