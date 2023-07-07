@@ -49,4 +49,25 @@ public class BCompoundException extends Exception {
 			.map(BException::withLinesOneOff)
 			.collect(Collectors.toList()));
 	}
+
+	/**
+	 * Adds the given locations to all wrapped {@link BException}s that don't have any locations yet.
+	 * This is useful for cases where no location info is available where the exception is thrown,
+	 * but a caller further up the stack can provide useful location info,
+	 * e. g. when parsing a file referenced from another file.
+	 * 
+	 * @param locations location info to add
+	 * @return a copy of this exception with locations added to all wrapped {@link BException}s that didn't have any
+	 */
+	public BCompoundException withMissingLocations(List<BException.Location> locations) {
+		return new BCompoundException(this.getBExceptions().stream()
+			.map(exc -> {
+				if (exc.getLocations().isEmpty()) {
+					return new BException(exc.getFilename(), locations, exc.getMessage(), exc.getCause());
+				} else {
+					return exc;
+				}
+			})
+			.collect(Collectors.toList()));
+	}
 }

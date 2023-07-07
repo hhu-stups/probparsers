@@ -21,8 +21,9 @@ import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
-import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
@@ -151,10 +152,10 @@ public class PreParser {
 
 		for (final Token fileNameToken : list) {
 			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
+			// Note, that the fileName could be a relative path, e.g.
+			// ./foo/bar/defs.def
+			final String fileName = fileNameToken.getText();
 			try {
-				// Note, that the fileName could be a relative path, e.g.
-				// ./foo/bar/defs.def
-				final String fileName = fileNameToken.getText();
 				if (doneDefFiles.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
 					for (String string : doneDefFiles) {
@@ -187,7 +188,8 @@ public class PreParser {
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
-			} finally {
+			} catch (BCompoundException e) {
+				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, fileNameToken)));
 			}
 		}
 	}

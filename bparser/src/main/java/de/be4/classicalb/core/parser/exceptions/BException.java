@@ -185,7 +185,7 @@ public class BException extends Exception {
 			this.endColumn = endColumn;
 		}
 
-		private static Location fromNode(final String filename, final PositionedNode node) {
+		public static Location fromNode(final String filename, final PositionedNode node) {
 			// Extra checks to handle null locations safely.
 			// This *should* not be needed normally,
 			// because all nodes from SableCC have position info,

@@ -327,6 +327,8 @@ public class RecursiveMachineLoader {
 				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 			} catch (final CheckException e) {
 				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+			} catch (BCompoundException e) {
+				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(machineFile.getAbsolutePath(), refMachine.getNode())));
 			}
 		}
 	}
