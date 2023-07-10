@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
-import de.be4.classicalb.core.parser.IDefinitionFileProvider;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IFileContentProvider;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -29,9 +28,9 @@ import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
-
 
 /**
  * TODO check for multiple Definition files
@@ -56,7 +55,7 @@ public class RecursiveMachineLoader {
 	private String main;
 
 
-	public RecursiveMachineLoader(final String directory, final IDefinitionFileProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
+	public RecursiveMachineLoader(final String directory, final IFileContentProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		this.parsingBehaviour = parsingBehaviour;
 		this.rootDirectory = directory == null ? new File(".") : new File(directory);
 
@@ -76,8 +75,12 @@ public class RecursiveMachineLoader {
 		this.contentProvider = contentProvider;
 	}
 
-	public RecursiveMachineLoader(String path, IDefinitionFileProvider contentProvider) throws BCompoundException {
+	public RecursiveMachineLoader(String path, IFileContentProvider contentProvider) throws BCompoundException {
 		this(path, contentProvider, new ParsingBehaviour());
+	}
+
+	private static void printLoadProgress(File machineFile) {
+		DebugPrinter.println("Parsing file '" + machineFile + "'");
 	}
 
 	/**
@@ -90,7 +93,7 @@ public class RecursiveMachineLoader {
 	 * @return a new {@link RecursiveMachineLoader} that has parsed all files referenced by the main machine
 	 * @throws BCompoundException if parsing fails in any way
 	 */
-	public static RecursiveMachineLoader loadFromAst(final BParser parser, final Start ast, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException {
+	public static RecursiveMachineLoader loadFromAst(final BParser parser, final Start ast, final ParsingBehaviour parsingBehaviour, final IFileContentProvider contentProvider) throws BCompoundException {
 		final File mainFile = new File(parser.getFileName());
 		final String parent = mainFile.getParent() == null ? "." : mainFile.getParent();
 		final RecursiveMachineLoader rml = new RecursiveMachineLoader(parent, contentProvider, parsingBehaviour);
@@ -106,25 +109,27 @@ public class RecursiveMachineLoader {
 	 * @param contentProvider controls how files referenced by the main file are read
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour, final IDefinitionFileProvider contentProvider) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour, final IFileContentProvider contentProvider) throws BCompoundException {
+		if (parsingBehaviour.isVerbose()) {
+			printLoadProgress(mainFile);
+		}
 		final BParser parser = new BParser(mainFile.toString());
-		final Start ast = parser.parseFile(mainFile, parsingBehaviour.isVerbose(), contentProvider);
+		parser.setContentProvider(contentProvider);
+		final Start ast = parser.parseFile(mainFile);
 		return loadFromAst(parser, ast, parsingBehaviour, contentProvider);
 	}
 
 	/**
 	 * Recursively parse the given B machine and any other files that it references.
-	 * Identical to {@link #loadFile(File, ParsingBehaviour, IDefinitionFileProvider)} with a {@link CachingDefinitionFileProvider}.
+	 * Identical to {@link #loadFile(File, ParsingBehaviour, IFileContentProvider)} with a {@link CachingDefinitionFileProvider}.
 	 *
 	 * @param mainFile the B machine file to parse
 	 * @param parsingBehaviour options controlling the behaviour of {@link RecursiveMachineLoader}
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile, final ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		return loadFile(mainFile, parsingBehaviour, new CachingDefinitionFileProvider());
 	}
 
@@ -135,9 +140,8 @@ public class RecursiveMachineLoader {
 	 * @param mainFile the B machine file to parse
 	 * @return a new {@link RecursiveMachineLoader} that has parsed the given B machine and referenced files
 	 * @throws BCompoundException if parsing fails in any way
-	 * @throws IOException if the main machine file cannot be read
 	 */
-	public static RecursiveMachineLoader loadFile(final File mainFile) throws BCompoundException, IOException {
+	public static RecursiveMachineLoader loadFile(final File mainFile) throws BCompoundException {
 		return loadFile(mainFile, new ParsingBehaviour());
 	}
 
@@ -146,15 +150,16 @@ public class RecursiveMachineLoader {
 		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
 	}
 
-	private void loadMachine(final List<Ancestor> ancestors, final File machineFile)
-			throws BCompoundException, IOException {
-
+	private void loadMachine(final List<Ancestor> ancestors, final File machineFile) throws BCompoundException {
 		if (machineFilesLoaded.contains(machineFile)) {
 			return;
 		}
+		if (parsingBehaviour.isVerbose()) {
+			printLoadProgress(machineFile);
+		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
-		Start tree;
-		tree = parser.parseFile(machineFile, parsingBehaviour.isVerbose(), contentProvider);
+		parser.setContentProvider(this.contentProvider);
+		Start tree = parser.parseFile(machineFile);
 		recursivlyLoadMachine(machineFile, tree, ancestors, false,
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
@@ -289,45 +294,48 @@ public class RecursiveMachineLoader {
 
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
-
-			try {
-				final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
-				newAncestors.add(new Ancestor(name, refMachine));
-				final String filePragma = refMachine.getPath();
-				File file;
-				if (filePragma == null) {
-					file = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
+			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
+			newAncestors.add(new Ancestor(name, refMachine));
+			final String filePragma = refMachine.getPath();
+			File referencedFile;
+			if (filePragma == null) {
+				try {
+					referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
+				} catch (CheckException e) {
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+				}
+			} else {
+				File p = new File(filePragma);
+				if (p.isAbsolute()) {
+					referencedFile = p;
 				} else {
-					File p = new File(filePragma);
-					if (p.isAbsolute()) {
-						file = p;
-					} else {
-						file = new File(directory, filePragma);
-					}
+					referencedFile = new File(directory, filePragma);
 				}
-				if (file.exists() && parsedFiles.containsKey(refMachine.getName())
-						&& !parsedFiles.get(refMachine.getName()).getCanonicalPath().equals(file.getCanonicalPath())) {
+			}
+
+			if (referencedFile.exists() && parsedFiles.containsKey(refMachine.getName())) {
+				String referencedFileCanonical;
+				String alreadyParsedCanonical;
+				try {
+					referencedFileCanonical = referencedFile.getCanonicalPath();
+					alreadyParsedCanonical = parsedFiles.get(refMachine.getName()).getCanonicalPath();
+				} catch (IOException e) {
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+				}
+				if (!alreadyParsedCanonical.equals(referencedFileCanonical)) {
 					final String message = "Two files with the same name are referenced:\n"
-							+ parsedFiles.get(refMachine.getName()).getCanonicalPath() + "\n" + file.getCanonicalPath();
-					throw new BException(machineFile.getCanonicalPath(),
-							new CheckException(message, refMachine.getNode()));
-
+							+ alreadyParsedCanonical + "\n" + referencedFileCanonical;
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(),
+							new CheckException(message, refMachine.getNode())));
 				}
-				if (!getParsedMachines().containsKey(refMachine.getName())) {
-					try {
-						loadMachine(newAncestors, file);
-					} catch (IOException e) {
-						throw new BException(machineFile.getCanonicalPath(),
-								new CheckException(e.getMessage(), refMachine.getNode(), e));
-					}
+			}
 
+			if (!getParsedMachines().containsKey(refMachine.getName())) {
+				try {
+					loadMachine(newAncestors, referencedFile);
+				} catch (BCompoundException e) {
+					throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(machineFile.getAbsolutePath(), refMachine.getNode())));
 				}
-			} catch (final BException e) {
-				throw new BCompoundException(e);
-			} catch (final IOException e) {
-				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
-			} catch (final CheckException e) {
-				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 			}
 		}
 	}

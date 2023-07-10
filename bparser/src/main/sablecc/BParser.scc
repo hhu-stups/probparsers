@@ -4,25 +4,18 @@ Package de.be4.classicalb.core.parser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  underscore = '_';
-  double_quotation = '"';
-  back_quote = '`';
+  all_chars = [0 .. 0xffff];
   lf = 10;
   cr = 13;
   unicode_line_seperator = 8232; // \x2028
   unicode_paragraph_seperator = 8233;
 
   comment_start = '/*';
-  comment_end = '*/';
 
   triple_quote = 39 39 39;
   single_quote = 39;
 
   minus = '-' | 0x2212;
-  plus = '+' | 0x002b;
-  gt = '>' | 0x003e;
-  lt = '<' | 0x003c;
-  eq = '=' | 0x003d;
 
   small_letter = ['a'..'z'];
   capital_letter = ['A' .. 'Z'];
@@ -101,12 +94,11 @@ Helpers
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
-  all_chars = [0 .. 0xffff];
 
-  //all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break];
-  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break] - '\'];
+  //all_chars_without_quote_and_newline = [[all_chars - '"'] - line_break];
+  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break] - '\'];
   all_chars_without_newline = [all_chars - line_break];
-  string_literal = double_quotation (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
+  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
@@ -119,15 +111,16 @@ Helpers
   white_space = line_break | layout_char+;
 
 
-  all_chars_without_back_quote_newline_slash = [[[all_chars - back_quote] - line_break] - '\'];
-  quoted_identifier_literal = back_quote (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* back_quote; // backquote to generate identifiers with special symbols or which clash with keywords
+  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
+  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
 
 
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
-  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
+  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
-  //pragma_identifier_literal = (letter | digit | underscore | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
+  pragma_prefix = '/*@' layout_char*;
+  //pragma_identifier_literal = (letter | digit | '_' | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
   pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
@@ -140,61 +133,60 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  section,
+  // Initial state in which the lexer recognizes only keywords that start a model.
+  // The internal keywords for special parsing modes (#EXPRESSION, etc. - see below)
+  // are recognized only in this start state.
+  // This avoids conflicts with the symbol # (existential quantification) in regular B syntax.
+  // After the first keyword has been lexed,
+  // the parser switches to the normal state and never returns to the start state.
+  start,
   normal,
-  comment,
-  multiline_string_state,
-  shebang,
-  pragma,
-  description,
-  pragma_content,
-  pragma_package_content,
-  pragma_ignore;
+  // Multiline constructs (block comments, pragmas, multiline strings) have their own lexer states
+  // to provide better errors when the closing delimiter is missing.
+  // If e. g. block comments were parsed as a single token,
+  // then a long unclosed block comment would cause a pushback buffer overflow:
+  // the lexer first tries to lex the entire remaining text as a block comment,
+  // but once EOF is reached,
+  // it tries to backtrack all the way to the start of the comment.
+  // This is not an issue for line comments,
+  // because EOF is a valid line comment terminator.
+  block_comment,
+  multiline_string,
+  pragma_description_content,
+  pragma_content;
 
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 Tokens
-  {section->shebang, normal -> shebang, shebang} shebang = '#!';
-  {shebang -> normal} shebang_end = line_break;
-  {shebang} shebang_char = all_chars;
+  {start->normal,normal} shebang = '#!' [all_chars - line_break]* line_break?;
 
-  {section,normal} line_comment = '//' [all_chars - line_break]* line_break?;
+  {start->normal,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
-  {section->pragma,normal->pragma} pragma_start = '/*@';
-  {pragma->normal,pragma_content->normal,pragma_package_content->normal} pragma_end = '*/';
-  {pragma} pragma_generated = 'generated'; // we could enforce nothing follows it
-  {pragma} pragma_symbolic = 'symbolic'; // ditto
-  {pragma->pragma_content} pragma_label = 'label';
-  {pragma->pragma_content} pragma_file = 'file';
-  {pragma->pragma_package_content} pragma_package = 'package';
-  {pragma->description} pragma_description = 'desc' | 'description' | 'pragma';
-
-  // the state for contents of the package pragma; import-package can also stand as its own pragma
-  // in the grammwar below, import-package always follows a pragma_package
-  {pragma_package_content,pragma->pragma_package_content} pragma_import_package = 'import-package' | 'import_package';
-
-  {pragma->pragma_ignore} unrecognised_pragma = string_literal | identifier_literal | pragma_identifier_literal;
+  {pragma_content->normal} pragma_end = '*/';
+  {start->pragma_content,normal->pragma_content} pragma_generated = pragma_prefix 'generated'; // we could enforce nothing follows it
+  {start->pragma_content,normal->pragma_content} pragma_symbolic = pragma_prefix 'symbolic'; // ditto
+  {start->pragma_content,normal->pragma_content} pragma_label = pragma_prefix 'label';
+  {start->pragma_content,normal->pragma_content} pragma_file = pragma_prefix 'file';
+  {start->pragma_content,normal->pragma_content} pragma_package = pragma_prefix 'package';
+  {start->pragma_description_content,normal->pragma_description_content} pragma_description = pragma_prefix 'desc';
+  {start->pragma_content,normal->pragma_content} pragma_import_package = pragma_prefix 'import-package';
+  {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix (string_literal | identifier_literal | pragma_identifier_literal);
 
   // content of description pragma
-  {description} pragma_free_text = [all_chars - ['*' + '/']]*;
+  {pragma_description_content} pragma_free_text = [all_chars - '*']*;
 
   // the pragma_content state collects attributes for label and file pragmas
-  {pragma_content,pragma_package_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
 
-  // the pragma_ignore state is like description but all tokens are ignored
-  {pragma_ignore} pragma_ignored_text = [all_chars - ['*' + '/']]*;
+  {start->block_comment, normal->block_comment} comment = comment_start; // comment_start helper is a workaround to force SableCC to allow modifying text of comment tokens.
+  {block_comment->normal,pragma_description_content->normal} comment_end = '*/';
+  {block_comment} comment_body = [all_chars - '*']*;
+  {block_comment,pragma_description_content} star = '*';
 
-  {section->comment, normal -> comment} comment = comment_start;
-  {comment->normal,description->normal,pragma_ignore->normal} comment_end = comment_end;
-  {comment} comment_body = [all_chars - ['*' + '/']]*;
-
-  {comment,description,pragma_ignore} star = '*';
-  {comment,description,pragma_ignore} slash = '/';
-
-  {section->multiline_string_state, normal->multiline_string_state} multiline_string_start = triple_quote;
-  {multiline_string_state->normal} multiline_string_end = triple_quote;
-  {multiline_string_state} multiline_string_content = multiline_string_literal;
+  {normal->multiline_string} multiline_string_start = triple_quote;
+  {multiline_string->normal} multiline_string_end = triple_quote;
+  {multiline_string} multiline_string_content = multiline_string_literal;
 
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
@@ -207,14 +199,14 @@ Tokens
   {normal} right_par = ')'; // closing/right parenthesis
   {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
   {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
-  {normal} plus = plus;
-  {normal} partial_function = plus minus gt | 0x21f8;
-  {normal} partial_surjection = plus minus gt gt | 0x2900;
+  {normal} plus = '+';
+  {normal} partial_function = '+' minus '>' | 0x21f8;
+  {normal} partial_surjection = '+' minus '>>' | 0x2900;
   {normal} comma = ',';
   {normal} minus = minus;
-  {normal} total_function = minus minus gt | 0x2192;
-  {normal} total_surjection = minus minus gt gt | 0x21a0;
-  {normal} insert_start_sequence = minus gt | 0x21fe;
+  {normal} total_function = minus minus '>' | 0x2192;
+  {normal} total_surjection = minus minus '>>' | 0x21a0;
+  {normal} insert_start_sequence = minus '>' | 0x21fe;
   {normal} dot = '.' ; // Ascii dot
   {normal} dot2 = '·' | 0x22c5 | '•'; // is the bullet, Option-8 on US keyboards
    // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
@@ -232,32 +224,32 @@ Tokens
   {normal} element_of = ':' | 0x2208;
   {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
     // Note TLA+ propses 0x2237 (PROPORTION) for label_as operator ::
-  {normal} assign = ':' eq | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
+  {normal} assign = ':=' | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
   {normal} semicolon = ';';
-  {normal} less = lt;
+  {normal} less = '<';
   {normal} ring = 0x2218; // circ or forward composition from Event-B, normally not allowed by Atelier-B
-  {normal} less_greater = lt white_space* gt; // for empty sequence
-  {normal} overwrite_relation = lt plus | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
-  {normal} set_relation = lt minus gt | 0x2194;
+  {normal} less_greater = '<' white_space* '>'; // for empty sequence
+  {normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
+  {normal} set_relation = '<' minus '>' | 0x2194;
   {normal} insert_end_sequence = '<-' | 0x21fd;
   {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 2190: Leftwards Arrow; 27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
   {normal} inclusion = '<:' | 0x2286;
   {normal} strict_inclusion = '<<:' | 0x2282;
   {normal} domain_subtraction = '<<|' | 0x2a64 | 0x25c0;
-  {normal} less_equal = lt eq | 0x2264;
-  {normal} equivalence = lt eq gt | 0x21d4 | 0x27fa;  // 0x21d4 is LEFT RIGHT DOUBLE ARROW; TLA proposes 0x27fa (LONG LEFT RIGHT DOUBLE ARROW) for iff
+  {normal} less_equal = '<=' | 0x2264;
+  {normal} equivalence = '<=>' | 0x21d4 | 0x27fa;  // 0x21d4 is LEFT RIGHT DOUBLE ARROW; TLA proposes 0x27fa (LONG LEFT RIGHT DOUBLE ARROW) for iff
     // there also is \equiv with 0x2261 (IDENTICAL TO)
-  {normal} domain_restriction = lt '|' | 0x25c1;
-  {normal} equal = eq;
-  {normal} double_equal = eq eq | 0x225c; // == , Unicode DELTA EQUAL TO proposed in https://github.com/tlaplus-community/tlaplus-standard
-  {normal} implies = eq gt | 0x21d2 | 0x27f9;  // 0x21ds is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
-  {normal} greater = gt;
-  {normal} partial_injection = gt plus gt | 0x2914;
-  {normal} total_injection = gt minus gt | 0x21a3;
-  {normal} partial_bijection = gt plus gt gt;
-  {normal} total_bijection = gt minus gt gt | 0x2916;
-  {normal} direct_product = gt lt | 0x2297;
-  {normal} greater_equal = gt eq | 0x2265;
+  {normal} domain_restriction = '<|' | 0x25c1;
+  {normal} equal = '=';
+  {normal} double_equal = '==' | 0x225c; // == , Unicode DELTA EQUAL TO proposed in https://github.com/tlaplus-community/tlaplus-standard
+  {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21ds is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
+  {normal} greater = '>';
+  {normal} partial_injection = '>+>' | 0x2914;
+  {normal} total_injection = '>' minus '>' | 0x21a3;
+  {normal} partial_bijection = '>+>>';
+  {normal} total_bijection = '>' minus '>>' | 0x2916;
+  {normal} direct_product = '><' | 0x2297;
+  {normal} greater_equal = '>=' | 0x2265;
   {normal} abstract_constants = 'ABSTRACT_CONSTANTS';
   {normal} abstract_variables = 'ABSTRACT_VARIABLES';
   {normal} any = 'ANY';
@@ -273,7 +265,7 @@ Tokens
   {normal} concrete_variables = 'CONCRETE_VARIABLES';
   {normal} constants = 'CONSTANTS';
   {normal} constraints = 'CONSTRAINTS';
-  {section->normal,normal} definitions = 'DEFINITIONS';
+  {start->normal,normal} definitions = 'DEFINITIONS';
   {normal} expressions = 'EXPRESSIONS';
   {normal} predicates = 'PREDICATES';
   {normal} do = 'DO';
@@ -286,7 +278,7 @@ Tokens
   {normal} fin = 'FIN';
   {normal} fin1 = 'FIN1'; // add 'FIN'0x8321 ?
   {normal} if = 'IF';
-  {section->normal,normal} implementation = 'IMPLEMENTATION';
+  {start->normal,normal} implementation = 'IMPLEMENTATION';
   {normal} imports = 'IMPORTS';
   {normal} in = 'IN';
   {normal} includes = 'INCLUDES';
@@ -299,9 +291,9 @@ Tokens
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
   {normal} local_operations = 'LOCAL_OPERATIONS';
-  {section->normal,normal} machine = 'MACHINE';
-  {section->normal,normal} model = 'MODEL';
-  {section->normal,normal} system = 'SYSTEM'; /* SYSTEM fuer Event-B */
+  {start->normal,normal} machine = 'MACHINE';
+  {start->normal,normal} model = 'MODEL';
+  {start->normal,normal} system = 'SYSTEM'; /* SYSTEM fuer Event-B */
   {normal} max_int = 'MAXINT';
   {normal} min_int = 'MININT';
   {normal} nat = 'NAT';
@@ -318,7 +310,7 @@ Tokens
   {normal} promotes = 'PROMOTES';
   {normal} properties = 'PROPERTIES';
   {normal} refines = 'REFINES';
-  {section->normal,normal} refinement = 'REFINEMENT';
+  {start->normal,normal} refinement = 'REFINEMENT';
   {normal} sees = 'SEES';
   {normal} select = 'SELECT';
   {normal} sets = 'SETS';
@@ -393,62 +385,37 @@ Tokens
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
 
   // Extensions
-  {normal} total_relation = lt lt minus gt | 0xe100;
-  {normal} surjection_relation = lt minus gt gt | 0xe101;
-  {normal} total_surjection_relation = lt lt minus gt gt | 0xe102;
+  {normal} total_relation = '<<' minus '>' | 0xe100;
+  {normal} surjection_relation = '<' minus '>>' | 0xe101;
+  {normal} total_surjection_relation = '<<' minus '>>' | 0xe102;
   {normal} kw_freetypes = 'FREETYPES';
 
   // keywords for special parsing modes;
   // these # keywords do not interfere with normal parsing
-  {section->normal} kw_expression = '#EXPRESSION';
-  {section->normal} kw_predicate = '#PREDICATE';
-  {section->normal} kw_formula = '#FORMULA';
-  {section->normal} kw_substitution = '#SUBSTITUTION';
-  {section->normal} kw_abstract_constants = '#ABSTRACT_CONSTANTS';
-  {section->normal} kw_abstract_variables = '#ABSTRACT_VARIABLES';
-  {section->normal} kw_assertions = '#ASSERTIONS';
-  {section->normal} kw_concrete_constants = '#CONCRETE_CONSTANTS';
-  {section->normal} kw_concrete_variables = '#CONCRETE_VARIABLES';
-  {section->normal} kw_constants = '#CONSTANTS';
-  {section->normal} kw_constraints = '#CONSTRAINTS';
-  {section->normal} kw_definitions = '#DEFINITIONS';
-  {section->normal} kw_definition = '#DEFINITION';
-  {section->normal} kw_extends = '#EXTENDS';
-  {section->normal} kw_imports = '#IMPORTS';
-  {section->normal} kw_includes = '#INCLUDES';
-  {section->normal} kw_initialisation = '#INITIALISATION';
-  {section->normal} kw_invariant = '#INVARIANT';
-  {section->normal} kw_local_operations = '#LOCAL_OPERATIONS';
-  {section->normal} kw_operations = '#OPERATIONS';
-  {section->normal} kw_promotes = '#PROMOTES';
-  {section->normal} kw_properties = '#PROPERTIES';
-  {section->normal} kw_sees = '#SEES';
-  {section->normal} kw_sets = '#SETS';
-  {section->normal} kw_uses = '#USES';
-  {section->normal} kw_variables = '#VARIABLES';
-  {section->normal} kw_values = '#VALUES';
-  {section->normal} kw_oppattern = '#OPPATTERN';
-  {section->normal} kw_machine_clause = '#MACHINECLAUSE';
+  {start->normal} kw_expression = '#EXPRESSION';
+  {start->normal} kw_predicate = '#PREDICATE';
+  {start->normal} kw_formula = '#FORMULA';
+  {start->normal} kw_substitution = '#SUBSTITUTION';
+  {start->normal} kw_oppattern = '#OPPATTERN';
+  {start->normal} kw_machine_clause = '#MACHINECLAUSE';
 
   {normal} truth_predicate = 'btrue' | 0x22A4; // truth, no longer accept #truth_predicate
-  {section->normal,normal} identifier_literal = identifier_literal;
+  {start->normal,normal} identifier_literal = identifier_literal; // Also allowed in start state because of rules DSL - the RULES_MACHINE keyword is parsed as an identifier before RulesGrammar transforms it.
   {normal} def_literal_substitution = '@#literal_substitution' letter*; // dummy tokens; not generated by lexing;
       // corresponding syntax nodes generated by Java code (by BLexer using Preparser definition list);
       // TODO: should we use unicode_letter? Parser works with definitions with unicode letters
   {normal} def_literal_predicate = '@#literal_predicate' letter*; // ditto
-  {normal} predicate_identifier = '@#predicate_identifier' letter*; // ditto, but not created by BLexer?
   {normal} integer_literal = digit+;
   {normal} real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
   {normal} hex_literal = '0x' hexdigit+; // currently BLexer.java replaces THexLiteral with TIntegerLiteral
 
-  {normal} underscore = underscore;
+  {normal} underscore = '_';
 
-  white_space = white_space;
+  {start,normal,pragma_content} white_space = white_space;
 
   // grammar extensions
   // the following tokens are never recognized by the lexer because they declared below identifier_literal
   // keywords should be synchronized with RuleGrammar.java
-  {normal} kw_rules_machine = 'RULES_MACHINE';
   {normal} kw_rule = 'RULE';
   {normal} kw_substitution_operator = identifier_literal;
   {normal} kw_predicate_operator = identifier_literal;
@@ -474,10 +441,9 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-  shebang, shebang_char, shebang_end,
   white_space,
-  comment, comment_body, comment_end, pragma_start, pragma_end,
-  unrecognised_pragma, pragma_ignored_text,
+  comment, comment_body, comment_end,
+  unrecognised_pragma,
   line_comment;
 
 /*******************************************************************
@@ -488,26 +454,25 @@ Ignored Tokens
 Productions
 
 parse_unit {-> parse_unit} =
-  {machine} P.machine {-> machine.parse_unit} |
-  {definition_file} [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
+  {machine} shebang? P.machine {-> machine.parse_unit} |
+  {definition_file} shebang? [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
   {predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
   {expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
   {predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
   {exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
   {substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
   {oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
-  {definition} kw_definition [def]:definition {-> New parse_unit.parse_unit_definition(def.definition)} |
   {machine_clause} kw_machine_clause [clause]:machine_clause {-> New parse_unit.machine_clause(clause.machine_clause)}; // used to single machine clauses
 
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
-  {generated} pragma_generated [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {package} pragma_package [package]:pragma_id_or_string [imports]:import_package_list? [parse_unit]:P.machine
+  {generated} pragma_generated pragma_end [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
+  {package} pragma_package [package]:pragma_id_or_string pragma_end [imports]:import_package_list? [parse_unit]:P.machine
     {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)};
 
 import_package_list {-> import_package*} =
-  {single} pragma_import_package [package_or_machine]:pragma_id_or_string {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string {-> [rest.import_package, New import_package(package_or_machine)]};
+  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [New import_package(package_or_machine)]} |
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [rest.import_package, New import_package(package_or_machine)]};
 
 
 machine_x {-> parse_unit} =
@@ -615,7 +580,7 @@ machine_ref_list {-> machine_reference*} =
 
 machine_reference {-> machine_reference} =
   {simple} [machine_reference]:machine_reference2 {-> machine_reference.machine_reference} |
-  {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string
+  {file} [machine_reference]:machine_reference2 pragma_file [file]:pragma_id_or_string pragma_end
     {-> New machine_reference.file(machine_reference.machine_reference, file)};
 
 machine_reference2 {-> machine_reference} =
@@ -627,7 +592,7 @@ machine_reference_no_params_list {-> machine_reference_no_params*} =
 
 machine_reference_no_params {-> machine_reference_no_params} =
   {simple} [ref]:machine_reference_no_params2 {-> ref.machine_reference_no_params} |
-  {file} [ref]:machine_reference_no_params2 pragma_file [file]:pragma_id_or_string {-> New machine_reference_no_params.file(ref.machine_reference_no_params, file)};
+  {file} [ref]:machine_reference_no_params2 pragma_file [file]:pragma_id_or_string pragma_end {-> New machine_reference_no_params.file(ref.machine_reference_no_params, file)};
 
 machine_reference_no_params2 {-> machine_reference_no_params} =
   {simple} [machine_name]:composed_identifier {-> New machine_reference_no_params([machine_name.identifier_literal])};
@@ -752,7 +717,7 @@ predicate_p40 {-> predicate} =
   {next_level} [pred]:predicate_x40 {-> pred.predicate};
 
 predicate_x40 {-> predicate} =
-  {label} pragma_label [name]:pragma_id_or_string [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
+  {label} pragma_label [name]:pragma_id_or_string pragma_end [predicate]:predicate_x40 {-> New predicate.label(name,predicate.predicate)} |
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
@@ -815,8 +780,6 @@ predicate_atomic {-> predicate} =
   |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
   |
-  {identifier} [literal]:predicate_identifier {-> New predicate.predicate_identifier(literal)} |
-  {function} [literal]:predicate_identifier left_par [parameters]:expression_list right_par {-> New predicate.predicate_function(literal, [parameters.expression])} |
   {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
     {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
@@ -829,7 +792,7 @@ predicate_atomic {-> predicate} =
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
-  {symbolic_composition} [left]:expression_in_par pragma_symbolic semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
+  {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
   {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
   {next_level} [expr]:expression_top {-> expr.expression};
 
@@ -948,9 +911,9 @@ expression_keyword {-> expression} =
   {lambda2} lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.lambda([identifiers.expression], predicate.predicate, expression.expression)}
   |
-  {symbolic_lambda} pragma_symbolic lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
+  {symbolic_lambda} pragma_symbolic pragma_end lambda [identifiers]:quantified_variables_list dot left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)} |
-  {symbolic_lambda2} pragma_symbolic lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
+  {symbolic_lambda2} pragma_symbolic pragma_end lambda [identifiers]:quantified_variables_list dot2 left_par [predicate]:predicate_top vertical_bar [expression]:expression_in_par right_par
     {-> New expression.symbolic_lambda([identifiers.expression], predicate.predicate, expression.expression)}
   |
   {trans_function} fnc left_par [expression]:expression_in_par right_par {-> New expression.trans_function(expression.expression)} |
@@ -985,12 +948,12 @@ expression_keyword {-> expression} =
   |
   {event_b_comprehension_set} left_brace [identifiers]:expression_list dot2 [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
   |
-  {symbolic_comprehension_set} pragma_symbolic left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
+  {symbolic_comprehension_set} pragma_symbolic pragma_end left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
   |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_union2} quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
-  {symbolic_quantified_union} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
-  {symbolic_quantified_union2} pragma_symbolic quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)}
+  {symbolic_quantified_union} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
+  {symbolic_quantified_union2} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)}
   |
   {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
   |
@@ -1358,8 +1321,6 @@ predicate =
   {finite} [set]:expression |
   {partition} [set]:expression [elements]:expression* | /* Event-B only predicate */
   {definition} [def_literal]:def_literal_predicate [parameters]:expression* |
-  {predicate_identifier} [identifier]:predicate_identifier |
-  {predicate_function} [identifier]:predicate_identifier [parameters]:expression* |
   {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
   {if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
   {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only predicate - theory plugin */

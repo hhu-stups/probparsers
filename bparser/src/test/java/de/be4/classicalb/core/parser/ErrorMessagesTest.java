@@ -43,6 +43,6 @@ public class ErrorMessagesTest {
 	private void parseString(final String testMachine) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setGrammar(RulesGrammar.getInstance());
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 	}
 }

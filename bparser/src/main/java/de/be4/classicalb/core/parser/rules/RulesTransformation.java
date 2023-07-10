@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -97,9 +98,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		DefinitionInjector.injectDefinitions(start, iDefinitions);
 		MissingPositionsAdder.injectPositions(start);
 		if (!this.errorList.isEmpty()) {
+			File machineFile = this.rulesMachineChecker.getFile();
+			String machineFilePath = machineFile == null ? null : machineFile.getPath();
 			List<BException> list = new ArrayList<>();
 			for (CheckException checkException : this.errorList) {
-				list.add(new BException(this.rulesMachineChecker.getFileName(), checkException));
+				list.add(new BException(machineFilePath, checkException));
 			}
 			throw new BCompoundException(list);
 		}

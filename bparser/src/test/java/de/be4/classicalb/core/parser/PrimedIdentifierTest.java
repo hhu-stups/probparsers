@@ -32,12 +32,13 @@ public class PrimedIdentifierTest {
 		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 	}
 
+	@Deprecated
 	@Test(expected = BCompoundException.class)
 	public void testPrimedIdentifiersInQuantifiersRestrictedModeFalse() throws BCompoundException {
 		final String testMachine = "#PREDICATE !a$0.(a$0=5 => b=6)";
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setRestrictPrimedIdentifiers(false);
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 		// this mode is no longer supported
 	}
 

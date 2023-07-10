@@ -24,12 +24,10 @@ import de.be4.eventbalg.core.parser.node.PVariable;
 import de.be4.eventbalg.core.parser.node.Start;
 import de.be4.eventbalg.core.parser.node.TComment;
 
-public class CommentTest extends AbstractTest {
+public class CommentTest {
 	@Test
 	public void testCommentPredicates1() throws Exception {
-		final Start rootNode = parseInput(
-				"machine CommentPredicates1 invariants\n @inv1 asdf //MyComment\nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine CommentPredicates1 invariants\n @inv1 asdf //MyComment\nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -42,9 +40,7 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testCommentPredicates2() throws Exception {
-		final Start rootNode = parseInput(
-				"machine CommentPredicates2 invariants\n @inv0 asdf\n @inv1 asdf\n//MyComment\nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine CommentPredicates2 invariants\n @inv0 asdf\n @inv1 asdf\n//MyComment\nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -70,7 +66,7 @@ public class CommentTest extends AbstractTest {
 	public void testInvariantsAndMultiComments() throws BException {
 		final String input = "machine InvariantsAndMultiComments invariants\n"
 				+ "@inv1 1=1\n" + "@inv2 2=2\n" + "/*inv2\ncomment*/\n" + "end";
-		final Start rootNode = parseInput(input, false);
+		final Start rootNode = new EventBParser().parse(input);
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -92,9 +88,7 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testMultiLineComment() throws Exception {
-		final Start rootNode = parseInput(
-				"machine MultiLineComment invariants @inv1 asdf\n/* First line\n  Second line*/\nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine MultiLineComment invariants @inv1 asdf\n/* First line\n  Second line*/\nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -120,10 +114,15 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testCommentVariables1() throws Exception {
-		final Start rootNode = parseInput(
-				"machine CommentVariables1 variables\n" + "varA"
-						+ "//varA comment\n" + " varB\n" + "varC\n"
-						+ "/*varC\ncomment*/" + "end", false);
+		final Start rootNode = new EventBParser().parse(
+			"machine CommentVariables1 variables\n"
+			+ "varA"
+			+ "//varA comment\n"
+			+ " varB\n"
+			+ "varC\n"
+			+ "/*varC\ncomment*/"
+			+ "end"
+		);
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -155,9 +154,15 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testMultiLineMachineComment() throws Exception {
-		final Start rootNode = parseInput("machine MultiLineMachineComment"
-				+ "/*\n" + " comment\n" + " in multiple\n" + " lines\n"
-				+ "*/\n" + " end", false);
+		final Start rootNode = new EventBParser().parse(
+			"machine MultiLineMachineComment"
+			+ "/*\n"
+			+ " comment\n"
+			+ " in multiple\n"
+			+ " lines\n"
+			+ "*/\n"
+			+ " end"
+		);
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -174,9 +179,7 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testAtSignInComment() throws Exception {
-		final Start rootNode = parseInput(
-				"machine AtSignInComment\nevents\nevent testEvent\nthen\n@act1 skip\n@act2 skip\n// MyComment@act2\nend\nend",
-				false);
+		final Start rootNode = new EventBParser().parse("machine AtSignInComment\nevents\nevent testEvent\nthen\n@act1 skip\n@act2 skip\n// MyComment@act2\nend\nend");
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -198,9 +201,13 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testMultipleComments1() throws Exception {
-		final Start rootNode = parseInput("machine MultipleComments1"
-				+ "// line1\n" + "/* line2\nline3*/" + "// line4\n" + "\nend",
-				false);
+		final Start rootNode = new EventBParser().parse(
+			"machine MultipleComments1"
+			+ "// line1\n"
+			+ "/* line2\nline3*/"
+			+ "// line4\n"
+			+ "\nend"
+		);
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -214,9 +221,13 @@ public class CommentTest extends AbstractTest {
 
 	@Test
 	public void testMultipleComments2() throws Exception {
-		final Start rootNode = parseInput(
-				"machine MultipleComments2" + "/* line1*/\n"
-						+ "/* line2\nline3*/" + "// line4\n" + "\nend", false);
+		final Start rootNode = new EventBParser().parse(
+			"machine MultipleComments2"
+			+ "/* line1*/\n"
+			+ "/* line2\nline3*/"
+			+ "// line4\n"
+			+ "\nend"
+		);
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
@@ -231,9 +242,7 @@ public class CommentTest extends AbstractTest {
 	@Test
 	public void testCommentAtBeginErrorMessage() {
 		try {
-			parseInput(
-					"/* Comment before machine header */\nmachine CommentAtBeginErrorMessage end",
-					false);
+			new EventBParser().parse("/* Comment before machine header */\nmachine CommentAtBeginErrorMessage end");
 			fail("Expecting exception here");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();
@@ -247,9 +256,7 @@ public class CommentTest extends AbstractTest {
 	@Test
 	public void testMisplacedCommentMessage() {
 		try {
-			parseInput(
-					"machine MisplacedCommentMessage refines X\n/* Comment before machine header */\n variant 5\nend",
-					false);
+			new EventBParser().parse("machine MisplacedCommentMessage refines X\n/* Comment before machine header */\n variant 5\nend");
 			fail("Expecting exception here");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();

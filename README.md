@@ -14,7 +14,12 @@ This is an umbrella project for the following parsers and libraries used by ProB
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
 * answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
 * eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
-* typechecker: Java-based classical B typechecker. **No longer built or published - last release is 2.9.32.** If you have a project that needs this library, complain to @dgelessus (or just re-add this subproject in settings.gradle). Note that **this is not the normal ProB typechecker** - that is part of prob_prolog and is completely separate from this code.
+
+The following subprojects were formerly part of this repo:
+
+* translator: Replaced by the [value-translator](https://github.com/hhu-stups/value-translator) project. The last release as part of probparsers was version 2.9.23.
+* typechecker: Java-based classical B typechecker. No longer maintained - last release was version 2.9.32. Note that the normal ProB typechecker is part of prob_prolog and is unrelated to this subproject.
+* voparser: Now maintained in the separate [vo_parser](https://gitlab.cs.uni-duesseldorf.de/general/stups/vo_parser) repository.
 
 ## Using
 
@@ -23,7 +28,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.12.4"
+final parserVersion = "2.12.5"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
@@ -55,6 +60,11 @@ Available options are:
 -fastprolog Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
 -prepl      Enter parser-repl. Should only be used from inside ProB's Prolog Core.
 -checkname  The name of a machine have to match file name (except for the file name extension)
+```
+
+You probably also want to set the path to the stdlib folder of ProB (containing files like LibraryStrings.def):
+```
+java -Dprob.stdlib=../stdlib/ -jar probcliparser.jar MyBMachine.mch
 ```
 
 ## Building

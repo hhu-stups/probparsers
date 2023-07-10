@@ -47,16 +47,6 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	public static ListPrologTerm emptyList() {
 		return EMPTY_LIST;
 	}
-
-	/**
-	 * @deprecated Use {@link #subList(int, int)} instead.
-	 */
-	@Deprecated
-	public ListPrologTerm(int start, int end, ListPrologTerm org) {
-		this.start = start;
-		this.end = end;
-		this.elements = org.elements;
-	}
 	
 	// Note: this functor and arity are not entirely correct, they don't match the structure of Prolog lists properly.
 	// A Prolog list is either the atom [] or a term of the form .(Head, Tail), where Tail is another list.

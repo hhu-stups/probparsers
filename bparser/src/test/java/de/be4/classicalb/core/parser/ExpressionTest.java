@@ -325,6 +325,7 @@ public class ExpressionTest {
 		assertEquals(expected, standard);
 	}
 
+	@Deprecated
 	@Test
 	public void testProverComprehensionSets() throws BCompoundException {
 		final String testMachine = "#EXPRESSION SET(i).(i>0)";
@@ -332,7 +333,7 @@ public class ExpressionTest {
 
 		final BParser parser = new BParser("testcase");
 		parser.getOptions().setRestrictProverExpressions(false);
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 		assertEquals(expected, Helpers.getTreeAsPrologTerm(startNode));
 
 		Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));

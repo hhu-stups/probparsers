@@ -79,6 +79,6 @@ public class DefinitionsErrorsTest {
 
 	private void parseString(final String testMachine) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parse(testMachine, false);
+		final Start startNode = parser.parseMachine(testMachine);
 	}
 }

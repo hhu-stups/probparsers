@@ -12,7 +12,11 @@ import de.be4.classicalb.core.parser.node.Start;
 /**
  * Semantic check for expressions that can only be used in the prover, not
  * standard B machines
+ * 
+ * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
+ *     making this check unnecessary.
  */
+@Deprecated
 public class ProverExpressionsCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private ParseOptions options;

@@ -91,7 +91,6 @@ import de.be4.classicalb.core.parser.util.Utils;
  * This class checks that all extensions for the rules language are used in a correct way
  */
 public class RulesMachineChecker extends DepthFirstAdapter {
-	private final String fileName;
 	private String machineName;
 	private final File file;
 	private final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
@@ -117,10 +116,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final Start start;
 	private TIdentifierLiteral nameLiteral;
 
-	public RulesMachineChecker(final File file, final String fileName, List<RulesMachineReference> machineReferences,
-			Start start) {
+	public RulesMachineChecker(final File file, List<RulesMachineReference> machineReferences, Start start) {
 		this.file = file;
-		this.fileName = fileName;
 		this.machineReferences = machineReferences;
 		this.start = start;
 	}
@@ -129,7 +126,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		start.apply(this);
 		if (!errorList.isEmpty()) {
 			final List<BException> bExceptionList = new ArrayList<>();
-			final String filePath = file == null ? "UnknownFile" : file.getAbsolutePath();
+			final String filePath = file == null ? null : file.getPath();
 			for (CheckException checkException : errorList) {
 				final BException bException = new BException(filePath, checkException);
 				bExceptionList.add(bException);
@@ -138,12 +135,20 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
+	public File getFile() {
+		return this.file;
+	}
+
 	public Set<RuleOperation> getRuleOperations() {
 		return new HashSet<>(this.rulesMap.values());
 	}
 
+	/**
+	 * @deprecated Use {@link #getFile()} instead.
+	 */
+	@Deprecated
 	public String getFileName() {
-		return this.fileName;
+		return this.getFile().getPath();
 	}
 
 	public TIdentifierLiteral getNameLiteral() {
@@ -472,7 +477,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
-		currentOperation = new RuleOperation(node.getRuleName(), this.fileName, this.machineName, machineReferences);
+		currentOperation = new RuleOperation(node.getRuleName(), this.file == null ? null : this.file.getPath(), this.machineName, machineReferences);
 		if (containsRule(currentOperation.getOriginalName())) {
 			errorList.add(new CheckException("Duplicate operation name '" + currentOperation.getOriginalName() + "'.",
 					node.getRuleName()));
@@ -498,7 +503,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAComputationOperation(AComputationOperation node) {
-		currentOperation = new ComputationOperation(node.getName(), this.fileName, this.machineName, machineReferences);
+		currentOperation = new ComputationOperation(node.getName(), this.file == null ? null : this.file.getPath(), this.machineName, machineReferences);
 		computationMap.put(node, (ComputationOperation) currentOperation);
 		visitOperationAttributes(node.getAttributes());
 		node.getBody().apply(this);
@@ -507,7 +512,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAFunctionOperation(AFunctionOperation node) {
-		currentOperation = new FunctionOperation(node.getName(), this.fileName, this.machineName, machineReferences);
+		currentOperation = new FunctionOperation(node.getName(), this.file == null ? null : this.file.getPath(), this.machineName, machineReferences);
 		functionMap.put(node, (FunctionOperation) currentOperation);
 
 		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));

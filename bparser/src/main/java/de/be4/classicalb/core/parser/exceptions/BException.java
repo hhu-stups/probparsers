@@ -12,9 +12,53 @@ import java.util.stream.Collectors;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+/**
+ * <p>
+ * Wrapper around the different kinds of exceptions that may be thrown during parsing.
+ * Adds context about the file in which the error occurred
+ * and provides a generic interface for getting the error position(s).
+ * </p>
+ * <p>
+ * Note that this exception is normally not thrown directly,
+ * but instead wrapped again in a {@link BCompoundException}
+ * to allow reporting multiple {@link BException}s at once.
+ * </p>
+ * <p>
+ * The cause of this exception is normally one of the following:
+ * </p>
+ * <ul>
+ * <li>
+ * {@link PreParseException}: This exception contains errors that occur during the preparsing.
+ * If possible it supplies a token where the error occurred.
+ * </li>
+ * <li>
+ * {@link BLexerException}: Thrown if any error is detected by the customized lexer.
+ * Includes the token responsible for the error.
+ * </li>
+ * <li>
+ * {@link LexerException}: Thrown if any error occurs in the SableCC-generated lexer.
+ * This class doesn't have any direct way to get the error position,
+ * but {@link BException} tries to parse this information from the exception message
+ * and provides it via the generic interface if possible.
+ * </li>
+ * <li>
+ * {@link BParseException}: This exception is thrown in two situations.
+ * On the one hand, if the parser throws a {@link ParserException},
+ * we convert it into a {@link BParseException}.
+ * On the other hand it can be thrown if any error is found during the AST transformations after the parser has finished.
+ * </li>
+ * <li>
+ * {@link CheckException}: Thrown if any problem occurs while performing semantic checks.
+ * We provide one or more nodes that are involved in the problem.
+ * For example, if we find duplicate machine clauses,
+ * we will list all occurrences in the exception.
+ * </li>
+ * </ul>
+ */
 public class BException extends Exception {
 
 	private static final long serialVersionUID = -693107947667081359L;
@@ -104,10 +148,10 @@ public class BException extends Exception {
 	}
 
 	/**
-	 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
-	 *
 	 * @return a copy of this exception with all line numbers decremented by one
+	 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 	 */
+	@Deprecated
 	public BException withLinesOneOff() {
 		if (this.getLocations().isEmpty()) {
 			return this;
@@ -141,7 +185,7 @@ public class BException extends Exception {
 			this.endColumn = endColumn;
 		}
 
-		private static Location fromNode(final String filename, final PositionedNode node) {
+		public static Location fromNode(final String filename, final PositionedNode node) {
 			// Extra checks to handle null locations safely.
 			// This *should* not be needed normally,
 			// because all nodes from SableCC have position info,
@@ -217,10 +261,10 @@ public class BException extends Exception {
 		}
 
 		/**
-		 * This method shouldn't be needed anymore - {@link BParser#setStartPosition(int, int)} can be used to offset all position info during parsing.
-		 * 
 		 * @return a copy of this position with all line numbers decremented by one
+		 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
 		 */
+		@Deprecated
 		public Location withLineOneOff() {
 			return new Location(this.getFilename(), this.getStartLine() - 1, this.getStartColumn(), this.getEndLine() - 1, this.getEndColumn());
 		}

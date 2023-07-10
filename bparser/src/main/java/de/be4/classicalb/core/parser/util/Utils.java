@@ -117,6 +117,7 @@ public final class Utils {
 	 * The name patterns for special definitions are <i>not</i> fixed or stable.
 	 * The exact names checked by this method <i>will</i> change in future releases
 	 * as new special definitions are added to ProB.
+	 * They are also declared in prob_prolog in bvisual2.pl and in main_prob_tcltk_gui.tcl
 	 * </p>
 	 * <p>
 	 * This method is currently not used by the B parser itself.
@@ -132,13 +133,14 @@ public final class Utils {
 			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
 			|| identifier.startsWith("ASSERT_CTL")
 			|| identifier.startsWith("ASSERT_LTL")
-			|| identifier.startsWith("CUSTOM_GRAPH_")
+			|| identifier.equals("CUSTOM_GRAPH") 
+			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
-			|| identifier.startsWith("SCOPE")
+			|| identifier.equals("SCOPE")
 			|| identifier.startsWith("scope_")
 			|| identifier.startsWith("SET_PREF_")
-			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS
+			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
 		;
 	}
 

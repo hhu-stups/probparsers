@@ -130,7 +130,7 @@ public class RulesLanguageExceptionTest {
 	public void testUnkownPredicateOperatorException() throws Exception {
 		AOperatorPredicate operator = new AOperatorPredicate(new TKwPredicateOperator("foo"),
 				new ArrayList<PExpression>());
-		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null, null);
+		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}
 
@@ -138,7 +138,7 @@ public class RulesLanguageExceptionTest {
 	public void testUnkownExpressionOperatorException() throws Exception {
 		AOperatorExpression operator = new AOperatorExpression(new TKwExpressionOperator("foo"),
 				new ArrayList<PExpression>());
-		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null, null);
+		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}
 

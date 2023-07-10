@@ -17,8 +17,6 @@ import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionUsageCheck;
 import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
-import de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck;
-import de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
@@ -70,12 +68,11 @@ public class BParser {
 	private List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
-	private File directory;
 
 	private int startLine;
 	private int startColumn;
 
-	private IDefinitionFileProvider contentProvider;
+	private IFileContentProvider contentProvider;
 
 	public static String getVersion() {
 		return buildProperties.getProperty("version");
@@ -117,14 +114,56 @@ public class BParser {
 		this.startColumn = column;
 	}
 
-	public IDefinitionFileProvider getContentProvider() {
-		return contentProvider;
+	/**
+	 * Get the currently configured {@link IFileContentProvider} that will/has been used to get the content of referenced definition files.
+	 * If you don't use {@link #setContentProvider(IFileContentProvider)} to set one yourself,
+	 * then calling {@link #parseFile(File)} or {@link #parseMachine(String)} will set up a default {@link CachingDefinitionFileProvider}.
+	 * 
+	 * @return the currently configured file content provider,
+	 *     or {@code null} if none has been set yet (automatically or manually)
+	 */
+	public IFileContentProvider getContentProvider() {
+		return this.contentProvider;
+	}
+
+	/**
+	 * Set a custom {@link IFileContentProvider} to be used to get the content of referenced definition files.
+	 * If you don't call this method,
+	 * then calling {@link #parseFile(File)} or {@link #parseMachine(String)} will set up a default {@link CachingDefinitionFileProvider}.
+	 * A useful alternative is {@link NoContentProvider},
+	 * which disables reading of external definition files.
+	 * 
+	 * @param contentProvider used to get the content of referenced files
+	 */
+	public void setContentProvider(IFileContentProvider contentProvider) {
+		this.contentProvider = contentProvider;
 	}
 
 	/**
 	 * Parses the input file.
 	 * 
-	 * @see #parse(String, boolean, IFileContentProvider)
+	 * @param machineFile the machine file to be parsed
+	 * @return the parsed AST
+	 * @throws BCompoundException if the file couldn't be read or parsed
+	 * @see #parseMachine(String)
+	 */
+	public Start parseFile(File machineFile) throws BCompoundException {
+		String content;
+		try {
+			content = Utils.readFile(machineFile);
+		} catch (IOException e) {
+			throw new BCompoundException(new BException(machineFile.getPath(), e));
+		}
+		return parseMachine(content, machineFile);
+	}
+
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
+	/**
+	 * Parses the input file.
+	 * 
+	 * @deprecated Use {@link #parseFile(File)} instead.
+	 * @see #parseMachine(String)
 	 * @param machineFile
 	 *            the machine file to be parsed
 	 * @param verbose
@@ -135,15 +174,21 @@ public class BParser {
 	 * @throws BCompoundException
 	 *             if the file cannot be parsed
 	 */
+	@Deprecated
 	public Start parseFile(final File machineFile, final boolean verbose) throws IOException, BCompoundException {
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
 		contentProvider = new CachingDefinitionFileProvider();
 		return parseFile(machineFile, verbose, contentProvider);
 	}
 
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
 	/**
 	 * Parses the input file.
 	 * 
-	 * @see #parse(String, boolean)
+	 * @deprecated Use {@link #parseFile(File)} and {@link #setContentProvider(IFileContentProvider)} instead.
+	 * @see #parseMachine(String)
 	 * @param machineFile
 	 *            the machine file to be parsed
 	 * @param verbose
@@ -156,14 +201,16 @@ public class BParser {
 	 * @throws BCompoundException
 	 *             if the file cannot be parsed
 	 */
+	@Deprecated
 	public Start parseFile(final File machineFile, final boolean verbose, final IFileContentProvider contentProvider)
 			throws IOException, BCompoundException {
-		this.directory = machineFile.getParentFile();
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
 		if (verbose) {
 			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
-		return parse(content, verbose, true, contentProvider);
+		return parseWithPreParsing(new StringReader(content), machineFile, contentProvider);
 	}
 
 	/**
@@ -181,7 +228,7 @@ public class BParser {
 	 */
 	public static Start parse(final String input) throws BCompoundException {
 		BParser parser = new BParser("String Input");
-		return parser.parse(input, false, true, new NoContentProvider());
+		return parser.parseMachine(input);
 	}
 
 	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
@@ -191,9 +238,7 @@ public class BParser {
 			// Decrease the start column by the size of the implicitly added prefix
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
-			return this.parse(theFormula, false, 
-			                  false, // pre-parsing is not required; there can be no DEFINITIONS inside
-			                  new NoContentProvider());
+			return this.parseWithoutPreParsing(new StringReader(theFormula));
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
@@ -219,6 +264,7 @@ public class BParser {
 		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
 	}
 
+	@Deprecated
 	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
 		final Reader reader = new StringReader(input);
 
@@ -267,43 +313,86 @@ public class BParser {
 		return ast;
 	}
 
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
 	/**
 	 * Like {@link #parse(String, boolean, IFileContentProvider)}, but with
 	 * {@link NoContentProvider} as last parameter, i.e., loading of referenced
 	 * files is not enabled.
 	 * 
-	 * Use {@link #parse(String, boolean, IFileContentProvider)} instead to be
-	 * able to control loading of referenced files.
-	 * 
+	 * @deprecated Use {@link #parseMachine(String)} instead.
+	 *     Note that this also enables loading of referenced files -
+	 *     use {@link #setContentProvider(IFileContentProvider)} to control this.
+	 *     The {@code debugOutput} parameter does nothing.
 	 * @param input
 	 *            the B machine as input string
-	 * @param debugOutput
-	 *            print debug information
+	 * @param debugOutput ignored
 	 * @return the AST node
 	 * @throws BCompoundException
 	 *             if the B machine cannot be parsed
 	 */
+	@Deprecated
 	public Start parse(final String input, final boolean debugOutput) throws BCompoundException {
-		return parse(input, debugOutput, true, new NoContentProvider());
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
+		return parse(input, debugOutput, new NoContentProvider());
 	}
 	
-	public Start parse(final String input, final boolean debugOutput, 
-	                   final boolean preparseNecessary) throws BCompoundException {
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @deprecated Use {@link #parseMachine(String)} instead.
+	 *     Note that this also enables loading of referenced files -
+	 *     use {@link #setContentProvider(IFileContentProvider)} to control this.
+	 *     The {@code debugOutput} parameter does nothing.
+	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
+	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
+	 *     that are not complete B machines and thus don't require pre-parsing.
+	 * @param input B machine source code
+	 * @param debugOutput ignored
+	 * @param preparseNecessary should pre-parsing be performed to detect DEFINITION types
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	@Deprecated
+	public Start parse(final String input, final boolean debugOutput, final boolean preparseNecessary) throws BCompoundException {
 		return parse(input, debugOutput, preparseNecessary, new NoContentProvider());
 	}
 	
-	public Start parse(final String input, final boolean debugOutput, 
-	                   final IFileContentProvider contentProvider) throws BCompoundException {
-	     return parse(input, debugOutput, true, contentProvider)  ;                 
+	// Don't delete this deprecated method too soon!
+	// It was one of the main parser APIs for a long time.
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @deprecated Use {@link #parseMachine(String)} and {@link #setContentProvider(IFileContentProvider)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
+	 * @param input B machine source code
+	 * @param debugOutput ignored
+	 * @param contentProvider A {@link IFileContentProvider} that is able to load content of referenced files during the parsing process.
+	 *     The content provider is used for referenced definition files for example.
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	@Deprecated
+	public Start parse(final String input, final boolean debugOutput, final IFileContentProvider contentProvider) throws BCompoundException {
+		// Don't delete this deprecated method too soon!
+		// It was one of the main parser APIs for a long time.
+		return parseWithPreParsing(new StringReader(input), this.getMachineFile(), contentProvider);
 	}
 
 	/**
 	 * Parses the input string.
 	 * 
+	 * @deprecated Use {@link #parseMachine(String)} and {@link #setContentProvider(IFileContentProvider)} instead.
+	 *     The {@code debugOutput} parameter does nothing.
+	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
+	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
+	 *     that are not complete B machines and thus don't require pre-parsing.
 	 * @param input
 	 *            The {@link String} to be parsed
-	 * @param debugOutput
-	 *            output debug messages on standard out?
+	 * @param debugOutput ignored
 	 * @param preparseNecessary
 	 *            should pre-parsing be performed to detect DEFINITION types
 	 * @param contentProvider
@@ -311,69 +400,27 @@ public class BParser {
 	 *            referenced files during the parsing process. The content
 	 *            provider is used for referenced definition files for example.
 	 * @return the root node of the AST
-	 * @throws BCompoundException
-	 *             The {@link BCompoundException} class stores all
-	 *             {@link BException}s occurred during the parsing process. The
-	 *             {@link BException} class stores the actual exception as
-	 *             delegate and forwards all method calls to it. So it is save
-	 *             for tools to just use this exception if they want to extract
-	 *             an error message. If the tools needs to extract additional
-	 *             information, such as a source code position or involved
-	 *             tokens respectively nodes, it needs to retrieve the delegate
-	 *             exception. The {@link BException} class offers a
-	 *             {@link BException#getCause()} method for this, which returns
-	 *             the delegate exception.
-	 *             <p>
-	 *             Internal exceptions:
-	 *             <ul>
-	 *             <li>{@link PreParseException}: This exception contains errors
-	 *             that occur during the preparsing. If possible it supplies a
-	 *             token, where the error occurred.</li>
-	 *             <li>{@link BLexerException}: If any error occurs in the
-	 *             generated or customized lexer a {@link LexerException} is
-	 *             thrown. Usually the lexer classes just throw a
-	 *             {@link LexerException}. But this class unfortunately does not
-	 *             contain any explicit information about the source code
-	 *             position where the error occurred. Using aspect-oriented
-	 *             programming we intercept the throwing of these exceptions to
-	 *             replace them by our own exception. In our own exception we
-	 *             provide the source code position of the last characters that
-	 *             were read from the input.</li>
-	 *             <li>{@link BParseException}: This exception is thrown in two
-	 *             situations. On the one hand if the parser throws a
-	 *             {@link ParserException} we convert it into a
-	 *             {@link BParseException}. On the other hand it can be thrown
-	 *             if any error is found during the AST transformations after
-	 *             the parser has finished.</li>
-	 *             <li>{@link CheckException}: If any problem occurs while
-	 *             performing semantic checks, a {@link CheckException} is
-	 *             thrown. We provide one or more nodes that are involved in the
-	 *             problem. For example, if we find duplicate machine clauses,
-	 *             we will list all occurrences in the exception.</li>
-	 *             </ul>
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
 	 */
-	public Start parse(final String input,
-	                   final boolean debugOutput,
-	                   final boolean preparseNecessary,
-	                   final IFileContentProvider contentProvider)
-			throws BCompoundException {
-		final Reader reader = new StringReader(input);
-		try {
-			/*
-			 * Pre-parsing: find and parse any referenced definition files (.def)
-			 * and determine the types of all definitions.
-			 * 
-			 * The definition types are used in the lexer in order to replace an
-			 * identifier token by a definition call token. This is required if
-			 * the definition is a predicate because an identifier can not be
-			 * parsed as a predicate. For example "... SELECT def THEN ... "
-			 * would yield to a parse error. The lexer will replace the
-			 * identifier token "def" by a TDefLiteralPredicate which will be
-			 * excepted by the parser
-			 */
-			 
-			final DefinitionTypes defTypes = preParsing(debugOutput, preparseNecessary, reader, contentProvider, directory);
+	@Deprecated
+	public Start parse(
+		final String input,
+		final boolean debugOutput,
+		final boolean preparseNecessary,
+		final IFileContentProvider contentProvider
+	) throws BCompoundException {
+		Reader reader = new StringReader(input);
+		if (preparseNecessary) {
+			return parseWithPreParsing(reader, this.getMachineFile(), contentProvider);
+		} else {
+			return parseWithoutPreParsing(reader);
+		}
+	}
 
+	private Start parseInternal(Reader reader, File machineFile, DefinitionTypes defTypes) throws BCompoundException {
+		String machineFilePath = machineFile == null ? null : machineFile.getPath();
+		try {
 			/*
 			 * Main parser
 			 */
@@ -392,20 +439,20 @@ public class BParser {
 			collector.collectDefinitions(rootNode);
 			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
 			for (CheckException checkException : definitionsCollectorExceptions) {
-				bExceptionList.add(new BException(getFileName(), checkException));
+				bExceptionList.add(new BException(machineFilePath, checkException));
 			}
 
 			// perfom AST transformations that can't be done by SableCC
 			try {
 				applyAstTransformations(rootNode);
 			} catch (CheckException e) {
-				throw new BCompoundException(new BException(getFileName(), e));
+				throw new BCompoundException(new BException(machineFilePath, e));
 			}
 
 			// perform some semantic checks which are not done in the parser
 			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
 			for (CheckException checkException : checkExceptions) {
-				bExceptionList.add(new BException(getFileName(), checkException));
+				bExceptionList.add(new BException(machineFilePath, checkException));
 			}
 			if (!bExceptionList.isEmpty()) {
 				throw new BCompoundException(bExceptionList);
@@ -414,22 +461,74 @@ public class BParser {
 			return rootNode;
 
 		} catch (final BLexerException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final BParseException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final IOException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
-		} catch (final PreParseException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
 			final String msg = e.getLocalizedMessage();
 			final String realMsg = e.getRealMsg();
-			throw new BCompoundException(new BException(getFileName(), new BParseException(token, msg, realMsg, e)));
-		} catch (BException e) {
-			throw new BCompoundException(e);
+			throw new BCompoundException(new BException(machineFilePath, new BParseException(token, msg, realMsg, e)));
 		} catch (LexerException e) {
-			throw new BCompoundException(new BException(getFileName(), e));
+			throw new BCompoundException(new BException(machineFilePath, e));
+		}
+	}
+
+	private Start parseWithPreParsing(Reader reader, File machineFile, IFileContentProvider provider) throws BCompoundException {
+		String machineFilePath = machineFile == null ? null : machineFile.getPath();
+		DefinitionTypes defTypes;
+		try {
+			defTypes = preParsing(reader, machineFile, provider);
+		} catch (IOException e) {
+			throw new BCompoundException(new BException(machineFilePath, e));
+		} catch (PreParseException e) {
+			throw new BCompoundException(new BException(machineFilePath, e));
+		}
+		return parseInternal(reader, machineFile, defTypes);
+	}
+
+	private Start parseWithoutPreParsing(Reader reader) throws BCompoundException {
+		return parseInternal(reader, null, new DefinitionTypes(definitions.getTypes()));
+	}
+
+	/**
+	 * Parses a complete B machine from a string.
+	 * {@code machineFile} indicates what file (if any) the source code string belongs to.
+	 * This is used to resolve definition files and displayed in error messages.
+	 * 
+	 * @param input B machine source code
+	 * @param machineFile file that the source code belongs to,
+	 *     or {@code null} to use the file name passed to the {@link #BParser(String)} constructor
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	Start parseMachine(String input, File machineFile) throws BCompoundException {
+		if (this.contentProvider == null) {
+			this.contentProvider = new CachingDefinitionFileProvider();
+		}
+		return parseWithPreParsing(new StringReader(input), machineFile != null ? machineFile : this.getMachineFile(), this.contentProvider);
+	}
+
+	/**
+	 * Parses a complete B machine from a string.
+	 * 
+	 * @param input B machine source code
+	 * @return the root node of the AST
+	 * @throws BCompoundException if the B code could not be parsed
+	 *     (see {@link BException} for details)
+	 */
+	public Start parseMachine(String input) throws BCompoundException {
+		return this.parseMachine(input, null);
+	}
+
+	private File getMachineFile() {
+		if (this.fileName == null) {
+			return null;
+		} else {
+			return new File(this.fileName);
 		}
 	}
 
@@ -449,19 +548,36 @@ public class BParser {
 		}
 	}
 
-	private DefinitionTypes preParsing(final boolean debugOutput, final boolean preparseNecessary,
-	        final Reader reader,
-			final IFileContentProvider contentProvider, File directory)
-					throws IOException, PreParseException, BException, BCompoundException {
+	/**
+	 * <p>
+	 * Pre-parsing: find and parse any referenced definition files (.def)
+	 * and determine the types of all definitions.
+	 * This step is only necessary when parsing a full machine,
+	 * not just a formula, substitution, etc.
+	 * </p>
+	 * <p>
+	 * The definition types are used in the lexer in order to replace an
+	 * identifier token by a definition call token. This is required if
+	 * the definition is a predicate because an identifier can not be
+	 * parsed as a predicate. For example "... SELECT def THEN ... "
+	 * would yield to a parse error. The lexer will replace the
+	 * identifier token "def" by a TDefLiteralPredicate which will be
+	 * excepted by the parser
+	 * </p>
+	 */
+	private DefinitionTypes preParsing(
+		final Reader reader,
+		final File machineFile,
+		final IFileContentProvider contentProvider
+	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
-				contentProvider, doneDefFiles, this.fileName, directory, parseOptions, this.definitions);
-		if(preparseNecessary) {
-		    // scan for additional new definitions
-			preParser.setDebugOutput(debugOutput);
-			preParser.setStartPosition(this.startLine, this.startColumn);
-			preParser.parse();
-			reader.reset();
-		}
+			machineFile,
+			contentProvider, doneDefFiles, parseOptions, this.definitions
+		);
+		// scan for additional new definitions
+		preParser.setStartPosition(this.startLine, this.startColumn);
+		preParser.parse();
+		reader.reset();
 		return preParser.getDefinitionTypes();
 	}
 
@@ -479,8 +595,12 @@ public class BParser {
 
 	private List<CheckException> performSemanticChecks(final Start rootNode) {
 		final List<CheckException> list = new ArrayList<>();
+		@SuppressWarnings("deprecation")
+		SemanticCheck primedIdentifierCheck = new de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck();
+		@SuppressWarnings("deprecation")
+		SemanticCheck proverExpressionsCheck = new de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
-				new DefinitionUsageCheck(getDefinitions()), new PrimedIdentifierCheck(), new ProverExpressionsCheck(), new RefinedOperationCheck() };
+				new DefinitionUsageCheck(getDefinitions()), primedIdentifierCheck, proverExpressionsCheck, new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {
@@ -514,9 +634,5 @@ public class BParser {
 
 	public void setParseOptions(ParseOptions options) {
 		this.parseOptions = options;
-	}
-
-	public void setDirectory(final File directory) {
-		this.directory = directory;
 	}
 }

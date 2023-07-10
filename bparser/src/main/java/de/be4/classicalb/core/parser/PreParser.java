@@ -19,12 +19,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
+import de.be4.classicalb.core.parser.node.ADefinitionPredicate;
+import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -32,6 +35,8 @@ import de.be4.classicalb.core.parser.node.APredicateParseUnit;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PParseUnit;
+import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
+import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
@@ -40,30 +45,56 @@ import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
 
+/**
+ * <p>
+ * Pre-parsing: find and parse any referenced definition files (.def)
+ * and determine the types of all definitions.
+ * This is necessary because the parser handles expressions, predicates, and substitutions separately,
+ * so different token/node types are needed for definition identifiers depending on whether they are
+ * expressions ({@link TIdentifierLiteral}/{@link AIdentifierExpression}),
+ * predicates ({@link TDefLiteralPredicate}/{@link ADefinitionPredicate}),
+ * or substitutions ({@link TDefLiteralSubstitution}/{@link ADefinitionSubstitution}).
+ * The PreParser collects all needed type information into {@link DefinitionTypes},
+ * which is used by {@link BLexer} to convert all identifiers to the appropriate token/node types.
+ * </p>
+ * <p>
+ * This is an annoying mess and nobody wants it,
+ * but it's more or less necessary with the current parser architecture.
+ * We have already tried to avoid/remove this step,
+ * but haven't succeeded so far.
+ * If you try to remove the PreParser,
+ * please update the following counters afterwards:
+ * </p>
+ * <p>
+ * 1 person has tried 4 times to remove the PreParser.
+ * </p>
+ * 
+ * @see BLexer#replaceDefTokens()
+ * @see BParser#preParsing(Reader, File, IFileContentProvider)
+ * @see DefinitionCollector
+ * @see DefinitionPreCollector
+ */
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
-	private boolean debugOutput = false;
-
+	private final File modelFile;
 	private final DefinitionTypes definitionTypes;
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
 	private final List<String> doneDefFiles;
-	private final String modelFileName;
-	private final File directory;
 
 	private int startLine;
 	private int startColumn;
 
-	public PreParser(final PushbackReader pushbackReader, final IFileContentProvider contentProvider,
-			final List<String> doneDefFiles, final String modelFileName, final File directory,
+	public PreParser(PushbackReader pushbackReader, File modelFile,
+			IFileContentProvider contentProvider,
+			List<String> doneDefFiles,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
+		this.modelFile = modelFile;
 		this.contentProvider = contentProvider;
 		this.doneDefFiles = doneDefFiles;
-		this.modelFileName = modelFileName;
-		this.directory = directory;
 		this.parseOptions = parseOptions;
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
@@ -73,16 +104,12 @@ public class PreParser {
 		this.startColumn = 1;
 	}
 
-	public void setDebugOutput(final boolean debugOutput) {
-		this.debugOutput = debugOutput;
-	}
-
 	public void setStartPosition(final int line, final int column) {
 		this.startLine = line;
 		this.startColumn = column;
 	}
 
-	public void parse() throws PreParseException, IOException, BException, BCompoundException {
+	public void parse() throws PreParseException, IOException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setPosition(this.startLine, this.startColumn);
 
@@ -116,7 +143,7 @@ public class PreParser {
 	}
 
 	private void evaluateDefinitionFiles(final List<Token> list)
-			throws PreParseException, BException, BCompoundException {
+			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
 		if (contentProvider instanceof IDefinitionFileProvider) {
@@ -125,10 +152,10 @@ public class PreParser {
 
 		for (final Token fileNameToken : list) {
 			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
+			// Note, that the fileName could be a relative path, e.g.
+			// ./foo/bar/defs.def
+			final String fileName = fileNameToken.getText();
 			try {
-				// Note, that the fileName could be a relative path, e.g.
-				// ./foo/bar/defs.def
-				final String fileName = fileNameToken.getText();
 				if (doneDefFiles.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
 					for (String string : doneDefFiles) {
@@ -144,15 +171,14 @@ public class PreParser {
 					definitions = cache.getDefinitions(fileName);
 				} else {
 					newDoneList.add(fileName);
+					File directory = modelFile == null ? null : modelFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
-					final BParser parser = new BParser(fileName, parseOptions);
 					final File file = contentProvider.getFile(directory, fileName);
-					if (file != null) {
-						parser.setDirectory(file.getParentFile());
-					}
+					final BParser parser = new BParser(fileName, parseOptions);
+					parser.setContentProvider(contentProvider);
 					parser.setDoneDefFiles(newDoneList);
 					parser.setDefinitions(new Definitions(file));
-					parser.parse(content, debugOutput, contentProvider);
+					parser.parseMachine(content, file);
 					definitions = parser.getDefinitions();
 					if (cache != null) {
 						cache.storeDefinition(fileName, definitions);
@@ -162,7 +188,8 @@ public class PreParser {
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
-			} finally {
+			} catch (BCompoundException e) {
+				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, fileNameToken)));
 			}
 		}
 	}
@@ -213,10 +240,11 @@ public class PreParser {
 			final Token defRhs = definitions.get(definition);
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
-				throw new PreParseException(definitionType.errorMessage + " in file: " + modelFileName);
-				// throw new BParseException(definitionType.errorToken,
-				// definitionType.errorMessage + " in file: "
-				// + modelFileName);
+				String message = definitionType.errorMessage;
+				if (modelFile != null) {
+					message += " in file: " + modelFile;
+				}
+				throw new PreParseException(message);
 			} else {
 				// fall back message
 				throw new PreParseException(definition, "[" + definition.getLine() + "," + definition.getPos()
@@ -361,6 +389,23 @@ public class PreParser {
 		}
 	}
 
+	/**
+	 * Try to determine the abstract type of the right-hand side of a definition,
+	 * i. e. whether it's an expression, a predicate, or a substitution.
+	 * If the right-hand side references other definitions,
+	 * it may not be possible to determine this definition's type yet
+	 * if the types of the other definitions aren't known yet.
+	 * For such cases,
+	 * {@link #evaluateTypes(List, Map)} calls this method repeatedly until the type can be successfully determined.
+	 * 
+	 * @param definition the definition name token
+	 * @param rhsToken the right-hand side of the definition (as a single token, merged by the {@link PreLexer})
+	 * @param untypedDefinitions names of all definitions whose types haven't been determined yet
+	 * @return the type of the definition's right-hand side, or error information if the type cannot be determined yet
+	 *     (but it's expected that the type can be determined later, once some other definitions' types are known)
+	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
+	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
+	 */
 	private DefinitionType determineType(final Token definition, final Token rhsToken,
 			final Set<String> untypedDefinitions) throws PreParseException {
 

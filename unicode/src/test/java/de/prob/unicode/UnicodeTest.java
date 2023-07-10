@@ -35,7 +35,23 @@ public class UnicodeTest {
 
 	@Test
 	public void testQuotes() {
-		assertEquals("\"test\"", UnicodeTranslator.toUnicode("\"test\""));
+		for (String s : new String[] {
+			"\"test\"",
+			"\"ab.c\"",
+			"\"#unicode\"",
+			"'''#oneline'''",
+			"'''#multi\n#line'''",
+			"'''qu'ot''es'''",
+			"`#backquotes`",
+		}) {
+			assertEquals(s, UnicodeTranslator.toAscii(s));
+			assertEquals(s, UnicodeTranslator.toUnicode(s));
+		}
+		
+		assertEquals("\\text{\"test\"}", UnicodeTranslator.toLatex("\"test\""));
+		assertEquals("\\text{\"#unicode\"}", UnicodeTranslator.toLatex("\"#unicode\""));
+		assertEquals("\\text{'''#oneline'''}", UnicodeTranslator.toLatex("'''#oneline'''"));
+		assertEquals("\\mathit{\\text{`}\\#backquotes\\text{`}}", UnicodeTranslator.toLatex("`#backquotes`"));
 	}
 
 	@Test

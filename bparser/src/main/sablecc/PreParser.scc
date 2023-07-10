@@ -4,23 +4,11 @@ Package de.be4.classicalb.core.preparser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  line_comment_start = '//';
-  comment_start = '/*';
-  comment_end = '*/';
-
-  underscore = '_';
-  semicolon = ';';
-  star = '*';
-  slash = '/';
-  hash = '#';
-  double_quotation = '"';
   triple_quote = 39 39 39;
   single_quate = 39;
 
   lf = 10;
   cr = 13;
-  tab = 8;
-  space = 32;
 
   line_break = [lf + cr];
 
@@ -94,16 +82,15 @@ Helpers
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 
-  all_chars_without_quote_and_newline = [[all_chars - double_quotation] - line_break ];
-  all_chars_without_quote_newline_slash = [[[all_chars - double_quotation] - line_break ] - '\'];
+  all_chars_without_quote_and_newline = [[all_chars - '"'] - line_break ];
+  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break ] - '\'];
   all_chars_without_newline = [all_chars - line_break ];
-  string_literal = double_quotation (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* double_quotation;
+  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
 
-  word_chars = [[[[[all_chars - layout_char] - semicolon] - '('] - ')'] - slash];
-  comment_char = [[all_chars - star] - slash];
+  word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
   abstract_constants = 'ABSTRACT_CONSTANTS';
   abstract_variables = 'ABSTRACT_VARIABLES';
@@ -132,9 +119,8 @@ Helpers
   values = 'VALUES';
   variables = 'VARIABLES';
 
-  back_quote = '`';
-  all_chars_without_back_quote_newline_slash = [[[all_chars - back_quote] - line_break] - '\'];
-  quoted_identifier_literal = back_quote (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* back_quote; // backquote to generate identifiers with special symbols or which clash with keywords
+  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
+  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
 
 
   safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':' |
@@ -151,23 +137,33 @@ States
   definitions_rhs,
   definition_file,
   no_definitions,
-  comment,
-  multiline_string_state;
+  // Multiline constructs (block comments, multiline strings) have their own lexer states
+  // to provide better errors when the closing delimiter is missing.
+  // If e. g. block comments were parsed as a single token,
+  // then a long unclosed block comment would cause a pushback buffer overflow:
+  // the lexer first tries to lex the entire remaining text as a block comment,
+  // but once EOF is reached,
+  // it tries to backtrack all the way to the start of the comment.
+  // This is not an issue for line comments,
+  // because EOF is a valid line comment terminator.
+  block_comment,
+  multiline_string;
 
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 
 Tokens
-  {start->normal, normal, definitions, definitions_rhs} comment = comment_start; // switch to comment state is done in PreLexer.java
-  {comment} comment_end = comment_end; // switch back to previous state is done in PreLexer.java
-  {comment} comment_content = all_chars [[[all_chars - '*'] - '/'] - line_break]*;
+  {start->normal, normal, definitions, definitions_rhs} comment = '/*'; // switch to block_comment state is done in PreLexer.java
+  {block_comment} comment_end = '*/'; // switch back to previous state is done in PreLexer.java
+  {block_comment} comment_body = [all_chars - '*']*;
+  {block_comment} star = '*';
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
-  {multiline_string_state} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
-  {multiline_string_state} multiline_string_content = multiline_string_literal;
+  {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
+  {multiline_string} multiline_string_content = multiline_string_literal;
 
-  {start -> normal, normal, definitions, definitions_rhs} line_comment = line_comment_start [all_chars - line_break]* line_break?;
+  {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {start -> definitions, normal -> definitions} definitions = 'DEFINITIONS';
 
@@ -181,48 +177,44 @@ Tokens
 
   {start -> normal, normal, definitions -> normal} end_machine = end;
 
-  {start} kw_definitions = '#DEFINITIONS';
-  {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION' ; // what about #EXPRESSION.(EXPRESSION=1)
+  {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
   {no_definitions} no_def_something = all_chars*;
 
-  {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
+  {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
   {definitions, definitions_rhs} left_par = '(';
   {definitions, definitions_rhs} right_par = ')';
-  {definitions, definitions_rhs} slash = slash;
+  {definitions, definitions_rhs} slash = '/';
   {definitions} comma = ',';
 
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
-  {definitions_rhs} rhs_body = [word_chars - double_quotation] | string_literal;
+  {definitions_rhs} rhs_body = [word_chars - '"'] | string_literal;
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
   {definitions_rhs} end_nesting = end;
-  {definitions_rhs} rhs_identifier = letter (letter | digit | underscore)*; // lex identifiers as complete words to ignore keywords within identifiers
-  {definitions, definitions_rhs} semicolon = semicolon; // returning to state definitions is done by PreLexer
+  {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
+  {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
-  {definitions -> definition_file, definition_file -> definitions} double_quotation = double_quotation;
+  {definitions -> definition_file, definition_file -> definitions} double_quotation = '"';
   {definition_file} filename = all_chars_without_quote_and_newline*;
   //{definitions} filename= string_literal;
 
   {definitions, definitions_rhs} white_space = layout_char+;
 
   {start -> normal, normal} some_value = // could actually be renamed to some_identifier
-    (letter (letter | digit | underscore)*)
+    (letter (letter | digit | '_')*)
      // if we allow whitespace after identifiers, maximal munch rule means Lexer will miss DEFINITIONS token
-    |
-    ('#' letter (letter)* (tab|space)* '.')  // something like #DEFINITIONS followed by a .
-     // not perfect rule; does not allow new line or comments; ideally we should only accept kw_.... at beginning
    ;
 
   // we want to detect things like { "abc" |-> 10, "ef" |-> 20, ... } as a single chunk
 
-  // other transition rules in normal mode we need to be careful about: line_comment_start
+  // other transition rules in normal mode we need to be careful about: line_comment
   // something could in principle match more than line_comment, but as we match only safe characters
   // we will not miss start of DEFINITIONS or '/' or '"' or ''' or ` (backquote) or machine clause
   // we ar thus safe to skip over any char that is not a letter, a / or a " or '
   {start -> normal, normal} something =
-     //[[all_chars - double_quotation] - layout_char] // could be backslash !
-     ( [all_chars - double_quotation] // could be backslash !
+     //[[all_chars - '"'] - layout_char] // could be backslash !
+     ( [all_chars - '"'] // could be backslash !
        | string_literal
        | quoted_identifier_literal
       )
@@ -239,7 +231,7 @@ Tokens
 Ignored Tokens
   white_space, other_clause_begin, end_machine,
   some_value, something,
-  comment, comment_content, comment_end, line_comment,
+  comment, comment_body, star, comment_end, line_comment,
   multiline_string_start, multiline_string_end, multiline_string_content;
 
 /*******************************************************************
@@ -249,16 +241,8 @@ Productions
 
 parse_unit {-> parse_unit} =
   {defs_clause} [def_clause]:def_clause {-> New parse_unit.defs([def_clause.definition])} |
-  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
   {something} kw_prefix no_def_something {-> New parse_unit.no_defs()} |
   {nothing} {-> New parse_unit.no_defs()};
-
-/*
-parse_unit {-> parse_unit} =
-  {defs_clause} [def_clause]:def_clause? {-> New parse_unit.defs([def_clause.definition])} |
-  {kw_definitions} kw_definitions [list]:def_clause {-> New parse_unit.defs([list.definition])} |
-  {no_defs} kw_prefix no_def_something {-> New parse_unit.no_defs()};
-*/
 
 def_clause {-> definition*} = definitions [list]:definition_list semicolon? {-> [list.definition]};
 

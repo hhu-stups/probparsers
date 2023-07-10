@@ -3,6 +3,7 @@ package util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.stream.Stream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -22,11 +23,21 @@ import org.junit.Assert;
 import org.junit.function.ThrowingRunnable;
 
 public class Helpers {
+	public static File[] getMachines(String path) {
+		final File dir;
+		try {
+			dir = new File(Helpers.class.getResource("/" + path).toURI());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".def").anyMatch(name::endsWith));
+	}
+
 	public static String getPrettyPrint(final String testMachine) {
 		final BParser parser = new BParser("testcase");
 		Start startNode;
 		try {
-			startNode = parser.parse(testMachine, false);
+			startNode = parser.parseMachine(testMachine);
 		} catch (BCompoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -74,7 +85,7 @@ public class Helpers {
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
-		Start start = parser.parse(input, false);
+		Start start = parser.parseMachine(input);
 		return getTreeAsPrologTerm(start);
 	}
 

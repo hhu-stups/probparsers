@@ -1,6 +1,8 @@
 plugins {
-    // SableCC plugin is only applied in the subprojects that actually need it.
+    // The plugins are declared as .apply(false) here
+    // and only applied in the subprojects that actually need them.
     id("de.hhu.stups.sablecc").version("1.0.0").apply(false)
+    id("org.graalvm.buildtools.native").version("0.9.21").apply(false)
 }
 
 apply plugin: 'java-library'
@@ -9,14 +11,14 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.12.4'
+project.version = '2.12.5'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 ext {
-    sableCCVersion = '3.4.1'
+    sableCCVersion = '3.5.0'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
@@ -25,7 +27,22 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    
+    apply plugin: 'org.graalvm.buildtools.native'
+
+    graalvmNative {
+        binaries{
+            all {
+                resources.autodetect()
+                // see https://build-native-java-apps.cc/expert-options/21/
+                // the stack size must be given in bytes
+                //override at runtime with -XX:StackSize=... 
+                buildArgs.add('-R:StackSize=8388608')
+            }
+        }
+        
+        toolchainDetection = false
+    }
+
     group = rootProject.group
     version = rootProject.version
     

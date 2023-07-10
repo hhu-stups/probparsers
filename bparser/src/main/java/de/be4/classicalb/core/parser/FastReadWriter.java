@@ -14,8 +14,6 @@ import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
 
-// In contrast to FastReadTransformer this class writes directly to an output stream
-// instead of buffering the output data in memory first.
 // writes Prolog terms in SICStus (undocumented) fastrw format
 // generates same output as fast_write(Stream,Term) after use_module(library(fastrw)).
 // and can be read using fast_read(Stream,Term)

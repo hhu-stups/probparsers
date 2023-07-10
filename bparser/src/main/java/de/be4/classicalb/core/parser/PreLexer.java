@@ -21,7 +21,6 @@ import de.be4.classicalb.core.preparser.node.TSemicolon;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.node.TSomeValue;
 import de.be4.classicalb.core.preparser.node.TSomething;
-//import de.be4.classicalb.core.preparser.node.TCommentContent;
 
 public class PreLexer extends Lexer {
 
@@ -80,12 +79,7 @@ public class PreLexer extends Lexer {
 	
 	// small debugging utility:
 	private void printState() {
-		if (state.equals(State.DEFINITIONS_RHS)) System.out.println("DEFINITIONS_RHS");
-		if (state.equals(State.COMMENT)) System.out.println("State.COMMENT");
-		if (state.equals(State.DEFINITIONS)) System.out.println("DEFINITIONS");
-		if (state.equals(State.NO_DEFINITIONS)) System.out.println("NO_DEFINITIONS");
-		if (state.equals(State.MULTILINE_STRING_STATE)) System.out.println("MULTILINE_STRING_STATE");
-		if (state.equals(State.NORMAL)) System.out.println("NORMAL");
+		System.out.println(state);
 		if (token != null) {
 			System.out.println("Token = " + token + " at line = " + token.getLine() + ", col = " + token.getPos());
 		}
@@ -131,7 +125,10 @@ public class PreLexer extends Lexer {
 	}
 
 	private State getNextState() {
-		if (token instanceof TOtherClauseBegin || token instanceof EOF) {
+		// Recognize clause beginning tokens only outside nesting,
+		// because e. g. INVARIANT may also appear in a WHILE loop,
+		// where it shouldn't signal the end of the DEFINITIONS block.
+		if ((otherNestingLevel == 0 && token instanceof TOtherClauseBegin) || token instanceof EOF) {
 			return State.NORMAL;
 		}
 
@@ -183,7 +180,7 @@ public class PreLexer extends Lexer {
 		// switch to special COMMENT state and back
 		if (token instanceof TComment) {
 			previousState = state;
-			state = State.COMMENT;
+			state = State.BLOCK_COMMENT;
 		} else if (token instanceof TCommentEnd) {
 			state = previousState;
 			previousState = null;
@@ -194,7 +191,7 @@ public class PreLexer extends Lexer {
 		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
-			state = State.MULTILINE_STRING_STATE;
+			state = State.MULTILINE_STRING;
 		} else if (token instanceof TMultilineStringEnd) {
 			state = previousState;
 			previousState = null;
@@ -202,15 +199,12 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void optimizeToken() {
-		if (
-			token instanceof TIdentifierLiteral
-			|| token instanceof TSemicolon
-		) {
+		if (token instanceof TIdentifierLiteral) {
 			token.setText(token.getText().intern());
 		} else if (
 			token instanceof TSomeValue
 			|| token instanceof TSomething
-			// || token instanceof TCommentContent // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
+			// || token instanceof TCommentBody // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
 			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
 		) {
 			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer

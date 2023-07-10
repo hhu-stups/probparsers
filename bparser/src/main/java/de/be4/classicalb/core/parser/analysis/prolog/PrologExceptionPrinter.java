@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -55,21 +54,6 @@ public final class PrologExceptionPrinter {
 		pto.flush();
 	}
 
-	/**
-	 * @deprecated The {@code useIndentation} parameter almost never has an effect
-	 *     (use {@link PrologTermOutput} if you really need indentation).
-	 *     The {@code lineOneOff} parameter should no longer be needed in most cases
-	 *     ({@link BParser} methods that internally add a kind prefix now return correct error locations)
-	 *     and if necessary can be replaced with {@link BParser#setStartPosition(int, int)} or {@link BCompoundException#withLinesOneOff()}.
-	 */
-	@Deprecated
-	public static void printException(final OutputStream out, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {
-		IPrologTermOutput pto = new PrologTermOutput(out, useIndentation);
-		printException(pto, e, useIndentation, lineOneOff);
-		pto.fullstop();
-		pto.flush();
-	}
-
 	public static void printException(final IPrologTermOutput pto, final BCompoundException e) {
 		if (e.getBExceptions().size() > 1) {
 			pto.openTerm("compound_exception", true);
@@ -85,17 +69,6 @@ public final class PrologExceptionPrinter {
 		} else {
 			throw new IllegalStateException("Empty compoundException.");
 		}
-	}
-
-	/**
-	 * @deprecated The {@code useIndentation} parameter has no effect anymore.
-	 *     The {@code lineOneOff} parameter should no longer be needed in most cases
-	 *     ({@link BParser} methods that internally add a kind prefix now return correct error locations)
-	 *     and if necessary can be replaced with {@link BParser#setStartPosition(int, int)} or {@link BCompoundException#withLinesOneOff()}.
-	 */
-	@Deprecated
-	public static void printException(final IPrologTermOutput pto, final BCompoundException e, boolean useIndentation, boolean lineOneOff) {
-		printException(pto, lineOneOff ? e.withLinesOneOff() : e);
 	}
 
 	public static void printBException(IPrologTermOutput pto, final BException e) {

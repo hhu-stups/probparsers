@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.EventBParseException;
+import de.be4.eventb.core.parser.EventBParser;
 import de.be4.eventb.core.parser.lexer.LexerException;
 import de.be4.eventb.core.parser.node.AEvent;
 import de.be4.eventb.core.parser.node.AMachineParseUnit;
@@ -21,28 +22,25 @@ import de.be4.eventb.core.parser.node.PWitness;
 import de.be4.eventb.core.parser.node.Start;
 import de.be4.eventb.core.parser.node.TAt;
 
-public class StructureTest extends AbstractTest {
+public class StructureTest {
 	@Test
 	public void testEventStructure() throws Exception {
-		parseInput(
-				"machine Test\nevents\n\nconvergent event test //comment\nend\nend",
-				false);
+		new EventBParser().parse("machine Test\nevents\n\nconvergent event test //comment\nend\nend");
 	}
 
 	@Test
 	public void testOptionalConvergence() throws Exception {
-		parseInput("machine Test\nevents\n\nevent test //comment\nend\nend",
-				false);
+		new EventBParser().parse("machine Test\nevents\n\nevent test //comment\nend\nend");
 	}
 
 	@Test
 	public void testContextExtends() throws Exception {
-		parseInput("context Context2 extends Context1 end", false);
+		new EventBParser().parse("context Context2 extends Context1 end");
 	}
 
 	@Test
 	public void testIdentifierTick() throws Exception {
-		final Start root = parseInput("machine Mac variables x' y end", false);
+		final Start root = new EventBParser().parse("machine Mac variables x' y end");
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) root
 				.getPParseUnit();
 
@@ -55,9 +53,7 @@ public class StructureTest extends AbstractTest {
 
 	@Test
 	public void testWitnessTick() throws Exception {
-		final Start root = parseInput(
-				"machine WitnessTick\nevents\nevent Eve\nwith\n@x' x' :: NAT\nend\nend",
-				false);
+		final Start root = new EventBParser().parse("machine WitnessTick\nevents\nevent Eve\nwith\n@x' x' :: NAT\nend\nend");
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) root
 				.getPParseUnit();
 
@@ -73,16 +69,13 @@ public class StructureTest extends AbstractTest {
 
 	@Test
 	public void testUnicodeIdentifiers1() throws Exception {
-		parseInput(
-				"context UnicodeIdentifiers1 constants \u00dcber \u00E6 m\u00e4h end",
-				false);
+		new EventBParser().parse("context UnicodeIdentifiers1 constants \u00dcber \u00E6 m\u00e4h end");
 	}
 
 	@Test
 	public void testUnicodeIdentifiers2() {
 		try {
-			parseInput("context UnicodeIdentifiers2 constants \u00dcber @ end",
-					false);
+			new EventBParser().parse("context UnicodeIdentifiers2 constants \u00dcber @ end");
 			fail("Expecting exception");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();
@@ -101,8 +94,7 @@ public class StructureTest extends AbstractTest {
 	@Test(expected = LexerException.class)
 	public void testUnicodeIdentifiers3() throws Exception {
 		try {
-			parseInput("context UnicodeIdentifiers3 constants Über ' end",
-					false);
+			new EventBParser().parse("context UnicodeIdentifiers3 constants Über ' end");
 			fail("Expecting exception");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();
@@ -113,7 +105,7 @@ public class StructureTest extends AbstractTest {
 	@Test
 	public void testMissingAtMessage() {
 		try {
-			parseInput("context MissingAtMessage axioms blub x:=1 end", false);
+			new EventBParser().parse("context MissingAtMessage axioms blub x:=1 end");
 			fail("Expecting exception");
 		} catch (final BException e) {
 			final Exception cause = e.getCause();

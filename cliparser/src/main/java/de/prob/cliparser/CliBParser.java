@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.FastReadWriter;
@@ -34,9 +35,9 @@ import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
+import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
@@ -52,6 +53,7 @@ public class CliBParser {
 
 	private static final String CLI_SWITCH_VERBOSE = "-v";
 	private static final String CLI_SWITCH_VERSION = "-version";
+	private static final String CLI_SWITCH_PRINT_STACK_SIZE = "-printstacksize";
 	private static final String CLI_SWITCH_HELP = "-h";
 	private static final String CLI_SWITCH_HELP2 = "-help";
 	private static final String CLI_SWITCH_HELP3 = "--help";
@@ -69,7 +71,39 @@ public class CliBParser {
 	private static Socket socket;
 	private static PrintWriter socketWriter;
 
-	public static void main(final String[] args) throws IOException {
+
+	private static int getStackSize(int acc){
+		try {
+			return CliBParser.getStackSize(acc+1);
+		} catch (final StackOverflowError e) {
+			return acc;
+		}
+	}
+
+	/**
+	 * Main method wrapper.
+	 * This is necessary because of <a href="https://github.com/oracle/graal/issues/3398">a bug with graalvm and musl</a>.
+	 * Workaround inspired by: <a href="https://github.com/babashka/babashka/issues/831">babashka/babashka#831</a>
+	 */
+	public static void main(final String[] args) throws InterruptedException, IOException {
+		AtomicReference<IOException> maybeException = new AtomicReference<>(null);
+		Thread t = new Thread(()->{
+			try {
+				CliBParser.mainImpl(args);
+			} catch (IOException e) {
+				maybeException.set(e);
+			}
+		});
+		t.start();
+		t.join();
+		if(maybeException.get()!=null)throw maybeException.get();
+	}
+
+	/**
+	 * Actual main method
+	 */
+	public static void mainImpl(final String[] args) throws IOException {
+
 		// System.out.println("Ready. Press enter");
 		// System.in.read();
 		// System.out.println("Starting");
@@ -86,6 +120,10 @@ public class CliBParser {
 			System.out.println(String.format("Version:    %s", BParser.getVersion()));
 			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
 			System.exit(0);
+		}
+
+		if(options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE)) {
+			System.out.format("Local stack size:\t%d\n", CliBParser.getStackSize(0));
 		}
 
 		final String[] arguments = options.getRemainingOptions();
@@ -120,6 +158,7 @@ public class CliBParser {
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
+		behaviour.setPrintLocalStackSize(options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE));
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
@@ -165,6 +204,8 @@ public class CliBParser {
 				return String.valueOf(behaviour.getStartLineNumber());
 			case "startColumnNumber":
 				return String.valueOf(behaviour.getStartColumnNumber());
+			case "printstacksize":
+				return String.valueOf(behaviour.isPrintLocalStackSize());
 			default:
 				// Unknown/unsupported option
 				return null;
@@ -197,6 +238,9 @@ public class CliBParser {
 			case "startColumnNumber":
 				behaviour.setStartColumnNumber(Integer.parseInt(value));
 				break;
+			case "printstacksize":
+				behaviour.setPrintLocalStackSize(Boolean.parseBoolean(value));
+				break;
 			default:
 				// Unknown/unsupported option
 				return false;
@@ -220,8 +264,6 @@ public class CliBParser {
 			line = in.readLine();
 
 			EPreplCommands command;
-			String theFormula;
-
 			if (line == null) {
 				// the prob instance has been terminated. exit gracefully
 				command = EPreplCommands.halt;
@@ -341,36 +383,11 @@ public class CliBParser {
 				}
 				break;
 			case formula:
-				theFormula = "#FORMULA\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case expression:
-				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case predicate:
-				theFormula = "#PREDICATE\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
 			case substitution:
-				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseFormula(theFormula, context, behaviour);
-				break;
-			case extendedformula:
-				theFormula = "#FORMULA\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedexpression:
-				theFormula = "#EXPRESSION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedpredicate:
-				theFormula = "#PREDICATE\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
-				break;
-			case extendedsubstitution:
-				theFormula = "#SUBSTITUTION\n" + in.readLine();
-				parseExtendedFormula(theFormula, context, behaviour);
+				String theFormula = in.readLine();
+				parseFormula(command, theFormula, context, behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -416,22 +433,32 @@ public class CliBParser {
 		pout.flush();
 	}
 
-	private static void parseFormulaInternal(String theFormula, IDefinitions context, 
-	                                         final ParsingBehaviour behaviour, final boolean extended) {
+	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
 		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
 
 		try {
 			BParser parser = new BParser();
-			// Reduce starting line number by one
-			// so that the line with a #FORMULA, etc. prefix isn't counted
-			// and the actual formula is counted as line 1.
-			parser.setStartPosition(behaviour.getStartLineNumber()-1, behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
 			Start start;
-			if (extended) {
-				start = parser.eparse(theFormula, context);
-			} else {
-				start = parser.parse(theFormula, false, false); // debugOutput=false, preparseNecessary=false
+			switch (command) {
+				case formula:
+					start = parser.parseFormula(theFormula);
+					break;
+
+				case expression:
+					start = parser.parseExpression(theFormula);
+					break;
+
+				case predicate:
+					start = parser.parsePredicate(theFormula);
+					break;
+
+				case substitution:
+					start = parser.parseSubstitution(theFormula);
+					break;
+
+				default:
+					throw new AssertionError("Unhandled parsing command: " + command);
 			}
 
 			// In the compact position format, node IDs are not used,
@@ -467,22 +494,10 @@ public class CliBParser {
 			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(pout, e);
-		} catch (LexerException e) {
-			pout.openTerm("exception").printAtom(e.getLocalizedMessage()).closeTerm();
-		} catch (IOException e) {
-			PrologExceptionPrinter.printException(pout, e);
 		}
 
 		pout.fullstop();
 		pout.flush();
-	}
-
-	private static void parseExtendedFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		parseFormulaInternal(theFormula, context, behaviour, true);
-	}
-
-	private static void parseFormula(String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		parseFormulaInternal(theFormula, context, behaviour, false);
 	}
 
 	private static void print(String output) {
@@ -556,7 +571,10 @@ public class CliBParser {
 		final BParser parser = new BParser(bfile.getAbsolutePath());
 
 		final long startParseMain = System.currentTimeMillis();
-		final Start tree = parser.parseFile(bfile, parsingBehaviour.isVerbose());
+		if (parsingBehaviour.isVerbose()) {
+			DebugPrinter.println("Parsing file '" + bfile + "'");
+		}
+		final Start tree = parser.parseFile(bfile);
 		final long endParseMain = System.currentTimeMillis();
 
 		if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) { // -time flag in CliBParser
@@ -634,16 +652,6 @@ public class CliBParser {
 		
 		bufOut.flush();
 	}
-	/* old version with transformer, seems slightly faster even though it builds up unnecessary intermediate term
-			for (PrologTerm term : sentences) {
-			StructuredPrologOutput output = new StructuredPrologOutput();
-			output.printTerm(term);
-			output.fullstop();
-			FastReadTransformer transformer = new FastReadTransformer(output);
-			out.print(transformer.write());
-	*/
-			
-			
 
 	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws BCompoundException {
 		RulesProject project = new RulesProject();
@@ -681,6 +689,7 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");
 		options.addOption(CLI_SWITCH_NAME_CHECK,
 				"The name of a machine have to match file name (except for the file name extension)");
+		options.addOption(CLI_SWITCH_PRINT_STACK_SIZE, "print the locally available size of the call stack at runtime");
 		try {
 			options.parseOptions(args);
 		} catch (final IllegalArgumentException e) {

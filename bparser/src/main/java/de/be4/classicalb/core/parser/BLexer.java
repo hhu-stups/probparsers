@@ -319,15 +319,6 @@ public class BLexer extends Lexer {
 
 	private final DefinitionTypes definitions;
 
-	/**
-	 * @deprecated Use {@link #BLexer(PushbackReader, DefinitionTypes)} instead.
-	 *     The {@code tokenCountPrediction} parameter has no effect.
-	 */
-	@Deprecated
-	public BLexer(final PushbackReader in, final DefinitionTypes definitions, final int tokenCountPrediction) {
-		this(in, definitions);
-	}
-
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
 		this.definitions = definitions;
@@ -348,8 +339,11 @@ public class BLexer extends Lexer {
 		if (token == null) {
 			return;
 		}
-		if (token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment ||
-			token instanceof TPragmaStart || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString) {
+		if (
+			state.equals(State.BLOCK_COMMENT)
+			|| token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment
+			|| token instanceof TCommentEnd || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString
+		) {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
 
@@ -416,18 +410,17 @@ public class BLexer extends Lexer {
 			token = comment;
 			comment = null;
 			commentBuffer = null;
+		} else if (token instanceof TShebang && token.getLine() != 1) {
+			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
-		} else if (state.equals(State.COMMENT)) {
+		} else if (state.equals(State.BLOCK_COMMENT)) {
 			collectComment();
-		} else if ((state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_IGNORE)) &&
-				!(token instanceof TPragmaDescription)) {
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) && !(token instanceof TPragmaDescription)) {
 			collectComment();
-		} else if (state.equals(State.DESCRIPTION) || state.equals(State.PRAGMA_CONTENT)) {
+		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
-		} else if (state.equals(State.SHEBANG) && token != null && token.getLine() != 1) {
-			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
 		}
 
 		if (token != null) {

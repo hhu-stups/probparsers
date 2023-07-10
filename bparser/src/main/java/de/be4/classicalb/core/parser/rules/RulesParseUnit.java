@@ -88,24 +88,17 @@ public class RulesParseUnit implements IModel {
 			return;
 		}
 		try {
-			bParser = null;
-			if (machineFile != null) {
-				bParser = new BParser(machineFile.getPath());
-				bParser.setDirectory(machineFile.getParentFile());
-			} else {
-				bParser = new BParser();
-			}
+			bParser = new BParser(machineFile != null ? machineFile.getPath() : null);
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
-			start = bParser.parse(content, false, new CachingDefinitionFileProvider());
+			start = bParser.parseMachine(content);
 			refFinder = new RulesMachineReferencesFinder(machineFile, start);
 			refFinder.findReferencedMachines();
 
 			this.machineReferences = refFinder.getReferences();
 			this.machineName = refFinder.getName();
-			this.rulesMachineChecker = new RulesMachineChecker(machineFile, bParser.getFileName(), machineReferences,
-					start);
+			this.rulesMachineChecker = new RulesMachineChecker(machineFile, machineReferences, start);
 			rulesMachineChecker.runChecks();
 			this.operationList.addAll(rulesMachineChecker.getOperations());
 

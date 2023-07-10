@@ -21,7 +21,6 @@ import de.be4.classicalb.core.parser.node.TKwRule;
 import de.be4.classicalb.core.parser.node.TKwRuleErrorType;
 import de.be4.classicalb.core.parser.node.TKwRuleFail;
 import de.be4.classicalb.core.parser.node.TKwRuleForAll;
-import de.be4.classicalb.core.parser.node.TKwRulesMachine;
 import de.be4.classicalb.core.parser.node.TKwType;
 import de.be4.classicalb.core.parser.node.TKwValue;
 import de.be4.classicalb.core.parser.node.TMachine;
@@ -31,6 +30,7 @@ public class RulesGrammar implements IGrammar {
 
 	private static final String INSTANTIATION_ERROR_MESSAGE = "Cannot create an instance of class: ";
 
+	public static final String RULES_MACHINE = "RULES_MACHINE";
 	public static final String SUCCEEDED_RULE = "SUCCEEDED_RULE";
 	public static final String SUCCEEDED_RULE_ERROR_TYPE = "SUCCEEDED_RULE_ERROR_TYPE";
 	public static final String FAILED_RULE = "FAILED_RULE";
@@ -84,7 +84,7 @@ public class RulesGrammar implements IGrammar {
 		add(TKwRuleErrorType.class);
 		add(TKwBody.class);
 
-		map.put(new TKwRulesMachine().getText(), TMachine.class);
+		map.put(RULES_MACHINE, TMachine.class);
 		map.put(SUCCEEDED_RULE, TKwPredicateOperator.class);
 		map.put(SUCCEEDED_RULE_ERROR_TYPE, TKwPredicateOperator.class);
 		map.put(FAILED_RULE, TKwPredicateOperator.class);
@@ -115,10 +115,6 @@ public class RulesGrammar implements IGrammar {
 		} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
 			throw new AssertionError(INSTANTIATION_ERROR_MESSAGE + clazz.getName(), e);
 		}
-	}
-
-	public static String getModelType() {
-		return new TKwRulesMachine().getText();
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import de.be4.classicalb.core.parser.node.Start;
 
 import util.Helpers;
 
+@Deprecated
 public class PredVarsTest {
 
 	@Test

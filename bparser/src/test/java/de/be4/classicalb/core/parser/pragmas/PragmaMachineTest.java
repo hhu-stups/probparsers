@@ -9,13 +9,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import util.AbstractParseMachineTest;
+import util.Helpers;
 import util.PositionTester;
 
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Parameterized.class)
-public class PragmaMachineTest extends AbstractParseMachineTest {
+public class PragmaMachineTest {
 
 	private static final String PATH = "pragmas";
 
@@ -27,13 +27,13 @@ public class PragmaMachineTest extends AbstractParseMachineTest {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static File[] data() {
-		return getMachines(PATH);
+		return Helpers.getMachines(PATH);
 	}
 
 	@Test
 	public void testParsable() throws Exception {
 		final BParser parser = new BParser(machine.getName());
-		Start start = parser.parseFile(machine, false);
+		Start start = parser.parseFile(machine);
 		start.apply(new PositionTester());
 		assertNotNull(start);
 	}

@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.node.TRightPar;
 import de.be4.classicalb.core.parser.node.TTrue;
 import de.hhu.stups.sablecc.patch.IToken;
 
+@Deprecated
 public class EBLexer extends BLexer {
 
 	// True means Expression
@@ -54,7 +55,7 @@ public class EBLexer extends BLexer {
 			ts.add(token);
 			toks.add(token);
 
-			TEqual t2 = new TEqual("=", l, p);
+			TEqual t2 = new TEqual(l, p);
 			ts.add(t2);
 			toks.add(t2);
 

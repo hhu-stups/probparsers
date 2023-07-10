@@ -60,4 +60,34 @@ public class PrettyMachinePrinterTest {
 		assertFalse(result2.isEmpty());
 		assertEquals(result1, result2);
 	}
+
+	@Test
+	public void testPrettyPrintGenerated() {
+		String testMachine = "/*@generated*/\nMACHINE Test\nEND";
+		assertEquals(testMachine, Helpers.getPrettyPrint("/*@generated*/ MACHINE Test\nEND"));
+	}
+
+	@Test
+	public void testPrettyPrintPackage() {
+		String testMachine = "/*@package one.two */\nMACHINE Test\nEND";
+		assertEquals(testMachine, Helpers.getPrettyPrint(testMachine));
+	}
+
+	@Test
+	public void testPrettyPrintPackageString() {
+		String testMachine = "/*@package \"one two\" */\nMACHINE Test\nEND";
+		assertEquals(testMachine, Helpers.getPrettyPrint(testMachine));
+	}
+
+	@Test
+	public void testPrettyPrintPackageImport() {
+		String testMachine = "/*@package one.two */\n/*@import-package one.three */\nMACHINE Test\nEND";
+		assertEquals(testMachine, Helpers.getPrettyPrint(testMachine));
+	}
+
+	@Test
+	public void testPrettyPrintPackageImports() {
+		String testMachine = "/*@package one.two */\n/*@import-package one.three */\n/*@import-package \"one.two three\" */\nMACHINE Test\nEND";
+		assertEquals(testMachine, Helpers.getPrettyPrint(testMachine));
+	}
 }
