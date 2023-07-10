@@ -13,10 +13,10 @@ This is an umbrella project for the following parsers and libraries used by ProB
 * prologlib: Library to construct and manipulate well-formed Prolog terms.
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
 * answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
-* eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. **For internal use only** by the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library.
 
 The following subprojects were formerly part of this repo:
 
+* eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. Now moved into the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library. The last release as part of probparsers was version 2.12.5.
 * translator: Replaced by the [value-translator](https://github.com/hhu-stups/value-translator) project. The last release as part of probparsers was version 2.9.23.
 * typechecker: Java-based classical B typechecker. No longer maintained - last release was version 2.9.32. Note that the normal ProB typechecker is part of prob_prolog and is unrelated to this subproject.
 * voparser: Now maintained in the separate [vo_parser](https://gitlab.cs.uni-duesseldorf.de/general/stups/vo_parser) repository.
