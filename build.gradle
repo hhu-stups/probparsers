@@ -23,10 +23,13 @@ ext {
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
 
-def nativeCompilePGO(String variant, Boolean optimize) {
-    tasks.register("nativeCompile${variant.capitalize()}", tasks.nativeCompile.getClass()) {
+def nativeCompilePGO(Project project, String variant, Boolean optimize) {
+    
+    project.tasks.register("nativeCompile${variant.capitalize()}", tasks.nativeCompile.getClass()) {
+        options=project.tasks.nativeCompile.options
         if (optimize) {
             // optimized build
+            dependsOn 'nativeCompileInstrumented'
             graalvmNative {
                 binaries {
                     all {
@@ -54,11 +57,34 @@ def nativeCompilePGO(String variant, Boolean optimize) {
     }
 }
 
+final PROB_EXAMPLES_DIR = "../prob_examples/"
+
+final PGO_EXAMPLE_FILES = [
+    "examples/B/B4MSecure/Meeduse/v3/meeduse_tt2bdd.mch",
+    "examples/B/ClearSy/Caval/2020/01_Jan/regressions2/rule_Regle_Transverse_Variable_Q_DIR/rule_bugly.mch",
+    "examples/B/Alstom/DataValidationProject/Benchmarks/Ouverture.mch"
+    ]
+
+final CLI_PARSER_BINARY_PATH = './cliparser/build/native/nativeCompile/cliparser'
+
+task runInstrumentedVersion() {
+    dependsOn 'cliparser:nativeCompileInstrumented'
+    doLast {
+        exec {
+            PGO_EXAMPLE_FILES.each { mch->
+                filepath = PROB_EXAMPLES_DIR+mch
+                commandLine CLI_PARSER_BINARY_PATH, filepath
+            }
+        }
+    }
+}
+
+tasks.register('nativeWithPGO') {
+    dependsOn 'runInstrumentedVersion', 'cliparser:nativeCompileOptimized'
+
+}
 
 
-nativeCompilePGO("Instrumented",false)
-
-nativeCompilePGO("Optimized",true)
 
 subprojects {
     apply plugin: 'java'
@@ -74,30 +100,15 @@ subprojects {
                 // the stack size must be given in bytes
                 //override at runtime with -XX:StackSize=... 
                 buildArgs.add('-R:StackSize=8388608')
-                
-                //buildArgs.add('--pgo-instrument')
             }
         }
-        
         toolchainDetection = false
     }
 
+    
+    nativeCompilePGO(project,"Instrumented",false)
 
-
-    task runInstrumentedVersion() {
-        dependsOn 'nativeCompileInstrumented'
-        doLast {
-            exec {
-                commandLine './cliparser/build/native/nativeCompile/cliparser', 'eurg', 'arg2'
-            }
-        }
-    }
-
-    tasks.register('nativeWithPGO') {
-        dependsOn 'nativeCompileInstrumented', 'runInstrumentedVersion', 'nativeCompileOptimized' 
-    }
-
-
+    nativeCompilePGO(project,"Optimized",true)
 
     group = rootProject.group
     version = rootProject.version
