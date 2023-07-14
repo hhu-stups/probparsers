@@ -8,8 +8,6 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 
 import de.be4.eventb.core.parser.lexer.LexerException;
 import de.be4.eventb.core.parser.node.Start;
@@ -17,15 +15,10 @@ import de.be4.eventb.core.parser.node.TComment;
 import de.be4.eventb.core.parser.node.Token;
 import de.be4.eventb.core.parser.parser.Parser;
 import de.be4.eventb.core.parser.parser.ParserException;
-import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.PositionedNode;
 
 public class EventBParser {
 
 	public static final String MSG_COMMENT_PLACEMENT = "Comment can only be place behind the element they belong to. Please move the comment to an appropriate place!";
-
-	@Deprecated
-	private de.hhu.stups.sablecc.patch.SourcePositions sourcePositions;
 
 	/**
 	 * Parses the input file.
@@ -91,7 +84,6 @@ public class EventBParser {
 	 *             single token is involved in the error.</li>
 	 *             </ul>
 	 */
-	@SuppressWarnings("deprecation")
 	public Start parse(final String input, final boolean debugOutput) throws BException {
 		final Reader reader = new StringReader(input);
 
@@ -103,14 +95,7 @@ public class EventBParser {
 			lexer.setDebugOutput(debugOutput);
 
 			Parser parser = new Parser(lexer);
-			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = lexer.getTokenList();
-
-			final Map<PositionedNode, de.hhu.stups.sablecc.patch.SourcecodeRange> positions = parser.getMapping();
-
-			sourcePositions = new de.hhu.stups.sablecc.patch.SourcePositions(tokenList, positions);
-
-			return rootNode;
+			return parser.parse();
 		} catch (final LexerException e) {
 			throw new BException(e);
 		} catch (final ParserException e) {
@@ -145,15 +130,5 @@ public class EventBParser {
 		message = message.replaceFirst(" at", " @");
 
 		return new EventBParseException(token, message);
-	}
-
-	// Deprecated, but do not remove yet! Camille still uses this method to get position info for errors (as of April 2022).
-	/**
-	 * @deprecated Please use the {@link PositionedNode} methods to get position information instead. All SableCC-generated nodes and tokens extend this class.
-	 */
-	@Deprecated
-	public de.hhu.stups.sablecc.patch.SourcePositions getSourcePositions() {
-		// Deprecated, but do not remove yet! Camille still uses this method to get position info for errors (as of April 2022).
-		return sourcePositions;
 	}
 }
