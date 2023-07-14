@@ -18,7 +18,7 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 final SOURCE_ENCODING = "UTF-8"
 
 ext {
-    sableCCVersion = '3.5.0'
+    sableCCVersion = '3.6.0-SNAPSHOT'
     sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
     sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
