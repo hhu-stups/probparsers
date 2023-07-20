@@ -422,10 +422,6 @@ public class CliBParser {
 	}
 
 	private static ProBParserBase getExtensionParser(final String pattern, IDefinitions context) {
-		if (pattern == null) {
-			return UNPARSED_PARSER_BASE;
-		}
-
 		final String[] langs = pattern.split(",");
 		final ProBParserBase[] sublangs = new ProBParserBase[langs.length];
 		for (int i = 0; i < langs.length; i++) {
