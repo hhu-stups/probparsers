@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.classicalb.core.parser.FastReadWriter;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
@@ -43,7 +44,9 @@ import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
 import de.be4.ltl.core.parser.TemporalLogicParser;
+import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
+import de.prob.parserbase.UnparsedParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
@@ -67,6 +70,8 @@ public class CliBParser {
 	private static final String CLI_SWITCH_PREPL = "-prepl";
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
 	// other interesting parameters: System.getProperty : prob.stdlib
+
+	private static final UnparsedParserBase UNPARSED_PARSER_BASE = new UnparsedParserBase("unparsed_expr", "unparsed_pred", "unparsed_trans");
 
 	private static Socket socket;
 	private static PrintWriter socketWriter;
@@ -391,7 +396,7 @@ public class CliBParser {
 				break;
 			case ltl:
 				String extension = in.readLine();
-				final ProBParserBase extParser = LtlConsoleParser.getExtensionParser(extension,context);
+				final ProBParserBase extParser = getExtensionParser(extension, context);
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
@@ -399,7 +404,7 @@ public class CliBParser {
 				break;
 			case ctl:
 				String extension2 = in.readLine();
-				final ProBParserBase extParser2 = LtlConsoleParser.getExtensionParser(extension2,context);
+				final ProBParserBase extParser2 = getExtensionParser(extension2, context);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
 				break;
@@ -414,6 +419,38 @@ public class CliBParser {
 			}
 
 		}
+	}
+
+	private static ProBParserBase getExtensionParser(final String pattern, IDefinitions context) {
+		final ProBParserBase result;
+		if (pattern == null) {
+			result = UNPARSED_PARSER_BASE;
+		} else {
+			final String[] langs = pattern.split(",");
+			final ProBParserBase[] sublangs = new ProBParserBase[langs.length];
+			for (int i = 0; i < langs.length; i++) {
+				final String lang = langs[i];
+				final ProBParserBase sub;
+				if ("none".equals(lang)) {
+					sub = UNPARSED_PARSER_BASE;
+				} else if ("B".equals(lang)) {
+					BParser bparser = new BParser();
+					if (context!=null) {
+						bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
+					}
+					sub = new ClassicalBParser(bparser);
+				} else {
+					throw new IllegalArgumentException("Unknown language " + lang);
+				}
+				sublangs[i] = sub;
+			}
+			if (sublangs.length == 1) {
+				result = sublangs[0];
+			} else {
+				result = new JoinedParserBase(sublangs);
+			}
+		}
+		return result;
 	}
 
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
