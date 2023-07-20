@@ -422,35 +422,34 @@ public class CliBParser {
 	}
 
 	private static ProBParserBase getExtensionParser(final String pattern, IDefinitions context) {
-		final ProBParserBase result;
 		if (pattern == null) {
-			result = UNPARSED_PARSER_BASE;
-		} else {
-			final String[] langs = pattern.split(",");
-			final ProBParserBase[] sublangs = new ProBParserBase[langs.length];
-			for (int i = 0; i < langs.length; i++) {
-				final String lang = langs[i];
-				final ProBParserBase sub;
-				if ("none".equals(lang)) {
-					sub = UNPARSED_PARSER_BASE;
-				} else if ("B".equals(lang)) {
-					BParser bparser = new BParser();
-					if (context!=null) {
-						bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
-					}
-					sub = new ClassicalBParser(bparser);
-				} else {
-					throw new IllegalArgumentException("Unknown language " + lang);
-				}
-				sublangs[i] = sub;
-			}
-			if (sublangs.length == 1) {
-				result = sublangs[0];
-			} else {
-				result = new JoinedParserBase(sublangs);
-			}
+			return UNPARSED_PARSER_BASE;
 		}
-		return result;
+
+		final String[] langs = pattern.split(",");
+		final ProBParserBase[] sublangs = new ProBParserBase[langs.length];
+		for (int i = 0; i < langs.length; i++) {
+			final String lang = langs[i];
+			final ProBParserBase sub;
+			if ("none".equals(lang)) {
+				sub = UNPARSED_PARSER_BASE;
+			} else if ("B".equals(lang)) {
+				BParser bparser = new BParser();
+				if (context!=null) {
+					bparser.setDefinitions(context); // ensure that DEFINITION predicates, ... are available
+				}
+				sub = new ClassicalBParser(bparser);
+			} else {
+				throw new IllegalArgumentException("Unknown language " + lang);
+			}
+			sublangs[i] = sub;
+		}
+
+		if (sublangs.length == 1) {
+			return sublangs[0];
+		} else {
+			return new JoinedParserBase(sublangs);
+		}
 	}
 
 	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
