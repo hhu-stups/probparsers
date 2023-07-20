@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
@@ -261,55 +258,6 @@ public class BParser {
 
 	public Start parsePredicate(final String input) throws BCompoundException {
 		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
-	}
-
-	@Deprecated
-	public Start eparse(String input, IDefinitions context) throws BCompoundException, LexerException, IOException {
-		final Reader reader = new StringReader(input);
-
-		Start ast = null;
-
-		List<String> ids = new ArrayList<>();
-
-		final DefinitionTypes defTypes = new DefinitionTypes();
-		defTypes.addAll(context.getTypes());
-
-		BLexer bLexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
-		bLexer.setParseOptions(parseOptions);
-		Token t;
-		do {
-			t = bLexer.next();
-			if (t instanceof TIdentifierLiteral) {
-				if (!ids.contains(t.getText())) {
-					ids.add(t.getText());
-				}
-			}
-		} while (!(t instanceof EOF));
-
-		Parser p = new Parser(new EBLexer(input, BigInteger.ZERO, ids, defTypes));
-		boolean ok;
-		try {
-			ast = p.parse();
-			ok = true;
-		} catch (ParserException ignored) {
-			ok = false;
-		}
-
-		BigInteger b = new BigInteger("2");
-		b = b.pow(ids.size());
-		b = b.subtract(BigInteger.ONE);
-
-		while (!ok && b.compareTo(BigInteger.ZERO) > 0) {
-			p = new Parser(new EBLexer(input, b, ids, defTypes));
-			try {
-				ast = p.parse();
-				ok = true;
-			} catch (ParserException ignored) {
-				b = b.subtract(BigInteger.ONE);
-			}
-		}
-
-		return ast;
 	}
 
 	// Don't delete this deprecated method too soon!
