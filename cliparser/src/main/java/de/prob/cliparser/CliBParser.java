@@ -600,9 +600,7 @@ public class CliBParser {
 		final BParser parser = new BParser(bfile.getAbsolutePath());
 
 		final long startParseMain = System.currentTimeMillis();
-		if (parsingBehaviour.isVerbose()) {
-			System.out.println("*** Debug: Parsing file '" + bfile + "'");
-		}
+		debugPrint(parsingBehaviour, "*** Debug: Parsing file '" + bfile + "'");
 		final Start tree = parser.parseFile(bfile);
 		final long endParseMain = System.currentTimeMillis();
 
