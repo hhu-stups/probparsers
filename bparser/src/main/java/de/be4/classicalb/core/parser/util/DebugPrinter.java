@@ -2,6 +2,10 @@ package de.be4.classicalb.core.parser.util;
 
 import java.io.PrintStream;
 
+/**
+ * @deprecated Use {@link System#out} or a proper logging framework instead.
+ */
+@Deprecated
 public class DebugPrinter {
 
 	

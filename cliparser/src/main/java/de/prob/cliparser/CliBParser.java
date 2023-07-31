@@ -38,7 +38,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
-import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
@@ -604,7 +603,7 @@ public class CliBParser {
 
 		final long startParseMain = System.currentTimeMillis();
 		if (parsingBehaviour.isVerbose()) {
-			DebugPrinter.println("Parsing file '" + bfile + "'");
+			System.out.println("*** Debug: Parsing file '" + bfile + "'");
 		}
 		final Start tree = parser.parseFile(bfile);
 		final long endParseMain = System.currentTimeMillis();

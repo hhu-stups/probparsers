@@ -36,7 +36,6 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.parser.Parser;
 import de.be4.classicalb.core.parser.parser.ParserException;
-import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class BParser {
@@ -207,7 +206,7 @@ public class BParser {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
 		if (verbose) {
-			DebugPrinter.println("Parsing file '" + machineFile.getCanonicalPath() + "'");
+			System.out.println("*** Debug: Parsing file '" + machineFile.getCanonicalPath() + "'");
 		}
 		String content = Utils.readFile(machineFile);
 		return parseWithPreParsing(new StringReader(content), machineFile, contentProvider);
