@@ -515,14 +515,6 @@ public class CliBParser {
 			ASTProlog printer = new ASTProlog(pout, pprinter);
 
 			start.apply(printer);
-		} catch (NullPointerException e) {
-			// Not Parseable - Sadly, calling e.getLocalizedMessage() on the
-			// NullPointerException returns NULL itself, thus triggering another
-			// NullPointerException in the catch statement. Therefore we need a
-			// second catch statement with a special case for the
-			// NullPointerException instead of catching a general Exception
-			// print("EXCEPTION NullPointerException" + System.lineSeparator());
-			pout.openTerm("exception").printAtom("NullPointerException").closeTerm();
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(pout, e);
 		}
