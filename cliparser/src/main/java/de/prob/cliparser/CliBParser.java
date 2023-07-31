@@ -275,7 +275,7 @@ public class CliBParser {
 				command = EPreplCommands.valueOf(line);
 			}
 			
-			behaviour.debug_print("Received PREPL command: " + command);
+			debugPrint(behaviour, "Received PREPL command: " + command);
 
 			switch (command) {
 			case version:
@@ -352,7 +352,7 @@ public class CliBParser {
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
 				String newFVal = in.readLine();
-				behaviour.debug_print("Setting fastprolog to "+newFVal);
+				debugPrint(behaviour, "Setting fastprolog to " + newFVal);
 				behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 				break;
 			case compactpos:
@@ -536,9 +536,15 @@ public class CliBParser {
 		socketWriter.flush();
 	}
 
+	private static void debugPrint(ParsingBehaviour parsingBehaviour, final String msg) {
+		if (parsingBehaviour.isVerbose()) {
+			System.out.println(msg);
+		}
+	}
+
 	private static int doFileParsing(final ParsingBehaviour behaviour, final OutputStream out, final PrintWriter err, final File bfile) {
 		try {
-			behaviour.debug_print("Parsing file: " + bfile);
+			debugPrint(behaviour, "Parsing file: " + bfile);
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
@@ -613,7 +619,7 @@ public class CliBParser {
 		}
 
 		if (parsingBehaviour.isPrettyPrintB()) { // -pp flag in CliBParser
-			parsingBehaviour.debug_print("Pretty printing " + bfile + " in B format:");
+			debugPrint(parsingBehaviour, "Pretty printing " + bfile + " in B format:");
 			
 			PrettyPrinter pp = new PrettyPrinter();
 			tree.apply(pp);
