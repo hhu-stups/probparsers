@@ -28,7 +28,7 @@ ext {
 final PROB_EXAMPLES_DIR = "../prob_examples/"
 
 final PGO_EXAMPLE_FILES = [
-    //"examples/B/B4MSecure/Meeduse/v3/meeduse_tt2bdd.mch",
+    "examples/B/B4MSecure/Meeduse/v3/meeduse_tt2bdd.mch",
     "examples/B/ClearSy/Caval/2020/01_Jan/regressions2/rule_Regle_Transverse_Variable_Q_DIR/rule_bugly.mch",
     "examples/B/Alstom/DataValidationProject/Benchmarks/Ouverture.mch"
     ]
