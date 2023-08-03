@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
@@ -593,9 +594,21 @@ public class CliBParser {
 		}
 	}
 
-	private static IPrologTermOutput prologTermOutputForStream(final OutputStream out) {
-		final PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-		return new PrologTermOutput(writer, false);
+	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
+		final long startOutput = System.currentTimeMillis();
+		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
+			printASTasFastProlog(out, printer);
+		} else { // -prolog flag in CliBParser
+			final PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+			final IPrologTermOutput pout = new PrologTermOutput(writer, false);
+			printer.accept(pout);
+			pout.flush();
+		}
+		final long endOutput = System.currentTimeMillis();
+
+		if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
+			System.out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
+		}
 	}
 
 	private static void fullParsing(final File bfile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws IOException, BCompoundException {
@@ -628,20 +641,7 @@ public class CliBParser {
 				System.out.println("% Time for parsing of referenced files: " + (endParseRecursive - startParseRecursive) + " ms");
 			}
 
-			final long startOutput = System.currentTimeMillis();
-			if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-				System.out.println("Generating fastrw binary output");
-				printASTasFastProlog(out, rml);
-			} else { // -prolog flag in CliBParser
-				final IPrologTermOutput pout = prologTermOutputForStream(out);
-				rml.printAsProlog(pout);
-				pout.flush();
-			}
-			final long endOutput = System.currentTimeMillis();
-
-			if (parsingBehaviour.isPrintTime() || parsingBehaviour.isVerbose()) {
-				System.out.println("% Time for Prolog output: " + (endOutput - startOutput) + " ms");
-			}
+			printPrologAst(parsingBehaviour, out, rml::printAsProlog);
 		}
 
 		if (parsingBehaviour.isPrintTime()) {
@@ -667,9 +667,9 @@ public class CliBParser {
 	
 	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
-	private static void printASTasFastProlog(final OutputStream out, final RecursiveMachineLoader rml) throws IOException {
+	private static void printASTasFastProlog(OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
-		rml.printAsProlog(structuredPrologOutput);
+		printer.accept(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
 
 		final BufferedOutputStream bufOut = new BufferedOutputStream(out);
@@ -682,7 +682,7 @@ public class CliBParser {
 		bufOut.flush();
 	}
 
-	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws BCompoundException {
+	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws IOException, BCompoundException {
 		RulesProject project = new RulesProject();
 		project.setParsingBehaviour(parsingBehaviour);
 		project.parseProject(mainFile);
@@ -692,9 +692,7 @@ public class CliBParser {
 			throw new BCompoundException(project.getBExceptionList());
 		}
 
-		final IPrologTermOutput pout = prologTermOutputForStream(out);
-		project.printProjectAsPrologTerm(pout);
-		pout.flush();
+		printPrologAst(parsingBehaviour, out, project::printProjectAsPrologTerm);
 	}
 
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
