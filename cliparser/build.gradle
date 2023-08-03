@@ -61,7 +61,7 @@ project("nativeParserOptimized"){
                 //override at runtime with -XX:StackSize=...
                 buildArgs.add('-R:StackSize=8388608')
 
-                buildArgs.add('--pgo=default.iprof')
+                buildArgs.add('--pgo=../../../../../default.iprof')
                 buildArgs.add('-march=native')
             }
         }

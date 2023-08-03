@@ -33,7 +33,7 @@ final PGO_EXAMPLE_FILES = [
     "examples/B/Alstom/DataValidationProject/Benchmarks/Ouverture.mch"
     ]
 
-final CLI_PARSER_BINARY_PATH = 'cliparser/build/native/nativeCompileInstrumented/cliparser'
+final CLI_PARSER_BINARY_PATH = 'cliparser/nativeParserInstrumented/build/native/nativeCompile/nativeParserInstrumented'
 
 task runInstrumentedVersion() {
     dependsOn 'cliparser:nativeParserInstrumented:nativeCompile'
