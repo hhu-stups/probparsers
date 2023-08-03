@@ -644,7 +644,7 @@ public class CliBParser {
 			}
 		}
 
-		if (parsingBehaviour.isPrintTime() && !parsingBehaviour.isFastPrologOutput()) {
+		if (parsingBehaviour.isPrintTime()) {
 			System.out.println("% Used memory : " + 
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
 			System.out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
