@@ -28,7 +28,6 @@ import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.util.DebugPrinter;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -80,7 +79,7 @@ public class RecursiveMachineLoader {
 	}
 
 	private static void printLoadProgress(File machineFile) {
-		DebugPrinter.println("Parsing file '" + machineFile + "'");
+		System.out.println("*** Debug: Parsing file '" + machineFile + "'");
 	}
 
 	/**

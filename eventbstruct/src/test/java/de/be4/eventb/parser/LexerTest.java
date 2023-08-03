@@ -48,4 +48,10 @@ public class LexerTest {
 
 		assertEquals("y-x", variantClause.getExpression().getText());
 	}
+
+	@Test(expected = BException.class)
+	public void testFormulaAtEof() throws BException {
+		// Test that this doesn't give an OutOfMemoryError.
+		new EventBParser().parse("machine Test\ninvariants\n\t@inv1 1=1");
+	}
 }

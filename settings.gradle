@@ -1,1 +1,1 @@
-include 'bparser', 'prologlib', 'parserbase', 'ltlparser', 'answerparser', 'unicode', 'cliparser', "cliparser:nativeParserInstrumented", "cliparser:nativeParserOptimized", 'theorymapping', 'eventbstruct', 'eventbalg'
+include 'bparser', 'prologlib', 'parserbase', 'ltlparser', 'answerparser', 'unicode', 'cliparser', "cliparser:nativeParserInstrumented", "cliparser:nativeParserOptimized", 'theorymapping', 'eventbstruct'
