@@ -182,7 +182,9 @@ public class CliBParser {
 			}
 			String filename = options.getRemainingOptions()[0];
 			final File bfile = new File(filename);
-			int returnValue = doFileParsing(behaviour, out, new PrintWriter(System.err), bfile);
+			@SuppressWarnings("ImplicitDefaultCharsetUsage") // System.err really uses the default charset
+			PrintWriter err = new PrintWriter(System.err, true);
+			int returnValue = doFileParsing(behaviour, out, err, bfile);
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 				out.close();
 			}
