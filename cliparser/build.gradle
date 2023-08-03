@@ -3,6 +3,8 @@ apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+apply plugin: 'org.graalvm.buildtools.native'
+
 dependencies {
     implementation project(":bparser")
     implementation project(":prologlib")
@@ -15,3 +17,54 @@ application {
 }
 
 rootProject.setupTestReport(project, [])
+
+project("nativeParserInstrumented"){
+    apply plugin: 'application'
+    dependencies {
+        implementation project(":cliparser")
+    }
+
+    application {
+        mainClass = "de.prob.cliparser.CliBParser"
+    }
+    graalvmNative {
+        binaries{
+            all {
+                resources.autodetect()
+                // see https://build-native-java-apps.cc/expert-options/21/
+                // the stack size must be given in bytes
+                //override at runtime with -XX:StackSize=...
+                buildArgs.add('-R:StackSize=8388608')
+
+                buildArgs.add('--pgo-instrument')
+            }
+        }
+        toolchainDetection = false
+    }
+}
+
+project("nativeParserOptimized"){
+    apply plugin: 'application'
+    dependencies {
+        implementation project(":cliparser")
+    }
+
+    application {
+        mainClass = "de.prob.cliparser.CliBParser"
+    }
+    graalvmNative {
+        binaries{
+            all {
+                resources.autodetect()
+                // see https://build-native-java-apps.cc/expert-options/21/
+                // the stack size must be given in bytes
+                //override at runtime with -XX:StackSize=...
+                buildArgs.add('-R:StackSize=8388608')
+
+                buildArgs.add('--pgo=default.iprof')
+                buildArgs.add('-march=native')
+            }
+        }
+        toolchainDetection = false
+    }
+}
