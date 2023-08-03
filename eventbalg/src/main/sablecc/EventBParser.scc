@@ -282,7 +282,6 @@ guard {-> guard} =
   [label]:P.label [predicate]:formula [comment]:comment* {-> New guard([comment], label.label, predicate)} |
   {derived} theorem [label]:P.label [predicate]:formula [comment]:comment* {-> New guard.derived([comment], label.label, predicate)};
 
-
 event_with {-> witness*} = with [first]:witness [rest]:event_with_tail* {-> [first.witness, rest.witness]};
 event_with_tail {-> witness} = [witness]:witness {-> witness.witness};
 witness {-> witness} = [label]:P.label [predicate]:formula [comment]:comment* {-> New witness([comment], label.label, predicate)};
@@ -399,6 +398,7 @@ label {-> label} = at [identifier]:T.label {-> identifier};
  * Abstract Syntax Tree                                            *
  *******************************************************************/
 Abstract Syntax Tree
+
 parse_unit =
   {machine}
     [comments]:comment*

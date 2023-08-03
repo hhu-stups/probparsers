@@ -28,7 +28,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.12.4"
+final parserVersion = "2.12.5"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
@@ -60,6 +60,11 @@ Available options are:
 -fastprolog Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
 -prepl      Enter parser-repl. Should only be used from inside ProB's Prolog Core.
 -checkname  The name of a machine have to match file name (except for the file name extension)
+```
+
+You probably also want to set the path to the stdlib folder of ProB (containing files like LibraryStrings.def):
+```
+java -Dprob.stdlib=../stdlib/ -jar probcliparser.jar MyBMachine.mch
 ```
 
 ## Building

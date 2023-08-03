@@ -3,22 +3,13 @@ package de.be4.eventb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.be4.eventb.core.parser.lexer.Lexer;
 import de.be4.eventb.core.parser.lexer.LexerException;
-import de.be4.eventb.core.parser.node.EOF;
-import de.be4.eventb.core.parser.node.TColon;
-import de.be4.eventb.core.parser.node.TComment;
-import de.be4.eventb.core.parser.node.TEnd;
-import de.be4.eventb.core.parser.node.TEvent;
-import de.be4.eventb.core.parser.node.TFormula;
-import de.be4.eventb.core.parser.node.TMultiCommentEnd;
-import de.be4.eventb.core.parser.node.TMultiCommentStart;
-import de.be4.eventb.core.parser.node.TVariant;
-import de.be4.eventb.core.parser.node.TWhiteSpace;
-import de.be4.eventb.core.parser.node.Token;
+import de.be4.eventb.core.parser.node.*;
 
 public class EventBLexer extends Lexer {
 
@@ -39,7 +30,17 @@ public class EventBLexer extends Lexer {
 			"Set declarations are only allowed before the constants declarations",
 			"Constants declarations are only allowed after sets and before axioms",
 			"The axioms clause is only allowed at the end" };
-	private static List<String> clausesOrder = new LinkedList<String>();
+	private static final List<Class<? extends Token>> clausesOrder = Collections.unmodifiableList(Arrays.asList(
+		TMachine.class,
+		TVariables.class,
+		TInvariants.class,
+		TVariant.class,
+		TEvents.class,
+		TContext.class,
+		TSets.class,
+		TConstants.class,
+		TAxioms.class
+	));
 	private int lastClauseIndex;
 
 	private boolean inEvent;
@@ -48,24 +49,13 @@ public class EventBLexer extends Lexer {
 			"Guards (where) are only allowed after parameters and before witnesses",
 			"Witnesses (with) are only allowed after guards and before actions",
 			"Actions (then) are only allowed at the end of an event" };
-	private static List<String> eventClausesOrder = new LinkedList<String>();
+	private static final List<Class<? extends Token>> eventClausesOrder = Collections.unmodifiableList(Arrays.asList(
+		TAny.class,
+		TWhere.class,
+		TWith.class,
+		TThen.class
+	));
 	private int lastEventClauseIndex;
-
-	static {
-		clausesOrder.add("TMachine");
-		clausesOrder.add("TVariables");
-		clausesOrder.add("TInvariants");
-		clausesOrder.add("TVariant");
-		clausesOrder.add("TEvents");
-		clausesOrder.add("TContext");
-		clausesOrder.add("TSets");
-		clausesOrder.add("TConstants");
-		clausesOrder.add("TAxioms");
-		eventClausesOrder.add("TAny");
-		eventClausesOrder.add("TWhere");
-		eventClausesOrder.add("TWith");
-		eventClausesOrder.add("TThen");
-	}
 
 	public EventBLexer(final PushbackReader in) {
 		super(in);
@@ -104,11 +94,9 @@ public class EventBLexer extends Lexer {
 				return;
 			}
 
-			final String className = token.getClass().getSimpleName();
-
 			// check machine/context clauses' order
-			if (!inEvent && clausesOrder.contains(className)) {
-				final int nextIndex = clausesOrder.indexOf(className);
+			if (!inEvent && clausesOrder.contains(token.getClass())) {
+				final int nextIndex = clausesOrder.indexOf(token.getClass());
 
 				if (nextIndex < lastClauseIndex) {
 					throwClausesOrderException(clauseErrorMessages[nextIndex]);
@@ -119,8 +107,8 @@ public class EventBLexer extends Lexer {
 			}
 
 			// check order within an event
-			if (inEvent && eventClausesOrder.contains(className)) {
-				final int nextIndex = eventClausesOrder.indexOf(className);
+			if (inEvent && eventClausesOrder.contains(token.getClass())) {
+				final int nextIndex = eventClausesOrder.indexOf(token.getClass());
 
 				if (nextIndex < lastEventClauseIndex) {
 					throwClausesOrderException(eventClauseErrorMessages[nextIndex]);

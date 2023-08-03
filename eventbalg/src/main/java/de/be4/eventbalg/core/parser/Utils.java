@@ -8,6 +8,7 @@ import de.be4.eventbalg.core.parser.node.PParseUnit;
 import de.be4.eventbalg.core.parser.node.Start;
 import de.be4.eventbalg.core.parser.node.TIdentifierLiteral;
 
+@Deprecated
 public class Utils {
 
 	public static String getIdentifierAsString(

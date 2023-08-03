@@ -17,31 +17,27 @@ import de.be4.eventb.core.parser.node.TComment;
 import de.be4.eventb.core.parser.node.Token;
 import de.be4.eventb.core.parser.parser.Parser;
 import de.be4.eventb.core.parser.parser.ParserException;
-import de.hhu.stups.sablecc.patch.IParser;
 import de.hhu.stups.sablecc.patch.IToken;
-import de.hhu.stups.sablecc.patch.ITokenListContainer;
 import de.hhu.stups.sablecc.patch.PositionedNode;
-import de.hhu.stups.sablecc.patch.SourcePositions;
-import de.hhu.stups.sablecc.patch.SourcecodeRange;
 
 public class EventBParser {
 
 	public static final String MSG_COMMENT_PLACEMENT = "Comment can only be place behind the element they belong to. Please move the comment to an appropriate place!";
 
-	private SourcePositions sourcePositions;
+	@Deprecated
+	private de.hhu.stups.sablecc.patch.SourcePositions sourcePositions;
 
 	/**
 	 * Parses the input file.
 	 * 
 	 * @see #parse(String, boolean)
-	 * @param machine
-	 * @param verbose
-	 * @return
-	 * @throws IOException
-	 * @throws BException
+	 * @param machine the machine file
+	 * @param verbose print debug information
+	 * @return the generated AST
+	 * @throws IOException if stream cannot be written to or closed
+	 * @throws BException if parsing fails
 	 */
-	public Start parseFile(final File machine, final boolean verbose)
-			throws IOException, BException {
+	public Start parseFile(final File machine, final boolean verbose) throws IOException, BException {
 		final InputStreamReader inputStreamReader
 			= new InputStreamReader(new FileInputStream(machine), StandardCharsets.UTF_8);
 
@@ -52,7 +48,12 @@ public class EventBParser {
 			builder.append(String.valueOf(buffer, 0, read));
 		}
 		inputStreamReader.close();
+
 		return parse(builder.toString(), verbose);
+	}
+
+	public Start parseFile(File machine) throws IOException, BException {
+		return this.parseFile(machine, false);
 	}
 
 	/**
@@ -76,66 +77,41 @@ public class EventBParser {
 	 *             <p>
 	 *             Internal exceptions:
 	 *             <ul>
-	 *             <li> {@link EventBLexerException}: If any error occurs in the
-	 *             generated or customized lexer a {@link LexerException} is
-	 *             thrown. Usually the lexer classes just throw a
-	 *             {@link LexerException}. But this class unfortunately does not
-	 *             contain any explicit information about the sourcecode
-	 *             position where the error occured. Using aspect-oriented
-	 *             programming we intercept the throwing of these exceptions to
-	 *             replace them by our own exception. In our own exception we
-	 *             provide the sourcecode position of the last characters that
-	 *             were read from the input.</li>
-	 *             <li> {@link EventBParseException}: This exception is thrown in
+	 *             <li>{@link EventBLexerException}:
+	 *             Thrown if any error occurs in the generated or customized lexer.
+	 *             Unlike SableCC's standard {@link LexerException},
+	 *             our own exception provides the source code position
+	 *             of the last characters that were read from the input.</li>
+	 *             <li>{@link EventBParseException}: This exception is thrown in
 	 *             two situations. On the one hand if the parser throws a
 	 *             {@link ParserException} we convert it into a
 	 *             {@link EventBParseException}. On the other hand it can be
 	 *             thrown if any error is found during the AST transformations
 	 *             after the parser has finished. We try to provide a token if a
-	 *             single token is involved in the error. Otherwise a
-	 *             {@link SourcecodeRange} is provided, which can be used to
-	 *             retrieve detailed position information from the
-	 *             {@link SourcePositions} (s. {@link #getSourcePositions()}).</li>
-	 *             <li> {@link CheckException}: If any problem occurs while
-	 *             performing semantic checks, a {@link CheckException} is
-	 *             thrown. We provide one or more nodes that are involved in the
-	 *             problem. For example, if we find dublicate machine clauses,
-	 *             we will list all occurances in the exception.</li>
+	 *             single token is involved in the error.</li>
 	 *             </ul>
 	 */
-	public Start parse(final String input, final boolean debugOutput)
-			throws BException {
+	@SuppressWarnings("deprecation")
+	public Start parse(final String input, final boolean debugOutput) throws BException {
 		final Reader reader = new StringReader(input);
 
 		try {
 			/*
 			 * Main parser
 			 */
-			final EventBLexer lexer = new EventBLexer(new PushbackReader(
-					reader, 99));
+			final EventBLexer lexer = new EventBLexer(new PushbackReader(reader, 99));
 			lexer.setDebugOutput(debugOutput);
 
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
-			final List<IToken> tokenList = ((ITokenListContainer) lexer)
-					.getTokenList();
+			final List<IToken> tokenList = lexer.getTokenList();
 
-			/*
-			 * Retrieving sourcecode positions which were found by ParserAspect
-			 */
-			final Map<PositionedNode, SourcecodeRange> positions = ((IParser) parser)
-					.getMapping();
+			final Map<PositionedNode, de.hhu.stups.sablecc.patch.SourcecodeRange> positions = parser.getMapping();
 
-			sourcePositions = new SourcePositions(tokenList, positions);
-			parser = null;
+			sourcePositions = new de.hhu.stups.sablecc.patch.SourcePositions(tokenList, positions);
 
 			return rootNode;
 		} catch (final LexerException e) {
-			/*
-			 * Actually it's supposed to be a EventBLexerException because the
-			 * aspect 'LexerAspect' replaces any LexerException to provide
-			 * sourcecode position information in the BLexerException.
-			 */
 			throw new BException(e);
 		} catch (final ParserException e) {
 			throw new BException(createEventBParseException(e));
@@ -147,8 +123,11 @@ public class EventBParser {
 		}
 	}
 
-	private EventBParseException createEventBParseException(
-			final ParserException e) {
+	public Start parse(String input) throws BException {
+		return this.parse(input, false);
+	}
+
+	private EventBParseException createEventBParseException(final ParserException e) {
 		final Token token = e.getToken();
 		String message = e.getMessage();
 		final boolean expectingFound = message.indexOf("expecting") >= 0;
@@ -173,7 +152,7 @@ public class EventBParser {
 	 * @deprecated Please use the {@link PositionedNode} methods to get position information instead. All SableCC-generated nodes and tokens extend this class.
 	 */
 	@Deprecated
-	public SourcePositions getSourcePositions() {
+	public de.hhu.stups.sablecc.patch.SourcePositions getSourcePositions() {
 		// Deprecated, but do not remove yet! Camille still uses this method to get position info for errors (as of April 2022).
 		return sourcePositions;
 	}

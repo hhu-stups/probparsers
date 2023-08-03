@@ -14,7 +14,7 @@ import de.be4.eventb.core.parser.node.PVariable;
 import de.be4.eventb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 
-public class SourcePositionsTest extends AbstractTest {
+public class SourcePositionsTest {
 
 	EventBParser parser = new EventBParser();
 

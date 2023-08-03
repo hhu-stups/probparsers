@@ -113,17 +113,17 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		if (expression instanceof AFunctionExpression) {
 			// the operation was parsed as a function expression
 			final AFunctionExpression function = (AFunctionExpression) expression;
-			final PExpression funcId = function.getIdentifier();
+			idExpr = function.getIdentifier();
 
-			if (funcId instanceof AIdentifierExpression) {
-				final AIdentifierExpression identifier = (AIdentifierExpression) funcId;
+			if (idExpr instanceof AIdentifierExpression) {
+				final AIdentifierExpression identifier = (AIdentifierExpression)idExpr;
 				idString = Utils.getTIdentifierListAsString(identifier.getIdentifier());
 				idToken = identifier.getIdentifier().get(0);
 				type = definitions.getType(idString);
 			} else {
 				type = Type.NoDefinition;
 			}
-			idExpr = function.getIdentifier();
+
 			parameters = new LinkedList<>(function.getParameters());
 		} else if (expression instanceof AIdentifierExpression) {
 			// the operation was parsed as an identifier expression

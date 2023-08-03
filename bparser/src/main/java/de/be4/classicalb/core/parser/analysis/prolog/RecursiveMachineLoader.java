@@ -294,39 +294,48 @@ public class RecursiveMachineLoader {
 
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
-
-			try {
-				final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
-				newAncestors.add(new Ancestor(name, refMachine));
-				final String filePragma = refMachine.getPath();
-				File file;
-				if (filePragma == null) {
-					file = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
+			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
+			newAncestors.add(new Ancestor(name, refMachine));
+			final String filePragma = refMachine.getPath();
+			File referencedFile;
+			if (filePragma == null) {
+				try {
+					referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
+				} catch (CheckException e) {
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+				}
+			} else {
+				File p = new File(filePragma);
+				if (p.isAbsolute()) {
+					referencedFile = p;
 				} else {
-					File p = new File(filePragma);
-					if (p.isAbsolute()) {
-						file = p;
-					} else {
-						file = new File(directory, filePragma);
-					}
+					referencedFile = new File(directory, filePragma);
 				}
-				if (file.exists() && parsedFiles.containsKey(refMachine.getName())
-						&& !parsedFiles.get(refMachine.getName()).getCanonicalPath().equals(file.getCanonicalPath())) {
-					final String message = "Two files with the same name are referenced:\n"
-							+ parsedFiles.get(refMachine.getName()).getCanonicalPath() + "\n" + file.getCanonicalPath();
-					throw new BException(machineFile.getCanonicalPath(),
-							new CheckException(message, refMachine.getNode()));
+			}
 
+			if (referencedFile.exists() && parsedFiles.containsKey(refMachine.getName())) {
+				String referencedFileCanonical;
+				String alreadyParsedCanonical;
+				try {
+					referencedFileCanonical = referencedFile.getCanonicalPath();
+					alreadyParsedCanonical = parsedFiles.get(refMachine.getName()).getCanonicalPath();
+				} catch (IOException e) {
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 				}
-				if (!getParsedMachines().containsKey(refMachine.getName())) {
-					loadMachine(newAncestors, file);
+				if (!alreadyParsedCanonical.equals(referencedFileCanonical)) {
+					final String message = "Two files with the same name are referenced:\n"
+							+ alreadyParsedCanonical + "\n" + referencedFileCanonical;
+					throw new BCompoundException(new BException(machineFile.getAbsolutePath(),
+							new CheckException(message, refMachine.getNode())));
 				}
-			} catch (final BException e) {
-				throw new BCompoundException(e);
-			} catch (final IOException e) {
-				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
-			} catch (final CheckException e) {
-				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
+			}
+
+			if (!getParsedMachines().containsKey(refMachine.getName())) {
+				try {
+					loadMachine(newAncestors, referencedFile);
+				} catch (BCompoundException e) {
+					throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(machineFile.getAbsolutePath(), refMachine.getNode())));
+				}
 			}
 		}
 	}
