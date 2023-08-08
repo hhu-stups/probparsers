@@ -44,28 +44,22 @@ public class EBLexer extends BLexer {
 		super.filter();
 		if (token != null && token instanceof TIdentifierLiteral && v.get(token.getText())) {
 			Queue<IToken> ts = getNextList();
-			List<IToken> toks = getTokenList();
 			int l = token.getLine();
 			int p = token.getPos();
 
 			TLeftPar t1 = new TLeftPar(l, p);
 			ts.add(t1);
-			toks.add(t1);
 
 			ts.add(token);
-			toks.add(token);
 
 			TEqual t2 = new TEqual(l, p);
 			ts.add(t2);
-			toks.add(t2);
 
 			TTrue t3 = new TTrue(l, p);
 			ts.add(t3);
-			toks.add(t3);
 
 			TRightPar t4 = new TRightPar(l, p);
 			ts.add(t4);
-			toks.add(t4);
 
 			token = null;
 		}

@@ -129,6 +129,7 @@ public final class Utils {
 	 */
 	public static boolean isProBSpecialDefinitionName(String identifier) {
 		return "GOAL".equals(identifier)
+			|| "SHIELD_INTERVENTION".equals(identifier) // SimB reinforcement learning shield (in ProB 2 UI)
 			|| "VISB_JSON_FILE".equals(identifier)
 			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
 			|| identifier.startsWith("ASSERT_CTL")

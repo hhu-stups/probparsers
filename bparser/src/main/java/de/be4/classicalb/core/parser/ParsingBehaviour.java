@@ -39,12 +39,6 @@ public class ParsingBehaviour {
 	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;
 	}
-	
-	public void debug_print(final String msg) {
-		if (verbose) {
-			System.out.println(msg);
-		}
-	}
 
 	public boolean isPrintTime() {
 		return printTime;

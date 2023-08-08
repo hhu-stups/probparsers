@@ -159,7 +159,7 @@ public class EventBLexer extends Lexer {
 	}
 
 	private void collectString() throws EventBLexerException {
-		if (state.equals(State.FORMULA)) {
+		if (!(token instanceof EOF) && state.equals(State.FORMULA)) {
 			// we are entering state STRING
 			if (string == null) {
 				beginStringToken();
