@@ -1018,6 +1018,18 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseAFlooredDivExpression(AFlooredDivExpression node) {
+		// Floored division doesn't exist in B syntax -
+		// it's only produced by translation from TLA+ or Z.
+		// ProB's LibraryMath.def provides an external function FDIV that implements floored division.
+		sb.append("FDIV(");
+		node.getLeft().apply(this);
+		sb.append(",");
+		node.getRight().apply(this);
+		sb.append(")");
+	}
+
+	@Override
 	public void caseAIfElsifExprExpression(AIfElsifExprExpression node) {
 		sb.append(" ELSIF ");
 		node.getCondition().apply(this);
