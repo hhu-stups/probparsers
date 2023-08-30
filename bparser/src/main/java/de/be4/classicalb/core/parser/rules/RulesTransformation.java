@@ -910,7 +910,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		AVarSubstitution var = new AVarSubstitution();
 
-		final String RESULT_STRINGS = "$ResultSrings";
+		final String RESULT_STRINGS = "$ResultStrings";
 		var.setIdentifiers(createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(RESULT_STRINGS)));
 		List<PSubstitution> subList = new ArrayList<>();
 		{
