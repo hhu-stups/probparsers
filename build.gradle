@@ -80,6 +80,13 @@ subprojects {
         withJavadocJar()
     }
 
+    javadoc {
+        options {
+            // silence warnings on missing javadoc
+            addBooleanOption('Xdoclint:all,-missing', true)
+        }
+    }
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
