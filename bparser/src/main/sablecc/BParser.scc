@@ -208,10 +208,9 @@ Tokens
   {normal} total_surjection = minus minus '>>' | 0x21a0;
   {normal} insert_start_sequence = minus '>' | 0x21fe;
   {normal} dot = '.' ; // Ascii dot
-  {normal} dot2 = '·' | 0x22c5 | '•'; // is the bullet, Option-8 on US keyboards
+  {normal} dot2 = '·' | 0x22c5 | 0x00b7 | '•'; // is the bullet, Option-8 on US keyboards
    // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
   {normal} interval = '..' | 0x2025;
-  //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
   {normal} finite = 0x2a0d; // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
   {normal} not_belonging = '/:' | 0x2209;
@@ -245,9 +244,9 @@ Tokens
   {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21ds is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
   {normal} greater = '>';
   {normal} partial_injection = '>+>' | 0x2914;
-  {normal} total_injection = '>' minus '>' | 0x21a3;
+  {normal} total_injection = '>' minus '>' | 0x21a3;  // >->
   {normal} partial_bijection = '>+>>';
-  {normal} total_bijection = '>' minus '>>' | 0x2916;
+  {normal} total_bijection = '>' minus '>>' | 0x2916; // >->>
   {normal} direct_product = '><' | 0x2297;
   {normal} greater_equal = '>=' | 0x2265;
   {normal} abstract_constants = 'ABSTRACT_CONSTANTS';
@@ -384,10 +383,10 @@ Tokens
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
 
-  // Extensions
-  {normal} total_relation = '<<' minus '>' | 0xe100;
-  {normal} surjection_relation = '<' minus '>>' | 0xe101;
-  {normal} total_surjection_relation = '<<' minus '>>' | 0xe102;
+  // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
+  {normal} total_relation = '<<' minus '>' | 0xe100;             // <<->
+  {normal} surjection_relation = '<' minus '>>' | 0xe101;        // <->>
+  {normal} total_surjection_relation = '<<' minus '>>' | 0xe102; // <<->>
   {normal} kw_freetypes = 'FREETYPES';
 
   // keywords for special parsing modes;
