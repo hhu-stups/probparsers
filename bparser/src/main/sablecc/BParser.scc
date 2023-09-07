@@ -224,9 +224,9 @@ Tokens
   {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
     // Note TLA+ propses 0x2237 (PROPORTION) for label_as operator ::
   {normal} assign = ':=' | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
-  {normal} semicolon = ';';
+  {normal} semicolon = ';'; // separator, sequential composition and also forward composition (is 0x3b)
   {normal} less = '<';
-  {normal} ring = 0x2218; // circ or forward composition from Event-B, normally not allowed by Atelier-B
+  {normal} ring = 0x2218; // circ or backward composition from Event-B, normally not allowed by Atelier-B
   {normal} less_greater = '<' white_space* '>'; // for empty sequence
   {normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
   {normal} set_relation = '<' minus '>' | 0x2194;
@@ -382,6 +382,7 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
+  // {normal} oftype = 0x2982; // coming from Rodin; TODO support and create oftype AST node
 
   // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
   {normal} total_relation = '<<' minus '>' | 0xe100;             // <<->
