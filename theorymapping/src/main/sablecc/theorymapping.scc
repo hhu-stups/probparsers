@@ -19,6 +19,7 @@ Helpers
   digit = ['0'..'9'];
   alpha = [['a'..'z'] + ['A'..'Z']];
   alphanum = [digit + alpha];
+  dot = '.';
 
 /*******************************************************************
  * Tokens                                                          *
@@ -31,7 +32,11 @@ Tokens
   opname = quote nonquote+ quote;
   symbol_open = cbr_open;
   symbol_close = cbr_close;
-  internal_spec = alpha (alphanum | underscore)*;
+ /* used to be: internal_spec = alpha (alphanum | underscore)*; */
+  internal_spec = alpha (alphanum | underscore)* | /* identifier */
+                  digit+ | /* integer literal */
+                  (digit+ dot digit+) | /* real literal */
+                  quote nonquote+ quote; /* string literal */
 
 /*******************************************************************
  * Ignored Tokens                                                  *
