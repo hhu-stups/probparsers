@@ -45,7 +45,7 @@ public class BindingGenerator {
 			ListPrologTerm list = (ListPrologTerm) term;
 			result = createBinding(list);
 		} else
-			throw new IllegalArgumentException("Expected list");
+			throw new IllegalArgumentException("Expected Prolog list, but was " + term.toString());
 		return result;
 	}
 
