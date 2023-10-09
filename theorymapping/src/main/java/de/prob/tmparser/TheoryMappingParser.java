@@ -1,9 +1,12 @@
 package de.prob.tmparser;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import de.prob.core.theorymapping.lexer.Lexer;
@@ -16,8 +19,13 @@ import de.prob.tmparser.internal.MappingVisitor;
 public class TheoryMappingParser {
 	public static Collection<OperatorMapping> parseTheoryMapping(
 			String theoryName, String filename) throws IOException {
-		final Reader input = new FileReader(filename);
-		return parseTheoryMapping(theoryName, input);
+		return parseTheoryMapping(theoryName, Paths.get(filename));
+	}
+
+	public static Collection<OperatorMapping> parseTheoryMapping(String theoryName, Path path) throws IOException {
+		try (BufferedReader reader = Files.newBufferedReader(path)) {
+			return parseTheoryMapping(theoryName, reader);
+		}
 	}
 
 	public static Collection<OperatorMapping> parseTheoryMapping(
