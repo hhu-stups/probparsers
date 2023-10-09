@@ -1,9 +1,9 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -329,14 +329,17 @@ public final class ASTBuilder {
 		iDefinitions.addDefinition(formatType, IDefinitions.Type.Expression);
 	}
 
-	public static void addBooleanPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
-		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
-				new ArrayList<PExpression>(), bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
+	private static void addPreferenceDefinition(IDefinitions iDefinitions, String name, PExpression value) {
+		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(PREFERENCES_PREFIX + name), Collections.emptyList(), value);
 		iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
 	}
 
+	public static void addBooleanPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
+		addPreferenceDefinition(iDefinitions, name, bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
+	}
+
 	public static void addGeneralPreferenceDefinitions(IDefinitions iDefinitions, Map<String, String> map) {
-		for (Entry<String, String> entry : map.entrySet()) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
 			addGeneralPreferenceDefinition(iDefinitions, entry.getKey(), entry.getValue());
 		}
 	}
@@ -345,31 +348,26 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(name)) {
 			return;
 		}
-		if ("TRUE".equals(value)) {
-			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, true);
-		} else if ("FALSE".equals(value)) {
-			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
-		} else {
-			if (getIntegerFromString(value) != null) {
-				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
-						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
-						new AIntegerExpression(new TIntegerLiteral(value)));
-				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-			} else {
-				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
-						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
-						new AStringExpression(new TStringLiteral(value)));
-				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-			}
-		}
 
+		PExpression expr;
+		if ("TRUE".equals(value)) {
+			expr = new ABooleanTrueExpression();
+		} else if ("FALSE".equals(value)) {
+			expr = new ABooleanFalseExpression();
+		} else if (isInteger(value)) {
+			expr = new AIntegerExpression(new TIntegerLiteral(value));
+		} else {
+			expr = new AStringExpression(new TStringLiteral(value));
+		}
+		addPreferenceDefinition(iDefinitions, name, expr);
 	}
 
-	private static Integer getIntegerFromString(String value) {
+	private static boolean isInteger(String value) {
 		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) {
-			return null;
+			Integer.parseInt(value);
+			return true;
+		} catch (NumberFormatException ignored) {
+			return false;
 		}
 	}
 
