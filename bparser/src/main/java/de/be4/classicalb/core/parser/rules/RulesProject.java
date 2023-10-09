@@ -173,8 +173,8 @@ public class RulesProject {
 		addSortDefinition(iDefinitions);
 		addFormatToStringDefinition(iDefinitions);
 		addChooseDefinition(iDefinitions);
-		addBooleanPreferenceDefinition(iDefinitions, "SET_PREF_ALLOW_LOCAL_OPERATION_CALLS", true);
-		addBooleanPreferenceDefinition(iDefinitions, "SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS", true);
+		addBooleanPreferenceDefinition(iDefinitions, "ALLOW_LOCAL_OPERATION_CALLS", true);
+		addBooleanPreferenceDefinition(iDefinitions, "ALLOW_OPERATION_CALLS_IN_EXPRESSIONS", true);
 		mainMachine.replaceDefinition(iDefinitions);
 		return mainMachine;
 	}
