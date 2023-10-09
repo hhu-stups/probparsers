@@ -14,13 +14,13 @@ import de.prob.core.theorymapping.parser.ParserException;
 import de.prob.tmparser.internal.MappingVisitor;
 
 public class TheoryMappingParser {
-	static public Collection<OperatorMapping> parseTheoryMapping(
+	public static Collection<OperatorMapping> parseTheoryMapping(
 			String theoryName, String filename) throws IOException {
 		final Reader input = new FileReader(filename);
 		return parseTheoryMapping(theoryName, input);
 	}
 
-	static public Collection<OperatorMapping> parseTheoryMapping(
+	public static Collection<OperatorMapping> parseTheoryMapping(
 			String theoryName, Reader input) throws IOException {
 		Start ast;
 		try {
@@ -33,14 +33,14 @@ public class TheoryMappingParser {
 		return extractMappings(ast, theoryName);
 	}
 
-	static private Start parse(Reader input) throws ParserException,
+	private static Start parse(Reader input) throws ParserException,
 			LexerException, IOException {
 		final Lexer lexer = new Lexer(new PushbackReader(input));
 		final Parser parser = new Parser(lexer);
 		return parser.parse();
 	}
 
-	static private Collection<OperatorMapping> extractMappings(Start ast,
+	private static Collection<OperatorMapping> extractMappings(Start ast,
 			String theoryName) {
 		MappingVisitor visitor = new MappingVisitor(theoryName);
 		ast.apply(visitor);
