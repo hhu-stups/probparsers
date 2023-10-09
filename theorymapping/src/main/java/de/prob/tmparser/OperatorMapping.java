@@ -1,5 +1,7 @@
 package de.prob.tmparser;
 
+import de.prob.prolog.output.IPrologTermOutput;
+
 public class OperatorMapping {
 	private final String theoryName;
 	private final String operatorName;
@@ -79,4 +81,10 @@ public class OperatorMapping {
 		return true;
 	}
 
+	public void printProlog(IPrologTermOutput pout) {
+		pout.openTerm("tag");
+		pout.printAtom(this.getOperatorName());
+		pout.printAtom(this.getSpec());
+		pout.closeTerm();
+	}
 }
