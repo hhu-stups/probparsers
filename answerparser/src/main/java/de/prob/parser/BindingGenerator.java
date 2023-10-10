@@ -24,7 +24,12 @@ import de.prob.prolog.term.VariablePrologTerm;
  * identifiers and a,b,c prolog terms.
  */
 public class BindingGenerator {
-
+	/**
+	 * @deprecated This method doesn't distinguish between callback/progress results and the actual final result.
+	 *     Use {@link #createBinding(PrologTerm)} instead,
+	 *     or use {@link #createBindingMustNotFail(String, Start)} if you don't want to handle callback/progress/error results.
+	 */
+	@Deprecated
 	public static Map<String, PrologTerm> createBinding(final Start ast) {
 		PrologTerm term = PrologTermGenerator.toPrologTerm(ast);
 		return createBinding(term);
@@ -37,7 +42,7 @@ public class BindingGenerator {
 		return createBinding(term);
 	}
 
-	private static Map<String, PrologTerm> createBinding(final PrologTerm term) {
+	public static Map<String, PrologTerm> createBinding(final PrologTerm term) {
 		Map<String, PrologTerm> result;
 		if (term == null) {
 			result = null;

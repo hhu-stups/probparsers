@@ -38,8 +38,7 @@ import de.prob.prolog.term.VariablePrologTerm;
 public class PrologTermGenerator {
 	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];
 
-	public static PrologTerm toPrologTerm(final Start node) {
-		PResult topnode = node.getPResult();
+	public static PrologTerm toPrologTerm(PResult topnode) {
 		PrologTerm term = null;
 		if (topnode instanceof AYesResult) {
 			term = toPrologTerm(((AYesResult) topnode).getTerm());
@@ -61,17 +60,23 @@ public class PrologTermGenerator {
 		return term;
 	}
 
+	public static PrologTerm toPrologTerm(Start node) {
+		return toPrologTerm(node.getPResult());
+	}
+
 	public static PrologTerm toPrologTermMustNotFail(final String query,
 			final Start node) {
-		PrologTerm term = toPrologTerm(node);
-		if (term == null) {
+		PResult topnode = node.getPResult();
+		if (topnode instanceof ACallBackResult || topnode instanceof AProgressResult) {
+			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported here: " + query, null);
+		} else if (!(topnode instanceof AYesResult)) {
 			final String message = "Prolog query unexpectedly failed: " + query;
 			throw new ResultParserException(message, null);
 		}
-		return term;
+		return toPrologTerm(((AYesResult)topnode).getTerm());
 	}
 
-	private static PrologTerm toPrologTerm(final PTerm node) {
+	public static PrologTerm toPrologTerm(final PTerm node) {
 		PrologTerm term;
 		if (node instanceof ANumberTerm) {
 			String text = ((ANumberTerm) node).getNumber().getText();
