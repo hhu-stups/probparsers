@@ -472,6 +472,7 @@ public class CliBParser {
 
 		try {
 			BParser parser = new BParser();
+			parser.setStartPosition(behaviour.getStartLineNumber(), behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
 			Start start;
 			switch (command) {
