@@ -540,7 +540,6 @@ public class CliBParser {
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final OutputStream out, final PrintWriter err, final File bfile) {
 		try {
-			debugPrint(behaviour, "Parsing file: " + bfile);
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
