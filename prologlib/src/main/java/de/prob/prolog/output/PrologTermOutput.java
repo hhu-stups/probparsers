@@ -1,9 +1,12 @@
 package de.prob.prolog.output;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -18,7 +21,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 	private static final char[] VALID_CHARS = validChars();
 	private static final char[] VALID_ATOM_CHARS = validAtomChars();
 
-	private final PrintWriter out;
+	private final Writer out;
 
 	// commaNeeded states if the next term can be printed directly (false) or
 	// if a separating comma is needed first
@@ -36,9 +39,13 @@ public class PrologTermOutput implements IPrologTermOutput {
 	// before closing the term, an opening parenthesis should be printed.
 	private boolean lazyParenthesis = false;
 
-	public PrologTermOutput(final PrintWriter out, final boolean useIndentation) {
-		this.useIndentation = useIndentation;
+	public PrologTermOutput(Writer out, boolean useIndentation) {
 		this.out = out;
+		this.useIndentation = useIndentation;
+	}
+
+	public PrologTermOutput(final PrintWriter out, final boolean useIndentation) {
+		this((Writer)out, useIndentation);
 	}
 
 	public PrologTermOutput(final PrintWriter out) {
@@ -46,7 +53,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	public PrologTermOutput(final OutputStream out, final boolean useIndentation) {
-		this(new PrintWriter(new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))), useIndentation);
+		this(new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)), useIndentation);
 	}
 
 	public PrologTermOutput(final OutputStream out) {
@@ -63,23 +70,23 @@ public class PrologTermOutput implements IPrologTermOutput {
 	 * @param doubleQuotes
 	 *            if double quotes may be used
 	 */
-	private void escape(final String input, final boolean singleQuotes, final boolean doubleQuotes) {
+	private void escape(final String input, final boolean singleQuotes, final boolean doubleQuotes) throws IOException {
 		for (int i = 0; i < input.length(); i++) {
 			final char c = input.charAt(i);
 			if (Arrays.binarySearch(VALID_CHARS, c) >= 0) {
-				out.print(c);
+				out.write(c);
 			} else if (c == '\'') {
-				out.print(singleQuotes ? "'" : "\\'");
+				out.write(singleQuotes ? "'" : "\\'");
 			} else if (c == '\\') {
-				out.print("\\\\");
+				out.write("\\\\");
 			} else if (c == '\n') {
-				out.print("\\n");
+				out.write("\\n");
 			} else if (c == '"') {
-				out.print(doubleQuotes ? "\"" : "\\\"");
+				out.write(doubleQuotes ? "\"" : "\\\"");
 			} else {
-				out.print('\\');
-				out.print(Integer.toOctalString(c));
-				out.print('\\');
+				out.write('\\');
+				out.write(Integer.toOctalString(c));
+				out.write('\\');
 			}
 		}
 	}
@@ -142,13 +149,13 @@ public class PrologTermOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	private void printIndentation() {
+	private void printIndentation() throws IOException {
 		if (useIndentation && ignoreIndentationLevel == 0) {
 			// synchronized to speed up printing
 			synchronized (out) {
-				out.println();
+				out.write(System.lineSeparator());
 				for (int i = 0; i < indentLevel; i++) {
-					out.print(' ');
+					out.write(' ');
 				}
 			}
 		}
@@ -163,7 +170,11 @@ public class PrologTermOutput implements IPrologTermOutput {
 		if (lazyParenthesis) {
 			lazyParenthesis = false;
 		} else {
-			out.print(')');
+			try {
+				out.write(')');
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 		}
 		commaNeeded = true;
 		indentLevel -= 2;
@@ -177,13 +188,17 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printAtom(final String content) {
 		Objects.requireNonNull(content, "Atom value is null");
 		synchronized (out) {
-			printCommaIfNeeded();
-			if (escapeIsNeeded(content)) {
-				out.print('\'');
-				escape(content, false, true);
-				out.print('\'');
-			} else {
-				out.print(content);
+			try {
+				printCommaIfNeeded();
+				if (escapeIsNeeded(content)) {
+					out.write('\'');
+					escape(content, false, true);
+					out.write('\'');
+				} else {
+					out.write(content);
+				}
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
 			}
 			commaNeeded = true;
 		}
@@ -206,10 +221,14 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printString(final String content) {
 		Objects.requireNonNull(content, "String value is null");
 		synchronized (out) {
-			printCommaIfNeeded();
-			out.print('"');
-			escape(content, true, false);
-			out.print('"');
+			try {
+				printCommaIfNeeded();
+				out.write('"');
+				escape(content, true, false);
+				out.write('"');
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 		}
 		return this;
@@ -218,8 +237,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printNumber(final long number) {
 		synchronized (out) {
-			printCommaIfNeeded();
-			out.print(number);
+			try {
+				printCommaIfNeeded();
+				out.write(Long.toString(number));
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 		}
 		return this;
@@ -229,8 +252,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printNumber(final BigInteger number) {
 		Objects.requireNonNull(number, "Number is null");
 		synchronized (out) {
-			printCommaIfNeeded();
-			out.print(number);
+			try {
+				printCommaIfNeeded();
+				out.write(number.toString());
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 		}
 		return this;
@@ -239,8 +266,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printNumber(final double number) {
 		synchronized (out) {
-			printCommaIfNeeded();
-			out.print(number);
+			try {
+				printCommaIfNeeded();
+				out.write(Double.toString(number));
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 		}
 		return this;
@@ -250,8 +281,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput openList() {
 		synchronized (out) {
 			listCount++;
-			printCommaIfNeeded();
-			out.print('[');
+			try {
+				printCommaIfNeeded();
+				out.write('[');
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = false;
 			indentLevel += 1;
 		}
@@ -265,7 +300,11 @@ public class PrologTermOutput implements IPrologTermOutput {
 			if (listCount < 0)
 				throw new IllegalStateException(
 						"Tried to close a list that has not been opened.");
-			out.print(']');
+			try {
+				out.write(']');
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 			indentLevel -= 1;
 		}
@@ -275,8 +314,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput emptyList() {
 		synchronized (out) {
-			printCommaIfNeeded();
-			out.print("[]");
+			try {
+				printCommaIfNeeded();
+				out.write("[]");
+			} catch (IOException exc) {
+				throw new UncheckedIOException(exc);
+			}
 			commaNeeded = true;
 		}
 		return this;
@@ -286,8 +329,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printVariable(final String var) {
 		Objects.requireNonNull(var, "Variable name is null");
 		checkVariable(var);
-		printCommaIfNeeded();
-		out.print(var);
+		try {
+			printCommaIfNeeded();
+			out.write(var);
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
+		}
 		commaNeeded = true;
 		return this;
 	}
@@ -309,17 +356,21 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput flush() {
-		out.flush();
+		try {
+			out.flush();
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
+		}
 		return this;
 	}
 
-	private void printCommaIfNeeded() {
+	private void printCommaIfNeeded() throws IOException {
 		if (lazyParenthesis) {
-			out.print('(');
+			out.write('(');
 			lazyParenthesis = false;
 		}
 		if (commaNeeded) {
-			out.print(',');
+			out.write(',');
 			printIndentation();
 		}
 	}
@@ -334,7 +385,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 			throw new IllegalStateException(
 					"Number of openTerm and closeTerm do not match. openTerm Counter is "
 							+ termCount);
-		out.println('.');
+		try {
+			out.write('.');
+			out.write(System.lineSeparator());
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
+		}
 		commaNeeded = false;
 		return this;
 	}
