@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Objects;
 
 import de.prob.prolog.term.PrologTerm;
 
@@ -103,9 +104,6 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	private static boolean escapeIsNeeded(final String input) {
-		if (input == null) {
-			return false; // null is a valid atom
-		}
 		final int length = input.length();
 		if (length > 0
 				&& Arrays.binarySearch(VALID_ATOM_CHARS, input.charAt(0)) >= 0
@@ -129,6 +127,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput openTerm(final String functor,
 			final boolean ignoreIndention) {
+		Objects.requireNonNull(functor, "Functor is null");
 		termCount++;
 		printAtom(functor);
 		lazy_parenthesis = true;
@@ -175,6 +174,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printAtom(final String content) {
+		Objects.requireNonNull(content, "Atom value is null");
 		synchronized (out) {
 			printCommaIfNeeded();
 			if (escapeIsNeeded(content)) {
@@ -203,6 +203,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printString(final String content) {
+		Objects.requireNonNull(content, "String value is null");
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print('"');
@@ -225,6 +226,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
+		Objects.requireNonNull(number, "Number is null");
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print(number);
@@ -281,8 +283,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printVariable(final String var) {
-		printCommaIfNeeded();
+		Objects.requireNonNull(var, "Variable name is null");
 		checkVariable(var);
+		printCommaIfNeeded();
 		out.print(var);
 		comma_needed = true;
 		return this;

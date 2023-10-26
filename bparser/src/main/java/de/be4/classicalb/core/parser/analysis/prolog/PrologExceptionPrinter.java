@@ -36,7 +36,7 @@ public final class PrologExceptionPrinter {
 
 	public static void printException(final IPrologTermOutput pto, final IOException e) {
 		pto.openTerm("io_exception");
-		pto.printAtom(e.getMessage());
+		pto.printAtom(String.valueOf(e.getMessage())); // message may be null
 		pto.closeTerm();
 	}
 
@@ -80,11 +80,11 @@ public final class PrologExceptionPrinter {
 			pto.printNumber(location.getStartColumn());
 			pto.printNumber(location.getEndLine());
 			pto.printNumber(location.getEndColumn());
-			pto.printAtom(location.getFilename());
+			pto.printAtom(String.valueOf(location.getFilename())); // filename may be null
 			pto.closeTerm();
 		}
 		pto.closeList();
-		pto.printAtom(e.getMessage());
+		pto.printAtom(String.valueOf(e.getMessage())); // message may be null
 		pto.closeTerm();
 	}
 }
