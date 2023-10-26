@@ -151,12 +151,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	private void printIndentation() throws IOException {
 		if (useIndentation && ignoreIndentationLevel == 0) {
-			// synchronized to speed up printing
-			synchronized (out) {
-				out.write(System.lineSeparator());
-				for (int i = 0; i < indentLevel; i++) {
-					out.write(' ');
-				}
+			out.write(System.lineSeparator());
+			for (int i = 0; i < indentLevel; i++) {
+				out.write(' ');
 			}
 		}
 	}
@@ -187,32 +184,28 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printAtom(final String content) {
 		Objects.requireNonNull(content, "Atom value is null");
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				if (escapeIsNeeded(content)) {
-					out.write('\'');
-					escape(content, false, true);
-					out.write('\'');
-				} else {
-					out.write(content);
-				}
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
+		try {
+			printCommaIfNeeded();
+			if (escapeIsNeeded(content)) {
+				out.write('\'');
+				escape(content, false, true);
+				out.write('\'');
+			} else {
+				out.write(content);
 			}
-			commaNeeded = true;
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printAtomOrNumber(final String content) {
-		synchronized (out) {
-			try {
-				printNumber(Long.parseLong(content));
-			} catch (NumberFormatException e) {
-				printAtom(content);
-			}
+		try {
+			printNumber(Long.parseLong(content));
+		} catch (NumberFormatException e) {
+			printAtom(content);
 		}
 		return this;
 	}
@@ -220,108 +213,94 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printString(final String content) {
 		Objects.requireNonNull(content, "String value is null");
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				out.write('"');
-				escape(content, true, false);
-				out.write('"');
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
+		try {
+			printCommaIfNeeded();
+			out.write('"');
+			escape(content, true, false);
+			out.write('"');
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printNumber(final long number) {
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				out.write(Long.toString(number));
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
+		try {
+			printCommaIfNeeded();
+			out.write(Long.toString(number));
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
 		Objects.requireNonNull(number, "Number is null");
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				out.write(number.toString());
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
+		try {
+			printCommaIfNeeded();
+			out.write(number.toString());
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printNumber(final double number) {
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				out.write(Double.toString(number));
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
+		try {
+			printCommaIfNeeded();
+			out.write(Double.toString(number));
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput openList() {
-		synchronized (out) {
-			listCount++;
-			try {
-				printCommaIfNeeded();
-				out.write('[');
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = false;
-			indentLevel += 1;
+		listCount++;
+		try {
+			printCommaIfNeeded();
+			out.write('[');
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = false;
+		indentLevel += 1;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput closeList() {
-		synchronized (out) {
-			listCount--;
-			if (listCount < 0)
-				throw new IllegalStateException(
-						"Tried to close a list that has not been opened.");
-			try {
-				out.write(']');
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
-			indentLevel -= 1;
+		listCount--;
+		if (listCount < 0)
+			throw new IllegalStateException(
+				"Tried to close a list that has not been opened.");
+		try {
+			out.write(']');
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
+		indentLevel -= 1;
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput emptyList() {
-		synchronized (out) {
-			try {
-				printCommaIfNeeded();
-				out.write("[]");
-			} catch (IOException exc) {
-				throw new UncheckedIOException(exc);
-			}
-			commaNeeded = true;
+		try {
+			printCommaIfNeeded();
+			out.write("[]");
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
 		}
+		commaNeeded = true;
 		return this;
 	}
 
