@@ -12,18 +12,18 @@ import de.prob.prolog.term.PrologTerm;
  * Helper class to generate Prolog terms.
  */
 public class PrologTermOutput implements IPrologTermOutput {
-	private final static char[] VALID_CHARS = validChars();
-	private final static char[] VALID_ATOM_CHARS = validAtomChars();
+	private static final char[] VALID_CHARS = validChars();
+	private static final char[] VALID_ATOM_CHARS = validAtomChars();
 
 	private final PrintWriter out;
 
-	// comma_needed states if the next term can be printed directly (false) or
+	// commaNeeded states if the next term can be printed directly (false) or
 	// if a separating comma is needed first
-	private boolean comma_needed = false;
+	private boolean commaNeeded = false;
 
-	private final boolean use_indention;
-	private int indent_level = 0;
-	private int ignore_indention_level = 0;
+	private final boolean useIndentation;
+	private int indentLevel = 0;
+	private int ignoreIndentationLevel = 0;
 
 	private int termCount = 0;
 	private int listCount = 0;
@@ -31,10 +31,10 @@ public class PrologTermOutput implements IPrologTermOutput {
 	// flag to enable printing of terms without arguments as atoms.
 	// if set, the last printed object was a functor, and if anything is printed
 	// before closing the term, an opening parenthesis should be printed.
-	private boolean lazy_parenthesis = false;
+	private boolean lazyParenthesis = false;
 
-	public PrologTermOutput(final PrintWriter out, final boolean use_indention) {
-		this.use_indention = use_indention;
+	public PrologTermOutput(final PrintWriter out, final boolean useIndentation) {
+		this.useIndentation = useIndentation;
 		this.out = out;
 	}
 
@@ -42,8 +42,8 @@ public class PrologTermOutput implements IPrologTermOutput {
 		this(out, true);
 	}
 
-	public PrologTermOutput(final OutputStream out, final boolean use_indention) {
-		this(new PrintWriter(out), use_indention);
+	public PrologTermOutput(final OutputStream out, final boolean useIndentation) {
+		this(new PrintWriter(out), useIndentation);
 	}
 
 	public PrologTermOutput(final OutputStream out) {
@@ -55,25 +55,24 @@ public class PrologTermOutput implements IPrologTermOutput {
 	 * 
 	 * @param input
 	 *            A string, never <code>null</code>.
-	 * @param single_quotes
+	 * @param singleQuotes
 	 *            if single quotes may be used
-	 * @param double_quotes
+	 * @param doubleQuotes
 	 *            if double quotes may be used
 	 */
-	private void escape(final String input, final boolean single_quotes,
-			final boolean double_quotes) {
+	private void escape(final String input, final boolean singleQuotes, final boolean doubleQuotes) {
 		for (int i = 0; i < input.length(); i++) {
 			final char c = input.charAt(i);
 			if (Arrays.binarySearch(VALID_CHARS, c) >= 0) {
 				out.print(c);
 			} else if (c == '\'') {
-				out.print(single_quotes ? "'" : "\\'");
+				out.print(singleQuotes ? "'" : "\\'");
 			} else if (c == '\\') {
 				out.print("\\\\");
 			} else if (c == '\n') {
 				out.print("\\n");
 			} else if (c == '"') {
-				out.print(double_quotes ? "\"" : "\\\"");
+				out.print(doubleQuotes ? "\"" : "\\\"");
 			} else {
 				out.print('\\');
 				out.print(Integer.toOctalString(c));
@@ -125,28 +124,27 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor,
-			final boolean ignoreIndention) {
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		Objects.requireNonNull(functor, "Functor is null");
 		termCount++;
 		printAtom(functor);
-		lazy_parenthesis = true;
-		comma_needed = false;
-		indent_level += 2;
-		if (ignore_indention_level > 0) {
-			ignore_indention_level++;
-		} else if (ignoreIndention) {
-			ignore_indention_level = 1;
+		lazyParenthesis = true;
+		commaNeeded = false;
+		indentLevel += 2;
+		if (ignoreIndentationLevel > 0) {
+			ignoreIndentationLevel++;
+		} else if (ignoreIndentation) {
+			ignoreIndentationLevel = 1;
 		}
 		return this;
 	}
 
-	private void printIndention() {
-		if (use_indention && ignore_indention_level == 0) {
+	private void printIndentation() {
+		if (useIndentation && ignoreIndentationLevel == 0) {
 			// synchronized to speed up printing
 			synchronized (out) {
 				out.println();
-				for (int i = 0; i < indent_level; i++) {
+				for (int i = 0; i < indentLevel; i++) {
 					out.print(' ');
 				}
 			}
@@ -159,15 +157,15 @@ public class PrologTermOutput implements IPrologTermOutput {
 		if (termCount < 0)
 			throw new IllegalStateException(
 					"Tried to close a term that has not been opened.");
-		if (lazy_parenthesis) {
-			lazy_parenthesis = false;
+		if (lazyParenthesis) {
+			lazyParenthesis = false;
 		} else {
 			out.print(')');
 		}
-		comma_needed = true;
-		indent_level -= 2;
-		if (ignore_indention_level > 0) {
-			ignore_indention_level--;
+		commaNeeded = true;
+		indentLevel -= 2;
+		if (ignoreIndentationLevel > 0) {
+			ignoreIndentationLevel--;
 		}
 		return this;
 	}
@@ -184,7 +182,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 			} else {
 				out.print(content);
 			}
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -209,7 +207,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 			out.print('"');
 			escape(content, true, false);
 			out.print('"');
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -219,7 +217,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print(number);
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -230,7 +228,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print(number);
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -240,7 +238,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print(number);
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -251,8 +249,8 @@ public class PrologTermOutput implements IPrologTermOutput {
 			listCount++;
 			printCommaIfNeeded();
 			out.print('[');
-			comma_needed = false;
-			indent_level += 1;
+			commaNeeded = false;
+			indentLevel += 1;
 		}
 		return this;
 	}
@@ -265,8 +263,8 @@ public class PrologTermOutput implements IPrologTermOutput {
 				throw new IllegalStateException(
 						"Tried to close a list that has not been opened.");
 			out.print(']');
-			comma_needed = true;
-			indent_level -= 1;
+			commaNeeded = true;
+			indentLevel -= 1;
 		}
 		return this;
 	}
@@ -276,7 +274,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		synchronized (out) {
 			printCommaIfNeeded();
 			out.print("[]");
-			comma_needed = true;
+			commaNeeded = true;
 		}
 		return this;
 	}
@@ -287,7 +285,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		checkVariable(var);
 		printCommaIfNeeded();
 		out.print(var);
-		comma_needed = true;
+		commaNeeded = true;
 		return this;
 	}
 
@@ -313,13 +311,13 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	private void printCommaIfNeeded() {
-		if (lazy_parenthesis) {
+		if (lazyParenthesis) {
 			out.print('(');
-			lazy_parenthesis = false;
+			lazyParenthesis = false;
 		}
-		if (comma_needed) {
+		if (commaNeeded) {
 			out.print(',');
-			printIndention();
+			printIndentation();
 		}
 	}
 
@@ -334,7 +332,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 					"Number of openTerm and closeTerm do not match. openTerm Counter is "
 							+ termCount);
 		out.println('.');
-		comma_needed = false;
+		commaNeeded = false;
 		return this;
 	}
 

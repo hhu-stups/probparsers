@@ -49,7 +49,7 @@ public class DummyPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndention) {
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		return this;
 	}
 

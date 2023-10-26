@@ -54,9 +54,8 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor,
-			final boolean ignoreIndention) {
-		pto.openTerm(functor, ignoreIndention);
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
+		pto.openTerm(functor, ignoreIndentation);
 		return this;
 	}
 

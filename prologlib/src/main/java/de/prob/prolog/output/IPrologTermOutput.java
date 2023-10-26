@@ -34,12 +34,12 @@ public interface IPrologTermOutput {
 	 * 
 	 * @param functor
 	 *            the functor, never <code>null</code>
-	 * @param ignoreIndention
+	 * @param ignoreIndentation
 	 *            if this is set to true, the arguments of this term are not
 	 *            subject to indent.
 	 * @return the IPrologTermOutput
 	 */
-	IPrologTermOutput openTerm(final String functor, final boolean ignoreIndention);
+	IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation);
 
 	/**
 	 * Finish a term that was started with {@link #openTerm(String)}. This
