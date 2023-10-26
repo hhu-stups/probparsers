@@ -1,8 +1,11 @@
 package de.prob.prolog.output;
 
+import java.io.BufferedWriter;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -43,11 +46,11 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	public PrologTermOutput(final OutputStream out, final boolean useIndentation) {
-		this(new PrintWriter(out), useIndentation);
+		this(new PrintWriter(new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))), useIndentation);
 	}
 
 	public PrologTermOutput(final OutputStream out) {
-		this(new PrintWriter(out));
+		this(out, true);
 	}
 
 	/**
