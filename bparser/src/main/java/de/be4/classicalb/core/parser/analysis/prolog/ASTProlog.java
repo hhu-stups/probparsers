@@ -275,7 +275,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAPrimedIdentifierExpression(final APrimedIdentifierExpression node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
-		pout.printNumber(Long.parseLong((node.getGrade().getText())));
+		// The parser now only supports $0
+		pout.printNumber(0);
 		close(node);
 	}
 

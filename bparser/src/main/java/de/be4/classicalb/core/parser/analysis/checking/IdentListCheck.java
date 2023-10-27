@@ -24,7 +24,6 @@ import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
-import de.be4.classicalb.core.parser.node.APrimedIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
@@ -170,7 +169,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	@Override
 	public void inARecordFieldExpression(ARecordFieldExpression node) {
 		PExpression identifier = node.getIdentifier();
-		if (!(isIdentifierExpression(identifier))) {
+		if (!(identifier instanceof AIdentifierExpression)) {
 			nonIdentifiers.add(identifier);
 		}
 	}
@@ -178,7 +177,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	@Override
 	public void inARecEntry(ARecEntry node) {
 		PExpression identifier = node.getIdentifier();
-		if (!(isIdentifierExpression(identifier))) {
+		if (!(identifier instanceof AIdentifierExpression)) {
 			nonIdentifiers.add(identifier);
 		}
 	}
@@ -204,16 +203,10 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
 			final PExpression expression = iterator.next();
 
-			if (!(isIdentifierExpression(expression))) {
+			if (!(expression instanceof AIdentifierExpression)) {
 				nonIdentifiers.add(expression);
 			}
 		}
-	}
-
-	@SuppressWarnings("deprecation")
-	private boolean isIdentifierExpression(final PExpression expression) {
-		return expression instanceof AIdentifierExpression
-				|| (!options.isRestrictPrimedIdentifiers() && expression instanceof APrimedIdentifierExpression);
 	}
 
 	class AssignCheck extends OptimizedTraversingAdapter {

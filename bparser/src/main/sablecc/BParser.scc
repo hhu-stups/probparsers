@@ -191,7 +191,7 @@ Tokens
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
   {normal} exists = '#' | 0x2203;
-  {normal} dollar = '$';
+  {normal} b_prime = '$0';
   {normal} lambda = '%' | unicode_lambda;
   {normal} conjunction = '&' | 0x2227;
   {normal} single_quotation = 39; // single quote: '
@@ -988,7 +988,7 @@ expression_func {-> expression} =
 expression_atomic {-> expression} =
   {paren} left_par [expression]:expression_in_par right_par {-> expression.expression} |
   {identifier} [identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} |
-  {primed_identifier} [identifier]:composed_identifier dollar [grade]:integer_literal {-> New expression.primed_identifier([identifier.identifier_literal], grade)} |
+  {primed_identifier} [identifier]:composed_identifier b_prime {-> New expression.primed_identifier([identifier.identifier_literal])} |
   {string} [content]:string_literal {-> New expression.string(content)} |
   {multiline_string} multiline_string_start [content]:multiline_string_content multiline_string_end {-> New expression.multiline_string(content)} |
   {boolean_true} true {-> New expression.boolean_true()} |
@@ -1330,7 +1330,7 @@ predicate =
 expression =
   {description} [content]:pragma_free_text [expression]:expression |
   {identifier} [identifier]:identifier_literal* |
-  {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
+  {primed_identifier} [identifier]:identifier_literal* |
   {string} [content]:string_literal |
   {multiline_string} [content]:multiline_string_content |
   {boolean_true} |

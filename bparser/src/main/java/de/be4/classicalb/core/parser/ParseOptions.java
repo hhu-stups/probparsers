@@ -5,16 +5,6 @@ import de.be4.classicalb.core.parser.grammars.IGrammar;
 
 public class ParseOptions {
 	/*
-	 * The parser should accept a primed identifier ("x$0") only in becomeSuch
-	 * substitutions and there only with the integer 0. This option can be set
-	 * to false in order to parse PO files of AtelierB.
-	 * 
-	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	private boolean restrictPrimedIdentifiers = true;
-	
-	/*
 	 * if true the parser will throw a LexerException when unrecognised pragmas appear
 	*/
 	private boolean strictPragmaChecking = false;
@@ -30,24 +20,6 @@ public class ParseOptions {
 	private boolean ignoreUselessTokens = true;
 	
 	private IGrammar grammar = new DefaultGrammar();
-
-	/**
-	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	@Deprecated
-	public boolean isRestrictPrimedIdentifiers() {
-		return restrictPrimedIdentifiers;
-	}
-
-	/**
-	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	@Deprecated
-	public void setRestrictPrimedIdentifiers(boolean restrictPrimedIdentifiers) {
-		this.restrictPrimedIdentifiers = restrictPrimedIdentifiers;
-	}
 
 	public IGrammar getGrammar() {
 		return grammar;

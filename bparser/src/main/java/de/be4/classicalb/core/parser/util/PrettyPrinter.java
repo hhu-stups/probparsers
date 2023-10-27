@@ -876,8 +876,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAPrimedIdentifierExpression(APrimedIdentifierExpression node) {
 		printDottedIdentifier(node.getIdentifier());
-		sb.append("$");
-		sb.append(node.getGrade().getText());
+		sb.append("$0");
 	}
 
 	@Override
