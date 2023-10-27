@@ -8,23 +8,13 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
 import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
 import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
@@ -59,62 +49,12 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	}
 
 	@Override
-	public void inAExistsPredicate(final AExistsPredicate node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAForallPredicate(final AForallPredicate node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralSumExpression(final AGeneralSumExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralProductExpression(final AGeneralProductExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALambdaExpression(final ALambdaExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
 	public void inAComprehensionSetExpression(final AComprehensionSetExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
 	@Override
 	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAAnySubstitution(final AAnySubstitution node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALetSubstitution(final ALetSubstitution node) {
-		checkForNonIdentifiers(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAVarSubstitution(final AVarSubstitution node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
