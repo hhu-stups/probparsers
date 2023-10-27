@@ -16,7 +16,7 @@ import java.util.*;
  */
 public final class ListPrologTerm extends PrologTerm implements List<PrologTerm> {
 
-	private static final ListPrologTerm EMPTY_LIST = new ListPrologTerm();
+	private static final ListPrologTerm EMPTY_LIST = new ListPrologTerm(null, 0, 0);
 
 	private final PrologTerm[] elements;
 	private final int start;
@@ -35,8 +35,11 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public static ListPrologTerm fromCollection(final Collection<? extends PrologTerm> elements) {
-		PrologTerm[] arr = elements != null && !elements.isEmpty() ? elements.toArray(new PrologTerm[0]) : null;
-		return new ListPrologTerm(arr);
+		if (elements == null || elements.isEmpty()) {
+			return EMPTY_LIST;
+		}
+
+		return new ListPrologTerm(elements.toArray(new PrologTerm[0]));
 	}
 
 	public static ListPrologTerm emptyList() {
