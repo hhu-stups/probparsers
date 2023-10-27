@@ -80,13 +80,13 @@ public final class PrologTermMatch extends PrologMatch {
 
 	@Override
 	protected boolean isMatch(PrologTerm term, Map<String, PrologTerm> hits) {
-		boolean match = term instanceof CompoundPrologTerm;
-		if (match
-			&& (arity < 0 || term.getArity() == arity)
-			&& (functor == null || functor.equals(term.getFunctor()))) {
-			match = args == null || allArgsMatch((CompoundPrologTerm) term, hits);
+		if (term instanceof CompoundPrologTerm) {
+			CompoundPrologTerm compound = (CompoundPrologTerm) term;
+			return (arity < 0 || compound.getArity() == arity)
+				&& (functor == null || functor.equals(compound.getFunctor()))
+				&& args == null || allArgsMatch(compound, hits);
 		}
-		return match;
+		return false;
 	}
 
 	private boolean allArgsMatch(CompoundPrologTerm term, Map<String, PrologTerm> hits) {

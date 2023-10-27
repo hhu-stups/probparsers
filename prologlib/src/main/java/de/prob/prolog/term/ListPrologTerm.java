@@ -287,12 +287,23 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	public ListPrologTerm tail() {
-		if (isEmpty()) {
+		return tail(1);
+	}
+
+	public ListPrologTerm tail(int start) {
+		if (start == 0) {
+			return this;
+		} else if (start < 0) {
+			throw new IllegalArgumentException("start must be non-negative");
+		}
+
+		int size = size();
+		if (size < start) {
 			throw new IllegalStateException("Cannot call tail on an empty list");
-		} else if (size() == 1) {
+		} else if (size == start) {
 			return EMPTY_LIST;
 		}
-		return new ListPrologTerm(this.elements, start + 1, end);
+		return new ListPrologTerm(this.elements, this.start + start, this.end);
 	}
 
 	public PrologTerm head() {

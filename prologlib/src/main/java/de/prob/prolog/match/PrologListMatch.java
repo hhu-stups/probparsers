@@ -5,6 +5,7 @@ import de.prob.prolog.term.PrologTerm;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Matches on a list with optional given length, provides direct access to the
@@ -13,16 +14,16 @@ import java.util.Map;
 public final class PrologListMatch extends PrologMatch {
 
 	private final int size;
-	private final PrologMatch[] args;
+	private final PrologMatch[] elements;
 
-	private PrologListMatch(final String name, final int size, PrologMatch[] args) {
+	private PrologListMatch(final String name, final int size, PrologMatch[] elements) {
 		super(name);
-		if (args != null && args.length != size) {
-			throw new IllegalArgumentException("wanted size is inconsistent with wanted args");
+		if (elements != null && elements.length != size) {
+			throw new IllegalArgumentException("wanted size is inconsistent with wanted elements");
 		}
 
 		this.size = size;
-		this.args = args != null ? Arrays.copyOf(args, args.length) : null;
+		this.elements = elements != null ? Arrays.copyOf(elements, elements.length) : null;
 	}
 
 	public static PrologListMatch anonList() {
@@ -33,12 +34,20 @@ public final class PrologListMatch extends PrologMatch {
 		return namedList(null, size);
 	}
 
-	public static PrologListMatch anonList(PrologMatch... args) {
-		return namedList(null, args);
+	public static PrologListMatch anonList(PrologMatch... elements) {
+		return namedList(null, elements);
 	}
 
 	public static PrologListMatch anonEmptyList() {
 		return namedEmptyList(null);
+	}
+
+	public static PrologDestructedListMatch anonDestructuredList(int headSize, PrologMatch tail) {
+		return namedDestructuredList(null, headSize, tail);
+	}
+
+	public static PrologDestructedListMatch anonDestructuredList(PrologMatch[] headElements, PrologMatch tail) {
+		return namedDestructuredList(null, headElements, tail);
 	}
 
 	public static PrologListMatch namedList(String name) {
@@ -49,28 +58,39 @@ public final class PrologListMatch extends PrologMatch {
 		return new PrologListMatch(name, size, null);
 	}
 
-	public static PrologListMatch namedList(String name, PrologMatch... args) {
-		return new PrologListMatch(name, args != null ? args.length : -1, args);
+	public static PrologListMatch namedList(String name, PrologMatch... elements) {
+		return new PrologListMatch(name, elements != null ? elements.length : -1, elements);
 	}
 
 	public static PrologListMatch namedEmptyList(String name) {
 		return new PrologListMatch(name, 0, null);
 	}
 
+	public static PrologDestructedListMatch namedDestructuredList(String name, int headSize, PrologMatch tail) {
+		return new PrologDestructedListMatch(name, headSize, null, tail);
+	}
+
+	public static PrologDestructedListMatch namedDestructuredList(String name, PrologMatch[] headElements,
+																  PrologMatch tail) {
+		Objects.requireNonNull(headElements, "headElements");
+		return new PrologDestructedListMatch(name, headElements.length, headElements, tail);
+	}
+
 	@Override
 	protected boolean isMatch(PrologTerm term, Map<String, PrologTerm> hits) {
-		boolean match = term instanceof ListPrologTerm;
-		if (match
-			&& (size < 0 || ((ListPrologTerm) term).size() == size)) {
-			match = args == null || allArgsMatch((ListPrologTerm) term, hits);
+		if (term instanceof ListPrologTerm) {
+			ListPrologTerm list = (ListPrologTerm) term;
+			if (size < 0 || list.size() == size) {
+				return elements == null || allArgsMatch(list, hits);
+			}
 		}
-		return match;
+		return false;
 	}
 
 	private boolean allArgsMatch(ListPrologTerm term, Map<String, PrologTerm> hits) {
 		for (int i = 0; i < size; i++) {
-			PrologMatch argMatch = args[i];
-			if (argMatch != null && !argMatch.matches(term.get(i), hits)) {
+			PrologMatch elementMatch = elements[i];
+			if (elementMatch != null && !elementMatch.matches(term.get(i), hits)) {
 				return false;
 			}
 		}
