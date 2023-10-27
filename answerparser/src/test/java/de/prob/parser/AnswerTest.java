@@ -7,6 +7,7 @@ import org.junit.Test;
 import de.prob.core.sablecc.node.Start;
 
 public class AnswerTest {
+
 	private static final String PARSETREE_WAS_NULL = "Parsetree was null";
 
 	@Test

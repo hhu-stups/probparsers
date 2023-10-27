@@ -12,11 +12,10 @@ import de.prob.prolog.term.*;
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
  */
-public class PrologTermGenerator {
-	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];
+public final class PrologTermGenerator {
 
 	public static PrologTerm toPrologTerm(PResult topnode) {
-		PrologTerm term = null;
+		PrologTerm term;
 		if (topnode instanceof AYesResult) {
 			term = toPrologTerm(((AYesResult) topnode).getTerm());
 		} else if (topnode instanceof ANoResult) {
@@ -24,16 +23,15 @@ public class PrologTermGenerator {
 		} else if (topnode instanceof AInterruptedResult) {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
-			String message = "ProB raised an exception: "
-					+ ((AExceptionResult) topnode).getString().getText();
+			String message = "ProB raised an exception: " + ((AExceptionResult) topnode).getString().getText();
 			throw new ResultParserException(message, null);
 		} else if (topnode instanceof AProgressResult) {
 			term = toPrologTerm(((AProgressResult) topnode).getTerm());
 		} else if (topnode instanceof ACallBackResult) {
 			term = toPrologTerm(((ACallBackResult) topnode).getTerm());
-		} else
-			throw new IllegalStateException("Unknown subclass of PResult: "
-					+ topnode.getClass().getCanonicalName());
+		} else {
+			throw new IllegalStateException("Unknown subclass of PResult: " + topnode.getClass().getCanonicalName());
+		}
 		return term;
 	}
 
@@ -41,16 +39,15 @@ public class PrologTermGenerator {
 		return toPrologTerm(node.getPResult());
 	}
 
-	public static PrologTerm toPrologTermMustNotFail(final String query,
-			final Start node) {
+	public static PrologTerm toPrologTermMustNotFail(final String query, final Start node) {
 		PResult topnode = node.getPResult();
 		if (topnode instanceof ACallBackResult || topnode instanceof AProgressResult) {
-			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported here: " + query, null);
+			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported" + " " + "here: " + query, null);
 		} else if (!(topnode instanceof AYesResult)) {
 			final String message = "Prolog query unexpectedly failed: " + query;
 			throw new ResultParserException(message, null);
 		}
-		return toPrologTerm(((AYesResult)topnode).getTerm());
+		return toPrologTerm(((AYesResult) topnode).getTerm());
 	}
 
 	public static PrologTerm toPrologTerm(final PTerm node) {
@@ -65,7 +62,7 @@ public class PrologTermGenerator {
 		} else if (node instanceof AAtomTerm) {
 			String text = ((AAtomTerm) node).getName().getText();
 			if ("[]".equals(text)) {
-				term = new ListPrologTerm(EMPTY_PROLOG_LIST);
+				term = ListPrologTerm.emptyList();
 			} else {
 				text = removeQuotes(text);
 				term = new CompoundPrologTerm(text);
@@ -73,23 +70,21 @@ public class PrologTermGenerator {
 		} else if (node instanceof ATerm) {
 			ATerm aterm = (ATerm) node;
 			int listSize = getListSize(node);
-			if (listSize >= 0) {
+			if (listSize == 0) {
+				term = ListPrologTerm.emptyList();
+			} else if (listSize > 0) {
 				PrologTerm[] list = new PrologTerm[listSize];
 				fillListWithElements(list, aterm);
 				term = new ListPrologTerm(list);
 			} else {
 				String functor = removeQuotes(aterm.getFunctor().getText());
-				PrologTerm[] params = evalParameters((AParams) aterm
-						.getParams());
+				PrologTerm[] params = evalParameters((AParams) aterm.getParams());
 				term = new CompoundPrologTerm(functor, params);
 			}
 		} else if (node instanceof AVariableTerm) {
-			String text = removeQuotes(((AVariableTerm) node).getVariable()
-					.getText());
+			String text = removeQuotes(((AVariableTerm) node).getVariable().getText());
 			term = new VariablePrologTerm(text);
-		} else
-			throw new IllegalStateException("Unexpected subclass of PTerm: "
-					+ node.getClass().getCanonicalName());
+		} else {throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());}
 		return term;
 	}
 
@@ -113,51 +108,49 @@ public class PrologTermGenerator {
 		return result;
 	}
 
-	private static int escapeCharacter(final String text,
-			final StringBuilder builder, int i) {
+	private static int escapeCharacter(final String text, final StringBuilder builder, int i) {
 		char c;
 		i++;
 		c = text.charAt(i);
 		switch (c) {
-		case 'b':
-			builder.append('\b');
-			break;
-		case 't':
-			builder.append('\t');
-			break;
-		case 'n':
-			builder.append('\n');
-			break;
-		case 'v':
-			builder.append('\u000C');
-			break;
-		case 'f':
-			builder.append('\f');
-			break;
-		case 'r':
-			builder.append('\r');
-			break;
-		case 'e':
-			builder.append('\u001C');
-			break;
-		case 'd':
-			builder.append('\u0008');
-			break;
-		case 'a':
-			builder.append('\u0007');
-			break;
-		case 'x':
-			i = getHex(i, text, builder);
-			break;
-		default:
-			builder.append(c);
-			break;
+			case 'b':
+				builder.append('\b');
+				break;
+			case 't':
+				builder.append('\t');
+				break;
+			case 'n':
+				builder.append('\n');
+				break;
+			case 'v':
+				builder.append('\u000C');
+				break;
+			case 'f':
+				builder.append('\f');
+				break;
+			case 'r':
+				builder.append('\r');
+				break;
+			case 'e':
+				builder.append('\u001C');
+				break;
+			case 'd':
+				builder.append('\u0008');
+				break;
+			case 'a':
+				builder.append('\u0007');
+				break;
+			case 'x':
+				i = getHex(i, text, builder);
+				break;
+			default:
+				builder.append(c);
+				break;
 		}
 		return i;
 	}
 
-	private static int getHex(int i, final String text,
-			final StringBuilder builder) {
+	private static int getHex(int i, final String text, final StringBuilder builder) {
 		StringBuilder hex = new StringBuilder();
 		i++;
 		char c = text.charAt(i);
@@ -177,8 +170,7 @@ public class PrologTermGenerator {
 		return params;
 	}
 
-	private static PrologTerm[] evalParameters(final int before,
-			final PMoreParams moreParams) {
+	private static PrologTerm[] evalParameters(final int before, final PMoreParams moreParams) {
 		PrologTerm[] params;
 		if (moreParams instanceof AEmptyMoreParams) {
 			params = new PrologTerm[before];
@@ -186,10 +178,9 @@ public class PrologTermGenerator {
 			AMoreParams nonempty = (AMoreParams) moreParams;
 			params = evalParameters(before + 1, nonempty.getMoreParams());
 			params[before] = toPrologTerm(nonempty.getTerm());
-		} else
-			throw new IllegalStateException(
-					"Unexpected subclass of PMoreParams: "
-							+ moreParams.getClass().getCanonicalName());
+		} else {
+			throw new IllegalStateException("Unexpected subclass of PMoreParams: " + moreParams.getClass().getCanonicalName());
+		}
 		return params;
 	}
 
@@ -242,15 +233,13 @@ public class PrologTermGenerator {
 		return size;
 	}
 
-	private static void fillListWithElements(final PrologTerm[] list,
-			ATerm aterm) {
+	private static void fillListWithElements(final PrologTerm[] list, ATerm aterm) {
 		for (int i = 0; i < list.length; i++) {
 			AParams params = (AParams) aterm.getParams();
 			list[i] = toPrologTerm(params.getTerm());
 			if (i < list.length - 1) {
 				// only get next element when this iteration was not the last
-				aterm = (ATerm) ((AMoreParams) params.getMoreParams())
-						.getTerm();
+				aterm = (ATerm) ((AMoreParams) params.getMoreParams()).getTerm();
 			}
 		}
 	}
