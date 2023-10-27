@@ -153,14 +153,14 @@ public class PrologTermOutput implements IPrologTermOutput {
 		Objects.requireNonNull(content, "Atom value is null");
 		try {
 			printCommaIfNeeded();
-			if (!Utils.isPrologAtom(content)) {
-				out.write('\'');
-				escape(content, false, true);
-				out.write('\'');
-			} else {
-				out.write(content);
-			}
-		} catch (IOException exc) {
+            if (Utils.isPrologAtom(content)) {
+                out.write(content);
+            } else {
+                out.write('\'');
+                escape(content, false, true);
+                out.write('\'');
+            }
+        } catch (IOException exc) {
 			throw new UncheckedIOException(exc);
 		}
 		commaNeeded = true;
@@ -171,7 +171,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printAtomOrNumber(final String content) {
 		try {
 			printNumber(Long.parseLong(content));
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException ignored) {
 			printAtom(content);
 		}
 		return this;

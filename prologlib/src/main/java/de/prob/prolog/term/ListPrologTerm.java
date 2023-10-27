@@ -23,7 +23,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	private final int end;
 
 	public ListPrologTerm(final Collection<? extends PrologTerm> elements) {
-		this(Objects.requireNonNull(elements, "elements").toArray(new PrologTerm[0]), 0, elements.size());
+		this(elements != null && !elements.isEmpty() ? elements.toArray(new PrologTerm[0]) : null);
 	}
 
 	public ListPrologTerm(final PrologTerm... elements) {

@@ -9,6 +9,7 @@ package de.prob.prolog.term;
 import de.prob.prolog.output.IPrologTermOutput;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -19,6 +20,10 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	private final String functor;
 	private final PrologTerm[] arguments;
+
+	public CompoundPrologTerm(final String functor, final Collection<? extends PrologTerm> arguments) {
+		this(functor, arguments != null && !arguments.isEmpty() ? arguments.toArray(new PrologTerm[0]) : null);
+	}
 
 	public CompoundPrologTerm(final String functor, final PrologTerm... arguments) {
 		this.functor = Objects.requireNonNull(functor, "functor");
