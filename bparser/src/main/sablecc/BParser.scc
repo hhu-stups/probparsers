@@ -950,6 +950,9 @@ expression_keyword {-> expression} =
   |
   {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)}
   |
+  // The identifier lists in all comprehension sets should really be identifier_list and not expression_list,
+  // but that causes reduce/reduce conflicts with set extensions (literals).
+  // Instead, IdentListCheck later enforces that only identifiers are used.
   {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}
   |
   {event_b_comprehension_set} left_brace [identifiers]:expression_list dot2 [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
@@ -1066,6 +1069,13 @@ substitution_l3 {-> substitution} =
   {select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
   {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
   {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+  // According to the Atelier-B reference manual,
+  // the LHS of "becomes element of" and "becomes such that" substitutions can only contain (possibly dotted) identifiers.
+  // assign_list allows a bit more than that (namely function calls and record fields),
+  // but we cannot use a different production here,
+  // because it would cause reduce/reduce conflicts with assignment substitutions.
+  // Instead, IdentListCheck later enforces that only identifiers are used.
+  // TODO Could/should we allow function calls and record fields here as an extension?
   {becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
   {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
   {var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
