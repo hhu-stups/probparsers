@@ -8,8 +8,9 @@ public final class Utils {
 		if (!isPrologIdentifier(name)) {
 			return false;
 		}
-		int c = name.codePointAt(0);
-		return c == '_' || Character.isUpperCase(c);
+
+		int cp = name.codePointAt(0);
+		return cp == '_' || Character.isUpperCase(cp);
 	}
 
 	public static boolean isPrologIdentifier(String name) {
@@ -17,10 +18,21 @@ public final class Utils {
 			return false;
 		}
 
-		int c = name.codePointAt(0);
-		if (c != '_' && !Character.isUnicodeIdentifierStart(c)) {
+		int first = name.codePointAt(0);
+		if (first != '_' && !Character.isUnicodeIdentifierStart(first)) {
 			return false;
 		}
-		return name.codePoints().skip(1).allMatch(Character::isUnicodeIdentifierPart);
+
+		int i = Character.charCount(first), len = name.length();
+		while (i < len) {
+			int cp = name.codePointAt(i);
+			if (!Character.isUnicodeIdentifierPart(cp)) {
+				return false;
+			}
+
+			i += Character.charCount(cp);
+		}
+
+		return true;
 	}
 }
