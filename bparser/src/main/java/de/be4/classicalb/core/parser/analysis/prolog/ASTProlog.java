@@ -35,9 +35,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
 			"machine_header", "machine_reference", "operation", "refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
-	// the simpleFormats are mappings from (simple) class names to prolog
-	// functor representing them
-	private final Map<String, String> simpleFormats = new HashMap<>();
+	// the simpleFormats are mappings from node classes to prolog functor representing them
+	private final Map<Class<? extends Node>, String> simpleFormats = new HashMap<>();
 
 	// to look up the identifier of each node
 	private final PositionPrinter positionPrinter;
@@ -186,11 +185,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
-		String className = node.getClass().getSimpleName();
-		String formatted = simpleFormats.get(className);
+		Class<? extends Node> clazz = node.getClass();
+		String formatted = simpleFormats.get(clazz);
 		if (formatted == null) {
-			formatted = toFunctorName(className);
-			simpleFormats.put(className, formatted);
+			formatted = toFunctorName(clazz.getSimpleName());
+			simpleFormats.put(clazz, formatted);
 		}
 		return formatted;
 	}
