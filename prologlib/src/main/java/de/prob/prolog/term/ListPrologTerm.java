@@ -22,10 +22,6 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	private final int start;
 	private final int end;
 
-	public ListPrologTerm(final Collection<? extends PrologTerm> elements) {
-		this(elements != null && !elements.isEmpty() ? elements.toArray(new PrologTerm[0]) : null);
-	}
-
 	public ListPrologTerm(final PrologTerm... elements) {
 		this.elements = elements != null && elements.length > 0 ? elements : null;
 		this.start = 0;
@@ -36,6 +32,11 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		this.elements = elements;
 		this.start = start;
 		this.end = end;
+	}
+
+	public static ListPrologTerm fromCollection(final Collection<? extends PrologTerm> elements) {
+		PrologTerm[] arr = elements != null && !elements.isEmpty() ? elements.toArray(new PrologTerm[0]) : null;
+		return new ListPrologTerm(arr);
 	}
 
 	public static ListPrologTerm emptyList() {

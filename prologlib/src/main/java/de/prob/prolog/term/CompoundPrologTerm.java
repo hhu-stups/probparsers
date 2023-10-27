@@ -21,10 +21,6 @@ public final class CompoundPrologTerm extends PrologTerm {
 	private final String functor;
 	private final PrologTerm[] arguments;
 
-	public CompoundPrologTerm(final String functor, final Collection<? extends PrologTerm> arguments) {
-		this(functor, arguments != null && !arguments.isEmpty() ? arguments.toArray(new PrologTerm[0]) : null);
-	}
-
 	public CompoundPrologTerm(final String functor, final PrologTerm... arguments) {
 		this.functor = Objects.requireNonNull(functor, "functor");
 		this.arguments = arguments != null && arguments.length > 0 ? arguments : null;
@@ -32,6 +28,12 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	public CompoundPrologTerm(final String atom) {
 		this(atom, (PrologTerm[]) null);
+	}
+
+	public static CompoundPrologTerm fromCollection(final String functor,
+													final Collection<? extends PrologTerm> arguments) {
+		PrologTerm[] arr = arguments != null && !arguments.isEmpty() ? arguments.toArray(new PrologTerm[0]) : null;
+		return new CompoundPrologTerm(functor, arr);
 	}
 
 	@Override

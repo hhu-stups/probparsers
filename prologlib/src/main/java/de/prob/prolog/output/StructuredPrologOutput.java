@@ -202,7 +202,7 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 				throw new IllegalStateException("expected term");
 			}
 
-			return new ListPrologTerm(this.args);
+			return ListPrologTerm.fromCollection(this.args);
 		}
 
 		PrologTerm buildTerm() {
@@ -210,7 +210,7 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 				throw new IllegalStateException("expected list");
 			}
 
-			return new CompoundPrologTerm(this.functor, this.args);
+			return CompoundPrologTerm.fromCollection(this.functor, this.args);
 		}
 
 		void addArgument(PrologTerm term) {
