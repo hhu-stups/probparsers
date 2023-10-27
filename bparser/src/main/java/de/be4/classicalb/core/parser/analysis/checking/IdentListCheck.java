@@ -59,22 +59,6 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	}
 
 	@Override
-	public void inARecordFieldExpression(ARecordFieldExpression node) {
-		PExpression identifier = node.getIdentifier();
-		if (!(identifier instanceof AIdentifierExpression)) {
-			nonIdentifiers.add(identifier);
-		}
-	}
-
-	@Override
-	public void inARecEntry(ARecEntry node) {
-		PExpression identifier = node.getIdentifier();
-		if (!(identifier instanceof AIdentifierExpression)) {
-			nonIdentifiers.add(identifier);
-		}
-	}
-
-	@Override
 	public void inABecomesSuchSubstitution(final ABecomesSuchSubstitution node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
