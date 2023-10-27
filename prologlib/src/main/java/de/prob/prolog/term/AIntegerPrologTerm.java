@@ -31,11 +31,6 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 		}
 	}
 
-	public static AIntegerPrologTerm create(final byte[] number) {
-		Objects.requireNonNull(number, "number");
-		return create(new BigInteger(number));
-	}
-
 	public static AIntegerPrologTerm create(String number) {
 		Objects.requireNonNull(number, "number");
 		return create(new BigInteger(number));

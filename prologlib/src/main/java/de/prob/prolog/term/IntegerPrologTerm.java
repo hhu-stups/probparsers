@@ -35,7 +35,7 @@ public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	}
 
 	/**
-	 * @deprecated use {@link AIntegerPrologTerm#create(byte[])} instead
+	 * @deprecated use {@link AIntegerPrologTerm#create(BigInteger)} instead
 	 */
 	@Deprecated
 	public IntegerPrologTerm(final byte[] arr) {
