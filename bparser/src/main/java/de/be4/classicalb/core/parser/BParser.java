@@ -547,7 +547,6 @@ public class BParser {
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {
-			check.setOptions(parseOptions);
 			check.runChecks(rootNode);
 			list.addAll(check.getCheckExceptions());
 		}

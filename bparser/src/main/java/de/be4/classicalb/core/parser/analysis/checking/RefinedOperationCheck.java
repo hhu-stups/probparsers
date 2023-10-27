@@ -25,10 +25,6 @@ public class RefinedOperationCheck extends MachineClauseAdapter implements Seman
 	private final List<CheckException> exceptions = new ArrayList<>();
 
 	@Override
-	public void setOptions(ParseOptions options) {
-	}
-
-	@Override
 	public void runChecks(Start rootNode) {
 		rootNode.apply(this);
 	}

@@ -57,11 +57,6 @@ public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements 
 	}
 
 	@Override
-	public void setOptions(ParseOptions options) {
-		// ignore options
-	}
-
-	@Override
 	public List<CheckException> getCheckExceptions() {
 		return this.exceptions;
 	}

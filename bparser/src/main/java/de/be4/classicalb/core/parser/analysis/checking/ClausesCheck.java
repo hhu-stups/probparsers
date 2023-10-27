@@ -240,11 +240,6 @@ public class ClausesCheck implements SemanticCheck {
 	}
 
 	@Override
-	public void setOptions(ParseOptions options) {
-		// ignore options
-	}
-
-	@Override
 	public List<CheckException> getCheckExceptions() {
 
 		return exceptions;

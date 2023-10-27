@@ -233,9 +233,6 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	}
 
 	@Override
-	public void setOptions(ParseOptions options) {}
-
-	@Override
 	public List<CheckException> getCheckExceptions() {
 		return this.exceptions;
 	}

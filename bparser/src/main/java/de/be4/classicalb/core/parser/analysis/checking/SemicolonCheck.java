@@ -51,10 +51,6 @@ public class SemicolonCheck implements SemanticCheck {
 	}
 
 	@Override
-	public void setOptions(ParseOptions options) {
-	}
-
-	@Override
 	public void runChecks(Start rootNode) {
 		MissingSemicolonWalker adapter = new MissingSemicolonWalker();
 		rootNode.apply(adapter);
