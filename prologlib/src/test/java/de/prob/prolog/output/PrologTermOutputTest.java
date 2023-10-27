@@ -1,15 +1,16 @@
 package de.prob.prolog.output;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PrologTermOutputTest {
+
 	private IPrologTermOutput pout;
 	private StringWriter swriter;
 
@@ -50,8 +51,8 @@ public class PrologTermOutputTest {
 		pout.openTerm("Functor");
 		pout.printAtom("with white spaces");
 		pout.closeTerm();
-		assertOutput("normal,camelStyle,with_underscore,'UpperCase',"
-				+ "'_begin_with_underscore','22number','Functor'('with white spaces')");
+		assertOutput("normal,camelStyle,with_underscore,'UpperCase'," + "'_begin_with_underscore','22number','Functor'" +
+			"('with white spaces')");
 	}
 
 	@Test
@@ -62,8 +63,8 @@ public class PrologTermOutputTest {
 		pout.printAtom(" donttrim ");
 		pout.printAtom("apo'stroph");
 		pout.printAtom("double\"quote");
-		assertOutput("'hallo\\nwelt','back\\\\slash','\\334\\mlaute',' donttrim ',"
-				+ "'apo\\'stroph','double\"quote'");
+		assertOutput("'hallo\\nwelt','back\\\\slash','\\334\\mlaute',' donttrim '," + "'apo\\'stroph'," +
+			"'double\"quote'");
 	}
 
 	@Test
@@ -135,7 +136,6 @@ public class PrologTermOutputTest {
 		} catch (IllegalStateException e) {
 			// ok
 		}
-
 	}
 
 	@Test
@@ -160,12 +160,10 @@ public class PrologTermOutputTest {
 		} catch (IllegalStateException e) {
 			// ok
 		}
-
 	}
 
 	@Test
 	public void testInvalidTerms2() {
-
 		try {
 			pout.closeTerm();
 			fail("IllegalStateException expected");
@@ -186,5 +184,4 @@ public class PrologTermOutputTest {
 		pout.closeTerm();
 		assertOutput("test");
 	}
-
 }

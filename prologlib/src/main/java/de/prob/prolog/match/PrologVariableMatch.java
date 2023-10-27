@@ -1,5 +1,6 @@
 package de.prob.prolog.match;
 
+import de.prob.prolog.internal.Utils;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
 
@@ -19,9 +20,12 @@ public final class PrologVariableMatch extends PrologMatch {
 	 */
 	private PrologVariableMatch(final String name, final String varName) {
 		super(name);
+		if (varName != null && !Utils.isPrologVariable(varName)) {
+			throw new IllegalArgumentException("varName");
+		}
+
 		this.varName = varName;
 	}
-
 
 	public static PrologVariableMatch anonVar() {
 		return namedVar(null);

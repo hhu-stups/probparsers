@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
+import de.prob.prolog.internal.Utils;
 import de.prob.prolog.term.PrologTerm;
 
 /**
@@ -307,7 +308,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printVariable(final String var) {
 		Objects.requireNonNull(var, "Variable name is null");
-		checkVariable(var);
+		if (!Utils.isPrologVariable(var)) {
+			throw new IllegalArgumentException("Invalid name for Prolog variable '" + var + "'");
+		}
 		try {
 			printCommaIfNeeded();
 			out.write(var);
@@ -316,21 +319,6 @@ public class PrologTermOutput implements IPrologTermOutput {
 		}
 		commaNeeded = true;
 		return this;
-	}
-
-	private void checkVariable(final String var) {
-		boolean ok = var.length() > 0;
-		if (ok) {
-			char c = var.charAt(0);
-			ok = c == '_' || Character.isUpperCase(c);
-			for (int i = 1; ok && i < var.length(); i++) {
-				c = var.charAt(i);
-				ok &= c == '_' || Character.isLetterOrDigit(c);
-			}
-		}
-		if (!ok)
-			throw new IllegalArgumentException(
-					"Invalid name for Prolog variable '" + var + "'");
 	}
 
 	@Override

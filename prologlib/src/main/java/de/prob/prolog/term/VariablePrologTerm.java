@@ -6,27 +6,30 @@
 
 package de.prob.prolog.term;
 
+import de.prob.prolog.internal.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
+
+import java.util.Objects;
 
 /**
  * Represents a Prolog variable.
  */
 public final class VariablePrologTerm extends PrologTerm {
+
 	private final String name;
 
 	public VariablePrologTerm(final String name) {
-		//super();
-		if (name == null)
-			throw new IllegalArgumentException(
-					"Name of variable must not be null");
-		this.name = name;
+		if (!Utils.isPrologVariable(name)) {
+			throw new IllegalArgumentException("name");
+		}
+		this.name = Objects.requireNonNull(name, "name");
 	}
 
 	@Override
 	public String getFunctor() {
 		return name;
 	}
-	
+
 	@Override
 	public boolean isVariable() {
 		return true;
@@ -45,14 +48,14 @@ public final class VariablePrologTerm extends PrologTerm {
 	public boolean equals(final Object other) {
 		if (this == other) {
 			return true;
-		} else if (other == null || !(other instanceof VariablePrologTerm)) {
+		} else if (!(other instanceof VariablePrologTerm)) {
 			return false;
 		}
-		return name.equals(((VariablePrologTerm)other).name);
+		return name.equals(((VariablePrologTerm) other).name);
 	}
 
 	@Override
 	public int hashCode() {
-		return name.hashCode() * 5 + 18;
+		return name.hashCode();
 	}
 }

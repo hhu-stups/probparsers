@@ -1,24 +1,21 @@
 package de.prob.prolog.term;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import de.prob.prolog.output.PrologTermStringOutput;
+import org.junit.Test;
 
 import java.util.ListIterator;
 
-import org.junit.Test;
-
-import de.prob.prolog.output.PrologTermStringOutput;
+import static org.junit.Assert.*;
 
 public class ListPrologTermTest {
+
 	@Test(expected = IllegalStateException.class)
 	public void tailTestEmpty() {
 		ListPrologTerm l = new ListPrologTerm();
 		l.tail(); // throws exception
 	}
 
-	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	@Test(expected = IllegalStateException.class)
 	public void headTestEmpty() {
 		ListPrologTerm l = new ListPrologTerm();
 		l.head();// throws exception
@@ -152,8 +149,10 @@ public class ListPrologTermTest {
 		final ListPrologTerm list = new ListPrologTerm(createFixture(10));
 		final ListPrologTerm subList = list.subList(1, 4);
 		assertEquals(3, subList.size());
-		assertEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3")), subList);
-		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3"), new CompoundPrologTerm("4")), subList);
+		assertEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"),
+                new CompoundPrologTerm("3")), subList);
+		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"),
+                new CompoundPrologTerm("3"), new CompoundPrologTerm("4")), subList);
 		assertNotEquals(subList, new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2")));
 		final ListPrologTerm subSubList = subList.subList(1, 2);
 		assertEquals(1, subSubList.size());
@@ -164,7 +163,8 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testLastIndexOf() {
-		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(6));
+		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5),
+                AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(6));
 		assertEquals(2, t1.lastIndexOf(AIntegerPrologTerm.create(5)));
 	}
 
@@ -175,5 +175,4 @@ public class ListPrologTermTest {
 		}
 		return res;
 	}
-
 }
