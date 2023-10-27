@@ -1147,10 +1147,7 @@ quantified_variables_list {-> expression*} =
   {no_parentheses} [id]:identifier_list {-> [id.expression]};
 
 identifier_declaration_expression {-> expression} =
-  {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
-  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
-
-identifier_expression {-> expression} =
+  {description} [identifier]:identifier_literal pragma_description [content]:pragma_free_text {-> New expression.description(content, New expression.identifier([identifier]))} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]};
