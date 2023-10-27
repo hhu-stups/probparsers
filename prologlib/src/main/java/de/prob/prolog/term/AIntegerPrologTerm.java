@@ -32,13 +32,16 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 	}
 
 	public static AIntegerPrologTerm create(String number) {
-		Objects.requireNonNull(number, "number");
-		return create(new BigInteger(number));
+		return create(number, 10);
 	}
 
 	public static AIntegerPrologTerm create(String number, int radix) {
 		Objects.requireNonNull(number, "number");
-		return create(new BigInteger(number, radix));
+		try {
+			return create(Long.parseLong(number, radix));
+		} catch (NumberFormatException ignored) {
+			return create(new BigInteger(number, radix));
+		}
 	}
 
 	@Override
