@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -325,18 +326,9 @@ public class ExpressionTest {
 		assertEquals(expected, standard);
 	}
 
-	@Deprecated
 	@Test
-	public void testProverComprehensionSets() throws BCompoundException {
-		final String testMachine = "#EXPRESSION SET(i).(i>0)";
-		final String expected = "machine(comprehension_set(none,[identifier(none,i)],greater(none,identifier(none,i),integer(none,0)))).";
-
-		final BParser parser = new BParser("testcase");
-		parser.getOptions().setRestrictProverExpressions(false);
-		final Start startNode = parser.parseMachine(testMachine);
-		assertEquals(expected, Helpers.getTreeAsPrologTerm(startNode));
-
-		Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+	public void testProverComprehensionSets() {
+		Helpers.assertThrowsCompound(BParseException.class, () -> new BParser().parseExpression("SET(i).(i>0)"));
 	}
 
 	@Test

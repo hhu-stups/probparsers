@@ -1174,15 +1174,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAProverComprehensionSetExpression(AProverComprehensionSetExpression node) {
-		sb.append("SET(");
-		printCommaListCompact(node.getIdentifiers());
-		sb.append(").(");
-		node.getPredicates().apply(this);
-		sb.append(")");
-	}
-
-	@Override
 	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
 		sb.append("{");
 		printCommaListCompact(node.getIdentifiers());

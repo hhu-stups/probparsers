@@ -313,7 +313,6 @@ Tokens
   {normal} sees = 'SEES';
   {normal} select = 'SELECT';
   {normal} sets = 'SETS';
-  {normal} quantified_set = 'SET';
   {normal} sigma = 'SIGMA' | 0x2211;
   {normal} string = 'STRING';
   {normal} then = 'THEN';
@@ -964,10 +963,6 @@ expression_keyword {-> expression} =
   |
   {quantified_intersection2} quantified_inter [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
   |
-  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}
-  |
-  {quantified_set2} quantified_set [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}
-  |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
@@ -1384,7 +1379,6 @@ expression =
   {couple} [list]:expression* |
   {comprehension_set} [identifiers]:expression* [predicates]:predicate |
   {symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {prover_comprehension_set} [identifiers]:expression* [predicates]:predicate | // todo: fix this special case
   {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB only
   {pow_subset} [expression]:expression |
   {pow1_subset} [expression]:expression |

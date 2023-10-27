@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -49,16 +48,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class ASTPrologTest {
-	@Deprecated
-	private boolean remove_restrictions;
-
-	@Before
-	@Deprecated
-	public void setUp() throws Exception {
-		remove_restrictions = false;
-	}
-
-	private String printAST(final Node node, final INodeIds nodeids) {
+	private static String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
 		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
@@ -68,40 +58,36 @@ public class ASTPrologTest {
 		return swriter.toString();
 	}
 
-	private void checkAST(final int counter, final String expected, final Node ast) {
+	private static void checkAST(final int counter, final String expected, final Node ast) {
 		final NodeIdAssignment nodeids = new NodeIdAssignment();
 		ast.apply(nodeids);
 		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
-	@SuppressWarnings("deprecation")
-	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
+	private static void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
-		if (remove_restrictions) {
-			parser.getOptions().setRestrictProverExpressions(false);
-		}
 		final Start startNode = parser.parseMachine(bspec);
 		checkAST(counter, expected, startNode);
 	}
 
-	private void checkPredicate(final String pred, final String expected) throws BCompoundException {
+	private static void checkPredicate(final String pred, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.PREDICATE_PREFIX + pred, expected);
 	}
 
-	private void checkExpression(final String expr, final String expected) throws BCompoundException {
+	private static void checkExpression(final String expr, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.EXPRESSION_PREFIX + expr, expected);
 	}
 
-	private void checkSubstitution(final String subst, final String expected) throws BCompoundException {
+	private static void checkSubstitution(final String subst, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.SUBSTITUTION_PREFIX + subst, expected);
 	}
 
-	private void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
+	private static void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
 		checkProlog(1, BParser.OPERATION_PATTERN_PREFIX + pattern, expected);
 	}
 
-	private String insertNumbers(int counter, final String string) {
+	private static String insertNumbers(int counter, final String string) {
 		StringBuilder buf = new StringBuilder();
 		char c[] = string.toCharArray();
 		for (int i = 0; i < c.length; i++) {
@@ -223,14 +209,6 @@ public class ASTPrologTest {
 	@Test
 	public void testBFalse() throws BCompoundException {
 		checkPredicate("bfalse", "falsity($)");
-	}
-
-	@Deprecated
-	@Test
-	public void testProverSET() throws BCompoundException {
-		remove_restrictions = true;
-		checkExpression("SET(x).(x>0)",
-				"comprehension_set($,[identifier($,x)],greater($,identifier($,x),integer($,0)))");
 	}
 
 	@Test

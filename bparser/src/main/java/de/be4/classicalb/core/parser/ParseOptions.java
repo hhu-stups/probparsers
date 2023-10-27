@@ -4,17 +4,6 @@ import de.be4.classicalb.core.parser.grammars.DefaultGrammar;
 import de.be4.classicalb.core.parser.grammars.IGrammar;
 
 public class ParseOptions {
-
-	/*
-	 * The parser must not accept some expressions that are only relevant in PO
-	 * files. (E.g. SET(x).(P) )
-	 * 
-	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	@Deprecated
-	private boolean restrictProverExpressions = true;
-
 	/*
 	 * The parser should accept a primed identifier ("x$0") only in becomeSuch
 	 * substitutions and there only with the integer 0. This option can be set
@@ -41,24 +30,6 @@ public class ParseOptions {
 	private boolean ignoreUselessTokens = true;
 	
 	private IGrammar grammar = new DefaultGrammar();
-
-	/**
-	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	@Deprecated
-	public boolean isRestrictProverExpressions() {
-		return restrictProverExpressions;
-	}
-
-	/**
-	 * @deprecated The Atelier B prover comprehension set syntax ({@code SET} keyword) will be removed entirely,
-	 *     i. e. this option will effectively always be {@code true}.
-	 */
-	@Deprecated
-	public void setRestrictProverExpressions(boolean restrictProverExpressions) {
-		this.restrictProverExpressions = restrictProverExpressions;
-	}
 
 	/**
 	 * @deprecated The Atelier B prover numbered identifier syntax will be removed entirely,

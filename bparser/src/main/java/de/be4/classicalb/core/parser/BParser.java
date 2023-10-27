@@ -544,10 +544,8 @@ public class BParser {
 		final List<CheckException> list = new ArrayList<>();
 		@SuppressWarnings("deprecation")
 		SemanticCheck primedIdentifierCheck = new de.be4.classicalb.core.parser.analysis.checking.PrimedIdentifierCheck();
-		@SuppressWarnings("deprecation")
-		SemanticCheck proverExpressionsCheck = new de.be4.classicalb.core.parser.analysis.checking.ProverExpressionsCheck();
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
-				new DefinitionUsageCheck(getDefinitions()), primedIdentifierCheck, proverExpressionsCheck, new RefinedOperationCheck() };
+				new DefinitionUsageCheck(getDefinitions()), primedIdentifierCheck, new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {

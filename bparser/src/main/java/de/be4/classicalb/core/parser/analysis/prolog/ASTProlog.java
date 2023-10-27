@@ -197,10 +197,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
-	 * grammar for non-Java front-ends. Two magic cases here:
-	 * "prover_comprehension_set" -&gt; "comprehension_set", "op" -&gt;
-	 * "operation_call" Todo: do remove magic special cases DO NOT add extra
-	 * special cases here !!
+	 * grammar for non-Java front-ends. One magic case here: "op" -&gt; "operation_call"
+	 * Todo: do remove magic special cases DO NOT add extra special cases here !!
 	 * 
 	 * @return Prolog functor name
 	 */
@@ -218,8 +216,6 @@ public class ASTProlog extends DepthFirstAdapter {
 				if (camelName.endsWith(checkend)) {
 					String shortName = camelName.substring(0, camelName.length() - checkend.length() - 1);
 					// hard-coded renamings
-					if (shortName.equals("prover_comprehension_set"))
-						return "comprehension_set";
 					if (shortName.equals("op"))
 						return "operation_call";
 					return shortName;
@@ -644,14 +640,6 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(final ASymbolicComprehensionSetExpression node) {
-		open(node);
-		printAsList(node.getIdentifiers());
-		node.getPredicates().apply(this);
-		close(node);
-	}
-
-	@Override
-	public void caseAProverComprehensionSetExpression(final AProverComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
