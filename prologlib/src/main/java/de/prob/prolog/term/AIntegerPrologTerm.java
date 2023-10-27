@@ -14,10 +14,41 @@ import java.util.Objects;
  * Can be a long or a BigInteger.
  * The string representation can be accessed via {@link PrologTerm#getFunctor()}.
  */
+@SuppressWarnings({ "deprecation", "StaticInitializerReferencesSubClass" })
 public abstract class AIntegerPrologTerm extends PrologTerm {
 
-	@SuppressWarnings("deprecation")
+
+	public static final AIntegerPrologTerm ZERO;
+	public static final AIntegerPrologTerm ONE;
+	public static final AIntegerPrologTerm MINUS_ONE;
+	public static final AIntegerPrologTerm TWO;
+	public static final AIntegerPrologTerm TEN;
+
+	private static final int MAX_CONSTANT = 16;
+	private static final AIntegerPrologTerm[] POS_CACHE = new AIntegerPrologTerm[MAX_CONSTANT + 1];
+	private static final AIntegerPrologTerm[] NEG_CACHE = new AIntegerPrologTerm[MAX_CONSTANT + 1];
+
+	static {
+		ZERO = new IntegerLongPrologTerm(0);
+		for (int i = 1; i <= MAX_CONSTANT; i++) {
+			POS_CACHE[i] = new IntegerLongPrologTerm(i);
+			NEG_CACHE[i] = new IntegerLongPrologTerm(-i);
+		}
+
+		ONE = create(1);
+		MINUS_ONE = create(-1);
+		TWO = create(2);
+		TEN = create(10);
+	}
+
 	public static AIntegerPrologTerm create(final long number) {
+		if (number == 0) {
+			return ZERO;
+		} else if (number > 0 && number <= MAX_CONSTANT) {
+			return POS_CACHE[(int) number];
+		} else if (number < 0 && number >= -MAX_CONSTANT) {
+			return NEG_CACHE[(int) -number];
+		}
 		return new IntegerLongPrologTerm(number);
 	}
 
