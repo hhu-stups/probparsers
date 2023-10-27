@@ -1,26 +1,20 @@
 package de.prob.prolog.output;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import de.prob.prolog.internal.Utils;
+import de.prob.prolog.term.PrologTerm;
+
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
-import de.prob.prolog.internal.Utils;
-import de.prob.prolog.term.PrologTerm;
-
 /**
  * Helper class to generate Prolog terms.
  */
 public class PrologTermOutput implements IPrologTermOutput {
+
 	private static final char[] VALID_CHARS = validChars();
-	private static final char[] VALID_ATOM_CHARS = validAtomChars();
 
 	private final Writer out;
 
@@ -46,7 +40,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	public PrologTermOutput(final PrintWriter out, final boolean useIndentation) {
-		this((Writer)out, useIndentation);
+		this((Writer) out, useIndentation);
 	}
 
 	public PrologTermOutput(final PrintWriter out) {
@@ -63,13 +57,10 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	/**
 	 * Escapes existing apostrophes by backslashes.
-	 * 
-	 * @param input
-	 *            A string, never <code>null</code>.
-	 * @param singleQuotes
-	 *            if single quotes may be used
-	 * @param doubleQuotes
-	 *            if double quotes may be used
+	 *
+	 * @param input        A string, never <code>null</code>.
+	 * @param singleQuotes if single quotes may be used
+	 * @param doubleQuotes if double quotes may be used
 	 */
 	private void escape(final String input, final boolean singleQuotes, final boolean doubleQuotes) throws IOException {
 		for (int i = 0; i < input.length(); i++) {
@@ -101,31 +92,6 @@ public class PrologTermOutput implements IPrologTermOutput {
 		char[] chars = buf.toString().toCharArray();
 		Arrays.sort(chars);
 		return chars;
-	}
-
-	private static char[] validAtomChars() {
-		StringBuilder buf = new StringBuilder();
-		buf.append("abcdefghijklmnopqrstuvwxyz");
-		buf.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-		buf.append("0123456789_");
-		char[] chars = buf.toString().toCharArray();
-		Arrays.sort(chars);
-		return chars;
-	}
-
-	private static boolean escapeIsNeeded(final String input) {
-		final int length = input.length();
-		if (length > 0
-				&& Arrays.binarySearch(VALID_ATOM_CHARS, input.charAt(0)) >= 0
-				&& Character.isLowerCase(input.charAt(0))) {
-			for (int i = 1; i < length; i++) {
-				char c = input.charAt(i);
-				if (Arrays.binarySearch(VALID_ATOM_CHARS, c) < 0)
-					return true;
-			}
-			return false;
-		} else
-			return true;
 	}
 
 	@Override
@@ -162,9 +128,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput closeTerm() {
 		termCount--;
-		if (termCount < 0)
-			throw new IllegalStateException(
-					"Tried to close a term that has not been opened.");
+		if (termCount < 0) {
+			throw new IllegalStateException("Tried to close a term that has not been opened.");
+		}
 		if (lazyParenthesis) {
 			lazyParenthesis = false;
 		} else {
@@ -187,7 +153,7 @@ public class PrologTermOutput implements IPrologTermOutput {
 		Objects.requireNonNull(content, "Atom value is null");
 		try {
 			printCommaIfNeeded();
-			if (escapeIsNeeded(content)) {
+			if (!Utils.isPrologAtom(content)) {
 				out.write('\'');
 				escape(content, false, true);
 				out.write('\'');
@@ -280,9 +246,9 @@ public class PrologTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput closeList() {
 		listCount--;
-		if (listCount < 0)
-			throw new IllegalStateException(
-				"Tried to close a list that has not been opened.");
+		if (listCount < 0) {
+			throw new IllegalStateException("Tried to close a list that has not been opened.");
+		}
 		try {
 			out.write(']');
 		} catch (IOException exc) {
@@ -344,14 +310,12 @@ public class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput fullstop() {
-		if (listCount != 0)
-			throw new IllegalStateException(
-					"Number of openList and closeList do not match. openList Counter is "
-							+ listCount);
-		if (termCount != 0)
-			throw new IllegalStateException(
-					"Number of openTerm and closeTerm do not match. openTerm Counter is "
-							+ termCount);
+		if (listCount != 0) {
+			throw new IllegalStateException("Number of openList and closeList do not match. openList Counter is " + listCount);
+		}
+		if (termCount != 0) {
+			throw new IllegalStateException("Number of openTerm and closeTerm do not match. openTerm Counter is " + termCount);
+		}
 		try {
 			out.write('.');
 			out.write(System.lineSeparator());
