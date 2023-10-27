@@ -5,7 +5,7 @@ import de.prob.prolog.term.*;
 import java.math.BigInteger;
 import java.util.*;
 
-public class StructuredPrologOutput implements IPrologTermOutput {
+public final class StructuredPrologOutput implements IPrologTermOutput {
 
 	private final List<PrologTerm> sentences = new ArrayList<>();
 	private final Deque<TermBuilder> termBuilderStack = new ArrayDeque<>();

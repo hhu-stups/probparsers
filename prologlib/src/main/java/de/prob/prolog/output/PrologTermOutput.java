@@ -12,17 +12,15 @@ import java.util.Objects;
 /**
  * Helper class to generate Prolog terms.
  */
-public class PrologTermOutput implements IPrologTermOutput {
+public final class PrologTermOutput implements IPrologTermOutput {
 
 	private static final char[] VALID_CHARS = validChars();
 
 	private final Writer out;
-
+	private final boolean useIndentation;
 	// commaNeeded states if the next term can be printed directly (false) or
 	// if a separating comma is needed first
 	private boolean commaNeeded = false;
-
-	private final boolean useIndentation;
 	private int indentLevel = 0;
 	private int ignoreIndentationLevel = 0;
 
@@ -55,6 +53,16 @@ public class PrologTermOutput implements IPrologTermOutput {
 		this(out, true);
 	}
 
+	private static char[] validChars() {
+		String buf = "abcdefghijklmnopqrstuvwxyz" +
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+			"0123456789" +
+			"_ +-*/^<>=~:.?@#$&!;%(),[]{|}";
+		char[] chars = buf.toCharArray();
+		Arrays.sort(chars);
+		return chars;
+	}
+
 	/**
 	 * Escapes existing apostrophes by backslashes.
 	 *
@@ -81,17 +89,6 @@ public class PrologTermOutput implements IPrologTermOutput {
 				out.write('\\');
 			}
 		}
-	}
-
-	private static char[] validChars() {
-		StringBuilder buf = new StringBuilder();
-		buf.append("abcdefghijklmnopqrstuvwxyz");
-		buf.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-		buf.append("0123456789");
-		buf.append("_ +-*/^<>=~:.?@#$&!;%(),[]{|}");
-		char[] chars = buf.toString().toCharArray();
-		Arrays.sort(chars);
-		return chars;
 	}
 
 	@Override
@@ -153,14 +150,14 @@ public class PrologTermOutput implements IPrologTermOutput {
 		Objects.requireNonNull(content, "Atom value is null");
 		try {
 			printCommaIfNeeded();
-            if (Utils.isPrologAtom(content)) {
-                out.write(content);
-            } else {
-                out.write('\'');
-                escape(content, false, true);
-                out.write('\'');
-            }
-        } catch (IOException exc) {
+			if (Utils.isPrologAtom(content)) {
+				out.write(content);
+			} else {
+				out.write('\'');
+				escape(content, false, true);
+				out.write('\'');
+			}
+		} catch (IOException exc) {
 			throw new UncheckedIOException(exc);
 		}
 		commaNeeded = true;
@@ -312,10 +309,10 @@ public class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput fullstop() {
 		if (listCount != 0) {
 			throw new IllegalStateException("Number of openList and closeList do not match. openList Counter is " + listCount);
-		}
-		if (termCount != 0) {
+		} else if (termCount != 0) {
 			throw new IllegalStateException("Number of openTerm and closeTerm do not match. openTerm Counter is " + termCount);
 		}
+
 		try {
 			out.write('.');
 			out.write(System.lineSeparator());

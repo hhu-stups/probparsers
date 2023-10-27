@@ -1,10 +1,11 @@
 package de.prob.prolog.output;
 
-import java.math.BigInteger;
-
 import de.prob.prolog.term.PrologTerm;
 
+import java.math.BigInteger;
+
 public class PrologTermDelegate implements IPrologTermOutput {
+
 	protected final IPrologTermOutput pto;
 
 	public PrologTermDelegate(final IPrologTermOutput pto) {
@@ -106,5 +107,4 @@ public class PrologTermDelegate implements IPrologTermOutput {
 		pto.printTerm(term);
 		return this;
 	}
-
 }
