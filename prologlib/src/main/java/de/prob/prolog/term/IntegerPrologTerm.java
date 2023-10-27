@@ -6,90 +6,64 @@
 
 package de.prob.prolog.term;
 
-import java.math.BigInteger;
-
 import de.prob.prolog.output.IPrologTermOutput;
+
+import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Represents a Prolog integer.
  */
 public final class IntegerPrologTerm extends AIntegerPrologTerm {
+
 	private final BigInteger value;
-	private final long ivalue; // holds the integer if value==null
-	// ideally we should create two instance classes, one for long and one for BigInteger
 
+	/**
+	 * @deprecated use {@link AIntegerPrologTerm#create(BigInteger)} instead
+	 */
+	@Deprecated
 	public IntegerPrologTerm(final BigInteger value) {
-		// super(value.toString());
-		// TODO: we could check longValueExact and catch ArithmeticException
-		this.value = value;
-		this.ivalue = -1;
+		this.value = Objects.requireNonNull(value, "value");
 	}
 
+	/**
+	 * @deprecated use {@link AIntegerPrologTerm#create(long)} instead
+	 */
+	@Deprecated
 	public IntegerPrologTerm(final long value) {
-		//this(BigInteger.valueOf(value));
-		this.value = null; // BigInteger is not required
-		this.ivalue = value;
-	}
-	
-	public IntegerPrologTerm(final byte[] arr) {
-		// super(new BigInteger(arr).toString());
-		this.value = new BigInteger(arr);
-		this.ivalue = -1;
+		this.value = BigInteger.valueOf(value);
 	}
 
-	
+	/**
+	 * @deprecated use {@link AIntegerPrologTerm#create(byte[])} instead
+	 */
+	@Deprecated
+	public IntegerPrologTerm(final byte[] arr) {
+		this.value = new BigInteger(arr);
+	}
+
 	@Override
 	public String getFunctor() {
-		if (value==null)
-			return Long.toString(ivalue);
-		else
-			return value.toString();
+		return this.value.toString();
 	}
 
 	@Override
 	public BigInteger getValue() {
-		if (value==null)
-			return BigInteger.valueOf(ivalue);
-		else
-			return value;
+		return this.value;
 	}
 
 	@Override
 	public long longValueExact() {
-		if (value == null) {
-			return this.ivalue;
-		} else {
-			return this.value.longValueExact();
-		}
+		return this.value.longValueExact();
 	}
-	
+
 	@Override
 	public int intValueExact() {
-		if (value == null) {
-			if (this.ivalue > Integer.MAX_VALUE || this.ivalue < Integer.MIN_VALUE) {
-				throw new ArithmeticException("IntegerPrologTerm value out of int range");
-			}
-			return (int)this.ivalue;
-		} else {
-			return this.value.intValueExact();
-		}
+		return this.value.intValueExact();
 	}
-	
+
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
-		if (value==null)
-			pto.printNumber(ivalue);
-		else
-			pto.printNumber(value);
+		pto.printNumber(this.value);
 	}
-
-
-	@Override
-	public int hashCode() {
-		if (value==null)
-			return Long.hashCode(ivalue) * 11 + 4;
-		else
-			return value.hashCode() * 11 + 4;
-	}
-
 }

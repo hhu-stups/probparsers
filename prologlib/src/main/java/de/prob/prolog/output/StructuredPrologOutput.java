@@ -6,13 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.FloatPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.IntegerLongPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.prolog.term.VariablePrologTerm;
+import de.prob.prolog.term.*;
 
 public class StructuredPrologOutput implements IPrologTermOutput {
 	private final Collection<PrologTerm> sentences = new ArrayList<PrologTerm>();
@@ -103,13 +97,13 @@ public class StructuredPrologOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printNumber(final long number) {
-		addArgument(new IntegerLongPrologTerm(number));
+		addArgument(AIntegerPrologTerm.create(number));
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printNumber(final BigInteger number) {
-		addArgument(new IntegerPrologTerm(number));
+		addArgument(AIntegerPrologTerm.create(number));
 		return this;
 	}
 

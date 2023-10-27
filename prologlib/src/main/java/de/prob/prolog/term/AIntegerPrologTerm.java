@@ -7,12 +7,44 @@
 package de.prob.prolog.term;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
- * Represents a Prolog integer which can be represented as long.
- * a variation of IntegerPrologTerm which avoids using a BigInteger reference
+ * The abstract class representing a Prolog integer.
+ * Can be a long or a BigInteger.
+ * The string representation can be accessed via {@link PrologTerm#getFunctor()}.
  */
 public abstract class AIntegerPrologTerm extends PrologTerm {
+
+	@SuppressWarnings("deprecation")
+	public static AIntegerPrologTerm create(final long number) {
+		return new IntegerLongPrologTerm(number);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static AIntegerPrologTerm create(final BigInteger number) {
+		Objects.requireNonNull(number, "number");
+		try {
+			return create(number.longValueExact());
+		} catch (ArithmeticException ignored) {
+			return new IntegerPrologTerm(number);
+		}
+	}
+
+	public static AIntegerPrologTerm create(final byte[] number) {
+		Objects.requireNonNull(number, "number");
+		return create(new BigInteger(number));
+	}
+
+	public static AIntegerPrologTerm create(String number) {
+		Objects.requireNonNull(number, "number");
+		return create(new BigInteger(number));
+	}
+
+	public static AIntegerPrologTerm create(String number, int radix) {
+		Objects.requireNonNull(number, "number");
+		return create(new BigInteger(number, radix));
+	}
 
 	@Override
 	public boolean isNumber() {
@@ -24,7 +56,7 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 	/**
 	 * Get this integer's value as a {@code long},
 	 * checking for overflows.
-	 * 
+	 *
 	 * @return this integer's value as a {@code long}
 	 * @throws ArithmeticException if the value cannot be represented as a {@code long}
 	 */
@@ -49,5 +81,8 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 		return this.getValue().equals(((AIntegerPrologTerm) other).getValue());
 	}
 
-
+	@Override
+	public int hashCode() {
+		return this.getValue().hashCode();
+	}
 }

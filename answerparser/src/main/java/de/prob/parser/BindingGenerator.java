@@ -12,11 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.prob.core.sablecc.node.Start;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.prolog.term.VariablePrologTerm;
+import de.prob.prolog.term.*;
 
 /**
  * Takes a Prolog term of the form (only its canonical form) "[x=a,y=b,z=c]" and
@@ -174,14 +170,38 @@ public class BindingGenerator {
 		return getList(prologTerm);
 	}
 
-	public static IntegerPrologTerm getInteger(final PrologTerm term) {
-		if (term instanceof IntegerPrologTerm)
-			return (IntegerPrologTerm) term;
-		final String message = "Expected ListPrologTerm, but got "
+	public static AIntegerPrologTerm getAInteger(final PrologTerm term) {
+		if (term instanceof AIntegerPrologTerm)
+			return (AIntegerPrologTerm) term;
+		final String message = "Expected AIntegerPrologTerm, but got "
 				+ term.getClass().getSimpleName();
 		throw new ResultParserException(message, null);
 	}
 
+	public static AIntegerPrologTerm getAInteger(
+			final Map<String, PrologTerm> bindings, final String name) {
+		PrologTerm prologTerm = getFromBindings(bindings, name);
+		return getAInteger(prologTerm);
+	}
+
+	/**
+	 * @deprecated use {@link BindingGenerator#getAInteger(PrologTerm)} instead
+	 */
+	@Deprecated
+	public static IntegerPrologTerm getInteger(final PrologTerm term) {
+		if (term instanceof IntegerPrologTerm)
+			return (IntegerPrologTerm) term;
+		else if (term instanceof AIntegerPrologTerm)
+			return new IntegerPrologTerm(((AIntegerPrologTerm) term).getValue());
+		final String message = "Expected IntegerPrologTerm, but got "
+				+ term.getClass().getSimpleName();
+		throw new ResultParserException(message, null);
+	}
+
+	/**
+	 * @deprecated use {@link BindingGenerator#getAInteger(Map, String)} instead
+	 */
+	@Deprecated
 	public static IntegerPrologTerm getInteger(
 			final Map<String, PrologTerm> bindings, final String name) {
 		PrologTerm prologTerm = getFromBindings(bindings, name);
@@ -191,7 +211,7 @@ public class BindingGenerator {
 	public static VariablePrologTerm getVariable(final PrologTerm term) {
 		if (term instanceof VariablePrologTerm)
 			return (VariablePrologTerm) term;
-		final String message = "Expected ListPrologTerm, but got "
+		final String message = "Expected VariablePrologTerm, but got "
 				+ term.getClass().getSimpleName();
 		throw new ResultParserException(message, null);
 	}

@@ -6,31 +6,8 @@
 
 package de.prob.parser;
 
-import java.math.BigInteger;
-
-import de.prob.core.sablecc.node.AAtomTerm;
-import de.prob.core.sablecc.node.AEmptyMoreParams;
-import de.prob.core.sablecc.node.AExceptionResult;
-import de.prob.core.sablecc.node.AInterruptedResult;
-import de.prob.core.sablecc.node.AProgressResult;
-import de.prob.core.sablecc.node.ACallBackResult;
-import de.prob.core.sablecc.node.AMoreParams;
-import de.prob.core.sablecc.node.ANoResult;
-import de.prob.core.sablecc.node.ANumberTerm;
-import de.prob.core.sablecc.node.AParams;
-import de.prob.core.sablecc.node.ATerm;
-import de.prob.core.sablecc.node.AVariableTerm;
-import de.prob.core.sablecc.node.AYesResult;
-import de.prob.core.sablecc.node.PMoreParams;
-import de.prob.core.sablecc.node.PResult;
-import de.prob.core.sablecc.node.PTerm;
-import de.prob.core.sablecc.node.Start;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.FloatPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.prolog.term.VariablePrologTerm;
+import de.prob.core.sablecc.node.*;
+import de.prob.prolog.term.*;
 
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
@@ -83,7 +60,7 @@ public class PrologTermGenerator {
 			if (text.indexOf('.') != -1 || text.indexOf('e') != -1 || text.indexOf('E') != -1) {
 				term = new FloatPrologTerm(Double.parseDouble(text));
 			} else {
-				term = new IntegerPrologTerm(new BigInteger(text));
+				term = AIntegerPrologTerm.create(text);
 			}
 		} else if (node instanceof AAtomTerm) {
 			String text = ((AAtomTerm) node).getName().getText();

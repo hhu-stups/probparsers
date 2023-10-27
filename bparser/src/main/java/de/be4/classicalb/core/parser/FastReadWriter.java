@@ -9,7 +9,6 @@ import java.util.Map;
 
 import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.IntegerLongPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
@@ -33,10 +32,7 @@ public class FastReadWriter {
 	}
 
 	public void writeTerm(PrologTerm term) throws IOException {
-		if (term instanceof IntegerLongPrologTerm) {
-			IntegerLongPrologTerm intTerm = (IntegerLongPrologTerm) term;
-			writeLongInteger(intTerm);
-		}else if (term instanceof AIntegerPrologTerm) {
+		if (term instanceof AIntegerPrologTerm) {
 			AIntegerPrologTerm intTerm = (AIntegerPrologTerm) term;
 			writeInteger(intTerm);
 		} else if (term instanceof CompoundPrologTerm) {
@@ -68,13 +64,7 @@ public class FastReadWriter {
 
 	private void writeInteger(AIntegerPrologTerm ip) throws IOException {
 		out.write('I');
-		writeText(ip.getValue().toString());
-		out.write(0);
-	}
-	
-	private void writeLongInteger(IntegerLongPrologTerm ip) throws IOException {
-		out.write('I');
-		writeText(String.valueOf(ip.longValueExact()));
+		writeText(ip.getFunctor());
 		out.write(0);
 	}
 
