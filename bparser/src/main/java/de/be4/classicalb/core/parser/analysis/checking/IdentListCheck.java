@@ -52,7 +52,6 @@ import de.be4.classicalb.core.parser.node.Start;
 public class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final Set<Node> nonIdentifiers = new HashSet<>();
-	private ParseOptions options;
 	private final List<CheckException> exceptions = new ArrayList<>();
 
 	/**
@@ -234,9 +233,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	}
 
 	@Override
-	public void setOptions(ParseOptions options) {
-		this.options = options;
-	}
+	public void setOptions(ParseOptions options) {}
 
 	@Override
 	public List<CheckException> getCheckExceptions() {
