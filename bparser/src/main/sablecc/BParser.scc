@@ -740,6 +740,8 @@ predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 */
 
 predicate_atomic {-> predicate} =
+  // lhs_expression should really be assign_list and not expression_list,
+  // but that causes reduce/reduce conflicts with sequence extensions.
   {subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic
     {-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } | //weakest precondition
     /* The following predicates have a priority in the AtelierB manual.

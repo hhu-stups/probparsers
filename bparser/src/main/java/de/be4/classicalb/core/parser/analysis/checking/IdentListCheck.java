@@ -6,24 +6,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AAssignSubstitution;
 import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
 import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ARecEntry;
@@ -43,59 +39,16 @@ import de.be4.classicalb.core.parser.node.Start;
  * This class finds those constructs and checks if the identifier lists only
  * contain {@link AIdentifierExpression} nodes.
  * </p>
- * <p>
- * Additionally it checks if the LHS of an {@link AAssignSubstitution} and the
- * result list of an {@link AOperationCallSubstitution} only contain
- * {@link AIdentifierExpression} or {@link AFunctionExpression} nodes.
- * </p>
  */
 public class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final Set<Node> nonIdentifiers = new HashSet<>();
 	private final List<CheckException> exceptions = new ArrayList<>();
 
-	/**
-	 * <p>
-	 * See class description. First {@link AAssignSubstitution} nodes are
-	 * checked, then the other nodes.
-	 * </p>
-	 * <p>
-	 * An {@link CheckException} is thrown if there are
-	 * {@link AAssignSubstitution} or {@link AOperationCallSubstitution} nodes
-	 * with illegal elements in the LHS. Otherwise the other relevant nodes are
-	 * checked for illegal entries in their identifier lists.
-	 * </p>
-	 * <p>
-	 * In both cases the erroneous nodes are collected, so that only one
-	 * exception is thrown for the {@link AAssignSubstitution} and
-	 * {@link AOperationCallSubstitution} nodes respectively one for all other
-	 * nodes.
-	 * </p>
-	 * 
-	 * @param rootNode
-	 *            the start node of the AST
-	 */
 	@Override
 	public void runChecks(final Start rootNode) {
 		nonIdentifiers.clear();
 
-		/*
-		 * First check all assignment nodes if the LHS only contains identifiers
-		 * or functions.
-		 */
-		final AssignCheck assignCheck = new AssignCheck();
-		rootNode.apply(assignCheck);
-
-		final Set<Node> assignErrorNodes = assignCheck.nonIdentifiers;
-		if (!assignErrorNodes.isEmpty()) {
-			exceptions.add(new CheckException("Identifier or function or record field expected",
-					new ArrayList<>(assignErrorNodes)));
-		}
-
-		/*
-		 * Then check other constructs which can only contain identifiers at
-		 * special places.
-		 */
 		rootNode.apply(this);
 
 		if (!nonIdentifiers.isEmpty()) {
@@ -204,30 +157,6 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 
 			if (!(expression instanceof AIdentifierExpression)) {
 				nonIdentifiers.add(expression);
-			}
-		}
-	}
-
-	class AssignCheck extends OptimizedTraversingAdapter {
-		final Set<Node> nonIdentifiers = new HashSet<>();
-
-		@Override
-		public void inAAssignSubstitution(final AAssignSubstitution node) {
-			checkList(node.getLhsExpression());
-		}
-
-		@Override
-		public void inAOperationCallSubstitution(final AOperationCallSubstitution node) {
-			checkList(node.getResultIdentifiers());
-		}
-
-		private void checkList(final List<PExpression> list) {
-			for (final Iterator<PExpression> iterator = list.iterator(); iterator.hasNext();) {
-				final PExpression expression = iterator.next();
-				if (!(expression instanceof AIdentifierExpression || expression instanceof AFunctionExpression
-						|| expression instanceof ARecordFieldExpression)) {
-					nonIdentifiers.add(expression);
-				}
 			}
 		}
 	}
