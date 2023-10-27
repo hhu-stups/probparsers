@@ -1,41 +1,42 @@
 package de.prob.prolog.match;
 
-import java.util.Map;
-
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
+
+import java.util.Map;
 
 /**
  * Matches a Prolog variable.
  */
-public class PrologVariableMatch extends PrologMatch {
+public final class PrologVariableMatch extends PrologMatch {
+
 	private final String varName;
+
+	/**
+	 * Matches on a Prolog variable with the given name
+	 *
+	 * @param name the name, if <code>null</code> it will not be checked
+	 */
+	private PrologVariableMatch(final String name, final String varName) {
+		super(name);
+		this.varName = varName;
+	}
+
+
+	public static PrologVariableMatch anonVar() {
+		return namedVar(null);
+	}
 
 	public static PrologVariableMatch anonVar(String varName) {
 		return namedVar(null, varName);
-	}
-
-	public static PrologVariableMatch anonVar() {
-		return namedVar(null, null);
-	}
-
-	public static PrologVariableMatch namedVar(String name, String varName) {
-		return new PrologVariableMatch(name, varName);
 	}
 
 	public static PrologVariableMatch namedVar(String name) {
 		return namedVar(name, null);
 	}
 
-	/**
-	 * Matches on a Prolog variable with the given name
-	 * 
-	 * @param name
-	 *            the name, if <code>null</code> it will not be checked
-	 */
-	private PrologVariableMatch(final String name, final String varName) {
-		super(name);
-		this.varName = varName;
+	public static PrologVariableMatch namedVar(String name, String varName) {
+		return new PrologVariableMatch(name, varName);
 	}
 
 	@Override

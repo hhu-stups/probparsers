@@ -16,19 +16,6 @@ import de.prob.prolog.output.PrologTermStringOutput;
  * This is the abstract base class for Prolog terms
  */
 public abstract class PrologTerm {
-	// protected final String functor;
-	//protected final PrologTerm[] arguments;
-
-	//public PrologTerm(final String functor, final PrologTerm... arguments) {
-		//if (functor == null)
-		//	throw new IllegalArgumentException("Functor must not be null");
-		//this.functor = functor;
-		//if (arguments == null || arguments.length == 0) {
-		//	this.arguments = null;
-		//} else {
-		//	this.arguments = arguments;
-		//}
-	//}
 
 	public boolean isTerm() {
 		return false;
@@ -71,7 +58,6 @@ public abstract class PrologTerm {
 
 	public int getArity() {
 		return 0;
-		//return arguments == null ? 0 : arguments.length;
 	}
 
 	/**
@@ -83,10 +69,6 @@ public abstract class PrologTerm {
 	 */
 	public PrologTerm getArgument(final int index) {
 		throw new IndexOutOfBoundsException("Atom has no arguments");
-		//if (arguments == null)
-		//	throw new IndexOutOfBoundsException("Atom has no arguments");
-		//else
-		//	return arguments[index - 1];
 	}
 
 	/**

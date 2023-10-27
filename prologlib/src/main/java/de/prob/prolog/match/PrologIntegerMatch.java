@@ -1,54 +1,52 @@
 package de.prob.prolog.match;
 
-import java.math.BigInteger;
-import java.util.Map;
-
 import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.PrologTerm;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * Matches an integer, provides the found integer as BigInt
  */
-public class PrologIntegerMatch extends PrologMatch {
-	private final BigInteger integer;
+public final class PrologIntegerMatch extends PrologMatch {
 
-	public static PrologIntegerMatch anonInt(final BigInteger integer) {
-		return namedInt(null, integer);
-	}
+	private final BigInteger number;
 
-	public static PrologIntegerMatch anonInt(final long integer) {
-		return namedInt(null, BigInteger.valueOf(integer));
+	private PrologIntegerMatch(final String name, final BigInteger number) {
+		super(name);
+		this.number = number;
 	}
 
 	public static PrologIntegerMatch anonInt() {
 		return namedInt(null, null);
 	}
 
-	public static PrologIntegerMatch namedInt(final String name,
-			final BigInteger integer) {
-		return new PrologIntegerMatch(name, integer);
+	public static PrologIntegerMatch anonInt(final long number) {
+		return namedInt(null, BigInteger.valueOf(number));
 	}
 
-	public static PrologIntegerMatch namedInt(final String name,
-			final long integer) {
-		return new PrologIntegerMatch(name, BigInteger.valueOf(integer));
+	public static PrologIntegerMatch anonInt(final BigInteger number) {
+		return namedInt(null, number);
 	}
 
 	public static PrologIntegerMatch namedInt(final String name) {
 		return namedInt(name, null);
 	}
 
-	private PrologIntegerMatch(final String name, final BigInteger integer) {
-		super(name);
-		this.integer = integer;
+	public static PrologIntegerMatch namedInt(final String name, final long number) {
+		return namedInt(name, BigInteger.valueOf(number));
+	}
+
+	public static PrologIntegerMatch namedInt(final String name, final BigInteger number) {
+		return new PrologIntegerMatch(name, number);
 	}
 
 	@Override
-	protected boolean isMatch(final PrologTerm term,
-			final Map<String, PrologTerm> hits) {
+	protected boolean isMatch(final PrologTerm term, final Map<String, PrologTerm> hits) {
 		boolean match = term instanceof AIntegerPrologTerm;
-		if (match && integer != null) {
-			match = integer.equals(((AIntegerPrologTerm) term).getValue());
+		if (match && number != null) {
+			match = number.equals(((AIntegerPrologTerm) term).getValue());
 		}
 		return match;
 	}
