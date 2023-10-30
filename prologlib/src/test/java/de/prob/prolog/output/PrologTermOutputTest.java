@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 public class PrologTermOutputTest {
 
@@ -15,14 +15,14 @@ public class PrologTermOutputTest {
 	private StringWriter swriter;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		swriter = new StringWriter();
 		pout = new PrologTermOutput(new PrintWriter(swriter), false);
 	}
 
 	private void assertOutput(final String expected) {
 		pout.flush();
-		assertEquals(expected, swriter.toString());
+		assertEquals(expected, swriter.toString().trim());
 	}
 
 	@Test
@@ -36,8 +36,7 @@ public class PrologTermOutputTest {
 		pout.printAtom("atom2");
 		pout.closeTerm();
 		pout.fullstop();
-		pout.flush();
-		assertEquals("func(atom,inner(4500,22),atom2).", swriter.toString().trim());
+		assertOutput("func(atom,inner(4500,22),atom2).");
 	}
 
 	@Test
@@ -51,7 +50,7 @@ public class PrologTermOutputTest {
 		pout.openTerm("Functor");
 		pout.printAtom("with white spaces");
 		pout.closeTerm();
-		assertOutput("normal,camelStyle,with_underscore,'UpperCase'," + "'_begin_with_underscore','22number','Functor'" +
+		assertOutput("normal,camelStyle,with_underscore,'UpperCase','_begin_with_underscore','22number','Functor'" +
 			"('with white spaces')");
 	}
 
@@ -63,8 +62,7 @@ public class PrologTermOutputTest {
 		pout.printAtom(" donttrim ");
 		pout.printAtom("apo'stroph");
 		pout.printAtom("double\"quote");
-		assertOutput("'hallo\\nwelt','back\\\\slash','\\334\\mlaute',' donttrim '," + "'apo\\'stroph'," +
-			"'double\"quote'");
+		assertOutput("'hallo\\nwelt','back\\\\slash','\\334\\mlaute',' donttrim ','apo\\'stroph','double\"quote'");
 	}
 
 	@Test
@@ -111,65 +109,37 @@ public class PrologTermOutputTest {
 
 	@Test
 	public void testInvalidVariables() {
-		try {
-			pout.printVariable("lowerCase");
-			fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException e) {
-			// o.k.
-		}
-
-		try {
-			pout.printVariable("Having whitespace");
-			fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException e) {
-			// o.k.
-		}
+		assertThrows(IllegalArgumentException.class, () -> pout.printVariable("lowerCase"));
+		assertThrows(IllegalArgumentException.class, () -> pout.printVariable("Having whitespace"));
 	}
 
 	@Test
 	public void testInvalidLists1() {
-		try {
+		assertThrows(IllegalStateException.class, () -> {
 			pout.openList();
 			pout.printAtom("test");
 			pout.fullstop();
-			fail("IllegalStateException expected");
-		} catch (IllegalStateException e) {
-			// ok
-		}
+		});
 	}
 
 	@Test
 	public void testInvalidLists2() {
-
-		try {
-			pout.closeList();
-			fail("IllegalStateException expected");
-		} catch (IllegalStateException e) {
-			// ok
-		}
+		assertThrows(IllegalStateException.class, () -> pout.closeList());
 	}
 
 	@Test
 	public void testInvalidTerms1() {
-		try {
+		assertThrows(IllegalStateException.class, () -> {
 			pout.openTerm("test");
 			pout.printAtom("test");
 			pout.printAtom("test");
 			pout.fullstop();
-			fail("IllegalStateException expected");
-		} catch (IllegalStateException e) {
-			// ok
-		}
+		});
 	}
 
 	@Test
 	public void testInvalidTerms2() {
-		try {
-			pout.closeTerm();
-			fail("IllegalStateException expected");
-		} catch (IllegalStateException e) {
-			// ok
-		}
+		assertThrows(IllegalStateException.class, () -> pout.closeTerm());
 	}
 
 	@Test
