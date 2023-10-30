@@ -84,7 +84,9 @@ public final class PrologTermGenerator {
 		} else if (node instanceof AVariableTerm) {
 			String text = removeQuotes(((AVariableTerm) node).getVariable().getText());
 			term = new VariablePrologTerm(text);
-		} else {throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());}
+		} else {
+			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
+		}
 		return term;
 	}
 

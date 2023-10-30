@@ -149,10 +149,8 @@ public class ListPrologTermTest {
 		final ListPrologTerm list = new ListPrologTerm(createFixture(10));
 		final ListPrologTerm subList = list.subList(1, 4);
 		assertEquals(3, subList.size());
-		assertEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"),
-                new CompoundPrologTerm("3")), subList);
-		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"),
-                new CompoundPrologTerm("3"), new CompoundPrologTerm("4")), subList);
+		assertEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3")), subList);
+		assertNotEquals(new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2"), new CompoundPrologTerm("3"), new CompoundPrologTerm("4")), subList);
 		assertNotEquals(subList, new ListPrologTerm(new CompoundPrologTerm("1"), new CompoundPrologTerm("2")));
 		final ListPrologTerm subSubList = subList.subList(1, 2);
 		assertEquals(1, subSubList.size());
@@ -163,8 +161,7 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testLastIndexOf() {
-		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5),
-                AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(6));
+		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(6));
 		assertEquals(2, t1.lastIndexOf(AIntegerPrologTerm.create(5)));
 	}
 

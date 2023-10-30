@@ -142,8 +142,7 @@ public abstract class PrologTerm {
 		if (this.isAtom()) {
 			return this.getFunctor();
 		} else {
-			throw new IllegalArgumentException("Expected a Prolog atom, but was " + this + " (" + this.getClass() +
-				")");
+			throw new IllegalArgumentException("Expected a Prolog atom, but was " + this + " (" + this.getClass() + ")");
 		}
 	}
 

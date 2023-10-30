@@ -70,8 +70,7 @@ public final class PrologListMatch extends PrologMatch {
 		return new PrologDestructedListMatch(name, headSize, null, tail);
 	}
 
-	public static PrologDestructedListMatch namedDestructuredList(String name, PrologMatch[] headElements,
-																  PrologMatch tail) {
+	public static PrologDestructedListMatch namedDestructuredList(String name, PrologMatch[] headElements, PrologMatch tail) {
 		Objects.requireNonNull(headElements, "headElements");
 		return new PrologDestructedListMatch(name, headElements.length, headElements, tail);
 	}

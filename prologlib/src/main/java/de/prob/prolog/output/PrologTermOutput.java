@@ -66,7 +66,7 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	/**
 	 * Escapes existing apostrophes by backslashes.
 	 *
-	 * @param input        A string, never <code>null</code>.
+	 * @param input A string, never <code>null</code>.
 	 * @param singleQuotes if single quotes may be used
 	 * @param doubleQuotes if double quotes may be used
 	 */

@@ -31,9 +31,8 @@ public interface IPrologTermOutput {
 	 * is useful to write terms more compact when you know that they are always
 	 * short.
 	 *
-	 * @param functor           the functor, never <code>null</code>
-	 * @param ignoreIndentation if this is set to true, the arguments of this term are not
-	 *                          subject to indent.
+	 * @param functor the functor, never <code>null</code>
+	 * @param ignoreIndentation if this is set to true, the arguments of this term are not subject to indent.
 	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation);

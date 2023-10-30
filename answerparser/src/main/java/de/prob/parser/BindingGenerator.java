@@ -57,18 +57,18 @@ public final class BindingGenerator {
 	private static Map<String, PrologTerm> createBinding(final ListPrologTerm list) {
 		Map<String, PrologTerm> result;
 		result = new HashMap<>();
-        for (PrologTerm element : list) {
-            if (element.isTerm()) {
-                CompoundPrologTerm binding = (CompoundPrologTerm) element;
-                if (binding.getArity() == 2 && "=".equals(binding.getFunctor())) {
-                    extractBinding(result, binding);
-                } else {
-                    throw new IllegalArgumentException("Expected binding (=/2), but was " + binding.getFunctor() + "/" + String.valueOf(binding.getArity()));
-                }
-            } else {
-                throw new IllegalArgumentException("Expected binding but was not a term");
-            }
-        }
+		for (PrologTerm element : list) {
+			if (element.isTerm()) {
+				CompoundPrologTerm binding = (CompoundPrologTerm) element;
+				if (binding.getArity() == 2 && "=".equals(binding.getFunctor())) {
+					extractBinding(result, binding);
+				} else {
+					throw new IllegalArgumentException("Expected binding (=/2), but was " + binding.getFunctor() + "/" + String.valueOf(binding.getArity()));
+				}
+			} else {
+				throw new IllegalArgumentException("Expected binding but was not a term");
+			}
+		}
 		return Collections.unmodifiableMap(result);
 	}
 
@@ -103,20 +103,17 @@ public final class BindingGenerator {
 		throw new ResultParserException(message, null);
 	}
 
-	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name,
-													 final String functor, final int arity) {
+	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name, final String functor, final int arity) {
 		final PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getCompoundTerm(prologTerm, functor, arity);
 	}
 
-	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name,
-													 final int arity) {
+	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name, final int arity) {
 		final PrologTerm prologTerm = getFromBindings(bindings, name);
 		return getCompoundTerm(prologTerm, arity);
 	}
 
-	private static CompoundPrologTerm checkSignature(final CompoundPrologTerm term, final String functor,
-													 final int arity) {
+	private static CompoundPrologTerm checkSignature(final CompoundPrologTerm term, final String functor, final int arity) {
 		checkArity(term, arity);
 		checkFunctor(term, functor);
 		return term;

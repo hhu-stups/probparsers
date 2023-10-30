@@ -22,10 +22,9 @@ public final class PrologTermMatch extends PrologMatch {
 	 * Matches on a term with given functor and arguments
 	 *
 	 * @param functor the functor, <code>null</code> if it should not be checked
-	 * @param arity   the arity, &lt;0 if it should not be checked
-	 * @param args    the arguments. If <code>null</code>, they remain unchecked. If
-	 *                an element of <code>args</code> is <code>null</code>, it
-	 *                remains unchecked.
+	 * @param arity the arity, &lt;0 if it should not be checked
+	 * @param args the arguments. If <code>null</code>, they remain unchecked.
+	 *     If an element of <code>args</code> is <code>null</code>, it remains unchecked.
 	 */
 	private PrologTermMatch(String name, String functor, int arity, PrologMatch[] args) {
 		super(name);

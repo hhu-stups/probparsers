@@ -23,7 +23,9 @@ public final class ProBResultParser {
 	}
 
 	public static Start parse(final String prologAnswer) {
-		if (prologAnswer.length() == 0) {throw new ResultParserException("Received empty Result", null);}
+		if (prologAnswer.length() == 0) {
+			throw new ResultParserException("Received empty Result", null);
+		}
 
 		final PushbackReader codeReader = new PushbackReader(new StringReader(prologAnswer), prologAnswer.length());
 		final Lexer lexer = new Lexer(codeReader);
