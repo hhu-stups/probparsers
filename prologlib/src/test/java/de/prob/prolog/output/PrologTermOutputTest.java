@@ -2,13 +2,21 @@ package de.prob.prolog.output;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeNoException;
 
+@RunWith(Enclosed.class)
 public class PrologTermOutputTest {
 
 	private IPrologTermOutput pout;
@@ -50,8 +58,7 @@ public class PrologTermOutputTest {
 		pout.openTerm("Functor");
 		pout.printAtom("with white spaces");
 		pout.closeTerm();
-		assertOutput("normal,camelStyle,with_underscore,'UpperCase','_begin_with_underscore','22number','Functor'" +
-			"('with white spaces')");
+		assertOutput("normal,camelStyle,with_underscore,'UpperCase','_begin_with_underscore','22number','Functor'('with white spaces')");
 	}
 
 	@Test
@@ -153,5 +160,170 @@ public class PrologTermOutputTest {
 		pout.openTerm("test");
 		pout.closeTerm();
 		assertOutput("test");
+	}
+
+	@RunWith(Parameterized.class)
+	public static class AtomTest {
+
+		@Parameterized.Parameter
+		public String input;
+		@Parameterized.Parameter(1)
+		public String output;
+
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			return Arrays.asList(new Object[][] {
+				{ "", "''" },
+				{ "a", "a" },
+				{ "foobarbaz", "foobarbaz" },
+			});
+		}
+
+		@Test
+		public void testAtom() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			pto.printAtom(input);
+			assertEquals(output, sw.toString().trim());
+		}
+
+		@Test
+		public void testTerm() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			pto.openTerm(input);
+			pto.closeTerm();
+			assertEquals(output, sw.toString().trim());
+		}
+	}
+
+	@RunWith(Parameterized.class)
+	public static class IntegerTest {
+
+		@Parameterized.Parameter
+		public Object input;
+		@Parameterized.Parameter(1)
+		public String output;
+
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			return Arrays.asList(new Object[][] {
+				{ 0, "0" },
+				{ 1, "1" },
+				{ -1, "-1" },
+				{ BigInteger.ONE.shiftLeft(64), "18446744073709551616" },
+			});
+		}
+
+		@Test
+		public void testLong() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			if (input instanceof BigInteger) {
+				long n;
+				try {
+					n = ((BigInteger) input).longValueExact();
+				} catch (ArithmeticException e) {
+					assumeNoException(e);
+					return;
+				}
+				pto.printNumber(n);
+			} else {
+				long n = ((Number) input).longValue();
+				pto.printNumber(n);
+			}
+			assertEquals(output, sw.toString().trim());
+		}
+
+		@Test
+		public void testBigInteger() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			if (input instanceof BigInteger) {
+				pto.printNumber((BigInteger) input);
+			} else {
+				BigInteger n = BigInteger.valueOf(((Number) input).longValue());
+				pto.printNumber(n);
+			}
+			assertEquals(output, sw.toString().trim());
+		}
+	}
+
+	@RunWith(Parameterized.class)
+	public static class FloatTest {
+
+		@Parameterized.Parameter
+		public double input;
+		@Parameterized.Parameter(1)
+		public String output;
+
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			return Arrays.asList(new Object[][] {
+				{ 0, "0.0" },
+				{ 1, "1.0" },
+				{ -1, "-1.0" },
+			});
+		}
+
+		@Test
+		public void test() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			pto.printNumber(input);
+			assertEquals(output, sw.toString().trim());
+		}
+	}
+
+	@RunWith(Parameterized.class)
+	public static class StringTest {
+
+		@Parameterized.Parameter
+		public String input;
+		@Parameterized.Parameter(1)
+		public String output;
+
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			return Arrays.asList(new Object[][] {
+				{ "", "\"\"" },
+				{ "a", "\"a\"" },
+				{ "foobarbaz", "\"foobarbaz\"" },
+			});
+		}
+
+		@Test
+		public void test() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			pto.printString(input);
+			assertEquals(output, sw.toString().trim());
+		}
+	}
+
+	@RunWith(Parameterized.class)
+	public static class AtomOrNumberTest {
+
+		@Parameterized.Parameter
+		public String input;
+		@Parameterized.Parameter(1)
+		public String output;
+
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			return Arrays.asList(new Object[][] {
+				{ "", "''" },
+				{ "a", "a" },
+				{ "foobarbaz", "foobarbaz" },
+			});
+		}
+
+		@Test
+		public void test() {
+			StringWriter sw = new StringWriter();
+			IPrologTermOutput pto = new PrologTermOutput(sw, false);
+			pto.printAtomOrNumber(input);
+			assertEquals(output, sw.toString().trim());
+		}
 	}
 }
