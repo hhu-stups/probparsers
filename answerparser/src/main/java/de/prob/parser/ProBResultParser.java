@@ -38,14 +38,9 @@ public final class ProBResultParser {
 				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser. String was: '"
 					+ prologAnswer + "'. Last Token was '" + e.getToken() + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
-		} catch (final LexerException e) {
+		} catch (LexerException | IOException e) {
 			String message =
-				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser String was: '"
-					+ prologAnswer + "': " + e.getLocalizedMessage();
-			throw new ResultParserException(message, e);
-		} catch (final IOException e) {
-			String message =
-				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser String was: "
+				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser. String was: '"
 					+ prologAnswer + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		}
