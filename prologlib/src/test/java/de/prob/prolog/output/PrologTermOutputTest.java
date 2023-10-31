@@ -1,16 +1,14 @@
 package de.prob.prolog.output;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.math.BigInteger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -171,12 +169,12 @@ public class PrologTermOutputTest {
 		public String output;
 
 		@Parameterized.Parameters
-		public static Collection<Object[]> data() {
-			return Arrays.asList(new Object[][] {
+		public static Object[][] data() {
+			return new Object[][] {
 				{ "", "''" },
 				{ "a", "a" },
 				{ "foobarbaz", "foobarbaz" },
-			});
+			};
 		}
 
 		@Test
@@ -206,13 +204,13 @@ public class PrologTermOutputTest {
 		public String output;
 
 		@Parameterized.Parameters
-		public static Collection<Object[]> data() {
-			return Arrays.asList(new Object[][] {
+		public static Object[][] data() {
+			return new Object[][] {
 				{ 0, "0" },
 				{ 1, "1" },
 				{ -1, "-1" },
 				{ BigInteger.ONE.shiftLeft(64), "18446744073709551616" },
-			});
+			};
 		}
 
 		@Test
@@ -258,12 +256,12 @@ public class PrologTermOutputTest {
 		public String output;
 
 		@Parameterized.Parameters
-		public static Collection<Object[]> data() {
-			return Arrays.asList(new Object[][] {
+		public static Object[][] data() {
+			return new Object[][] {
 				{ 0, "0.0" },
 				{ 1, "1.0" },
 				{ -1, "-1.0" },
-			});
+			};
 		}
 
 		@Test
@@ -284,12 +282,12 @@ public class PrologTermOutputTest {
 		public String output;
 
 		@Parameterized.Parameters
-		public static Collection<Object[]> data() {
-			return Arrays.asList(new Object[][] {
+		public static Object[][] data() {
+			return new Object[][] {
 				{ "", "\"\"" },
 				{ "a", "\"a\"" },
 				{ "foobarbaz", "\"foobarbaz\"" },
-			});
+			};
 		}
 
 		@Test
@@ -310,12 +308,12 @@ public class PrologTermOutputTest {
 		public String output;
 
 		@Parameterized.Parameters
-		public static Collection<Object[]> data() {
-			return Arrays.asList(new Object[][] {
+		public static Object[][] data() {
+			return new Object[][] {
 				{ "", "''" },
 				{ "a", "a" },
 				{ "foobarbaz", "foobarbaz" },
-			});
+			};
 		}
 
 		@Test
