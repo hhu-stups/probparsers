@@ -63,7 +63,7 @@ public class PrologTermOutputTest {
 	public void testEscape2() {
 		pout.printAtom("hallo\nwelt");
 		pout.printAtom("back\\slash");
-		pout.printAtom("\u00dcmlaute"); // U - Umlaut
+		pout.printAtom("Ümlaute");
 		pout.printAtom(" donttrim ");
 		pout.printAtom("apo'stroph");
 		pout.printAtom("double\"quote");
@@ -149,7 +149,7 @@ public class PrologTermOutputTest {
 
 	@Test
 	public void testAccents() {
-		pout.printAtom("h\u00e4ll\u00f3");
+		pout.printAtom("hälló");
 		assertOutput("'h\\344\\ll\\363\\'");
 	}
 
