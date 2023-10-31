@@ -181,6 +181,8 @@ public final class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printAtomOrNumber(final String content) {
+		Objects.requireNonNull(content, "Atom or Number value is null");
+
 		try {
 			printNumber(Long.parseLong(content));
 		} catch (NumberFormatException ignored) {
