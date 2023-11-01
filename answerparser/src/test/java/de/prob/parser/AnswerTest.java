@@ -1,10 +1,9 @@
 package de.prob.parser;
 
-import static org.junit.Assert.assertNotNull;
-
+import de.prob.core.sablecc.node.Start;
 import org.junit.Test;
 
-import de.prob.core.sablecc.node.Start;
+import static org.junit.Assert.assertNotNull;
 
 public class AnswerTest {
 
@@ -90,6 +89,42 @@ public class AnswerTest {
 	@Test
 	public void testFloats() {
 		final Start rootNode = ProBResultParser.parse("yes(x(1,2.0,3e4,5.6e7,8e+9,-1,-2.0,-3e4,-5.6e7,-8e-9))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testListSyntaxSWI() {
+		final Start rootNode = ProBResultParser.parse("yes(x(.(1,.(2,.(=(foo,bar),[])))))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testListSyntaxSICStus() {
+		final Start rootNode = ProBResultParser.parse("yes(x('.'(1,'.'(2,'.'(=(foo,bar),[])))))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testOctalEscape() {
+		final Start rootNode = ProBResultParser.parse("yes(x('\\334\\'))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testEscapedNewline() {
+		final Start rootNode = ProBResultParser.parse("yes(x('a\\\nb'))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testMixedQuotes() {
+		final Start rootNode = ProBResultParser.parse("yes(x('\"',\"'\",'\\`',\"\\`\"))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
+	public void testWhitespaceBetweenTokens() {
+		final Start rootNode = ProBResultParser.parse("yes\n(\r\n  x(\n\ta, 2))\n");
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 }

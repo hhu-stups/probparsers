@@ -91,79 +91,94 @@ public final class PrologTermGenerator {
 	}
 
 	private static String removeQuotes(final String text) {
-		String result;
-		if (text.charAt(0) == '\'') {
-			int length = text.length();
-			StringBuilder builder = new StringBuilder(length - 2);
-			for (int i = 1; i < length - 1; i++) {
-				char c = text.charAt(i);
-				if (c == '\\') {
-					i = escapeCharacter(text, builder, i);
-				} else {
-					builder.append(c);
+		if (text != null && !text.isEmpty()) {
+			char first = text.charAt(0);
+			if (first == '\'' || first == '"') {
+				int len = text.length();
+				StringBuilder b = new StringBuilder(len - 2);
+				for (int i = 1; i < len - 1; i++) {
+					char c = text.charAt(i);
+					if (c == '\\') {
+						i = unescapeCharacter(b, text, i);
+					} else {
+						b.append(c);
+					}
 				}
+				return b.toString();
 			}
-			result = builder.toString();
-		} else {
-			result = text;
 		}
-		return result;
+
+		return text;
 	}
 
-	private static int escapeCharacter(final String text, final StringBuilder builder, int i) {
+	private static int unescapeCharacter(final StringBuilder b, final String text, int i) {
 		char c;
 		i++;
 		c = text.charAt(i);
 		switch (c) {
+			case 'a':
+				b.append('\u0007');
+				break;
 			case 'b':
-				builder.append('\b');
+				b.append('\b');
 				break;
 			case 't':
-				builder.append('\t');
+				b.append('\t');
 				break;
 			case 'n':
-				builder.append('\n');
+				b.append('\n');
 				break;
 			case 'v':
-				builder.append('\u000C');
+				b.append('\u000B');
 				break;
 			case 'f':
-				builder.append('\f');
+				b.append('\f');
 				break;
 			case 'r':
-				builder.append('\r');
+				b.append('\r');
 				break;
 			case 'e':
-				builder.append('\u001C');
+				b.append('\u001B');
 				break;
 			case 'd':
-				builder.append('\u0008');
+				b.append('\u007F');
 				break;
-			case 'a':
-				builder.append('\u0007');
+			case '\n':
+				// ignore escaped newline
 				break;
 			case 'x':
-				i = getHex(i, text, builder);
+				i = getHex(i, text, b);
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+				i = getOct(i, text, b);
 				break;
 			default:
-				builder.append(c);
+				b.append(c);
 				break;
 		}
+
 		return i;
 	}
 
 	private static int getHex(int i, final String text, final StringBuilder builder) {
-		StringBuilder hex = new StringBuilder();
-		i++;
-		char c = text.charAt(i);
-		while (c != '\\') {
-			hex.append(c);
-			i++;
-			c = text.charAt(i);
-		}
-		int value = Integer.parseInt(hex.toString(), 16);
+		int end = text.indexOf('\\', ++i);
+		int value = Integer.parseInt(text.substring(i, end), 16);
 		builder.append((char) value);
-		return i;
+		return end;
+	}
+
+	private static int getOct(int i, final String text, final StringBuilder builder) {
+		int end = text.indexOf('\\', i);
+		int value = Integer.parseInt(text.substring(i, end), 8);
+		builder.append((char) value);
+		return end;
 	}
 
 	private static PrologTerm[] evalParameters(final AParams node) {

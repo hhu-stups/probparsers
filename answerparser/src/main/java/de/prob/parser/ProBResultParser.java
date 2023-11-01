@@ -23,25 +23,22 @@ public final class ProBResultParser {
 	}
 
 	public static Start parse(final String prologAnswer) {
-		if (prologAnswer.length() == 0) {
-			throw new ResultParserException("Received empty Result", null);
+		if (prologAnswer == null || prologAnswer.isEmpty()) {
+			throw new ResultParserException("Received empty Result");
 		}
 
 		final PushbackReader codeReader = new PushbackReader(new StringReader(prologAnswer), prologAnswer.length());
 		final Lexer lexer = new Lexer(codeReader);
 		final Parser parser = new Parser(lexer);
-		Start parseResult = null;
+
+		Start parseResult;
 		try {
 			parseResult = parser.parse();
-		} catch (final ParserException e) {
-			String message =
-				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser. String was: '"
-					+ prologAnswer + "'. Last Token was '" + e.getToken() + "': " + e.getLocalizedMessage();
+		} catch (ParserException e) {
+			String message = "Internal Error while parsing ProB answer. This is most likely a bug in the Result-Parser. String was: '" + prologAnswer + "'. Last Token was '" + e.getToken() + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		} catch (LexerException | IOException e) {
-			String message =
-				"Internal Error while parsing ProB answer. This ist most likely a bug in the Result-Parser. String was: '"
-					+ prologAnswer + "': " + e.getLocalizedMessage();
+			String message = "Internal Error while parsing ProB answer. This is most likely a bug in the Result-Parser. String was: '" + prologAnswer + "': " + e.getLocalizedMessage();
 			throw new ResultParserException(message, e);
 		}
 

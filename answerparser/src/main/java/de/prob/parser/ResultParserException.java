@@ -8,7 +8,11 @@ package de.prob.parser;
 
 public class ResultParserException extends RuntimeException {
 
-	public ResultParserException(final String message, final Throwable t) {
-		super(message, t);
+	public ResultParserException(String message) {
+		super(message);
+	}
+
+	public ResultParserException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

@@ -68,6 +68,7 @@ public final class Utils {
 					out.write('n');
 					break;
 				case '"':
+				case '`':
 				case '\\':
 					out.write('\\');
 					out.write(c);
@@ -134,7 +135,6 @@ public final class Utils {
 				case ']':
 				case '^':
 				case '_':
-				case '`':
 				case 'a':
 				case 'b':
 				case 'c':
@@ -185,6 +185,7 @@ public final class Utils {
 					out.write('n');
 					break;
 				case '\'':
+				case '`':
 				case '\\':
 					out.write('\\');
 					out.write(c);
@@ -251,7 +252,6 @@ public final class Utils {
 				case ']':
 				case '^':
 				case '_':
-				case '`':
 				case 'a':
 				case 'b':
 				case 'c':
