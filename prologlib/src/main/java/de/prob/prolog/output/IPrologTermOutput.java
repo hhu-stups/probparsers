@@ -8,7 +8,7 @@ import java.util.Objects;
 public interface IPrologTermOutput {
 
 	/**
-	 * Start a new term. This methods prints the (escaped, if needed) functor
+	 * Start a new term. This method prints the (escaped, if needed) functor
 	 * and the opening brackets. All other terms (atoms, numbers, variables,
 	 * ...) are printed as arguments of this term until it is closed with
 	 * {@link #closeTerm()}.
@@ -24,7 +24,7 @@ public interface IPrologTermOutput {
 	}
 
 	/**
-	 * Start a new term. This methods prints the (escaped, if needed) functor
+	 * Start a new term. This method prints the (escaped, if needed) functor
 	 * and the opening brackets. All other terms (atoms, numbers, variables,
 	 * ...) are printed as arguments of this term until it is closed with
 	 * {@link #closeTerm()}. You should close all opened terms.
@@ -57,9 +57,9 @@ public interface IPrologTermOutput {
 	IPrologTermOutput printAtom(final String content);
 
 	/**
-	 * Print an atom or number. Use this for State ID!
+	 * Print an atom or number. Use this for State IDs!
 	 *
-	 * @param content the name of the atom, never <code>null</code>
+	 * @param content the name of the atom or the string representation of a number, never <code>null</code>
 	 * @return the IPrologTermOutput
 	 */
 	default IPrologTermOutput printAtomOrNumber(final String content) {
@@ -150,14 +150,14 @@ public interface IPrologTermOutput {
 	IPrologTermOutput printTerm(final PrologTerm term);
 
 	/**
-	 * flush the underlying output stream
+	 * Flush the underlying output stream
 	 *
 	 * @return the IPrologTermOutput
 	 */
 	IPrologTermOutput flush();
 
 	/**
-	 * print a Prolog full stop.
+	 * Print a Prolog full stop.
 	 *
 	 * @return the IPrologTermOutput
 	 */
