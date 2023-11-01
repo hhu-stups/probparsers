@@ -84,10 +84,10 @@ Helpers
   quoted_char = alpha | symbol_char_without_backslash | solo_char | punctuation_char | ' ';
 
   string_item = escape_sequences | quoted_char | quote;
-  string = '"' string_item+ '"';
+  string = '"' string_item* '"';
 
   quoted_atom_item = escape_sequences | quoted_char | '"';
-  quoted_atom = quote quoted_atom_item+ quote;
+  quoted_atom = quote quoted_atom_item* quote;
 
   any_char = [0 .. 0xffff]; /* THIS IS ACTUALLY ANY UNICODE CHARACTER */
 
@@ -142,8 +142,8 @@ Productions
         | {exception} exception string
         | {progress} progress l_par term r_par
         | {call_back} call_back l_par term r_par;
-  term = {number} number | {variable} variable | {atom} name | [functor]:name params;
-  params = l_par term more_params r_par;
+  term = {number} number | {variable} variable | {atom} name | {compound} [functor]:name l_par params r_par | {list} l_sq params r_sq;
+  params = term more_params;
   more_params = {empty} | comma term more_params;
 
 // end of grammar

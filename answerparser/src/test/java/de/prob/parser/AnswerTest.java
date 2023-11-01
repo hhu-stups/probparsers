@@ -105,6 +105,12 @@ public class AnswerTest {
 	}
 
 	@Test
+	public void testListSyntax() {
+		final Start rootNode = ProBResultParser.parse("yes(x([1,2,=(foo,bar)]))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
+
+	@Test
 	public void testOctalEscape() {
 		final Start rootNode = ProBResultParser.parse("yes(x('\\334\\'))");
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);

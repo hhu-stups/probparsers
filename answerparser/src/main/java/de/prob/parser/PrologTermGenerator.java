@@ -9,6 +9,9 @@ package de.prob.parser;
 import de.prob.core.sablecc.node.*;
 import de.prob.prolog.term.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
  */
@@ -59,35 +62,61 @@ public final class PrologTermGenerator {
 			} else {
 				term = AIntegerPrologTerm.create(text);
 			}
+		} else if (node instanceof AVariableTerm) {
+			term = new VariablePrologTerm(((AVariableTerm) node).getVariable().getText());
 		} else if (node instanceof AAtomTerm) {
-			String text = ((AAtomTerm) node).getName().getText();
+			String text = removeQuotes(((AAtomTerm) node).getName().getText());
 			if ("[]".equals(text)) {
 				term = ListPrologTerm.emptyList();
 			} else {
-				text = removeQuotes(text);
 				term = new CompoundPrologTerm(text);
 			}
-		} else if (node instanceof ATerm) {
-			ATerm aterm = (ATerm) node;
-			int listSize = getListSize(node);
-			if (listSize == 0) {
-				term = ListPrologTerm.emptyList();
-			} else if (listSize > 0) {
-				PrologTerm[] list = new PrologTerm[listSize];
-				fillListWithElements(list, aterm);
-				term = new ListPrologTerm(list);
-			} else {
-				String functor = removeQuotes(aterm.getFunctor().getText());
-				PrologTerm[] params = evalParameters((AParams) aterm.getParams());
-				term = new CompoundPrologTerm(functor, params);
-			}
-		} else if (node instanceof AVariableTerm) {
-			String text = removeQuotes(((AVariableTerm) node).getVariable().getText());
-			term = new VariablePrologTerm(text);
+		} else if (node instanceof ACompoundTerm) {
+			ACompoundTerm acompound = (ACompoundTerm) node;
+			// TODO: optimize list concatenation with '.' functor
+			String functor = removeQuotes(acompound.getFunctor().getText());
+			List<PrologTerm> args = extractArgs(acompound.getParams());
+			term = transformToList(CompoundPrologTerm.fromCollection(functor, args));
+		} else if (node instanceof AListTerm) {
+			AListTerm alist = (AListTerm) node;
+			List<PrologTerm> args = extractArgs(alist.getParams());
+			term = ListPrologTerm.fromCollection(args);
 		} else {
 			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
 		}
 		return term;
+	}
+
+	private static PrologTerm transformToList(CompoundPrologTerm term) {
+		if ((!".".equals(term.getFunctor()) && !"[|]".equals(term.getFunctor())) || term.getArity() != 2) {
+			return term;
+		}
+
+		PrologTerm tail = term.getArgument(2);
+		if (tail.isList()) {
+			ListPrologTerm ltail = (ListPrologTerm) tail;
+			List<PrologTerm> list = new ArrayList<>(ltail.size() + 1);
+			list.add(term.getArgument(1));
+			list.addAll(ltail);
+			return ListPrologTerm.fromCollection(list);
+		}
+
+		return term;
+	}
+
+	private static List<PrologTerm> extractArgs(PParams params) {
+		AParams aparams = (AParams) params;
+		List<PrologTerm> terms = new ArrayList<>();
+		terms.add(toPrologTerm(aparams.getTerm()));
+
+		PMoreParams more = aparams.getMoreParams();
+		while (more instanceof AMoreParams) {
+			AMoreParams amore = (AMoreParams) more;
+			terms.add(toPrologTerm(amore.getTerm()));
+			more = amore.getMoreParams();
+		}
+
+		return terms;
 	}
 
 	private static String removeQuotes(final String text) {
@@ -179,85 +208,5 @@ public final class PrologTermGenerator {
 		int value = Integer.parseInt(text.substring(i, end), 8);
 		builder.append((char) value);
 		return end;
-	}
-
-	private static PrologTerm[] evalParameters(final AParams node) {
-		PrologTerm[] params = evalParameters(1, node.getMoreParams());
-		params[0] = toPrologTerm(node.getTerm());
-		return params;
-	}
-
-	private static PrologTerm[] evalParameters(final int before, final PMoreParams moreParams) {
-		PrologTerm[] params;
-		if (moreParams instanceof AEmptyMoreParams) {
-			params = new PrologTerm[before];
-		} else if (moreParams instanceof AMoreParams) {
-			AMoreParams nonempty = (AMoreParams) moreParams;
-			params = evalParameters(before + 1, nonempty.getMoreParams());
-			params[before] = toPrologTerm(nonempty.getTerm());
-		} else {
-			throw new IllegalStateException("Unexpected subclass of PMoreParams: " + moreParams.getClass().getCanonicalName());
-		}
-		return params;
-	}
-
-	private static int getArity(final AParams params) {
-		PMoreParams moreParams = params.getMoreParams();
-		int arity = 1;
-		while (moreParams != null) {
-			if (moreParams instanceof AEmptyMoreParams) {
-				moreParams = null;
-			} else {
-				arity++;
-				moreParams = ((AMoreParams) moreParams).getMoreParams();
-			}
-		}
-		return arity;
-	}
-
-	private static int getListSize(PTerm term) {
-		int size = 0;
-		while (term != null) {
-			boolean invalid;
-			if (term instanceof AAtomTerm) {
-				String atom = ((AAtomTerm) term).getName().getText();
-				invalid = !"[]".equals(atom);
-				term = null;
-			} else if (term instanceof ATerm) {
-				ATerm copoundTerm = (ATerm) term;
-				String functor = copoundTerm.getFunctor().getText();
-				if (".".equals(functor) || "'.'".equals(functor)) {
-					AParams params = (AParams) copoundTerm.getParams();
-					int arity = getArity(params);
-					if (arity == 2) {
-						size++;
-						term = ((AMoreParams) params.getMoreParams()).getTerm();
-						invalid = false;
-					} else {
-						invalid = true;
-					}
-				} else {
-					invalid = true;
-				}
-			} else {
-				invalid = true;
-			}
-			if (invalid) {
-				size = -1;
-				term = null;
-			}
-		}
-		return size;
-	}
-
-	private static void fillListWithElements(final PrologTerm[] list, ATerm aterm) {
-		for (int i = 0; i < list.length; i++) {
-			AParams params = (AParams) aterm.getParams();
-			list[i] = toPrologTerm(params.getTerm());
-			if (i < list.length - 1) {
-				// only get next element when this iteration was not the last
-				aterm = (ATerm) ((AMoreParams) params.getMoreParams()).getTerm();
-			}
-		}
 	}
 }
