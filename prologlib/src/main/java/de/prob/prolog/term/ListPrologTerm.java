@@ -101,11 +101,15 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
-		pto.openList();
-		for (PrologTerm t : this) {
-			t.toTermOutput(pto);
+		if (isEmpty()) {
+			pto.emptyList();
+		} else {
+			pto.openList();
+			for (PrologTerm t : this) {
+				t.toTermOutput(pto);
+			}
+			pto.closeList();
 		}
-		pto.closeList();
 	}
 
 	@Override

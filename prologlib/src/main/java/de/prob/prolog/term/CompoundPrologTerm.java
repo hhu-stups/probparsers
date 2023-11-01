@@ -57,7 +57,7 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	@Override
 	public PrologTerm getArgument(final int index) {
-		if (arguments == null || arguments.length == 0) {
+		if (isAtom()) {
 			throw new IndexOutOfBoundsException("Atom " + functor + " has no arguments");
 		} else {
 			return arguments[index - 1];
@@ -66,13 +66,15 @@ public final class CompoundPrologTerm extends PrologTerm {
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
-		pto.openTerm(functor);
-		if (arguments != null) {
+		if (isAtom()) {
+			pto.printAtom(functor);
+		} else {
+			pto.openTerm(functor);
 			for (PrologTerm argument : arguments) {
 				argument.toTermOutput(pto);
 			}
+			pto.closeTerm();
 		}
-		pto.closeTerm();
 	}
 
 	@Override
