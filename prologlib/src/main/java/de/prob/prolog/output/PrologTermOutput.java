@@ -75,12 +75,6 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor) {
-		openTerm(functor, false);
-		return this;
-	}
-
-	@Override
 	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		Objects.requireNonNull(functor, "Functor is null");
 
@@ -140,20 +134,6 @@ public final class PrologTermOutput implements IPrologTermOutput {
 		}
 
 		commaNeeded = true;
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printAtomOrNumber(final String content) {
-		Objects.requireNonNull(content, "Atom or Number value is null");
-
-		try {
-			long n = Long.parseLong(content);
-			printNumber(n);
-		} catch (NumberFormatException ignored) {
-			printAtom(content);
-		}
-
 		return this;
 	}
 
@@ -245,20 +225,6 @@ public final class PrologTermOutput implements IPrologTermOutput {
 
 		commaNeeded = true;
 		indentLevel -= 1;
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput emptyList() {
-		try {
-			printCommaIfNeeded();
-			out.write('[');
-			out.write(']');
-		} catch (IOException exc) {
-			throw new UncheckedIOException(exc);
-		}
-
-		commaNeeded = true;
 		return this;
 	}
 

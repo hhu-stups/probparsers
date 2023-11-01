@@ -25,11 +25,6 @@ public final class DummyPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput emptyList() {
-		return this;
-	}
-
-	@Override
 	public IPrologTermOutput flush() {
 		return this;
 	}
@@ -45,22 +40,12 @@ public final class DummyPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor) {
-		return this;
-	}
-
-	@Override
 	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printAtom(final String content) {
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printAtomOrNumber(final String content) {
 		return this;
 	}
 

@@ -3,6 +3,7 @@ package de.prob.prolog.output;
 import de.prob.prolog.term.PrologTerm;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 public interface IPrologTermOutput {
 
@@ -18,7 +19,9 @@ public interface IPrologTermOutput {
 	 * @param functor the functor, never <code>null</code>.
 	 * @return the IPrologTermOutput
 	 */
-	IPrologTermOutput openTerm(final String functor);
+	default IPrologTermOutput openTerm(final String functor) {
+		return this.openTerm(functor, false);
+	}
 
 	/**
 	 * Start a new term. This methods prints the (escaped, if needed) functor
@@ -31,7 +34,7 @@ public interface IPrologTermOutput {
 	 * is useful to write terms more compact when you know that they are always
 	 * short.
 	 *
-	 * @param functor the functor, never <code>null</code>
+	 * @param functor           the functor, never <code>null</code>
 	 * @param ignoreIndentation if this is set to true, the arguments of this term are not subject to indent.
 	 * @return the IPrologTermOutput
 	 */
@@ -59,7 +62,15 @@ public interface IPrologTermOutput {
 	 * @param content the name of the atom, never <code>null</code>
 	 * @return the IPrologTermOutput
 	 */
-	IPrologTermOutput printAtomOrNumber(final String content);
+	default IPrologTermOutput printAtomOrNumber(final String content) {
+		Objects.requireNonNull(content, "Atom or Number value is null");
+		try {
+			long n = Long.parseLong(content);
+			return this.printNumber(n);
+		} catch (NumberFormatException ignored) {
+			return this.printAtom(content);
+		}
+	}
 
 	/**
 	 * Print a string. The content of the string will be escaped, if needed.
@@ -115,7 +126,9 @@ public interface IPrologTermOutput {
 	 *
 	 * @return the IPrologTermOutput
 	 */
-	IPrologTermOutput emptyList();
+	default IPrologTermOutput emptyList() {
+		return this.openList().closeList();
+	}
 
 	/**
 	 * Print a Prolog variable. Variables should start with an upper case

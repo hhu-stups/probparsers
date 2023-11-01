@@ -19,10 +19,12 @@ public final class VariablePrologTerm extends PrologTerm {
 	private final String name;
 
 	public VariablePrologTerm(final String name) {
+		Objects.requireNonNull(name, "name");
 		if (!Utils.isPrologVariable(name)) {
 			throw new IllegalArgumentException("name");
 		}
-		this.name = Objects.requireNonNull(name, "name");
+
+		this.name = name;
 	}
 
 	@Override

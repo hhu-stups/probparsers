@@ -42,12 +42,6 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput emptyList() {
-		this.addTerm(ListPrologTerm.emptyList());
-		return this;
-	}
-
-	@Override
 	public IPrologTermOutput flush() {
 		return this;
 	}
@@ -73,32 +67,15 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor) {
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		this.checkTerm();
 		this.termBuilderStack.push(new TermBuilder(Objects.requireNonNull(functor, "functor")));
 		return this;
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
-		return this.openTerm(functor);
-	}
-
-	@Override
 	public IPrologTermOutput printAtom(final String content) {
 		this.addTerm(new CompoundPrologTerm(content));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printAtomOrNumber(final String content) {
-		try {
-			long n = Long.parseLong(content);
-			this.printNumber(n);
-		} catch (NumberFormatException ignored) {
-			this.printAtom(content);
-		}
-
 		return this;
 	}
 
