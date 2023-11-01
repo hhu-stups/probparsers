@@ -53,42 +53,6 @@ public final class PrologTermOutput implements IPrologTermOutput {
 		this(out, true);
 	}
 
-	/**
-	 * Escapes existing apostrophes by backslashes.
-	 *
-	 * @param input        A string, never <code>null</code>.
-	 * @param singleQuotes if single quotes may be used
-	 * @param doubleQuotes if double quotes may be used
-	 */
-	private void writeEscaped(final String input, final boolean singleQuotes, final boolean doubleQuotes) throws IOException {
-		for (int i = 0, len = input.length(); i < len; i++) {
-			final char c = input.charAt(i);
-			switch (c) {
-				case '\n':
-					out.write("\\n");
-					break;
-				case '"':
-					out.write(doubleQuotes ? "\"" : "\\\"");
-					break;
-				case '\'':
-					out.write(singleQuotes ? "'" : "\\'");
-					break;
-				case '\\':
-					out.write("\\\\");
-					break;
-				default:
-					if (Utils.isValidPrologAtom(c)) {
-						out.write(c);
-					} else {
-						out.write('\\');
-						out.write(Integer.toOctalString(c));
-						out.write('\\');
-					}
-					break;
-			}
-		}
-	}
-
 	private void printIndentation() throws IOException {
 		if (useIndentation && ignoreIndentationLevel == 0) {
 			out.write(System.lineSeparator());
@@ -168,7 +132,7 @@ public final class PrologTermOutput implements IPrologTermOutput {
 				out.write(content);
 			} else {
 				out.write('\'');
-				writeEscaped(content, false, true);
+				Utils.writeEscapedAtom(out, content);
 				out.write('\'');
 			}
 		} catch (IOException exc) {
@@ -200,7 +164,7 @@ public final class PrologTermOutput implements IPrologTermOutput {
 		try {
 			printCommaIfNeeded();
 			out.write('"');
-			writeEscaped(content, true, false);
+			Utils.writeEscapedString(out, content);
 			out.write('"');
 		} catch (IOException exc) {
 			throw new UncheckedIOException(exc);
@@ -288,7 +252,8 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput emptyList() {
 		try {
 			printCommaIfNeeded();
-			out.write("[]");
+			out.write('[');
+			out.write(']');
 		} catch (IOException exc) {
 			throw new UncheckedIOException(exc);
 		}

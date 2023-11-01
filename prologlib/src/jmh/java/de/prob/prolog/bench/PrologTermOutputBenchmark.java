@@ -14,10 +14,10 @@ import java.io.StringWriter;
 public class PrologTermOutputBenchmark {
 
 	@Benchmark
-	public void string(Blackhole bh) {
+	public void atom(Blackhole bh) {
 		StringWriter sw = new StringWriter();
 		IPrologTermOutput pto = new PrologTermOutput(sw, false);
-		pto.printString("asdf foobarbaz");
+		pto.printAtom("asdfofoobarbaz");
 		bh.consume(sw.toString());
 	}
 
@@ -30,18 +30,26 @@ public class PrologTermOutputBenchmark {
 	}
 
 	@Benchmark
-	public void atomOrNumber_Escaped(Blackhole bh) {
+	public void string(Blackhole bh) {
 		StringWriter sw = new StringWriter();
 		IPrologTermOutput pto = new PrologTermOutput(sw, false);
-		pto.printAtomOrNumber("asdf foobarbaz");
+		pto.printString("asdf foobarbaz");
 		bh.consume(sw.toString());
 	}
 
 	@Benchmark
-	public void atom(Blackhole bh) {
+	public void number(Blackhole bh) {
 		StringWriter sw = new StringWriter();
 		IPrologTermOutput pto = new PrologTermOutput(sw, false);
-		pto.printAtom("asdfofoobarbaz");
+		pto.printNumber(12345678901234L);
+		bh.consume(sw.toString());
+	}
+
+	@Benchmark
+	public void atomOrNumber_Escaped(Blackhole bh) {
+		StringWriter sw = new StringWriter();
+		IPrologTermOutput pto = new PrologTermOutput(sw, false);
+		pto.printAtomOrNumber("asdf foobarbaz");
 		bh.consume(sw.toString());
 	}
 
@@ -58,14 +66,6 @@ public class PrologTermOutputBenchmark {
 		StringWriter sw = new StringWriter();
 		IPrologTermOutput pto = new PrologTermOutput(sw, false);
 		pto.printAtomOrNumber("12345678901234");
-		bh.consume(sw.toString());
-	}
-
-	@Benchmark
-	public void number(Blackhole bh) {
-		StringWriter sw = new StringWriter();
-		IPrologTermOutput pto = new PrologTermOutput(sw, false);
-		pto.printNumber(12345678901234L);
 		bh.consume(sw.toString());
 	}
 }

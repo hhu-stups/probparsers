@@ -93,7 +93,8 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printAtomOrNumber(final String content) {
 		try {
-			this.printNumber(Long.parseLong(content));
+			long n = Long.parseLong(content);
+			this.printNumber(n);
 		} catch (NumberFormatException ignored) {
 			this.printAtom(content);
 		}

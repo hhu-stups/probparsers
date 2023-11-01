@@ -1,10 +1,9 @@
 package de.prob.prolog.internal;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.Writer;
 
 public final class Utils {
-
-	private static final char[] VALID_CHARS = validChars();
 
 	private Utils() {}
 
@@ -19,13 +18,12 @@ public final class Utils {
 		}
 
 		char first = name.charAt(0);
-		if (first != '_' && ('A' > first || first > 'Z')) {
+		if (first != '_' && (first > 'Z' || 'A' > first)) {
 			return false;
 		}
 
 		for (int i = 1; i < len; i++) {
-			char c = name.charAt(i);
-			if (isInvalidPrologIdentifierPart(c)) {
+			if (isInvalidPrologIdentifierChar(name.charAt(i))) {
 				return false;
 			}
 		}
@@ -49,8 +47,7 @@ public final class Utils {
 		}
 
 		for (int i = 1; i < len; i++) {
-			char c = name.charAt(i);
-			if (isInvalidPrologIdentifierPart(c)) {
+			if (isInvalidPrologIdentifierChar(name.charAt(i))) {
 				return false;
 			}
 		}
@@ -58,21 +55,241 @@ public final class Utils {
 		return true;
 	}
 
-	private static boolean isInvalidPrologIdentifierPart(char c) {
+	private static boolean isInvalidPrologIdentifierChar(char c) {
 		return c != '_' && ('a' > c || c > 'z') && ('A' > c || c > 'Z') && ('0' > c || c > '9');
 	}
 
-	public static boolean isValidPrologAtom(char c) {
-		return Arrays.binarySearch(VALID_CHARS, c) >= 0;
+	public static void writeEscapedString(Writer out, String input) throws IOException {
+		for (int i = 0, len = input.length(); i < len; i++) {
+			final char c = input.charAt(i);
+			switch (c) {
+				case '\n':
+					out.write('\\');
+					out.write('n');
+					break;
+				case '"':
+				case '\\':
+					out.write('\\');
+					out.write(c);
+					break;
+				case ' ':
+				case '!':
+				case '#':
+				case '$':
+				case '%':
+				case '&':
+				case '\'':
+				case '(':
+				case ')':
+				case '*':
+				case '+':
+				case ',':
+				case '-':
+				case '.':
+				case '/':
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case ':':
+				case ';':
+				case '<':
+				case '=':
+				case '>':
+				case '?':
+				case '@':
+				case 'A':
+				case 'B':
+				case 'C':
+				case 'D':
+				case 'E':
+				case 'F':
+				case 'G':
+				case 'H':
+				case 'I':
+				case 'J':
+				case 'K':
+				case 'L':
+				case 'M':
+				case 'N':
+				case 'O':
+				case 'P':
+				case 'Q':
+				case 'R':
+				case 'S':
+				case 'T':
+				case 'U':
+				case 'V':
+				case 'W':
+				case 'X':
+				case 'Y':
+				case 'Z':
+				case '[':
+				case ']':
+				case '^':
+				case '_':
+				case '`':
+				case 'a':
+				case 'b':
+				case 'c':
+				case 'd':
+				case 'e':
+				case 'f':
+				case 'g':
+				case 'h':
+				case 'i':
+				case 'j':
+				case 'k':
+				case 'l':
+				case 'm':
+				case 'n':
+				case 'o':
+				case 'p':
+				case 'q':
+				case 'r':
+				case 's':
+				case 't':
+				case 'u':
+				case 'v':
+				case 'w':
+				case 'x':
+				case 'y':
+				case 'z':
+				case '{':
+				case '|':
+				case '}':
+				case '~':
+					out.write(c);
+					break;
+				default:
+					out.write('\\');
+					out.write(Integer.toOctalString(c));
+					out.write('\\');
+					break;
+			}
+		}
 	}
 
-	private static char[] validChars() {
-		String buf = "abcdefghijklmnopqrstuvwxyz" +
-			"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-			"0123456789" +
-			"_ +-*/^<>=~:.?@#$&!;%(),[]{|}";
-		char[] chars = buf.toCharArray();
-		Arrays.sort(chars);
-		return chars;
+	public static void writeEscapedAtom(Writer out, String input) throws IOException {
+		for (int i = 0, len = input.length(); i < len; i++) {
+			final char c = input.charAt(i);
+			switch (c) {
+				case '\n':
+					out.write('\\');
+					out.write('n');
+					break;
+				case '\'':
+				case '\\':
+					out.write('\\');
+					out.write(c);
+					break;
+				case ' ':
+				case '!':
+				case '"':
+				case '#':
+				case '$':
+				case '%':
+				case '&':
+				case '(':
+				case ')':
+				case '*':
+				case '+':
+				case ',':
+				case '-':
+				case '.':
+				case '/':
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case ':':
+				case ';':
+				case '<':
+				case '=':
+				case '>':
+				case '?':
+				case '@':
+				case 'A':
+				case 'B':
+				case 'C':
+				case 'D':
+				case 'E':
+				case 'F':
+				case 'G':
+				case 'H':
+				case 'I':
+				case 'J':
+				case 'K':
+				case 'L':
+				case 'M':
+				case 'N':
+				case 'O':
+				case 'P':
+				case 'Q':
+				case 'R':
+				case 'S':
+				case 'T':
+				case 'U':
+				case 'V':
+				case 'W':
+				case 'X':
+				case 'Y':
+				case 'Z':
+				case '[':
+				case ']':
+				case '^':
+				case '_':
+				case '`':
+				case 'a':
+				case 'b':
+				case 'c':
+				case 'd':
+				case 'e':
+				case 'f':
+				case 'g':
+				case 'h':
+				case 'i':
+				case 'j':
+				case 'k':
+				case 'l':
+				case 'm':
+				case 'n':
+				case 'o':
+				case 'p':
+				case 'q':
+				case 'r':
+				case 's':
+				case 't':
+				case 'u':
+				case 'v':
+				case 'w':
+				case 'x':
+				case 'y':
+				case 'z':
+				case '{':
+				case '|':
+				case '}':
+				case '~':
+					out.write(c);
+					break;
+				default:
+					out.write('\\');
+					out.write(Integer.toOctalString(c));
+					out.write('\\');
+					break;
+			}
+		}
 	}
 }
