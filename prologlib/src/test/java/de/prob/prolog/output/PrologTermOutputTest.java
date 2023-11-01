@@ -142,6 +142,7 @@ public class PrologTermOutputTest {
 				{ " a ", "' a '" },
 				{ "foo bar baz", "'foo bar baz'" },
 				{ "1", "'1'" },
+				{ "1.0", "'1.0'" },
 				{ "1foo2bar3baz4", "'1foo2bar3baz4'" },
 				{ "\n", "'\\n'" },
 				{ "\\", "'\\\\'" },
@@ -330,6 +331,14 @@ public class PrologTermOutputTest {
 				{ 0, "0.0" },
 				{ 1, "1.0" },
 				{ -1, "-1.0" },
+				{ Float.MAX_VALUE, "3.4028234663852886E38" },
+				{ -Float.MAX_VALUE, "-3.4028234663852886E38" },
+				{ Float.MIN_VALUE, "1.401298464324817E-45" },
+				{ -Float.MIN_VALUE, "-1.401298464324817E-45" },
+				{ Double.MAX_VALUE, "1.7976931348623157E308" },
+				{ -Double.MAX_VALUE, "-1.7976931348623157E308" },
+				{ Double.MIN_VALUE, "4.9E-324" },
+				{ -Double.MIN_VALUE, "-4.9E-324" },
 			};
 		}
 
@@ -374,6 +383,7 @@ public class PrologTermOutputTest {
 				{ " a ", "\" a \"" },
 				{ "foo bar baz", "\"foo bar baz\"" },
 				{ "1", "\"1\"" },
+				{ "1.0", "\"1.0\"" },
 				{ "1foo2bar3baz4", "\"1foo2bar3baz4\"" },
 				{ "\n", "\"\\n\"" },
 				{ "\\", "\"\\\\\"" },
@@ -418,6 +428,7 @@ public class PrologTermOutputTest {
 				{ String.valueOf(Long.MIN_VALUE), "-9223372036854775808" },
 				{ BigInteger.ONE.shiftLeft(127).subtract(BigInteger.ONE).toString(), "'170141183460469231731687303715884105727'" },
 				{ BigInteger.ONE.shiftLeft(127).negate().toString(), "'-170141183460469231731687303715884105728'" },
+				{ "1.0", "'1.0'" },
 			};
 		}
 
@@ -442,7 +453,11 @@ public class PrologTermOutputTest {
 		public static Object[][] data() {
 			return new Object[][] {
 				{ ListPrologTerm.emptyList(), "[]" },
+				{ new ListPrologTerm(AIntegerPrologTerm.create(1)), "[1]" },
+				{ new ListPrologTerm(AIntegerPrologTerm.create(1), AIntegerPrologTerm.create(2)), "[1,2]" },
+				{ new CompoundPrologTerm("a"), "a" },
 				{ new CompoundPrologTerm("a", AIntegerPrologTerm.create(1)), "a(1)" },
+				{ new CompoundPrologTerm("a", AIntegerPrologTerm.create(1), AIntegerPrologTerm.create(2)), "a(1,2)" },
 			};
 		}
 
