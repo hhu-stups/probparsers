@@ -27,7 +27,7 @@ public final class PrologTermGenerator {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
 			String message = "ProB raised an exception: " + ((AExceptionResult) topnode).getString().getText();
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		} else if (topnode instanceof AProgressResult) {
 			term = toPrologTerm(((AProgressResult) topnode).getTerm());
 		} else if (topnode instanceof ACallBackResult) {
@@ -45,10 +45,10 @@ public final class PrologTermGenerator {
 	public static PrologTerm toPrologTermMustNotFail(final String query, final Start node) {
 		PResult topnode = node.getPResult();
 		if (topnode instanceof ACallBackResult || topnode instanceof AProgressResult) {
-			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported here: " + query, null);
+			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported here: " + query);
 		} else if (!(topnode instanceof AYesResult)) {
 			final String message = "Prolog query unexpectedly failed: " + query;
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return toPrologTerm(((AYesResult) topnode).getTerm());
 	}

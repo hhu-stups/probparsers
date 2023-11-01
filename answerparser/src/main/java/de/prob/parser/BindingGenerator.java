@@ -90,7 +90,7 @@ public final class BindingGenerator {
 	private static CompoundPrologTerm checkComponentType(final PrologTerm term) {
 		if (!(term instanceof CompoundPrologTerm)) {
 			final String message = "Expected CompoundPrologTerm, but got " + term.getClass().getSimpleName();
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return (CompoundPrologTerm) term;
 	}
@@ -100,7 +100,7 @@ public final class BindingGenerator {
 			return checkArity((CompoundPrologTerm) term, arity);
 		}
 		final String message = "Expected CompoundPrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message, null);
+		throw new ResultParserException(message);
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name, final String functor, final int arity) {
@@ -123,7 +123,7 @@ public final class BindingGenerator {
 		if (!term.getFunctor().equals(functor)) {
 			final String message =
 				"Expected " + term + " to have functor " + functor + ", but got " + term.getFunctor();
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return term;
 	}
@@ -131,7 +131,7 @@ public final class BindingGenerator {
 	private static CompoundPrologTerm checkArity(final CompoundPrologTerm term, final int arity) {
 		if (term.getArity() != arity) {
 			final String message = "Expected " + term + " to have an arity " + arity + ", but got " + term.getArity();
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return term;
 	}
@@ -141,7 +141,7 @@ public final class BindingGenerator {
 			return (ListPrologTerm) term;
 		}
 		final String message = "Expected ListPrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message, null);
+		throw new ResultParserException(message);
 	}
 
 	public static ListPrologTerm getList(final Map<String, PrologTerm> bindings, final String name) {
@@ -159,7 +159,7 @@ public final class BindingGenerator {
 			return (AIntegerPrologTerm) term;
 		}
 		final String message = "Expected AIntegerPrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message, null);
+		throw new ResultParserException(message);
 	}
 
 	public static AIntegerPrologTerm getAInteger(final Map<String, PrologTerm> bindings, final String name) {
@@ -178,7 +178,7 @@ public final class BindingGenerator {
 			return new IntegerPrologTerm(((AIntegerPrologTerm) term).getValue());
 		}
 		final String message = "Expected IntegerPrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message, null);
+		throw new ResultParserException(message);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public final class BindingGenerator {
 			return (VariablePrologTerm) term;
 		}
 		final String message = "Expected VariablePrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message, null);
+		throw new ResultParserException(message);
 	}
 
 	public static VariablePrologTerm getVariable(final Map<String, PrologTerm> bindings, final String name) {
@@ -207,7 +207,7 @@ public final class BindingGenerator {
 		PrologTerm prologTerm = bindings.get(name);
 		if (prologTerm == null) {
 			final String message = "Cannot extract " + name + " from bindings.\n" + listBindings(bindings);
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return prologTerm;
 	}
@@ -216,7 +216,7 @@ public final class BindingGenerator {
 		PrologTerm prologTerm = bindings.get(name);
 		if (prologTerm == null) {
 			final String message = "Cannot extract " + name + " from bindings.\n";
-			throw new ResultParserException(message, null);
+			throw new ResultParserException(message);
 		}
 		return prologTerm;
 	}
