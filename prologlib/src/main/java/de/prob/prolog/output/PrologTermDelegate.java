@@ -12,6 +12,10 @@ public class PrologTermDelegate implements IPrologTermOutput {
 		this.pto = pto;
 	}
 
+	public IPrologTermOutput getDelegate() {
+		return pto;
+	}
+
 	@Override
 	public IPrologTermOutput closeList() {
 		pto.closeList();

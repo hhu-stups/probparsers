@@ -1,6 +1,5 @@
 package de.prob.prolog.output;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
@@ -11,16 +10,16 @@ public final class PrologTermStringOutput extends PrologTermDelegate {
 	private final StringWriter sw;
 
 	public PrologTermStringOutput() {
-		this(new StringWriter());
+		this(false);
 	}
 
-	private PrologTermStringOutput(StringWriter sw) {
-		super(new PrologTermOutput(new PrintWriter(sw), false));
+	public PrologTermStringOutput(boolean useIndentation) {
+		this(new StringWriter(), useIndentation);
+	}
+
+	private PrologTermStringOutput(StringWriter sw, boolean useIndentation) {
+		super(new PrologTermOutput(sw, useIndentation));
 		this.sw = sw;
-	}
-
-	public IPrologTermOutput getPrologTermOutput() {
-		return pto;
 	}
 
 	@Override
