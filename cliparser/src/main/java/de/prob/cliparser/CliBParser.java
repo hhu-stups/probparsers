@@ -594,7 +594,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
+	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
 		final long startOutput = System.currentTimeMillis();
 		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 			printASTasFastProlog(out, printer);
@@ -667,7 +667,7 @@ public class CliBParser {
 	
 	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
-	private static void printASTasFastProlog(OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
+	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		printer.accept(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();

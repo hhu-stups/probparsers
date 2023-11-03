@@ -1,56 +1,51 @@
 package de.be4.classicalb.core.parser;
 
+import de.prob.prolog.term.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.ListIterator;
 import java.util.Map;
-
-import de.prob.prolog.term.AIntegerPrologTerm;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.prolog.term.VariablePrologTerm;
 
 // writes Prolog terms in SICStus (undocumented) fastrw format
 // generates same output as fast_write(Stream,Term) after use_module(library(fastrw)).
 // and can be read using fast_read(Stream,Term)
 
-public class FastReadWriter {
-	private final Map<String, String> varnums = new HashMap<String, String>();
+public final class FastReadWriter {
+
+	private final Map<String, Integer> varnums = new HashMap<>();
 	private final OutputStream out;
 
 	public FastReadWriter(OutputStream out) {
 		this.out = out;
 	}
 
-
 	public void fastwrite(PrologTerm term) throws IOException {
 		out.write('D');
 		writeTerm(term);
 	}
 
-	public void writeTerm(PrologTerm term) throws IOException {
+	private void writeTerm(PrologTerm term) throws IOException {
 		if (term instanceof AIntegerPrologTerm) {
-			AIntegerPrologTerm intTerm = (AIntegerPrologTerm) term;
-			writeInteger(intTerm);
+			writeInteger((AIntegerPrologTerm) term);
+		} else if (term instanceof FloatPrologTerm) {
+			writeFloat((FloatPrologTerm) term);
 		} else if (term instanceof CompoundPrologTerm) {
-			writeCompound(term);
+			writeCompound((CompoundPrologTerm) term);
 		} else if (term instanceof ListPrologTerm) {
-			//ListPrologTerm list = (ListPrologTerm) term; writeList(list);
-			writeList( (ListPrologTerm) term);
+			writeList((ListPrologTerm) term);
 		} else if (term instanceof VariablePrologTerm) {
 			writeVariable((VariablePrologTerm) term);
 		} else {
-			throw new IllegalArgumentException("Illegal Prolog term for writeTerm"); 
+			throw new IllegalArgumentException("Illegal Prolog term for writeTerm");
 		}
 	}
 
 	private void writeList(ListPrologTerm lp) throws IOException {
-		for (ListIterator<PrologTerm> i = lp.listIterator(); i.hasNext();) {
+		for (PrologTerm t : lp) {
 			out.write('[');
-			writeTerm(i.next());
+			writeTerm(t);
 		}
 		out.write(']');
 	}
@@ -68,15 +63,15 @@ public class FastReadWriter {
 		out.write(0);
 	}
 
-	private String getRenamedVariable(String name) {
-		if (!varnums.containsKey(name)) {
-			String newnum = String.valueOf(varnums.size());
-			varnums.put(name, newnum);
-		}
-		return varnums.get(name);
+	private void writeFloat(FloatPrologTerm fp) throws IOException {
+		throw new UnsupportedOperationException("float term not supported");
 	}
 
-	private void writeCompound(PrologTerm cp) throws IOException {
+	private String getRenamedVariable(String name) {
+		return String.valueOf(varnums.computeIfAbsent(name, k -> varnums.size()));
+	}
+
+	private void writeCompound(CompoundPrologTerm cp) throws IOException {
 		if (cp.isAtom()) {
 			out.write('A');
 			writeText(cp.getFunctor());
@@ -90,8 +85,6 @@ public class FastReadWriter {
 				PrologTerm argument = cp.getArgument(i);
 				writeTerm(argument);
 			}
-			// TODO: we could implement tail-recursion and iterate on the last argument
-			// However, as conjuncts nest usually in the left argument this does not help a lot
 		}
 	}
 

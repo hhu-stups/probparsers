@@ -130,29 +130,14 @@ public final class PrologTermGenerator {
 			term = ListPrologTerm.fromCollection(args);
 		} else if (node instanceof ACompoundTerm) {
 			ACompoundTerm acompound = (ACompoundTerm) node;
-			// TODO: optimize list concatenation with '.' functor
 			String functor = removeQuotes(acompound.getFunctor().getText());
 			List<PrologTerm> args = extractArgs(acompound.getParams());
-			term = transformToList(CompoundPrologTerm.fromCollection(functor, args));
+			PrologTerm compoundTerm = CompoundPrologTerm.fromCollection(functor, args);
+
+			// TODO: optimize list concatenation with '.' functor
+			term = DotListConversion.asListTerm(compoundTerm);
 		} else {
 			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
-		}
-
-		return term;
-	}
-
-	private static PrologTerm transformToList(CompoundPrologTerm term) {
-		if ((!".".equals(term.getFunctor()) && !"[|]".equals(term.getFunctor())) || term.getArity() != 2) {
-			return term;
-		}
-
-		PrologTerm tail = term.getArgument(2);
-		if (tail.isList()) {
-			ListPrologTerm ltail = (ListPrologTerm) tail;
-			List<PrologTerm> list = new ArrayList<>(ltail.size() + 1);
-			list.add(term.getArgument(1));
-			list.addAll(ltail);
-			return ListPrologTerm.fromCollection(list);
 		}
 
 		return term;
