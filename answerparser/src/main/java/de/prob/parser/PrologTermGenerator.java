@@ -132,10 +132,10 @@ public final class PrologTermGenerator {
 			ACompoundTerm acompound = (ACompoundTerm) node;
 			String functor = removeQuotes(acompound.getFunctor().getText());
 			List<PrologTerm> args = extractArgs(acompound.getParams());
-			PrologTerm compoundTerm = CompoundPrologTerm.fromCollection(functor, args);
+			CompoundPrologTerm compoundTerm = CompoundPrologTerm.fromCollection(functor, args);
 
 			// TODO: optimize list concatenation with '.' functor
-			term = DotListConversion.asListTerm(compoundTerm);
+			term = DotListConversion.asListTermNonRecursive(compoundTerm);
 		} else {
 			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
 		}

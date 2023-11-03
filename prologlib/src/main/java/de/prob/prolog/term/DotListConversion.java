@@ -55,6 +55,27 @@ public final class DotListConversion {
 		}
 	}
 
+	public static PrologTerm asListTermNonRecursive(PrologTerm term) {
+		Objects.requireNonNull(term, "term");
+
+		if (term.isAtom() && "[]".equals(term.getFunctor())) {
+			return ListPrologTerm.emptyList();
+		} else if (term.isTerm() && term.getArity() == 2) {
+			String functor = term.getFunctor();
+			if (".".equals(functor) || "[|]".equals(functor)) {
+				PrologTerm tail = term.getArgument(2);
+				if (tail.isList()) {
+					List<PrologTerm> args = new ArrayList<>();
+					args.add(term.getArgument(1));
+					args.addAll((ListPrologTerm) tail);
+					return ListPrologTerm.fromCollection(args);
+				}
+			}
+		}
+
+		return term;
+	}
+
 	public static PrologTerm asListConcatTerm(PrologTerm term) {
 		return asListConcatTerm(term, ".");
 	}
