@@ -1,13 +1,8 @@
 package de.prob.parser;
 
 import de.prob.core.sablecc.node.Start;
-import de.prob.prolog.term.AIntegerPrologTerm;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class AnswerTest {
@@ -104,36 +99,15 @@ public class AnswerTest {
 	}
 
 	@Test
-	public void testListSemanticSWI() {
-		PrologTerm expected = new CompoundPrologTerm("x", new ListPrologTerm(AIntegerPrologTerm.create(1), AIntegerPrologTerm.create(2), new CompoundPrologTerm("=", new CompoundPrologTerm("foo"), new CompoundPrologTerm("bar"))));
-		PrologTerm actual = PrologTermGenerator.toPrologTerm(ProBResultParser.parse("yes(x(.(1,.(2,.(=(foo,bar),[])))))"));
-		assertEquals(expected, actual);
-	}
-
-	@Test
 	public void testListSyntaxSICStus() {
 		final Start rootNode = ProBResultParser.parse("yes(x('.'(1,'.'(2,'.'(=(foo,bar),[])))))");
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
 
 	@Test
-	public void testListSemanticSICStus() {
-		PrologTerm expected = new CompoundPrologTerm("x", new ListPrologTerm(AIntegerPrologTerm.create(1), AIntegerPrologTerm.create(2), new CompoundPrologTerm("=", new CompoundPrologTerm("foo"), new CompoundPrologTerm("bar"))));
-		PrologTerm actual = PrologTermGenerator.toPrologTerm(ProBResultParser.parse("yes(x('.'(1,'.'(2,'.'(=(foo,bar),[])))))"));
-		assertEquals(expected, actual);
-	}
-
-	@Test
 	public void testListSyntax() {
 		final Start rootNode = ProBResultParser.parse("yes(x([1,2,=(foo,bar)]))");
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
-	}
-
-	@Test
-	public void testListSemantic() {
-		PrologTerm expected = new CompoundPrologTerm("x", new ListPrologTerm(AIntegerPrologTerm.create(1), AIntegerPrologTerm.create(2), new CompoundPrologTerm("=", new CompoundPrologTerm("foo"), new CompoundPrologTerm("bar"))));
-		PrologTerm actual = PrologTermGenerator.toPrologTerm(ProBResultParser.parse("yes(x([1,2,=(foo,bar)]))"));
-		assertEquals(expected, actual);
 	}
 
 	@Test

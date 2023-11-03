@@ -17,7 +17,7 @@ import static org.junit.Assume.assumeNoException;
 @RunWith(Enclosed.class)
 public class PrologTermOutputTest {
 
-	public static class NormalTests {
+	public static class NormalTest {
 
 		private IPrologTermOutput pto;
 		private StringWriter sw;
