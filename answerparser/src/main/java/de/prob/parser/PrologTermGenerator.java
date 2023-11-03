@@ -61,48 +61,49 @@ public final class PrologTermGenerator {
 				AIntegerNumber intNumber = (AIntegerNumber) number;
 				String text = intNumber.getInteger().getText();
 
-				if (text.startsWith("0'")) {
-					char c = text.charAt(2);
+				char first = text.charAt(0);
+				boolean hasSign = first == '-' || first == '+';
+				int signOffset = hasSign ? 1 : 0;
+				boolean neg = first == '-';
+				if (text.startsWith("0'", signOffset)) {
+					char c = text.charAt(2 + signOffset);
 					int cp;
 					if (c == '\\') {
 						// TODO: remove need for StringBuilder allocation
 						StringBuilder b = new StringBuilder(1);
-						unescapeCharacter(b, text, 3);
+						unescapeCharacter(b, text, 3 + signOffset);
 						cp = b.codePointAt(0);
 					} else {
 						cp = c;
 					}
 
-					TSign sign = intNumber.getSign();
-					if (sign != null) {
-						String signText = sign.getText();
-						if ("-".equals(signText)) {
-							cp = -cp;
-						}
+					if (neg) {
+						cp = -cp;
 					}
 
 					term = AIntegerPrologTerm.create(cp);
 				} else {
 					int radix;
-					if (text.startsWith("0b")) {
+					if (text.startsWith("0b", signOffset)) {
 						radix = 2;
-						text = text.substring(2);
-					} else if (text.startsWith("0o")) {
+						text = text.substring(2 + signOffset);
+						if (neg) {
+							text = "-" + text;
+						}
+					} else if (text.startsWith("0o", signOffset)) {
 						radix = 8;
-						text = text.substring(2);
-					} else if (text.startsWith("0x")) {
+						text = text.substring(2 + signOffset);
+						if (neg) {
+							text = "-" + text;
+						}
+					} else if (text.startsWith("0x", signOffset)) {
 						radix = 16;
-						text = text.substring(2);
+						text = text.substring(2 + signOffset);
+						if (neg) {
+							text = "-" + text;
+						}
 					} else {
 						radix = 10;
-					}
-
-					TSign sign = intNumber.getSign();
-					if (sign != null) {
-						String signText = sign.getText();
-						if ("-".equals(signText)) {
-							text = signText + text;
-						}
 					}
 
 					term = AIntegerPrologTerm.create(text, radix);
@@ -111,15 +112,6 @@ public final class PrologTermGenerator {
 				AFloatNumber floatNumber = (AFloatNumber) number;
 				String text = floatNumber.getFloat().getText();
 				double d = Double.parseDouble(text);
-
-				TSign sign = floatNumber.getSign();
-				if (sign != null) {
-					String signText = sign.getText();
-					if ("-".equals(signText)) {
-						d = -d;
-					}
-				}
-
 				term = new FloatPrologTerm(d);
 			} else {
 				throw new IllegalStateException("Unexpected subclass of PNumber: " + number.getClass().getCanonicalName());

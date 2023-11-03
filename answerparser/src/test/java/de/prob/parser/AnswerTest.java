@@ -159,4 +159,10 @@ public class AnswerTest {
 		final Start rootNode = ProBResultParser.parse("yes\n(\r\n  x(\n\ta, 2))\n");
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}
+
+	@Test
+	public void testMinusFunctor() {
+		final Start rootNode = ProBResultParser.parse("yes(-(a,b))");
+		assertNotNull(PARSETREE_WAS_NULL, rootNode);
+	}
 }
