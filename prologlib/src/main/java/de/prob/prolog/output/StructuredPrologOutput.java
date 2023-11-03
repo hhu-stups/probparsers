@@ -122,7 +122,7 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 		if (this.finishedTerm != null) {
 			return this.finishedTerm;
 		} else {
-			throw new IllegalStateException("no unfinished term");
+			throw new IllegalStateException("no finished term");
 		}
 	}
 
@@ -140,7 +140,7 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 		} else if (!this.sentences.isEmpty()) {
 			return this.sentences.get(this.sentences.size() - 1);
 		} else {
-			throw new IllegalStateException("no term");
+			throw new IllegalStateException("no finished term or sentence");
 		}
 	}
 

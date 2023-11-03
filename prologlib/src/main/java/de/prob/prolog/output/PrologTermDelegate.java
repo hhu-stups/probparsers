@@ -3,6 +3,7 @@ package de.prob.prolog.output;
 import de.prob.prolog.term.PrologTerm;
 
 import java.math.BigInteger;
+import java.util.function.Consumer;
 
 public class PrologTermDelegate implements IPrologTermOutput {
 
@@ -47,8 +48,20 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	}
 
 	@Override
+	public IPrologTermOutput sentence(final PrologTerm term) {
+		pto.sentence(term);
+		return this;
+	}
+
+	@Override
 	public IPrologTermOutput openList() {
 		pto.openList();
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput list(final Consumer<? super IPrologTermOutput> scope) {
+		pto.list(scope);
 		return this;
 	}
 
@@ -61,6 +74,18 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		pto.openTerm(functor, ignoreIndentation);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput term(final String functor, final Consumer<? super IPrologTermOutput> scope) {
+		pto.term(functor, scope);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput term(final String functor, final boolean ignoreIndentation, final Consumer<? super IPrologTermOutput> scope) {
+		pto.term(functor, ignoreIndentation, scope);
 		return this;
 	}
 

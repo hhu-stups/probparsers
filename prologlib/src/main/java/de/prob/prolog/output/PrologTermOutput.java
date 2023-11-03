@@ -267,6 +267,7 @@ public final class PrologTermOutput implements IPrologTermOutput {
 		try {
 			out.write('.');
 			out.write(System.lineSeparator());
+			out.flush();
 		} catch (IOException exc) {
 			throw new UncheckedIOException(exc);
 		}
