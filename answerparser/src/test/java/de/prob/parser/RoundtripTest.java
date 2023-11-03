@@ -31,6 +31,11 @@ public class RoundtripTest {
 	}
 
 	@Test
+	public void testString() {
+		testRoundtrip(pto -> pto.printString("foo"));
+	}
+
+	@Test
 	public void testVariable() {
 		testRoundtrip(pto -> pto.printVariable("X"));
 	}
@@ -49,28 +54,37 @@ public class RoundtripTest {
 	public void testList() {
 		testRoundtrip(pto -> pto.list(l1 -> {
 			l1.printAtom("a");
+			l1.printString("foo");
 			l1.printVariable("X");
 			l1.printNumber(42);
 			l1.emptyList();
+			l1.list(l2 -> {
+				l2.printAtom("a");
+				l2.printString("foo");
+				l2.printVariable("X");
+				l2.printNumber(42);
+				l2.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));
+				l2.emptyList();
+			});
 		}));
 	}
 
 	@Test
 	public void testTerm() {
-		testRoundtrip(pto -> {
-			pto.term("f", t1 -> {
-				t1.printAtom("a");
-				t1.printVariable("X");
-				t1.printNumber(42);
-				t1.emptyList();
-				t1.list(l1 -> {
-					l1.printAtom("a");
-					l1.printVariable("X");
-					l1.printNumber(42);
-					l1.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));
-					l1.emptyList();
-				});
+		testRoundtrip(pto -> pto.term("f", t1 -> {
+			t1.printAtom("a");
+			t1.printString("foo");
+			t1.printVariable("X");
+			t1.printNumber(42);
+			t1.emptyList();
+			t1.list(l1 -> {
+				l1.printAtom("a");
+				l1.printString("foo");
+				l1.printVariable("X");
+				l1.printNumber(42);
+				l1.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));
+				l1.emptyList();
 			});
-		});
+		}));
 	}
 }
