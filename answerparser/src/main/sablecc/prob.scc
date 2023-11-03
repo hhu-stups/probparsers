@@ -76,6 +76,7 @@ Helpers
 
   hex = [[['A' .. 'F'] + ['0' .. '9']] + ['a' .. 'f']];
   octal = ['0' .. '7'];
+  bin = ['0' .. '1'];
   escape_sequences =
     '\a' | '\b' | '\t' | '\n' | '\v' | '\f' | '\r' | '\e' | '\d' |
     '\x' hex+ '\' | '\' octal+ '\' | '\' 10 | '\\' | '\' quote_char | '\`';
@@ -83,11 +84,13 @@ Helpers
   /* without backslash and quote_char! */
   quoted_char = alpha | symbol_char_without_backslash | solo_char | punctuation_char | ' ';
 
-  string_item = escape_sequences | quoted_char | quote;
+  string_item = escape_sequences | quoted_char | quote | '""';
   string = '"' string_item* '"';
 
-  quoted_atom_item = escape_sequences | quoted_char | '"';
+  quoted_atom_item = escape_sequences | quoted_char | '"' | quote quote;
   quoted_atom = quote quoted_atom_item* quote;
+
+  sign = ['-' + '+'];
 
   any_char = [0 .. 0xffff]; /* THIS IS ACTUALLY ANY UNICODE CHARACTER */
 
@@ -118,8 +121,10 @@ Tokens
   {normal} r_par = r_par;
   {normal} l_sq = l_sq;
   {normal} r_sq = r_sq;
+  {normal} sign = sign;
 
-  {normal} number = '-'? digit+ ('.' digit+)? (['E' + 'e'] ['+' + '-']? digit+)?;
+  {normal} integer = '0b' bin+ | '0o' octal+ | '0x' hex+ | '0' quote quoted_atom_item | digit+;
+  {normal} float = (digit+ '.' digit+) | (digit+ ('.' digit+)? ['E' + 'e'] sign? digit+);
   {normal} name =  solo_char | '{' '}' | l_sq r_sq | word | symbol | string | quoted_atom;
   {normal} variable = underline alpha* | capital_letter alpha*;
 
@@ -142,7 +147,8 @@ Productions
         | {exception} exception string
         | {progress} progress l_par term r_par
         | {call_back} call_back l_par term r_par;
-  term = {number} number | {variable} variable | {atom} name | {compound} [functor]:name l_par params r_par | {list} l_sq params r_sq;
+  term = {number} number | {variable} variable | {atom} name | {list} l_sq params r_sq | {compound} [functor]:name l_par params r_par;
+  number = {float} sign? float | {integer} sign? integer;
   params = term more_params;
   more_params = {empty} | comma term more_params;
 

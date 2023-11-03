@@ -56,11 +56,73 @@ public final class PrologTermGenerator {
 	public static PrologTerm toPrologTerm(final PTerm node) {
 		PrologTerm term;
 		if (node instanceof ANumberTerm) {
-			String text = ((ANumberTerm) node).getNumber().getText();
-			if (text.indexOf('.') != -1 || text.indexOf('e') != -1 || text.indexOf('E') != -1) {
-				term = new FloatPrologTerm(Double.parseDouble(text));
+			PNumber number = ((ANumberTerm) node).getNumber();
+			if (number instanceof AIntegerNumber) {
+				AIntegerNumber intNumber = (AIntegerNumber) number;
+				String text = intNumber.getInteger().getText();
+
+				if (text.startsWith("0'")) {
+					char c = text.charAt(2);
+					int cp;
+					if (c == '\\') {
+						// TODO: remove need for StringBuilder allocation
+						StringBuilder b = new StringBuilder(1);
+						unescapeCharacter(b, text, 3);
+						cp = b.codePointAt(0);
+					} else {
+						cp = c;
+					}
+
+					TSign sign = intNumber.getSign();
+					if (sign != null) {
+						String signText = sign.getText();
+						if ("-".equals(signText)) {
+							cp = -cp;
+						}
+					}
+
+					term = AIntegerPrologTerm.create(cp);
+				} else {
+					int radix;
+					if (text.startsWith("0b")) {
+						radix = 2;
+						text = text.substring(2);
+					} else if (text.startsWith("0o")) {
+						radix = 8;
+						text = text.substring(2);
+					} else if (text.startsWith("0x")) {
+						radix = 16;
+						text = text.substring(2);
+					} else {
+						radix = 10;
+					}
+
+					TSign sign = intNumber.getSign();
+					if (sign != null) {
+						String signText = sign.getText();
+						if ("-".equals(signText)) {
+							text = signText + text;
+						}
+					}
+
+					term = AIntegerPrologTerm.create(text, radix);
+				}
+			} else if (number instanceof AFloatNumber) {
+				AFloatNumber floatNumber = (AFloatNumber) number;
+				String text = floatNumber.getFloat().getText();
+				double d = Double.parseDouble(text);
+
+				TSign sign = floatNumber.getSign();
+				if (sign != null) {
+					String signText = sign.getText();
+					if ("-".equals(signText)) {
+						d = -d;
+					}
+				}
+
+				term = new FloatPrologTerm(d);
 			} else {
-				term = AIntegerPrologTerm.create(text);
+				throw new IllegalStateException("Unexpected subclass of PNumber: " + number.getClass().getCanonicalName());
 			}
 		} else if (node instanceof AVariableTerm) {
 			term = new VariablePrologTerm(((AVariableTerm) node).getVariable().getText());
@@ -71,19 +133,19 @@ public final class PrologTermGenerator {
 			} else {
 				term = new CompoundPrologTerm(text);
 			}
+		} else if (node instanceof AListTerm) {
+			List<PrologTerm> args = extractArgs(((AListTerm) node).getParams());
+			term = ListPrologTerm.fromCollection(args);
 		} else if (node instanceof ACompoundTerm) {
 			ACompoundTerm acompound = (ACompoundTerm) node;
 			// TODO: optimize list concatenation with '.' functor
 			String functor = removeQuotes(acompound.getFunctor().getText());
 			List<PrologTerm> args = extractArgs(acompound.getParams());
 			term = transformToList(CompoundPrologTerm.fromCollection(functor, args));
-		} else if (node instanceof AListTerm) {
-			AListTerm alist = (AListTerm) node;
-			List<PrologTerm> args = extractArgs(alist.getParams());
-			term = ListPrologTerm.fromCollection(args);
 		} else {
 			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
 		}
+
 		return term;
 	}
 
@@ -119,7 +181,7 @@ public final class PrologTermGenerator {
 		return terms;
 	}
 
-	private static String removeQuotes(final String text) {
+	private static String removeQuotes(String text) {
 		if (text != null && !text.isEmpty()) {
 			char first = text.charAt(0);
 			if (first == '\'' || first == '"') {
@@ -128,7 +190,10 @@ public final class PrologTermGenerator {
 				for (int i = 1; i < len - 1; i++) {
 					char c = text.charAt(i);
 					if (c == '\\') {
-						i = unescapeCharacter(b, text, i);
+						i = unescapeCharacter(b, text, i + 1);
+					} else if (c == first) {
+						i++; // assume the next char is also equal to 'first'
+						b.append(c);
 					} else {
 						b.append(c);
 					}
@@ -140,10 +205,8 @@ public final class PrologTermGenerator {
 		return text;
 	}
 
-	private static int unescapeCharacter(final StringBuilder b, final String text, int i) {
-		char c;
-		i++;
-		c = text.charAt(i);
+	private static int unescapeCharacter(StringBuilder b, String text, int i) {
+		char c = text.charAt(i);
 		switch (c) {
 			case 'a':
 				b.append('\u0007');
@@ -176,7 +239,7 @@ public final class PrologTermGenerator {
 				// ignore escaped newline
 				break;
 			case 'x':
-				i = getHex(i, text, b);
+				i = getChar(b, text, i + 1, 16);
 				break;
 			case '0':
 			case '1':
@@ -186,9 +249,10 @@ public final class PrologTermGenerator {
 			case '5':
 			case '6':
 			case '7':
-				i = getOct(i, text, b);
+				i = getChar(b, text, i, 8);
 				break;
 			default:
+				// all the other escape sequences just resolve to the 2nd char
 				b.append(c);
 				break;
 		}
@@ -196,17 +260,15 @@ public final class PrologTermGenerator {
 		return i;
 	}
 
-	private static int getHex(int i, final String text, final StringBuilder builder) {
-		int end = text.indexOf('\\', ++i);
-		int value = Integer.parseInt(text.substring(i, end), 16);
-		builder.append((char) value);
-		return end;
-	}
-
-	private static int getOct(int i, final String text, final StringBuilder builder) {
+	private static int getChar(StringBuilder b, String text, int i, int radix) {
 		int end = text.indexOf('\\', i);
-		int value = Integer.parseInt(text.substring(i, end), 8);
-		builder.append((char) value);
+		int value = Integer.parseInt(text.substring(i, end), radix);
+		if (Character.isBmpCodePoint(value)) {
+			b.append((char) value);
+		} else {
+			b.appendCodePoint(value);
+		}
+
 		return end;
 	}
 }
