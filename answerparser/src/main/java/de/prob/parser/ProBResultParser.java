@@ -18,6 +18,8 @@ import java.io.StringReader;
 
 public final class ProBResultParser {
 
+	private static final int PUSHBACK_READER_SIZE = 1;
+
 	private ProBResultParser() {
 		throw new UnsupportedOperationException("not intended for instantiation");
 	}
@@ -27,7 +29,7 @@ public final class ProBResultParser {
 			throw new ResultParserException("Received empty Result");
 		}
 
-		final PushbackReader codeReader = new PushbackReader(new StringReader(prologAnswer), prologAnswer.length());
+		final PushbackReader codeReader = new PushbackReader(new StringReader(prologAnswer), PUSHBACK_READER_SIZE);
 		final Lexer lexer = new Lexer(codeReader);
 		final Parser parser = new Parser(lexer);
 
