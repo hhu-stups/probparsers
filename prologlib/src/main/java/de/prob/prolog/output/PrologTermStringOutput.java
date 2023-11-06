@@ -10,15 +10,11 @@ public final class PrologTermStringOutput extends PrologTermDelegate {
 	private final StringWriter sw;
 
 	public PrologTermStringOutput() {
-		this(false);
+		this(new StringWriter());
 	}
 
-	public PrologTermStringOutput(boolean useIndentation) {
-		this(new StringWriter(), useIndentation);
-	}
-
-	private PrologTermStringOutput(StringWriter sw, boolean useIndentation) {
-		super(new PrologTermOutput(sw, useIndentation));
+	private PrologTermStringOutput(StringWriter sw) {
+		super(new PrologTermOutput(sw, false));
 		this.sw = sw;
 	}
 
