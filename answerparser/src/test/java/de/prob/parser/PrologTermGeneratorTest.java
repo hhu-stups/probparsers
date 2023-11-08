@@ -191,6 +191,7 @@ public class PrologTermGeneratorTest {
 				{ "0'''", '\'' },
 				{ "0' ", ' ' },
 				{ "0'a", 'a' },
+				{ "0'`", '`' },
 			};
 		}
 
