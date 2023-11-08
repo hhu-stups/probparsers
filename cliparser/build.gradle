@@ -2,7 +2,6 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: "com.github.johnrengelman.shadow"
 
 dependencies {
     implementation project(":bparser")
@@ -21,11 +20,6 @@ jar {
             "Main-Class": application.mainClass,
         ])
     }
-}
-
-afterEvaluate {
-    // Don't publish shadow jar for now
-    publishing.publications.mavenJava.artifacts.removeIf({it.classifier == "all"})
 }
 
 rootProject.setupTestReport(project, [])
