@@ -69,8 +69,12 @@ Helpers
     '\a' | '\b' | '\t' | '\n' | '\v' | '\f' | '\r' | '\e' | '\d' |
     '\x' hex+ '\' | '\' octal+ '\' | '\' 10 | '\\' | '\' quote_char | '\`';
 
-  /* without backslash and quote_char! */
-  quoted_char = [[[alpha + [symbol_char - '\']] + [solo_char + punctuation_char]] + ' '];
+  /*
+    variations from grammar:
+      - backslash and quote_char are removed, they are added later
+      - the backtick is added as a valid character
+  */
+  quoted_char = [[[alpha + [symbol_char - '\']] + [solo_char + punctuation_char]] + [' ' + '`']];
 
   string_item = escape_sequences | quoted_char | quote | '""';
   string = '"' string_item* '"';
