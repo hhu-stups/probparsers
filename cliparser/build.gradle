@@ -23,7 +23,9 @@ jar {
     }
 }
 
-// Don't publish shadow jar for now
-publishing.publications.mavenJava.artifacts.removeIf({it.classifier == "all"})
+afterEvaluate {
+    // Don't publish shadow jar for now
+    publishing.publications.mavenJava.artifacts.removeIf({it.classifier == "all"})
+}
 
 rootProject.setupTestReport(project, [])
