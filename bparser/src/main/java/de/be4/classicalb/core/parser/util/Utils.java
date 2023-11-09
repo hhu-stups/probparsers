@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.util;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -204,25 +207,24 @@ public final class Utils {
 
 	public static String readFile(final File filePath) throws IOException {
 		String content;
-		try (
-			FileInputStream fis = new FileInputStream(filePath);
-			InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)
-		) {
+		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
 			final StringBuilder builder = new StringBuilder();
 			final char[] buffer = new char[1024];
 			int read;
-			while ((read = reader.read(buffer)) >= 0) {
+			while ((read = inputStreamReader.read(buffer)) >= 0) {
 				builder.append(String.valueOf(buffer, 0, read));
 			}
 			content = builder.toString();
+			inputStreamReader.close();
 		}
 
 		// remove utf-8 byte order mark
-		if (!content.isEmpty() && content.codePointAt(0) == 0xfeff) {
+		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
 			content = content.substring(1);
 		}
 
-		return content.replace("\r\n", "\n");
+		return content.replaceAll("\r\n", "\n");
 	}
 	
 	public static boolean isQuoted(final String string, final char quote) {
