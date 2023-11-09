@@ -286,7 +286,7 @@ public class PrettyPrinterTest {
 
 	private static final String PREFIX = "#EXPRESSION ";
 
-	String theString;
+	final String theString;
 
 	public PrettyPrinterTest(String theString) {
 		this.theString = theString;

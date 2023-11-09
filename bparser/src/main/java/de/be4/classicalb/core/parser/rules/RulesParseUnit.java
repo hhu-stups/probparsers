@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.CachingDefinitionFileProvider;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;

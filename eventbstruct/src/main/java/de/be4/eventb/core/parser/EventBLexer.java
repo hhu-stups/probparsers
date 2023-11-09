@@ -20,7 +20,7 @@ public class EventBLexer extends Lexer {
 	private TFormula string = null;
 	private List<Token> stringBuffer;
 
-	private static String[] clauseErrorMessages = {
+	private static final String[] clauseErrorMessages = {
 			"'machine' is only allowed at the beginning of a file",
 			"Variable declarations are only allowed before invariant declarations",
 			"Invariant declarations are only allowed after variables and before the variant",
@@ -44,7 +44,7 @@ public class EventBLexer extends Lexer {
 	private int lastClauseIndex;
 
 	private boolean inEvent;
-	private static String[] eventClauseErrorMessages = {
+	private static final String[] eventClauseErrorMessages = {
 			"Parameter declarations (any) are only allowed at the beginning of an event",
 			"Guards (where) are only allowed after parameters and before witnesses",
 			"Witnesses (with) are only allowed after guards and before actions",
@@ -115,15 +115,13 @@ public class EventBLexer extends Lexer {
 				}
 
 				lastEventClauseIndex = nextIndex;
-				return;
-			}
+            }
 		}
 	}
 
 	private void throwClausesOrderException(final String message)
 			throws EventBLexerException {
-		throw new EventBLexerException(token, message, token.getText()
-				.toString(), token.getLine(), token.getPos());
+		throw new EventBLexerException(token, message, token.getText(), token.getLine(), token.getPos());
 	}
 
 	private void collectMultiLineComment() throws EventBLexerException {
@@ -219,7 +217,7 @@ public class EventBLexer extends Lexer {
 		}
 
 		string = (TFormula) token;
-		stringBuffer = new ArrayList<Token>();
+		stringBuffer = new ArrayList<>();
 		stringBuffer.add(token);
 		token = null;
 	}

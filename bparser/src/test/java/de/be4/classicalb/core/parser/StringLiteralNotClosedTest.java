@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import java.util.Random;
-
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
 

@@ -29,8 +29,8 @@ public abstract class AbstractOperation {
 	private List<ComputationOperation> implicitDependenciesToComputations;
 	private AIdentifierExpression replacesIdentifier;
 
-	protected Map<String, AIdentifierExpression> readMap = new HashMap<>();
-	protected Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
+	protected final Map<String, AIdentifierExpression> readMap = new HashMap<>();
+	protected final Map<String, TIdentifierLiteral> functionCallMap = new HashMap<>();
 	private Set<AbstractOperation> requiredDependencies;
 
 	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,

@@ -62,12 +62,10 @@ public class OperatorMapping {
 
 	@Override
 	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("operator '").append(operatorName);
-		str.append("' of theory ").append(theoryName);
-		str.append(" and type " + operatorType.toString());
-		str.append(": {").append(spec).append("}");
-		return str.toString();
+        return "operator '" + operatorName +
+			"' of theory " + theoryName +
+			" and type " + operatorType.toString() +
+			": {" + spec + "}";
 	}
 
 	@Override

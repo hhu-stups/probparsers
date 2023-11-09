@@ -13,7 +13,7 @@ public interface INodeIds {
 	 * @param fileNumber the file number which will be assigned to {@code node} and its child nodes
 	 * @param node the node from which to start assigning IDs
 	 */
-	public abstract void assignIdentifiers(int fileNumber, Node node);
+    void assignIdentifiers(int fileNumber, Node node);
 	
 	/**
 	 * <p>Looks up the ID of the given node.</p>
@@ -22,7 +22,7 @@ public interface INodeIds {
 	 * @param node the node of which we want to have the ID
 	 * @return the ID of the node, or {@code null} if no ID is available
 	 */
-	public abstract Integer lookup(Node node);
+    Integer lookup(Node node);
 	
 	/**
 	 * Looks up the file number of the given node.
@@ -30,5 +30,5 @@ public interface INodeIds {
 	 * @param node the node of which we want to have the file number
 	 * @return the file number of the node, or {@code -1} if no file number was assigned
 	 */
-	public abstract int lookupFileNumber(Node node);
+    int lookupFileNumber(Node node);
 }

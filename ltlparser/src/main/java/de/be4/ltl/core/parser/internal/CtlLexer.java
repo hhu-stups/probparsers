@@ -18,7 +18,7 @@ import de.be4.ltl.core.ctlparser.node.Token;
 
 public class CtlLexer extends Lexer {
 
-	private CtlLexerHelper helper = new CtlLexerHelper();
+	private final CtlLexerHelper helper = new CtlLexerHelper();
 
 	public CtlLexer(final PushbackReader in) {
 		super(in);

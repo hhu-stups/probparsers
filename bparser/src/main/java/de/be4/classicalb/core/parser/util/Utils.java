@@ -1,10 +1,8 @@
 package de.be4.classicalb.core.parser.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -205,8 +205,8 @@ public final class Utils {
 		}
 	}
 
-	public static final String readFile(final File filePath) throws IOException {
-		String content = null;
+	public static String readFile(final File filePath) throws IOException {
+		String content;
 		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
 			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
 			final StringBuilder builder = new StringBuilder();

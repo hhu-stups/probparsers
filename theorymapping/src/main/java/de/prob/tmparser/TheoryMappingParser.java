@@ -33,12 +33,10 @@ public class TheoryMappingParser {
 		Start ast;
 		try {
 			ast = parse(input);
-		} catch (ParserException e) {
-			throw new TheoryMappingException(e);
-		} catch (LexerException e) {
+		} catch (ParserException | LexerException e) {
 			throw new TheoryMappingException(e);
 		}
-		return extractMappings(ast, theoryName);
+        return extractMappings(ast, theoryName);
 	}
 
 	private static Start parse(Reader input) throws ParserException,

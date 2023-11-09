@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class FastWriteTest {
-	private StructuredPrologOutput spo = new StructuredPrologOutput();
+	private final StructuredPrologOutput spo = new StructuredPrologOutput();
 	
 	@Test
 	public void testSingleNumber() {

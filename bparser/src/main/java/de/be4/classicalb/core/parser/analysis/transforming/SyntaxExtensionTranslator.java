@@ -93,7 +93,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		// Unquote and unescape backquoted identifiers
 		if (text.startsWith("`") && text.endsWith("`")) {
 			if (text.indexOf('.') != -1) {
-				final String fixed = Arrays.stream(text.split("\\.")).collect(Collectors.joining("`.`"));
+				final String fixed = String.join("`.`", text.split("\\."));
 				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, node));
 			}
 			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));

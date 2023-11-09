@@ -32,7 +32,7 @@ public class RulesMachineRunConfiguration {
 	final Map<String, AbstractOperation> allOperations;
 	final RulesParseUnit mainModel;
 	final Map<String, RuleGoalAssumption> rulesGoalAssumptions = new HashMap<>();
-	private Map<String, String> preferencesInMainMachine = new HashMap<>();
+	private final Map<String, String> preferencesInMainMachine = new HashMap<>();
 
 	public static RulesMachineRunConfiguration extractConfigurationOfMainModel(IModel mainModel,
 			Map<String, AbstractOperation> allOperations) {
@@ -116,7 +116,7 @@ public class RulesMachineRunConfiguration {
 				return rulesGoalAssumptions.get(ruleName);
 			} else {
 				RuleGoalAssumption ruleGoalAssumption = new RuleGoalAssumption(ruleName,
-						(RuleOperation) allOperations.get(ruleName));
+					(RuleOperation) allOperations.get(ruleName));
 				rulesGoalAssumptions.put(ruleName, ruleGoalAssumption);
 				return ruleGoalAssumption;
 			}
@@ -156,7 +156,7 @@ public class RulesMachineRunConfiguration {
 
 	}
 
-	public class RuleGoalAssumption {
+	public static class RuleGoalAssumption {
 		final String name;
 		final RuleOperation ruleOperation;
 		final HashSet<Integer> errorTypesAssumedToFail = new HashSet<>();

@@ -51,7 +51,7 @@ public class PrettyAssignmentPrinterTest {
 			"BEGIN BEGIN skip END; BEGIN x := 42 END END",
 	};
 
-	String theString;
+	final String theString;
 
 	public PrettyAssignmentPrinterTest(String theString) {
 		this.theString = theString;

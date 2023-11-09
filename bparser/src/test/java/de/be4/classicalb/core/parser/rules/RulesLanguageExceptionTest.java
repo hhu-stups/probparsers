@@ -6,7 +6,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AOperatorExpression;
 import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.TKwExpressionOperator;
 import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
 
@@ -129,7 +128,7 @@ public class RulesLanguageExceptionTest {
 	@Test(expected = AssertionError.class)
 	public void testUnkownPredicateOperatorException() throws Exception {
 		AOperatorPredicate operator = new AOperatorPredicate(new TKwPredicateOperator("foo"),
-				new ArrayList<PExpression>());
+                new ArrayList<>());
 		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}
@@ -137,7 +136,7 @@ public class RulesLanguageExceptionTest {
 	@Test(expected = AssertionError.class)
 	public void testUnkownExpressionOperatorException() throws Exception {
 		AOperatorExpression operator = new AOperatorExpression(new TKwExpressionOperator("foo"),
-				new ArrayList<PExpression>());
+                new ArrayList<>());
 		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;

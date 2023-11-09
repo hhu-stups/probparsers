@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -122,8 +123,8 @@ public class CliBParser {
 		}
 		
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
-			System.out.println(String.format("Version:    %s", BParser.getVersion()));
-			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
+			System.out.printf("Version:    %s%n", BParser.getVersion());
+			System.out.printf("Git Commit: %s%n", BParser.getGitSha());
 			System.exit(0);
 		}
 
@@ -255,7 +256,7 @@ public class CliBParser {
 		return true;
 	}
 	
-	private static void runPRepl(ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
+	private static void runPRepl(ParsingBehaviour behaviour) throws IOException {
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
@@ -264,7 +265,7 @@ public class CliBParser {
 		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)));
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-		String line = "";
+		String line;
 		MockedDefinitions context = new MockedDefinitions();
 		boolean terminate = false;
 		while (!terminate) {
@@ -372,10 +373,10 @@ public class CliBParser {
 				break;
 			case machine:
 				String filename = in.readLine();
-				String outFile = in.readLine();
+				Path outFile = Paths.get(in.readLine());
 				final File bfile = new File(filename);
 				final int returnValue;
-				try (final OutputStream out = new FileOutputStream(outFile)) {
+				try (final OutputStream out = Files.newOutputStream(outFile)) {
 					returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
 				}
 				context = new MockedDefinitions();
@@ -386,7 +387,7 @@ public class CliBParser {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
 				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
 					System.out.println("Erasing file contents of " + outFile);
-					Files.write(Paths.get(outFile), Collections.singletonList("% VM Error occurred"));
+					Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 				}
 				break;
 			case formula:

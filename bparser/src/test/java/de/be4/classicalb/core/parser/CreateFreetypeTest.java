@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +61,7 @@ public class CreateFreetypeTest {
 	private static final String CONS_INT = "myInt";
 	private static final String CONS_BOOL = "myBool";
 	private static final List<PExpression> EMPTY_EXPRS = Collections
-			.<PExpression> emptyList();
+			.emptyList();
 
 	@Test
 	public void testManualFreetypeCreation() {
@@ -75,35 +78,35 @@ public class CreateFreetypeTest {
 		Assert.assertTrue("Freetype contained", result.contains(expectedPart));
 	}
 
-	public static void main(String args[]) throws IOException {
-		final String filename = "freetypetest.prob";
+	public static void main(String[] args) throws IOException {
+		final Path outFile = Paths.get("freetypetest.prob");
 		CreateFreetypeTest test = new CreateFreetypeTest();
-		final OutputStream file = new FileOutputStream(filename);
-		final PrologTermOutput pto = new PrologTermOutput(file);
-		// parser_version(none).
-		pto.openTerm("parser_version");
-		pto.printAtom("none");
-		pto.closeTerm();
-		pto.fullstop();
+		try (final OutputStream file = Files.newOutputStream(outFile)) {
+			final PrologTermOutput pto = new PrologTermOutput(file);
 
-		// classical_b(machine_name, [filename])
-		pto.openTerm("classical_b");
-		pto.printAtom(MACHINE_NAME);
-		pto.openList();
-		pto.printAtom(filename);
-		pto.closeList();
-		pto.closeTerm();
-		pto.fullstop();
+			// parser_version(none).
+			pto.openTerm("parser_version");
+			pto.printAtom("none");
+			pto.closeTerm();
+			pto.fullstop();
 
-		// machine(...)
-		pto.openTerm("machine");
-		test.printProlog(pto);
-		pto.closeTerm();
-		pto.fullstop();
+			// classical_b(machine_name, [filename])
+			pto.openTerm("classical_b");
+			pto.printAtom(MACHINE_NAME);
+			pto.openList();
+			pto.printAtom(outFile.toString());
+			pto.closeList();
+			pto.closeTerm();
+			pto.fullstop();
 
-		pto.flush();
+			// machine(...)
+			pto.openTerm("machine");
+			test.printProlog(pto);
+			pto.closeTerm();
+			pto.fullstop();
 
-		file.close();
+			pto.flush();
+		}
 	}
 
 	private void printProlog(final IPrologTermOutput pto) {
@@ -141,9 +144,8 @@ public class CreateFreetypeTest {
 		final AOperation op2 = createAdd("addInt", "i",
 				new AIntSetExpression(), CONS_INT);
 		final AOperation op3 = createSimpleAdd("addEmpty");
-		final AOperationsMachineClause operations = new AOperationsMachineClause(
-				Arrays.<POperation> asList(op1, op2, op3));
-		return operations;
+        return new AOperationsMachineClause(
+				Arrays.asList(op1, op2, op3));
 	}
 
 	private AOperation createAdd(String name, String param, PExpression type,
@@ -151,8 +153,8 @@ public class CreateFreetypeTest {
 		final AMemberPredicate pre = new AMemberPredicate(
 				createIdentifier(param), type);
 		final ASetExtensionExpression newVal = new ASetExtensionExpression(
-				Arrays.<PExpression> asList(new AFunctionExpression(
-						createIdentifier(cons), createIdentifiers(param))));
+                Collections.singletonList(new AFunctionExpression(
+                        createIdentifier(cons), createIdentifiers(param))));
 		final PSubstitution subst = new APreconditionSubstitution(pre,
 				createAssignment(VAR_NAME, new AUnionExpression(
 						createIdentifier(VAR_NAME), newVal)));
@@ -172,7 +174,7 @@ public class CreateFreetypeTest {
 
 	private PSubstitution createAssignment(String var, PExpression expr) {
 		return new AAssignSubstitution(createIdentifiers(var),
-				Arrays.asList(expr));
+                Collections.singletonList(expr));
 	}
 
 	private AFreetypesMachineClause createFreetype() {
@@ -183,13 +185,13 @@ public class CreateFreetypeTest {
 		final AElementFreetypeConstructor cons3 = new AElementFreetypeConstructor(
 				new TIdentifierLiteral(CONS_EMPTY));
 		final AFreetype freetype = new AFreetype(new TIdentifierLiteral(
-				FREETYPE_NAME), Arrays.<PFreetypeConstructor> asList(cons1,
+				FREETYPE_NAME), Arrays.asList(cons1,
 				cons2, cons3));
-		return new AFreetypesMachineClause(Arrays.<PFreetype> asList(freetype));
+		return new AFreetypesMachineClause(Collections.singletonList(freetype));
 	}
 
 	private List<PExpression> createIdentifiers(String name) {
-		return Arrays.<PExpression> asList(createIdentifier(name));
+		return Collections.singletonList(createIdentifier(name));
 	}
 
 	private AIdentifierExpression createIdentifier(String name) {
@@ -197,7 +199,7 @@ public class CreateFreetypeTest {
 	}
 
 	private List<TIdentifierLiteral> createIdLits(String name) {
-		return Arrays.asList(new TIdentifierLiteral(name));
+		return Collections.singletonList(new TIdentifierLiteral(name));
 	}
 
 	@Test

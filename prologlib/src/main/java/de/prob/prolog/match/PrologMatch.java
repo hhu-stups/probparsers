@@ -40,7 +40,7 @@ public class PrologMatch {
 	}
 
 	public final Map<String, PrologTerm> getMatches(final PrologTerm term) {
-		Map<String, PrologTerm> hits = new HashMap<String, PrologTerm>();
+		Map<String, PrologTerm> hits = new HashMap<>();
 		boolean matches = matches(term, hits);
 		return matches ? hits : null;
 	}

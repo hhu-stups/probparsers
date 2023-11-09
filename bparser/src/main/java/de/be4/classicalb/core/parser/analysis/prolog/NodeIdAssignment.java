@@ -13,12 +13,12 @@ import de.be4.classicalb.core.parser.node.Node;
  * class to guarantee unique identifiers.
  */
 public class NodeIdAssignment extends DepthFirstAdapter implements INodeIds {
-	private Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();
-	private ArrayList<Node> nodes = new ArrayList<>(1000);
+	private final Map<Node, Integer> nodeToIdentifierMap = new HashMap<>();
+	private final ArrayList<Node> nodes = new ArrayList<>(1000);
 	private int currentIdentifier = 0;
 
 	private int currentFileNumber = -1;
-	private Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
+	private final Map<Node, Integer> nodeToFileNumberMap = new HashMap<>();
 
 	@Override
 	public void assignIdentifiers(int fileNumber, Node node) {

@@ -1,9 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -93,9 +90,7 @@ public final class ASTBuilder {
 		List<PSubstitution> subList = new ArrayList<>();
 		subList.add(sub1);
 		subList.add(sub2);
-		for (PSubstitution pSubstitution : subs) {
-			subList.add(pSubstitution);
-		}
+		subList.addAll(Arrays.asList(subs));
 		return new ASequenceSubstitution(subList);
 	}
 
@@ -116,22 +111,17 @@ public final class ASTBuilder {
 	}
 
 	public static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
-		List<PSubstitution> list = new ArrayList<>();
-		for (PSubstitution pSubstitution : pSubstitutions) {
-			list.add(pSubstitution);
-		}
-		return list;
+        return new ArrayList<>(Arrays.asList(pSubstitutions));
 	}
 
 	public static List<PExpression> createExpressionList(PExpression... pExpressions) {
 		final List<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < pExpressions.length; i++) {
-			PExpression oldNode = pExpressions[i];
-			PExpression node = pExpressions[i].clone();
-			node.setStartPos(oldNode.getStartPos());
-			node.setEndPos(oldNode.getEndPos());
-			list.add(node);
-		}
+        for (PExpression oldNode : pExpressions) {
+            PExpression node = oldNode.clone();
+            node.setStartPos(oldNode.getStartPos());
+            node.setEndPos(oldNode.getEndPos());
+            list.add(node);
+        }
 		return list;
 	}
 
@@ -166,9 +156,9 @@ public final class ASTBuilder {
 
 	public static List<PExpression> createIdentifierList(String... strings) {
 		ArrayList<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < strings.length; i++) {
-			list.add(createIdentifier(strings[i]));
-		}
+        for (String string : strings) {
+            list.add(createIdentifier(string));
+        }
 		return list;
 	}
 

@@ -2,8 +2,7 @@ package de.be4.classicalb.core.parser;
 
 import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
 import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parsePred;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -43,7 +42,7 @@ public class EnglishVsFrenchManual {
 		final String parsedFrench = parsePred(french);
 
 		assertEquals(parsedFrench, parsedPred);
-		assertFalse(parsedPred.equals(parsedEnglish));
+        assertNotEquals(parsedPred, parsedEnglish);
 	}
 
 	@Test
@@ -59,7 +58,7 @@ public class EnglishVsFrenchManual {
 		final String parsedFrench = parseExpr(french);
 
 		assertEquals(parsedFrench, parsedExpr);
-		assertFalse(parsedExpr.equals(parsedEnglish));
+        assertNotEquals(parsedExpr, parsedEnglish);
 	}
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
-	private ArrayList<String> searchPath = new ArrayList<>();
+	private final ArrayList<String> searchPath = new ArrayList<>();
 
 	public FileSearchPathProvider(String fileName) {
 		this(".", fileName);

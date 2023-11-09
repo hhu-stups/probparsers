@@ -49,7 +49,7 @@ public class PrettyPredicatePrinterTest {
 			"bfalse",
 	};
 
-	String theString;
+	final String theString;
 
 	public PrettyPredicatePrinterTest(String theString) {
 		this.theString = theString;

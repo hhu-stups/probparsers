@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class TwoBinopAssoziativityTests {
 	private final BinaryOperator op1;
 	private final BinaryOperator op2;
-	private EAssoc assoc;
+	private final EAssoc assoc;
 
 	public TwoBinopAssoziativityTests(final BinaryOperator op1, final BinaryOperator op2, final EAssoc assoc) {
 		this.op1 = op1;

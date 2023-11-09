@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -89,20 +90,20 @@ public class ASTPrologTest {
 
 	private static String insertNumbers(int counter, final String string) {
 		StringBuilder buf = new StringBuilder();
-		char c[] = string.toCharArray();
-		for (int i = 0; i < c.length; i++) {
-			switch (c[i]) {
-			case '$':
-				buf.append(counter++);
-				break;
-			case '%':
-				buf.append(counter - 1);
-				break;
-			default:
-				buf.append(c[i]);
-				break;
-			}
-		}
+		char[] c = string.toCharArray();
+        for (char value : c) {
+            switch (value) {
+                case '$':
+                    buf.append(counter++);
+                    break;
+                case '%':
+                    buf.append(counter - 1);
+                    break;
+                default:
+                    buf.append(value);
+                    break;
+            }
+        }
 		return buf.toString();
 	}
 
@@ -222,17 +223,17 @@ public class ASTPrologTest {
 		final AEventBModelParseUnit model = new AEventBModelParseUnit();
 		model.setName(new TIdentifierLiteral("mm"));
 		final AEventsModelClause events = new AEventsModelClause();
-		model.setModelClauses(Arrays.asList((PModelClause) events));
+		model.setModelClauses(Collections.singletonList(events));
 		AEvent event = new AEvent();
-		events.setEvent(Arrays.asList((PEvent) event));
+		events.setEvent(Collections.singletonList(event));
 		event.setEventName(new TIdentifierLiteral("testevent"));
-		event.setVariables(Arrays.asList(createId("param")));
-		event.setGuards(Arrays.asList((PPredicate) new ATruthPredicate()));
-		PSubstitution subst1 = new AAssignSubstitution(Arrays.asList(createId("x")), Arrays.asList(createId("param")));
-		event.setAssignments(Arrays.asList(subst1));
+		event.setVariables(Collections.singletonList(createId("param")));
+		event.setGuards(Collections.singletonList(new ATruthPredicate()));
+		PSubstitution subst1 = new AAssignSubstitution(Collections.singletonList(createId("x")), Collections.singletonList(createId("param")));
+		event.setAssignments(Collections.singletonList(subst1));
 		PWitness witness = new AWitness(new TIdentifierLiteral("ab"),
 				new AEqualPredicate(createId("ab"), createId("y")));
-		event.setWitness(Arrays.asList(witness));
+		event.setWitness(Collections.singletonList(witness));
 		event.setRefines(Arrays.asList(new TIdentifierLiteral("abstract1"), new TIdentifierLiteral("abstract2")));
 
 		checkAST(0,
@@ -275,7 +276,7 @@ public class ASTPrologTest {
 	}
 
 	private PExpression createId(final String name) {
-		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(name)));
+		return new AIdentifierExpression(Collections.singletonList(new TIdentifierLiteral(name)));
 	}
 
 	@Test
@@ -290,9 +291,9 @@ public class ASTPrologTest {
 				new AIntegerSetExpression());
 
 		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"),
-				Arrays.<PFreetypeConstructor>asList(multi, single));
+				Arrays.asList(multi, single));
 
-		AFreetypesMachineClause clause = new AFreetypesMachineClause(Arrays.<PFreetype>asList(freetype));
+		AFreetypesMachineClause clause = new AFreetypesMachineClause(Collections.singletonList(freetype));
 
 		checkAST(0, "freetypes($,[freetype($,'T',[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}

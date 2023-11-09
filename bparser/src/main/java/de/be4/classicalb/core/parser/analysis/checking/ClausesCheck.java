@@ -5,12 +5,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
@@ -226,17 +224,15 @@ public class ClausesCheck implements SemanticCheck {
 	 * Checks if one clause is used more than once in the machine.
 	 */
 	private void checkDoubleClauses() {
-		for (final Iterator<Set<Node>> iterator = clauses.values().iterator(); iterator.hasNext();) {
-			final Set<Node> nodesforClause = iterator.next();
+        for (final Set<Node> nodesforClause : clauses.values()) {
+            if (nodesforClause.size() > 1) {
+                final Node clauseNode = nodesforClause.iterator().next();
+                final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
 
-			if (nodesforClause.size() > 1) {
-				final Node clauseNode = nodesforClause.iterator().next();
-				final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
-
-				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
-						new ArrayList<>(nodesforClause)));
-			}
-		}
+                exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
+                        new ArrayList<>(nodesforClause)));
+            }
+        }
 	}
 
 	@Override

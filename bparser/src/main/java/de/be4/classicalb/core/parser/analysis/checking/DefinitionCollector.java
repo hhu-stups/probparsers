@@ -34,7 +34,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
 public class DefinitionCollector extends MachineClauseAdapter {
 
 	private final IDefinitions definitions;
-	private List<CheckException> exceptions = new ArrayList<>();
+	private final List<CheckException> exceptions = new ArrayList<>();
 
 	public DefinitionCollector(IDefinitions definitions) {
 		this.definitions = definitions;
@@ -87,7 +87,7 @@ public class DefinitionCollector extends MachineClauseAdapter {
 			PDefinition existingDefinition = definitions.getDefinition(name);
 			File file = definitions.getFile(name);
 			StringBuilder sb = new StringBuilder();
-			sb.append("Duplicate definition: " + name + ".\n");
+			sb.append("Duplicate definition: ").append(name).append(".\n");
 			SourcePosition firstPos = existingDefinition.getStartPos();
 			sb.append("(First appearance at ").append(this.getPosition(firstPos));
 			if (file != null) {

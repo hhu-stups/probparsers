@@ -12,7 +12,7 @@ public enum ReferenceType {
 	
 	private final String description;
 	
-	private ReferenceType(final String description) {
+	ReferenceType(final String description) {
 		this.description = description;
 	}
 	

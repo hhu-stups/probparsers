@@ -19,12 +19,12 @@ public class BLexer extends Lexer {
 	
 	private boolean parse_definition=false; // a flag to indicate when the lexer is used to parse Definitions
 
-	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
+	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
+	private static final Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
-	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
-	private static Set<Class<? extends Token>> literalTokenClasses = new HashSet<>();
-	
+	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
+	private static final Set<Class<? extends Token>> literalTokenClasses;
+
 	// called by PreParser
 	public void setLexerPreparse(){
 		parse_definition = true; 
@@ -196,13 +196,13 @@ public class BLexer extends Lexer {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 			if (funOpClass == TConvertIntFloor.class) {
-				opName = new String("floor");
+				opName = "floor";
 			} else if( funOpClass == TConvertIntCeiling.class) {
-				opName = new String("ceiling");
+				opName = "ceiling";
 			} else if( funOpClass == TConvertReal.class) {
-				opName = new String("real");
+				opName = "real";
 			} else if( funOpClass == TBoolCast.class) {
-				opName = new String("bool");
+				opName = "bool";
 			}
 			String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
@@ -264,7 +264,7 @@ public class BLexer extends Lexer {
 		addInvalid(TPragmaLabel.class, TSemicolon.class, "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-		
+
 		literalTokenClasses = new HashSet<>();
 		literalTokenClasses.add(TIntegerLiteral.class);
 		literalTokenClasses.add(TStringLiteral.class);

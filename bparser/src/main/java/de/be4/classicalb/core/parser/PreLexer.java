@@ -106,7 +106,7 @@ public class PreLexer extends Lexer {
 					}
 
 					// prepare rhs_body token to be the current one
-					((Token) rhsToken).setText(rhsBuffer.toString());
+					rhsToken.setText(rhsBuffer.toString());
 					token = rhsToken;
 					rhsToken = null;
 					rhsBuffer = null;

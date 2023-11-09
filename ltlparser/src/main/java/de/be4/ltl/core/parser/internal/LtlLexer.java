@@ -14,7 +14,7 @@ import de.be4.ltl.core.parser.node.TForallIdentifier;
 
 public class LtlLexer extends Lexer {
 
-	private LtlLexerHelper helper = new LtlLexerHelper();
+	private final LtlLexerHelper helper = new LtlLexerHelper();
 
 	private TExistsIdentifier exists_identifier;
 	private TForallIdentifier forall_identifier;

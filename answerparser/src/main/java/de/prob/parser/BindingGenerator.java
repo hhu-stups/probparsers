@@ -49,7 +49,7 @@ public final class BindingGenerator {
 			ListPrologTerm list = (ListPrologTerm) term;
 			result = createBinding(list);
 		} else {
-			throw new IllegalArgumentException("Expected Prolog list, but was " + term.toString());
+			throw new IllegalArgumentException("Expected Prolog list, but was " + term);
 		}
 		return result;
 	}
@@ -63,7 +63,7 @@ public final class BindingGenerator {
 				if (binding.getArity() == 2 && "=".equals(binding.getFunctor())) {
 					extractBinding(result, binding);
 				} else {
-					throw new IllegalArgumentException("Expected binding (=/2), but was " + binding.getFunctor() + "/" + String.valueOf(binding.getArity()));
+					throw new IllegalArgumentException("Expected binding (=/2), but was " + binding.getFunctor() + "/" + binding.getArity());
 				}
 			} else {
 				throw new IllegalArgumentException("Expected binding but was not a term");
@@ -79,7 +79,7 @@ public final class BindingGenerator {
 			PrologTerm value = binding.getArgument(2);
 			result.put(name, value);
 		} else {
-			throw new IllegalArgumentException("Expected atomic variable name, but found " + varterm.toString());
+			throw new IllegalArgumentException("Expected atomic variable name, but found " + varterm);
 		}
 	}
 

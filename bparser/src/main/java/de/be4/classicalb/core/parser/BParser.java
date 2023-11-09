@@ -1,12 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PushbackReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +73,7 @@ public class BParser {
 	}
 
 	public BParser() {
-		this((String) null);
+		this(null);
 	}
 
 	public BParser(final String fileName) {

@@ -2,10 +2,7 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -86,18 +83,17 @@ public class RulesMachineFilesTest {
 		RulesMachineRunConfiguration rulesMachineRunConfiguration = project.getRulesMachineRunConfiguration();
 		Set<RuleGoalAssumption> rulesGoalAssumptions = rulesMachineRunConfiguration.getRulesGoalAssumptions();
 		assertEquals(2, rulesGoalAssumptions.size());
-		for (Iterator<RuleGoalAssumption> iterator = rulesGoalAssumptions.iterator(); iterator.hasNext();) {
-			RuleGoalAssumption next = iterator.next();
-			if ("rule1".equals(next.getRuleName())) {
-				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToSucceed());
-				assertEquals(true, next.isCheckedForCounterexamples());
-				assertEquals("rule1", next.getRuleOperation().getOriginalName());
-			} else {
-				assertEquals("rule2", next.getRuleName());
-				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToFail());
-				assertEquals(false, next.isCheckedForCounterexamples());
-			}
-		}
+        for (RuleGoalAssumption next : rulesGoalAssumptions) {
+            if ("rule1".equals(next.getRuleName())) {
+                assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToSucceed());
+                assertTrue(next.isCheckedForCounterexamples());
+                assertEquals("rule1", next.getRuleOperation().getOriginalName());
+            } else {
+                assertEquals("rule2", next.getRuleName());
+                assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToFail());
+                assertFalse(next.isCheckedForCounterexamples());
+            }
+        }
 	}
 
 	@Test

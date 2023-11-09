@@ -13,8 +13,8 @@ import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
 
 public class MockedDefinitions extends IDefinitions {
-	private Map<String, Type> types = new HashMap<>();
-	private Map<String, Integer> arity = new HashMap<>();
+	private final Map<String, Type> types = new HashMap<>();
+	private final Map<String, Integer> arity = new HashMap<>();
 
 	public void addMockedDefinition(String name, String type, String parameterCount) {
 		if ("predicate".equals(type)) {

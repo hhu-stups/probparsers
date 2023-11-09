@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -13,8 +12,6 @@ import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.ARecEntry;
-import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
@@ -76,13 +73,11 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-		for (final Iterator<PExpression> iterator = identifiers.iterator(); iterator.hasNext();) {
-			final PExpression expression = iterator.next();
-
-			if (!(expression instanceof AIdentifierExpression)) {
-				nonIdentifiers.add(expression);
-			}
-		}
+        for (final PExpression expression : identifiers) {
+            if (!(expression instanceof AIdentifierExpression)) {
+                nonIdentifiers.add(expression);
+            }
+        }
 	}
 
 	@Override

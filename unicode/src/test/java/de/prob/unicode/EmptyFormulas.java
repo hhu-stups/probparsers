@@ -8,12 +8,12 @@ import de.prob.unicode.UnicodeTranslator;
 public class EmptyFormulas {
 	@Test
 	public void EmptyToAscii() {
-		assertTrue(UnicodeTranslator.toAscii("").equals(""));
+		assertTrue(UnicodeTranslator.toAscii("").isEmpty());
 	}
 
 	@Test
 	public void EmptyToUnicode() {
-		assertTrue(UnicodeTranslator.toUnicode("").equals(""));
+		assertTrue(UnicodeTranslator.toUnicode("").isEmpty());
 	}
 
 }

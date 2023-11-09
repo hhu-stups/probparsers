@@ -256,7 +256,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
 		this.knownIdentifier.addKnownIdentifier(copy.get(0));
-		this.knownIdentifier.addKnownIdentifierList(new ArrayList<PExpression>(node.getElements()));
+		this.knownIdentifier.addKnownIdentifierList(new ArrayList<>(node.getElements()));
 	}
 
 	class OccurredAttributes {
@@ -323,8 +323,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
 		currentOperation.addReplacesIdentifier(idExpr);
-		return;
-	}
+    }
 
 	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		final List<String> tags = new ArrayList<>();
@@ -342,8 +341,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addTags(tags);
-		return;
-	}
+    }
 
 	private void checkClassificationAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -361,8 +359,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException(
 					"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.", pOperationAttribute));
 		}
-		return;
-	}
+    }
 
 	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
@@ -378,8 +375,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
 					pOperationAttribute));
 		}
-		return;
-	}
+    }
 
 	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
@@ -394,8 +390,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation.",
 					pOperationAttribute));
 		}
-		return;
-	}
+    }
 
 	private void checkDependsOnComputationAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -409,8 +404,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllComputationDependencies(list);
-		return;
-	}
+    }
 
 	private void checkDependsOnRuleAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -424,8 +418,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllRuleDependencies(list);
-		return;
-	}
+    }
 
 	private void checkOperationPredicateAttribute(OccurredAttributes occurredAttributes,
 			POperationAttribute pOperationAttribute) throws AssertionError {
@@ -557,7 +550,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()), true);
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()), true);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -589,8 +582,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
-		return;
-	}
+    }
 
 	private Integer countPlaceHoldersInExpression(PExpression param) {
 		if (param instanceof AConcatExpression) {
@@ -631,8 +623,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
-		return;
-	}
+    }
 
 	@Override
 	public void inAAssignSubstitution(AAssignSubstitution node) {
@@ -740,8 +731,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkNotCheckedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -750,8 +740,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 2) {
@@ -772,8 +761,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -782,8 +770,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkFailedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -792,8 +779,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkSucceededRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -802,8 +788,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	private void checkSucceededRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 2) {
@@ -824,8 +809,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
-	}
+    }
 
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
@@ -840,7 +824,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
 			if (!node.getIdentifiers().isEmpty()) {
 				// implication is not allowed as the top level predicate if
@@ -868,7 +852,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		checkTopLevelPredicate(node.getWhere(), "(WHERE predicate in RULE_FORALL)");
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);
 		node.getMessage().apply(this);
@@ -1156,7 +1140,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class KnownIdentifier {
-		Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
+		final Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
 
 		public void addKnownIdentifierList(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
@@ -1244,9 +1228,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	class Scope {
-		Set<String> identifiers;
-		boolean assignable;
+	static class Scope {
+		final Set<String> identifiers;
+		final boolean assignable;
 
 		Scope(Set<String> identifiers, boolean assignable) {
 			this.identifiers = identifiers;

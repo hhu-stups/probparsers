@@ -2,8 +2,6 @@ package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Test;
 

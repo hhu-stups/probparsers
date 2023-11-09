@@ -35,7 +35,7 @@ public class LtlParser extends TemporalLogicParser<Start> {
 		PushbackReader r = new PushbackReader(reader,99);
 		Lexer l = new LtlLexer(r);
 		Parser p = new Parser(l);
-		Start ast = null;
+		Start ast;
 		try {
 			ast = p.parse();
 		} catch (ParserException e) {

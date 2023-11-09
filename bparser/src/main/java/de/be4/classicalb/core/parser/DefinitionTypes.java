@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class DefinitionTypes {
 
-	private final Map<String, Definitions.Type> types = new HashMap<String, Definitions.Type>();
+	private final Map<String, Definitions.Type> types = new HashMap<>();
 
 	public DefinitionTypes() {
 	}
@@ -24,11 +24,7 @@ public class DefinitionTypes {
 	}
 
 	public Definitions.Type getType(final String definitionName) {
-		if (types.containsKey(definitionName)) {
-			return types.get(definitionName);
-		} else {
-			return IDefinitions.Type.NoDefinition;
-		}
+        return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
 	}
 	
 	@Override

@@ -14,8 +14,8 @@ import de.prob.tmparser.TheoryMappingException;
 
 public class MappingVisitor extends DepthFirstAdapter {
 	private final String theoryName;
-	private Collection<OperatorMapping> mappings = new ArrayList<OperatorMapping>();
-	private Collection<String> knownOperators = new HashSet<String>();
+	private final Collection<OperatorMapping> mappings = new ArrayList<>();
+	private final Collection<String> knownOperators = new HashSet<>();
 
 	public MappingVisitor(String theoryName) {
 		super();

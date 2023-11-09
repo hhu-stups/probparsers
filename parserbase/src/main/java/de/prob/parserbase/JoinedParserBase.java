@@ -6,11 +6,11 @@ import de.prob.prolog.term.PrologTerm;
 public class JoinedParserBase implements ProBParserBase {
 	private final ProBParserBaseAdapter[] parsers;
 
-	private static enum Type {
+	private enum Type {
 		EXPR, PRED, TRANS
-	};
+	}
 
-	public JoinedParserBase(final ProBParserBase[] parsers) {
+    public JoinedParserBase(final ProBParserBase[] parsers) {
 		if (parsers.length == 0)
 			throw new IllegalArgumentException(
 					"There should be at least one parser");

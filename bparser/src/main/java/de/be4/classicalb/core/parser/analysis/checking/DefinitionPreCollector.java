@@ -16,8 +16,8 @@ import de.be4.classicalb.core.preparser.node.Token;
  */
 public class DefinitionPreCollector extends DepthFirstAdapter {
 
-	private final Map<Token, Token> definitions = new HashMap<Token, Token>();
-	private final List<Token> fileDefinitions = new ArrayList<Token>();
+	private final Map<Token, Token> definitions = new HashMap<>();
+	private final List<Token> fileDefinitions = new ArrayList<>();
 
 	@Override
 	public void inADefinition(final ADefinition node) {

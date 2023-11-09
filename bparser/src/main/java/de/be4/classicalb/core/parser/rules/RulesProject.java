@@ -42,11 +42,11 @@ public class RulesProject {
 	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final INodeIds nodeIdAssignment = new NodeFileNumbers();
-	private List<File> filesLoaded = new ArrayList<>(); // rules machine files
+	private final List<File> filesLoaded = new ArrayList<>(); // rules machine files
 														// and definitions files
-	private HashMap<String, String> constantStringValues = new HashMap<>();
+	private final HashMap<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
-	private HashMap<String, String> operationReplacementMap = new HashMap<>();
+	private final HashMap<String, String> operationReplacementMap = new HashMap<>();
 
 	public RulesProject() {
 		// use the provided setter methods to parameterize the rules project
@@ -432,7 +432,7 @@ public class RulesProject {
 					operation.setImplicitComputationDependencies(inferredDependenciesToComputations);
 				}
 			} else {
-				operation.setImplicitComputationDependencies(Collections.<ComputationOperation>emptyList());
+				operation.setImplicitComputationDependencies(Collections.emptyList());
 			}
 		}
 
@@ -520,7 +520,7 @@ public class RulesProject {
 		while (!todoList.isEmpty()) {
 			AbstractOperation operation = todoList.poll();
 			if (operation.getTransitiveDependencies() == null) {
-				findTransitiveDependencies(operation, new ArrayList<AbstractOperation>());
+				findTransitiveDependencies(operation, new ArrayList<>());
 			}
 		}
 	}
@@ -584,7 +584,7 @@ public class RulesProject {
 				}
 				sb.append(opName);
 				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Cyclic dependencies between operations: " + sb.toString(), id)));
+						new CheckException("Cyclic dependencies between operations: " + sb, id)));
 
 				return true;
 			}

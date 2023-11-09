@@ -75,7 +75,7 @@ public class RulesLanguageTest {
 	public void testRuleFailSequence() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"fail1\"END; RULE_FAIL COUNTEREXAMPLE \"fail2\"END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue(!result.contains("$ResultTuple"));
+        assertFalse(result.contains("$ResultTuple"));
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class RulesLanguageTest {
 	public void testRuleId() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue("RULEID should not appear in the translated B machine.", !result.contains("id2"));
+        assertFalse("RULEID should not appear in the translated B machine.", result.contains("id2"));
 	}
 
 	@Test

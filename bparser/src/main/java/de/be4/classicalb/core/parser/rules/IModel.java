@@ -9,17 +9,17 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 public interface IModel {
 
-	public String getMachineName();
+	String getMachineName();
 
-	public List<RulesMachineReference> getMachineReferences();
+	List<RulesMachineReference> getMachineReferences();
 
-	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping);
+	void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping);
 
-	public String getPath();
+	String getPath();
 
-	public boolean hasError();
+	boolean hasError();
 
-	public BCompoundException getCompoundException();
+	BCompoundException getCompoundException();
 
 	Start getStart();
 	
