@@ -75,8 +75,6 @@ subprojects {
         testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
         testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
         testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-        testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.24.2'
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.7.0'
     }
 
     java {
