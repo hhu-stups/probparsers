@@ -1,33 +1,22 @@
 package de.be4.classicalb.core.parser.util;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.AImplementationMachineParseUnit;
-import de.be4.classicalb.core.parser.node.APackageParseUnit;
-import de.be4.classicalb.core.parser.node.ARefinementMachineParseUnit;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PParseUnit;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
 public final class Utils {
+
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS_REVERSE;
 
@@ -42,7 +31,7 @@ public final class Utils {
 		stringEscapeReplacements.put('t', '\t');
 		stringEscapeReplacements.put('\\', '\\');
 		STRING_ESCAPE_REPLACEMENTS = Collections.unmodifiableMap(stringEscapeReplacements);
-		
+
 		final Map<Character, Character> stringEscapeReplacementsReverse = new HashMap<>();
 		for (final Map.Entry<Character, Character> entry : stringEscapeReplacements.entrySet()) {
 			stringEscapeReplacementsReverse.put(entry.getValue(), entry.getKey());
@@ -78,11 +67,11 @@ public final class Utils {
 		}
 		return string.trim();
 	}
-	
+
 	/**
 	 * Check whether the given identifier is a valid plain B identifier
 	 * that does not need to be quoted.
-	 * 
+	 *
 	 * @param identifier the string to check
 	 * @return whether {@code identifier} is a plain B identifier
 	 */
@@ -100,11 +89,11 @@ public final class Utils {
 		} catch (final BCompoundException ignored) {
 			return false;
 		}
-		final PExpression expr = ((AExpressionParseUnit)ast.getPParseUnit()).getExpression();
+		final PExpression expr = ((AExpressionParseUnit) ast.getPParseUnit()).getExpression();
 		if (!(expr instanceof AIdentifierExpression)) {
 			return false;
 		}
-		final List<TIdentifierLiteral> parsedId = ((AIdentifierExpression)expr).getIdentifier();
+		final List<TIdentifierLiteral> parsedId = ((AIdentifierExpression) expr).getIdentifier();
 		return parsedId.size() == 1 && identifier.equals(parsedId.get(0).getText());
 	}
 
@@ -123,7 +112,7 @@ public final class Utils {
 	 * This method is currently not used by the B parser itself.
 	 * It is meant for use by other libraries, such as tla2bAST and tlc4b.
 	 * </p>
-	 * 
+	 *
 	 * @param identifier the definition name to check
 	 * @return whether the given definition name has special meaning to ProB
 	 */
@@ -134,7 +123,7 @@ public final class Utils {
 			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
 			|| identifier.startsWith("ASSERT_CTL")
 			|| identifier.startsWith("ASSERT_LTL")
-			|| identifier.equals("CUSTOM_GRAPH") 
+			|| identifier.equals("CUSTOM_GRAPH")
 			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
@@ -142,13 +131,13 @@ public final class Utils {
 			|| identifier.startsWith("scope_")
 			|| identifier.startsWith("SET_PREF_")
 			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
-		;
+			;
 	}
 
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
-				|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
+			|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
@@ -205,37 +194,48 @@ public final class Utils {
 		}
 	}
 
+	public static String readFile(final String filePath) throws IOException {
+		return readFile(Paths.get(filePath));
+	}
+
 	public static String readFile(final File filePath) throws IOException {
-		String content;
-		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-			final StringBuilder builder = new StringBuilder();
-			final char[] buffer = new char[1024];
-			int read;
-			while ((read = inputStreamReader.read(buffer)) >= 0) {
-				builder.append(String.valueOf(buffer, 0, read));
-			}
-			content = builder.toString();
-			inputStreamReader.close();
-		}
+		return readFile(filePath.toPath());
+	}
+
+	public static String readFile(final Path filePath) throws IOException {
+		// in Java 11 we would use "Files.readString(Path)"
+		// we are on Java 8 and must use an alternative:
+		// we want to fail on invalid (non-utf8) input, thus we cannot use "new String(byte[], Charset)"
+		// we want to keep line ending information, thus we cannot use "BufferedReader#readLine()"-based approaches
+		// so we use this buffer approach with an explicit CharsetDecoder
+
+		byte[] bytes = Files.readAllBytes(filePath);
+		ByteBuffer bb = ByteBuffer.wrap(bytes);
+		CharBuffer cb = StandardCharsets.UTF_8.newDecoder().decode(bb);
 
 		// remove utf-8 byte order mark
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
-			content = content.substring(1);
+		if (cb.hasRemaining()) {
+			int pos = cb.position();
+			if (cb.get(pos) == 0xfeff) {
+				cb.position(pos + 1);
+			}
 		}
 
-		return content.replaceAll("\r\n", "\n");
+		String content = cb.toString();
+		// TODO: remove this once line numbers are fixed
+		content = content.replace("\r\n", "\n");
+		return content;
 	}
-	
+
 	public static boolean isQuoted(final String string, final char quote) {
-		return string.length() >= 2 && string.charAt(0) == quote && string.charAt(string.length()-1) == quote;
+		return string.length() >= 2 && string.charAt(0) == quote && string.charAt(string.length() - 1) == quote;
 	}
-	
+
 	/**
 	 * Remove surrounding quote characters from a string. This does not handle backslash escapes, use {@link #unescapeStringContents(String)} afterwards to do this.
-	 * 
+	 *
 	 * @param literal the string from which to remove the quotes
-	 * @param quote the quote character to remove
+	 * @param quote   the quote character to remove
 	 * @return the string without quotes
 	 * @throws IllegalArgumentException if the literal is not a double-quoted string
 	 */
@@ -246,10 +246,10 @@ public final class Utils {
 		}
 		return literal.substring(1, literal.length() - 1);
 	}
-	
+
 	public static String unescapeStringContents(String contents) {
 		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < contents.length();) {
+		for (int i = 0; i < contents.length(); ) {
 			final char c = contents.charAt(i);
 			if (c == '\\') {
 				// Start of escape sequence.
@@ -274,7 +274,7 @@ public final class Utils {
 		}
 		return sb.toString();
 	}
-	
+
 	public static String escapeStringContents(final String contents) {
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < contents.length(); i++) {

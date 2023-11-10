@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -143,7 +144,7 @@ public class RulesMachineFilesTest {
 		project.parseProject(new File("DirDoesNotExist/FileDoesNotExist.rmch"));
 		assertTrue(project.hasErrors());
 		final BException e = project.getBExceptionList().get(0);
-		assertTrue(e.getCause() instanceof FileNotFoundException);
+		assertTrue(e.getCause() instanceof FileNotFoundException || e.getCause() instanceof NoSuchFileException);
 		assertTrue(e.getMessage().contains("FileDoesNotExist.rmch"));
 	}
 
