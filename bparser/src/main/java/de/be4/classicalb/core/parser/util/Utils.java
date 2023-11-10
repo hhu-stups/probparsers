@@ -204,24 +204,24 @@ public final class Utils {
 		// In the future, we should disallow this and report non-UTF-8 input as an error.
 		// Once we require Java 11, we should consider replacing this method with Files.readString(Path).
 
-		String content;
-		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-			final StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder();
+		try (
+			FileInputStream is = new FileInputStream(filePath);
+			InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+		) {
 			final char[] buffer = new char[1024];
 			int read;
-			while ((read = inputStreamReader.read(buffer)) >= 0) {
-				builder.append(String.valueOf(buffer, 0, read));
+			while ((read = reader.read(buffer)) >= 0) {
+				builder.append(buffer, 0, read);
 			}
-			content = builder.toString();
-			inputStreamReader.close();
 		}
 
 		// remove utf-8 byte order mark
-		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
-			content = content.substring(1);
+		if (builder.length() != 0 && builder.charAt(0) == 0xfeff) {
+			builder.deleteCharAt(0);
 		}
 
+		String content = builder.toString();
 		// TODO: remove this once line numbers are fixed
 		content = content.replace("\r\n", "\n");
 		return content;
