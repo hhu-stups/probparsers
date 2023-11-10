@@ -165,7 +165,7 @@ ext {
             task.reports {
                 xml.required = false
                 csv.required = false
-                html.outputLocation = new File(subproject.buildDir, "jacocoHtml")
+                html.outputLocation = subproject.layout.buildDirectory.dir('jacocoHtml')
             }
             
             task.classDirectories.from = task.classDirectories.from.collect {
