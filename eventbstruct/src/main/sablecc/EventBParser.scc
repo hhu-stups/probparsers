@@ -8,6 +8,7 @@ Helpers
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   all_chars = [0 .. 0xffff];
   all_formula_chars = [[[all_chars - layout_char] - '@'] - '/'];
+  tick = 39;
 
   unicode_letter =
     [[[0x0041..0x005a] + [0x0061..0x007a]] + [[0x00aa..0x00aa] + [0x00b5..0x00b5]]] |
@@ -70,10 +71,6 @@ Helpers
     [[[0x0be7..0x0bef] + [0x0c66..0x0c6f]] + [[0x0ce6..0x0cef] + [0x0d66..0x0d6f]]] |
     [[[0x0e50..0x0e59] + [0x0ed0..0x0ed9]] + [[0x0f20..0x0f29] + [0xff10..0xff19]]];
 
-  tick = 39;
-  identifier = ('_' | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | '_')* tick?;
-  label = [all_chars - layout_char]+ tick?;
-
 /*******************************************************************
  * States                                                          *
  *******************************************************************/
@@ -133,8 +130,8 @@ Tokens
   {normal, formula -> normal} with = 'with';
   {normal, formula -> normal} then = 'then' | 'begin';
 
-  {normal} identifier_literal = identifier;
-  {label} label = label;
+  {normal} identifier_literal = ('_' | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | '_')* tick?;
+  {label} label = [all_chars - layout_char]+ tick?;
 
   {normal, label -> formula, formula} white_space = layout_char+;
 
