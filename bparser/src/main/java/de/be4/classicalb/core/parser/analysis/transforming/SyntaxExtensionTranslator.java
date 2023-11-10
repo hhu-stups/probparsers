@@ -69,7 +69,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
-		TStringLiteral tStringLiteral = new TStringLiteral(Utils.unescapeStringContents(text), 
+		TStringLiteral tStringLiteral = new TStringLiteral(Utils.unescapeStringContents(text, true),
 				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());

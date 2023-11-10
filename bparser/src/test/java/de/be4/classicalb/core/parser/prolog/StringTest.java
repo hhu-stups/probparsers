@@ -58,13 +58,23 @@ public class StringTest {
 
 	@Test
 	public void testCarriageReturn() throws BCompoundException {
-		final String testMachine = "MACHINE Test PROPERTIES ''' \\r ''' = ''' \r ''' END";
+		// \r and \r\n will be transformed into a single \n
+		// \n will stay the same
+		final String testMachine = "MACHINE Test PROPERTIES '''a\r\nb\rc\nd''' = \"b\" END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("equal(none,string(none,' \\15\\ '),string(none,' \\15\\ '))"));
+		assertTrue(result.contains("string(none,'a\\nb\\nc\\nd')"));
 	}
 
 	@Test
-	public void testSignleQuote() throws BCompoundException {
+	public void testEscapedCarriageReturn() throws BCompoundException {
+		// ...those same characters in their escaped variants will not trigger normalization
+		final String testMachine = "MACHINE Test PROPERTIES '''a\\r\\nb\\rc\\nd''' = \"b\" END";
+		String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("string(none,'a\\15\\\\nb\\15\\c\\nd')"));
+	}
+
+	@Test
+	public void testSingleQuote() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES ''' \\' ''' = ''' ' ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 		assertTrue(result.contains("equal(none,string(none,' \\' '),string(none,' \\' '))"));

@@ -1,18 +1,11 @@
 package de.be4.classicalb.core.parser.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -199,33 +192,28 @@ public final class Utils {
 	}
 
 	public static String readFile(final File filePath) throws IOException {
+		return readFile(filePath.toPath());
+	}
+
+	private static String readFile(final Path filePath) throws IOException {
 		// For now, we accept files that aren't valid UTF-8 and silently replace non-UTF-8 bytes,
 		// because some existing machines have comments containing non-ASCII characters in legacy encodings (ISO 8859-1, Windows-1252, MacRoman, etc.).
 		// In the future, we should disallow this and report non-UTF-8 input as an error.
+		// we want to keep line ending information, thus we cannot use "BufferedReader#readLine()"-based approaches
 		// Once we require Java 11, we should consider replacing this method with Files.readString(Path).
 
-		StringBuilder builder = new StringBuilder();
-		try (
-			FileInputStream is = new FileInputStream(filePath);
-			InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-		) {
-			final char[] buffer = new char[1024];
-			int read;
-			while ((read = reader.read(buffer)) >= 0) {
-				builder.append(buffer, 0, read);
-			}
-		}
+		byte[] bytes = Files.readAllBytes(filePath);
+
+		int length = bytes.length;
+		int offset = 0;
 
 		// remove utf-8 byte order mark
-		if (builder.length() != 0 && builder.charAt(0) == 0xfeff) {
-			builder.deleteCharAt(0);
+		if (length >= 3 && bytes[0] == (byte) 0xef && bytes[1] == (byte) 0xbb && bytes[2] == (byte) 0xbf) {
+			offset = 3;
+			length -= 3;
 		}
 
-		return builder.toString();
-	}
-
-	public static String readFile(final Path filePath) throws IOException {
-		return readFile(filePath.toFile());
+		return new String(bytes, offset, length, StandardCharsets.UTF_8);
 	}
 
 	public static boolean isQuoted(final String string, final char quote) {
@@ -249,12 +237,21 @@ public final class Utils {
 	}
 
 	public static String unescapeStringContents(String contents) {
+		return unescapeStringContents(contents, false);
+	}
+
+	/**
+	 * Will unescape the given string, interpreted as a string constant.
+	 * <br/>
+	 * The {@code multiline} parameter controls whether sequences of "\r\n" will be transformed to just a single "\n", used for multiline compatibility on Windows.
+	 */
+	public static String unescapeStringContents(String contents, boolean multiline) {
 		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < contents.length(); ) {
+		for (int i = 0, len = contents.length(); i < len; ) {
 			final char c = contents.charAt(i);
 			if (c == '\\') {
 				// Start of escape sequence.
-				if (i + 1 >= contents.length()) {
+				if (i + 1 >= len) {
 					throw new IllegalArgumentException("Unescaped backslash at end of string not allowed");
 				}
 				final char escapedChar = contents.charAt(i + 1);
@@ -267,6 +264,16 @@ public final class Utils {
 				}
 				// Skip over backslash and the following character.
 				i += 2;
+			} else if (multiline && c == '\r') {
+				// This is "\r", apply normalization
+				sb.append('\n');
+				if (i + 1 < len && contents.charAt(i + 1) == '\n') {
+					// This is a "\r\n" sequence, we want to replace it by a single "\n"
+					i += 2;
+				} else {
+					// This is a single "\r", we also want to replace it by a single "\n"
+					i++;
+				}
 			} else {
 				// Simple unescaped character.
 				sb.append(c);
