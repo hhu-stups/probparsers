@@ -4,25 +4,10 @@ Package de.be4.eventb.core.parser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  underscore = '_';
-  at = '@';
-  lf = 10;
-  cr = 13;
-  space = ' ';
-  slash = '/';
-  comment_start = slash slash;
-  multi_comment_start = slash '*';
-  multi_comment_end = '*' slash;
-
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
-  digit = ['0' .. '9'];
-
-  line_break = [lf + cr];
+  line_break = [10 + 13];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   all_chars = [0 .. 0xffff];
-  all_formula_chars = [[[[all_chars - layout_char] - line_break] - at] - slash];
+  all_formula_chars = [[[[all_chars - layout_char] - line_break] - '@'] - '/'];
 
   unicode_letter =
     [[[0x0041..0x005a] + [0x0061..0x007a]] + [[0x00aa..0x00aa] + [0x00b5..0x00b5]]] |
@@ -86,7 +71,7 @@ Helpers
     [[[0x0e50..0x0e59] + [0x0ed0..0x0ed9]] + [[0x0f20..0x0f29] + [0xff10..0xff19]]];
 
   tick = 39;
-  identifier = (underscore | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | underscore)* tick?;
+  identifier = ('_' | unicode_letter | unicode_digit) (unicode_letter | unicode_digit | '_')* tick?;
   label = [all_chars - layout_char]+ tick?;
 
 /*******************************************************************
@@ -104,18 +89,18 @@ States
  *******************************************************************/
 Tokens
   // single line comments
-  {normal -> comment, formula -> normal} comment_start = comment_start space*;
+  {normal -> comment, formula -> normal} comment_start = '//' ' '*;
   {comment} comment = [all_chars - line_break]*;
   {comment -> normal} comment_end = line_break;
 
   // multiline comments: a lot of it is handle in the lexer
-  {normal -> multi_comment, formula -> multi_comment} multi_comment_start = multi_comment_start space*;
+  {normal -> multi_comment, formula -> multi_comment} multi_comment_start = '/*' ' '*;
   {multi_comment} multi_comment_body = [all_chars - ['*' + '/']]*;
   {multi_comment} star = '*';
-  {multi_comment, formula} slash = slash;
-  {multi_comment} multi_comment_end = multi_comment_end; // return to state 'normal' is done in Lexer
+  {multi_comment, formula} slash = '/';
+  {multi_comment} multi_comment_end = '*/'; // return to state 'normal' is done in Lexer
 
-  {normal -> label, formula -> normal} at = at;
+  {normal -> label, formula -> normal} at = '@';
   {normal} comma = ',';
   {normal -> formula} colon = ':';
 
