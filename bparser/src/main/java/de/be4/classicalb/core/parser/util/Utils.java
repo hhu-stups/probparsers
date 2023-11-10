@@ -115,26 +115,26 @@ public final class Utils {
 	 */
 	public static boolean isProBSpecialDefinitionName(String identifier) {
 		return "GOAL".equals(identifier)
-			|| "SHIELD_INTERVENTION".equals(identifier) // SimB reinforcement learning shield (in ProB 2 UI)
-			|| "VISB_JSON_FILE".equals(identifier)
-			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
-			|| identifier.startsWith("ASSERT_CTL")
-			|| identifier.startsWith("ASSERT_LTL")
-			|| identifier.equals("CUSTOM_GRAPH")
-			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
-			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
-			|| identifier.startsWith("HEURISTIC_FUNCTION")
-			|| identifier.equals("SCOPE")
-			|| identifier.startsWith("scope_")
-			|| identifier.startsWith("SET_PREF_")
-			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
+			       || "SHIELD_INTERVENTION".equals(identifier) // SimB reinforcement learning shield (in ProB 2 UI)
+			       || "VISB_JSON_FILE".equals(identifier)
+			       || identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
+			       || identifier.startsWith("ASSERT_CTL")
+			       || identifier.startsWith("ASSERT_LTL")
+			       || identifier.equals("CUSTOM_GRAPH")
+			       || identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
+			       || identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
+			       || identifier.startsWith("HEURISTIC_FUNCTION")
+			       || identifier.equals("SCOPE")
+			       || identifier.startsWith("scope_")
+			       || identifier.startsWith("SET_PREF_")
+			       || identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
 			;
 	}
 
 	public static boolean isCompleteMachine(final Start rootNode) {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
-			|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
+			        || parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
@@ -241,11 +241,13 @@ public final class Utils {
 	}
 
 	/**
-	 * Will unescape the given string, interpreted as a string constant.
-	 * <br/>
-	 * The {@code multiline} parameter controls whether sequences of "\r\n" will be transformed to just a single "\n", used for multiline compatibility on Windows.
+	 * Unescape the given string.
+	 *
+	 * @param contents             possibly escaped string contents
+	 * @param normalizeLineEndings This parameter controls whether sequences of "\r\n" and "\r" will be transformed to just a single "\n", used for compatibility with Windows.
+	 * @return unescaped and possibly normalized string
 	 */
-	public static String unescapeStringContents(String contents, boolean multiline) {
+	public static String unescapeStringContents(String contents, boolean normalizeLineEndings) {
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0, len = contents.length(); i < len; ) {
 			final char c = contents.charAt(i);
@@ -264,7 +266,7 @@ public final class Utils {
 				}
 				// Skip over backslash and the following character.
 				i += 2;
-			} else if (multiline && c == '\r') {
+			} else if (normalizeLineEndings && c == '\r') {
 				// This is "\r", apply normalization
 				sb.append('\n');
 				if (i + 1 < len && contents.charAt(i + 1) == '\n') {
