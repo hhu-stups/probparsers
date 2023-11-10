@@ -62,7 +62,7 @@ public class OperatorMapping {
 
 	@Override
 	public String toString() {
-        return "operator '" + operatorName +
+		return "operator '" + operatorName +
 			"' of theory " + theoryName +
 			" and type " + operatorType.toString() +
 			": {" + spec + "}";

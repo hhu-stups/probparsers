@@ -21,7 +21,7 @@ public interface IFileContentProvider {
 	 * @throws IOException	when the given file cannot be found
 	 * @return 	the content of the file
 	 */
-    String getFileContent(final File directory, final String fileName) throws IOException;
+	String getFileContent(final File directory, final String fileName) throws IOException;
 
 	File getFile(final File directory, String fileName) throws IOException;
 }

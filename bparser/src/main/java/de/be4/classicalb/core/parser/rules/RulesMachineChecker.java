@@ -323,7 +323,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
 		currentOperation.addReplacesIdentifier(idExpr);
-    }
+	}
 
 	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		final List<String> tags = new ArrayList<>();
@@ -341,7 +341,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addTags(tags);
-    }
+	}
 
 	private void checkClassificationAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -359,7 +359,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException(
 					"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.", pOperationAttribute));
 		}
-    }
+	}
 
 	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
@@ -375,7 +375,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
 					pOperationAttribute));
 		}
-    }
+	}
 
 	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
@@ -390,7 +390,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation.",
 					pOperationAttribute));
 		}
-    }
+	}
 
 	private void checkDependsOnComputationAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -404,7 +404,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllComputationDependencies(list);
-    }
+	}
 
 	private void checkDependsOnRuleAttribute(POperationAttribute pOperationAttribute,
 			LinkedList<PExpression> arguments) {
@@ -418,7 +418,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllRuleDependencies(list);
-    }
+	}
 
 	private void checkOperationPredicateAttribute(OccurredAttributes occurredAttributes,
 			POperationAttribute pOperationAttribute) throws AssertionError {
@@ -582,7 +582,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
-    }
+	}
 
 	private Integer countPlaceHoldersInExpression(PExpression param) {
 		if (param instanceof AConcatExpression) {
@@ -623,7 +623,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
-    }
+	}
 
 	@Override
 	public void inAAssignSubstitution(AAssignSubstitution node) {
@@ -731,7 +731,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkNotCheckedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -740,7 +740,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 2) {
@@ -761,7 +761,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -770,7 +770,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkFailedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -779,7 +779,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkSucceededRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
@@ -788,7 +788,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	private void checkSucceededRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 2) {
@@ -809,7 +809,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-    }
+	}
 
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {

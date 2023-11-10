@@ -238,14 +238,14 @@ public class ASTProlog extends DepthFirstAdapter {
 	private String formatCamel(final String input) {
 		StringWriter out = new StringWriter();
 		char[] chars = input.toCharArray();
-        for (char current : chars) {
-            if (Character.isUpperCase(current)) {
-                out.append('_');
-                out.append(Character.toLowerCase(current));
-            } else {
-                out.append(current);
-            }
-        }
+		for (char current : chars) {
+			if (Character.isUpperCase(current)) {
+				out.append('_');
+				out.append(Character.toLowerCase(current));
+			} else {
+				out.append(current);
+			}
+		}
 		return out.toString();
 	}
 

@@ -83,17 +83,17 @@ public class RulesMachineFilesTest {
 		RulesMachineRunConfiguration rulesMachineRunConfiguration = project.getRulesMachineRunConfiguration();
 		Set<RuleGoalAssumption> rulesGoalAssumptions = rulesMachineRunConfiguration.getRulesGoalAssumptions();
 		assertEquals(2, rulesGoalAssumptions.size());
-        for (RuleGoalAssumption next : rulesGoalAssumptions) {
-            if ("rule1".equals(next.getRuleName())) {
-                assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToSucceed());
-                assertTrue(next.isCheckedForCounterexamples());
-                assertEquals("rule1", next.getRuleOperation().getOriginalName());
-            } else {
-                assertEquals("rule2", next.getRuleName());
-                assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToFail());
-                assertFalse(next.isCheckedForCounterexamples());
-            }
-        }
+		for (RuleGoalAssumption next : rulesGoalAssumptions) {
+			if ("rule1".equals(next.getRuleName())) {
+				assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToSucceed());
+				assertTrue(next.isCheckedForCounterexamples());
+				assertEquals("rule1", next.getRuleOperation().getOriginalName());
+			} else {
+				assertEquals("rule2", next.getRuleName());
+				assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToFail());
+				assertFalse(next.isCheckedForCounterexamples());
+			}
+		}
 	}
 
 	@Test

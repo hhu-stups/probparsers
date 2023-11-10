@@ -111,17 +111,17 @@ public final class ASTBuilder {
 	}
 
 	public static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
-        return new ArrayList<>(Arrays.asList(pSubstitutions));
+		return new ArrayList<>(Arrays.asList(pSubstitutions));
 	}
 
 	public static List<PExpression> createExpressionList(PExpression... pExpressions) {
 		final List<PExpression> list = new ArrayList<>();
-        for (PExpression oldNode : pExpressions) {
-            PExpression node = oldNode.clone();
-            node.setStartPos(oldNode.getStartPos());
-            node.setEndPos(oldNode.getEndPos());
-            list.add(node);
-        }
+		for (PExpression oldNode : pExpressions) {
+			PExpression node = oldNode.clone();
+			node.setStartPos(oldNode.getStartPos());
+			node.setEndPos(oldNode.getEndPos());
+			list.add(node);
+		}
 		return list;
 	}
 
@@ -156,9 +156,9 @@ public final class ASTBuilder {
 
 	public static List<PExpression> createIdentifierList(String... strings) {
 		ArrayList<PExpression> list = new ArrayList<>();
-        for (String string : strings) {
-            list.add(createIdentifier(string));
-        }
+		for (String string : strings) {
+			list.add(createIdentifier(string));
+		}
 		return list;
 	}
 

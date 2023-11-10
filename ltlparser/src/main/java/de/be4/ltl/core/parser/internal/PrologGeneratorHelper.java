@@ -122,7 +122,7 @@ final class PrologGeneratorHelper {
 		} catch (ProBParseException | UnsupportedOperationException e) {
 			throw createAdapterException(token, e);
 		}
-    }
+	}
 
 	public void sink() {
 		pto.openTerm("ap");

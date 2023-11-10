@@ -115,7 +115,7 @@ public class EventBLexer extends Lexer {
 				}
 
 				lastEventClauseIndex = nextIndex;
-            }
+			}
 		}
 	}
 

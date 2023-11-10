@@ -203,7 +203,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void caseAComputationOperation(AComputationOperation node) {
 		if (operationsToBeDeleted.contains(node.getName().getText())) {
 			node.replaceBy(null);
-        } else {
+		} else {
 			ComputationOperation computationOperation = this.rulesMachineChecker.getComputationOperation(node);
 			if (computationOperation.replacesOperation()) {
 				this.currentComputationIdentifier = computationOperation.getReplacesIdentifier().getIdentifier()
@@ -315,7 +315,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void caseARuleOperation(ARuleOperation node) {
 		if (operationsToBeDeleted.contains(this.rulesMachineChecker.getRuleOperation(node).getOriginalName())) {
 			node.replaceBy(null);
-        } else {
+		} else {
 			// transform rule operation
 			super.caseARuleOperation(node);
 		}
@@ -490,7 +490,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 					rule.getNumberOfErrorTypes());
 			node.replaceBy(funcCall);
 		}
-    }
+	}
 
 	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
 		addFormatToStringDefinition(iDefinitions);
@@ -514,7 +514,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		list.add(seq);
 		final ADefinitionExpression def = new ADefinitionExpression(format, list);
 		node.replaceBy(def);
-    }
+	}
 
 	private AAssignSubstitution createRuleSuccessAssignment(final TIdentifierLiteral ruleLiteral) {
 		final ArrayList<PExpression> nameList = new ArrayList<>();
@@ -531,7 +531,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private PSubstitution createConditionalFailAssignment() {
 		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(RESULT_TUPLE), new AEmptySetExpression());
 		return new AIfSubstitution(ifCondition, createRuleFailAssignment(currentRule.getNameLiteral()),
-                new ArrayList<>(), null);
+				new ArrayList<>(), null);
 	}
 
 	private AAssignSubstitution createRuleFailAssignment(final TIdentifierLiteral ruleLiteral) {
@@ -688,7 +688,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				rule.getNumberOfErrorTypes());
 		AEqualPredicate equal = new AEqualPredicate(funcCall, new AEmptySetExpression());
 		node.replaceBy(equal);
-    }
+	}
 
 	private void replaceFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final RuleOperation rule) {
 		// dom(rule_cts) = 1..n
@@ -697,7 +697,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				new AIntervalExpression(createAIntegerExpression(1),
 						createAIntegerExpression(rule.getNumberOfErrorTypes())));
 		node.replaceBy(equal);
-    }
+	}
 
 	private void replaceFailedRuleErrorTypeOperator(AOperatorPredicate node, final RuleOperation rule) {
 		PExpression pExpression = node.getIdentifiers().get(0);
@@ -707,7 +707,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				rule.getNumberOfErrorTypes());
 		ANotEqualPredicate notEqual = new ANotEqualPredicate(funcCall, new AEmptySetExpression());
 		node.replaceBy(notEqual);
-    }
+	}
 
 	private void replacePredicateOperator(final AOperatorPredicate node, List<PExpression> copy,
 			final String stringValue) {

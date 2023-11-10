@@ -153,7 +153,7 @@ public class ToUnicodeTest {
 	@Test
 	public void TBcomp() {
 		String actual = UnicodeTranslator.toUnicode("circ");
-        String expected = "\u2218";
+		String expected = "\u2218";
 		assertEquals(expected, actual);
 	}
 

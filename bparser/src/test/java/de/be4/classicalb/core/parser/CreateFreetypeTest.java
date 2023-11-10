@@ -60,8 +60,7 @@ public class CreateFreetypeTest {
 	private static final String CONS_EMPTY = "nothing";
 	private static final String CONS_INT = "myInt";
 	private static final String CONS_BOOL = "myBool";
-	private static final List<PExpression> EMPTY_EXPRS = Collections
-			.emptyList();
+	private static final List<PExpression> EMPTY_EXPRS = Collections.emptyList();
 
 	@Test
 	public void testManualFreetypeCreation() {
@@ -144,7 +143,7 @@ public class CreateFreetypeTest {
 		final AOperation op2 = createAdd("addInt", "i",
 				new AIntSetExpression(), CONS_INT);
 		final AOperation op3 = createSimpleAdd("addEmpty");
-        return new AOperationsMachineClause(
+		return new AOperationsMachineClause(
 				Arrays.asList(op1, op2, op3));
 	}
 
@@ -153,8 +152,8 @@ public class CreateFreetypeTest {
 		final AMemberPredicate pre = new AMemberPredicate(
 				createIdentifier(param), type);
 		final ASetExtensionExpression newVal = new ASetExtensionExpression(
-                Collections.singletonList(new AFunctionExpression(
-                        createIdentifier(cons), createIdentifiers(param))));
+				Collections.singletonList(new AFunctionExpression(
+						createIdentifier(cons), createIdentifiers(param))));
 		final PSubstitution subst = new APreconditionSubstitution(pre,
 				createAssignment(VAR_NAME, new AUnionExpression(
 						createIdentifier(VAR_NAME), newVal)));
@@ -173,8 +172,7 @@ public class CreateFreetypeTest {
 	}
 
 	private PSubstitution createAssignment(String var, PExpression expr) {
-		return new AAssignSubstitution(createIdentifiers(var),
-                Collections.singletonList(expr));
+		return new AAssignSubstitution(createIdentifiers(var), Collections.singletonList(expr));
 	}
 
 	private AFreetypesMachineClause createFreetype() {

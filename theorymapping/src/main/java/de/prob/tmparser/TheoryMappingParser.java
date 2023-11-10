@@ -36,7 +36,7 @@ public class TheoryMappingParser {
 		} catch (ParserException | LexerException e) {
 			throw new TheoryMappingException(e);
 		}
-        return extractMappings(ast, theoryName);
+		return extractMappings(ast, theoryName);
 	}
 
 	private static Start parse(Reader input) throws ParserException,

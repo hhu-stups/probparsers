@@ -339,21 +339,21 @@ public class PreParser {
 		// however, the list is needed for collections.sort
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
-        final LinkedList<Token> list = new LinkedList<>(definitions.keySet());
+		final LinkedList<Token> list = new LinkedList<>(definitions.keySet());
 		/*
 		 * Sort the definitions in order of their appearance in the sourcecode.
 		 * Dependencies in between definitions are handled later when computing
 		 * there type
 		 */
 		list.sort((o1, o2) -> {
-            if (o1.getLine() == o2.getLine()) {
-                if (o1.getPos() == o2.getPos())
-                    return 0;
-                else
-                    return o1.getPos() - o2.getPos();
-            } else
-                return o1.getLine() - o2.getLine();
-        });
+			if (o1.getLine() == o2.getLine()) {
+				if (o1.getPos() == o2.getPos())
+					return 0;
+				else
+					return o1.getPos() - o2.getPos();
+			} else
+				return o1.getLine() - o2.getLine();
+		});
 		return list;
 	}
 

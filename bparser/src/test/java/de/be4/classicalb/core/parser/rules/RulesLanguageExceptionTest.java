@@ -127,16 +127,14 @@ public class RulesLanguageExceptionTest {
 
 	@Test(expected = AssertionError.class)
 	public void testUnkownPredicateOperatorException() throws Exception {
-		AOperatorPredicate operator = new AOperatorPredicate(new TKwPredicateOperator("foo"),
-                new ArrayList<>());
+		AOperatorPredicate operator = new AOperatorPredicate(new TKwPredicateOperator("foo"), new ArrayList<>());
 		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void testUnkownExpressionOperatorException() throws Exception {
-		AOperatorExpression operator = new AOperatorExpression(new TKwExpressionOperator("foo"),
-                new ArrayList<>());
+		AOperatorExpression operator = new AOperatorExpression(new TKwExpressionOperator("foo"), new ArrayList<>());
 		RulesMachineChecker rulesMachineVisitor = new RulesMachineChecker(null, null, null);
 		operator.apply(rulesMachineVisitor);
 	}

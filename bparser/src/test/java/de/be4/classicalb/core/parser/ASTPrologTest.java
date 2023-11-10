@@ -91,19 +91,19 @@ public class ASTPrologTest {
 	private static String insertNumbers(int counter, final String string) {
 		StringBuilder buf = new StringBuilder();
 		char[] c = string.toCharArray();
-        for (char value : c) {
-            switch (value) {
-                case '$':
-                    buf.append(counter++);
-                    break;
-                case '%':
-                    buf.append(counter - 1);
-                    break;
-                default:
-                    buf.append(value);
-                    break;
-            }
-        }
+		for (char value : c) {
+			switch (value) {
+				case '$':
+					buf.append(counter++);
+					break;
+				case '%':
+					buf.append(counter - 1);
+					break;
+				default:
+					buf.append(value);
+					break;
+			}
+		}
 		return buf.toString();
 	}
 

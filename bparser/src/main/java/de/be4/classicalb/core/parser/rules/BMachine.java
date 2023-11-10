@@ -45,8 +45,7 @@ public class BMachine implements IModel {
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add(new TIdentifierLiteral(name));
 		AMachineHeader header = new AMachineHeader(nameList, new ArrayList<>());
-		this.parseUnit = new AAbstractMachineParseUnit(new AMachineMachineVariant(), header,
-                new ArrayList<>());
+		this.parseUnit = new AAbstractMachineParseUnit(new AMachineMachineVariant(), header, new ArrayList<>());
 		this.start = new Start(parseUnit, new EOF());
 		this.machineName = name;
 	}

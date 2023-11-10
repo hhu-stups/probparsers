@@ -12,8 +12,7 @@ public class EventBLexerException extends LexerException {
 	private final int lastPos;
 
 	public EventBLexerException(final Token token, final String message) {
-		this(token, message, token.getText(), token.getLine(), token
-				.getPos());
+		this(token, message, token.getText(), token.getLine(), token.getPos());
 	}
 
 	public EventBLexerException(final Token lastToken, final String message,
@@ -43,7 +42,7 @@ public class EventBLexerException extends LexerException {
 
 	@Override
 	public String toString() {
-        return super.toString() + " (" +
+		return super.toString() + " (" +
 			lastLine +
 			" / " +
 			lastPos +

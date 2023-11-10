@@ -24,7 +24,7 @@ public class DefinitionTypes {
 	}
 
 	public Definitions.Type getType(final String definitionName) {
-        return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
+		return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
 	}
 	
 	@Override

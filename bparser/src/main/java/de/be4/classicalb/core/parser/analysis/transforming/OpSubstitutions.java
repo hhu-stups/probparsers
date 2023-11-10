@@ -152,7 +152,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 				}
 
 				// transfer position information
-                defSubst.setStartPos(node.getStartPos());
+				defSubst.setStartPos(node.getStartPos());
 				defSubst.setEndPos(node.getEndPos());
 
 				node.replaceBy(defSubst);
@@ -361,7 +361,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			newNode.setParameters(paramList);
 		}
 
-        newNode.setStartPos(node.getStartPos());
+		newNode.setStartPos(node.getStartPos());
 		newNode.setEndPos(node.getEndPos());
 
 		node.replaceBy(newNode);
@@ -413,7 +413,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		if (defRhs instanceof AFunctionExpression) {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
-                    new LinkedList<>(rhsFunction.getParameters()));
+					new LinkedList<>(rhsFunction.getParameters()));
 			rhsSubst.setStartPos(rhsFunction.getStartPos());
 			rhsSubst.setEndPos(rhsFunction.getEndPos());
 		} else if (defRhs instanceof AIdentifierExpression) {
@@ -430,7 +430,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(oldDefId.getText(), oldDefId.getLine(),
 				oldDefId.getPos());
 		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(defId,
-                new LinkedList<>(oldDefinition.getParameters()), rhsSubst);
+				new LinkedList<>(oldDefinition.getParameters()), rhsSubst);
 		substDef.setStartPos(oldDefinition.getStartPos());
 		substDef.setEndPos(oldDefinition.getEndPos());
 		definitions.replaceDefinition(idString, Type.Substitution, substDef);

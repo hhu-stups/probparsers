@@ -73,11 +73,11 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-        for (final PExpression expression : identifiers) {
-            if (!(expression instanceof AIdentifierExpression)) {
-                nonIdentifiers.add(expression);
-            }
-        }
+		for (final PExpression expression : identifiers) {
+			if (!(expression instanceof AIdentifierExpression)) {
+				nonIdentifiers.add(expression);
+			}
+		}
 	}
 
 	@Override

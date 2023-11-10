@@ -97,7 +97,7 @@ public class StructureTest {
 			new EventBParser().parse("context UnicodeIdentifiers3 constants Über ' end");
 			fail("Expecting exception");
 		} catch (final BException e) {
-            throw e.getCause();
+			throw e.getCause();
 		}
 	}
 

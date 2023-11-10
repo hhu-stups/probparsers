@@ -39,13 +39,13 @@ public class SourcePositionsTest {
 		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 
 		assertTrue(intExpression instanceof PositionedNode);
-        assertNotNull(intExpression.getStartPos());
+		assertNotNull(intExpression.getStartPos());
 		assertNotNull(intExpression.getEndPos());
 
 		final TIntegerLiteral intLiteral = intExpression.getLiteral();
 
 		assertTrue(intLiteral instanceof PositionedNode);
-        assertNotNull(((PositionedNode) intLiteral).getStartPos());
+		assertNotNull(((PositionedNode) intLiteral).getStartPos());
 		assertNotNull(((PositionedNode) intLiteral).getEndPos());
 	}
 

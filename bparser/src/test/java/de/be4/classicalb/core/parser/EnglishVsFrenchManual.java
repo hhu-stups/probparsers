@@ -42,7 +42,7 @@ public class EnglishVsFrenchManual {
 		final String parsedFrench = parsePred(french);
 
 		assertEquals(parsedFrench, parsedPred);
-        assertNotEquals(parsedPred, parsedEnglish);
+		assertNotEquals(parsedPred, parsedEnglish);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class EnglishVsFrenchManual {
 		final String parsedFrench = parseExpr(french);
 
 		assertEquals(parsedFrench, parsedExpr);
-        assertNotEquals(parsedExpr, parsedEnglish);
+		assertNotEquals(parsedExpr, parsedEnglish);
 	}
 
 }
