@@ -1,19 +1,23 @@
 package de.be4.classicalb.core.parser.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 public final class Utils {
 
@@ -195,32 +199,36 @@ public final class Utils {
 	}
 
 	public static String readFile(final File filePath) throws IOException {
-		return readFile(filePath.toPath());
-	}
+		// For now, we accept files that aren't valid UTF-8 and silently replace non-UTF-8 bytes,
+		// because some existing machines have comments containing non-ASCII characters in legacy encodings (ISO 8859-1, Windows-1252, MacRoman, etc.).
+		// In the future, we should disallow this and report non-UTF-8 input as an error.
+		// Once we require Java 11, we should consider replacing this method with Files.readString(Path).
 
-	public static String readFile(final Path filePath) throws IOException {
-		// in Java 11 we would use "Files.readString(Path)"
-		// we are on Java 8 and must use an alternative:
-		// we want to fail on invalid (non-utf8) input, thus we cannot use "new String(byte[], Charset)"
-		// we want to keep line ending information, thus we cannot use "BufferedReader#readLine()"-based approaches
-		// so we use this buffer approach with an explicit CharsetDecoder
-
-		byte[] bytes = Files.readAllBytes(filePath);
-		ByteBuffer bb = ByteBuffer.wrap(bytes);
-		CharBuffer cb = StandardCharsets.UTF_8.newDecoder().decode(bb);
-
-		// remove utf-8 byte order mark
-		if (cb.hasRemaining()) {
-			int pos = cb.position();
-			if (cb.get(pos) == 0xfeff) {
-				cb.position(pos + 1);
+		String content;
+		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+			final StringBuilder builder = new StringBuilder();
+			final char[] buffer = new char[1024];
+			int read;
+			while ((read = inputStreamReader.read(buffer)) >= 0) {
+				builder.append(String.valueOf(buffer, 0, read));
 			}
+			content = builder.toString();
+			inputStreamReader.close();
 		}
 
-		String content = cb.toString();
+		// remove utf-8 byte order mark
+		if (!content.isEmpty() && Character.codePointAt(content, 0) == 0xfeff) {
+			content = content.substring(1);
+		}
+
 		// TODO: remove this once line numbers are fixed
 		content = content.replace("\r\n", "\n");
 		return content;
+	}
+
+	public static String readFile(final Path filePath) throws IOException {
+		return readFile(filePath.toFile());
 	}
 
 	public static boolean isQuoted(final String string, final char quote) {
