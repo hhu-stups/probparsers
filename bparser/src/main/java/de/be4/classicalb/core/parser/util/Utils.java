@@ -194,10 +194,6 @@ public final class Utils {
 		}
 	}
 
-	public static String readFile(final String filePath) throws IOException {
-		return readFile(Paths.get(filePath));
-	}
-
 	public static String readFile(final File filePath) throws IOException {
 		return readFile(filePath.toPath());
 	}
