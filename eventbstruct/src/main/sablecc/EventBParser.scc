@@ -5,9 +5,9 @@ Package de.be4.eventb.core.parser;
  *******************************************************************/
 Helpers
   line_break = [10 + 13];
-  layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   all_chars = [0 .. 0xffff];
-  all_formula_chars = [[[[all_chars - layout_char] - line_break] - '@'] - '/'];
+  all_formula_chars = [[[all_chars - layout_char] - '@'] - '/'];
 
   unicode_letter =
     [[[0x0041..0x005a] + [0x0061..0x007a]] + [[0x00aa..0x00aa] + [0x00b5..0x00b5]]] |
@@ -136,7 +136,7 @@ Tokens
   {normal} identifier_literal = identifier;
   {label} label = label;
 
-  {normal, label -> formula, formula} white_space = line_break | layout_char+;
+  {normal, label -> formula, formula} white_space = layout_char+;
 
   {formula} formula = all_formula_chars+;
 
