@@ -68,9 +68,9 @@ public class StringTest {
 	@Test
 	public void testEscapedCarriageReturn() throws BCompoundException {
 		// ...those same characters in their escaped variants will not trigger normalization
-		final String testMachine = "MACHINE Test PROPERTIES '''a\\r\\nb\\rc\\nd''' = \"b\" END";
+		final String testMachine = "MACHINE Test PROPERTIES '''a\\r\\nb\\rc\\nd\r\\ne\\r\nf''' = \"b\" END";
 		String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertTrue(result.contains("string(none,'a\\15\\\\nb\\15\\c\\nd')"));
+		assertTrue(result.contains("string(none,'a\\15\\\\nb\\15\\c\\nd\\n\\ne\\15\\\\nf')"));
 	}
 
 	@Test
