@@ -221,10 +221,7 @@ public final class Utils {
 			builder.deleteCharAt(0);
 		}
 
-		String content = builder.toString();
-		// TODO: remove this once line numbers are fixed
-		content = content.replace("\r\n", "\n");
-		return content;
+		return builder.toString();
 	}
 
 	public static String readFile(final Path filePath) throws IOException {
