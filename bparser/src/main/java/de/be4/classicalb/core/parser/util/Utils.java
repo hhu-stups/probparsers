@@ -302,4 +302,14 @@ public final class Utils {
 		}
 		return sb.toString();
 	}
+
+	public static String unquotePragmaIdentifier(String text) {
+		if (isQuoted(text, '"')) {
+			return unescapeStringContents(removeSurroundingQuotes(text, '"'));
+		} else if (isQuoted(text, '`')) {
+			return unescapeStringContents(removeSurroundingQuotes(text, '`'));
+		}
+
+		return text;
+	}
 }
