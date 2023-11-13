@@ -1,8 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -69,7 +67,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 			// multiline strings do not have surrounding "
-		TStringLiteral tStringLiteral = new TStringLiteral(Utils.unescapeStringContents(text, true),
+		TStringLiteral tStringLiteral = new TStringLiteral(Utils.unescapeStringContents(text),
 				content.getLine(), content.getPos());
 		AStringExpression stringNode = new AStringExpression(tStringLiteral);
 		stringNode.setStartPos(node.getStartPos());

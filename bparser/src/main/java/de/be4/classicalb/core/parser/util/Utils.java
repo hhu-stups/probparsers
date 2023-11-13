@@ -236,18 +236,22 @@ public final class Utils {
 		return literal.substring(1, literal.length() - 1);
 	}
 
-	public static String unescapeStringContents(String contents) {
-		return unescapeStringContents(contents, false);
-	}
-
 	/**
-	 * Unescape the given string.
+	 * <p>
+	 * Unescape the contents of a string literal (single-line or multiline).
+	 * The string quotes must already be removed (e. g. using {@link #removeSurroundingQuotes(String, char)}).
+	 * </p>
+	 * <p>
+	 * In multiline strings,
+	 * unescaped newline sequences of the form CRLF ("\r\n") or CR ("\r") are normalized to LF ("\n")
+	 * to ensure consistent string values regardless of the newline style used by the source file.
+	 * Escaped newline characters written using the backslash escapes "\r" or "\n" are <em>not</em> normalized.
+	 * </p>
 	 *
-	 * @param contents             possibly escaped string contents
-	 * @param normalizeLineEndings This parameter controls whether sequences of "\r\n" and "\r" will be transformed to just a single "\n", used for compatibility with Windows.
-	 * @return unescaped and possibly normalized string
+	 * @param contents escaped string contents without surrounding quotes
+	 * @return unescaped and normalized string
 	 */
-	public static String unescapeStringContents(String contents, boolean normalizeLineEndings) {
+	public static String unescapeStringContents(String contents) {
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0, len = contents.length(); i < len; ) {
 			final char c = contents.charAt(i);
@@ -266,7 +270,7 @@ public final class Utils {
 				}
 				// Skip over backslash and the following character.
 				i += 2;
-			} else if (normalizeLineEndings && c == '\r') {
+			} else if (c == '\r') {
 				// This is "\r", apply normalization
 				sb.append('\n');
 				if (i + 1 < len && contents.charAt(i + 1) == '\n') {
