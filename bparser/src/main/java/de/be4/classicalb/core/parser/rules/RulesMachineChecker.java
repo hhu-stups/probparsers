@@ -27,64 +27,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
-import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AAssignSubstitution;
-import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
-import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AComputationOperation;
-import de.be4.classicalb.core.parser.node.AConcatExpression;
-import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.ADeferredSetSet;
-import de.be4.classicalb.core.parser.node.ADefineSubstitution;
-import de.be4.classicalb.core.parser.node.ADefinitionExpression;
-import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AForLoopSubstitution;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
-import de.be4.classicalb.core.parser.node.AFunctionOperation;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.AImplicationPredicate;
-import de.be4.classicalb.core.parser.node.AIntegerExpression;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
-import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AOperationAttribute;
-import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
-import de.be4.classicalb.core.parser.node.AOperatorExpression;
-import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.ARecEntry;
-import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
-import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.ARuleFailSubSubstitution;
-import de.be4.classicalb.core.parser.node.ARuleOperation;
-import de.be4.classicalb.core.parser.node.ASeesMachineClause;
-import de.be4.classicalb.core.parser.node.AStringExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
-import de.be4.classicalb.core.parser.node.AUsesMachineClause;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
-import de.be4.classicalb.core.parser.node.AWhileSubstitution;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.POperationAttribute;
-import de.be4.classicalb.core.parser.node.PPredicate;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 /*
@@ -1056,7 +999,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if ("READ_XML_FROM_STRING".equals(defName)) {
 			if (node.getParameters().size() != 1) {
 				errorList.add(new CheckException(
-						"The external function 'READ_XML_FROM_STRING' requires exactly one argrument.", node));
+						"The external function 'READ_XML_FROM_STRING' requires exactly one argument.", node));
 				return;
 			}
 			PExpression pExpression = node.getParameters().get(0);
@@ -1161,7 +1104,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public void addKnownIdentifier(PExpression expression) {
-			if (expression instanceof AIdentifierExpression) {
+			if (expression instanceof ADescriptionExpression) {
+				// expression with description pragma
+				this.addKnownIdentifier(((ADescriptionExpression) expression).getExpression());
+			} else if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
 				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
 				// the size of list is zero; this ensured by the grammar
