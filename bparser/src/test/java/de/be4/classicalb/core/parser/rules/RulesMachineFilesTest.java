@@ -304,4 +304,10 @@ public class RulesMachineFilesTest {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("replaces/VariableNotReplaced.rmch"));
 		assertTrue(e.getMessage().contains("COMP_comp1"));
 	}
+
+	@Test
+	public void testDescriptionPragma() throws BCompoundException {
+		String output = RulesUtil.getFileAsPrologTerm("project/Rule_42.rmch");
+		assertTrue(output.contains("the answer"));
+	}
 }
