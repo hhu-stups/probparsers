@@ -63,7 +63,7 @@ public final class ASTBuilder {
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
 		list.add(pExpression.clone());
-		return createPositinedNode(new ASetExtensionExpression(list), pos);
+		return createPositionedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
@@ -94,7 +94,7 @@ public final class ASTBuilder {
 		return new ASequenceSubstitution(subList);
 	}
 
-	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
+	public static <T extends PositionedNode> T createPositionedNode(T node, PositionedNode pos) {
 		node.setStartPos(pos.getStartPos());
 		node.setEndPos(pos.getEndPos());
 		return node;
