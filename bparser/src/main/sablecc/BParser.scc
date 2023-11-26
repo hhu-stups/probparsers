@@ -197,7 +197,10 @@ Tokens
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
-  {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
+  {normal} product = '*';
+  {normal} cartesian_product = 0x00d7 | // 215 decimal; used in rodin
+                               0x2217 | // 0x2217 = 8727 decimal; used in Camille in Rodin
+                               0x2a2f; // vector or cross product, used in IDP-Z3
   {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = '+';
   {normal} partial_function = '+' minus '>' | 0x21f8;
@@ -256,7 +259,8 @@ Tokens
   {normal} assertions = 'ASSERTIONS';
   {normal} be = 'BE';
   {normal} begin = 'BEGIN';
-  {normal} bool = 'BOOL';
+  {normal} bool = 'BOOL'
+               |  0x1d539; // BOOL B bool_set symbol, similar to NATURAL N or INTEGER Z symbol; used by IDP-Z3
   {normal} bfalse = 'bfalse' | 0x22A5; // falsity
   {normal} case = 'CASE';
   {normal} choice = 'CHOICE';
@@ -854,6 +858,7 @@ expression_p180 {-> expression} =
 // Priority 190:
 expression_p190 {-> expression} =
   {mul} [left]:expression_p190 product [right]:expression_p200 {-> New expression.mult_or_cart(left.expression, right.expression)} |
+  {mulcart} [left]:expression_p190 cartesian_product [right]:expression_p200 {-> New expression.cartesian_product(left.expression, right.expression)} |
   {div} [left]:expression_p190 division [right]:expression_p200 {-> New expression.div(left.expression, right.expression)} |
   {modulo} [left]:expression_p190 mod [right]:expression_p200 {-> New expression.modulo(left.expression, right.expression)} |
   {next_level} [expr]:expression_p200 {-> expr.expression};
