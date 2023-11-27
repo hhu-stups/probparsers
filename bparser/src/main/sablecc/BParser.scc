@@ -210,7 +210,7 @@ Tokens
   {normal} total_surjection = minus minus '>>' | 0x21a0;
   {normal} insert_start_sequence = minus '>' | 0x21fe;
   {normal} dot = '.' ; // Ascii dot
-  {normal} dot2 = '·' | 0x22c5 | 0x00b7 | '•'; // is the bullet, Option-8 on US keyboards
+  {normal} dot2 = '·' | 0x22c5 | '•'; // is the bullet, Option-8 on US keyboards
    // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
   {normal} interval = '..' | 0x2025;
   {normal} division = '/' | 0xf7;
