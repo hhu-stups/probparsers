@@ -197,9 +197,8 @@ Tokens
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
-  {normal} product = '*';
+  {normal} product = '*' | 0x2217; // Unicode asterisk operator; used in Camille in Rodin
   {normal} cartesian_product = 0x00d7 | // 215 decimal; used in rodin
-                               0x2217 | // 0x2217 = 8727 decimal; used in Camille in Rodin
                                0x2a2f; // vector or cross product, used in IDP-Z3
   {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = '+';
