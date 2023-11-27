@@ -49,6 +49,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		prio.put(AMinusOrSetSubtractExpression.class, 180);
 		prio.put(AAddExpression.class, 180);
 		prio.put(ASetSubtractionExpression.class, 180);
+		prio.put(ACartesianProductExpression.class, 190);
 		prio.put(AMultOrCartExpression.class, 190);
 		prio.put(AMultiplicationExpression.class, 190);
 		prio.put(ADivExpression.class, 190);
@@ -1004,6 +1005,11 @@ public class PrettyPrinter extends AnalysisAdapter {
 		leftParAssoc(node, node.getExpression());
 		node.getExpression().apply(this);
 		rightParAssoc(node, node.getExpression());
+	}
+
+	@Override
+	public void caseACartesianProductExpression(ACartesianProductExpression node) {
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), "×");
 	}
 
 	@Override
