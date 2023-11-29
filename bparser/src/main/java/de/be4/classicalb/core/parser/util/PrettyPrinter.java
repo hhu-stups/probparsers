@@ -841,6 +841,17 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseAPartitionPredicate(APartitionPredicate node) {
+		sb.append("@partition(");
+		node.getSet().apply(this);
+		if (!node.getElements().isEmpty()) {
+			sb.append(", ");
+			printCommaList(node.getElements());
+		}
+		sb.append(")");
+	}
+
+	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
 		node.getDefLiteral().apply(this);
 		printParameterList(node.getParameters());

@@ -215,6 +215,7 @@ Tokens
   {normal} interval = '..' | 0x2025;
   {normal} division = '/' | 0xf7;
   {normal} finite = '@finite'; // Event-B finite predicate (ProB-specific syntax)
+  {normal} partition = '@partition'; // Event-B partition predicate (ProB-specific syntax)
   {normal} not_belonging = '/:' | 0x2209;
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
@@ -773,6 +774,7 @@ predicate_atomic {-> predicate} =
   {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
   {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
   {finite} finite left_par [set]:expression_in_par right_par {-> New predicate.finite(set.expression)} |
+  {partition} partition left_par [set]:expression_top [elements]:expression_list_tail? right_par {-> New predicate.partition(set.expression, [elements.expression])} |
   {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
   | // check in typechecker: predicate must be an implication predicate
   {forall2} for_any [identifiers]:quantified_variables_list dot2 left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
@@ -1030,6 +1032,8 @@ if_elseif_expression {-> expression} =
 expression_list {-> expression*} =
   {single} [expression]:expression_top {-> [expression.expression]} |
   {multiple} [rest]:expression_list comma [last]:expression_top {-> [rest.expression, last.expression]};
+
+expression_list_tail {-> expression*} = comma expression_list {-> [expression_list.expression]};
 
 /*expression_list_in_par {-> expression*} =
   {single} [expression]:expression_in_par {-> [expression.expression]} |
