@@ -834,6 +834,13 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseAFinitePredicate(AFinitePredicate node) {
+		sb.append("@finite(");
+		node.getSet().apply(this);
+		sb.append(")");
+	}
+
+	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
 		node.getDefLiteral().apply(this);
 		printParameterList(node.getParameters());
@@ -1213,13 +1220,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAFin1SubsetExpression(final AFin1SubsetExpression node) {
 		sb.append("FIN1(");
-		node.getExpression().apply(this);
-		sb.append(")");
-	}
-
-	@Override
-	public void caseAFiniteExpression(AFiniteExpression node) {
-		sb.append("@finite(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
