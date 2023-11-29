@@ -214,7 +214,7 @@ Tokens
    // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
   {normal} interval = '..' | 0x2025;
   {normal} division = '/' | 0xf7;
-  {normal} finite = '@finite' | 0x2a0d; // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
+  {normal} finite = '@finite'; // Event-B finite predicate (ProB-specific syntax)
   {normal} not_belonging = '/:' | 0x2209;
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
