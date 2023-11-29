@@ -105,7 +105,7 @@ public class PrettyPrinterTest {
 			"POW1(A<->B)",
 			"FIN(A\\/B)",
 			"FIN1(B/\\A)",
-			"⨍(B/\\A)",
+			"@finite(B/\\A)",
 			"union(z)",
 			"inter(A)",
 			"id(A)",

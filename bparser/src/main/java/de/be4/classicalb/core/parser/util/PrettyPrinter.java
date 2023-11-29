@@ -1219,7 +1219,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAFiniteExpression(AFiniteExpression node) {
-		sb.append("⨍(");
+		sb.append("@finite(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
