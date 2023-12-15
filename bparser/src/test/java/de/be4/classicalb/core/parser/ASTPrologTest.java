@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -48,7 +49,9 @@ import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
+
 public class ASTPrologTest {
+	private static final List<PExpression> EMPTY_EXPRS = Collections.emptyList();
 	private static String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
 		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
@@ -290,12 +293,12 @@ public class ASTPrologTest {
 
 				new AIntegerSetExpression());
 
-		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"),
+		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"), EMPTY_EXPRS,
 				Arrays.asList(multi, single));
 
 		AFreetypesMachineClause clause = new AFreetypesMachineClause(Collections.singletonList(freetype));
 
-		checkAST(0, "freetypes($,[freetype($,'T',[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
+		checkAST(0, "freetypes($,[freetype($,'T',[],[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}
 
 }

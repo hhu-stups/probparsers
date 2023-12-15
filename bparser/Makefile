@@ -27,6 +27,9 @@ msgs:
 	gradle test --tests de.be4.classicalb.core.parser.ErrorMessagesTest  --info
 slnc:
 	gradle test --tests de.be4.classicalb.core.parser.StringLiteralNotClosedTest  --info
+ast:
+	gradle test --tests de.be4.classicalb.core.parser.ASTPrologTest  --info
+	gradle test --tests de.be4.classicalb.core.parser.CreateFreetypeTest  --info
 
 count:
 	@echo "Line count for Java files:"

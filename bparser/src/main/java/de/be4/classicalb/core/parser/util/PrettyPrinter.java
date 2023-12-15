@@ -587,6 +587,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAFreetype(AFreetype node) {
 		node.getName().apply(this);
+		printParameterList(node.getParameters());
 		sb.append(" = ");
 		printCommaList(node.getConstructors());
 	}

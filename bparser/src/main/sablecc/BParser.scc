@@ -697,8 +697,8 @@ freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_lis
 freetype_list {-> freetype*} =
   {single} [freetype]:freetype {-> [freetype.freetype]} |
   {multi} [rest]:freetype_list semicolon [freetype]:freetype {-> [rest.freetype, freetype.freetype]} ;
-freetype {-> freetype} = [name]:identifier_literal equal [cons_list]:freetypecons_list
-  {-> New freetype(name, [cons_list.freetype_constructor])};
+freetype {-> freetype} = [name]:identifier_literal [parameters]:def_parameters? equal [cons_list]:freetypecons_list
+  {-> New freetype(name, [parameters.expression], [cons_list.freetype_constructor])};
 freetypecons_list {-> freetype_constructor*} =
   {single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
   {multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]};
@@ -1282,7 +1282,7 @@ set =
   {enumerated_set} [identifier]:identifier_literal* [elements]:expression* |
   {enumerated_set_via_def} [identifier]:identifier_literal* [elements_def]:identifier_literal*;  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
 
-freetype = [name]:identifier_literal [constructors]:freetype_constructor+;
+freetype = [name]:identifier_literal  [parameters]:expression* [constructors]:freetype_constructor+;
 freetype_constructor =
   {constructor} [name]:identifier_literal [argument]:expression |
   {element} [name]:identifier_literal;

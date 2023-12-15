@@ -71,7 +71,7 @@ public class CreateFreetypeTest {
 		final String ftc1 = "constructor(none,myBool,bool_set(none))";
 		final String ftc2 = "constructor(none,myInt,int_set(none))";
 		final String ftc3 = "element(none,nothing)";
-		final String freetypeStr = "freetype(none,ft,[" + ftc1 + "," + ftc2
+		final String freetypeStr = "freetype(none,ft,[],[" + ftc1 + "," + ftc2
 				+ "," + ftc3 + "])";
 		final String expectedPart = "freetypes(none,[" + freetypeStr + "])";
 		Assert.assertTrue("Freetype contained", result.contains(expectedPart));
@@ -182,9 +182,10 @@ public class CreateFreetypeTest {
 				new TIdentifierLiteral(CONS_INT), new AIntSetExpression());
 		final AElementFreetypeConstructor cons3 = new AElementFreetypeConstructor(
 				new TIdentifierLiteral(CONS_EMPTY));
-		final AFreetype freetype = new AFreetype(new TIdentifierLiteral(
-				FREETYPE_NAME), Arrays.asList(cons1,
-				cons2, cons3));
+		final AFreetype freetype = new AFreetype(
+		        new TIdentifierLiteral(FREETYPE_NAME),
+				EMPTY_EXPRS,
+				Arrays.asList(cons1, cons2, cons3));
 		return new AFreetypesMachineClause(Collections.singletonList(freetype));
 	}
 

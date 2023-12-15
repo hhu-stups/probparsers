@@ -1052,6 +1052,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAFreetype(AFreetype node) {
 		open(node);
 		pout.printAtom(node.getName().getText());
+		printAsList(node.getParameters());
 		printAsList(node.getConstructors());
 		close(node);
 	}
