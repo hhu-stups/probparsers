@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -42,9 +41,6 @@ import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
 import de.be4.classicalb.core.parser.node.AUnionExpression;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PFreetype;
-import de.be4.classicalb.core.parser.node.PFreetypeConstructor;
-import de.be4.classicalb.core.parser.node.POperation;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -60,7 +56,6 @@ public class CreateFreetypeTest {
 	private static final String CONS_EMPTY = "nothing";
 	private static final String CONS_INT = "myInt";
 	private static final String CONS_BOOL = "myBool";
-	private static final List<PExpression> EMPTY_EXPRS = Collections.emptyList();
 
 	@Test
 	public void testManualFreetypeCreation() {
@@ -129,8 +124,7 @@ public class CreateFreetypeTest {
 				createAssignment(VAR_NAME, new AEmptySetExpression()));
 		final AOperationsMachineClause operations = createOperations();
 
-		final AMachineHeader header = new AMachineHeader(createIdLits(name),
-				EMPTY_EXPRS);
+		final AMachineHeader header = new AMachineHeader(createIdLits(name), Collections.emptyList());
 		final AAbstractMachineParseUnit machine = new AAbstractMachineParseUnit(
 				new AMachineMachineVariant(), header, Arrays.asList(freetypes,
 						variables, inv, init, operations));
@@ -157,7 +151,7 @@ public class CreateFreetypeTest {
 		final PSubstitution subst = new APreconditionSubstitution(pre,
 				createAssignment(VAR_NAME, new AUnionExpression(
 						createIdentifier(VAR_NAME), newVal)));
-		return new AOperation(EMPTY_EXPRS, createIdLits(name),
+		return new AOperation(Collections.emptyList(), createIdLits(name),
 				createIdentifiers(param), subst);
 	}
 
@@ -166,7 +160,7 @@ public class CreateFreetypeTest {
 				createIdentifiers(CONS_EMPTY));
 		final PSubstitution subst = createAssignment(VAR_NAME,
 				new AUnionExpression(createIdentifier(VAR_NAME), newVal));
-		return new AOperation(EMPTY_EXPRS, createIdLits(name), EMPTY_EXPRS,
+		return new AOperation(Collections.emptyList(), createIdLits(name), Collections.emptyList(),
 				subst);
 
 	}
@@ -184,7 +178,7 @@ public class CreateFreetypeTest {
 				new TIdentifierLiteral(CONS_EMPTY));
 		final AFreetype freetype = new AFreetype(
 		        new TIdentifierLiteral(FREETYPE_NAME),
-				EMPTY_EXPRS,
+				Collections.emptyList(),
 				Arrays.asList(cons1, cons2, cons3));
 		return new AFreetypesMachineClause(Collections.singletonList(freetype));
 	}
