@@ -177,7 +177,7 @@ public class CreateFreetypeTest {
 		final AElementFreetypeConstructor cons3 = new AElementFreetypeConstructor(
 				new TIdentifierLiteral(CONS_EMPTY));
 		final AFreetype freetype = new AFreetype(
-		        new TIdentifierLiteral(FREETYPE_NAME),
+				new TIdentifierLiteral(FREETYPE_NAME),
 				Collections.emptyList(),
 				Arrays.asList(cons1, cons2, cons3));
 		return new AFreetypesMachineClause(Collections.singletonList(freetype));

@@ -27,7 +27,7 @@ public class StringLiteralNotClosedTest {
 				+ "'%'''%*__abcdezABCZäîüß ab 12ab ==> <===> !@#$%^&*()(]{[||]};;; "
 				+ "== DEFINITIONS a=== MACHINE <<> ~`DEFINITIONS` ''  "
 				+ "12345678999911112334234234345236245634563456345635463465345634563456345346534563546 "
-			    + "END";
+				+ "END";
 		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		// System.out.println("Exception = " + e.getLocalizedMessage());
 		assertTrue(e.getLocalizedMessage(),e.getLocalizedMessage().contains("Unknown token:"));

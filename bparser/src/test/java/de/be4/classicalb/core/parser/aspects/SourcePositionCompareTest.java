@@ -15,7 +15,7 @@ public class SourcePositionCompareTest {
 		SourcePosition p3 = new SourcePosition(3, 1);
 		SourcePosition p4 = new SourcePosition(3, 11);
 
-        assertEquals(0, p1.compareTo(p1));
+		assertEquals(0, p1.compareTo(p1));
 		assertTrue(p1.compareTo(p2) < 0);
 		assertTrue(p2.compareTo(p1) > 0);
 		assertTrue(p1.compareTo(p3) < 0);
