@@ -237,13 +237,13 @@ public class CliBParser {
 			case "machineNameMustMatchFileName":
 				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
 				break;
-			case "defaultFileNumber":
+			case "defaultFileNumber":  // default in ParsingBehaviour.java: -1
 				behaviour.setDefaultFileNumber(Integer.parseInt(value));
 				break;
-			case "startLineNumber":
+			case "startLineNumber":  // default in ParsingBehaviour.java: 1
 				behaviour.setStartLineNumber(Integer.parseInt(value));
 				break;
-			case "startColumnNumber":
+			case "startColumnNumber": // default in ParsingBehaviour.java: 1
 				behaviour.setStartColumnNumber(Integer.parseInt(value));
 				break;
 			case "printstacksize":
@@ -254,6 +254,14 @@ public class CliBParser {
 				return false;
 		}
 		return true;
+	}
+	private static void resetVolatilePositionOptions(ParsingBehaviour behaviour) {
+	        // reset volatile options to default (usually after one parse command)
+	        // we typically never parse twice at the same location
+	        // and setting back these options after every formula parse adds a noticeable overhead
+	        // when many small formulas need to be parsed (e.g., for VisB JSON files)
+			behaviour.setStartLineNumber(1);
+			behaviour.setStartColumnNumber(1);
 	}
 	
 	private static void runPRepl(ParsingBehaviour behaviour) throws IOException {
@@ -372,6 +380,7 @@ public class CliBParser {
 				behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
 				break;
 			case machine:
+				resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
 				String filename = in.readLine();
 				Path outFile = Paths.get(in.readLine());
 				final File bfile = new File(filename);
@@ -396,6 +405,7 @@ public class CliBParser {
 			case substitution:
 				String theFormula = in.readLine();
 				parseFormula(command, theFormula, context, behaviour);
+				resetVolatilePositionOptions(behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -403,6 +413,7 @@ public class CliBParser {
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
+				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to LTL parser above
 
 				break;
 			case ctl:
@@ -410,6 +421,7 @@ public class CliBParser {
 				final ProBParserBase extParser2 = getExtensionParser(extension2, context);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
+				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
 				break;
 
 			case halt:
