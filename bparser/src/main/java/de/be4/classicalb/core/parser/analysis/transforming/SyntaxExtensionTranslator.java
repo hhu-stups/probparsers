@@ -74,17 +74,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		// Remove the surrounding quotes "..." from the string token content
 		// and process backslash escape sequences.
 		final String text = node.getText();
-
-		final String unescaped;
-		if (Utils.isQuoted(text, '"')) {
-			unescaped = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '"'));
-		} else {
-			// the grammar enforces "-quotes, so the AST was either already processed
-			// or was built by an external tool like LisB
-			// => do not unescape again
-			unescaped = text;
-		}
-
+		final String unescaped = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '"'));
 		node.replaceBy(new TStringLiteral(unescaped, node.getLine(), node.getPos()));
 	}
 
