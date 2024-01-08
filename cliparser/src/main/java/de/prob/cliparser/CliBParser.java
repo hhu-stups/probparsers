@@ -255,13 +255,14 @@ public class CliBParser {
 		}
 		return true;
 	}
+	
 	private static void resetVolatilePositionOptions(ParsingBehaviour behaviour) {
-	        // reset volatile options to default (usually after one parse command)
-	        // we typically never parse twice at the same location
-	        // and setting back these options after every formula parse adds a noticeable overhead
-	        // when many small formulas need to be parsed (e.g., for VisB JSON files)
-			behaviour.setStartLineNumber(1);
-			behaviour.setStartColumnNumber(1);
+		// reset volatile options to default (usually after one parse command)
+		// we typically never parse twice at the same location
+		// and setting back these options after every formula parse adds a noticeable overhead
+		// when many small formulas need to be parsed (e.g., for VisB JSON files)
+		behaviour.setStartLineNumber(1);
+		behaviour.setStartColumnNumber(1);
 	}
 	
 	private static void runPRepl(ParsingBehaviour behaviour) throws IOException {
