@@ -103,6 +103,7 @@ Helpers
   implementation = 'IMPLEMENTATION';
   imports = 'IMPORTS';
   extends = 'EXTENDS';
+  freetypes = 'FREETYPES';
   includes = 'INCLUDES';
   initialisation = 'INITIALISATION' | 'INITIALIZATION';
   invariant = 'INVARIANT';
@@ -173,6 +174,7 @@ Tokens
     concrete_variables | constants | constraints | implementation |
     imports | includes | initialisation | invariant | local_operations |
     operations | promotes | properties | refines | refinement | extends |
+    freetypes |
     sees | sets | uses | values | variables;
 
   {start -> normal, normal, definitions -> normal} end_machine = end;
