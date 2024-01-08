@@ -3,12 +3,9 @@ package de.be4.classicalb.core.parser.util;
 import de.be4.classicalb.core.parser.analysis.AnalysisAdapter;
 import de.be4.classicalb.core.parser.node.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PrettyPrinter extends AnalysisAdapter {
 	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
@@ -914,7 +911,14 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAMultilineStringExpression(AMultilineStringExpression node) {
-		throw new IllegalArgumentException("SyntaxExtensionTranslator should have rewritten this to AStringExpression");
+		sb.append("'''");
+		// we could do the same as for the AStringExpression,
+		// but it looks nicer when multi-line strings are actually multi-line
+		String text = Arrays.stream(node.getContent().getText().split("\n"))
+			              .map(Utils::escapeStringContents)
+			              .collect(Collectors.joining("\n"));
+		sb.append(text);
+		sb.append("'''");
 	}
 
 	@Override
@@ -939,7 +943,8 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
-		throw new IllegalArgumentException("SyntaxExtensionTranslator should have rewritten this to AIntegerExpression");
+		sb.append("0x");
+		sb.append(new BigInteger(node.getLiteral().getText()).toString(16));
 	}
 
 	@Override
