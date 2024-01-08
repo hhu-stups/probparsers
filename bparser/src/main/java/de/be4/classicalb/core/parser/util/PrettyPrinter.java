@@ -871,7 +871,13 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfPredicatePredicate(AIfPredicatePredicate node) {
-		throw new IllegalArgumentException("SyntaxExtensionTranslator should have rewritten this to implications");
+		sb.append("IF ");
+		node.getCondition().apply(this);
+		sb.append(" THEN ");
+		node.getThen().apply(this);
+		sb.append(" ELSE ");
+		node.getElse().apply(this);
+		sb.append(" END ");
 	}
 
 	@Override

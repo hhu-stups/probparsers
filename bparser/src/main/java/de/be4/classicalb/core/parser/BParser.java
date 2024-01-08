@@ -370,37 +370,43 @@ public class BParser {
 			lexer.setParseOptions(parseOptions);
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
+
 			final List<BException> bExceptionList = new ArrayList<>();
 
-			/*
-			 * Collect available definition declarations. Needs to be done now
-			 * cause they are needed by the following transformations.
-			 */
-			final DefinitionCollector collector = new DefinitionCollector(this.definitions);
-			collector.collectDefinitions(rootNode);
-			List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
-			for (CheckException checkException : definitionsCollectorExceptions) {
-				bExceptionList.add(new BException(machineFilePath, checkException));
+			if (parseOptions.isCollectDefinitions()) {
+				/*
+				 * Collect available definition declarations. Needs to be done now
+				 * because they are needed by the following transformations.
+				 */
+				final DefinitionCollector collector = new DefinitionCollector(this.definitions);
+				collector.collectDefinitions(rootNode);
+				List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
+				for (CheckException checkException : definitionsCollectorExceptions) {
+					bExceptionList.add(new BException(machineFilePath, checkException));
+				}
 			}
 
-			// perfom AST transformations that can't be done by SableCC
-			try {
-				applyAstTransformations(rootNode);
-			} catch (CheckException e) {
-				throw new BCompoundException(new BException(machineFilePath, e));
+			if (parseOptions.isApplyASTTransformations()) {
+				// perform AST transformations that can't be done by SableCC
+				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
+				for (CheckException checkException : checkExceptions) {
+					bExceptionList.add(new BException(machineFilePath, checkException));
+				}
 			}
 
-			// perform some semantic checks which are not done in the parser
-			List<CheckException> checkExceptions = performSemanticChecks(rootNode);
-			for (CheckException checkException : checkExceptions) {
-				bExceptionList.add(new BException(machineFilePath, checkException));
+			if (parseOptions.isApplySemanticChecks()) {
+				// perform some semantic checks which are not done in the parser
+				List<CheckException> checkExceptions = performSemanticChecks(rootNode);
+				for (CheckException checkException : checkExceptions) {
+					bExceptionList.add(new BException(machineFilePath, checkException));
+				}
 			}
+
 			if (!bExceptionList.isEmpty()) {
 				throw new BCompoundException(bExceptionList);
-
 			}
-			return rootNode;
 
+			return rootNode;
 		} catch (final BLexerException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final BParseException e) {
@@ -522,16 +528,25 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private void applyAstTransformations(final Start rootNode) throws CheckException {
+	private List<CheckException> applyAstTransformations(final Start rootNode) {
+		final List<CheckException> list = new ArrayList<>();
+
 		// default transformations
-		OpSubstitutions.transform(rootNode, getDefinitions());
+		try {
+			OpSubstitutions.transform(rootNode, getDefinitions());
+		} catch (CheckException e) {
+			list.add(e);
+		}
+
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
 		} catch (VisitorException e) {
-			throw e.getException();
+			list.add(e.getException());
 		}
+
 		// more AST transformations?
 
+		return list;
 	}
 
 	private List<CheckException> performSemanticChecks(final Start rootNode) {
