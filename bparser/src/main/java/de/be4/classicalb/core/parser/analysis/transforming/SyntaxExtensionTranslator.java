@@ -47,9 +47,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		// will be translated into
 		// (p => p2) & (not(p) => p3)
 		AImplicationPredicate imp1 = new AImplicationPredicate(node.getCondition().clone(), node.getThen().clone());
-		AImplicationPredicate imp2 = new AImplicationPredicate(
-			new ANegationPredicate(node.getCondition().clone()),
-			node.getElse().clone());
+		AImplicationPredicate imp2 = new AImplicationPredicate(new ANegationPredicate(node.getCondition().clone()), node.getElse().clone());
 		AConjunctPredicate con = new AConjunctPredicate(imp1, imp2);
 		con.setStartPos(node.getStartPos());
 		con.setEndPos(node.getEndPos());

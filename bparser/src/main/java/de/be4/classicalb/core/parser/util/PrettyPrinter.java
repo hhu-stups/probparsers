@@ -1,14 +1,14 @@
 package de.be4.classicalb.core.parser.util;
 
-import de.be4.classicalb.core.parser.analysis.AnalysisAdapter;
-import de.be4.classicalb.core.parser.node.*;
-
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import de.be4.classicalb.core.parser.analysis.AnalysisAdapter;
+import de.be4.classicalb.core.parser.node.*;
+
 public class PrettyPrinter extends AnalysisAdapter {
 	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
+
 	static {
 		final Map<Class<? extends Node>, Integer> prio = new HashMap<>();
 		prio.put(AParallelProductExpression.class, 20);
@@ -60,8 +60,8 @@ public class PrettyPrinter extends AnalysisAdapter {
 		OPERATOR_PRIORITIES = Collections.unmodifiableMap(prio);
 	}
 
-	private IIdentifierRenaming renaming;
 	private final StringBuilder sb = new StringBuilder();
+	private IIdentifierRenaming renaming;
 
 	public PrettyPrinter() {
 		this.renaming = IIdentifierRenaming.QUOTE_INVALID;
@@ -80,7 +80,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void printList(final List<? extends Node> list, final String separator) {
-		for (final Iterator<? extends Node> it = list.iterator(); it.hasNext();) {
+		for (final Iterator<? extends Node> it = list.iterator(); it.hasNext(); ) {
 			final Node node = it.next();
 			node.apply(this);
 			if (it.hasNext()) {
@@ -943,8 +943,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
-		sb.append("0x");
-		sb.append(new BigInteger(node.getLiteral().getText()).toString(16));
+		sb.append(node.getLiteral().getText());
 	}
 
 	@Override
@@ -1727,14 +1726,14 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseABtreeExpression(ABtreeExpression node) {
 		sb.append("btree(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAConstExpression(AConstExpression node) {
 		sb.append("const(");
@@ -1743,49 +1742,49 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression2().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseATopExpression(ATopExpression node) {
 		sb.append("top(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseASonsExpression(ASonsExpression node) {
 		sb.append("sons(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAPrefixExpression(APrefixExpression node) {
 		sb.append("prefix(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAPostfixExpression(APostfixExpression node) {
 		sb.append("postfix(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseASizetExpression(ASizetExpression node) {
 		sb.append("sizet(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAMirrorExpression(AMirrorExpression node) {
 		sb.append("mirror(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseARankExpression(ARankExpression node) {
 		sb.append("rank(");
@@ -1794,7 +1793,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression2().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAFatherExpression(AFatherExpression node) {
 		sb.append("father(");
@@ -1803,7 +1802,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression2().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseASonExpression(ASonExpression node) {
 		sb.append("son(");
@@ -1814,7 +1813,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression3().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseASubtreeExpression(ASubtreeExpression node) {
 		sb.append("subtree(");
@@ -1823,7 +1822,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression2().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAArityExpression(AArityExpression node) {
 		sb.append("arity(");
@@ -1832,7 +1831,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getExpression2().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseABinExpression(ABinExpression node) {
 		sb.append("bin(");
@@ -1848,28 +1847,28 @@ public class PrettyPrinter extends AnalysisAdapter {
 		}
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseALeftExpression(ALeftExpression node) {
 		sb.append("left(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseARightExpression(ARightExpression node) {
 		sb.append("right(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAInfixExpression(AInfixExpression node) {
 		sb.append("infix(");
 		node.getExpression().apply(this);
 		sb.append(")");
 	}
-	
+
 	@Override
 	public void caseAStructExpression(final AStructExpression node) {
 		sb.append("struct(");
