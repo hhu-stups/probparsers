@@ -915,8 +915,8 @@ public class PrettyPrinter extends AnalysisAdapter {
 		// we could do the same as for the AStringExpression,
 		// but it looks nicer when multi-line strings are actually multi-line
 		String text = Arrays.stream(node.getContent().getText().split("\n"))
-			              .map(Utils::escapeStringContents)
-			              .collect(Collectors.joining("\n"));
+			.map(Utils::escapeStringContents)
+			.collect(Collectors.joining("\n"));
 		sb.append(text);
 		sb.append("'''");
 	}
