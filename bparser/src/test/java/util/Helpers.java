@@ -46,6 +46,20 @@ public class Helpers {
 		return pp.getPrettyPrint();
 	}
 
+	public static String getPrettyPrintWithIndentation(final String testMachine) {
+		final BParser parser = new BParser("testcase");
+		Start startNode;
+		try {
+			startNode = parser.parseMachine(testMachine);
+		} catch (BCompoundException e) {
+			throw new RuntimeException(e);
+		}
+		PrettyPrinter pp = new PrettyPrinter();
+		pp.setUseIndentation(true);
+		startNode.apply(pp);
+		return pp.getPrettyPrint();
+	}
+
 	/**
 	 * Clean up line separators in a Prolog term string,
 	 * so that it can be compared more easily using {@link Assert#assertEquals(Object, Object)} and similar methods.

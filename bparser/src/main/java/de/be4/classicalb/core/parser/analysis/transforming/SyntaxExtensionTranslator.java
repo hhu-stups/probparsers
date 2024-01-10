@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
+
 	private static String cleanDescriptionText(final String descriptionText) {
 		String formatted = descriptionText;
 		if (descriptionText.endsWith("*/")) {
@@ -27,17 +28,15 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	}
 
 	private static void checkArgumentCount(final AFunctionExpression node, final int count) {
-		if (node.getParameters().size() != count) {
+		int paramCount = node.getParameters().size();
+		if (paramCount != count) {
 			final String funcName = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
-			throw new VisitorException(new CheckException("Built-in function " + funcName + " expects exactly " + count + " arguments, but got " + node.getParameters().size(), node));
+			throw new VisitorException(new CheckException("Built-in function " + funcName + " expects exactly " + count + " argument(s), but got " + paramCount, node));
 		}
 	}
 
 	private static PExpression checkSingleArgument(final AFunctionExpression node) {
-		if (node.getParameters().size() != 1) {
-			final String funcName = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
-			throw new VisitorException(new CheckException("Built-in function " + funcName + " expects exactly one argument, but got " + node.getParameters().size(), node));
-		}
+		checkArgumentCount(node, 1);
 		return node.getParameters().get(0);
 	}
 
@@ -55,7 +54,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	}
 
 	@Override
-	public void caseAMultilineStringExpression(AMultilineStringExpression node) {
+	public void outAMultilineStringExpression(AMultilineStringExpression node) {
 		final TMultilineStringContent content = node.getContent();
 		final String text = content.getText();
 		// multiline strings do not have surrounding "
@@ -73,7 +72,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		// and process backslash escape sequences.
 		final String text = node.getText();
 		final String unescaped = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '"'));
-		node.replaceBy(new TStringLiteral(unescaped, node.getLine(), node.getPos()));
+		node.setText(unescaped);
 	}
 
 	@Override
@@ -86,17 +85,17 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, node));
 			}
 			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
-			node.replaceBy(new TIdentifierLiteral(unescapedText, node.getLine(), node.getPos()));
+			node.setText(unescapedText);
 		}
 	}
 
 	@Override
-	public void caseAHexIntegerExpression(AHexIntegerExpression node) {
+	public void outAHexIntegerExpression(AHexIntegerExpression node) {
 		// transform hex_integer into integer case (so that Prolog AST does not have to deal with new node):
 		THexLiteral literal = node.getLiteral();
 		String text = literal.getText().substring(2);
-		//int value = Integer.valueOf(text, 16);
 		BigInteger value = new BigInteger(text, 16);
+
 		// generate an integer literal:
 		TIntegerLiteral tIntLiteral = new TIntegerLiteral(value.toString(), literal.getLine(), literal.getPos());
 		AIntegerExpression intNode = new AIntegerExpression(tIntLiteral);
@@ -131,15 +130,14 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	 * @param node the function expression to transform
 	 */
 	@Override
-	public void caseAFunctionExpression(final AFunctionExpression node) {
+	public void outAFunctionExpression(final AFunctionExpression node) {
 		if (!(node.getIdentifier() instanceof AIdentifierExpression)) {
-			super.caseAFunctionExpression(node);
 			return;
 		}
+
 		final String funcName = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
 		if (Utils.isQuoted(funcName, '`')) {
 			// Allow suppressing the built-in function by backquoting the function identifier.
-			super.caseAFunctionExpression(node);
 			return;
 		}
 
@@ -208,12 +206,13 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 				break;
 
 			case "bin":
-				if (node.getParameters().size() == 1) {
+				int paramCount = node.getParameters().size();
+				if (paramCount == 1) {
 					replacement = new ABinExpression(node.getParameters().get(0), null, null);
-				} else if (node.getParameters().size() == 3) {
+				} else if (paramCount == 3) {
 					replacement = new ABinExpression(node.getParameters().get(0), node.getParameters().get(1), node.getParameters().get(2));
 				} else {
-					throw new VisitorException(new CheckException("Built-in function " + funcName + " expects 1 or 3 arguments, but got " + node.getParameters().size(), node));
+					throw new VisitorException(new CheckException("Built-in function " + funcName + " expects 1 or 3 arguments, but got " + paramCount, node));
 				}
 				break;
 
@@ -230,13 +229,11 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 				break;
 
 			default:
-				super.caseAFunctionExpression(node);
 				return;
 		}
 
-		node.replaceBy(replacement);
 		replacement.setStartPos(node.getStartPos());
 		replacement.setEndPos(node.getEndPos());
-		replacement.apply(this);
+		node.replaceBy(replacement);
 	}
 }

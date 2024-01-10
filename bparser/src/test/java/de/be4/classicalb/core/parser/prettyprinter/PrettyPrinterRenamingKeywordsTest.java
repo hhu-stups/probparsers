@@ -51,7 +51,7 @@ public final class PrettyPrinterRenamingKeywordsTest {
 		Start ast = new BParser().parseExpression(this.expr);
 		PrettyPrinter pp = new PrettyPrinter();
 		ast.apply(pp);
-		
+
 		Start ast2 = new BParser().parseExpression(pp.getPrettyPrint());
 		PrettyPrinter pp2 = new PrettyPrinter();
 		ast2.apply(pp2);
@@ -67,7 +67,7 @@ public final class PrettyPrinterRenamingKeywordsTest {
 		pp.setRenaming(new SuffixIdentifierRenaming());
 		ast.apply(pp);
 		Assert.assertEquals(this.suffixedPP, pp.getPrettyPrint());
-		
+
 		Start ast2 = new BParser().parseExpression(pp.getPrettyPrint());
 		PrettyPrinter pp2 = new PrettyPrinter();
 		pp2.setRenaming(new SuffixIdentifierRenaming());
