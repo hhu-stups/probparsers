@@ -278,11 +278,18 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void applyLeftAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+		String[] lines = operatorStr.split("\n", -1);
+
 		this.leftParAssoc(node, left);
 		left.apply(this);
 		this.rightParAssoc(node, left);
 
-		this.print(operatorStr);
+		for (int i = 0; i < lines.length; i++) {
+			this.print(lines[i]);
+			if (i < lines.length - 1) {
+				this.printlnOpt();
+			}
+		}
 
 		this.leftPar(node, right);
 		right.apply(this);
@@ -290,11 +297,18 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void applyRightAssociative(final Node left, final Node node, final Node right, final String operatorStr) {
+		String[] lines = operatorStr.split("\n", -1);
+
 		this.leftPar(node, left);
 		left.apply(this);
 		this.rightPar(node, left);
 
-		this.print(operatorStr);
+		for (int i = 0; i < lines.length; i++) {
+			this.print(lines[i]);
+			if (i < lines.length - 1) {
+				this.printlnOpt();
+			}
+		}
 
 		this.leftParAssoc(node, right);
 		right.apply(this);
@@ -868,7 +882,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAConjunctPredicate(final AConjunctPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), " & ");
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " &\n");
 	}
 
 	@Override
@@ -879,7 +893,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseADisjunctPredicate(final ADisjunctPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), " or ");
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " or\n");
 	}
 
 	@Override
