@@ -984,24 +984,42 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
-		print("LET ");
+		indent();
+		printlnOpt("LET");
 		printCommaListCompact(node.getIdentifiers());
-		print(" BE ");
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("BE");
 		node.getAssignment().apply(this);
-		print(" IN ");
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("IN");
 		node.getPred().apply(this);
-		print(" END");
+		dedent();
+		printlnOpt();
+		print("END");
 	}
 
 	@Override
 	public void caseAIfPredicatePredicate(AIfPredicatePredicate node) {
-		print("IF ");
+		indent();
+		printlnOpt("IF");
 		node.getCondition().apply(this);
-		print(" THEN ");
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("THEN");
 		node.getThen().apply(this);
-		print(" ELSE ");
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("ELSE");
 		node.getElse().apply(this);
-		print(" END");
+		dedent();
+		printlnOpt();
+		print("END");
 	}
 
 	@Override
@@ -2194,10 +2212,13 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAVarSubstitution(AVarSubstitution node) {
-		print("VAR ");
-		printCommaListCompact(node.getIdentifiers());
 		indent();
-		printlnOpt(" IN ");
+		printlnOpt("VAR");
+		printCommaListCompact(node.getIdentifiers());
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("IN");
 		node.getSubstitution().apply(this);
 		dedent();
 		printlnOpt();
@@ -2377,14 +2398,6 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseTPragmaIdOrString(TPragmaIdOrString node) {
-		// Unlike regular TStringLiteral tokens,
-		// the quotes (if any) are kept in the token text,
-		// so we don't have to re-add them.
-		print(node.getText());
-	}
-
-	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
 		print(this.renaming.renameIdentifier(node.getText()));
 	}
@@ -2399,35 +2412,12 @@ public class PrettyPrinter extends AnalysisAdapter {
 		print(this.renaming.renameIdentifier(node.getText()));
 	}
 
-	// Rules DSL grammar extension keywords
-
-	@Override
-	public void caseTKwSubstitutionOperator(TKwSubstitutionOperator node) {
-		print(node.getText());
-	}
-
-	@Override
-	public void caseTKwPredicateOperator(TKwPredicateOperator node) {
-		print(node.getText());
-	}
-
-	@Override
-	public void caseTKwExpressionOperator(TKwExpressionOperator node) {
-		print(node.getText());
-	}
-
-	@Override
-	public void caseTKwPredicateAttribute(TKwPredicateAttribute node) {
-		print(node.getText());
-	}
-
-	@Override
-	public void caseTKwAttributeIdentifier(TKwAttributeIdentifier node) {
-		print(node.getText());
-	}
-
 	@Override
 	public void defaultCase(final Node node) {
-		throw new IllegalArgumentException("Node type not (yet) supported by PrettyPrinter: " + node.getClass());
+		if (node instanceof Token) {
+			print(((Token) node).getText());
+		} else {
+			throw new IllegalArgumentException("Node type '" + node.getClass().getSimpleName() + "' not (yet) supported by PrettyPrinter: " + node);
+		}
 	}
 }
