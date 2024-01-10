@@ -9,7 +9,7 @@ import de.be4.classicalb.core.parser.node.*;
 
 public class PrettyPrinter extends AnalysisAdapter {
 
-	private static final String INDENT = "    ";
+	private static final String DEFAULT_INDENT = "    ";
 	private static final Map<Class<? extends Node>, Integer> OPERATOR_PRIORITIES;
 
 	static {
@@ -64,22 +64,30 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private final StringBuilder sb = new StringBuilder();
-	private boolean useIndentation;
+	private String indent;
 	private IIdentifierRenaming renaming;
-	private int indent;
+	private int indentLevel;
 
 	public PrettyPrinter() {
-		this.useIndentation = false;
+		this.indent = null;
 		this.renaming = IIdentifierRenaming.QUOTE_INVALID;
-		this.indent = 0;
+		this.indentLevel = 0;
 	}
 
 	public boolean isUseIndentation() {
-		return useIndentation;
+		return this.indent != null && !this.indent.isEmpty();
 	}
 
 	public void setUseIndentation(boolean useIndentation) {
-		this.useIndentation = useIndentation;
+		this.setIndent(useIndentation ? DEFAULT_INDENT : null);
+	}
+
+	public String getIndent() {
+		return indent;
+	}
+
+	public void setIndent(String indent) {
+		this.indent = indent;
 	}
 
 	public IIdentifierRenaming getRenaming() {
@@ -94,26 +102,26 @@ public class PrettyPrinter extends AnalysisAdapter {
 		return sb.toString();
 	}
 
-	public int getIndent() {
-		return indent;
+	public int getIndentLevel() {
+		return indentLevel;
 	}
 
-	public void setIndent(int indent) {
-		this.indent = indent;
+	public void setIndentLevel(int indentLevel) {
+		this.indentLevel = indentLevel;
 	}
 
 	private void indent() {
-		this.indent++;
+		this.indentLevel++;
 	}
 
 	private void dedent() {
-		if (this.indent > 0) {
-			this.indent--;
+		if (this.indentLevel > 0) {
+			this.indentLevel--;
 		}
 	}
 
 	private void print(String s) {
-		if (this.indent > 0 && this.sb.length() == 0) {
+		if (this.indentLevel > 0 && this.sb.length() == 0) {
 			this.printIndent();
 		}
 
@@ -121,9 +129,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void printIndent() {
-		if (this.useIndentation) {
-			for (int i = 0; i < this.indent; i++) {
-				this.sb.append(INDENT);
+		if (this.isUseIndentation()) {
+			for (int i = 0; i < this.indentLevel; i++) {
+				this.sb.append(this.indent);
 			}
 		}
 	}
@@ -134,7 +142,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void printlnOpt() {
-		if (this.useIndentation) {
+		if (this.isUseIndentation()) {
 			this.print("\n");
 		} else {
 			this.print(" ");
@@ -152,12 +160,12 @@ public class PrettyPrinter extends AnalysisAdapter {
 		this.printlnOpt();
 	}
 
-	private void printListImpl(final Iterable<? extends Node> iterable, String separator, boolean opt) {
+	private void printListImpl(final Iterable<? extends Node> iterable, String separator, boolean trailing, boolean opt) {
 		String[] lines = separator.split("\n", -1);
 		for (final Iterator<? extends Node> it = iterable.iterator(); it.hasNext(); ) {
 			final Node node = it.next();
 			node.apply(this);
-			if (it.hasNext()) {
+			if (trailing || it.hasNext()) {
 				for (int i = 0; i < lines.length; i++) {
 					this.print(lines[i]);
 					if (i < lines.length - 1) {
@@ -173,23 +181,35 @@ public class PrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void printList(final Iterable<? extends Node> iterable, String separator) {
-		this.printListImpl(iterable, separator, false);
+		this.printListImpl(iterable, separator, false, false);
+	}
+
+	private void printListTrailing(final Iterable<? extends Node> iterable, String separator) {
+		this.printListImpl(iterable, separator, true, false);
 	}
 
 	private void printListOpt(final Iterable<? extends Node> iterable, String separator) {
-		this.printListImpl(iterable, separator, true);
+		this.printListImpl(iterable, separator, false, true);
 	}
 
-	private void printListCompact(final Iterable<? extends Node> iterable) {
-		this.printListOpt(iterable, "");
+	private void printListOptTrailing(final Iterable<? extends Node> iterable, String separator) {
+		this.printListImpl(iterable, separator, true, true);
 	}
 
 	private void printList(final Iterable<? extends Node> iterable) {
 		this.printListOpt(iterable, "\n");
 	}
 
+	private void printListTrailing(final Iterable<? extends Node> iterable) {
+		this.printListOptTrailing(iterable, "\n");
+	}
+
 	private void printListMultiLine(final Iterable<? extends Node> iterable) {
 		this.printList(iterable, "\n");
+	}
+
+	private void printListMultiLineTrailing(final Iterable<? extends Node> iterable) {
+		this.printListTrailing(iterable, "\n");
 	}
 
 	private void printDottedList(final Iterable<? extends Node> iterable) {
@@ -297,7 +317,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		print("/*@package ");
 		node.getPackage().apply(this);
 		println(" */");
-		printListCompact(node.getImports());
+		printListMultiLineTrailing(node.getImports());
 		node.getParseUnit().apply(this);
 	}
 
@@ -385,7 +405,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	public void caseAImportPackage(AImportPackage node) {
 		print("/*@import-package ");
 		node.getPackage().apply(this);
-		println(" */");
+		print(" */");
 	}
 
 	@Override
@@ -423,9 +443,8 @@ public class PrettyPrinter extends AnalysisAdapter {
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
 		indent();
 		printlnOpt("DEFINITIONS");
-		printSemicolonList(node.getDefinitions());
+		printSemicolonListMultiLine(node.getDefinitions());
 		dedent();
-		print(";");
 	}
 
 	@Override
@@ -767,8 +786,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getRuleName().apply(this);
 		indent();
 		printlnOpt();
-		printList(node.getAttributes());
-		printlnOpt();
+		printListTrailing(node.getAttributes());
 		indent();
 		printlnOpt("BODY");
 		node.getRuleBody().apply(this);
@@ -783,8 +801,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		indent();
 		printlnOpt();
-		printList(node.getAttributes());
-		printlnOpt();
+		printListTrailing(node.getAttributes());
 		indent();
 		printlnOpt("BODY");
 		node.getBody().apply(this);
@@ -802,8 +819,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 		printParameterList(node.getParameters());
 		indent();
 		printlnOpt();
-		printList(node.getAttributes());
-		printlnOpt();
+		printListTrailing(node.getAttributes());
 		indent();
 		printlnOpt("BODY");
 		node.getBody().apply(this);
@@ -984,13 +1000,10 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
-		indent();
-		printlnOpt("LET");
+		print("LET ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("BE");
+		printlnOpt(" BE");
 		node.getAssignment().apply(this);
 		dedent();
 		printlnOpt();
@@ -1004,13 +1017,10 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfPredicatePredicate(AIfPredicatePredicate node) {
+		print("IF ");
 		indent();
-		printlnOpt("IF");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThen().apply(this);
 		dedent();
 		printlnOpt();
@@ -1204,17 +1214,14 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfThenElseExpression(AIfThenElseExpression node) {
+		print("IF ");
 		indent();
-		printlnOpt("IF");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThen().apply(this);
 		dedent();
 		printlnOpt();
-		printListCompact(node.getElsifs());
+		printListTrailing(node.getElsifs());
 		indent();
 		printlnOpt("ELSE");
 		node.getElse().apply(this);
@@ -1225,27 +1232,20 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfElsifExprExpression(AIfElsifExprExpression node) {
+		print("ELSIF ");
 		indent();
-		printlnOpt("ELSIF");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThen().apply(this);
 		dedent();
-		printlnOpt();
 	}
 
 	@Override
 	public void caseALetExpressionExpression(final ALetExpressionExpression node) {
-		indent();
-		printlnOpt("LET");
+		print("LET ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("BE");
+		printlnOpt(" BE");
 		node.getAssignment().apply(this);
 		dedent();
 		printlnOpt();
@@ -1748,7 +1748,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASequenceExtensionExpression(final ASequenceExtensionExpression node) {
 		print("[");
-		printCommaList(node.getExpression());
+		printCommaListSingleLine(node.getExpression());
 		print("]");
 	}
 
@@ -2041,17 +2041,14 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfSubstitution(AIfSubstitution node) {
+		print("IF ");
 		indent();
-		printlnOpt("IF");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThen().apply(this);
 		dedent();
 		printlnOpt();
-		printListCompact(node.getElsifSubstitutions());
+		printListTrailing(node.getElsifSubstitutions());
 		if (node.getElse() != null) {
 			indent();
 			printlnOpt("ELSE");
@@ -2064,31 +2061,24 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAIfElsifSubstitution(AIfElsifSubstitution node) {
+		print("ELSIF ");
 		indent();
-		printlnOpt("ELSIF");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThenSubstitution().apply(this);
 		dedent();
-		printlnOpt();
 	}
 
 	@Override
 	public void caseASelectSubstitution(ASelectSubstitution node) {
+		print("SELECT ");
 		indent();
-		printlnOpt("SELECT");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getThen().apply(this);
 		dedent();
 		printlnOpt();
-		printListCompact(node.getWhenSubstitutions());
+		printListTrailing(node.getWhenSubstitutions());
 		if (node.getElse() != null) {
 			indent();
 			printlnOpt("ELSE");
@@ -2102,35 +2092,27 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASelectWhenSubstitution(ASelectWhenSubstitution node) {
 		indent();
-		printlnOpt("WHEN");
+		print("WHEN ");
 		node.getCondition().apply(this);
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getSubstitution().apply(this);
 		dedent();
-		printlnOpt();
 	}
 
 	@Override
 	public void caseACaseSubstitution(ACaseSubstitution node) {
+		print("CASE ");
 		indent();
-		printlnOpt("CASE");
 		node.getExpression().apply(this);
-		dedent();
-		printlnOpt();
+		printlnOpt(" OF");
+		print("EITHER ");
 		indent();
-		printlnOpt("OF EITHER");
 		printCommaListSingleLine(node.getEitherExpr());
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printlnOpt(" THEN");
 		node.getEitherSubst().apply(this);
 		dedent();
 		printlnOpt();
-		printListCompact(node.getOrSubstitutions());
+		printListTrailing(node.getOrSubstitutions());
 		if (node.getElse() != null) {
 			indent();
 			printlnOpt("ELSE");
@@ -2138,32 +2120,27 @@ public class PrettyPrinter extends AnalysisAdapter {
 			dedent();
 			printlnOpt();
 		}
-		print("END END");
+		dedent();
+		printlnOpt("END");
+		print("END");
 	}
 
 	@Override
 	public void caseACaseOrSubstitution(ACaseOrSubstitution node) {
+		print("OR ");
 		indent();
-		printlnOpt("OR");
-		printCommaList(node.getExpressions());
-		dedent();
-		printlnOpt();
-		indent();
-		printlnOpt("THEN");
+		printCommaListSingleLine(node.getExpressions());
+		printlnOpt(" THEN");
 		node.getSubstitution().apply(this);
 		dedent();
-		printlnOpt();
 	}
 
 	@Override
 	public void caseAAnySubstitution(AAnySubstitution node) {
-		indent();
-		printlnOpt("ANY");
+		print("ANY ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("WHERE");
+		printlnOpt(" WHERE");
 		node.getWhere().apply(this);
 		dedent();
 		printlnOpt();
@@ -2177,13 +2154,10 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
-		indent();
-		printlnOpt("LET");
+		print("LET ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("BE");
+		printlnOpt(" BE");
 		node.getPredicate().apply(this);
 		dedent();
 		printlnOpt();
@@ -2205,20 +2179,17 @@ public class PrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseABecomesSuchSubstitution(ABecomesSuchSubstitution node) {
 		printCommaListCompact(node.getIdentifiers());
-		print(" :(");
+		print(" : (");
 		node.getPredicate().apply(this);
 		print(")");
 	}
 
 	@Override
 	public void caseAVarSubstitution(AVarSubstitution node) {
-		indent();
-		printlnOpt("VAR");
+		print("VAR ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("IN");
+		printlnOpt(" IN");
 		node.getSubstitution().apply(this);
 		dedent();
 		printlnOpt();
@@ -2227,7 +2198,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseASequenceSubstitution(ASequenceSubstitution node) {
-		printListOpt(node.getSubstitutions(), "\n; ");
+		printListOpt(node.getSubstitutions(), " ;\n");
 	}
 
 	@Override
@@ -2278,7 +2249,7 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAParallelSubstitution(AParallelSubstitution node) {
-		printListOpt(node.getSubstitutions(), "\n|| ");
+		printListOpt(node.getSubstitutions(), " ||\n");
 	}
 
 	@Override
@@ -2289,10 +2260,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		indent();
-		printlnOpt("RULE_FORALL");
+		print("RULE_FORALL ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
+		indent();
 		printlnOpt();
 		indent();
 		printlnOpt("WHERE");
@@ -2313,16 +2283,16 @@ public class PrettyPrinter extends AnalysisAdapter {
 		printlnOpt("COUNTEREXAMPLE");
 		node.getMessage().apply(this);
 		dedent();
+		dedent();
 		printlnOpt();
 		print("END");
 	}
 
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
-		indent();
-		printlnOpt("RULE_FAIL");
+		print("RULE_FAIL ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
+		indent();
 		printlnOpt();
 		if (node.getWhen() != null) {
 			indent();
@@ -2340,19 +2310,17 @@ public class PrettyPrinter extends AnalysisAdapter {
 		printlnOpt("COUNTEREXAMPLE");
 		node.getMessage().apply(this);
 		dedent();
+		dedent();
 		printlnOpt();
 		print("END");
 	}
 
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
-		indent();
-		printlnOpt("FOR");
+		print("FOR ");
 		printCommaListCompact(node.getIdentifiers());
-		dedent();
-		printlnOpt();
 		indent();
-		printlnOpt("IN");
+		printlnOpt(" IN");
 		node.getSet().apply(this);
 		dedent();
 		printlnOpt();
@@ -2372,26 +2340,26 @@ public class PrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseADefineSubstitution(ADefineSubstitution node) {
-		indent();
-		printlnOpt("DEFINE");
+		print("DEFINE ");
 		node.getName().apply(this);
-		dedent();
+		indent();
 		printlnOpt();
 		indent();
-		printlnOpt("TYPE");
+		print("TYPE ");
 		node.getType().apply(this);
 		dedent();
 		printlnOpt();
 		if (node.getDummyValue() != null) {
 			indent();
-			printlnOpt("DUMMY_VALUE");
+			print("DUMMY_VALUE ");
 			node.getDummyValue().apply(this);
 			dedent();
 			printlnOpt();
 		}
 		indent();
-		printlnOpt("VALUE");
+		print("VALUE ");
 		node.getValue().apply(this);
+		dedent();
 		dedent();
 		printlnOpt();
 		print("END");

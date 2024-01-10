@@ -641,6 +641,7 @@ public class CliBParser {
 			debugPrint(parsingBehaviour, "Pretty printing " + bfile + " in B format:");
 			
 			PrettyPrinter pp = new PrettyPrinter();
+			pp.setUseIndentation(true);
 			tree.apply(pp);
 			System.out.println(pp.getPrettyPrint());
 		}

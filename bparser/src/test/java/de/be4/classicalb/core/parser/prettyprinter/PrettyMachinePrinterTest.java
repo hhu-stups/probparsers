@@ -41,8 +41,8 @@ public class PrettyMachinePrinterTest {
 			"    INVARIANT\n" +
 			"        x:INTEGER & y:INTEGER\n" +
 			"    INITIALISATION\n" +
-			"        x := 1\n" +
-			"        || y := 2\n" +
+			"        x := 1 ||\n" +
+			"        y := 2\n" +
 			"    OPERATIONS\n" +
 			"        foo =\n" +
 			"            skip;\n" +
