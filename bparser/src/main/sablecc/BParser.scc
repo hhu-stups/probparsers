@@ -785,11 +785,14 @@ predicate_atomic {-> predicate} =
   |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
   |
-  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
-    {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
+  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elseif_predicate* else [else_pred]:predicate_top end
+    {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, [elsifs.predicate], else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
   {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
+
+if_elseif_predicate {-> predicate} =
+  elsif [condition]:predicate_top then [pred]:predicate_top {-> New predicate.if_elsif_predicate(condition.predicate, pred.predicate)};
 
 /* Expressions */
 
@@ -1337,7 +1340,8 @@ predicate =
   {partition} [set]:expression [elements]:expression* | /* Event-B only predicate */
   {definition} [def_literal]:def_literal_predicate [parameters]:expression* |
   {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
-  {if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
+  {if_elsif_predicate} [condition]:predicate [then]:predicate |
+  {if_predicate} [condition]:predicate [then]:predicate [elsifs]:predicate* [else]:predicate |
   {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only predicate - theory plugin */
   {operator} [name]:kw_predicate_operator [identifiers]:expression*; // extension for rules
 

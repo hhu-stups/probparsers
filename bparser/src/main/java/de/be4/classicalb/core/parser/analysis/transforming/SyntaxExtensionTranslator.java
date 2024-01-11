@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -40,17 +42,34 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		return node.getParameters().get(0);
 	}
 
+	private PPredicate rewriteIfPredicate(PPredicate condition, PPredicate thenBlock, List<PPredicate> elsifs, PPredicate elseBlock) {
+		// IF P1 THEN P2 ELSIF P3 THEN P4 ... ELSE Pn END
+		// is equivalent to:
+		// IF P1 THEN P2 ELSE (IF P3 THEN P4 ... ELSE Pn END) END
+		// and that will be translated into:
+		// (P1 => P2) & (not(P1) => [(P3 => P4) & (not(P3) => Pn)])
+		AImplicationPredicate imp1 = new AImplicationPredicate(condition.clone(), thenBlock.clone());
+		imp1.setStartPos(condition.getStartPos());
+		imp1.setEndPos(thenBlock.getEndPos());
+
+		PPredicate realElseBlock;
+		if (elsifs.isEmpty()) {
+			realElseBlock = elseBlock.clone();
+		} else {
+			AIfElsifPredicatePredicate first = (AIfElsifPredicatePredicate) elsifs.remove(0);
+			realElseBlock = rewriteIfPredicate(first.getCondition(), first.getThen(), elsifs, elseBlock);
+		}
+
+		AImplicationPredicate imp2 = new AImplicationPredicate(new ANegationPredicate(condition.clone()), realElseBlock);
+		return new AConjunctPredicate(imp1, imp2);
+	}
+
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
-		// IF P THE P2 ELSE P3 END
-		// will be translated into
-		// (p => p2) & (not(p) => p3)
-		AImplicationPredicate imp1 = new AImplicationPredicate(node.getCondition().clone(), node.getThen().clone());
-		AImplicationPredicate imp2 = new AImplicationPredicate(new ANegationPredicate(node.getCondition().clone()), node.getElse().clone());
-		AConjunctPredicate con = new AConjunctPredicate(imp1, imp2);
-		con.setStartPos(node.getStartPos());
-		con.setEndPos(node.getEndPos());
-		node.replaceBy(con);
+		PPredicate result = rewriteIfPredicate(node.getCondition(), node.getThen(), new ArrayList<>(node.getElsifs()), node.getElse());
+		result.setStartPos(node.getStartPos());
+		result.setEndPos(node.getEndPos());
+		node.replaceBy(result);
 	}
 
 	@Override

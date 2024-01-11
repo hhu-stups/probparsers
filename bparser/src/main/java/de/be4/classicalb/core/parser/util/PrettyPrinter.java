@@ -1038,12 +1038,23 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getThen().apply(this);
 		dedent();
 		printlnOpt();
+		printListTrailing(node.getElsifs());
 		indent();
 		printlnOpt("ELSE");
 		node.getElse().apply(this);
 		dedent();
 		printlnOpt();
 		print("END");
+	}
+
+	@Override
+	public void caseAIfElsifPredicatePredicate(AIfElsifPredicatePredicate node) {
+		print("ELSIF ");
+		indent();
+		node.getCondition().apply(this);
+		printlnOpt(" THEN");
+		node.getThen().apply(this);
+		dedent();
 	}
 
 	@Override

@@ -395,6 +395,8 @@ public class PrettyPrinterTest {
 				"btrue",
 				"bfalse",
 				"IF mode=0 THEN value=1 ELSE value=2 END",
+				"IF mode=0 THEN value=1 ELSIF mode=1 THEN value=2 ELSE value=3 END",
+				"IF mode=0 THEN value=1 ELSIF mode=1 THEN value=2 ELSIF mode=2 THEN value=3 ELSE value=4 END",
 			};
 		}
 
@@ -415,6 +417,8 @@ public class PrettyPrinterTest {
 			return new Object[] {
 				"1=1",
 				"IF mode=0 THEN value=1 ELSE value=2 END",
+				"IF mode=0 THEN value=1 ELSIF mode=1 THEN value=2 ELSE value=3 END",
+				"IF mode=0 THEN value=1 ELSIF mode=1 THEN value=2 ELSIF mode=2 THEN value=3 ELSE value=4 END",
 			};
 		}
 
