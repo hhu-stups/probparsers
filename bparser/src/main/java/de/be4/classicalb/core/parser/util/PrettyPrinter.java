@@ -668,7 +668,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		print(" == ");
+		indent();
 		node.getRhs().apply(this);
+		dedent();
 	}
 
 	@Override
@@ -676,7 +678,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		print(" == ");
+		indent();
 		node.getRhs().apply(this);
+		dedent();
 	}
 
 	@Override
@@ -684,7 +688,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		print(" == ");
+		indent();
 		node.getRhs().apply(this);
+		dedent();
 	}
 
 	@Override
@@ -692,7 +698,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		print(" == ");
+		indent();
 		node.getRhs().apply(this);
+		dedent();
 	}
 
 	@Override
@@ -700,7 +708,9 @@ public class PrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterList(node.getParameters());
 		print(" == ");
+		indent();
 		node.getRhs().apply(this);
+		dedent();
 	}
 
 	@Override

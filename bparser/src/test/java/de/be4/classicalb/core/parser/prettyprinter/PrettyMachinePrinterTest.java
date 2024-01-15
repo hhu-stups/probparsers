@@ -40,8 +40,8 @@ public class PrettyMachinePrinterTest {
 			"SET_PREF_MAX_OPERATIONS == 100;\n" +
 			"SET_PREF_OPERATION_REUSE == \"full\";\n" +
 			"SET_PREF_COMPRESSION == \"true\";\n" +
-			"SET_PREF_SYMMETRY_MODE == \"hash\";\n" +
-			"GOAL == not(!honest_tid.(honest_tid:dom(threads) & thread_actions(honest_tid)=[] & Adversary/:ran(threads(honest_tid)'sub) => thread_memory(honest_tid)[{(initiator,Na),(responder,Nb)}[{threads(honest_tid)'role}]/\\{Na,Nb}]/\\adversary_knowledge={}));\n" +
+			"GENERATED_VARS == {(initiator,Na),(responder,Nb)};\n" +
+			"GOAL == not(!honest_tid.(honest_tid:dom(threads) & thread_actions(honest_tid)=[] & Adversary/:ran(threads(honest_tid)'sub) => thread_memory(honest_tid)[GENERATED_VARS[{threads(honest_tid)'role}]/\\{Na,Nb}]/\\adversary_knowledge={}));\n" +
 			"SETS STATE={Create,Run}; ROLE={initiator,responder}; ACTION={generate_2,send_1,send_3,receive_3,receive_2,send_2,receive_1,generate_1}; FRESH={Na,Nb}; AGENT={Adversary,Alice,Bob}\n" +
 			"FREETYPES\n" +
 			"TERM = PublicKey(AGENT), PrivateKey(AGENT), Enc(struct(key:TERM,term:TERM)), Seq(seq(TERM)), Fresh(NATURAL1)\n" +
