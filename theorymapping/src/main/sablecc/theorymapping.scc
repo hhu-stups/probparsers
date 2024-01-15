@@ -4,7 +4,10 @@ Package de.prob.core.theorymapping;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  space = ' ' | '\t' | 10 | 13;
+  lf = 10;
+  cr = 13;
+  space = ' ' | '\t' | lf | cr;
+  line_break = [lf + cr];
   underscore = '_';
 
   cbr_open = '{';
@@ -22,12 +25,14 @@ Helpers
   alpha = [['a'..'z'] + ['A'..'Z']];
   alphanum = [digit + alpha];
   dot = '.';
+  all_chars = [0 .. 0xffff];
 
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 Tokens
   white_space = space*;
+  line_comment = '//' [all_chars - line_break]* line_break?;
 
   keyword_op = 'operator';
   keyword_internal = 'internal';
@@ -44,7 +49,7 @@ Tokens
  * Ignored Tokens                                                  *
  *******************************************************************/
 Ignored Tokens
-  white_space;
+  white_space, line_comment;
 
 /*******************************************************************
  * Productions                                                     *
