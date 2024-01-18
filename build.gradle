@@ -3,7 +3,8 @@ plugins {
     // and only applied in the subprojects that actually need them.
     id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
     id("me.champeau.jmh").version("0.7.2").apply(false)
-    id("org.graalvm.buildtools.native").version("0.9.23").apply(false)
+    // the graalvm plugin 0.9.26+ is only compatible with Java 11+
+    id("org.graalvm.buildtools.native").version("0.9.25").apply(false)
 }
 
 apply plugin: 'java-library'
