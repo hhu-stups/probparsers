@@ -60,10 +60,10 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * </ul>
  */
 public class BException extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = -693107947667081359L;
 	private final String filename;
-	private final List<Location> locations = new ArrayList<>();
+	private final transient List<Location> locations = new ArrayList<>();
 
 	public BException(final String filename, final List<Location> locations, final String message, final Throwable cause) {
 		super(message, cause);
