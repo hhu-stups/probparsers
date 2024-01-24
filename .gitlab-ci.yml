@@ -38,6 +38,10 @@ tests:jdk-17:
   extends: .tests
   image: eclipse-temurin:17
 
+tests:jdk-21:
+  extends: .tests
+  image: eclipse-temurin:21
+
 tests:macos:
   extends: .tests
   before_script:
