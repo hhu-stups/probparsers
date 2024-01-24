@@ -1017,11 +1017,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					InputSource inputSource = new InputSource(new StringReader(text.trim()));
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					SAXParser saxParser = factory.newSAXParser();
-					Locale newLocale = new Locale("en", "GB");
 					// Surprisingly, we need both of the following two lines in
 					// order to obtain all error messages in English.
-					java.util.Locale.setDefault(newLocale);
-					saxParser.setProperty("http://apache.org/xml/properties/locale", newLocale);
+					Locale.setDefault(Locale.UK);
+					saxParser.setProperty("http://apache.org/xml/properties/locale", Locale.UK);
 					saxParser.parse(inputSource, new DefaultHandler());
 				} catch (SAXParseException e) {
 					final int line = content.getLine() + numberOfNewLines + e.getLineNumber() - 1;
