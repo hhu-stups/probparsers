@@ -1,17 +1,18 @@
 package de.be4.classicalb.core.parser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DefinitionTypes {
-
-	private final Map<String, Definitions.Type> types = new HashMap<>();
+	private final Map<String, Definitions.Type> types;
 
 	public DefinitionTypes() {
+		this(Collections.emptyMap());
 	}
 
 	public DefinitionTypes(final Map<String, Definitions.Type> newTypes) {
-		addAll(newTypes);
+		this.types = new HashMap<>(newTypes);
 	}
 
 	public void addTyping(final String definitionName,

@@ -27,7 +27,7 @@ import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 
-public class MachineInjector extends DepthFirstAdapter {
+public final class MachineInjector extends DepthFirstAdapter {
 	AAbstractMachineParseUnit abstractMachineParseUnit;
 	List<PMachineClause> clausesList;
 
