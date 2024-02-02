@@ -5,7 +5,7 @@ package de.prob.parser;
  * map. Its purpose is to allow it to implement easily a rewriting-strategy for
  * keys without working out all those details in all the {@link java.util.Map}.
  * <p>
- * The class {@link ISimplifiedROMap} provides a simple wrapper class to use a
+ * The class {@link SimplifiedROMap} provides a simple wrapper class to use a
  * {@link java.util.Map} as a {@link ISimplifiedROMap}.
  */
 public interface ISimplifiedROMap<K, V> {
