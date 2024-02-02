@@ -17,12 +17,11 @@ public class DropHaskellRegressionTests {
 
 	@Test
 	public void test() throws BCompoundException, IOException, PreParseException, URISyntaxException {
-		String name = "parsable/InfiniteParityFunction.mch";
-		BParser parser = new BParser(name);
-		parser.parseFile(new File(this.getClass().getClassLoader().getResource(name).toURI()));
+		BParser parser = new BParser();
+		parser.parseFile(new File(this.getClass().getResource("/parsable/InfiniteParityFunction.mch").toURI()));
 
 		String code = "not(finite({x|x>2}))";
-		BParser parser2 = new BParser(name);
+		BParser parser2 = new BParser();
 		
 		parser2.getDefinitions().addDefinitions(parser.getDefinitions());
 		Start parse = parser2.parseFormula(code);

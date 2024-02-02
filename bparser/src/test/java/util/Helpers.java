@@ -86,7 +86,7 @@ public class Helpers {
 	public static String parseFile(String filename, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
 		final File machineFile;
 		try {
-			machineFile = new File(Helpers.class.getClassLoader().getResource(filename).toURI());
+			machineFile = new File(Helpers.class.getResource("/" + filename).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

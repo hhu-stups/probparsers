@@ -74,7 +74,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testRulesMachineConfiguration() throws Exception {
-		File file = new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineConfigurationTest.rmch").toURI());
+		File file = new File(this.getClass().getResource("/rules/project/RulesMachineConfigurationTest.rmch").toURI());
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);

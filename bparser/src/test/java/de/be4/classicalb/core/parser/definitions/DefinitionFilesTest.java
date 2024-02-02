@@ -134,7 +134,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
 		File machine = new File(
-				this.getClass().getClassLoader().getResource("parsable/DefinitionFileTest.mch").toURI());
+				this.getClass().getResource("/parsable/DefinitionFileTest.mch").toURI());
 		parser.parseFile(machine);
 
 		final IDefinitions definitions = parser.getDefinitions();

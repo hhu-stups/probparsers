@@ -198,7 +198,7 @@ public class CreateFreetypeTest {
 	@Test
 	public void testFreetypeSyntax() throws IOException, BCompoundException, URISyntaxException {
 		final BParser parser = new BParser("FreetypeIntList");
-		final File file = new File(this.getClass().getClassLoader().getResource("FreetypeIntList.mch").toURI());
+		final File file = new File(this.getClass().getResource("/FreetypeIntList.mch").toURI());
 		parser.parseFile(file);
 	}
 }
