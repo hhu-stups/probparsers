@@ -1,8 +1,8 @@
 pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-    }
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+	}
 }
 
 include 'bparser', 'prologlib', 'parserbase', 'ltlparser', 'answerparser', 'unicode', 'cliparser', 'theorymapping', 'eventbstruct'

@@ -3,28 +3,28 @@ apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-    sableCC(rootProject.sableCCDependency)
-    api(rootProject.sableCCRuntimeDependency)
-    api project(":prologlib")
-    api project(":parserbase")
+	sableCC(rootProject.sableCCDependency)
+	api(rootProject.sableCCRuntimeDependency)
+	api project(":prologlib")
+	api project(":parserbase")
 }
 
 def readCurrentGitCommit() {
-    def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
-    def exitCode = proc.waitFor()
-    if (exitCode != 0) {
-        throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-    }
-    return proc.in.readLines()[0]
+	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+	def exitCode = proc.waitFor()
+	if (exitCode != 0) {
+		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+	}
+	return proc.in.readLines()[0]
 }
 
 final currentGitCommit = readCurrentGitCommit()
 processResources {
-    inputs.property("project.version", project.version)
-    inputs.property("currentGitCommit", currentGitCommit)
-    filesMatching("de/be4/classicalb/core/parser/build.properties") {
-        expand(version: project.version, git: currentGitCommit)
-    }
+	inputs.property("project.version", project.version)
+	inputs.property("currentGitCommit", currentGitCommit)
+	filesMatching("de/be4/classicalb/core/parser/build.properties") {
+		expand(version: project.version, git: currentGitCommit)
+	}
 }
 
 rootProject.setupTestReport(project, ["de.be4.classicalb.core.parser", "de.be4.classicalb.core.preparser"])

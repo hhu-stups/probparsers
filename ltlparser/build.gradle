@@ -3,10 +3,10 @@ apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-    sableCC(rootProject.sableCCDependency)
-    api(rootProject.sableCCRuntimeDependency)
-    api project(":prologlib")
-    api project(":parserbase")
+	sableCC(rootProject.sableCCDependency)
+	api(rootProject.sableCCRuntimeDependency)
+	api project(":prologlib")
+	api project(":parserbase")
 }
 
 rootProject.setupTestReport(project, ["de.be4.ltl.core.ctlparser", "de.be4.ltl.core.parser"])

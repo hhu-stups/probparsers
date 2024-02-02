@@ -1,10 +1,10 @@
 plugins {
-    // The plugins are declared as .apply(false) here
-    // and only applied in the subprojects that actually need them.
-    id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
-    id("me.champeau.jmh").version("0.7.2").apply(false)
-    // the graalvm plugin 0.9.26+ is only compatible with Java 11+
-    id("org.graalvm.buildtools.native").version("0.9.25").apply(false)
+	// The plugins are declared as .apply(false) here
+	// and only applied in the subprojects that actually need them.
+	id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
+	id("me.champeau.jmh").version("0.7.2").apply(false)
+	// the graalvm plugin 0.9.26+ is only compatible with Java 11+
+	id("org.graalvm.buildtools.native").version("0.9.25").apply(false)
 }
 
 apply plugin: 'java-library'
@@ -20,170 +20,171 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 final SOURCE_ENCODING = "UTF-8"
 
 ext {
-    sableCCVersion = '3.7.0-SNAPSHOT'
-    sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
-    sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
+	sableCCVersion = '3.7.0-SNAPSHOT'
+	sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
+	sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
 
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
-    apply plugin: 'org.graalvm.buildtools.native'
+	apply plugin: 'java'
+	apply plugin: 'maven-publish'
+	apply plugin: 'signing'
+	apply plugin: 'org.graalvm.buildtools.native'
 
-    graalvmNative {
-        binaries{
-            all {
-                resources.autodetect()
-                // see https://build-native-java-apps.cc/expert-options/21/
-                // the stack size must be given in bytes
-                //override at runtime with -XX:StackSize=... 
-                buildArgs.add('-R:StackSize=8388608')
-            }
-        }
-        
-        toolchainDetection = false
-    }
+	graalvmNative {
+		binaries {
+			all {
+				resources.autodetect()
+				// see https://build-native-java-apps.cc/expert-options/21/
+				// the stack size must be given in bytes
+				//override at runtime with -XX:StackSize=...
+				buildArgs.add('-R:StackSize=8388608')
+			}
+		}
 
-    group = rootProject.group
-    version = rootProject.version
-    
-    repositories {
-        mavenCentral()
-        if (isSnapshot) {
-            maven {
-                name "snapshots"
-                url "https://oss.sonatype.org/content/repositories/snapshots/"
-            }
-        }
-    }
-    
-    tasks.withType(JavaCompile) {
-        options.encoding = SOURCE_ENCODING
-    }
-    
-    tasks.withType(Javadoc) {
-        options.encoding = SOURCE_ENCODING
-    }
+		toolchainDetection = false
+	}
 
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
+	group = rootProject.group
+	version = rootProject.version
 
-    dependencies {
-        testImplementation platform('org.junit:junit-bom:5.10.1')
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
-        testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
-        testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
-        testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-    }
+	repositories {
+		mavenCentral()
+		if (isSnapshot) {
+			maven {
+				name "snapshots"
+				url "https://oss.sonatype.org/content/repositories/snapshots/"
+			}
+		}
+	}
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+	tasks.withType(JavaCompile) {
+		options.encoding = SOURCE_ENCODING
+	}
 
-        withSourcesJar()
-        withJavadocJar()
-    }
+	tasks.withType(Javadoc) {
+		options.encoding = SOURCE_ENCODING
+	}
 
-    tasks.named('test', Test) {
-        useJUnitPlatform()
-    }
+	configurations.all {
+		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	}
 
-    javadoc {
-        options {
-            // silence warnings on missing javadoc
-            addBooleanOption('Xdoclint:all,-missing', true)
-        }
-    }
+	dependencies {
+		testImplementation platform('org.junit:junit-bom:5.10.1')
+		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
+		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
+		testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
+		testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
+	}
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
+	java {
+		sourceCompatibility = JavaVersion.VERSION_1_8
+		targetCompatibility = JavaVersion.VERSION_1_8
 
-                pom {
-                    name = project.name
-                    description = 'Part of the ProB Parser library'
-                    url = 'https://github.com/bendisposto/probparsers'
+		withSourcesJar()
+		withJavadocJar()
+	}
 
-                    licenses {
-                        license {
-                            name = 'Eclipse Public License, Version 1.0'
-                            url = 'http://www.eclipse.org/org/documents/epl-v10.html'
-                        }
-                    }
+	tasks.named('test', Test) {
+		useJUnitPlatform()
+	}
 
-                    scm {
-                        connection = 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
-                        developerConnection = 'scm:git:git@github.com:hhu-stups/probparsers.git'
-                        url = 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
-                    }
+	javadoc {
+		options {
+			// silence warnings on missing javadoc
+			addBooleanOption('Xdoclint:all,-missing', true)
+		}
+	}
 
-                    developers {
-                        developer {
-                            id = 'bendisposto'
-                            name = 'Jens Bendisposto'
-                            email = 'jens@bendisposto.de'
-                        }
-                        developer {
-                            id = 'leuschel'
-                            name = 'Michael Leuschel'
-                            email = 'leuschel@hhu.de'
-                        }
-                    }
-                }
-            }
-        }
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
 
-        repositories {
-            maven {
-                final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-                final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-                url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
-                if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-                    credentials {
-                        username project.ossrhUsername
-                        password project.ossrhPassword
-                    }
-                }
-            }
-        }
-    }
+				pom {
+					name = project.name
+					description = 'Part of the ProB Parser library'
+					url = 'https://github.com/bendisposto/probparsers'
 
-    ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+					licenses {
+						license {
+							name = 'Eclipse Public License, Version 1.0'
+							url = 'http://www.eclipse.org/org/documents/epl-v10.html'
+						}
+					}
 
-    signing {
-        sign publishing.publications.mavenJava
-    }
+					scm {
+						connection = 'scm:git:git://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers.git'
+						developerConnection = 'scm:git:git@github.com:hhu-stups/probparsers.git'
+						url = 'https://gitlab.cs.uni-duesseldorf.de/stups/prob/probparsers'
+					}
+
+					developers {
+						developer {
+							id = 'bendisposto'
+							name = 'Jens Bendisposto'
+							email = 'jens@bendisposto.de'
+						}
+						developer {
+							id = 'leuschel'
+							name = 'Michael Leuschel'
+							email = 'leuschel@hhu.de'
+						}
+					}
+				}
+			}
+		}
+
+		repositories {
+			maven {
+				final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+				final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+				url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+				if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+					credentials {
+						username project.ossrhUsername
+						password project.ossrhPassword
+					}
+				}
+			}
+		}
+	}
+
+	ext."signing.secretKeyRingFile" = rootProject.file("secring.gpg").absolutePath
+
+	signing {
+		sign publishing.publications.mavenJava
+	}
 }
 
 ext {
-    // This closure is called in each subproject that wants test reports generated.
-    setupTestReport = {Project subproject, List<String> sableCCPackageNames -> void
-        final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
-        jacocoTestReportTask.configure {JacocoReport task ->
-            task.reports {
-                xml.required = false
-                csv.required = false
-                html.outputLocation = subproject.layout.buildDirectory.dir('jacocoHtml')
-            }
-            
-            task.classDirectories.from = task.classDirectories.from.collect {
-                final exclusions = ["**/de/hhu/stups/sablecc/patch/**"]
-                sableCCPackageNames.each {packageName ->
-                    final packagePath = packageName.replace(".", "/")
-                    exclusions.addAll([
-                        "**/${packagePath}/analysis/**",
-                        "**/${packagePath}/lexer/**",
-                        "**/${packagePath}/node/**",
-                        "**/${packagePath}/parser/**",
-                    ])
-                }
-                it.asFileTree.matching {
-                    exclude(exclusions)
-                }
-            }
-        }
-    }
+	// This closure is called in each subproject that wants test reports generated.
+	setupTestReport = { Project subproject, List<String> sableCCPackageNames ->
+		void
+		final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
+		jacocoTestReportTask.configure { JacocoReport task ->
+			task.reports {
+				xml.required = false
+				csv.required = false
+				html.outputLocation = subproject.layout.buildDirectory.dir('jacocoHtml')
+			}
+
+			task.classDirectories.from = task.classDirectories.from.collect {
+				final exclusions = ["**/de/hhu/stups/sablecc/patch/**"]
+				sableCCPackageNames.each { packageName ->
+					final packagePath = packageName.replace(".", "/")
+					exclusions.addAll([
+						"**/${packagePath}/analysis/**",
+						"**/${packagePath}/lexer/**",
+						"**/${packagePath}/node/**",
+						"**/${packagePath}/parser/**",
+					])
+				}
+				it.asFileTree.matching {
+					exclude(exclusions)
+				}
+			}
+		}
+	}
 }
