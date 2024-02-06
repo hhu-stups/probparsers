@@ -666,6 +666,9 @@ operation_list {-> operation*} =
   {missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 operation {-> operation} =
+  {description} [operation]:operation pragma_description [content]:pragma_free_text {-> New operation.description(content,operation)}
+  // this allows description pragmas at the very end of an operation, not before the equal (=) sign
+  |
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)}
     // Note: operation names can be composed identifiers within refinements, see section 7.23 in Atelier-B handbook
@@ -678,7 +681,8 @@ operation {-> operation} =
   {rule_operation} kw_rule [rule_name]:identifier_literal [attributes]:operation_attribute_list? kw_body [operation_body]:substitution_l0 end
     {-> New operation.rule(rule_name, [attributes.operation_attribute], operation_body.substitution)} |
   {computation} kw_computation [name]:identifier_literal [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
-    {-> New operation.computation(name, [attributes.operation_attribute], body.substitution)} |
+    {-> New operation.computation(name, [attributes.operation_attribute], body.substitution)}
+     |
   {function} kw_function [return_values]:operation_return_values [name]:identifier_literal [parameters]:op_params? [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
     {-> New operation.function([return_values.expression], name, [parameters.expression], [attributes.operation_attribute], body.substitution)};
 
@@ -1295,6 +1299,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
+  {description} [content]:pragma_free_text [operation]:operation |
   {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |
   {rule} [rule_name]:identifier_literal [attributes]:operation_attribute* [rule_body]:substitution |
   {computation} [name]:identifier_literal [attributes]:operation_attribute* [body]:substitution |

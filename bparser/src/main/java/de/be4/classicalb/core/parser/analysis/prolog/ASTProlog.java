@@ -32,8 +32,10 @@ public class ASTProlog extends DepthFirstAdapter {
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
-			"machine_header", "machine_reference", "operation", "refined_operation", "rec_entry", "values_entry", "witness", "unit"));
+	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
+	        "description_operation", "event", "freetype",
+			"machine_header", "machine_reference", "operation",
+			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
 	// the simpleFormats are mappings from node classes to prolog functor representing them
 	private final Map<Class<? extends Node>, String> simpleFormats = new HashMap<>();
