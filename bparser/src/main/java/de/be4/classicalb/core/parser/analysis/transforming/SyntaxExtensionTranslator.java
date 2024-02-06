@@ -138,6 +138,11 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		cleanDescriptionNode(node.getContent());
 	}
 
+	@Override
+	public void inADescriptionOperation(final ADescriptionOperation node) {
+		cleanDescriptionNode(node.getContent());
+	}
+
 	/**
 	 * Recognize calls to built-in functions that are not declared as keywords.
 	 * This allows using the keywords as regular identifiers
