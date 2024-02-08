@@ -33,6 +33,7 @@ public class ASTProlog extends DepthFirstAdapter {
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
+			"description_event", // for ADescriptionEvent
 			"description_operation", "event", "freetype",
 			"machine_header", "machine_reference", "operation",
 			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
