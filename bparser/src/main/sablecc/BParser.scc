@@ -1309,7 +1309,11 @@ operation_attribute =
   [name]: kw_attribute_identifier [arguments]:expression* |
   {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate;
 
-event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
+event =
+  [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal*
+    [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*
+  |
+  {description} [content]:pragma_free_text [event]:event;
 witness = [name]:identifier_literal [predicate]:predicate;
 
 eventstatus = {ordinary} | {anticipated} | {convergent};
