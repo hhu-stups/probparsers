@@ -190,18 +190,18 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() {
-	    // TODO: check if we need to do this for multiline templates as well
+		// TODO: check if we need to do this for multiline templates as well
 		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
 		} else if (token instanceof TMultilineStringEnd) {
 			if (previousState == null) {
-			   System.out.println("Unexpected end of multiline string or template " + token);
-			   // TODO: throw exception
+				System.out.println("Unexpected end of multiline string or template " + token);
+				// TODO: throw exception
 			} else {
-			   state = previousState;
-			   previousState = null;
+				state = previousState;
+				previousState = null;
 			}
 		}
 	}
