@@ -100,8 +100,12 @@ Helpers
   all_chars_without_newline = [all_chars - line_break];
   string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
-  all_chars_without_single_quote = [all_chars - 39];
-  multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
+  all_chars_without_single_quote = [all_chars - 39];  // 39 is the single quote char
+  multiline_string_literal = (all_chars_without_single_quote |
+                              39 all_chars_without_single_quote |  // single quote does not end string
+                              39 39 all_chars_without_single_quote | // double quote does not end string
+                               '\' 39 // escaped quote also does not count towards end
+                               )*;
 
   // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
