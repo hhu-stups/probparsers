@@ -174,6 +174,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseTMultilineTemplateContent(TMultilineTemplateContent node) {
+		pout.printAtom(node.getText());
+	}
+
+	@Override
 	public void caseTStringLiteral(TStringLiteral node) {
 		String text = node.getText();
 		pout.printAtom(text);
