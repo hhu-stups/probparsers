@@ -172,8 +172,8 @@ Tokens
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
   {multiline_string} multiline_string_content = multiline_string_literal;
 
-  {normal->multiline_template} multiline_template_start = '```';
-  {multiline_template->normal} multiline_template_end = '```';
+  {start->normal, normal, definitions_rhs} multiline_template_start = '```';
+  {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
   {multiline_template} multiline_template_content = multiline_template_literal;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
