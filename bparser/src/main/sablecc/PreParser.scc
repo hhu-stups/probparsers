@@ -6,7 +6,6 @@ Package de.be4.classicalb.core.preparser;
 Helpers
   triple_quote = 39 39 39;
   single_quote = 39;
-  triple_back_quote = '```';
 
   lf = 10;
   cr = 13;
@@ -91,11 +90,11 @@ Helpers
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
 
-  all_chars_without_single_back_quote = [all_chars - 96];  // 96 is the single back quote char `
+  all_chars_without_single_back_quote = [all_chars - '`'];
   multiline_template_literal = (all_chars_without_single_back_quote |
-                              96 all_chars_without_single_back_quote |  // single quote does not end string
-                              96 96 all_chars_without_single_back_quote | // double quote does not end string
-                               '\' 96 // escaped quote also does not count towards end
+                              '`' all_chars_without_single_back_quote |  // single quote does not end string
+                              '``' all_chars_without_single_back_quote | // double quote does not end string
+                               '\`' // escaped quote also does not count towards end
                                )*;
 
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
@@ -173,8 +172,8 @@ Tokens
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
   {multiline_string} multiline_string_content = multiline_string_literal;
 
-  {normal->multiline_template} multiline_template_start = triple_back_quote;
-  {multiline_template->normal} multiline_template_end = triple_back_quote;
+  {normal->multiline_template} multiline_template_start = '```';
+  {multiline_template->normal} multiline_template_end = '```';
   {multiline_template} multiline_template_content = multiline_template_literal;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
