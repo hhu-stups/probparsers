@@ -15,8 +15,6 @@ Helpers
   triple_quote = 39 39 39;
   single_quote = 39;
 
-  triple_back_quote = '```';
-
   minus = '-' | 0x2212;
 
   small_letter = ['a'..'z'];
@@ -109,11 +107,11 @@ Helpers
                                '\' 39 // escaped quote also does not count towards end
                                )*;
 
-  all_chars_without_single_back_quote = [all_chars - 96];  // 96 is the single back quote char `
+  all_chars_without_single_back_quote = [all_chars - '`'];
   multiline_template_literal = (all_chars_without_single_back_quote |
-                              96 all_chars_without_single_back_quote |  // single quote does not end string
-                              96 96 all_chars_without_single_back_quote | // double quote does not end string
-                               '\' 96 // escaped quote also does not count towards end
+                              '`' all_chars_without_single_back_quote |  // single quote does not end string
+                              '``' all_chars_without_single_back_quote | // double quote does not end string
+                               '\`' // escaped quote also does not count towards end
                                )*;
 
   // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
@@ -202,8 +200,8 @@ Tokens
   {multiline_string->normal} multiline_string_end = triple_quote;
   {multiline_string} multiline_string_content = multiline_string_literal;
 
-  {normal->multiline_template} multiline_template_start = triple_back_quote;
-  {multiline_template->normal} multiline_template_end = triple_back_quote;
+  {normal->multiline_template} multiline_template_start = '```';
+  {multiline_template->normal} multiline_template_end = '```';
   {multiline_template} multiline_template_content = multiline_template_literal;
 
   {normal} string_literal = string_literal;
