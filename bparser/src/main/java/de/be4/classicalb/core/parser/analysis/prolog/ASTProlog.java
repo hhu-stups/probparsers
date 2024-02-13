@@ -170,7 +170,12 @@ public class ASTProlog extends DepthFirstAdapter {
 	 */
 	@Override
 	public void defaultCase(final Node node) {
-		pout.printAtom(node.toString().trim());
+		// All non-terminal cases have default implementations in DepthFirstAdapter.
+		// Their default handling happens in defaultIn/defaultOut.
+		assert node instanceof Token;
+
+		// FIXME Why do we trim the token text here? This is sometimes not the desired behavior (see string cases below)!
+		pout.printAtom(((Token) node).getText().trim());
 	}
 
 	@Override
