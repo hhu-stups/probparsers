@@ -14,6 +14,8 @@ import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
+import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
+import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
@@ -192,7 +194,11 @@ public class PreLexer extends Lexer {
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
-		} else if (token instanceof TMultilineStringEnd) {
+		} else if (token instanceof TMultilineTemplateStart) {
+			previousState = state;
+			state = State.MULTILINE_TEMPLATE;
+		} else if ((token instanceof TMultilineStringEnd) ||
+		           (token instanceof TMultilineTemplateEnd)) {
 			state = previousState;
 			previousState = null;
 		}
