@@ -1,16 +1,25 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		// The GraalVM plugin 0.9.26 and later is only compatible with Java 11 and later.
+		// Because of dependency variant info from Gradle module metadata,
+		// this makes it impossible to even declare it as a dependency if running on Java 8.
+		// So as a workaround,
+		// enable the GraalVM plugin only when explicitly requested (see below).
+		if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
+			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.9.28")
+		}
+	}
+}
+
 plugins {
 	// The plugins are declared as .apply(false) here
 	// and only applied in the subprojects that actually need them.
 	id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
 	id("me.champeau.jmh").version("0.7.2").apply(false)
-	// The graalvm plugin 0.9.26+ is only compatible with Java 11 and later.
-	// Version 0.9.28 and later also introduce a problematic test dependency
-	// (org.graalvm.buildtools:junit-platform-native)
-	// that is only available for Java 11 and later.
-	// This makes it impossible to build the tests with Java 8 compatibility.
-	// So as a workaround,
-	// enable the GraalVM plugin only when explicitly requested (see below).
-	id("org.graalvm.buildtools.native").version("0.9.28").apply(false)
 }
 
 apply plugin: 'java-library'
