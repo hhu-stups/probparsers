@@ -54,7 +54,7 @@ public class PreLexer extends Lexer {
 			// System.out.println("Exception: " + e.toString());
 			// printState();
 			String msg = e.getMessage();
-			if (state != null && state.equals(State.DEFINITIONS) && msg.length()>3) {
+			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
 				String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
 				if(last.equals("="))
 					throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
@@ -189,7 +189,7 @@ public class PreLexer extends Lexer {
 		}
 	}
 	
-	private void checkMultiLineString() {
+	private void checkMultiLineString() throws LexerException {
 		// TODO: check if we need to do this for multiline templates as well
 		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
@@ -197,12 +197,10 @@ public class PreLexer extends Lexer {
 			state = State.MULTILINE_STRING;
 		} else if (token instanceof TMultilineStringEnd) {
 			if (previousState == null) {
-				System.out.println("Unexpected end of multiline string or template " + token);
-				// TODO: throw exception
-			} else {
-				state = previousState;
-				previousState = null;
+				throw new LexerException("Encountered multiline string end token without corresponding start token");
 			}
+			state = previousState;
+			previousState = null;
 		}
 	}
 	
