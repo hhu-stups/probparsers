@@ -3,8 +3,14 @@ plugins {
 	// and only applied in the subprojects that actually need them.
 	id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
 	id("me.champeau.jmh").version("0.7.2").apply(false)
-	// the graalvm plugin 0.9.26+ is only compatible with Java 11+
-	id("org.graalvm.buildtools.native").version("0.9.25").apply(false)
+	// The graalvm plugin 0.9.26+ is only compatible with Java 11 and later.
+	// Version 0.9.28 and later also introduce a problematic test dependency
+	// (org.graalvm.buildtools:junit-platform-native)
+	// that is only available for Java 11 and later.
+	// This makes it impossible to build the tests with Java 8 compatibility.
+	// So as a workaround,
+	// enable the GraalVM plugin only when explicitly requested (see below).
+	id("org.graalvm.buildtools.native").version("0.9.28").apply(false)
 }
 
 apply plugin: 'java-library'
@@ -29,21 +35,6 @@ subprojects {
 	apply plugin: 'java'
 	apply plugin: 'maven-publish'
 	apply plugin: 'signing'
-	apply plugin: 'org.graalvm.buildtools.native'
-
-	graalvmNative {
-		binaries {
-			all {
-				resources.autodetect()
-				// see https://build-native-java-apps.cc/expert-options/21/
-				// the stack size must be given in bytes
-				//override at runtime with -XX:StackSize=...
-				buildArgs.add('-R:StackSize=8388608')
-			}
-		}
-
-		toolchainDetection = false
-	}
 
 	group = rootProject.group
 	version = rootProject.version
@@ -80,7 +71,6 @@ subprojects {
 
 	java {
 		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
 
 		withSourcesJar()
 		withJavadocJar()
@@ -94,6 +84,28 @@ subprojects {
 		options {
 			// silence warnings on missing javadoc
 			addBooleanOption('Xdoclint:all,-missing', true)
+		}
+	}
+
+	if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
+		// Required to make the org.graalvm.buildtools:junit-platform-native dependency resolve,
+		// because it only exists for Java 11 and later.
+		java.sourceCompatibility = JavaVersion.VERSION_11
+
+		apply plugin: 'org.graalvm.buildtools.native'
+
+		graalvmNative {
+			binaries {
+				all {
+					resources.autodetect()
+					// see https://build-native-java-apps.cc/expert-options/21/
+					// the stack size must be given in bytes
+					//override at runtime with -XX:StackSize=...
+					buildArgs.add('-R:StackSize=8388608')
+				}
+			}
+
+			toolchainDetection = false
 		}
 	}
 
