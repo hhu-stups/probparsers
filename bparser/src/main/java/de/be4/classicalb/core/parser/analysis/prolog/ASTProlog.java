@@ -174,19 +174,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		// Their default handling happens in defaultIn/defaultOut.
 		assert node instanceof Token;
 
-		// FIXME Why do we trim the token text here? This is sometimes not the desired behavior (see string cases below)!
-		pout.printAtom(((Token) node).getText().trim());
-	}
-
-	@Override
-	public void caseTMultilineTemplateContent(TMultilineTemplateContent node) {
-		pout.printAtom(node.getText());
-	}
-
-	@Override
-	public void caseTStringLiteral(TStringLiteral node) {
-		String text = node.getText();
-		pout.printAtom(text);
+		pout.printAtom(((Token) node).getText());
 	}
 
 	@Override
