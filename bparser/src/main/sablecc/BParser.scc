@@ -15,6 +15,8 @@ Helpers
   triple_quote = 39 39 39;
   single_quote = 39;
 
+  triple_back_quote = '```';
+
   minus = '-' | 0x2212;
 
   small_letter = ['a'..'z'];
@@ -107,6 +109,13 @@ Helpers
                                '\' 39 // escaped quote also does not count towards end
                                )*;
 
+  all_chars_without_single_back_quote = [all_chars - 96];  // 96 is the single back quote char `
+  multiline_template_literal = (all_chars_without_single_back_quote |
+                              96 all_chars_without_single_back_quote |  // single quote does not end string
+                              96 96 all_chars_without_single_back_quote | // double quote does not end string
+                               '\' 96 // escaped quote also does not count towards end
+                               )*;
+
   // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
   // 160: non-breaking space
@@ -157,7 +166,8 @@ States
   block_comment,
   multiline_string,
   pragma_description_content,
-  pragma_content;
+  pragma_content,
+  multiline_template;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -191,6 +201,10 @@ Tokens
   {normal->multiline_string} multiline_string_start = triple_quote;
   {multiline_string->normal} multiline_string_end = triple_quote;
   {multiline_string} multiline_string_content = multiline_string_literal;
+
+  {normal->multiline_template} multiline_template_start = triple_back_quote;
+  {multiline_template->normal} multiline_template_end = triple_back_quote;
+  {multiline_template} multiline_template_content = multiline_template_literal;
 
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
@@ -1011,6 +1025,7 @@ expression_atomic {-> expression} =
   {primed_identifier} [identifier]:composed_identifier b_prime {-> New expression.primed_identifier([identifier.identifier_literal])} |
   {string} [content]:string_literal {-> New expression.string(content)} |
   {multiline_string} multiline_string_start [content]:multiline_string_content multiline_string_end {-> New expression.multiline_string(content)} |
+  {multiline_template} multiline_template_start [content]:multiline_template_content multiline_template_end {-> New expression.multiline_template(content)} |
   {boolean_true} true {-> New expression.boolean_true()} |
   {boolean_false} false {-> New expression.boolean_false()} |
   {successor} succ {-> New expression.successor()} |
@@ -1365,6 +1380,7 @@ expression =
   {primed_identifier} [identifier]:identifier_literal* |
   {string} [content]:string_literal |
   {multiline_string} [content]:multiline_string_content |
+  {multiline_template} [content]:multiline_template_content |
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
