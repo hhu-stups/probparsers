@@ -197,8 +197,10 @@ public class PreLexer extends Lexer {
 		} else if (token instanceof TMultilineTemplateStart) {
 			previousState = state;
 			state = State.MULTILINE_TEMPLATE;
-		} else if ((token instanceof TMultilineStringEnd) ||
-		           (token instanceof TMultilineTemplateEnd)) {
+		} else if (
+			token instanceof TMultilineStringEnd
+			|| token instanceof TMultilineTemplateEnd
+		) {
 			state = previousState;
 			previousState = null;
 		}
