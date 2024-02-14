@@ -209,7 +209,7 @@ Tokens
   {normal} exists = '#' | 0x2203;
   {normal} b_prime = '$0';
   {normal} lambda = '%' | unicode_lambda;
-  {normal} conjunction = '&' | 0x2227;
+  {normal} conjunction = '&' | 0x2227 | 0x22c0; // 0x22c0 = 8896 is Unicode wedge inserted by macOS symbol table
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
@@ -373,7 +373,7 @@ Tokens
   {normal} min = 'min';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
-  {normal} logical_or = 'or' | 0x2228;
+  {normal} logical_or = 'or' | 0x2228;  // disjunction, 0x2228=8744 is Unicode vee inserted by macOS symbol table
   {normal} perm = 'perm';
   {normal} pred = 'pred';
   {normal} prj1 = 'prj1';
