@@ -209,7 +209,9 @@ Tokens
   {normal} exists = '#' | 0x2203;
   {normal} b_prime = '$0';
   {normal} lambda = '%' | unicode_lambda;
-  {normal} conjunction = '&' | 0x2227 | 0x22c0; // 0x22c0 = 8896 is Unicode wedge inserted by macOS symbol table
+  {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
+  {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
+                                    0x22c1; // n-ary disjunction
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis

@@ -347,19 +347,29 @@ public class BLexer extends Lexer {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
 
+		Class<? extends Token> tokenClass = token.getClass();
+		checkForInvalidTokens(tokenClass);
+		
 		if (lastToken != null) {
 			Class<? extends Token> lastTokenClass = lastToken.getClass();
-			Class<? extends Token> tokenClass = token.getClass();
 			
 			if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
 				checkForInvalidCombinations(lastTokenClass, tokenClass);
 				// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
 			}
 		}
-
+        
 		lastToken = token;
 	}
 
+    private void checkForInvalidTokens(Class<? extends Token> tokenClass)
+			throws LexerException {
+	   if (token instanceof TIllegalUnicodeSymbol) {
+	        // TODO: lookup up suggestions like 0x2227 for n-ary wedge 0x22c0
+	    	ThrowDefaultLexerException("Invalid Unicode symbol: '"+ token.getText().trim() + "' ",
+	    	                            token.getText().trim());
+	   }
+	}
 	private void checkForInvalidCombinations(Class<? extends Token> lastTokenClass, Class<? extends Token> tokenClass)
 			throws LexerException {
 		Map<Class<? extends Token>, String> map = invalid.get(lastTokenClass);
