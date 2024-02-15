@@ -24,6 +24,7 @@ public class BLexer extends Lexer {
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
 	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
 	private static final Set<Class<? extends Token>> literalTokenClasses;
+	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
 
 	// called by PreParser
 	public void setLexerPreparse(){
@@ -281,6 +282,8 @@ public class BLexer extends Lexer {
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
 		
+		invalidUnicodeSymbolMessages.put("⋀", "n-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
+		invalidUnicodeSymbolMessages.put("⋁", "n-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
 	}
 	
 	private static void AddBinExprOperators() {
@@ -347,9 +350,18 @@ public class BLexer extends Lexer {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
 
+		if (token instanceof TIllegalUnicodeSymbol) {
+			String symbol = token.getText();
+			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
+			String specificMessage = invalidUnicodeSymbolMessages.get(symbol);
+			if (specificMessage != null) {
+				ThrowDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
+			} else {
+				ThrowDefaultLexerException(defaultMessage, defaultMessage);
+			}
+		}
+
 		Class<? extends Token> tokenClass = token.getClass();
-		checkForInvalidTokens(tokenClass);
-		
 		if (lastToken != null) {
 			Class<? extends Token> lastTokenClass = lastToken.getClass();
 			
@@ -362,13 +374,6 @@ public class BLexer extends Lexer {
 		lastToken = token;
 	}
 
-	private void checkForInvalidTokens(Class<? extends Token> tokenClass)
-			throws LexerException {
-		if (token instanceof TIllegalUnicodeSymbol) {
-			// TODO: lookup up suggestions like 0x2227 for n-ary wedge 0x22c0
-			ThrowDefaultLexerException("Invalid Unicode symbol: '"+ token.getText().trim() + "' ", token.getText().trim());
-		}
-	}
 	private void checkForInvalidCombinations(Class<? extends Token> lastTokenClass, Class<? extends Token> tokenClass)
 			throws LexerException {
 		Map<Class<? extends Token>, String> map = invalid.get(lastTokenClass);
