@@ -358,17 +358,16 @@ public class BLexer extends Lexer {
 				// System.out.println("Ok: " + lastTokenClass + " -> " + tokenClass);
 			}
 		}
-        
+
 		lastToken = token;
 	}
 
-    private void checkForInvalidTokens(Class<? extends Token> tokenClass)
+	private void checkForInvalidTokens(Class<? extends Token> tokenClass)
 			throws LexerException {
-	   if (token instanceof TIllegalUnicodeSymbol) {
-	        // TODO: lookup up suggestions like 0x2227 for n-ary wedge 0x22c0
-	    	ThrowDefaultLexerException("Invalid Unicode symbol: '"+ token.getText().trim() + "' ",
-	    	                            token.getText().trim());
-	   }
+		if (token instanceof TIllegalUnicodeSymbol) {
+			// TODO: lookup up suggestions like 0x2227 for n-ary wedge 0x22c0
+			ThrowDefaultLexerException("Invalid Unicode symbol: '"+ token.getText().trim() + "' ", token.getText().trim());
+		}
 	}
 	private void checkForInvalidCombinations(Class<? extends Token> lastTokenClass, Class<? extends Token> tokenClass)
 			throws LexerException {
@@ -381,7 +380,7 @@ public class BLexer extends Lexer {
 						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
 					} else {
 						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
-					}	
+					}
 				} else
 					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
 			}
