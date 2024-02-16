@@ -255,10 +255,11 @@ Tokens
   {normal} insert_end_sequence = '<-' | 0x21fd;
   {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 2190: Leftwards Arrow; 27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
   {normal} inclusion = '<:' | 0x2286;
-  {normal} strict_inclusion = '<<:' | 0x2282;
+  {normal} strict_inclusion = '<<:' | 0x2282 | 0x228a; // 0x228a actually less ambiguous mathematically, see
+         // https://math.stackexchange.com/questions/1038233/subset-of-above-not-equal-to-subsetneqq-symbol
   {normal} superset = 0x2287; // no ASCII syntax
   {normal} superset_strict = 0x2283; // no ASCII syntax
-  {normal} not_superset_strict = 0x2285; // no ASCII syntax
+  {normal} not_superset_strict = 0x2285 | 0x228b; // no ASCII syntax, 228b has struck-through equal sign
   {normal} not_superset = 0x2289; // no ASCII syntax
   {normal} contains_element = 0x220b; // no ASCII syntax, inverted element of symbol
   {normal} not_contains_element = 0x220c; // no ASCII syntax
@@ -315,7 +316,7 @@ Tokens
   {normal} integer = 'INTEGER' | 0x2124;
   {normal} real = 'REAL' | 0x211D;
   {normal} float = 'FLOAT';
-  {normal} quantified_inter = 'INTER' | 0x22c2;
+  {normal} quantified_inter = 'INTER' | 0x22c2; // 0x22c2 is the n-ary intersection symbol
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
   {normal} local_operations = 'LOCAL_OPERATIONS';
@@ -346,7 +347,7 @@ Tokens
   {normal} string = 'STRING';
   {normal} then = 'THEN';
   {normal} true = 'TRUE'; // now reserved for truth: | 0x22a4
-  {normal} quantified_union = 'UNION' | 0x22c3;
+  {normal} quantified_union = 'UNION' | 0x22c3; // 0x22c3 is the n-ary union symbol
   {normal} uses = 'USES';
   {normal} value = 'VALUES';
   {normal} var = 'VAR';
