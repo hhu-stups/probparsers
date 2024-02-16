@@ -212,6 +212,10 @@ Tokens
   {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
   {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
               0x22c1 | // n-ary disjunction
+              0x2204 | // not exists
+              0x228e | // multi-set union bags
+              0x22a2 | 0x22a6 | 0x22a7 | // models / entails / sequent / turnstyle operators
+              0x21d0 | 0x27f8 | // inverse implies; we do not handle it in grammar because associativity not clear
               0x220a | 0x220d; // small element of and contains operators
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
@@ -270,7 +274,7 @@ Tokens
   {normal} domain_restriction = '<|' | 0x25c1;
   {normal} equal = '=';
   {normal} double_equal = '==' | 0x225c; // == , Unicode DELTA EQUAL TO proposed in https://github.com/tlaplus-community/tlaplus-standard
-  {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21ds is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
+  {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21d2 is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
   {normal} greater = '>';
   {normal} partial_injection = '>+>' | 0x2914;
   {normal} total_injection = '>' minus '>' | 0x21a3;  // >->

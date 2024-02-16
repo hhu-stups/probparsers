@@ -282,10 +282,16 @@ public class BLexer extends Lexer {
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
 		
-		invalidUnicodeSymbolMessages.put("⋀", "n-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
-		invalidUnicodeSymbolMessages.put("⋁", "n-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
-		invalidUnicodeSymbolMessages.put("∊", "small element-of not allowed, use '∈' instead");
-		invalidUnicodeSymbolMessages.put("∍", "small contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
+		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
+		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
+		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
 	}
 	
 	private static void AddBinExprOperators() {
