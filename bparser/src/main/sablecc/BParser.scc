@@ -211,7 +211,8 @@ Tokens
   {normal} lambda = '%' | unicode_lambda;
   {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
   {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
-                                    0x22c1; // n-ary disjunction
+              0x22c1 | // n-ary disjunction
+              0x220a | 0x220b | 0x220c | 0x220d | 0x2283 | 0x2289 | 0x2285 | 0x2287; // superset and contains operators
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis

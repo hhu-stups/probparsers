@@ -284,6 +284,13 @@ public class BLexer extends Lexer {
 		
 		invalidUnicodeSymbolMessages.put("⋀", "n-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
 		invalidUnicodeSymbolMessages.put("⋁", "n-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
+		invalidUnicodeSymbolMessages.put("∊", "small element-of not allowed, use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∋", "contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∍", "contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("⊇", "superset not allowed, reorder arguments and use '⊆' instead");
+		invalidUnicodeSymbolMessages.put("⊃", "superset not allowed, reorder arguments and use '⊂' instead");
+		invalidUnicodeSymbolMessages.put("⊅", "superset not allowed, reorder arguments and use '⊄' instead");
+		invalidUnicodeSymbolMessages.put("⊉", "superset not allowed, reorder arguments and use '⊈' instead");
 	}
 	
 	private static void AddBinExprOperators() {
