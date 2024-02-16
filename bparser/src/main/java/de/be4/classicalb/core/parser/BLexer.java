@@ -287,10 +287,6 @@ public class BLexer extends Lexer {
 		invalidUnicodeSymbolMessages.put("∊", "small element-of not allowed, use '∈' instead");
 		invalidUnicodeSymbolMessages.put("∋", "contains as member not allowed, reorder arguments and use '∈' instead");
 		invalidUnicodeSymbolMessages.put("∍", "contains as member not allowed, reorder arguments and use '∈' instead");
-		invalidUnicodeSymbolMessages.put("⊇", "superset not allowed, reorder arguments and use '⊆' instead");
-		invalidUnicodeSymbolMessages.put("⊃", "superset not allowed, reorder arguments and use '⊂' instead");
-		invalidUnicodeSymbolMessages.put("⊅", "superset not allowed, reorder arguments and use '⊄' instead");
-		invalidUnicodeSymbolMessages.put("⊉", "superset not allowed, reorder arguments and use '⊈' instead");
 	}
 	
 	private static void AddBinExprOperators() {

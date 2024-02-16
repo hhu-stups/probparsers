@@ -212,7 +212,7 @@ Tokens
   {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
   {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
               0x22c1 | // n-ary disjunction
-              0x220a | 0x220b | 0x220c | 0x220d | 0x2283 | 0x2289 | 0x2285 | 0x2287; // superset and contains operators
+              0x220a | 0x220b | 0x220c | 0x220d; // contains operators
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
@@ -256,6 +256,10 @@ Tokens
   {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 2190: Leftwards Arrow; 27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
   {normal} inclusion = '<:' | 0x2286;
   {normal} strict_inclusion = '<<:' | 0x2282;
+  {normal} superset = 0x2287; // no ASCII syntax
+  {normal} superset_strict = 0x2283; // no ASCII syntax
+  {normal} not_superset_strict = 0x2285; // no ASCII syntax
+  {normal} not_superset = 0x2289; // no ASCII syntax
   {normal} domain_subtraction = '<<|' | 0x2a64 | 0x25c0;
   {normal} less_equal = '<=' | 0x2264;
   {normal} equivalence = '<=>' | 0x21d4 | 0x27fa;  // 0x21d4 is LEFT RIGHT DOUBLE ARROW; TLA proposes 0x27fa (LONG LEFT RIGHT DOUBLE ARROW) for iff
@@ -783,6 +787,10 @@ predicate_atomic {-> predicate} =
   {subset_strict} [left]:expression_top strict_inclusion [right]:expression_top {-> New predicate.subset_strict(left.expression, right.expression)} |
   {not_subset} [left]:expression_top non_inclusion [right]:expression_top {-> New predicate.not_subset(left.expression, right.expression)} |
   {not_subset_strict} [left]:expression_top strict_non_inclusion [right]:expression_top {-> New predicate.not_subset_strict(left.expression, right.expression)} |
+  {superset} [left]:expression_top superset[right]:expression_top {-> New predicate.subset(right.expression, left.expression)} | // reverse arguments
+  {superset_strict} [left]:expression_top superset_strict[right]:expression_top {-> New predicate.subset_strict(right.expression, left.expression)} | // reverse arguments
+  {not_superset_strict} [left]:expression_top not_superset_strict[right]:expression_top {-> New predicate.not_subset_strict(right.expression, left.expression)} | // reverse arguments
+  {not_superset} [left]:expression_top not_superset[right]:expression_top {-> New predicate.not_subset(right.expression, left.expression)} | // reverse arguments
     /* Original priority: 160 */
   {not_equal} [left]:expression_top not_equal [right]:expression_top {-> New predicate.not_equal(left.expression, right.expression)} |
   {not_member} [left]:expression_top not_belonging [right]:expression_top {-> New predicate.not_member(left.expression, right.expression)} |
