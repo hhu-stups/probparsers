@@ -32,12 +32,14 @@ public class ASTProlog extends DepthFirstAdapter {
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList("event", "freetype",
-			"machine_header", "machine_reference", "operation", "refined_operation", "rec_entry", "values_entry", "witness", "unit"));
+	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
+			"description_event", // for ADescriptionEvent
+			"description_operation", "event", "freetype",
+			"machine_header", "machine_reference", "operation",
+			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
-	// the simpleFormats are mappings from (simple) class names to prolog
-	// functor representing them
-	private final Map<String, String> simpleFormats = new HashMap<>();
+	// the simpleFormats are mappings from node classes to prolog functor representing them
+	private final Map<Class<? extends Node>, String> simpleFormats = new HashMap<>();
 
 	// to look up the identifier of each node
 	private final PositionPrinter positionPrinter;
@@ -168,13 +170,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	 */
 	@Override
 	public void defaultCase(final Node node) {
-		pout.printAtom(node.toString().trim());
-	}
+		// All non-terminal cases have default implementations in DepthFirstAdapter.
+		// Their default handling happens in defaultIn/defaultOut.
+		assert node instanceof Token;
 
-	@Override
-	public void caseTStringLiteral(TStringLiteral node) {
-		String text = node.getText();
-		pout.printAtom(text);
+		pout.printAtom(((Token) node).getText());
 	}
 
 	@Override
@@ -186,11 +186,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	 * @return Corresponging Prolog functor Name.
 	 */
 	private String simpleFormat(final Node node) {
-		String className = node.getClass().getSimpleName();
-		String formatted = simpleFormats.get(className);
+		Class<? extends Node> clazz = node.getClass();
+		String formatted = simpleFormats.get(clazz);
 		if (formatted == null) {
-			formatted = toFunctorName(className);
-			simpleFormats.put(className, formatted);
+			formatted = toFunctorName(clazz.getSimpleName());
+			simpleFormats.put(clazz, formatted);
 		}
 		return formatted;
 	}
@@ -198,10 +198,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
-	 * grammar for non-Java front-ends. Two magic cases here:
-	 * "prover_comprehension_set" -&gt; "comprehension_set", "op" -&gt;
-	 * "operation_call" Todo: do remove magic special cases DO NOT add extra
-	 * special cases here !!
+	 * grammar for non-Java front-ends. One magic case here: "op" -&gt; "operation_call"
+	 * Todo: do remove magic special cases DO NOT add extra special cases here !!
 	 * 
 	 * @return Prolog functor name
 	 */
@@ -219,8 +217,6 @@ public class ASTProlog extends DepthFirstAdapter {
 				if (camelName.endsWith(checkend)) {
 					String shortName = camelName.substring(0, camelName.length() - checkend.length() - 1);
 					// hard-coded renamings
-					if (shortName.equals("prover_comprehension_set"))
-						return "comprehension_set";
 					if (shortName.equals("op"))
 						return "operation_call";
 					return shortName;
@@ -243,8 +239,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	private String formatCamel(final String input) {
 		StringWriter out = new StringWriter();
 		char[] chars = input.toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			char current = chars[i];
+		for (char current : chars) {
 			if (Character.isUpperCase(current)) {
 				out.append('_');
 				out.append(Character.toLowerCase(current));
@@ -280,7 +275,8 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAPrimedIdentifierExpression(final APrimedIdentifierExpression node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
-		pout.printNumber(Long.parseLong((node.getGrade().getText())));
+		// The parser now only supports $0
+		pout.printNumber(0);
 		close(node);
 	}
 
@@ -645,14 +641,6 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(final ASymbolicComprehensionSetExpression node) {
-		open(node);
-		printAsList(node.getIdentifiers());
-		node.getPredicates().apply(this);
-		close(node);
-	}
-
-	@Override
-	public void caseAProverComprehensionSetExpression(final AProverComprehensionSetExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
 		node.getPredicates().apply(this);
@@ -1065,6 +1053,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAFreetype(AFreetype node) {
 		open(node);
 		pout.printAtom(node.getName().getText());
+		printAsList(node.getParameters());
 		printAsList(node.getConstructors());
 		close(node);
 	}

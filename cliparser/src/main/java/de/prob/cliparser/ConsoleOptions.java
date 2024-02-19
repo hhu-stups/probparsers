@@ -10,10 +10,10 @@ import java.util.Map;
 public class ConsoleOptions {
 
 	private String intro = null;
-	private final Map<String, Option> options = new HashMap<String, Option>();
-	private final List<Option> listOfOptions = new ArrayList<Option>();
+	private final Map<String, Option> options = new HashMap<>();
+	private final List<Option> listOfOptions = new ArrayList<>();
 
-	private final Map<String, String[]> concreteOptions = new HashMap<String, String[]>();
+	private final Map<String, String[]> concreteOptions = new HashMap<>();
 	private String[] remaining;
 
 	public void setIntro(final String intro) {
@@ -32,8 +32,8 @@ public class ConsoleOptions {
 		addOption(key, desc, 0);
 	}
 
-	public void parseOptions(final String cmd[]) {
-		final ArrayList<String> rest = new ArrayList<String>();
+	public void parseOptions(final String[] cmd) {
+		final ArrayList<String> rest = new ArrayList<>();
 		concreteOptions.clear();
 		for (int i = 0; i < cmd.length; i++) {
 			final String key = cmd[i];

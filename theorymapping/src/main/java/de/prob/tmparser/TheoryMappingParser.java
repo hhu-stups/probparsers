@@ -1,9 +1,12 @@
 package de.prob.tmparser;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import de.prob.core.theorymapping.lexer.Lexer;
@@ -14,33 +17,36 @@ import de.prob.core.theorymapping.parser.ParserException;
 import de.prob.tmparser.internal.MappingVisitor;
 
 public class TheoryMappingParser {
-	static public Collection<OperatorMapping> parseTheoryMapping(
+	public static Collection<OperatorMapping> parseTheoryMapping(
 			String theoryName, String filename) throws IOException {
-		final Reader input = new FileReader(filename);
-		return parseTheoryMapping(theoryName, input);
+		return parseTheoryMapping(theoryName, Paths.get(filename));
 	}
 
-	static public Collection<OperatorMapping> parseTheoryMapping(
+	public static Collection<OperatorMapping> parseTheoryMapping(String theoryName, Path path) throws IOException {
+		try (BufferedReader reader = Files.newBufferedReader(path)) {
+			return parseTheoryMapping(theoryName, reader);
+		}
+	}
+
+	public static Collection<OperatorMapping> parseTheoryMapping(
 			String theoryName, Reader input) throws IOException {
 		Start ast;
 		try {
 			ast = parse(input);
-		} catch (ParserException e) {
-			throw new TheoryMappingException(e);
-		} catch (LexerException e) {
+		} catch (ParserException | LexerException e) {
 			throw new TheoryMappingException(e);
 		}
 		return extractMappings(ast, theoryName);
 	}
 
-	static private Start parse(Reader input) throws ParserException,
+	private static Start parse(Reader input) throws ParserException,
 			LexerException, IOException {
 		final Lexer lexer = new Lexer(new PushbackReader(input));
 		final Parser parser = new Parser(lexer);
 		return parser.parse();
 	}
 
-	static private Collection<OperatorMapping> extractMappings(Start ast,
+	private static Collection<OperatorMapping> extractMappings(Start ast,
 			String theoryName) {
 		MappingVisitor visitor = new MappingVisitor(theoryName);
 		ast.apply(visitor);

@@ -5,7 +5,7 @@ Package de.be4.classicalb.core.preparser;
  *******************************************************************/
 Helpers
   triple_quote = 39 39 39;
-  single_quate = 39;
+  single_quote = 39;
 
   lf = 10;
   cr = 13;
@@ -90,6 +90,13 @@ Helpers
   all_chars_without_single_quote = [all_chars - 39];
   multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
 
+  all_chars_without_single_back_quote = [all_chars - '`'];
+  multiline_template_literal = (all_chars_without_single_back_quote |
+                              '`' all_chars_without_single_back_quote |  // single quote does not end string
+                              '``' all_chars_without_single_back_quote | // double quote does not end string
+                               '\`' // escaped quote also does not count towards end
+                               )*;
+
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
   abstract_constants = 'ABSTRACT_CONSTANTS';
@@ -103,6 +110,7 @@ Helpers
   implementation = 'IMPLEMENTATION';
   imports = 'IMPORTS';
   extends = 'EXTENDS';
+  freetypes = 'FREETYPES';
   includes = 'INCLUDES';
   initialisation = 'INITIALISATION' | 'INITIALIZATION';
   invariant = 'INVARIANT';
@@ -147,7 +155,8 @@ States
   // This is not an issue for line comments,
   // because EOF is a valid line comment terminator.
   block_comment,
-  multiline_string;
+  multiline_string,
+  multiline_template;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -163,6 +172,10 @@ Tokens
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
   {multiline_string} multiline_string_content = multiline_string_literal;
 
+  {start->normal, normal, definitions_rhs} multiline_template_start = '```';
+  {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
+  {multiline_template} multiline_template_content = multiline_template_literal;
+
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
   {start -> definitions, normal -> definitions} definitions = 'DEFINITIONS';
@@ -173,6 +186,7 @@ Tokens
     concrete_variables | constants | constraints | implementation |
     imports | includes | initialisation | invariant | local_operations |
     operations | promotes | properties | refines | refinement | extends |
+    freetypes |
     sees | sets | uses | values | variables;
 
   {start -> normal, normal, definitions -> normal} end_machine = end;
@@ -232,7 +246,8 @@ Ignored Tokens
   white_space, other_clause_begin, end_machine,
   some_value, something,
   comment, comment_body, star, comment_end, line_comment,
-  multiline_string_start, multiline_string_end, multiline_string_content;
+  multiline_string_start, multiline_string_end, multiline_string_content,
+  multiline_template_start, multiline_template_end, multiline_template_content;
 
 /*******************************************************************
  * Productions                                                     *

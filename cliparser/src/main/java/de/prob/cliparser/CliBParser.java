@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -122,8 +123,8 @@ public class CliBParser {
 		}
 		
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
-			System.out.println(String.format("Version:    %s", BParser.getVersion()));
-			System.out.println(String.format("Git Commit: %s", BParser.getGitSha()));
+			System.out.printf("Version:    %s%n", BParser.getVersion());
+			System.out.printf("Git Commit: %s%n", BParser.getGitSha());
 			System.exit(0);
 		}
 
@@ -236,13 +237,13 @@ public class CliBParser {
 			case "machineNameMustMatchFileName":
 				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(value));
 				break;
-			case "defaultFileNumber":
+			case "defaultFileNumber":  // default in ParsingBehaviour.java: -1
 				behaviour.setDefaultFileNumber(Integer.parseInt(value));
 				break;
-			case "startLineNumber":
+			case "startLineNumber":  // default in ParsingBehaviour.java: 1
 				behaviour.setStartLineNumber(Integer.parseInt(value));
 				break;
-			case "startColumnNumber":
+			case "startColumnNumber": // default in ParsingBehaviour.java: 1
 				behaviour.setStartColumnNumber(Integer.parseInt(value));
 				break;
 			case "printstacksize":
@@ -255,7 +256,16 @@ public class CliBParser {
 		return true;
 	}
 	
-	private static void runPRepl(ParsingBehaviour behaviour) throws IOException, FileNotFoundException {
+	private static void resetVolatilePositionOptions(ParsingBehaviour behaviour) {
+		// reset volatile options to default (usually after one parse command)
+		// we typically never parse twice at the same location
+		// and setting back these options after every formula parse adds a noticeable overhead
+		// when many small formulas need to be parsed (e.g., for VisB JSON files)
+		behaviour.setStartLineNumber(1);
+		behaviour.setStartColumnNumber(1);
+	}
+	
+	private static void runPRepl(ParsingBehaviour behaviour) throws IOException {
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
@@ -264,7 +274,7 @@ public class CliBParser {
 		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)));
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-		String line = "";
+		String line;
 		MockedDefinitions context = new MockedDefinitions();
 		boolean terminate = false;
 		while (!terminate) {
@@ -371,11 +381,12 @@ public class CliBParser {
 				behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
 				break;
 			case machine:
+				resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
 				String filename = in.readLine();
-				String outFile = in.readLine();
+				Path outFile = Paths.get(in.readLine());
 				final File bfile = new File(filename);
 				final int returnValue;
-				try (final OutputStream out = new FileOutputStream(outFile)) {
+				try (final OutputStream out = Files.newOutputStream(outFile)) {
 					returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
 				}
 				context = new MockedDefinitions();
@@ -386,7 +397,7 @@ public class CliBParser {
 					print("exit(" + returnValue + ")." + System.lineSeparator());
 				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
 					System.out.println("Erasing file contents of " + outFile);
-					Files.write(Paths.get(outFile), Collections.singletonList("% VM Error occurred"));
+					Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 				}
 				break;
 			case formula:
@@ -395,6 +406,7 @@ public class CliBParser {
 			case substitution:
 				String theFormula = in.readLine();
 				parseFormula(command, theFormula, context, behaviour);
+				resetVolatilePositionOptions(behaviour);
 				break;
 			case ltl:
 				String extension = in.readLine();
@@ -402,6 +414,7 @@ public class CliBParser {
 				final TemporalLogicParser<?> parser = new LtlParser(extParser);
 
 				parseTemporalFormula(in, parser);
+				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to LTL parser above
 
 				break;
 			case ctl:
@@ -409,6 +422,7 @@ public class CliBParser {
 				final ProBParserBase extParser2 = getExtensionParser(extension2, context);
 				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
 				parseTemporalFormula(in, parser2);
+				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
 				break;
 
 			case halt:
@@ -472,6 +486,7 @@ public class CliBParser {
 
 		try {
 			BParser parser = new BParser();
+			parser.setStartPosition(behaviour.getStartLineNumber(), behaviour.getStartColumnNumber());
 			parser.setDefinitions(context);
 			Start start;
 			switch (command) {
@@ -539,7 +554,6 @@ public class CliBParser {
 
 	private static int doFileParsing(final ParsingBehaviour behaviour, final OutputStream out, final PrintWriter err, final File bfile) {
 		try {
-			debugPrint(behaviour, "Parsing file: " + bfile);
 			if (bfile.getName().endsWith(".rmch")) {
 				parseRulesProject(bfile, behaviour, out);
 			} else {
@@ -594,7 +608,7 @@ public class CliBParser {
 		}
 	}
 
-	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
+	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
 		final long startOutput = System.currentTimeMillis();
 		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 			printASTasFastProlog(out, printer);
@@ -627,6 +641,7 @@ public class CliBParser {
 			debugPrint(parsingBehaviour, "Pretty printing " + bfile + " in B format:");
 			
 			PrettyPrinter pp = new PrettyPrinter();
+			pp.setUseIndentation(true);
 			tree.apply(pp);
 			System.out.println(pp.getPrettyPrint());
 		}
@@ -667,7 +682,7 @@ public class CliBParser {
 	
 	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
-	private static void printASTasFastProlog(OutputStream out, Consumer<IPrologTermOutput> printer) throws IOException {
+	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
 		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
 		printer.accept(structuredPrologOutput);
 		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();

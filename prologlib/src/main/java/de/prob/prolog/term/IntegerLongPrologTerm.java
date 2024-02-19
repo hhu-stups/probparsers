@@ -6,52 +6,73 @@
 
 package de.prob.prolog.term;
 
-import java.math.BigInteger;
-
 import de.prob.prolog.output.IPrologTermOutput;
+
+import java.math.BigInteger;
 
 /**
  * Represents a Prolog integer which can be represented as long.
  * a variation of IntegerPrologTerm which avoids using a BigInteger reference
  */
 public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
-	private final long ivalue; // holds the integer 
 
+	// think about adding a hash/BigInteger cache
+	private final long value;
+
+	/**
+	 * @deprecated use {@link AIntegerPrologTerm#create(long)} instead
+	 */
+	@Deprecated
 	public IntegerLongPrologTerm(final long value) {
-		this.ivalue = value;
+		this.value = value;
 	}
-	
+
 	@Override
 	public String getFunctor() {
-		return Long.toString(ivalue);
+		return Long.toString(this.value);
 	}
-	
+
 	@Override
 	public BigInteger getValue() {
-		return BigInteger.valueOf(ivalue);
+		return BigInteger.valueOf(this.value);
 	}
-	
+
 	@Override
 	public long longValueExact() {
-		return ivalue;
+		return this.value;
 	}
 
 	@Override
 	public int intValueExact() {
-		if (this.ivalue > Integer.MAX_VALUE || this.ivalue < Integer.MIN_VALUE) {
-			throw new ArithmeticException("IntegerLongPrologTerm value out of int range");
-		}
-		return (int)this.ivalue;
+		return Math.toIntExact(this.value);
 	}
 
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
-		pto.printNumber(ivalue);
+		pto.printNumber(this.value);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		// for optimization
+		if (other instanceof IntegerLongPrologTerm) {
+			return this.value == ((IntegerLongPrologTerm) other).value;
+		}
+		return super.equals(other);
 	}
 
 	@Override
 	public int hashCode() {
-		return Long.hashCode(ivalue) * 11 + 4;
-	}
+		// this is a copy of the BigInteger hashing routine
+		// for optimization
+		long v = this.value;
+		boolean neg = v < 0;
+		if (neg) {
+			v = -v;
+		}
 
+		int h = (int) (v >>> 32);
+		int hash = (int) (31 * h + (v & 0xffffffffL));
+		return neg ? -hash : hash;
+	}
 }

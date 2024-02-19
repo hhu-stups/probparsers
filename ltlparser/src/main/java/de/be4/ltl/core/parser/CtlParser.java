@@ -33,7 +33,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 		PushbackReader r = new PushbackReader(reader);
 		Lexer l = new CtlLexer(r);
 		Parser p = new Parser(l);
-		Start ast = null;
+		Start ast;
 		try {
 			ast = p.parse();
 		} catch (ParserException e) {

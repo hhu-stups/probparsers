@@ -35,10 +35,10 @@ public class SourcePositionsTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) root
 				.getPParseUnit();
-		assertEquals(7, ((PositionedNode) parseUnit).getEndPos().getLine());
+		assertEquals(7, parseUnit.getEndPos().getLine());
 
 		final LinkedList<PVariable> variables = parseUnit.getVariables();
-		assertEquals(5, ((PositionedNode) variables.get(0)).getEndPos()
+		assertEquals(5, variables.get(0).getEndPos()
 				.getLine());
 	}
 }

@@ -31,8 +31,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public Map<String, Type> getTypes() {
-		final Map<String, Type> map = new HashMap<>();
-		map.putAll(types);
+		final Map<String, Type> map = new HashMap<>(types);
 		for (IDefinitions definitions : referencedDefinitions) {
 			map.putAll(definitions.getTypes());
 		}
@@ -74,8 +73,7 @@ public class Definitions extends IDefinitions {
 
 	@Override
 	public Set<String> getDefinitionNames() {
-		Set<String> resultSet = new HashSet<>();
-		resultSet.addAll(definitionsMap.keySet());
+		Set<String> resultSet = new HashSet<>(definitionsMap.keySet());
 		for (IDefinitions iDefinitions : referencedDefinitions) {
 			resultSet.addAll(iDefinitions.getDefinitionNames());
 		}

@@ -5,7 +5,7 @@ import de.be4.classicalb.core.parser.node.Token;
 @SuppressWarnings("serial")
 public class RhsException extends Exception {
 
-	private Token token;
+	private final Token token;
 
 	public RhsException(de.be4.classicalb.core.parser.node.Token token) {
 		this.token = token;

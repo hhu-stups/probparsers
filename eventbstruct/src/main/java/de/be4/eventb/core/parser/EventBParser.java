@@ -1,13 +1,7 @@
 package de.be4.eventb.core.parser;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PushbackReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
+import java.nio.file.Files;
 
 import de.be4.eventb.core.parser.lexer.LexerException;
 import de.be4.eventb.core.parser.node.Start;
@@ -31,18 +25,9 @@ public class EventBParser {
 	 * @throws BException if parsing fails
 	 */
 	public Start parseFile(final File machine, final boolean verbose) throws IOException, BException {
-		final InputStreamReader inputStreamReader
-			= new InputStreamReader(new FileInputStream(machine), StandardCharsets.UTF_8);
-
-		final StringBuilder builder = new StringBuilder();
-		final char[] buffer = new char[1024];
-		int read;
-		while ((read = inputStreamReader.read(buffer)) >= 0) {
-			builder.append(String.valueOf(buffer, 0, read));
+		try (BufferedReader reader = Files.newBufferedReader(machine.toPath())) {
+			return this.parse(reader, verbose);
 		}
-		inputStreamReader.close();
-
-		return parse(builder.toString(), verbose);
 	}
 
 	public Start parseFile(File machine) throws IOException, BException {
@@ -86,7 +71,14 @@ public class EventBParser {
 	 */
 	public Start parse(final String input, final boolean debugOutput) throws BException {
 		final Reader reader = new StringReader(input);
+		return this.parse(reader, debugOutput);
+	}
 
+	public Start parse(String input) throws BException {
+		return this.parse(input, false);
+	}
+
+	public Start parse(final Reader reader, final boolean debugOutput) throws BException {
 		try {
 			/*
 			 * Main parser
@@ -96,26 +88,20 @@ public class EventBParser {
 
 			Parser parser = new Parser(lexer);
 			return parser.parse();
-		} catch (final LexerException e) {
+		} catch (final LexerException | EventBParseException e) {
 			throw new BException(e);
 		} catch (final ParserException e) {
 			throw new BException(createEventBParseException(e));
-		} catch (final EventBParseException e) {
-			throw new BException(e);
 		} catch (final IOException e) {
 			// shouldn't happen and if, we cannot handle it
 			throw new BException(e);
 		}
 	}
 
-	public Start parse(String input) throws BException {
-		return this.parse(input, false);
-	}
-
 	private EventBParseException createEventBParseException(final ParserException e) {
 		final Token token = e.getToken();
 		String message = e.getMessage();
-		final boolean expectingFound = message.indexOf("expecting") >= 0;
+		final boolean expectingFound = message.contains("expecting");
 
 		/*
 		 * Special error message for misplaced comments.

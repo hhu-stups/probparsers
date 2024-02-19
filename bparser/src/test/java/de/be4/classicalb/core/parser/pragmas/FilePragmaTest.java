@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import util.Helpers;
 
-import static org.junit.Assert.assertTrue;
-
 public class FilePragmaTest {
 
 	@Test

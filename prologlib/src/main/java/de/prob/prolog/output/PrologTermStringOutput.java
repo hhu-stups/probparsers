@@ -1,12 +1,12 @@
 package de.prob.prolog.output;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
  * This class encapsulates the process of creating a Prolog Term as a String.
  */
-public class PrologTermStringOutput extends PrologTermDelegate {
+public final class PrologTermStringOutput extends PrologTermDelegate {
+
 	private final StringWriter sw;
 
 	public PrologTermStringOutput() {
@@ -14,12 +14,8 @@ public class PrologTermStringOutput extends PrologTermDelegate {
 	}
 
 	private PrologTermStringOutput(StringWriter sw) {
-		super(new PrologTermOutput(new PrintWriter(sw), false));
+		super(new PrologTermOutput(sw, false));
 		this.sw = sw;
-	}
-
-	public IPrologTermOutput getPrologTermOutput() {
-		return pto;
 	}
 
 	@Override

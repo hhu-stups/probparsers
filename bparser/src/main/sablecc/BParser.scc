@@ -100,8 +100,19 @@ Helpers
   all_chars_without_newline = [all_chars - line_break];
   string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
-  all_chars_without_single_quote = [all_chars - 39];
-  multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
+  all_chars_without_single_quote = [all_chars - 39];  // 39 is the single quote char
+  multiline_string_literal = (all_chars_without_single_quote |
+                              39 all_chars_without_single_quote |  // single quote does not end string
+                              39 39 all_chars_without_single_quote | // double quote does not end string
+                               '\' 39 // escaped quote also does not count towards end
+                               )*;
+
+  all_chars_without_single_back_quote = [all_chars - '`'];
+  multiline_template_literal = (all_chars_without_single_back_quote |
+                              '`' all_chars_without_single_back_quote |  // single quote does not end string
+                              '``' all_chars_without_single_back_quote | // double quote does not end string
+                               '\`' // escaped quote also does not count towards end
+                               )*;
 
   // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
@@ -153,7 +164,8 @@ States
   block_comment,
   multiline_string,
   pragma_description_content,
-  pragma_content;
+  pragma_content,
+  multiline_template;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -188,16 +200,29 @@ Tokens
   {multiline_string->normal} multiline_string_end = triple_quote;
   {multiline_string} multiline_string_content = multiline_string_literal;
 
+  {normal->multiline_template} multiline_template_start = '```';
+  {multiline_template->normal} multiline_template_end = '```';
+  {multiline_template} multiline_template_content = multiline_template_literal;
+
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
   {normal} exists = '#' | 0x2203;
-  {normal} dollar = '$';
+  {normal} b_prime = '$0';
   {normal} lambda = '%' | unicode_lambda;
-  {normal} conjunction = '&' | 0x2227;
+  {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
+  {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
+              0x22c1 | // n-ary disjunction
+              0x2204 | // not exists
+              0x228e | // multi-set union bags
+              0x22a2 | 0x22a6 | 0x22a7 | // models / entails / sequent / turnstyle operators
+              0x21d0 | 0x27f8 | // inverse implies; we do not handle it in grammar because associativity not clear
+              0x220a | 0x220d; // small element of and contains operators
   {normal} single_quotation = 39; // single quote: '
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
-  {normal} product = '*' | 0x00d7 | 0x2217; // 0x2217 = 8727 decimal; used in Camille in Rodin
+  {normal} product = '*' | 0x2217; // Unicode asterisk operator; used in Camille in Rodin
+  {normal} cartesian_product = 0x00d7 | // 215 decimal; used in rodin
+                               0x2a2f; // vector or cross product, used in IDP-Z3
   {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = '+';
   {normal} partial_function = '+' minus '>' | 0x21f8;
@@ -211,9 +236,9 @@ Tokens
   {normal} dot2 = '·' | 0x22c5 | '•'; // is the bullet, Option-8 on US keyboards
    // seperate from dot below to avoid shift-reduce conflicts for event-b comprehension with composed identifiers
   {normal} interval = '..' | 0x2025;
-  //{normal} dot_par = '.' white_space* '(' | 0x00b7 white_space* '(' ; // dot in generalisation expression and other expressions
   {normal} division = '/' | 0xf7;
-  {normal} finite = 0x2a0d; // not in Atelier-B, 10765 decimal finite part integral, https://www.fileformat.info/info/unicode/char/2a0d/index.htm
+  {normal} finite = '@finite'; // Event-B finite predicate (ProB-specific syntax)
+  {normal} partition = '@partition'; // Event-B partition predicate (ProB-specific syntax)
   {normal} not_belonging = '/:' | 0x2209;
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
@@ -225,16 +250,23 @@ Tokens
   {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
     // Note TLA+ propses 0x2237 (PROPORTION) for label_as operator ::
   {normal} assign = ':=' | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
-  {normal} semicolon = ';';
+  {normal} semicolon = ';'; // separator, sequential composition and also forward composition (is 0x3b)
   {normal} less = '<';
-  {normal} ring = 0x2218; // circ or forward composition from Event-B, normally not allowed by Atelier-B
+  {normal} ring = 0x2218; // circ or backward composition from Event-B, normally not allowed by Atelier-B
   {normal} less_greater = '<' white_space* '>'; // for empty sequence
   {normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
   {normal} set_relation = '<' minus '>' | 0x2194;
   {normal} insert_end_sequence = '<-' | 0x21fd;
   {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 2190: Leftwards Arrow; 27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
   {normal} inclusion = '<:' | 0x2286;
-  {normal} strict_inclusion = '<<:' | 0x2282;
+  {normal} strict_inclusion = '<<:' | 0x2282 | 0x228a; // 0x228a actually less ambiguous mathematically, see
+         // https://math.stackexchange.com/questions/1038233/subset-of-above-not-equal-to-subsetneqq-symbol
+  {normal} superset = 0x2287; // no ASCII syntax
+  {normal} superset_strict = 0x2283; // no ASCII syntax
+  {normal} not_superset_strict = 0x2285 | 0x228b; // no ASCII syntax, 228b has struck-through equal sign
+  {normal} not_superset = 0x2289; // no ASCII syntax
+  {normal} contains_element = 0x220b; // no ASCII syntax, inverted element of symbol
+  {normal} not_contains_element = 0x220c; // no ASCII syntax
   {normal} domain_subtraction = '<<|' | 0x2a64 | 0x25c0;
   {normal} less_equal = '<=' | 0x2264;
   {normal} equivalence = '<=>' | 0x21d4 | 0x27fa;  // 0x21d4 is LEFT RIGHT DOUBLE ARROW; TLA proposes 0x27fa (LONG LEFT RIGHT DOUBLE ARROW) for iff
@@ -242,12 +274,12 @@ Tokens
   {normal} domain_restriction = '<|' | 0x25c1;
   {normal} equal = '=';
   {normal} double_equal = '==' | 0x225c; // == , Unicode DELTA EQUAL TO proposed in https://github.com/tlaplus-community/tlaplus-standard
-  {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21ds is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
+  {normal} implies = '=>' | 0x21d2 | 0x27f9;  // 0x21d2 is RIGHTWARDS DOUBLE ARROW; TLA proposes 0x27f9 (LONG RIGHTWARDS DOUBLE ARROW)
   {normal} greater = '>';
   {normal} partial_injection = '>+>' | 0x2914;
-  {normal} total_injection = '>' minus '>' | 0x21a3;
+  {normal} total_injection = '>' minus '>' | 0x21a3;  // >->
   {normal} partial_bijection = '>+>>';
-  {normal} total_bijection = '>' minus '>>' | 0x2916;
+  {normal} total_bijection = '>' minus '>>' | 0x2916; // >->>
   {normal} direct_product = '><' | 0x2297;
   {normal} greater_equal = '>=' | 0x2265;
   {normal} abstract_constants = 'ABSTRACT_CONSTANTS';
@@ -257,7 +289,8 @@ Tokens
   {normal} assertions = 'ASSERTIONS';
   {normal} be = 'BE';
   {normal} begin = 'BEGIN';
-  {normal} bool = 'BOOL';
+  {normal} bool = 'BOOL'
+               |  0x1d539; // BOOL B bool_set symbol, similar to NATURAL N or INTEGER Z symbol; used by IDP-Z3
   {normal} bfalse = 'bfalse' | 0x22A5; // falsity
   {normal} case = 'CASE';
   {normal} choice = 'CHOICE';
@@ -287,7 +320,7 @@ Tokens
   {normal} integer = 'INTEGER' | 0x2124;
   {normal} real = 'REAL' | 0x211D;
   {normal} float = 'FLOAT';
-  {normal} quantified_inter = 'INTER' | 0x22c2;
+  {normal} quantified_inter = 'INTER' | 0x22c2; // 0x22c2 is the n-ary intersection symbol
   {normal} invariant = 'INVARIANT';
   {normal} let = 'LET';
   {normal} local_operations = 'LOCAL_OPERATIONS';
@@ -314,12 +347,11 @@ Tokens
   {normal} sees = 'SEES';
   {normal} select = 'SELECT';
   {normal} sets = 'SETS';
-  {normal} quantified_set = 'SET';
   {normal} sigma = 'SIGMA' | 0x2211;
   {normal} string = 'STRING';
   {normal} then = 'THEN';
   {normal} true = 'TRUE'; // now reserved for truth: | 0x22a4
-  {normal} quantified_union = 'UNION' | 0x22c3;
+  {normal} quantified_union = 'UNION' | 0x22c3; // 0x22c3 is the n-ary union symbol
   {normal} uses = 'USES';
   {normal} value = 'VALUES';
   {normal} var = 'VAR';
@@ -355,7 +387,7 @@ Tokens
   {normal} min = 'min';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
-  {normal} logical_or = 'or' | 0x2228;
+  {normal} logical_or = 'or' | 0x2228;  // disjunction, 0x2228=8744 is Unicode vee inserted by macOS symbol table
   {normal} perm = 'perm';
   {normal} pred = 'pred';
   {normal} prj1 = 'prj1';
@@ -383,11 +415,12 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
+  {normal} oftype = 0x2982; // coming from Rodin; we do not support the ASCII version oftype (yet)
 
-  // Extensions
-  {normal} total_relation = '<<' minus '>' | 0xe100;
-  {normal} surjection_relation = '<' minus '>>' | 0xe101;
-  {normal} total_surjection_relation = '<<' minus '>>' | 0xe102;
+  // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
+  {normal} total_relation = '<<' minus '>' | 0xe100;             // <<->
+  {normal} surjection_relation = '<' minus '>>' | 0xe101;        // <->>
+  {normal} total_surjection_relation = '<<' minus '>>' | 0xe102; // <<->>
   {normal} kw_freetypes = 'FREETYPES';
 
   // keywords for special parsing modes;
@@ -663,6 +696,9 @@ operation_list {-> operation*} =
   {missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 operation {-> operation} =
+  {description} [operation]:operation pragma_description [content]:pragma_free_text {-> New operation.description(content,operation)}
+  // this allows description pragmas at the very end of an operation, not before the equal (=) sign
+  |
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
     {-> New operation([return_values.expression], [op_name.identifier_literal], [parameters.expression], operation_body.substitution)}
     // Note: operation names can be composed identifiers within refinements, see section 7.23 in Atelier-B handbook
@@ -675,7 +711,8 @@ operation {-> operation} =
   {rule_operation} kw_rule [rule_name]:identifier_literal [attributes]:operation_attribute_list? kw_body [operation_body]:substitution_l0 end
     {-> New operation.rule(rule_name, [attributes.operation_attribute], operation_body.substitution)} |
   {computation} kw_computation [name]:identifier_literal [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
-    {-> New operation.computation(name, [attributes.operation_attribute], body.substitution)} |
+    {-> New operation.computation(name, [attributes.operation_attribute], body.substitution)}
+     |
   {function} kw_function [return_values]:operation_return_values [name]:identifier_literal [parameters]:op_params? [attributes]:operation_attribute_list? kw_body [body]:substitution_l0 end
     {-> New operation.function([return_values.expression], name, [parameters.expression], [attributes.operation_attribute], body.substitution)};
 
@@ -694,8 +731,8 @@ freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_lis
 freetype_list {-> freetype*} =
   {single} [freetype]:freetype {-> [freetype.freetype]} |
   {multi} [rest]:freetype_list semicolon [freetype]:freetype {-> [rest.freetype, freetype.freetype]} ;
-freetype {-> freetype} = [name]:identifier_literal equal [cons_list]:freetypecons_list
-  {-> New freetype(name, [cons_list.freetype_constructor])};
+freetype {-> freetype} = [name]:identifier_literal [parameters]:def_parameters? equal [cons_list]:freetypecons_list
+  {-> New freetype(name, [parameters.expression], [cons_list.freetype_constructor])};
 freetypecons_list {-> freetype_constructor*} =
   {single} [constructor]:freetypecons {-> [constructor.freetype_constructor]} |
   {multi} [rest]:freetypecons_list comma [constructor]:freetypecons {-> [rest.freetype_constructor, constructor.freetype_constructor]};
@@ -741,6 +778,8 @@ predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 */
 
 predicate_atomic {-> predicate} =
+  // lhs_expression should really be assign_list and not expression_list,
+  // but that causes reduce/reduce conflicts with sequence extensions.
   {subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic
     {-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } | //weakest precondition
     /* The following predicates have a priority in the AtelierB manual.
@@ -755,9 +794,15 @@ predicate_atomic {-> predicate} =
   {subset_strict} [left]:expression_top strict_inclusion [right]:expression_top {-> New predicate.subset_strict(left.expression, right.expression)} |
   {not_subset} [left]:expression_top non_inclusion [right]:expression_top {-> New predicate.not_subset(left.expression, right.expression)} |
   {not_subset_strict} [left]:expression_top strict_non_inclusion [right]:expression_top {-> New predicate.not_subset_strict(left.expression, right.expression)} |
+  {superset} [left]:expression_top superset[right]:expression_top {-> New predicate.subset(right.expression, left.expression)} | // reverse arguments
+  {superset_strict} [left]:expression_top superset_strict[right]:expression_top {-> New predicate.subset_strict(right.expression, left.expression)} | // reverse arguments
+  {not_superset_strict} [left]:expression_top not_superset_strict[right]:expression_top {-> New predicate.not_subset_strict(right.expression, left.expression)} | // reverse arguments
+  {not_superset} [left]:expression_top not_superset[right]:expression_top {-> New predicate.not_subset(right.expression, left.expression)} | // reverse arguments
+  {contains_element} [left]:expression_top contains_element [right]:expression_top {-> New predicate.member(right.expression, left.expression)} | // reverse arguments
     /* Original priority: 160 */
   {not_equal} [left]:expression_top not_equal [right]:expression_top {-> New predicate.not_equal(left.expression, right.expression)} |
   {not_member} [left]:expression_top not_belonging [right]:expression_top {-> New predicate.not_member(left.expression, right.expression)} |
+  {not_contains_element} [left]:expression_top not_contains_element [right]:expression_top {-> New predicate.not_member(right.expression, left.expression)} | // reverse arguments
   {less_equal} [left]:expression_top less_equal [right]:expression_top {-> New predicate.less_equal(left.expression, right.expression)} |
   {less} [left]:expression_top less [right]:expression_top {-> New predicate.less(left.expression, right.expression)} |
   {greater_equal} [left]:expression_top greater_equal [right]:expression_top {-> New predicate.greater_equal(left.expression, right.expression)} |
@@ -766,10 +811,10 @@ predicate_atomic {-> predicate} =
   /* Now we continue with the real atomic predicates: */
   {bfalse} bfalse {-> New predicate.falsity()} |
   {truth_predicate} truth_predicate {-> New predicate.truth()} |
-  {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate}
-  |
-  {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)}
-  |
+  {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
+  {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
+  {finite} finite left_par [set]:expression_in_par right_par {-> New predicate.finite(set.expression)} |
+  {partition} partition left_par [set]:expression_top [elements]:expression_list_tail? right_par {-> New predicate.partition(set.expression, [elements.expression])} |
   {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
   | // check in typechecker: predicate must be an implication predicate
   {forall2} for_any [identifiers]:quantified_variables_list dot2 left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
@@ -780,11 +825,14 @@ predicate_atomic {-> predicate} =
   |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
   |
-  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top else [else_pred]:predicate_top end
-    {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, else_pred.predicate)} |
+  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elseif_predicate* else [else_pred]:predicate_top end
+    {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, [elsifs.predicate], else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
   {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
+
+if_elseif_predicate {-> predicate} =
+  elsif [condition]:predicate_top then [pred]:predicate_top {-> New predicate.if_elsif_predicate(condition.predicate, pred.predicate)};
 
 /* Expressions */
 
@@ -803,80 +851,86 @@ expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
   {next_level} [expr]:expression_x20 {-> expr.expression};
 expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */
 
+// Priority 125:
 expression_p125 {-> expression} =
-  {relations} [left]:expression_p125 set_relation [right]:expression_x125 {-> New expression.relations(left.expression, right.expression)} |
-  {partial_function} [left]:expression_p125 partial_function [right]:expression_x125 {-> New expression.partial_function(left.expression, right.expression)} |
-  {total_function} [left]:expression_p125 total_function [right]:expression_x125 {-> New expression.total_function(left.expression, right.expression)} |
-  {partial_injection} [left]:expression_p125 partial_injection [right]:expression_x125 {-> New expression.partial_injection(left.expression, right.expression)} |
-  {total_injection} [left]:expression_p125 total_injection [right]:expression_x125 {-> New expression.total_injection(left.expression, right.expression)} |
-  {partial_surjection} [left]:expression_p125 partial_surjection [right]:expression_x125 {-> New expression.partial_surjection(left.expression, right.expression)} |
-  {total_surjection} [left]:expression_p125 total_surjection [right]:expression_x125 {-> New expression.total_surjection(left.expression, right.expression)} |
-  {partial_bijection} [left]:expression_p125 partial_bijection [right]:expression_x125 {-> New expression.partial_bijection(left.expression, right.expression)} |
-  {total_bijection} [left]:expression_p125 total_bijection [right]:expression_x125 {-> New expression.total_bijection(left.expression, right.expression)} |
-  {total_relation} [left]:expression_p125 total_relation [right]:expression_x125 {-> New expression.total_relation(left.expression, right.expression)} |
-  {surjection_relation} [left]:expression_p125 surjection_relation [right]:expression_x125 {-> New expression.surjection_relation(left.expression, right.expression)} |
-  {total_surjection_relation} [left]:expression_p125 total_surjection_relation [right]:expression_x125 {-> New expression.total_surjection_relation(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x125 {-> expr.expression};
-expression_x125 {-> expression} = [expr]:expression_p160 {-> expr.expression};
+  {relations} [left]:expression_p125 set_relation [right]:expression_p160 {-> New expression.relations(left.expression, right.expression)} |
+  {partial_function} [left]:expression_p125 partial_function [right]:expression_p160 {-> New expression.partial_function(left.expression, right.expression)} |
+  {total_function} [left]:expression_p125 total_function [right]:expression_p160 {-> New expression.total_function(left.expression, right.expression)} |
+  {partial_injection} [left]:expression_p125 partial_injection [right]:expression_p160 {-> New expression.partial_injection(left.expression, right.expression)} |
+  {total_injection} [left]:expression_p125 total_injection [right]:expression_p160 {-> New expression.total_injection(left.expression, right.expression)} |
+  {partial_surjection} [left]:expression_p125 partial_surjection [right]:expression_p160 {-> New expression.partial_surjection(left.expression, right.expression)} |
+  {total_surjection} [left]:expression_p125 total_surjection [right]:expression_p160 {-> New expression.total_surjection(left.expression, right.expression)} |
+  {partial_bijection} [left]:expression_p125 partial_bijection [right]:expression_p160 {-> New expression.partial_bijection(left.expression, right.expression)} |
+  {total_bijection} [left]:expression_p125 total_bijection [right]:expression_p160 {-> New expression.total_bijection(left.expression, right.expression)} |
+  {total_relation} [left]:expression_p125 total_relation [right]:expression_p160 {-> New expression.total_relation(left.expression, right.expression)} |
+  {surjection_relation} [left]:expression_p125 surjection_relation [right]:expression_p160 {-> New expression.surjection_relation(left.expression, right.expression)} |
+  {total_surjection_relation} [left]:expression_p125 total_surjection_relation [right]:expression_p160 {-> New expression.total_surjection_relation(left.expression, right.expression)} |
+  {next_level} [expr]:expression_p160 {-> expr.expression};
 
+// Priority 160:
 expression_p160 {-> expression} =
-  {overwrite} [left]:expression_p160 overwrite_relation [right]:expression_x160 {-> New expression.overwrite(left.expression, right.expression)} |
-  {direct_product} [left]:expression_p160 direct_product [right]:expression_x160 {-> New expression.direct_product(left.expression, right.expression)} |
-  {ring} [left]:expression_p160 ring [right]:expression_x160 {-> New expression.ring(left.expression, right.expression)} |
-  {concat} [left]:expression_p160 concat_sequence [right]:expression_x160 {-> New expression.concat(left.expression, right.expression)} |
-  {domain_restriction} [left]:expression_p160 domain_restriction [right]:expression_x160 {-> New expression.domain_restriction(left.expression, right.expression)} |
-  {domain_subtraction} [left]:expression_p160 domain_subtraction [right]:expression_x160 {-> New expression.domain_subtraction(left.expression, right.expression)} |
-  {range_restriction} [left]:expression_p160 range_restriction [right]:expression_x160 {-> New expression.range_restriction(left.expression, right.expression)} |
-  {range_subtraction} [left]:expression_p160 range_subtraction [right]:expression_x160 {-> New expression.range_subtraction(left.expression, right.expression)} |
-  {insert_front} [left]:expression_p160 insert_start_sequence [right]:expression_x160 {-> New expression.insert_front(left.expression, right.expression)} |
-  {insert_tail} [left]:expression_p160 insert_end_sequence [right]:expression_x160 {-> New expression.insert_tail(left.expression, right.expression)} |
-  {union} [left]:expression_p160 union [right]:expression_x160 {-> New expression.union(left.expression, right.expression)} |
-  {intersection} [left]:expression_p160 intersection [right]:expression_x160 {-> New expression.intersection(left.expression, right.expression)} |
-  {restrict_front} [left]:expression_p160 restrict_head_sequence [right]:expression_x160 {-> New expression.restrict_front(left.expression, right.expression)} |
-  {restrict_tail} [left]:expression_p160 restrict_tail_sequence [right]:expression_x160 {-> New expression.restrict_tail(left.expression, right.expression)} |
-  {couple1} [left]:expression_p160 maplet [right]:expression_x160 {-> New expression.couple([left.expression, right.expression])} |
-  {next_level} [expr]:expression_x160 {-> expr.expression};
-expression_x160 {-> expression} = [expr]:expression_p170 {-> expr.expression};
+  {overwrite} [left]:expression_p160 overwrite_relation [right]:expression_p170 {-> New expression.overwrite(left.expression, right.expression)} |
+  {direct_product} [left]:expression_p160 direct_product [right]:expression_p170 {-> New expression.direct_product(left.expression, right.expression)} |
+  {ring} [left]:expression_p160 ring [right]:expression_p170 {-> New expression.ring(left.expression, right.expression)} |
+  {concat} [left]:expression_p160 concat_sequence [right]:expression_p170 {-> New expression.concat(left.expression, right.expression)} |
+  {domain_restriction} [left]:expression_p160 domain_restriction [right]:expression_p170 {-> New expression.domain_restriction(left.expression, right.expression)} |
+  {domain_subtraction} [left]:expression_p160 domain_subtraction [right]:expression_p170 {-> New expression.domain_subtraction(left.expression, right.expression)} |
+  {range_restriction} [left]:expression_p160 range_restriction [right]:expression_p170 {-> New expression.range_restriction(left.expression, right.expression)} |
+  {range_subtraction} [left]:expression_p160 range_subtraction [right]:expression_p170 {-> New expression.range_subtraction(left.expression, right.expression)} |
+  {insert_front} [left]:expression_p160 insert_start_sequence [right]:expression_p170 {-> New expression.insert_front(left.expression, right.expression)} |
+  {insert_tail} [left]:expression_p160 insert_end_sequence [right]:expression_p170 {-> New expression.insert_tail(left.expression, right.expression)} |
+  {union} [left]:expression_p160 union [right]:expression_p170 {-> New expression.union(left.expression, right.expression)} |
+  {intersection} [left]:expression_p160 intersection [right]:expression_p170 {-> New expression.intersection(left.expression, right.expression)} |
+  {restrict_front} [left]:expression_p160 restrict_head_sequence [right]:expression_p170 {-> New expression.restrict_front(left.expression, right.expression)} |
+  {restrict_tail} [left]:expression_p160 restrict_tail_sequence [right]:expression_p170 {-> New expression.restrict_tail(left.expression, right.expression)} |
+  {couple1} [left]:expression_p160 maplet [right]:expression_p170 {-> New expression.couple([left.expression, right.expression])} |
+  {next_level} [expr]:expression_p170 {-> expr.expression};
 
+// Priority 170:
 expression_p170 {-> expression} =
-  {interval} [left_border]:expression_p170 interval [right_border]:expression_x170 {-> New expression.interval(left_border.expression, right_border.expression)} |
-  {next_level} [expr]:expression_x170 {-> expr.expression};
-expression_x170 {-> expression} = [expr]:expression_p180 {-> expr.expression};
+  {interval} [left_border]:expression_p170 interval [right_border]:expression_p180 {-> New expression.interval(left_border.expression, right_border.expression)} |
+  {next_level} [expr]:expression_p180 {-> expr.expression};
 
+// Priority 180:
 expression_p180 {-> expression} =
-  {minus_or_set_subtract} [left]:expression_p180 minus [right]:expression_x180 {-> New expression.minus_or_set_subtract(left.expression, right.expression)} |
-  {add} [left]:expression_p180 plus [right]:expression_x180 {-> New expression.add(left.expression, right.expression)} |
-  {set_subtraction} [left]:expression_p180 set_subtraction [right]:expression_x180 {-> New expression.set_subtraction(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x180 {-> expr.expression};
-expression_x180 {-> expression} = [expr]:expression_p190 {-> expr.expression};
+  {minus_or_set_subtract} [left]:expression_p180 minus [right]:expression_p190 {-> New expression.minus_or_set_subtract(left.expression, right.expression)} |
+  {add} [left]:expression_p180 plus [right]:expression_p190 {-> New expression.add(left.expression, right.expression)} |
+  {set_subtraction} [left]:expression_p180 set_subtraction [right]:expression_p190 {-> New expression.set_subtraction(left.expression, right.expression)} |
+  {next_level} [expr]:expression_p190 {-> expr.expression};
 
+// Priority 190:
 expression_p190 {-> expression} =
-  {mul} [left]:expression_p190 product [right]:expression_x190 {-> New expression.mult_or_cart(left.expression, right.expression)} |
-  {div} [left]:expression_p190 division [right]:expression_x190 {-> New expression.div(left.expression, right.expression)} |
-  {modulo} [left]:expression_p190 mod [right]:expression_x190 {-> New expression.modulo(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x190 {-> expr.expression};
-expression_x190 {-> expression} = [expr]:expression_p200 {-> expr.expression};
+  {mul} [left]:expression_p190 product [right]:expression_p200 {-> New expression.mult_or_cart(left.expression, right.expression)} |
+  {mulcart} [left]:expression_p190 cartesian_product [right]:expression_p200 {-> New expression.cartesian_product(left.expression, right.expression)} |
+  {div} [left]:expression_p190 division [right]:expression_p200 {-> New expression.div(left.expression, right.expression)} |
+  {modulo} [left]:expression_p190 mod [right]:expression_p200 {-> New expression.modulo(left.expression, right.expression)} |
+  {next_level} [expr]:expression_p200 {-> expr.expression};
 
+// Priority 200:
 /* Attention: power_of is right-assoziative! */
 expression_p200 {-> expression} =
   {power_of} [left]:expression_x200 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
   {next_level} [expr]:expression_x200 {-> expr.expression};
-expression_x200 {-> expression} = [expr]:expression_p210 {-> expr.expression};
 
+// Priority 201: CHECK IF Correct place for oftype
+expression_x200 {-> expression} =
+  {typeof} [left]:expression_p210 oftype [right]:expression_p210 {-> New expression.typeof(left.expression, right.expression)} | // TODO: check priority and nesting that should be allowed
+  [expr]:expression_p210 {-> expr.expression};
+
+// Priority 210:
 expression_p210 {-> expression} =
-  {unary_minus} minus [expression]:expression_x210 {-> New expression.unary_minus(expression.expression)} |
-  {next_level} [expr]:expression_x210 {-> expr.expression};
-expression_x210 {-> expression} = [expr]:expression_p230 {-> expr.expression};
+  {unary_minus} minus [expression]:expression_p230 {-> New expression.unary_minus(expression.expression)} |
+  {next_level} [expr]:expression_p230 {-> expr.expression};
 
+// Priority 230:
 expression_p230 {-> expression} =
-  {reverse} [expression]:expression_x230 tilde {-> New expression.reverse(expression.expression)} |
-  {next_level} [expr]:expression_x230 {-> expr.expression};
-expression_x230 {-> expression} = [expr]:expression_p231 {-> expr.expression};
+  {reverse} [expression]:expression_p231 tilde {-> New expression.reverse(expression.expression)} |
+  {next_level} [expr]:expression_p231 {-> expr.expression};
 
+// Priority 231:
 expression_p231 {-> expression} =
   {image} [left]:expression_p230 left_bracket [right]:expression_in_par right_bracket {-> New expression.image(left.expression, right.expression)} |
-  {next_level} [expr]:expression_x231 {-> expr.expression};
-expression_x231 {-> expression} = [expr]:expression_keyword {-> expr.expression};
+  {next_level} [expr]:expression_keyword {-> expr.expression};
 
 expression_keyword {-> expression} =
   {convert_bool} bool_cast left_par [predicate]:predicate_top right_par {-> New expression.convert_bool(predicate.predicate)} |
@@ -896,7 +950,6 @@ expression_keyword {-> expression} =
   {pow1_subset} pow1 left_par [expression]:expression_in_par right_par {-> New expression.pow1_subset(expression.expression)} |
   {fin_subset} fin left_par [expression]:expression_in_par right_par {-> New expression.fin_subset(expression.expression)} |
   {fin1_subset} fin1 left_par [expression]:expression_in_par right_par {-> New expression.fin1_subset(expression.expression)} |
-  {finite} finite left_par [expression]:expression_in_par right_par {-> New expression.finite(expression.expression)} |
   {general_union} generalized_union left_par [expression]:expression_in_par right_par {-> New expression.general_union(expression.expression)} |
   {general_intersection} generalized_inter left_par [expression]:expression_in_par right_par {-> New expression.general_intersection(expression.expression)} |
   {identity} id left_par [expression]:expression_in_par right_par {-> New expression.identity(expression.expression)} |
@@ -944,6 +997,9 @@ expression_keyword {-> expression} =
   |
   {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)}
   |
+  // The identifier lists in all comprehension sets should really be identifier_list and not expression_list,
+  // but that causes reduce/reduce conflicts with set extensions (literals).
+  // Instead, IdentListCheck later enforces that only identifiers are used.
   {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}
   |
   {event_b_comprehension_set} left_brace [identifiers]:expression_list dot2 [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
@@ -959,23 +1015,19 @@ expression_keyword {-> expression} =
   |
   {quantified_intersection2} quantified_inter [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
   |
-  {quantified_set} quantified_set [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}
-  |
-  {quantified_set2} quantified_set [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top right_par {-> New expression.prover_comprehension_set([identifiers.expression], predicates.predicate)}
-  |
   {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
   {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
-  {record_field} [record]:expression_p231 single_quotation [identifier]:expression_atomic {-> New expression.record_field(record.expression, identifier.expression)} |
+  {record_field} [record]:expression_p231 single_quotation [identifier]:normal_identifier_expression {-> New expression.record_field(record.expression, identifier.expression)} |
   {expression_operator} [name]:kw_expression_operator [parameters]:op_params {-> New expression.operator(name, [parameters.expression])} | // extension
   {next_level} [expr]:expression_func {-> expr.expression};
 
 rec_entry {-> rec_entry} =
-  {in_pars} left_par [identifier]:expression_top element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
-  {no_pars} [identifier]:expression_top element_of [value]:expression_in_par {-> New rec_entry(identifier.expression, value.expression)};
+  {in_pars} left_par [identifier]:normal_identifier_expression element_of [value]:expression_in_par right_par {-> New rec_entry(identifier.expression, value.expression)} |
+  {no_pars} [identifier]:normal_identifier_expression element_of [value]:expression_in_par {-> New rec_entry(identifier.expression, value.expression)};
 
 rec_entry_list {-> rec_entry*} =
   {single} [entry]:rec_entry {-> [entry.rec_entry]} |
@@ -988,9 +1040,10 @@ expression_func {-> expression} =
 expression_atomic {-> expression} =
   {paren} left_par [expression]:expression_in_par right_par {-> expression.expression} |
   {identifier} [identifier]:composed_identifier {-> New expression.identifier([identifier.identifier_literal])} |
-  {primed_identifier} [identifier]:composed_identifier dollar [grade]:integer_literal {-> New expression.primed_identifier([identifier.identifier_literal], grade)} |
+  {primed_identifier} [identifier]:composed_identifier b_prime {-> New expression.primed_identifier([identifier.identifier_literal])} |
   {string} [content]:string_literal {-> New expression.string(content)} |
   {multiline_string} multiline_string_start [content]:multiline_string_content multiline_string_end {-> New expression.multiline_string(content)} |
+  {multiline_template} multiline_template_start [content]:multiline_template_content multiline_template_end {-> New expression.multiline_template(content)} |
   {boolean_true} true {-> New expression.boolean_true()} |
   {boolean_false} false {-> New expression.boolean_false()} |
   {successor} succ {-> New expression.successor()} |
@@ -1023,6 +1076,8 @@ if_elseif_expression {-> expression} =
 expression_list {-> expression*} =
   {single} [expression]:expression_top {-> [expression.expression]} |
   {multiple} [rest]:expression_list comma [last]:expression_top {-> [rest.expression, last.expression]};
+
+expression_list_tail {-> expression*} = comma expression_list {-> [expression_list.expression]};
 
 /*expression_list_in_par {-> expression*} =
   {single} [expression]:expression_in_par {-> [expression.expression]} |
@@ -1064,6 +1119,13 @@ substitution_l3 {-> substitution} =
   {select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
   {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
   {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+  // According to the Atelier-B reference manual,
+  // the LHS of "becomes element of" and "becomes such that" substitutions can only contain (possibly dotted) identifiers.
+  // assign_list allows a bit more than that (namely function calls and record fields),
+  // but we cannot use a different production here,
+  // because it would cause reduce/reduce conflicts with assignment substitutions.
+  // Instead, IdentListCheck later enforces that only identifiers are used.
+  // TODO Could/should we allow function calls and record fields here as an extension?
   {becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
   {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
   {var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
@@ -1145,10 +1207,7 @@ quantified_variables_list {-> expression*} =
   {no_parentheses} [id]:identifier_list {-> [id.expression]};
 
 identifier_declaration_expression {-> expression} =
-  {description} [identifier]:identifier_expression pragma_description [content]:pragma_free_text {-> New expression.description(content,identifier.expression)}|
-  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
-
-identifier_expression {-> expression} =
+  {description} [identifier]:identifier_literal pragma_description [content]:pragma_free_text {-> New expression.description(content, New expression.identifier([identifier]))} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]};
@@ -1267,7 +1326,7 @@ set =
   {enumerated_set} [identifier]:identifier_literal* [elements]:expression* |
   {enumerated_set_via_def} [identifier]:identifier_literal* [elements_def]:identifier_literal*;  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
 
-freetype = [name]:identifier_literal [constructors]:freetype_constructor+;
+freetype = [name]:identifier_literal  [parameters]:expression* [constructors]:freetype_constructor+;
 freetype_constructor =
   {constructor} [name]:identifier_literal [argument]:expression |
   {element} [name]:identifier_literal;
@@ -1277,6 +1336,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
+  {description} [content]:pragma_free_text [operation]:operation |
   {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |
   {rule} [rule_name]:identifier_literal [attributes]:operation_attribute* [rule_body]:substitution |
   {computation} [name]:identifier_literal [attributes]:operation_attribute* [body]:substitution |
@@ -1286,7 +1346,11 @@ operation_attribute =
   [name]: kw_attribute_identifier [arguments]:expression* |
   {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate;
 
-event = [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal* [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*;
+event =
+  [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal*
+    [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*
+  |
+  {description} [content]:pragma_free_text [event]:event;
 witness = [name]:identifier_literal [predicate]:predicate;
 
 eventstatus = {ordinary} | {anticipated} | {convergent};
@@ -1322,7 +1386,8 @@ predicate =
   {partition} [set]:expression [elements]:expression* | /* Event-B only predicate */
   {definition} [def_literal]:def_literal_predicate [parameters]:expression* |
   {let_predicate} [identifiers]:expression* [assignment]:predicate [pred]:predicate |
-  {if_predicate} [condition]:predicate [then]:predicate [else]:predicate |
+  {if_elsif_predicate} [condition]:predicate [then]:predicate |
+  {if_predicate} [condition]:predicate [then]:predicate [elsifs]:predicate* [else]:predicate |
   {extended_pred} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only predicate - theory plugin */
   {operator} [name]:kw_predicate_operator [identifiers]:expression*; // extension for rules
 
@@ -1330,9 +1395,10 @@ predicate =
 expression =
   {description} [content]:pragma_free_text [expression]:expression |
   {identifier} [identifier]:identifier_literal* |
-  {primed_identifier} [identifier]:identifier_literal* [grade]:integer_literal |
+  {primed_identifier} [identifier]:identifier_literal* |
   {string} [content]:string_literal |
   {multiline_string} [content]:multiline_string_content |
+  {multiline_template} [content]:multiline_template_content |
   {boolean_true} |
   {boolean_false} |
   {integer} [literal]:integer_literal |
@@ -1379,13 +1445,11 @@ expression =
   {couple} [list]:expression* |
   {comprehension_set} [identifiers]:expression* [predicates]:predicate |
   {symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {prover_comprehension_set} [identifiers]:expression* [predicates]:predicate | // todo: fix this special case
   {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB only
   {pow_subset} [expression]:expression |
   {pow1_subset} [expression]:expression |
   {fin_subset} [expression]:expression |
   {fin1_subset} [expression]:expression |
-  {finite} [expression]:expression |
   {set_extension} [expressions]:expression* |
   {interval} [left_border]:expression [right_border]:expression |
   {union} [left]:expression [right]:expression |
@@ -1480,7 +1544,7 @@ expression =
   {rec} [entries]:rec_entry* |
   {record_field} [record]:expression [identifier]:expression |
   {extended_expr} [identifier]:identifier_literal [expressions]:expression* [predicates]:predicate* | /* Event-B only expression - theory plugin */
-  {typeof} [expression]:expression [type]:expression | /* Has no concrete syntax, is only generated by the translation process */
+  {typeof} [expression]:expression [type]:expression | /* Corresponds to oftype operator in Event-B, was only generated by the translation process */
   {operation_call} [operation]:identifier_literal* [parameters]:expression* |
   {operator} [name]:kw_expression_operator [identifiers]:expression*; // extension for rules
 

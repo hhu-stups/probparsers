@@ -10,14 +10,14 @@ public interface IIdentifierRenaming {
 	 * Minimal implementation that returns identifiers literally with no renaming or quoting at all.
 	 * This will result in invalid syntax if any identifiers in the AST are not valid in B syntax.
 	 */
-	public static final IIdentifierRenaming LITERAL = id -> id;
+	IIdentifierRenaming LITERAL = id -> id;
 	
 	/**
 	 * Default implementation that adds backquotes around identifiers that are otherwise not valid in B.
 	 * This allows outputting invalid identifiers in a way that ProB can parse again, allowing round-tripping of arbitrary identifiers.
 	 * Note that the backquote syntax is specific to ProB and not supported by other B tools.
 	 */
-	public static final IIdentifierRenaming QUOTE_INVALID = id -> {
+	IIdentifierRenaming QUOTE_INVALID = id -> {
 		if (Utils.isPlainBIdentifier(id)) {
 			return id;
 		} else {
@@ -43,5 +43,5 @@ public interface IIdentifierRenaming {
 	 * @param identifier the original identifier encountered by the pretty-printer
 	 * @return a possibly different identifier to use in place of the original identifier
 	 */
-	public abstract String renameIdentifier(String identifier);
+	String renameIdentifier(String identifier);
 }

@@ -1,11 +1,18 @@
 apply plugin: 'jacoco'
 apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
+apply plugin: 'me.champeau.jmh'
 
 dependencies {
-    sableCC(rootProject.sableCCDependency)
-    api(rootProject.sableCCRuntimeDependency)
-    api project(":prologlib")
+	sableCC(rootProject.sableCCDependency)
+	api(rootProject.sableCCRuntimeDependency)
+	api project(":prologlib")
 }
 
 rootProject.setupTestReport(project, ["de.prob.core.sablecc"])
+
+jmh {
+	warmupIterations = 2
+	iterations = 5
+	fork = 1
+}

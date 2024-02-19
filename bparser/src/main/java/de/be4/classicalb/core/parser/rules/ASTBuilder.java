@@ -1,9 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -66,7 +63,7 @@ public final class ASTBuilder {
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
 		final ArrayList<PExpression> list = new ArrayList<>();
 		list.add(pExpression.clone());
-		return createPositinedNode(new ASetExtensionExpression(list), pos);
+		return createPositionedNode(new ASetExtensionExpression(list), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
@@ -93,13 +90,11 @@ public final class ASTBuilder {
 		List<PSubstitution> subList = new ArrayList<>();
 		subList.add(sub1);
 		subList.add(sub2);
-		for (PSubstitution pSubstitution : subs) {
-			subList.add(pSubstitution);
-		}
+		subList.addAll(Arrays.asList(subs));
 		return new ASequenceSubstitution(subList);
 	}
 
-	public static <T extends PositionedNode> T createPositinedNode(T node, PositionedNode pos) {
+	public static <T extends PositionedNode> T createPositionedNode(T node, PositionedNode pos) {
 		node.setStartPos(pos.getStartPos());
 		node.setEndPos(pos.getEndPos());
 		return node;
@@ -116,18 +111,13 @@ public final class ASTBuilder {
 	}
 
 	public static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
-		List<PSubstitution> list = new ArrayList<>();
-		for (PSubstitution pSubstitution : pSubstitutions) {
-			list.add(pSubstitution);
-		}
-		return list;
+		return new ArrayList<>(Arrays.asList(pSubstitutions));
 	}
 
 	public static List<PExpression> createExpressionList(PExpression... pExpressions) {
 		final List<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < pExpressions.length; i++) {
-			PExpression oldNode = pExpressions[i];
-			PExpression node = pExpressions[i].clone();
+		for (PExpression oldNode : pExpressions) {
+			PExpression node = oldNode.clone();
 			node.setStartPos(oldNode.getStartPos());
 			node.setEndPos(oldNode.getEndPos());
 			list.add(node);
@@ -166,8 +156,8 @@ public final class ASTBuilder {
 
 	public static List<PExpression> createIdentifierList(String... strings) {
 		ArrayList<PExpression> list = new ArrayList<>();
-		for (int i = 0; i < strings.length; i++) {
-			list.add(createIdentifier(strings[i]));
+		for (String string : strings) {
+			list.add(createIdentifier(string));
 		}
 		return list;
 	}
@@ -329,14 +319,17 @@ public final class ASTBuilder {
 		iDefinitions.addDefinition(formatType, IDefinitions.Type.Expression);
 	}
 
-	public static void addBooleanPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
-		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(name),
-				new ArrayList<PExpression>(), bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
+	private static void addPreferenceDefinition(IDefinitions iDefinitions, String name, PExpression value) {
+		AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(new TIdentifierLiteral(PREFERENCES_PREFIX + name), Collections.emptyList(), value);
 		iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
 	}
 
+	public static void addBooleanPreferenceDefinition(IDefinitions iDefinitions, String name, boolean bool) {
+		addPreferenceDefinition(iDefinitions, name, bool ? new ABooleanTrueExpression() : new ABooleanFalseExpression());
+	}
+
 	public static void addGeneralPreferenceDefinitions(IDefinitions iDefinitions, Map<String, String> map) {
-		for (Entry<String, String> entry : map.entrySet()) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
 			addGeneralPreferenceDefinition(iDefinitions, entry.getKey(), entry.getValue());
 		}
 	}
@@ -345,31 +338,26 @@ public final class ASTBuilder {
 		if (iDefinitions.containsDefinition(name)) {
 			return;
 		}
-		if ("TRUE".equals(value)) {
-			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, true);
-		} else if ("FALSE".equals(value)) {
-			addBooleanPreferenceDefinition(iDefinitions, PREFERENCES_PREFIX + name, false);
-		} else {
-			if (getIntegerFromString(value) != null) {
-				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
-						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
-						new AIntegerExpression(new TIntegerLiteral(value)));
-				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-			} else {
-				AExpressionDefinitionDefinition def = new AExpressionDefinitionDefinition(
-						new TIdentifierLiteral(PREFERENCES_PREFIX + name), new ArrayList<PExpression>(),
-						new AStringExpression(new TStringLiteral(value)));
-				iDefinitions.addDefinition(def, IDefinitions.Type.Expression);
-			}
-		}
 
+		PExpression expr;
+		if ("TRUE".equals(value)) {
+			expr = new ABooleanTrueExpression();
+		} else if ("FALSE".equals(value)) {
+			expr = new ABooleanFalseExpression();
+		} else if (isInteger(value)) {
+			expr = new AIntegerExpression(new TIntegerLiteral(value));
+		} else {
+			expr = new AStringExpression(new TStringLiteral(value));
+		}
+		addPreferenceDefinition(iDefinitions, name, expr);
 	}
 
-	private static Integer getIntegerFromString(String value) {
+	private static boolean isInteger(String value) {
 		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) {
-			return null;
+			Integer.parseInt(value);
+			return true;
+		} catch (NumberFormatException ignored) {
+			return false;
 		}
 	}
 

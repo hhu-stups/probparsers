@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
@@ -54,11 +53,6 @@ public class DefinitionUsageCheck extends OptimizedTraversingAdapter implements 
 		if (paramCount != expected) {
 			exceptions.add(new CheckException("Number of parameters (" + paramCount + ") doesn't match declaration of definition " + literal + " (" + expected + ")", node));
 		}
-	}
-
-	@Override
-	public void setOptions(ParseOptions options) {
-		// ignore options
 	}
 
 	@Override

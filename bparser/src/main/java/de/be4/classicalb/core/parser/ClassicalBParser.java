@@ -12,7 +12,7 @@ public class ClassicalBParser implements ProBParserBase {
 	private static final String WRAPPER_PRED = "bpred";
 	private static final String WRAPPER_TRANS = "bop";
 	
-	private BParser bparser;
+	private final BParser bparser;
 	
 	public ClassicalBParser() {
 		this(new BParser());

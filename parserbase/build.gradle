@@ -3,7 +3,7 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 dependencies {
-    api project(":prologlib")
+	api project(":prologlib")
 }
 
 rootProject.setupTestReport(project, [])

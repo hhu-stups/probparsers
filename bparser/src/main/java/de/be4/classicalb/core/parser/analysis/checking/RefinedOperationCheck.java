@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.checking;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
@@ -23,10 +22,6 @@ public class RefinedOperationCheck extends MachineClauseAdapter implements Seman
 	 */
 	
 	private final List<CheckException> exceptions = new ArrayList<>();
-
-	@Override
-	public void setOptions(ParseOptions options) {
-	}
 
 	@Override
 	public void runChecks(Start rootNode) {

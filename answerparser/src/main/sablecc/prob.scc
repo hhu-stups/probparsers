@@ -6,7 +6,7 @@ Package de.prob.core.sablecc;
 Helpers
   /*
    Formal Syntax as defined in
-   http://www.sics.se/sicstus/docs/latest4/html/sicstus.html/ref_002dsyn_002dsyn_002dtok.html#ref_002dsyn_002dsyn_002dtok
+   https://sicstus.sics.se/sicstus/docs/latest4/html/sicstus.html/ref_002dsyn_002dsyn_002dtok.html#ref_002dsyn_002dsyn_002dtok
   */
 
   /* layout-char
@@ -14,14 +14,14 @@ Helpers
      such as <TAB>, <LFD>, and <SPC>, as well as all characters with Unicode property Pattern_Whitespace
      including the Unicode-specific <LINE SEPARATOR> (8232).
   */
-  // layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
-  layout_char = 10 | 13;
+  layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  // layout_char = 10 | 13;
 
   /* small-letter
      These are character codes 97..122, i.e. the letters `a' through `z', as well as the non-ASCII character
      codes 170, 186, 223..246, and 248..255.
   */
-  small_letter = ['a'..'z'] | 170 | 186 | [223..246] | [248..255];
+  small_letter = [[['a'..'z'] + [170 + 186]] + [[223..246] + [248..255]]];
 
   /* capital-letter
      These are character codes 65..90, i.e. the letters `A' through `Z', as well as the non-ASCII character
@@ -38,51 +38,51 @@ Helpers
      These are character codes 35, 36, 38, 42, 43, 45..47, 58, 60..64, 92, 94, and 126, i.e. the characters:
      + - * / \ ^ < > = ~ : . ? @ # $ &
   */
-  dot = '.';
-  symbol_char = '+' | '-' | '*' | '/' | '\' | '^' | '<' | '>' | '=' | '~' | ':' | dot | '?' | '@' | '#' | '$' | '&';
+  symbol_char = [[[[['+' + '-'] + ['*' + '/']] + [['\' + '^'] + ['<' + '>']]] + [[['=' + '~'] + [':' + '.']] + [['?' + '@'] + ['#' + '$']]]] + '&'];
 
   /* solo-char
      These are character codes 33 and 59 i.e. the characters `!' and `;'
   */
-
-  solo_char = 33 | 59;
+  solo_char = ['!' + ';'];
 
   /* punctuation-char
      These are character codes 37, 40, 41, 44, 91, 93, and 123..125, i.e. the characters:
      % ( ) , [ ] { | }
   */
-  l_par = '(';
-  r_par = ')';
-  l_sq = '[';
-  r_sq = ']';
-  comma = ',';
-  punctuation_char = '%' | l_par | r_par | l_sq | r_sq | '{' | '}' | '|' | comma;
+  punctuation_char = ['%' + [[['(' + ')'] + ['[' + ']']] + [['{' + '}'] + ['|' + ',']]]];
 
   /* quote-char
-     These are character codes 34, 39, and 96 i.e. the characters `"', `'', and ``'.
+     These are character codes 34 and 39 i.e. the characters `"' and `''.
   */
   quote = 39;
-  quote_char = 34 | quote | 96;
+  quote_char = ['"' + quote];
 
-  /* underline
-     This is character code 95 i.e. the character `_'.
-  */
-  underline = '_';
-
-  alpha = capital_letter | small_letter | digit | underline;
+  alpha = [[capital_letter + small_letter] + [digit + '_']];
 
   word = small_letter alpha*;
   symbol = symbol_char+;
 
   hex = [[['A' .. 'F'] + ['0' .. '9']] + ['a' .. 'f']];
   octal = ['0' .. '7'];
+  bin = ['0' .. '1'];
   escape_sequences =
-    '\b' | '\t' | '\n' | '\v' | '\f' | '\r' | '\e' | '\d' | '\a' |
-    '\x' hex+ '\' | '\' octal+ | '\' 10 | '\\' | '\' quote_char;
+    '\a' | '\b' | '\t' | '\n' | '\v' | '\f' | '\r' | '\e' | '\d' |
+    '\x' hex+ '\' | '\' octal+ '\' | '\' 10 | '\\' | '\' quote_char | '\`';
 
-  quoted_item = escape_sequences | [[[0 .. 0xffff] - 39] - 92];
+  /*
+    variations from grammar:
+      - backslash and quote_char are removed, they are added later
+      - the backtick is added as a valid character
+  */
+  quoted_char = [[[alpha + [symbol_char - '\']] + [solo_char + punctuation_char]] + [' ' + '`']];
 
-  quoted_name = quote quoted_item* quote;
+  string_item = escape_sequences | quoted_char | quote | '""';
+  string = '"' string_item* '"';
+
+  quoted_atom_item = escape_sequences | quoted_char | '"' | quote quote;
+  quoted_atom = quote quoted_atom_item* quote;
+
+  sign = ['-' + '+'];
 
   any_char = [0 .. 0xffff]; /* THIS IS ACTUALLY ANY UNICODE CHARACTER */
 
@@ -108,15 +108,16 @@ Tokens
   {init->exception} exception = 'exception';
 
   // P R O L O G - S T U F F
-  {normal} comma = comma;
-  {normal} l_par = l_par;
-  {normal} r_par = r_par;
-  {normal} l_sq = l_sq;
-  {normal} r_sq = r_sq;
+  {normal} comma = ',';
+  {normal} l_par = '(';
+  {normal} r_par = ')';
+  {normal} l_sq = '[';
+  {normal} r_sq = ']';
 
-  {normal} number = '-'? digit+ ('.' digit+)? (['E' + 'e'] ['+' + '-']? digit+)?;
-  {normal} name = word | '{' '}' | solo_char | l_sq r_sq | quoted_name | symbol;
-  {normal} variable = underline alpha* | capital_letter alpha*;
+  {normal} integer = sign? ('0b' bin+ | '0o' octal+ | '0x' hex+ | '0' quote quoted_atom_item | digit+);
+  {normal} float = sign? ((digit+ '.' digit+) | (digit+ ('.' digit+)? ['E' + 'e'] sign? digit+));
+  {normal} name =  solo_char | '{}' | '[]' | word | symbol | string | quoted_atom;
+  {normal} variable = '_' alpha* | capital_letter alpha*;
 
   // E X C E P T I O N S
   {exception} string = any_char*;
@@ -137,8 +138,9 @@ Productions
         | {exception} exception string
         | {progress} progress l_par term r_par
         | {call_back} call_back l_par term r_par;
-  term = {number} number | {atom} name | {variable} variable | [functor]:name params;
-  params = l_par term more_params r_par;
+  term = {number} number | {variable} variable | {atom} name | {list} l_sq params r_sq | {compound} [functor]:name l_par params r_par;
+  number = {float} float | {integer} integer;
+  params = term more_params;
   more_params = {empty} | comma term more_params;
 
 // end of grammar

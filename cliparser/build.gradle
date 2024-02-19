@@ -4,14 +4,22 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 dependencies {
-    implementation project(":bparser")
-    implementation project(":prologlib")
-    implementation project(":parserbase")
-    implementation project(":ltlparser")
+	implementation project(":bparser")
+	implementation project(":prologlib")
+	implementation project(":parserbase")
+	implementation project(":ltlparser")
 }
 
 application {
-    mainClass = "de.prob.cliparser.CliBParser"
+	mainClass = "de.prob.cliparser.CliBParser"
+}
+
+jar {
+	manifest {
+		attributes([
+			"Main-Class": application.mainClass,
+		])
+	}
 }
 
 rootProject.setupTestReport(project, [])

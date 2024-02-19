@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class BinaryOperator {
-	protected static final List<BinaryOperator> OPS = createBinaryOperators();
+	static final List<BinaryOperator> OPS = createBinaryOperators();
 
 	private static void defineBinaryOperators(final Collection<BinaryOperator> ops) {
 		addOp(ops, "*", 190, LEFT, "multiplication or Cartesian product");
@@ -52,7 +52,7 @@ public final class BinaryOperator {
 	}
 
 	private static List<BinaryOperator> createBinaryOperators() {
-		List<BinaryOperator> binOps = new ArrayList<BinaryOperator>();
+		List<BinaryOperator> binOps = new ArrayList<>();
 		defineBinaryOperators(binOps);
 		return Collections.unmodifiableList(binOps);
 	}

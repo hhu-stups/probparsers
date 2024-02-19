@@ -27,64 +27,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
-import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AAssignSubstitution;
-import de.be4.classicalb.core.parser.node.ABecomesElementOfSubstitution;
-import de.be4.classicalb.core.parser.node.AChoiceSubstitution;
-import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AComputationOperation;
-import de.be4.classicalb.core.parser.node.AConcatExpression;
-import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.ADeferredSetSet;
-import de.be4.classicalb.core.parser.node.ADefineSubstitution;
-import de.be4.classicalb.core.parser.node.ADefinitionExpression;
-import de.be4.classicalb.core.parser.node.AEnumeratedSetSet;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AForLoopSubstitution;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AForallSubMessageSubstitution;
-import de.be4.classicalb.core.parser.node.AFunctionOperation;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.AImplicationPredicate;
-import de.be4.classicalb.core.parser.node.AIntegerExpression;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
-import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AOperationAttribute;
-import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
-import de.be4.classicalb.core.parser.node.AOperatorExpression;
-import de.be4.classicalb.core.parser.node.AOperatorPredicate;
-import de.be4.classicalb.core.parser.node.APredicateAttributeOperationAttribute;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.ARecEntry;
-import de.be4.classicalb.core.parser.node.ARecordFieldExpression;
-import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.ARuleFailSubSubstitution;
-import de.be4.classicalb.core.parser.node.ARuleOperation;
-import de.be4.classicalb.core.parser.node.ASeesMachineClause;
-import de.be4.classicalb.core.parser.node.AStringExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
-import de.be4.classicalb.core.parser.node.AUsesMachineClause;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
-import de.be4.classicalb.core.parser.node.AWhileSubstitution;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.POperationAttribute;
-import de.be4.classicalb.core.parser.node.PPredicate;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 /*
@@ -256,7 +199,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
 		this.knownIdentifier.addKnownIdentifier(copy.get(0));
-		this.knownIdentifier.addKnownIdentifierList(new ArrayList<PExpression>(node.getElements()));
+		this.knownIdentifier.addKnownIdentifierList(new ArrayList<>(node.getElements()));
 	}
 
 	class OccurredAttributes {
@@ -323,7 +266,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		final AIdentifierExpression idExpr = (AIdentifierExpression) arguments.get(0);
 		currentOperation.addReplacesIdentifier(idExpr);
-		return;
 	}
 
 	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
@@ -342,7 +284,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addTags(tags);
-		return;
 	}
 
 	private void checkClassificationAttribute(POperationAttribute pOperationAttribute,
@@ -361,7 +302,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException(
 					"CLASSIFICATION is not an attribute of a FUNCTION or COMPUTATION operation.", pOperationAttribute));
 		}
-		return;
 	}
 
 	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
@@ -378,7 +318,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("ERROR_TYPES is not an attribute of a FUNCTION or COMPUTATION operation.",
 					pOperationAttribute));
 		}
-		return;
 	}
 
 	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
@@ -394,7 +333,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("RULEID is not an attribute of a FUNCTION or Computation operation.",
 					pOperationAttribute));
 		}
-		return;
 	}
 
 	private void checkDependsOnComputationAttribute(POperationAttribute pOperationAttribute,
@@ -409,7 +347,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllComputationDependencies(list);
-		return;
 	}
 
 	private void checkDependsOnRuleAttribute(POperationAttribute pOperationAttribute,
@@ -424,7 +361,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			}
 		}
 		currentOperation.addAllRuleDependencies(list);
-		return;
 	}
 
 	private void checkOperationPredicateAttribute(OccurredAttributes occurredAttributes,
@@ -557,7 +493,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()), true);
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()), true);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -589,7 +525,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
-		return;
 	}
 
 	private Integer countPlaceHoldersInExpression(PExpression param) {
@@ -631,7 +566,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
-		return;
 	}
 
 	@Override
@@ -740,7 +674,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkNotCheckedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -750,7 +683,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -772,7 +704,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -782,7 +713,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkFailedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -792,7 +722,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkSucceededRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -802,7 +731,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	private void checkSucceededRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -824,7 +752,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-		return;
 	}
 
 	@Override
@@ -840,7 +767,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
 			if (!node.getIdentifiers().isEmpty()) {
 				// implication is not allowed as the top level predicate if
@@ -868,7 +795,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		checkTopLevelPredicate(node.getWhere(), "(WHERE predicate in RULE_FORALL)");
-		this.identifierScope.createNewScope(new LinkedList<PExpression>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);
 		node.getMessage().apply(this);
@@ -1072,7 +999,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if ("READ_XML_FROM_STRING".equals(defName)) {
 			if (node.getParameters().size() != 1) {
 				errorList.add(new CheckException(
-						"The external function 'READ_XML_FROM_STRING' requires exactly one argrument.", node));
+						"The external function 'READ_XML_FROM_STRING' requires exactly one argument.", node));
 				return;
 			}
 			PExpression pExpression = node.getParameters().get(0);
@@ -1090,11 +1017,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					InputSource inputSource = new InputSource(new StringReader(text.trim()));
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					SAXParser saxParser = factory.newSAXParser();
-					Locale newLocale = new Locale("en", "GB");
 					// Surprisingly, we need both of the following two lines in
 					// order to obtain all error messages in English.
-					java.util.Locale.setDefault(newLocale);
-					saxParser.setProperty("http://apache.org/xml/properties/locale", newLocale);
+					Locale.setDefault(Locale.UK);
+					saxParser.setProperty("http://apache.org/xml/properties/locale", Locale.UK);
 					saxParser.parse(inputSource, new DefaultHandler());
 				} catch (SAXParseException e) {
 					final int line = content.getLine() + numberOfNewLines + e.getLineNumber() - 1;
@@ -1156,7 +1082,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class KnownIdentifier {
-		Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
+		final Map<String, TIdentifierLiteral> knownIdentifiers = new HashMap<>();
 
 		public void addKnownIdentifierList(List<PExpression> parameters) {
 			for (PExpression pExpression : parameters) {
@@ -1177,7 +1103,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public void addKnownIdentifier(PExpression expression) {
-			if (expression instanceof AIdentifierExpression) {
+			if (expression instanceof ADescriptionExpression) {
+				// expression with description pragma
+				this.addKnownIdentifier(((ADescriptionExpression) expression).getExpression());
+			} else if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
 				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
 				// the size of list is zero; this ensured by the grammar
@@ -1244,9 +1173,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	class Scope {
-		Set<String> identifiers;
-		boolean assignable;
+	static class Scope {
+		final Set<String> identifiers;
+		final boolean assignable;
 
 		Scope(Set<String> identifiers, boolean assignable) {
 			this.identifiers = identifiers;

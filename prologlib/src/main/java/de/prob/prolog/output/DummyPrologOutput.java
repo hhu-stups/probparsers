@@ -1,13 +1,14 @@
 package de.prob.prolog.output;
 
-import java.math.BigInteger;
-
 import de.prob.prolog.term.PrologTerm;
+
+import java.math.BigInteger;
 
 /**
  * An implementation of {@link IPrologTermOutput} that does nothing.
  */
-public class DummyPrologOutput implements IPrologTermOutput {
+public final class DummyPrologOutput implements IPrologTermOutput {
+
 	public static final DummyPrologOutput DUMMY = new DummyPrologOutput();
 
 	private DummyPrologOutput() {
@@ -20,11 +21,6 @@ public class DummyPrologOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput closeTerm() {
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput emptyList() {
 		return this;
 	}
 
@@ -44,22 +40,12 @@ public class DummyPrologOutput implements IPrologTermOutput {
 	}
 
 	@Override
-	public IPrologTermOutput openTerm(final String functor) {
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndention) {
+	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
 		return this;
 	}
 
 	@Override
 	public IPrologTermOutput printAtom(final String content) {
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printAtomOrNumber(final String content) {
 		return this;
 	}
 
@@ -92,5 +78,4 @@ public class DummyPrologOutput implements IPrologTermOutput {
 	public IPrologTermOutput printTerm(final PrologTerm term) {
 		return this;
 	}
-
 }

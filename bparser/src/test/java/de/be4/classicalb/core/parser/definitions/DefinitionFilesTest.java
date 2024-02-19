@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DefinitionFilesTest implements IFileContentProvider {
 
-	private static final Map<String, String> defFileContents = new HashMap<String, String>();
+	private static final Map<String, String> defFileContents = new HashMap<>();
 
 	static {
 		defFileContents.put("DefFile", "DEFINITIONS def2 == yy; def3 == zz");
@@ -134,7 +134,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRealFiles() throws Exception {
 		final BParser parser = new BParser("testcase");
 		File machine = new File(
-				this.getClass().getClassLoader().getResource("parsable/DefinitionFileTest.mch").toURI());
+				this.getClass().getResource("/parsable/DefinitionFileTest.mch").toURI());
 		parser.parseFile(machine);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -200,11 +200,11 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 
-	class CountingDefinitionFileProvider implements IDefinitionFileProvider {
+	static class CountingDefinitionFileProvider implements IDefinitionFileProvider {
 		int getStoredCounter = 0;
 		int storeCounter = 0;
 		int getContentCounter = 0;
-		private final Map<String, IDefinitions> store = new HashMap<String, IDefinitions>();
+		private final Map<String, IDefinitions> store = new HashMap<>();
 
 		@Override
 		public IDefinitions getDefinitions(final String filename) {

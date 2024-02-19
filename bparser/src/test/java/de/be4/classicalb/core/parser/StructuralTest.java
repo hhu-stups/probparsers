@@ -33,11 +33,11 @@ public class StructuralTest {
 		final AMachineHeader header = (AMachineHeader) machine.getHeader();
 		assertEquals("Machine name not as expected", "SimplyStructure", header.getName().get(0).getText());
 		assertNotNull("Machine header parameter list is null", header.getParameters());
-		assertTrue("More machine header parameters than expected", header.getParameters().size() == 0);
+		assertTrue("More machine header parameters than expected", header.getParameters().isEmpty());
 
 		final LinkedList<PMachineClause> machineClauses = machine.getMachineClauses();
 		assertNotNull("Machine clause list is null", machineClauses);
-		assertTrue("More machine clauses than expected", machineClauses.size() == 0);
+		assertTrue("More machine clauses than expected", machineClauses.isEmpty());
 	}
 
 	@Test

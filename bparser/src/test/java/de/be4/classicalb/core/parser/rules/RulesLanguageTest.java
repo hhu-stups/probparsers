@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import util.Helpers;
@@ -23,13 +24,13 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testRuleClassification() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFTY BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 CLASSIFICATION SAFETY BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 
 	@Test
 	public void testRuleTags() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFTY, \"Rule-123\" BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 TAGS SAFETY, \"Rule-123\" BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 
@@ -40,7 +41,9 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("sets(none,[enumerated_set(none,foo,[identifier(none,foo1),identifier(none,foo2)]"));
 	}
 
+	@Ignore
 	@Test
+	// print of counterexamples removed
 	public void testRulePrint() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
@@ -59,7 +62,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testDublicateRuleName() {
+	public void testDuplicateRuleName() {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END;RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> getRulesProjectAsPrologTerm(testMachine));
 		assertTrue(e.getMessage().contains("Duplicate operation name"));
@@ -75,7 +78,7 @@ public class RulesLanguageTest {
 	public void testRuleFailSequence() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"fail1\"END; RULE_FAIL COUNTEREXAMPLE \"fail2\"END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue(!result.contains("$ResultTuple"));
+		assertFalse(result.contains("$ResultTuple"));
 	}
 
 	@Test
@@ -125,7 +128,7 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleCounterexmples() throws BCompoundException {
+	public void testRuleCounterexamples() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"fail\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 	}
@@ -148,7 +151,7 @@ public class RulesLanguageTest {
 	public void testRuleId() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue("RULEID should not appear in the translated B machine.", !result.contains("id2"));
+		assertFalse("RULEID should not appear in the translated B machine.", result.contains("id2"));
 	}
 
 	@Test

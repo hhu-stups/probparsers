@@ -26,7 +26,7 @@ public class CTagsGenerator {
 		list.addAll(createCTagsEntryFromConstants(project));
 		list.addAll(createCTagsFromMachines(project));
 
-		try (FileWriter fw = new FileWriter(ctagsFile);) {
+		try (FileWriter fw = new FileWriter(ctagsFile)) {
 			for (CTagsEntry cTagsEntry : list) {
 				fw.write(cTagsEntry.toString());
 				fw.write(System.lineSeparator());

@@ -7,7 +7,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -114,7 +113,7 @@ public class PreParser {
 		preLexer.setPosition(this.startLine, this.startColumn);
 
 		final Parser preParser = new Parser(preLexer);
-		Start rootNode = null;
+		Start rootNode;
 		try {
 			rootNode = preParser.parse();
 		} catch (final ParserException e) {
@@ -151,7 +150,7 @@ public class PreParser {
 		}
 
 		for (final Token fileNameToken : list) {
-			final List<String> newDoneList = new ArrayList<String>(doneDefFiles);
+			final List<String> newDoneList = new ArrayList<>(doneDefFiles);
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def
 			final String fileName = fileNameToken.getText();
@@ -163,7 +162,7 @@ public class PreParser {
 					}
 					sb.append(fileName);
 					throw new PreParseException(fileNameToken,
-							"Cyclic references in definition files: " + sb.toString());
+							"Cyclic references in definition files: " + sb);
 				}
 
 				IDefinitions definitions;
@@ -198,8 +197,8 @@ public class PreParser {
 			throws PreParseException {
 		// use linked list as we rely on pop() and push()
 		final LinkedList<Token> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
-		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<Token>();
-		Set<String> todoDefs = new HashSet<String>();
+		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<>();
+		Set<String> todoDefs = new HashSet<>();
 		for (Token token : remainingDefinitions) {
 			todoDefs.add(token.getText());
 		}
@@ -218,7 +217,7 @@ public class PreParser {
 				final Token definition = remainingDefinitions.pop();
 
 				final Token defRhs = definitions.get(definition);
-				Definitions.Type type = null;
+				Definitions.Type type;
 				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 				type = definitionType.type;
 				if (type != null) {
@@ -276,7 +275,7 @@ public class PreParser {
 				}
 			}
 			final Token firstDefinitionToken = definitionMap.get(cycle.get(0));
-			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb.toString());
+			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb);
 		} else {
 			List<Token> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
@@ -304,7 +303,7 @@ public class PreParser {
 			lexer.setParseOptions(parseOptions);
 			lexer.setLexerPreparse();
 			Set<String> set = new HashSet<>();
-			de.be4.classicalb.core.parser.node.Token next = null;
+			de.be4.classicalb.core.parser.node.Token next;
 			try {
 				next = lexer.next();
 				while (!(next instanceof EOF)) {
@@ -318,6 +317,7 @@ public class PreParser {
 					next = lexer.next();
 				}
 			} catch (IOException e) {
+				throw new PreParseException("Error while parsing", e);
 			} catch (BLexerException e) {
 				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
 				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(nameToken, rhsToken,
@@ -339,33 +339,25 @@ public class PreParser {
 		// however, the list is needed for collections.sort
 		// we can not use a priority queue to sort, as the sorting is done once
 		// afterwards, it has to remain unsorted
-		final LinkedList<Token> list = new LinkedList<Token>();
-		for (final Iterator<Token> iterator = definitions.keySet().iterator(); iterator.hasNext();) {
-			final Token definition = iterator.next();
-			list.add(definition);
-
-		}
+		final LinkedList<Token> list = new LinkedList<>(definitions.keySet());
 		/*
 		 * Sort the definitions in order of their appearance in the sourcecode.
 		 * Dependencies in between definitions are handled later when computing
 		 * there type
 		 */
-		Collections.sort(list, new Comparator<Token>() {
-			@Override
-			public int compare(final Token o1, final Token o2) {
-				if (o1.getLine() == o2.getLine()) {
-					if (o1.getPos() == o2.getPos())
-						return 0;
-					else
-						return o1.getPos() - o2.getPos();
-				} else
-					return o1.getLine() - o2.getLine();
-			}
+		list.sort((o1, o2) -> {
+			if (o1.getLine() == o2.getLine()) {
+				if (o1.getPos() == o2.getPos())
+					return 0;
+				else
+					return o1.getPos() - o2.getPos();
+			} else
+				return o1.getLine() - o2.getLine();
 		});
 		return list;
 	}
 
-	class DefinitionType {
+	static class DefinitionType {
 		Definitions.Type type;
 		String errorMessage;
 		de.be4.classicalb.core.parser.node.Token errorToken;
@@ -412,7 +404,7 @@ public class PreParser {
 		final String definitionRhs = rhsToken.getText();
 
 		de.be4.classicalb.core.parser.node.Start start;
-		de.be4.classicalb.core.parser.node.Token errorToken = null;
+		de.be4.classicalb.core.parser.node.Token errorToken;
 		try {
 			start = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
 			// Predicate?
@@ -502,7 +494,7 @@ public class PreParser {
 	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,
 			Token rhsToken, String oldMessage) {
 		Pattern pattern = Pattern.compile("\\d+");
-		Matcher m = pattern.matcher((CharSequence) oldMessage);
+		Matcher m = pattern.matcher(oldMessage);
 		m.find();
 		int line = Integer.parseInt(m.group());
 		m.find();

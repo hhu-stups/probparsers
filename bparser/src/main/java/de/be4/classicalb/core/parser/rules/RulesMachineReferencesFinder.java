@@ -198,17 +198,13 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		}
 		if (tempFile.isDirectory()) {
 			errorList.add(new CheckException(String.format("File '%s' is a directory.", filePath), fileNode.getFile()));
-			return;
 		} else if (file == null) {
 			errorList.add(new CheckException(String.format("File '%s' does not exist.", filePath), fileNode.getFile()));
-			return;
 		} else {
 			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name,
 					fileNode.getReference());
 			references.add(rulesMachineReference);
-			return;
 		}
-
 	}
 
 	private static final String[] SUFFICES = new String[] { ".rmch", ".mch" };

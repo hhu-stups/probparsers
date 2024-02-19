@@ -1,24 +1,21 @@
 package de.prob.prolog.term;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import de.prob.prolog.output.PrologTermStringOutput;
+import org.junit.Test;
 
 import java.util.ListIterator;
 
-import org.junit.Test;
-
-import de.prob.prolog.output.PrologTermStringOutput;
+import static org.junit.Assert.*;
 
 public class ListPrologTermTest {
+
 	@Test(expected = IllegalStateException.class)
 	public void tailTestEmpty() {
 		ListPrologTerm l = new ListPrologTerm();
 		l.tail(); // throws exception
 	}
 
-	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	@Test(expected = IllegalStateException.class)
 	public void headTestEmpty() {
 		ListPrologTerm l = new ListPrologTerm();
 		l.head();// throws exception
@@ -26,14 +23,14 @@ public class ListPrologTermTest {
 
 	@Test
 	public void tailTest2() {
-		ListPrologTerm l = new ListPrologTerm(new IntegerPrologTerm(42));
+		ListPrologTerm l = new ListPrologTerm(AIntegerPrologTerm.create(42));
 		ListPrologTerm tail = l.tail();
 		assertTrue(tail.isEmpty());
 	}
 
 	@Test
 	public void tailTest3() {
-		ListPrologTerm l = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
+		ListPrologTerm l = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5));
 		ListPrologTerm tail = l.tail();
 		assertFalse(tail.isEmpty());
 		assertTrue(tail.tail().isEmpty());
@@ -48,8 +45,8 @@ public class ListPrologTermTest {
 
 	@Test
 	public void initTest2() {
-		ListPrologTerm t1 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
-		ListPrologTerm t2 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5));
+		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5));
+		ListPrologTerm t2 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5));
 		assertEquals(t1, t2);
 	}
 
@@ -164,8 +161,8 @@ public class ListPrologTermTest {
 
 	@Test
 	public void testLastIndexOf() {
-		ListPrologTerm t1 = new ListPrologTerm(new IntegerPrologTerm(42), new IntegerPrologTerm(5), new IntegerPrologTerm(5), new IntegerPrologTerm(6));
-		assertEquals(2, t1.lastIndexOf(new IntegerPrologTerm(5)));
+		ListPrologTerm t1 = new ListPrologTerm(AIntegerPrologTerm.create(42), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(5), AIntegerPrologTerm.create(6));
+		assertEquals(2, t1.lastIndexOf(AIntegerPrologTerm.create(5)));
 	}
 
 	private PrologTerm[] createFixture(int size) {
@@ -175,5 +172,4 @@ public class ListPrologTermTest {
 		}
 		return res;
 	}
-
 }

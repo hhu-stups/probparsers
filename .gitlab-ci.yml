@@ -8,6 +8,12 @@ variables:
   GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
   DEBIAN_FRONTEND: noninteractive
 
+cache:
+  paths:
+    - .gradle/caches
+    - .gradle/notifications
+    - .gradle/wrapper
+
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update
@@ -37,6 +43,10 @@ tests:jdk-11:
 tests:jdk-17:
   extends: .tests
   image: eclipse-temurin:17
+
+tests:jdk-21:
+  extends: .tests
+  image: eclipse-temurin:21
 
 tests:macos:
   extends: .tests

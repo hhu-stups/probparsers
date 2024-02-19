@@ -1,17 +1,18 @@
 package de.be4.classicalb.core.parser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DefinitionTypes {
-
-	private final Map<String, Definitions.Type> types = new HashMap<String, Definitions.Type>();
+	private final Map<String, Definitions.Type> types;
 
 	public DefinitionTypes() {
+		this(Collections.emptyMap());
 	}
 
 	public DefinitionTypes(final Map<String, Definitions.Type> newTypes) {
-		addAll(newTypes);
+		this.types = new HashMap<>(newTypes);
 	}
 
 	public void addTyping(final String definitionName,
@@ -24,11 +25,7 @@ public class DefinitionTypes {
 	}
 
 	public Definitions.Type getType(final String definitionName) {
-		if (types.containsKey(definitionName)) {
-			return types.get(definitionName);
-		} else {
-			return IDefinitions.Type.NoDefinition;
-		}
+		return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
 	}
 	
 	@Override

@@ -3,8 +3,8 @@ apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
 dependencies {
-    sableCC(rootProject.sableCCDependency)
-    api(rootProject.sableCCRuntimeDependency)
+	sableCC(rootProject.sableCCDependency)
+	api(rootProject.sableCCRuntimeDependency)
 }
 
 rootProject.setupTestReport(project, ["de.be4.eventb.core.parser"])

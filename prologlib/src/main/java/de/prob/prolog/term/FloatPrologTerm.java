@@ -12,46 +12,44 @@ import de.prob.prolog.output.IPrologTermOutput;
  * Represents a Prolog floating-point number (double precision).
  */
 public final class FloatPrologTerm extends PrologTerm {
-	private final double value; 
-	
+
+	private final double value;
+
 	public FloatPrologTerm(final double value) {
 		this.value = value;
 	}
-	
+
 	@Override
 	public boolean isNumber() {
 		return true;
 	}
-	
+
 	public double getValue() {
 		return this.value;
 	}
-	
+
 	@Override
 	public String getFunctor() {
 		return Double.toString(this.value);
 	}
-	
+
 	@Override
 	public void toTermOutput(final IPrologTermOutput pto) {
 		pto.printNumber(this.value);
 	}
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
-		}
-		if (obj == null || this.getClass() != obj.getClass()) {
+		} else if (!(obj instanceof FloatPrologTerm)) {
 			return false;
 		}
-		final FloatPrologTerm other = (FloatPrologTerm)obj;
-		return Double.compare(this.getValue(), other.getValue()) == 0;
+		return Double.compare(this.value, ((FloatPrologTerm) obj).value) == 0;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Double.hashCode(this.value);
 	}
-
 }

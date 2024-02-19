@@ -10,6 +10,7 @@ build/
 # IntelliJ
 *.iml
 .idea/
+out/
 
 # Junk from tests
 *.prob

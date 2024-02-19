@@ -14,13 +14,15 @@ import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
+import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
+import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
-import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.node.TSomeValue;
 import de.be4.classicalb.core.preparser.node.TSomething;
+import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
 
@@ -49,7 +51,7 @@ public class PreLexer extends Lexer {
 			// which cannot be done with filter.
 			return super.getToken();
 		} catch (LexerException e) {
-			//System.out.println("Exception: " + e.toString());
+			// System.out.println("Exception: " + e.toString());
 			// printState();
 			String msg = e.getMessage();
 			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
@@ -106,7 +108,7 @@ public class PreLexer extends Lexer {
 					}
 
 					// prepare rhs_body token to be the current one
-					((Token) rhsToken).setText(rhsBuffer.toString());
+					rhsToken.setText(rhsBuffer.toString());
 					token = rhsToken;
 					rhsToken = null;
 					rhsBuffer = null;
@@ -187,12 +189,19 @@ public class PreLexer extends Lexer {
 		}
 	}
 	
-	private void checkMultiLineString() {
+	private void checkMultiLineString() throws LexerException {
+		// TODO: check if we need to do this for multiline templates as well
 		// switch to special multiline_string_state state and back
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
-		} else if (token instanceof TMultilineStringEnd) {
+		} else if (token instanceof TMultilineTemplateStart) {
+			previousState = state;
+			state = State.MULTILINE_TEMPLATE;
+		} else if (token instanceof TMultilineStringEnd || token instanceof TMultilineTemplateEnd) {
+			if (previousState == null) {
+				throw new LexerException("Encountered multiline string end token without corresponding start token");
+			}
 			state = previousState;
 			previousState = null;
 		}

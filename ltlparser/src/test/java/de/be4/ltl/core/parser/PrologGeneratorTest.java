@@ -1,6 +1,6 @@
 package de.be4.ltl.core.parser;
 
-/** 
+/*
  * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
  * Heinrich Heine Universitaet Duesseldorf
  * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
@@ -581,6 +581,7 @@ public class PrologGeneratorTest {
 				"AG {taken= {}")))).parse();
 	}
 
+	@Test
 	public void testPredSyntaxError() throws Exception {
 		try {
 			parse("{X}");

@@ -34,7 +34,7 @@ final class PrologGeneratorHelper {
 	}
 
 	public void defaultIn(Class<?> clazz) {
-		StringBuffer sb = new StringBuffer(clazz.getSimpleName());
+		StringBuilder sb = new StringBuilder(clazz.getSimpleName());
 		sb.setLength(sb.length() - 3);
 		sb.deleteCharAt(0);
 		String term = sb.toString().toLowerCase(Locale.ENGLISH);
@@ -119,9 +119,7 @@ final class PrologGeneratorHelper {
 	public void parseTransitionPredicate(final UniversalToken token) {
 		try {
 			specParser.parseTransitionPredicate(pto, token.getText(), true, token.getLine(), token.getColumn());
-		} catch (ProBParseException e) {
-			throw createAdapterException(token, e);
-		} catch (UnsupportedOperationException e) {
+		} catch (ProBParseException | UnsupportedOperationException e) {
 			throw createAdapterException(token, e);
 		}
 	}

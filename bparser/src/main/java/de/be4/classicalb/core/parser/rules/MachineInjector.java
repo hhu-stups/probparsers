@@ -1,11 +1,6 @@
 package de.be4.classicalb.core.parser.rules;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
@@ -32,7 +27,7 @@ import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 
-public class MachineInjector extends DepthFirstAdapter {
+public final class MachineInjector extends DepthFirstAdapter {
 	AAbstractMachineParseUnit abstractMachineParseUnit;
 	List<PMachineClause> clausesList;
 
@@ -46,7 +41,7 @@ public class MachineInjector extends DepthFirstAdapter {
 	AInitialisationMachineClause initialisationClause;
 	AOperationsMachineClause operationClause;
 	ADefinitionsMachineClause definitionsClause;
-	HashSet<String> definitionNames = new HashSet<>();
+	final HashSet<String> definitionNames = new HashSet<>();
 	private APredicateDefinitionDefinition goalDefinition;
 	private List<PDefinition> mainMachineDefinitions;
 
@@ -142,7 +137,7 @@ public class MachineInjector extends DepthFirstAdapter {
 
 		@Override
 		public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
-			node.setMachineClauses(new LinkedList<PMachineClause>());
+			node.setMachineClauses(new LinkedList<>());
 		}
 
 		@Override
@@ -153,9 +148,7 @@ public class MachineInjector extends DepthFirstAdapter {
 			} else {
 
 				LinkedList<PSet> sets = setsClause.getSetDefinitions();
-				for (PSet set : node.getSetDefinitions()) {
-					sets.add(set);
-				}
+				sets.addAll(node.getSetDefinitions());
 			}
 		}
 
@@ -166,9 +159,7 @@ public class MachineInjector extends DepthFirstAdapter {
 				clausesList.add(node);
 			} else {
 				LinkedList<PExpression> identifiers = constantsClause.getIdentifiers();
-				for (PExpression id : node.getIdentifiers()) {
-					identifiers.add(id);
-				}
+				identifiers.addAll(node.getIdentifiers());
 			}
 		}
 
@@ -179,9 +170,7 @@ public class MachineInjector extends DepthFirstAdapter {
 				clausesList.add(node);
 			} else {
 				LinkedList<PExpression> identifiers = abstractConstantsClause.getIdentifiers();
-				for (PExpression id : node.getIdentifiers()) {
-					identifiers.add(id);
-				}
+				identifiers.addAll(node.getIdentifiers());
 			}
 		}
 
@@ -203,17 +192,10 @@ public class MachineInjector extends DepthFirstAdapter {
 				clausesList.add(node);
 			} else {
 				LinkedList<PExpression> identifiers = variablesClause.getIdentifiers();
-				for (PExpression id : node.getIdentifiers()) {
-					identifiers.add(id);
-				}
+				identifiers.addAll(node.getIdentifiers());
 			}
 
-			Collections.sort(variablesClause.getIdentifiers(), new Comparator<PExpression>() {
-				@Override
-				public int compare(PExpression o1, PExpression o2) {
-					return o1.toString().compareTo(o2.toString());
-				}
-			});
+			variablesClause.getIdentifiers().sort(Comparator.comparing(Object::toString));
 		}
 
 		@Override
@@ -267,7 +249,7 @@ public class MachineInjector extends DepthFirstAdapter {
 		@Override
 		public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
 			if (definitionsClause == null) {
-				definitionsClause = new ADefinitionsMachineClause(new ArrayList<PDefinition>());
+				definitionsClause = new ADefinitionsMachineClause(new ArrayList<>());
 				clausesList.add(definitionsClause);
 			}
 			boolean first = false;

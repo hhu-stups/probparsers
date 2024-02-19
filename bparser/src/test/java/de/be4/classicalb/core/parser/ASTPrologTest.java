@@ -5,8 +5,8 @@ import static org.junit.Assert.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collections;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
@@ -34,12 +34,7 @@ import de.be4.classicalb.core.parser.node.APowSubsetExpression;
 import de.be4.classicalb.core.parser.node.ATruthPredicate;
 import de.be4.classicalb.core.parser.node.AWitness;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PEvent;
 import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PFreetype;
-import de.be4.classicalb.core.parser.node.PFreetypeConstructor;
-import de.be4.classicalb.core.parser.node.PModelClause;
-import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.PSubstitution;
 import de.be4.classicalb.core.parser.node.PWitness;
 import de.be4.classicalb.core.parser.node.Start;
@@ -49,16 +44,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
 public class ASTPrologTest {
-	@Deprecated
-	private boolean remove_restrictions;
-
-	@Before
-	@Deprecated
-	public void setUp() throws Exception {
-		remove_restrictions = false;
-	}
-
-	private String printAST(final Node node, final INodeIds nodeids) {
+	private static String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
 		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
@@ -68,53 +54,50 @@ public class ASTPrologTest {
 		return swriter.toString();
 	}
 
-	private void checkAST(final int counter, final String expected, final Node ast) {
+	private static void checkAST(final int counter, final String expected, final Node ast) {
 		final NodeIdAssignment nodeids = new NodeIdAssignment();
 		ast.apply(nodeids);
 		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
-	@SuppressWarnings("deprecation")
-	private void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
+	private static void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
-		if (remove_restrictions) {
-			parser.getOptions().setRestrictProverExpressions(false);
-		}
 		final Start startNode = parser.parseMachine(bspec);
 		checkAST(counter, expected, startNode);
 	}
 
-	private void checkPredicate(final String pred, final String expected) throws BCompoundException {
+	private static void checkPredicate(final String pred, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.PREDICATE_PREFIX + pred, expected);
 	}
 
-	private void checkExpression(final String expr, final String expected) throws BCompoundException {
+	private static void checkExpression(final String expr, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.EXPRESSION_PREFIX + expr, expected);
 	}
 
-	private void checkSubstitution(final String subst, final String expected) throws BCompoundException {
+	private static void checkSubstitution(final String subst, final String expected) throws BCompoundException {
 		checkProlog(2, BParser.SUBSTITUTION_PREFIX + subst, expected);
 	}
 
-	private void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
+	private static void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
 		checkProlog(1, BParser.OPERATION_PATTERN_PREFIX + pattern, expected);
 	}
 
-	private String insertNumbers(int counter, final String string) {
+	private static String insertNumbers(int counter, final String string) {
 		StringBuilder buf = new StringBuilder();
-		char c[] = string.toCharArray();
-		for (int i = 0; i < c.length; i++) {
-			switch (c[i]) {
-			case '$':
-				buf.append(counter++);
-				break;
-			case '%':
-				buf.append(counter - 1);
-				break;
-			default:
-				buf.append(c[i]);
-				break;
+		char[] c = string.toCharArray();
+		for (char value : c) {
+			switch (value) {
+				case '$':
+					buf.append(counter);
+					counter++;
+					break;
+				case '%':
+					buf.append(counter - 1);
+					break;
+				default:
+					buf.append(value);
+					break;
 			}
 		}
 		return buf.toString();
@@ -225,14 +208,6 @@ public class ASTPrologTest {
 		checkPredicate("bfalse", "falsity($)");
 	}
 
-	@Deprecated
-	@Test
-	public void testProverSET() throws BCompoundException {
-		remove_restrictions = true;
-		checkExpression("SET(x).(x>0)",
-				"comprehension_set($,[identifier($,x)],greater($,identifier($,x),integer($,0)))");
-	}
-
 	@Test
 	public void testOperationCalls() throws BCompoundException {
 		checkSubstitution("do(x)", "operation_call($,identifier($,do),[],[identifier($,x)])");
@@ -244,17 +219,17 @@ public class ASTPrologTest {
 		final AEventBModelParseUnit model = new AEventBModelParseUnit();
 		model.setName(new TIdentifierLiteral("mm"));
 		final AEventsModelClause events = new AEventsModelClause();
-		model.setModelClauses(Arrays.asList((PModelClause) events));
+		model.setModelClauses(Collections.singletonList(events));
 		AEvent event = new AEvent();
-		events.setEvent(Arrays.asList((PEvent) event));
+		events.setEvent(Collections.singletonList(event));
 		event.setEventName(new TIdentifierLiteral("testevent"));
-		event.setVariables(Arrays.asList(createId("param")));
-		event.setGuards(Arrays.asList((PPredicate) new ATruthPredicate()));
-		PSubstitution subst1 = new AAssignSubstitution(Arrays.asList(createId("x")), Arrays.asList(createId("param")));
-		event.setAssignments(Arrays.asList(subst1));
+		event.setVariables(Collections.singletonList(createId("param")));
+		event.setGuards(Collections.singletonList(new ATruthPredicate()));
+		PSubstitution subst1 = new AAssignSubstitution(Collections.singletonList(createId("x")), Collections.singletonList(createId("param")));
+		event.setAssignments(Collections.singletonList(subst1));
 		PWitness witness = new AWitness(new TIdentifierLiteral("ab"),
 				new AEqualPredicate(createId("ab"), createId("y")));
-		event.setWitness(Arrays.asList(witness));
+		event.setWitness(Collections.singletonList(witness));
 		event.setRefines(Arrays.asList(new TIdentifierLiteral("abstract1"), new TIdentifierLiteral("abstract2")));
 
 		checkAST(0,
@@ -297,7 +272,7 @@ public class ASTPrologTest {
 	}
 
 	private PExpression createId(final String name) {
-		return new AIdentifierExpression(Arrays.asList(new TIdentifierLiteral(name)));
+		return new AIdentifierExpression(Collections.singletonList(new TIdentifierLiteral(name)));
 	}
 
 	@Test
@@ -311,12 +286,12 @@ public class ASTPrologTest {
 
 				new AIntegerSetExpression());
 
-		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"),
-				Arrays.<PFreetypeConstructor>asList(multi, single));
+		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"), Collections.emptyList(),
+				Arrays.asList(multi, single));
 
-		AFreetypesMachineClause clause = new AFreetypesMachineClause(Arrays.<PFreetype>asList(freetype));
+		AFreetypesMachineClause clause = new AFreetypesMachineClause(Collections.singletonList(freetype));
 
-		checkAST(0, "freetypes($,[freetype($,'T',[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
+		checkAST(0, "freetypes($,[freetype($,'T',[],[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}
 
 }

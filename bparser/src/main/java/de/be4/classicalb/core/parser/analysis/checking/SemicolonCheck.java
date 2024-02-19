@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.checking;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -48,10 +47,6 @@ public class SemicolonCheck implements SemanticCheck {
 		public void caseALocalOperationsMachineClause(final ALocalOperationsMachineClause node) {
 			node.apply(new OperationMissingSemicolonWalker());
 		}
-	}
-
-	@Override
-	public void setOptions(ParseOptions options) {
 	}
 
 	@Override

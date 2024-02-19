@@ -104,9 +104,9 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	@Override
 	public void caseAFuncOpSubstitution(final AFuncOpSubstitution node) {
 		final PExpression expression = node.getFunction();
-		PExpression idExpr = null;
-		LinkedList<PExpression> parameters = null;
-		Type type = null;
+		PExpression idExpr;
+		LinkedList<PExpression> parameters;
+		Type type;
 		TIdentifierLiteral idToken = null;
 		String idString = null;
 
@@ -152,10 +152,8 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 				}
 
 				// transfer position information
-				final PositionedNode posNode = node;
-				final PositionedNode newPosNode = defSubst;
-				newPosNode.setStartPos(posNode.getStartPos());
-				newPosNode.setEndPos(posNode.getEndPos());
+				defSubst.setStartPos(node.getStartPos());
+				defSubst.setEndPos(node.getEndPos());
 
 				node.replaceBy(defSubst);
 				defSubst.apply(this);
@@ -363,10 +361,8 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			newNode.setParameters(paramList);
 		}
 
-		final PositionedNode posNode = node;
-		final PositionedNode newPosNode = newNode;
-		newPosNode.setStartPos(posNode.getStartPos());
-		newPosNode.setEndPos(posNode.getEndPos());
+		newNode.setStartPos(node.getStartPos());
+		newNode.setEndPos(node.getEndPos());
 
 		node.replaceBy(newNode);
 
@@ -417,12 +413,12 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		if (defRhs instanceof AFunctionExpression) {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
-					new LinkedList<PExpression>(rhsFunction.getParameters()));
+					new LinkedList<>(rhsFunction.getParameters()));
 			rhsSubst.setStartPos(rhsFunction.getStartPos());
 			rhsSubst.setEndPos(rhsFunction.getEndPos());
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
-			rhsSubst = new AOpSubstitution(rhsIdent, new LinkedList<PExpression>());
+			rhsSubst = new AOpSubstitution(rhsIdent, new LinkedList<>());
 			rhsSubst.setStartPos(rhsIdent.getStartPos());
 			rhsSubst.setEndPos(rhsIdent.getEndPos());
 		} else {
@@ -434,7 +430,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(oldDefId.getText(), oldDefId.getLine(),
 				oldDefId.getPos());
 		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(defId,
-				new LinkedList<PExpression>(oldDefinition.getParameters()), rhsSubst);
+				new LinkedList<>(oldDefinition.getParameters()), rhsSubst);
 		substDef.setStartPos(oldDefinition.getStartPos());
 		substDef.setEndPos(oldDefinition.getEndPos());
 		definitions.replaceDefinition(idString, Type.Substitution, substDef);

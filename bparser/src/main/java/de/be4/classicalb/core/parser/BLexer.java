@@ -19,12 +19,13 @@ public class BLexer extends Lexer {
 	
 	private boolean parse_definition=false; // a flag to indicate when the lexer is used to parse Definitions
 
-	private static Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
+	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
+	private static final Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
-	private static Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
-	private static Set<Class<? extends Token>> literalTokenClasses = new HashSet<>();
-	
+	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
+	private static final Set<Class<? extends Token>> literalTokenClasses;
+	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
+
 	// called by PreParser
 	public void setLexerPreparse(){
 		parse_definition = true; 
@@ -196,13 +197,13 @@ public class BLexer extends Lexer {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 			if (funOpClass == TConvertIntFloor.class) {
-				opName = new String("floor");
+				opName = "floor";
 			} else if( funOpClass == TConvertIntCeiling.class) {
-				opName = new String("ceiling");
+				opName = "ceiling";
 			} else if( funOpClass == TConvertReal.class) {
-				opName = new String("real");
+				opName = "real";
 			} else if( funOpClass == TBoolCast.class) {
-				opName = new String("bool");
+				opName = "bool";
 			}
 			String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
 			addInvalid(funOpClass, TRightPar.class, Errmsg);
@@ -264,7 +265,7 @@ public class BLexer extends Lexer {
 		addInvalid(TPragmaLabel.class, TSemicolon.class, "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-		
+
 		literalTokenClasses = new HashSet<>();
 		literalTokenClasses.add(TIntegerLiteral.class);
 		literalTokenClasses.add(TStringLiteral.class);
@@ -281,6 +282,16 @@ public class BLexer extends Lexer {
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
 		
+		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
+		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
+		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
+		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
 	}
 	
 	private static void AddBinExprOperators() {
@@ -347,9 +358,20 @@ public class BLexer extends Lexer {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
 
+		if (token instanceof TIllegalUnicodeSymbol) {
+			String symbol = token.getText();
+			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
+			String specificMessage = invalidUnicodeSymbolMessages.get(symbol);
+			if (specificMessage != null) {
+				ThrowDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
+			} else {
+				ThrowDefaultLexerException(defaultMessage, defaultMessage);
+			}
+		}
+
+		Class<? extends Token> tokenClass = token.getClass();
 		if (lastToken != null) {
 			Class<? extends Token> lastTokenClass = lastToken.getClass();
-			Class<? extends Token> tokenClass = token.getClass();
 			
 			if(parseOptions == null || !parseOptions.isIgnoreCheckingValidCombinations()) {
 				checkForInvalidCombinations(lastTokenClass, tokenClass);
@@ -368,12 +390,12 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				if (token instanceof EOF ) {
 					if(parse_definition) {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string + "\n", string);
+						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
 					} else {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string + "\n", string);
-					}	
+						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
+					}
 				} else
-					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string + "\n", string);
+					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
 			}
 		}
 

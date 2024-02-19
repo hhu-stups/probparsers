@@ -6,7 +6,7 @@ import java.util.Map;
 public class CachingDefinitionFileProvider extends PlainFileContentProvider
 		implements IDefinitionFileProvider {
 
-	private final Map<String, IDefinitions> store = new HashMap<String, IDefinitions>();
+	private final Map<String, IDefinitions> store = new HashMap<>();
 
 	/**
 	 * s. {@link PlainFileContentProvider#PlainFileContentProvider()}

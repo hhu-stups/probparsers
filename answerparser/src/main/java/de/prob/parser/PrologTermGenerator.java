@@ -6,41 +6,19 @@
 
 package de.prob.parser;
 
-import java.math.BigInteger;
+import de.prob.core.sablecc.node.*;
+import de.prob.prolog.term.*;
 
-import de.prob.core.sablecc.node.AAtomTerm;
-import de.prob.core.sablecc.node.AEmptyMoreParams;
-import de.prob.core.sablecc.node.AExceptionResult;
-import de.prob.core.sablecc.node.AInterruptedResult;
-import de.prob.core.sablecc.node.AProgressResult;
-import de.prob.core.sablecc.node.ACallBackResult;
-import de.prob.core.sablecc.node.AMoreParams;
-import de.prob.core.sablecc.node.ANoResult;
-import de.prob.core.sablecc.node.ANumberTerm;
-import de.prob.core.sablecc.node.AParams;
-import de.prob.core.sablecc.node.ATerm;
-import de.prob.core.sablecc.node.AVariableTerm;
-import de.prob.core.sablecc.node.AYesResult;
-import de.prob.core.sablecc.node.PMoreParams;
-import de.prob.core.sablecc.node.PResult;
-import de.prob.core.sablecc.node.PTerm;
-import de.prob.core.sablecc.node.Start;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.FloatPrologTerm;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.prolog.term.VariablePrologTerm;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
  */
-public class PrologTermGenerator {
-	private static final PrologTerm[] EMPTY_PROLOG_LIST = new PrologTerm[0];
+public final class PrologTermGenerator {
 
-	public static PrologTerm toPrologTerm(final Start node) {
-		PResult topnode = node.getPResult();
-		PrologTerm term = null;
+	public static PrologTerm toPrologTerm(PResult topnode) {
+		PrologTerm term;
 		if (topnode instanceof AYesResult) {
 			term = toPrologTerm(((AYesResult) topnode).getTerm());
 		} else if (topnode instanceof ANoResult) {
@@ -48,228 +26,230 @@ public class PrologTermGenerator {
 		} else if (topnode instanceof AInterruptedResult) {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
-			String message = "ProB raised an exception: "
-					+ ((AExceptionResult) topnode).getString().getText();
-			throw new ResultParserException(message, null);
+			String message = "ProB raised an exception: " + ((AExceptionResult) topnode).getString().getText();
+			throw new ResultParserException(message);
 		} else if (topnode instanceof AProgressResult) {
 			term = toPrologTerm(((AProgressResult) topnode).getTerm());
 		} else if (topnode instanceof ACallBackResult) {
 			term = toPrologTerm(((ACallBackResult) topnode).getTerm());
-		} else
-			throw new IllegalStateException("Unknown subclass of PResult: "
-					+ topnode.getClass().getCanonicalName());
-		return term;
-	}
-
-	public static PrologTerm toPrologTermMustNotFail(final String query,
-			final Start node) {
-		PrologTerm term = toPrologTerm(node);
-		if (term == null) {
-			final String message = "Prolog query unexpectedly failed: " + query;
-			throw new ResultParserException(message, null);
+		} else {
+			throw new IllegalStateException("Unknown subclass of PResult: " + topnode.getClass().getCanonicalName());
 		}
 		return term;
 	}
 
-	private static PrologTerm toPrologTerm(final PTerm node) {
+	public static PrologTerm toPrologTerm(Start node) {
+		return toPrologTerm(node.getPResult());
+	}
+
+	public static PrologTerm toPrologTermMustNotFail(String query, Start node) {
+		PResult topnode = node.getPResult();
+		if (topnode instanceof ACallBackResult || topnode instanceof AProgressResult) {
+			throw new ResultParserException("Prolog query returned a callback/progress result, which isn't supported here: " + query);
+		} else if (!(topnode instanceof AYesResult)) {
+			final String message = "Prolog query unexpectedly failed: " + query;
+			throw new ResultParserException(message);
+		}
+		return toPrologTerm(((AYesResult) topnode).getTerm());
+	}
+
+	public static PrologTerm toPrologTerm(PTerm node) {
 		PrologTerm term;
 		if (node instanceof ANumberTerm) {
-			String text = ((ANumberTerm) node).getNumber().getText();
-			if (text.indexOf('.') != -1 || text.indexOf('e') != -1 || text.indexOf('E') != -1) {
-				term = new FloatPrologTerm(Double.parseDouble(text));
-			} else {
-				term = new IntegerPrologTerm(new BigInteger(text));
-			}
+			term = extractNumber((ANumberTerm) node);
+		} else if (node instanceof AVariableTerm) {
+			term = new VariablePrologTerm(((AVariableTerm) node).getVariable().getText());
 		} else if (node instanceof AAtomTerm) {
-			String text = ((AAtomTerm) node).getName().getText();
+			String text = removeQuotes(((AAtomTerm) node).getName().getText());
 			if ("[]".equals(text)) {
-				term = new ListPrologTerm(EMPTY_PROLOG_LIST);
+				term = ListPrologTerm.emptyList();
 			} else {
-				text = removeQuotes(text);
 				term = new CompoundPrologTerm(text);
 			}
-		} else if (node instanceof ATerm) {
-			ATerm aterm = (ATerm) node;
-			int listSize = getListSize(node);
-			if (listSize >= 0) {
-				PrologTerm[] list = new PrologTerm[listSize];
-				fillListWithElements(list, aterm);
-				term = new ListPrologTerm(list);
-			} else {
-				String functor = removeQuotes(aterm.getFunctor().getText());
-				PrologTerm[] params = evalParameters((AParams) aterm
-						.getParams());
-				term = new CompoundPrologTerm(functor, params);
-			}
-		} else if (node instanceof AVariableTerm) {
-			String text = removeQuotes(((AVariableTerm) node).getVariable()
-					.getText());
-			term = new VariablePrologTerm(text);
-		} else
-			throw new IllegalStateException("Unexpected subclass of PTerm: "
-					+ node.getClass().getCanonicalName());
+		} else if (node instanceof AListTerm) {
+			List<PrologTerm> args = extractArgs(((AListTerm) node).getParams());
+			term = ListPrologTerm.fromCollection(args);
+		} else if (node instanceof ACompoundTerm) {
+			ACompoundTerm acompound = (ACompoundTerm) node;
+			String functor = removeQuotes(acompound.getFunctor().getText());
+			List<PrologTerm> args = extractArgs(acompound.getParams());
+			CompoundPrologTerm compoundTerm = CompoundPrologTerm.fromCollection(functor, args);
+
+			term = DotListConversion.asListTermNonRecursive(compoundTerm);
+		} else {
+			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
+		}
+
 		return term;
 	}
 
-	private static String removeQuotes(final String text) {
-		String result;
-		if (text.charAt(0) == '\'') {
-			int length = text.length();
-			StringBuilder builder = new StringBuilder(length - 2);
-			for (int i = 1; i < length - 1; i++) {
-				char c = text.charAt(i);
+	private static PrologTerm extractNumber(ANumberTerm node) {
+		PNumber number = node.getNumber();
+		if (number instanceof AIntegerNumber) {
+			AIntegerNumber intNumber = (AIntegerNumber) number;
+			String text = intNumber.getInteger().getText();
+
+			char first = text.charAt(0);
+			int signOffset = first == '-' || first == '+' ? 1 : 0;
+			boolean neg = first == '-';
+			if (text.startsWith("0'", signOffset)) {
+				char c = text.charAt(2 + signOffset);
+				int cp;
 				if (c == '\\') {
-					i = escapeCharacter(text, builder, i);
+					// TODO: remove need for StringBuilder allocation
+					StringBuilder b = new StringBuilder(1);
+					unescapeCharacter(b, text, 3 + signOffset);
+					cp = b.codePointAt(0);
 				} else {
-					builder.append(c);
+					cp = c;
 				}
-			}
-			result = builder.toString();
-		} else {
-			result = text;
-		}
-		return result;
-	}
 
-	private static int escapeCharacter(final String text,
-			final StringBuilder builder, int i) {
-		char c;
-		i++;
-		c = text.charAt(i);
-		switch (c) {
-		case 'b':
-			builder.append('\b');
-			break;
-		case 't':
-			builder.append('\t');
-			break;
-		case 'n':
-			builder.append('\n');
-			break;
-		case 'v':
-			builder.append('\u000C');
-			break;
-		case 'f':
-			builder.append('\f');
-			break;
-		case 'r':
-			builder.append('\r');
-			break;
-		case 'e':
-			builder.append('\u001C');
-			break;
-		case 'd':
-			builder.append('\u0008');
-			break;
-		case 'a':
-			builder.append('\u0007');
-			break;
-		case 'x':
-			i = getHex(i, text, builder);
-			break;
-		default:
-			builder.append(c);
-			break;
-		}
-		return i;
-	}
+				if (neg) {
+					cp = -cp;
+				}
 
-	private static int getHex(int i, final String text,
-			final StringBuilder builder) {
-		StringBuilder hex = new StringBuilder();
-		i++;
-		char c = text.charAt(i);
-		while (c != '\\') {
-			hex.append(c);
-			i++;
-			c = text.charAt(i);
-		}
-		int value = Integer.parseInt(hex.toString(), 16);
-		builder.append((char) value);
-		return i;
-	}
-
-	private static PrologTerm[] evalParameters(final AParams node) {
-		PrologTerm[] params = evalParameters(1, node.getMoreParams());
-		params[0] = toPrologTerm(node.getTerm());
-		return params;
-	}
-
-	private static PrologTerm[] evalParameters(final int before,
-			final PMoreParams moreParams) {
-		PrologTerm[] params;
-		if (moreParams instanceof AEmptyMoreParams) {
-			params = new PrologTerm[before];
-		} else if (moreParams instanceof AMoreParams) {
-			AMoreParams nonempty = (AMoreParams) moreParams;
-			params = evalParameters(before + 1, nonempty.getMoreParams());
-			params[before] = toPrologTerm(nonempty.getTerm());
-		} else
-			throw new IllegalStateException(
-					"Unexpected subclass of PMoreParams: "
-							+ moreParams.getClass().getCanonicalName());
-		return params;
-	}
-
-	private static int getArity(final AParams params) {
-		PMoreParams moreParams = params.getMoreParams();
-		int arity = 1;
-		while (moreParams != null) {
-			if (moreParams instanceof AEmptyMoreParams) {
-				moreParams = null;
+				return AIntegerPrologTerm.create(cp);
 			} else {
-				arity++;
-				moreParams = ((AMoreParams) moreParams).getMoreParams();
-			}
-		}
-		return arity;
-	}
-
-	private static int getListSize(PTerm term) {
-		int size = 0;
-		while (term != null) {
-			boolean invalid;
-			if (term instanceof AAtomTerm) {
-				String atom = ((AAtomTerm) term).getName().getText();
-				invalid = !"[]".equals(atom);
-				term = null;
-			} else if (term instanceof ATerm) {
-				ATerm copoundTerm = (ATerm) term;
-				String functor = copoundTerm.getFunctor().getText();
-				if (".".equals(functor) || "'.'".equals(functor)) {
-					AParams params = (AParams) copoundTerm.getParams();
-					int arity = getArity(params);
-					if (arity == 2) {
-						size++;
-						term = ((AMoreParams) params.getMoreParams()).getTerm();
-						invalid = false;
-					} else {
-						invalid = true;
+				int radix;
+				if (text.startsWith("0b", signOffset)) {
+					radix = 2;
+					text = text.substring(2 + signOffset);
+					if (neg) {
+						text = "-" + text;
+					}
+				} else if (text.startsWith("0o", signOffset)) {
+					radix = 8;
+					text = text.substring(2 + signOffset);
+					if (neg) {
+						text = "-" + text;
+					}
+				} else if (text.startsWith("0x", signOffset)) {
+					radix = 16;
+					text = text.substring(2 + signOffset);
+					if (neg) {
+						text = "-" + text;
 					}
 				} else {
-					invalid = true;
+					radix = 10;
 				}
-			} else {
-				invalid = true;
+
+				return AIntegerPrologTerm.create(text, radix);
 			}
-			if (invalid) {
-				size = -1;
-				term = null;
-			}
+		} else if (number instanceof AFloatNumber) {
+			AFloatNumber floatNumber = (AFloatNumber) number;
+			String text = floatNumber.getFloat().getText();
+			double d = Double.parseDouble(text);
+			return new FloatPrologTerm(d);
+		} else {
+			throw new IllegalStateException("Unexpected subclass of PNumber: " + number.getClass().getCanonicalName());
 		}
-		return size;
 	}
 
-	private static void fillListWithElements(final PrologTerm[] list,
-			ATerm aterm) {
-		for (int i = 0; i < list.length; i++) {
-			AParams params = (AParams) aterm.getParams();
-			list[i] = toPrologTerm(params.getTerm());
-			if (i < list.length - 1) {
-				// only get next element when this iteration was not the last
-				aterm = (ATerm) ((AMoreParams) params.getMoreParams())
-						.getTerm();
+	private static List<PrologTerm> extractArgs(PParams params) {
+		AParams aparams = (AParams) params;
+		List<PrologTerm> terms = new ArrayList<>();
+		terms.add(toPrologTerm(aparams.getTerm()));
+
+		PMoreParams more = aparams.getMoreParams();
+		while (more instanceof AMoreParams) {
+			AMoreParams amore = (AMoreParams) more;
+			terms.add(toPrologTerm(amore.getTerm()));
+			more = amore.getMoreParams();
+		}
+
+		return terms;
+	}
+
+	private static String removeQuotes(String text) {
+		int len = text.length();
+		if (len > 0) {
+			char first = text.charAt(0);
+			if (first == '\'' || first == '"') {
+				StringBuilder b = new StringBuilder(len - 2);
+				for (int i = 1; i < len - 1; i++) {
+					char c = text.charAt(i);
+					if (c == '\\') {
+						i = unescapeCharacter(b, text, i + 1);
+					} else if (c == first) {
+						// assume the next char is also equal to 'first', enforced by grammar
+						i++;
+						b.append(c);
+					} else {
+						b.append(c);
+					}
+				}
+
+				return b.toString();
 			}
 		}
+
+		return text;
+	}
+
+	private static int unescapeCharacter(StringBuilder b, String text, int i) {
+		char c = text.charAt(i);
+		switch (c) {
+			case 'a':
+				b.append('\u0007');
+				break;
+			case 'b':
+				b.append('\b');
+				break;
+			case 't':
+				b.append('\t');
+				break;
+			case 'n':
+				b.append('\n');
+				break;
+			case 'v':
+				b.append('\u000B');
+				break;
+			case 'f':
+				b.append('\f');
+				break;
+			case 'r':
+				b.append('\r');
+				break;
+			case 'e':
+				b.append('\u001B');
+				break;
+			case 'd':
+				b.append('\u007F');
+				break;
+			case '\n':
+				// ignore escaped newline
+				break;
+			case 'x':
+				i = getChar(b, text, i + 1, 16);
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+				i = getChar(b, text, i, 8);
+				break;
+			default:
+				// all the other escape sequences just resolve to the 2nd char
+				b.append(c);
+				break;
+		}
+
+		return i;
+	}
+
+	private static int getChar(StringBuilder b, String text, int i, int radix) {
+		int end = text.indexOf('\\', i);
+		int value = Integer.parseInt(text.substring(i, end), radix);
+		if (Character.isBmpCodePoint(value)) {
+			b.append((char) value);
+		} else {
+			b.appendCodePoint(value);
+		}
+
+		return end;
 	}
 }

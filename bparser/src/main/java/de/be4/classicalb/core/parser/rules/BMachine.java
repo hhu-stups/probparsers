@@ -24,8 +24,6 @@ import de.be4.classicalb.core.parser.node.APromotesMachineClause;
 import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
 import de.be4.classicalb.core.parser.node.AStringExpression;
 import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.POperationReference;
 import de.be4.classicalb.core.parser.node.PPredicate;
@@ -41,14 +39,13 @@ public class BMachine implements IModel {
 	private final String machineName;
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final Start start;
-	private AAbstractMachineParseUnit parseUnit;
+	private final AAbstractMachineParseUnit parseUnit;
 
 	public BMachine(String name) {
 		List<TIdentifierLiteral> nameList = new ArrayList<>();
 		nameList.add(new TIdentifierLiteral(name));
-		AMachineHeader header = new AMachineHeader(nameList, new ArrayList<PExpression>());
-		this.parseUnit = new AAbstractMachineParseUnit(new AMachineMachineVariant(), header,
-				new ArrayList<PMachineClause>());
+		AMachineHeader header = new AMachineHeader(nameList, new ArrayList<>());
+		this.parseUnit = new AAbstractMachineParseUnit(new AMachineMachineVariant(), header, new ArrayList<>());
 		this.start = new Start(parseUnit, new EOF());
 		this.machineName = name;
 	}
@@ -67,7 +64,7 @@ public class BMachine implements IModel {
 		List<PMachineReference> referencesList = new ArrayList<>();
 		List<TIdentifierLiteral> idList = new ArrayList<>();
 		idList.add(new TIdentifierLiteral(machineName));
-		referencesList.add(new AMachineReference(idList, new ArrayList<PExpression>()));
+		referencesList.add(new AMachineReference(idList, new ArrayList<>()));
 		includes.setMachineReferences(referencesList);
 		this.parseUnit.getMachineClauses().add(includes);
 	}
@@ -129,7 +126,7 @@ public class BMachine implements IModel {
 	}
 
 	public void addPropertiesPredicates(Map<String, String> constantStringValues) {
-		if (constantStringValues.size() == 0) {
+		if (constantStringValues.isEmpty()) {
 			return;
 		}
 		APropertiesMachineClause clause = new APropertiesMachineClause();

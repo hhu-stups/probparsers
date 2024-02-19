@@ -1,0 +1,27 @@
+RULES_MACHINE Rule_42
+
+CONSTANTS
+  N  /*@desc the answer */
+PROPERTIES
+  N : NATURAL
+& N = 42
+
+OPERATIONS
+RULE RULE_42_1
+RULEID R42_1
+BODY
+  RULE_FORALL nr
+  WHERE
+      nr : INTEGER
+    & nr < 0
+  EXPECT
+    nr < N
+  COUNTEREXAMPLE
+    STRING_FORMAT(
+      "~w should be less than ~w."
+      , nr
+      , N
+    )
+  END
+END
+END

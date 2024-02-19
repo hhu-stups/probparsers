@@ -2,10 +2,8 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.nio.file.NoSuchFileException;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -76,7 +74,7 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testRulesMachineConfiguration() throws Exception {
-		File file = new File(this.getClass().getClassLoader().getResource("rules/project/RulesMachineConfigurationTest.rmch").toURI());
+		File file = new File(this.getClass().getResource("/rules/project/RulesMachineConfigurationTest.rmch").toURI());
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setAddLineNumbers(true);
 		parsingBehaviour.setPrologOutput(true);
@@ -86,16 +84,15 @@ public class RulesMachineFilesTest {
 		RulesMachineRunConfiguration rulesMachineRunConfiguration = project.getRulesMachineRunConfiguration();
 		Set<RuleGoalAssumption> rulesGoalAssumptions = rulesMachineRunConfiguration.getRulesGoalAssumptions();
 		assertEquals(2, rulesGoalAssumptions.size());
-		for (Iterator<RuleGoalAssumption> iterator = rulesGoalAssumptions.iterator(); iterator.hasNext();) {
-			RuleGoalAssumption next = iterator.next();
+		for (RuleGoalAssumption next : rulesGoalAssumptions) {
 			if ("rule1".equals(next.getRuleName())) {
-				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToSucceed());
-				assertEquals(true, next.isCheckedForCounterexamples());
+				assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToSucceed());
+				assertTrue(next.isCheckedForCounterexamples());
 				assertEquals("rule1", next.getRuleOperation().getOriginalName());
 			} else {
 				assertEquals("rule2", next.getRuleName());
-				assertEquals(new HashSet<Integer>(Arrays.asList(1)), next.getErrorTypesAssumedToFail());
-				assertEquals(false, next.isCheckedForCounterexamples());
+				assertEquals(new HashSet<>(Collections.singletonList(1)), next.getErrorTypesAssumedToFail());
+				assertFalse(next.isCheckedForCounterexamples());
 			}
 		}
 	}
@@ -147,7 +144,7 @@ public class RulesMachineFilesTest {
 		project.parseProject(new File("DirDoesNotExist/FileDoesNotExist.rmch"));
 		assertTrue(project.hasErrors());
 		final BException e = project.getBExceptionList().get(0);
-		assertTrue(e.getCause() instanceof FileNotFoundException);
+		assertTrue(e.getCause() instanceof FileNotFoundException || e.getCause() instanceof NoSuchFileException);
 		assertTrue(e.getMessage().contains("FileDoesNotExist.rmch"));
 	}
 
@@ -306,5 +303,11 @@ public class RulesMachineFilesTest {
 	public void testVariableNotReplaced() {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("replaces/VariableNotReplaced.rmch"));
 		assertTrue(e.getMessage().contains("COMP_comp1"));
+	}
+
+	@Test
+	public void testDescriptionPragma() throws BCompoundException {
+		String output = RulesUtil.getFileAsPrologTerm("project/Rule_42.rmch");
+		assertTrue(output.contains("the answer"));
 	}
 }
