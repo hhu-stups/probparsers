@@ -335,7 +335,9 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			return get(cursor++);
+			PrologTerm term = get(cursor);
+			cursor++;
+			return term;
 		}
 
 		@Override
@@ -348,7 +350,8 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 			if (!hasPrevious()) {
 				throw new NoSuchElementException();
 			}
-			return get(--cursor);
+			--cursor;
+			return get(cursor);
 		}
 
 		@Override

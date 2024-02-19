@@ -385,7 +385,8 @@ public final class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput closeTerm() {
-		if (--termCount < 0) {
+		--termCount;
+		if (termCount < 0) {
 			throw new IllegalStateException("Tried to close a term that has not been opened.");
 		}
 
@@ -504,7 +505,8 @@ public final class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput closeList() {
-		if (--listCount < 0) {
+		--listCount;
+		if (listCount < 0) {
 			throw new IllegalStateException("Tried to close a list that has not been opened.");
 		}
 

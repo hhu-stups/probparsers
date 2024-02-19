@@ -89,7 +89,8 @@ public class ASTPrologTest {
 		for (char value : c) {
 			switch (value) {
 				case '$':
-					buf.append(counter++);
+					buf.append(counter);
+					counter++;
 					break;
 				case '%':
 					buf.append(counter - 1);
