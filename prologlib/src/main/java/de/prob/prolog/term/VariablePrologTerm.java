@@ -6,10 +6,10 @@
 
 package de.prob.prolog.term;
 
-import de.prob.prolog.internal.Utils;
-import de.prob.prolog.output.IPrologTermOutput;
-
 import java.util.Objects;
+
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 /**
  * Represents a Prolog variable.
@@ -20,7 +20,7 @@ public final class VariablePrologTerm extends PrologTerm {
 
 	public VariablePrologTerm(final String name) {
 		Objects.requireNonNull(name, "name");
-		if (!Utils.isPrologVariable(name)) {
+		if (!PrologTermOutput.isValidPrologVariable(name)) {
 			throw new IllegalArgumentException("name");
 		}
 

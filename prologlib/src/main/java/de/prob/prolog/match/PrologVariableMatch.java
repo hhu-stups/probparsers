@@ -1,10 +1,10 @@
 package de.prob.prolog.match;
 
-import de.prob.prolog.internal.Utils;
+import java.util.Map;
+
+import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
 import de.prob.prolog.term.VariablePrologTerm;
-
-import java.util.Map;
 
 /**
  * Matches a Prolog variable.
@@ -20,7 +20,7 @@ public final class PrologVariableMatch extends PrologMatch {
 	 */
 	private PrologVariableMatch(final String name, final String varName) {
 		super(name);
-		if (varName != null && !Utils.isPrologVariable(varName)) {
+		if (varName != null && !PrologTermOutput.isValidPrologVariable(varName)) {
 			throw new IllegalArgumentException("varName");
 		}
 
