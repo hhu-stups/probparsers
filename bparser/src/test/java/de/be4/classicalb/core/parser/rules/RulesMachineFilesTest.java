@@ -116,6 +116,16 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testFreetypesInMainMachine() throws BCompoundException {
+		final String result = RulesUtil.getFileAsPrologTerm("project/RulesMachineFreetypes.rmch");
+	}
+
+	@Test
+	public void testFreetypesInReferencedMachine() throws BCompoundException {
+		final String result = RulesUtil.getFileAsPrologTerm("project/RulesMachineReferencesFreetypes.rmch");
+	}
+
+	@Test
 	public void testForAll() throws BCompoundException {
 		final String result = RulesUtil.getFileAsPrologTerm("ForAllPredicate.rmch");
 	}

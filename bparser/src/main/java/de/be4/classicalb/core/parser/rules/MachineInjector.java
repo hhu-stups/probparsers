@@ -3,29 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import java.util.*;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
-import de.be4.classicalb.core.parser.node.AAbstractConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AAssertionsMachineClause;
-import de.be4.classicalb.core.parser.node.AConjunctPredicate;
-import de.be4.classicalb.core.parser.node.AConstantsMachineClause;
-import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
-import de.be4.classicalb.core.parser.node.AInvariantMachineClause;
-import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
-import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.APropertiesMachineClause;
-import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
-import de.be4.classicalb.core.parser.node.ASetsMachineClause;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AVariablesMachineClause;
-import de.be4.classicalb.core.parser.node.PDefinition;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PMachineClause;
-import de.be4.classicalb.core.parser.node.PSet;
-import de.be4.classicalb.core.parser.node.PSubstitution;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
+import de.be4.classicalb.core.parser.node.*;
 
 public final class MachineInjector extends DepthFirstAdapter {
 	AAbstractMachineParseUnit abstractMachineParseUnit;
@@ -33,6 +11,7 @@ public final class MachineInjector extends DepthFirstAdapter {
 
 	AAbstractConstantsMachineClause abstractConstantsClause;
 	ASetsMachineClause setsClause;
+	AFreetypesMachineClause freetypesClause;
 	AConstantsMachineClause constantsClause;
 	APropertiesMachineClause propertiesClause;
 	AVariablesMachineClause variablesClause;
@@ -71,6 +50,11 @@ public final class MachineInjector extends DepthFirstAdapter {
 	@Override
 	public void inASetsMachineClause(ASetsMachineClause node) {
 		this.setsClause = node;
+	}
+
+	@Override
+	public void inAFreetypesMachineClause(AFreetypesMachineClause node) {
+		this.freetypesClause = node;
 	}
 
 	@Override
@@ -149,6 +133,17 @@ public final class MachineInjector extends DepthFirstAdapter {
 
 				LinkedList<PSet> sets = setsClause.getSetDefinitions();
 				sets.addAll(node.getSetDefinitions());
+			}
+		}
+
+		@Override
+		public void inAFreetypesMachineClause(AFreetypesMachineClause node) {
+			if (freetypesClause == null) {
+				freetypesClause = node;
+				clausesList.add(node);
+			} else {
+				LinkedList<PFreetype> freetypes = freetypesClause.getFreetypes();
+				freetypes.addAll(node.getFreetypes());
 			}
 		}
 

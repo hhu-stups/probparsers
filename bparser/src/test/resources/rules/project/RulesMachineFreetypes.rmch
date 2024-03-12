@@ -1,0 +1,5 @@
+RULES_MACHINE RulesMachineFreetypes
+FREETYPES test = test1(INTEGER), test2
+CONSTANTS abc
+PROPERTIES abc : test & abc = test1(1) & abc /= test2
+END
