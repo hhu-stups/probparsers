@@ -488,7 +488,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseADefinitionsMachineClause(ADefinitionsMachineClause node) {
 		indent();
-		printlnOpt("DEFINITIONS");
+		println("DEFINITIONS");
 		printSemicolonListMultiLine(node.getDefinitions());
 		dedent();
 	}

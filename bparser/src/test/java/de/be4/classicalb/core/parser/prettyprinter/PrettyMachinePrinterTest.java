@@ -79,6 +79,9 @@ public class PrettyMachinePrinterTest {
 	@Test
 	public void testPrettyPrint_Indent() {
 		final String testMachine = "MACHINE Test\n" +
+			"    DEFINITIONS\n" +
+			"        FOO == 1=1;\n" +
+			"        BAR == 1/=1\n" +
 			"    VARIABLES\n" +
 			"        x,\n" +
 			"        y\n" +
@@ -158,6 +161,21 @@ public class PrettyMachinePrinterTest {
 		assertFalse(result1.isEmpty());
 		assertFalse(result2.isEmpty());
 		assertEquals(result1, result2);
+	}
+
+	@Test
+	public void testPrettyPrint4() {
+		final String testMachine = "MACHINE Test\n" +
+			"DEFINITIONS\nCHOOSE(X) == \"a member of X\";\nEXTERNAL_FUNCTION_CHOOSE(T) == POW(T)-->T\n" +
+			"VARIABLES x, y, z\n" +
+			"INVARIANT 1=1\n" +
+			"INITIALISATION skip\n" +
+			"OPERATIONS\nfoo = skip;\nbar = skip\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
 	}
 
 	@Test
