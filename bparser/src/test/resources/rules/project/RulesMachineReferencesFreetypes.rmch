@@ -1,0 +1,5 @@
+RULES_MACHINE RulesMachineReferencesFreetypes
+REFERENCES RulesMachineFreetypes
+CONSTANTS xyz
+PROPERTIES xyz : test & xyz /= test1(1) & xyz = test2
+END

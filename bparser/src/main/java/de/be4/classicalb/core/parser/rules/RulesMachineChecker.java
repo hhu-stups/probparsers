@@ -3,15 +3,8 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -171,6 +164,27 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAReferencesMachineClause(AReferencesMachineClause node) {
 		// do nothing
+	}
+
+	@Override
+	public void caseAFreetypesMachineClause(AFreetypesMachineClause node) {
+		LinkedList<PExpression> identifiers = new LinkedList<>();
+		for (PFreetype freetype : node.getFreetypes()) {
+			if (freetype instanceof AFreetype) {
+				AFreetype aFreetype = (AFreetype) freetype;
+				identifiers.add(ASTBuilder.createAIdentifierExpression(aFreetype.getName()));
+				for (PFreetypeConstructor freetypeConstructor : aFreetype.getConstructors()) {
+					if (freetypeConstructor instanceof AElementFreetypeConstructor) {
+						TIdentifierLiteral identifier = ((AElementFreetypeConstructor) freetypeConstructor).getName();
+						identifiers.add(ASTBuilder.createAIdentifierExpression(identifier));
+					} else if (freetypeConstructor instanceof AConstructorFreetypeConstructor) {
+						TIdentifierLiteral identifier = ((AConstructorFreetypeConstructor) freetypeConstructor).getName();
+						identifiers.add(ASTBuilder.createAIdentifierExpression(identifier));
+					}
+				}
+			}
+		}
+		this.knownIdentifier.addKnownIdentifierList(identifiers);
 	}
 
 	@Override
