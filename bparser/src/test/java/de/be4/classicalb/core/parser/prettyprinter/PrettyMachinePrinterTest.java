@@ -5,7 +5,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.IDefinitionFileProvider;
+import de.be4.classicalb.core.parser.IDefinitions;
+import de.be4.classicalb.core.parser.MockedDefinitions;
+import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.classicalb.core.parser.util.Utils;
 
 import org.junit.Test;
@@ -206,5 +213,49 @@ public class PrettyMachinePrinterTest {
 	public void testPrettyPrintPackageImports() {
 		String testMachine = "/*@package one.two */\n/*@import-package one.three */\n/*@import-package \"one.two three\" */\nMACHINE Test\nEND";
 		assertEquals(testMachine, Helpers.getPrettyPrint(testMachine));
+	}
+
+	@Test
+	public void testPrettyPrintFileDefinition() throws Exception {
+		final String testMachine = "MACHINE Test\n" +
+				                           "DEFINITIONS\n\"LibraryStrings.def\"\n" +
+				                           "END";
+		ParseOptions options = new ParseOptions();
+		options.setCollectDefinitions(false);
+		BParser parser = new BParser(null, options);
+
+		// very hacky way to make sure that "LibraryStrings.def" is not being parsed because it doesn't exist
+		parser.setContentProvider(new IDefinitionFileProvider() {
+
+			@Override
+			public IDefinitions getDefinitions(String filename) {
+				if (filename.equals("LibraryStrings.def")) {
+					return new MockedDefinitions();
+				} else {
+					return null;
+				}
+			}
+
+			@Override
+			public void storeDefinition(String filename, IDefinitions definitions) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public String getFileContent(File directory, String fileName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public File getFile(File directory, String fileName) {
+				throw new UnsupportedOperationException();
+			}
+		});
+		Start start = parser.parseMachine(testMachine);
+		PrettyPrinter pp = new PrettyPrinter();
+		start.apply(pp);
+		String result = pp.getPrettyPrint();
+
+		assertEquals(testMachine, result);
 	}
 }

@@ -747,7 +747,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAFileDefinitionDefinition(AFileDefinitionDefinition node) {
-		node.getFilename().apply(this);
+		print("\"");
+		print(Utils.escapeStringContents(node.getFilename().getText()));
+		print("\"");
 	}
 
 	@Override
