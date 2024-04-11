@@ -28,7 +28,7 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.13.2'
+project.version = '2.13.3-SNAPSHOT'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
