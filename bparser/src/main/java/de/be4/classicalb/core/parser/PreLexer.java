@@ -179,7 +179,9 @@ public class PreLexer extends Lexer {
 	}
 
 	private void checkComment() {
-		// switch to special COMMENT state and back
+		// Switch to special COMMENT state for block comments
+		// and switch back to the previous state after the comment ends.
+		// This special logic is necessary because the previous state may be NORMAL, DEFINITIONS, or DEFINITIONS_RHS.
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.BLOCK_COMMENT;
@@ -190,8 +192,9 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() throws LexerException {
-		// TODO: check if we need to do this for multiline templates as well
-		// switch to special multiline_string_state state and back
+		// Switch to special states for multiline strings
+		// and switch back to the previous state after the string ends.
+		// This special logic is necessary because the previous state may be NORMAL or DEFINITIONS_RHS.
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
