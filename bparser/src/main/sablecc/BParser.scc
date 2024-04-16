@@ -580,9 +580,6 @@ expression_def {-> expression_definition} = [name]:identifier_literal [parameter
 predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
-  definition_x {-> definition_x.definition};
-
-definition_x {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
