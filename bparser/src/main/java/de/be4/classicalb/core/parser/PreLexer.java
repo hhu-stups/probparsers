@@ -158,24 +158,15 @@ public class PreLexer extends Lexer {
 	}
 
 	private int changeNesting() {
-		// default if no nesting is started/ended
-		int result = 0;
-
-		// is the token starting a nesting?
 		if (token instanceof TBeginNesting) {
-			result++;
+			// is the token starting a nesting?
+			return 1;
+		} else if (token instanceof TEndNesting) {
+			// is the token ending a nesting?
+			return -1;
+		} else {
+			return 0;
 		}
-
-		// is the token ending a nesting?
-		if (token instanceof TEndNesting) {
-			result--;
-		}
-
-		/*
-		 * A token can start and end a nesting at the same time. Example
-		 * "(PP=TRUE)". So both calls above are needed.
-		 */
-		return result;
 	}
 
 	private void checkComment() {
