@@ -99,34 +99,6 @@ Helpers
 
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
-  abstract_constants = 'ABSTRACT_CONSTANTS';
-  abstract_variables = 'ABSTRACT_VARIABLES';
-  assertions = 'ASSERTIONS';
-  concrete_constants = 'CONCRETE_CONSTANTS';
-  concrete_variables = 'CONCRETE_VARIABLES';
-  constants = 'CONSTANTS';
-  constraints = 'CONSTRAINTS';
-  end = 'END';
-  implementation = 'IMPLEMENTATION';
-  imports = 'IMPORTS';
-  extends = 'EXTENDS';
-  freetypes = 'FREETYPES';
-  includes = 'INCLUDES';
-  initialisation = 'INITIALISATION' | 'INITIALIZATION';
-  invariant = 'INVARIANT';
-  local_operations = 'LOCAL_OPERATIONS';
-  machine = 'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE';
-  operations = 'OPERATIONS' | 'EVENTS'; /* EVENTS for Event-B */
-  promotes = 'PROMOTES';
-  properties = 'PROPERTIES';
-  refines = 'REFINES';
-  refinement = 'REFINEMENT';
-  sees = 'SEES';
-  sets = 'SETS';
-  uses = 'USES';
-  values = 'VALUES';
-  variables = 'VARIABLES';
-
   all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
   quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
 
@@ -181,15 +153,15 @@ Tokens
   {start -> definitions, normal -> definitions} definitions = 'DEFINITIONS';
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
-    machine |
-    abstract_constants | abstract_variables | assertions | concrete_constants |
-    concrete_variables | constants | constraints | implementation |
-    imports | includes | initialisation | invariant | local_operations |
-    operations | promotes | properties | refines | refinement | extends |
-    freetypes |
-    sees | sets | uses | values | variables;
+    'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE' |
+    'ABSTRACT_CONSTANTS' | 'ABSTRACT_VARIABLES' | 'ASSERTIONS' | 'CONCRETE_CONSTANTS' |
+    'CONCRETE_VARIABLES' | 'CONSTANTS' | 'CONSTRAINTS' | 'IMPLEMENTATION' |
+    'IMPORTS' | 'INCLUDES' | 'INITIALISATION' | 'INITIALIZATION' | 'INVARIANT' | 'LOCAL_OPERATIONS' |
+    'OPERATIONS' | 'EVENTS' | 'PROMOTES' | 'PROPERTIES' | 'REFINES' | 'REFINEMENT' | 'EXTENDS' |
+    'FREETYPES' |
+    'SEES' | 'SETS' | 'USES' | 'VALUES' | 'VARIABLES';
 
-  {start -> normal, normal, definitions -> normal} end_machine = end;
+  {start -> normal, normal, definitions -> normal} end_machine = 'END';
 
   {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
   {no_definitions} no_def_something = all_chars*;
@@ -205,7 +177,7 @@ Tokens
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
-  {definitions_rhs} end_nesting = end;
+  {definitions_rhs} end_nesting = 'END';
   {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
   {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
