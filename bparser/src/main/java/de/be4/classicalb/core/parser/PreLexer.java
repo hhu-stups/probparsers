@@ -134,15 +134,15 @@ public class PreLexer extends Lexer {
 			return State.NORMAL;
 		}
 
-		// check for parenthesis first
+		// Update nesting levels when there is a parenthesis or a keyword that begins/ends a block.
 		if (token instanceof TLeftPar) {
 			parenNestingLevel++;
 		} else if (token instanceof TRightPar) {
 			parenNestingLevel--;
-		}
-		// then check other tokens which start/end nestings
-		else {
-			otherNestingLevel += changeNesting();
+		} else if (token instanceof TBeginNesting) {
+			otherNestingLevel++;
+		} else if (token instanceof TEndNesting) {
+			otherNestingLevel--;
 		}
 
 		if (otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon) {
@@ -155,18 +155,6 @@ public class PreLexer extends Lexer {
 		}
 
 		return null;
-	}
-
-	private int changeNesting() {
-		if (token instanceof TBeginNesting) {
-			// is the token starting a nesting?
-			return 1;
-		} else if (token instanceof TEndNesting) {
-			// is the token ending a nesting?
-			return -1;
-		} else {
-			return 0;
-		}
 	}
 
 	private void checkComment() {
