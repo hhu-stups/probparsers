@@ -128,13 +128,13 @@ Tokens
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
-  // One or two single quotes or an escaped single quote are part of the content and don't terminate the string.
-  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [all_chars - single_quote] | '\' single_quote)*;
+  // One or two single quotes followed by a different character don't terminate the string.
+  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [all_chars - [single_quote + '\']] | '\' all_chars)*;
 
   {start->normal, normal, definitions_rhs} multiline_template_start = '```';
   {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
-  // One or two backquotes or an escaped backquote are part of the content and don't terminate the string.
-  {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - '`'] | '\`')*;
+  // One or two backquotes followed by a different character don't terminate the string.
+  {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - ['`' + '\']] | '\' all_chars)*;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
