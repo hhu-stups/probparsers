@@ -87,13 +87,11 @@ Helpers
   all_chars_without_newline = [all_chars - line_break ];
   string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
-  all_chars_without_single_quote = [all_chars - 39];
-  multiline_string_literal = (all_chars_without_single_quote | 39 all_chars_without_single_quote | 39 39 all_chars_without_single_quote | '\' 39)*;
+  multiline_string_literal = ((single_quote single_quote?)? [all_chars - single_quote] | // one or two single quotes do not end string
+                               '\' single_quote // escaped quote also does not count towards end
+                               )*;
 
-  all_chars_without_single_back_quote = [all_chars - '`'];
-  multiline_template_literal = (all_chars_without_single_back_quote |
-                              '`' all_chars_without_single_back_quote |  // single quote does not end string
-                              '``' all_chars_without_single_back_quote | // double quote does not end string
+  multiline_template_literal = (('`' '`'?)? [all_chars - '`'] | // one or two backquotes do not end string
                                '\`' // escaped quote also does not count towards end
                                )*;
 
