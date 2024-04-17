@@ -40,6 +40,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
+import de.be4.classicalb.core.preparser.node.TFilenameString;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
@@ -141,7 +142,7 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(final List<Token> list)
+	private void evaluateDefinitionFiles(List<TFilenameString> list)
 			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
@@ -149,11 +150,13 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (final Token fileNameToken : list) {
+		for (TFilenameString filenameString : list) {
 			final List<String> newDoneList = new ArrayList<>(doneDefFiles);
+			// Unquote and unescape the definition file name string.
+			String quotedFilename = filenameString.getText();
+			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def
-			final String fileName = fileNameToken.getText();
 			try {
 				if (doneDefFiles.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
@@ -161,7 +164,7 @@ public class PreParser {
 						sb.append(string).append(" -> ");
 					}
 					sb.append(fileName);
-					throw new PreParseException(fileNameToken,
+					throw new PreParseException(filenameString,
 							"Cyclic references in definition files: " + sb);
 				}
 
@@ -186,9 +189,9 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
+				throw new PreParseException(filenameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
-				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, fileNameToken)));
+				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, filenameString)));
 			}
 		}
 	}

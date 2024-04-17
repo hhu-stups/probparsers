@@ -82,7 +82,6 @@ Helpers
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 
-  all_chars_without_quote_and_newline = [[all_chars - '"'] - line_break ];
   all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break ] - '\'];
   all_chars_without_newline = [all_chars - line_break ];
   string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
@@ -105,7 +104,6 @@ States
   normal,
   definitions,
   definitions_rhs,
-  definition_file,
   no_definitions,
   // Multiline constructs (block comments, multiline strings) have their own lexer states
   // to provide better errors when the closing delimiter is missing.
@@ -173,9 +171,7 @@ Tokens
   {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
   {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
-  {definitions -> definition_file, definition_file -> definitions} double_quotation = '"';
-  {definition_file} filename = all_chars_without_quote_and_newline*;
-  //{definitions} filename= string_literal;
+  {definitions} filename_string = string_literal;
 
   {definitions, definitions_rhs} white_space = layout_char+;
 
@@ -231,7 +227,7 @@ definition_list {-> definition*} =
 
 definition {-> definition} =
   [def_name]:identifier_literal [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New definition(def_name, [parameters.identifier_literal], rhs)} |
-  {file} [q1]:double_quotation [filename]:filename [q2]:double_quotation {-> New definition.file(filename)};
+  {file} [filename]:filename_string {-> New definition.file(filename)};
 
 def_parameters {-> identifier_literal*} = left_par [parameters]:identifier_list right_par {-> [parameters.identifier_literal]};
 
@@ -250,4 +246,4 @@ parse_unit =
 
 definition =
   [def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
-  {file} [filename]:filename;
+  {file} [filename]:filename_string;
