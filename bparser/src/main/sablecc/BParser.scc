@@ -95,10 +95,6 @@ Helpers
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
 
-  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break] - '\'];
-  all_chars_without_newline = [all_chars - line_break];
-  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
-
   // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
   // 160: non-breaking space
@@ -106,10 +102,10 @@ Helpers
   // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
-
-  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
-  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
-
+  single_line_string_char = [all_chars - line_break];
+  string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
+  // backquote to generate identifiers with special symbols or which clash with keywords
+  quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
 
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
   regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end

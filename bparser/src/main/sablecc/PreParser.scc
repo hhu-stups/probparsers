@@ -82,15 +82,12 @@ Helpers
   all_chars = [0 .. 0xffff];
   layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
 
-  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break ] - '\'];
-  all_chars_without_newline = [all_chars - line_break ];
-  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
-
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
-  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
-  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
-
+  single_line_string_char = [all_chars - line_break];
+  string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
+  // backquote to generate identifiers with special symbols or which clash with keywords
+  quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
 
   safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':' |
                  '<' | '.' | '|' | '(' | ')' | '[' | ']' | '%'; // safe to skip in normal mode
