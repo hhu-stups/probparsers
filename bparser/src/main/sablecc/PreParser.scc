@@ -9,8 +9,8 @@ Helpers
 
   lf = 10;
   cr = 13;
-
-  line_break = [lf + cr];
+  unicode_line_seperator = 8232;
+  unicode_paragraph_seperator = 8233;
 
   small_letter = ['a'..'z'];
   capital_letter = ['A' .. 'Z'];
@@ -80,7 +80,8 @@ Helpers
   unicode_prime = [0x2032 + [8216..8217]]; // ' primes; we could also add 8219
 
   all_chars = [0 .. 0xffff];
-  layout_char = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator];
+  layout_char = [[9 + 32] + 160];
 
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
@@ -170,7 +171,7 @@ Tokens
 
   {definitions} filename_string = string_literal;
 
-  {definitions, definitions_rhs} white_space = layout_char+;
+  {definitions, definitions_rhs} white_space = line_break | layout_char+;
 
   {start -> normal, normal} some_value = // could actually be renamed to some_identifier
     (letter (letter | digit | '_')*)

@@ -94,12 +94,8 @@ Helpers
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
-
-  // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
   // 160: non-breaking space
-  // 8206: Left-To_Right_Mark, 8207: Right-To-Left Mark, [now no longer accepted by the parser]
-  // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
   single_line_string_char = [all_chars - line_break];
