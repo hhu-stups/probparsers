@@ -87,14 +87,6 @@ Helpers
   all_chars_without_newline = [all_chars - line_break ];
   string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
 
-  multiline_string_literal = ((single_quote single_quote?)? [all_chars - single_quote] | // one or two single quotes do not end string
-                               '\' single_quote // escaped quote also does not count towards end
-                               )*;
-
-  multiline_template_literal = (('`' '`'?)? [all_chars - '`'] | // one or two backquotes do not end string
-                               '\`' // escaped quote also does not count towards end
-                               )*;
-
   word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
 
   all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
@@ -140,11 +132,13 @@ Tokens
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
-  {multiline_string} multiline_string_content = multiline_string_literal;
+  // One or two single quotes or an escaped single quote are part of the content and don't terminate the string.
+  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [all_chars - single_quote] | '\' single_quote)*;
 
   {start->normal, normal, definitions_rhs} multiline_template_start = '```';
   {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
-  {multiline_template} multiline_template_content = multiline_template_literal;
+  // One or two backquotes or an escaped backquote are part of the content and don't terminate the string.
+  {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - '`'] | '\`')*;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
