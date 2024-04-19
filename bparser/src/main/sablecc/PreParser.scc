@@ -134,6 +134,8 @@ Tokens
   {start->normal, normal, definitions_rhs} multiline_template_start = '```';
   {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
   // One or two backquotes followed by a different character don't terminate the string.
+  // The PreParser doesn't need to care about the syntax of template parameters,
+  // so just lex them as if they were literal text.
   {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - ['`' + '\']] | '\' all_chars)*;
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;

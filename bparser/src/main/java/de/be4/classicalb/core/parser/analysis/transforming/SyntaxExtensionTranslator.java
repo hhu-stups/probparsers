@@ -86,6 +86,15 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	}
 
 	@Override
+	public void caseTMultilineTemplateContent(TMultilineTemplateContent node) {
+		String unescaped = Utils.unescapeStringContents(node.getText());
+		TMultilineTemplateContent unescapedContentToken = new TMultilineTemplateContent(unescaped);
+		unescapedContentToken.setStartPos(node.getStartPos());
+		unescapedContentToken.setEndPos(node.getEndPos());
+		node.replaceBy(unescapedContentToken);
+	}
+
+	@Override
 	public void caseTStringLiteral(TStringLiteral node) {
 		// Remove the surrounding quotes "..." from the string token content
 		// and process backslash escape sequences.

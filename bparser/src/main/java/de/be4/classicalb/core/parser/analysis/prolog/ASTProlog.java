@@ -28,7 +28,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
-	private static final List<String> SUM_TYPE = new LinkedList<>(Arrays.asList("expression", "predicate",
+	private static final List<String> SUM_TYPE = new LinkedList<>(Arrays.asList("expression", "template_string_part", "predicate",
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
@@ -727,6 +727,34 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAStructExpression(final AStructExpression node) {
 		printOCAsList(node, node.getEntries());
+	}
+
+	@Override
+	public void caseAMultilineTemplateExpression(AMultilineTemplateExpression node) {
+		open(node);
+		pout.openList();
+		for (PTemplateStringPart part : node.getParts()) {
+			part.apply(this);
+		}
+		pout.closeList();
+		close(node);
+	}
+
+	@Override
+	public void caseAParameterTemplateStringPart(AParameterTemplateStringPart node) {
+		open(node);
+		String beginText = node.getBeginAndOptions().getText();
+		String options;
+		if ("${".equals(beginText)) {
+			options = "";
+		} else {
+			assert beginText.startsWith("$[");
+			assert beginText.endsWith("]{");
+			options = beginText.substring(2, beginText.length() - 2);
+		}
+		pout.printAtom(options);
+		node.getExpression().apply(this);
+		close(node);
 	}
 
 	@Override

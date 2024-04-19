@@ -327,11 +327,13 @@ public class BLexer extends Lexer {
 
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
+	private int templateParameterBraceLevel;
 
 	private final DefinitionTypes definitions;
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
+		this.templateParameterBraceLevel = 0;
 		this.definitions = definitions;
 	}
 
@@ -342,6 +344,42 @@ public class BLexer extends Lexer {
 	public void setPosition(final int line, final int column) {
 		this.line = line - 1;
 		this.pos = column - 1;
+	}
+
+	private void countBracesInTemplateParameter() throws LexerException {
+		// Disallow certain syntax inside template parameters that could make lexing/parsing difficult or ambiguous.
+		// In particular, it disallows all comments and quoted literals, because they may contain unmatched braces.
+		// Many of these restrictions are not required by our current lexer and *could* be removed,
+		// but they should be left in place if possible
+		// to give us more flexibility to change the lexing/parsing implementation in the future.
+		if (state == State.MULTILINE_TEMPLATE || token instanceof EOF) {
+			// Disallow template strings nested inside another template string parameter.
+			// This has very few practical uses and is much more likely to be an error due to mismatched braces.
+			String message = "Template string parameter not closed";
+			if (templateParameterBraceLevel == 1) {
+				message += " (missing 1 closing brace)";
+			} else {
+				message += " (missing " + templateParameterBraceLevel + " closing braces)";
+			}
+			ThrowDefaultLexerException(message, token.getText());
+		} else if (token instanceof TLineComment || state == State.BLOCK_COMMENT || state == State.PRAGMA_CONTENT || state == State.PRAGMA_DESCRIPTION_CONTENT) {
+			ThrowDefaultLexerException("Comments are not allowed inside template parameters", token.getText());
+		} else if (token instanceof TStringLiteral || state == State.MULTILINE_STRING) {
+			ThrowDefaultLexerException("Strings are not allowed inside template parameters", token.getText());
+		} else if (token instanceof TIdentifierLiteral && token.getText().charAt(0) == '`') {
+			ThrowDefaultLexerException("Quoted identifiers are not allowed inside template parameters", token.getText());
+		}
+
+		assert state == State.NORMAL;
+
+		if (token instanceof TLeftBrace) {
+			templateParameterBraceLevel++;
+		} else if (token instanceof TRightBrace) {
+			templateParameterBraceLevel--;
+			if (templateParameterBraceLevel == 0) {
+				state = State.MULTILINE_TEMPLATE;
+			}
+		}
 	}
 
 	private Token lastToken;
@@ -419,6 +457,10 @@ public class BLexer extends Lexer {
 	protected void filter() throws LexerException, IOException {
 		// System.out.println("State = " + state + " token = " + token);
 
+		if (templateParameterBraceLevel > 0) {
+			countBracesInTemplateParameter();
+		}
+
 		optimizeToken();
 
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
@@ -443,6 +485,12 @@ public class BLexer extends Lexer {
 			collectComment();
 		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
+		} else if (state.equals(State.MULTILINE_TEMPLATE) && token instanceof TTemplateParameterBegin) {
+			// Beginning of template string parameter:
+			// switch to normal state until the matching closing brace is reached.
+			state = State.NORMAL;
+			assert templateParameterBraceLevel == 0;
+			templateParameterBraceLevel = 1;
 		}
 
 		if (token != null) {

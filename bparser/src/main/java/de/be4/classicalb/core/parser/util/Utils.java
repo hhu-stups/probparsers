@@ -23,6 +23,8 @@ public final class Utils {
 		final Map<Character, Character> stringEscapeReplacements = new HashMap<>();
 		stringEscapeReplacements.put('"', '"');
 		stringEscapeReplacements.put('\'', '\'');
+		stringEscapeReplacements.put('`', '`');
+		stringEscapeReplacements.put('$', '$');
 		stringEscapeReplacements.put('n', '\n');
 		stringEscapeReplacements.put('r', '\r');
 		stringEscapeReplacements.put('t', '\t');
