@@ -64,14 +64,10 @@ tests:windows64:
 
 publish:
   stage: deploy
-  before_script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-    - apt-get update
-    - apt-get install -y git
+  script:
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in secring.gpg.enc       -out secring.gpg 
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in pubring.gpg.enc       -out pubring.gpg
     - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in gradle.properties.enc -out gradle.properties
-  script:
     - ./gradlew ${GRADLE_ARGS} publish
   only: 
     - master 
