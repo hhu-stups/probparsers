@@ -10,7 +10,7 @@ buildscript {
 		// So as a workaround,
 		// enable the GraalVM plugin only when explicitly requested (see below).
 		if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
-			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.9.28")
+			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.10.1")
 		}
 	}
 }
@@ -71,7 +71,7 @@ subprojects {
 	}
 
 	dependencies {
-		testImplementation platform('org.junit:junit-bom:5.10.1')
+		testImplementation platform('org.junit:junit-bom:5.10.2')
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
 		testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
