@@ -256,6 +256,10 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		this.printListOpt(iterable, ", ");
 	}
 
+	private void printCommaListMultiLine(final Iterable<? extends Node> iterable) {
+		this.printList(iterable, ",\n");
+	}
+
 	private void printCommaListCompact(final Iterable<? extends Node> iterable) {
 		this.printListOpt(iterable, ",");
 	}
@@ -769,7 +773,14 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
 		printDottedList(node.getIdentifier());
 		print(" = {");
-		printCommaListSingleLine(node.getElements());
+		indent();
+		List<PExpression> expressions = node.getElements();
+		if (expressions.size() > 20) {
+			printCommaListMultiLine(expressions);
+		} else {
+			printCommaListSingleLine(expressions);
+		}
+		dedent();
 		print("}");
 	}
 
@@ -1466,7 +1477,14 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		print("{");
-		printCommaListSingleLine(node.getExpressions());
+		indent();
+		List<PExpression> expressions = node.getExpressions();
+		if (expressions.size() > 20) {
+			printCommaListMultiLine(expressions);
+		} else {
+			printCommaListSingleLine(expressions);
+		}
+		dedent();
 		print("}");
 	}
 
@@ -1817,7 +1835,14 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASequenceExtensionExpression(final ASequenceExtensionExpression node) {
 		print("[");
-		printCommaListSingleLine(node.getExpression());
+		indent();
+		List<PExpression> expressions = node.getExpression();
+		if (expressions.size() > 20) {
+			printCommaListMultiLine(expressions);
+		} else {
+			printCommaListSingleLine(expressions);
+		}
+		dedent();
 		print("]");
 	}
 
