@@ -186,6 +186,58 @@ public class PrettyMachinePrinterTest {
 	}
 
 	@Test
+	public void testPrettyPrint_SetLineBreak() {
+		// do not line break when not using indentation
+		final String testMachine = "MACHINE Test\n" +
+			"SETS Foo = {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z}\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
+	}
+
+	@Test
+	public void testPrettyPrint_Indent_SetLineBreak() {
+		// do use line breaks with long enumerated sets and enabled indentations
+		final String testMachine = "MACHINE Test\n" +
+			"    SETS\n" +
+			"        Foo = {\n" +
+			"            a,\n" +
+			"            b,\n" +
+			"            c,\n" +
+			"            d,\n" +
+			"            e,\n" +
+			"            f,\n" +
+			"            g,\n" +
+			"            h,\n" +
+			"            i,\n" +
+			"            j,\n" +
+			"            k,\n" +
+			"            l,\n" +
+			"            m,\n" +
+			"            n,\n" +
+			"            o,\n" +
+			"            p,\n" +
+			"            q,\n" +
+			"            r,\n" +
+			"            s,\n" +
+			"            t,\n" +
+			"            u,\n" +
+			"            v,\n" +
+			"            w,\n" +
+			"            x,\n" +
+			"            y,\n" +
+			"            z\n" +
+			"        }\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrintWithIndentation(testMachine);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
+	}
+
+	@Test
 	public void testPrettyPrintGenerated() {
 		String testMachine = "/*@generated*/\nMACHINE Test\nEND";
 		assertEquals(testMachine, Helpers.getPrettyPrint("/*@generated*/ MACHINE Test\nEND"));
