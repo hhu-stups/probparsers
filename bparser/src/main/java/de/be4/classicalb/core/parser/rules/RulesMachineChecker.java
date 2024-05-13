@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -43,7 +44,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
 	private final HashSet<String> definitions = new HashSet<>();
 	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
-	private final List<RulesMachineReference> machineReferences;
+	private final List<MachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
 
@@ -52,7 +53,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final Start start;
 	private TIdentifierLiteral nameLiteral;
 
-	public RulesMachineChecker(final File file, List<RulesMachineReference> machineReferences, Start start) {
+	public RulesMachineChecker(final File file, List<MachineReference> machineReferences, Start start) {
 		this.file = file;
 		this.machineReferences = machineReferences;
 		this.start = start;
@@ -323,7 +324,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			final RuleOperation rule = (RuleOperation) currentOperation;
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
 				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(0);
-				rule.setErrrorTypes(intExpr);
+				rule.setErrorTypes(intExpr);
 			} else {
 				errorList.add(
 						new CheckException("Expected exactly one integer after ERROR_TYPES.", pOperationAttribute));

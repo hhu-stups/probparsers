@@ -20,6 +20,7 @@ import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -82,9 +83,9 @@ public class RulesProject {
 			this.bExceptionList.addAll(compound.getBExceptions());
 		}
 		bModels.add(mainModel);
-		final LinkedList<RulesMachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
+		final LinkedList<MachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
-			final RulesMachineReference modelReference = fifo.pollFirst();
+			final MachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
 				final IModel bModel = parseRulesMachine(modelReference);
 				if (bModel.hasError()) {
@@ -455,8 +456,8 @@ public class RulesProject {
 		for (IModel model : bModels) {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			HashSet<String> knownIdentifiers = new HashSet<>();
-			List<RulesMachineReference> machineReferences = parseUnit.getMachineReferences();
-			for (RulesMachineReference rulesMachineReference : machineReferences) {
+			List<MachineReference> machineReferences = parseUnit.getMachineReferences();
+			for (MachineReference rulesMachineReference : machineReferences) {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
@@ -494,7 +495,7 @@ public class RulesProject {
 				for (RuleOperation ruleOperation : rulesParseUnit.getRulesMachineChecker().getRuleOperations()) {
 					knownRules.add(ruleOperation.getOriginalName());
 				}
-				for (RulesMachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
+				for (MachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
 					String referenceName = rulesMachineReference.getName();
 					RulesParseUnit otherParseUnit = map.get(referenceName);
 					for (RuleOperation ruleOperation : otherParseUnit.getRulesMachineChecker().getRuleOperations()) {
@@ -596,8 +597,8 @@ public class RulesProject {
 		return this.rulesMachineRunConfiguration;
 	}
 
-	private IModel parseRulesMachine(RulesMachineReference reference) {
-		File file = reference.getFile();
+	private IModel parseRulesMachine(MachineReference reference) {
+		File file = new File(reference.getPath());
 		RulesParseUnit unit = new RulesParseUnit(reference.getName());
 		unit.setParsingBehaviour(this.parsingBehaviour);
 		unit.readMachineFromFile(file);
@@ -613,7 +614,7 @@ public class RulesProject {
 		return bParseUnit;
 	}
 
-	protected boolean isANewModel(RulesMachineReference reference) {
+	protected boolean isANewModel(MachineReference reference) {
 		for (IModel iModel : bModels) {
 			if (iModel.getMachineName().equals(reference.getName())) {
 				return false;

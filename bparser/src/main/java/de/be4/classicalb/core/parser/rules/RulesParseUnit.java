@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
@@ -22,7 +23,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 
 public class RulesParseUnit implements IModel {
 	private String machineName;
-	private List<RulesMachineReference> machineReferences;
+	private List<MachineReference> machineReferences;
 
 	private String content;
 	private File machineFile;
@@ -134,7 +135,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public List<RulesMachineReference> getMachineReferences() {
+	public List<MachineReference> getMachineReferences() {
 		if (this.machineReferences == null) {
 			return new ArrayList<>();
 		} else {

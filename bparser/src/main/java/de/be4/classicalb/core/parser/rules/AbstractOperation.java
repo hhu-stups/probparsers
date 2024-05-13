@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.PPredicate;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -19,7 +20,7 @@ public abstract class AbstractOperation {
 	private final TIdentifierLiteral originalName;
 	private final String fileName; // can be null
 	private final String machineName;
-	private final List<RulesMachineReference> machineReferences;
+	private final List<MachineReference> machineReferences;
 	private final List<AIdentifierExpression> dependsOnRuleList = new ArrayList<>();
 	private final List<AIdentifierExpression> dependsOnComputationList = new ArrayList<>();
 	private final List<String> tags = new ArrayList<>();
@@ -34,7 +35,7 @@ public abstract class AbstractOperation {
 	private Set<AbstractOperation> requiredDependencies;
 
 	public AbstractOperation(TIdentifierLiteral name, String fileName, String machineName,
-			List<RulesMachineReference> machineReferences2) {
+			List<MachineReference> machineReferences2) {
 		this.originalName = name;
 		this.fileName = fileName;
 		this.machineName = machineName;
@@ -173,7 +174,7 @@ public abstract class AbstractOperation {
 
 	public List<String> getMachineReferencesAsString() {
 		List<String> list = new ArrayList<>();
-		for (RulesMachineReference reference : this.machineReferences) {
+		for (MachineReference reference : this.machineReferences) {
 			list.add(reference.getName());
 		}
 		return list;

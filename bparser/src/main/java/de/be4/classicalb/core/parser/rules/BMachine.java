@@ -10,6 +10,7 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.analysis.transforming.DefinitionInjector;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -88,7 +89,7 @@ public class BMachine implements IModel {
 	}
 
 	@Override
-	public List<RulesMachineReference> getMachineReferences() {
+	public List<MachineReference> getMachineReferences() {
 		return new ArrayList<>();
 	}
 
