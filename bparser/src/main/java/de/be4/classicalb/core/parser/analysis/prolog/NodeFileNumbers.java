@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 import de.be4.classicalb.core.parser.node.Node;
 
@@ -13,12 +12,8 @@ import de.be4.classicalb.core.parser.node.Node;
  * </p>
  */
 public final class NodeFileNumbers implements INodeIds {
-	private final Map<Node, Integer> nodeToFileNumberMap;
-	
-	public NodeFileNumbers() {
-		super();
-		this.nodeToFileNumberMap = new HashMap<>();
-	}
+
+	private final WeakHashMap<Node, Integer> nodeToFileNumberMap = new WeakHashMap<>();
 	
 	/**
 	 * Assign the given file number to a syntax tree. This implementation does not assign unique identifiers, only file numbers.
