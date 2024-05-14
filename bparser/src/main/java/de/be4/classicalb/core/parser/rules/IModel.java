@@ -14,7 +14,15 @@ public interface IModel {
 
 	List<MachineReference> getMachineReferences();
 
-	void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping);
+	default void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
+		this.printAsPrologWithFullstops(pout, nodeIdMapping, true);
+	}
+
+	default void printAsPrologDirect(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
+		this.printAsPrologWithFullstops(pout, nodeIdMapping, false);
+	}
+
+	void printAsPrologWithFullstops(final IPrologTermOutput pout, INodeIds nodeIdMapping, boolean withFullstops);
 
 	String getPath();
 

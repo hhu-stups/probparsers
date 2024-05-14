@@ -144,7 +144,7 @@ public class RulesParseUnit implements IModel {
 	}
 
 	@Override
-	public void printAsProlog(final IPrologTermOutput pout, INodeIds nodeIdMapping) {
+	public void printAsPrologWithFullstops(final IPrologTermOutput pout, INodeIds nodeIdMapping, boolean withFullstops) {
 		assert start != null;
 		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
 		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(), parsingBehaviour.isCompactPrologPositions());
@@ -152,7 +152,9 @@ public class RulesParseUnit implements IModel {
 		pout.openTerm("machine");
 		start.apply(prolog);
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 	}
 
 	@Override

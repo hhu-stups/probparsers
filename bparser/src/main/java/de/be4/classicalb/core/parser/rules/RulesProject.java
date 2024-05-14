@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +30,12 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
+
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addBooleanPreferenceDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addChooseDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addFormatToStringDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addSortDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addToStringDefinition;
 
 public class RulesProject {
 	private File mainFile;
@@ -632,26 +636,38 @@ public class RulesProject {
 	}
 
 	public void printProjectAsPrologTerm(final IPrologTermOutput pout) {
+		this.printAsPrologTermWithFullstops(pout, true);
+	}
+
+	public void printProjectAsPrologTermDirect(final IPrologTermOutput pout) {
+		this.printAsPrologTermWithFullstops(pout, false);
+	}
+
+	public void printAsPrologTermWithFullstops(final IPrologTermOutput pout, final boolean withFullstops) {
 		// parser version
 		pout.openTerm("parser_version");
 		pout.printAtom(BParser.getGitSha());
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 
-		// machine
+		// machine metadata
 		pout.openTerm("classical_b");
 		pout.printAtom(MAIN_MACHINE_NAME);
 		pout.openList();
-
 		for (File file : this.filesLoaded) {
 			pout.printAtom(file.getAbsolutePath());
 		}
 		pout.closeList();
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 
+		// machines
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, this.nodeIdAssignment);
+			iModel.printAsPrologWithFullstops(pout, this.nodeIdAssignment, withFullstops);
 		}
 	}
 
