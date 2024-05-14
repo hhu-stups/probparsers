@@ -53,11 +53,12 @@ public final class NodeFileNumbers implements INodeIds {
 		// To speed up future lookups,
 		// add the found file number to the node
 		// and to any intermediate parents that also have no file number yet.
-		Node currentNode2 = node;
+		// FIXME: disabled to save memory, but what is the actual performance impact?
+		/*Node currentNode2 = node;
 		while (currentNode2 != null && !currentNode2.equals(currentNode)) {
 			this.nodeToFileNumberMap.put(currentNode2, fileNumber);
 			currentNode2 = currentNode2.parent();
-		}
+		}*/
 		
 		return fileNumber;
 	}
