@@ -33,7 +33,6 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -510,22 +509,9 @@ public class CliBParser {
 					throw new AssertionError("Unhandled parsing command: " + command);
 			}
 
-			// In the compact position format, node IDs are not used,
-			// so generate them only if the old non-compact format is requested.
-			final INodeIds nodeIds;
-			if (behaviour.isCompactPrologPositions()) {
-				nodeIds = new NodeFileNumbers();
-				if (behaviour.getDefaultFileNumber() != -1) {
-					nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
-				}
-			} else {
-				final NodeIdAssignment na = new NodeIdAssignment();
-				if (behaviour.getDefaultFileNumber() == -1) {
-					start.apply(na);
-				} else {
-					na.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
-				}
-				nodeIds = na;
+			INodeIds nodeIds = new NodeFileNumbers();
+			if (behaviour.getDefaultFileNumber() != -1) {
+				nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
 			}
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);

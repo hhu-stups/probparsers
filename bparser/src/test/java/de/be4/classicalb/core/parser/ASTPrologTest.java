@@ -1,19 +1,14 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
-
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
@@ -43,6 +38,10 @@ import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
 public class ASTPrologTest {
 	private static String printAST(final Node node, final INodeIds nodeids) {
 		final StringWriter swriter = new StringWriter();
@@ -55,7 +54,8 @@ public class ASTPrologTest {
 	}
 
 	private static void checkAST(final int counter, final String expected, final Node ast) {
-		final NodeIdAssignment nodeids = new NodeIdAssignment();
+		@SuppressWarnings("deprecation")
+		de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment nodeids = new de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment();
 		ast.apply(nodeids);
 		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));

@@ -63,14 +63,7 @@ public class RecursiveMachineLoader {
 					new BException(null, new IOException("Directory does not exist: " + directory)));
 		}
 
-		// In the compact position format, node IDs are not used,
-		// so generate them only if the old non-compact format is requested.
-		if (parsingBehaviour.isCompactPrologPositions()) {
-			this.nodeIds = new NodeFileNumbers();
-		} else {
-			this.nodeIds = new NodeIdAssignment();
-		}
-
+		this.nodeIds = new NodeFileNumbers();
 		this.contentProvider = contentProvider;
 	}
 
