@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
+import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,8 +29,15 @@ public class NodeIdAssignment extends DepthFirstAdapter implements INodeIds {
 		return nodeToIdentifierMap.get(node);
 	}
 
+	@Deprecated
 	public Node lookupById(int id) {
-		throw new UnsupportedOperationException();
+		for (Map.Entry<Node, Integer> entry : nodeToIdentifierMap.entrySet()) {
+			if (entry.getValue() == id) {
+				return entry.getKey();
+			}
+		}
+
+		throw new AssertionError("Unknown id " + id);
 	}
 
 	@Override
