@@ -39,26 +39,22 @@ public final class NodeFileNumbers implements INodeIds {
 	
 	@Override
 	public int lookupFileNumber(final Node node) {
-		// First, check if we already know this node's file number.
-		if (this.nodeToFileNumberMap.containsKey(node)) {
-			return this.nodeToFileNumberMap.get(node);
-		}
-		
-		// If not, walk up the node's parents until finding one with a file number.
+		// Find the first node in the parent-chain that has a file number
+		Integer existingFileNumber = null;
 		Node currentNode = node;
-		do {
+		while (currentNode != null && (existingFileNumber = this.nodeToFileNumberMap.get(currentNode)) == null) {
 			currentNode = currentNode.parent();
-		} while (currentNode != null && !this.nodeToFileNumberMap.containsKey(currentNode));
-		
+		}
+
 		// At this point, we have either found a parent node with a file number,
-		// or we reached the top of the AST without finding one (in which case currentNode is null).
-		final int fileNumber = currentNode == null ? -1 : this.nodeToFileNumberMap.get(currentNode);
+		// or we reached the top of the AST without finding one (in which case existingFileNumber is null).
+		final int fileNumber = existingFileNumber == null ? -1 : existingFileNumber;
 		
 		// To speed up future lookups,
 		// add the found file number to the node
 		// and to any intermediate parents that also have no file number yet.
 		Node currentNode2 = node;
-		while (currentNode2 != null && !this.nodeToFileNumberMap.containsKey(currentNode2)) {
+		while (currentNode2 != null && !currentNode2.equals(currentNode)) {
 			this.nodeToFileNumberMap.put(currentNode2, fileNumber);
 			currentNode2 = currentNode2.parent();
 		}
