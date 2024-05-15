@@ -1,19 +1,12 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.LinkedList;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.List;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAddExpression;
+import de.be4.classicalb.core.parser.node.ADescriptionExpression;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
@@ -25,6 +18,15 @@ import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.hhu.stups.sablecc.patch.PositionedNode;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SourcePositionsTest {
 
@@ -164,6 +166,70 @@ public class SourcePositionsTest {
 		assertEquals(5, y.getStartPos().getPos());
 		assertEquals(4, y.getEndPos().getLine());
 		assertEquals(7, y.getEndPos().getPos());
+	}
+
+	@Test
+	public void testVariableWithPragmaPositions() throws Exception {
+		final String testMachine = "MACHINE SimpleDescPragma\n" +
+				                           "VARIABLES\n" +
+				                           "  x, // a variable without description\n" +
+				                           "  y /*@desc \"The y coordinate\" */,  // this variable gets position p3(0,0,0)\n" +
+				                           "  z\n" +
+				                           "INVARIANT\n" +
+				                           " x+y+z = 0\n" +
+				                           "INITIALISATION\n" +
+				                           " x,y,z := 1,0,-1\n" +
+				                           "END";
+		final Start result = getAst(testMachine);
+		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) result.getPParseUnit();
+
+		AVariablesMachineClause variables = null;
+		for (final PMachineClause clause : machine.getMachineClauses()) {
+			if (clause instanceof AVariablesMachineClause) {
+				variables = (AVariablesMachineClause) clause;
+				break;
+			}
+		}
+		if (variables == null) {
+			fail("variables clause not found");
+		}
+
+		final List<PExpression> ids = variables.getIdentifiers();
+		assertEquals(3, ids.size());
+		final AIdentifierExpression x = (AIdentifierExpression) ids.get(0);
+		final ADescriptionExpression yDesc = (ADescriptionExpression) ids.get(1);
+		final AIdentifierExpression y = (AIdentifierExpression) yDesc.getExpression();
+		final AIdentifierExpression z = (AIdentifierExpression) ids.get(2);
+
+		// VARIABLES block
+		assertEquals(2, variables.getStartPos().getLine());
+		assertEquals(1, variables.getStartPos().getPos());
+		assertEquals(5, variables.getEndPos().getLine());
+		assertEquals(4, variables.getEndPos().getPos());
+
+		// variable x
+		assertEquals(3, x.getStartPos().getLine());
+		assertEquals(3, x.getStartPos().getPos());
+		assertEquals(3, x.getEndPos().getLine());
+		assertEquals(4, x.getEndPos().getPos());
+
+		// variable y with description
+		assertEquals(4, yDesc.getStartPos().getLine());
+		assertEquals(3, yDesc.getStartPos().getPos());
+		assertEquals(4, yDesc.getEndPos().getLine());
+		assertEquals(34, yDesc.getEndPos().getPos());
+
+		// variable y itself
+		assertEquals(4, y.getStartPos().getLine());
+		assertEquals(3, y.getStartPos().getPos());
+		assertEquals(4, y.getEndPos().getLine());
+		assertEquals(4, y.getEndPos().getPos());
+
+		// variable z
+		assertEquals(5, z.getStartPos().getLine());
+		assertEquals(3, z.getStartPos().getPos());
+		assertEquals(5, z.getEndPos().getLine());
+		assertEquals(4, z.getEndPos().getPos());
 	}
 
 	@Before
