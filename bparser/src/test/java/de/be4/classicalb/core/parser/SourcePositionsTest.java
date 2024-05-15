@@ -173,7 +173,7 @@ public class SourcePositionsTest {
 		final String testMachine = "MACHINE SimpleDescPragma\n"
 			+ "VARIABLES\n"
 			+ "  x, // a variable without description\n"
-			+ "  y /*@desc \"The y coordinate\" */,  // this variable gets position p3(0,0,0)\n"
+			+ "  y /*@desc \"The y coordinate\" */,\n" // this variable gets position p3(0,0,0)
 			+ "  z\n"
 			+ "INVARIANT\n"
 			+ " x+y+z = 0\n"
