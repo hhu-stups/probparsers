@@ -813,7 +813,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		node.getName().apply(this);
 		printParameterListOpt(node.getParameters());
 		print(" = ");
-		printCommaListSingleLine(node.getConstructors());
+		printDelimitedCommaList(node.getConstructors(), "", "", ENUMERATED_MULTILINE_THRESHOLD);
 	}
 
 	@Override
