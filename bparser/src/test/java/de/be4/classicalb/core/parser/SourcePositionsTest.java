@@ -21,6 +21,7 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -168,6 +169,7 @@ public class SourcePositionsTest {
 		assertEquals(7, y.getEndPos().getPos());
 	}
 
+	@Ignore // Needs a fix in sablecc-stups
 	@Test
 	public void testVariableWithPragmaPositions() throws Exception {
 		final String testMachine = "MACHINE SimpleDescPragma\n"
