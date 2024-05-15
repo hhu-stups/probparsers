@@ -170,16 +170,16 @@ public class SourcePositionsTest {
 
 	@Test
 	public void testVariableWithPragmaPositions() throws Exception {
-		final String testMachine = "MACHINE SimpleDescPragma\n" +
-				                           "VARIABLES\n" +
-				                           "  x, // a variable without description\n" +
-				                           "  y /*@desc \"The y coordinate\" */,  // this variable gets position p3(0,0,0)\n" +
-				                           "  z\n" +
-				                           "INVARIANT\n" +
-				                           " x+y+z = 0\n" +
-				                           "INITIALISATION\n" +
-				                           " x,y,z := 1,0,-1\n" +
-				                           "END";
+		final String testMachine = "MACHINE SimpleDescPragma\n"
+			+ "VARIABLES\n"
+			+ "  x, // a variable without description\n"
+			+ "  y /*@desc \"The y coordinate\" */,  // this variable gets position p3(0,0,0)\n"
+			+ "  z\n"
+			+ "INVARIANT\n"
+			+ " x+y+z = 0\n"
+			+ "INITIALISATION\n"
+			+ " x,y,z := 1,0,-1\n"
+			+ "END";
 		final Start result = getAst(testMachine);
 		final AAbstractMachineParseUnit machine = (AAbstractMachineParseUnit) result.getPParseUnit();
 
