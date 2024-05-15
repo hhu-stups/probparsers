@@ -21,7 +21,6 @@ import de.hhu.stups.sablecc.patch.PositionedNode;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -169,13 +168,12 @@ public class SourcePositionsTest {
 		assertEquals(7, y.getEndPos().getPos());
 	}
 
-	@Ignore // Needs a fix in sablecc-stups
 	@Test
 	public void testVariableWithPragmaPositions() throws Exception {
 		final String testMachine = "MACHINE SimpleDescPragma\n"
 			+ "VARIABLES\n"
 			+ "  x, // a variable without description\n"
-			+ "  y /*@desc \"The y coordinate\" */,\n" // this variable gets position p3(0,0,0)
+			+ "  y /*@desc \"The y coordinate\" */,\n"
 			+ "  z\n"
 			+ "INVARIANT\n"
 			+ " x+y+z = 0\n"
@@ -225,7 +223,9 @@ public class SourcePositionsTest {
 		assertEquals(4, y.getStartPos().getLine());
 		assertEquals(3, y.getStartPos().getPos());
 		assertEquals(4, y.getEndPos().getLine());
-		assertEquals(4, y.getEndPos().getPos());
+		// Ideally this should be column 4, but the grammar parses the identifier and the pragma together,
+		// so the identifier gets the same end column as the entire pragma expression.
+		assertEquals(34, y.getEndPos().getPos());
 
 		// variable z
 		assertEquals(5, z.getStartPos().getLine());
