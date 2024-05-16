@@ -285,24 +285,37 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		this.printDelimitedCommaList(iterable, "(", ")", PARAMETER_MULTILINE_THRESHOLD);
 	}
 
+	/**
+	 * When {@code prefix} is {@code null} this will assume no opening delimiter and add a space when required instead.
+	 * <br>
+	 * When {@code suffix} is {@code null} this will assume no closing delimiter and not add a newline at the end.
+	 */
 	private void printDelimitedCommaList(final Collection<? extends Node> iterable, String prefix, String suffix, int threshold) {
 		this.indent();
-		this.print(prefix);
+		if (prefix != null) {
+			this.print(prefix);
+		}
 		if (iterable.size() >= threshold) {
-			// we cannot use printlnOpt here because that prints a space (' ') when there is no indentation
-			if (this.isUseIndentation()) {
-				this.println();
+			// we cannot use printlnOpt unconditionally because that prints a space (' ') when there is no indentation
+			if (prefix == null || this.isUseIndentation()) {
+				this.printlnOpt();
 			}
 			this.printCommaList(iterable);
 			this.dedent();
-			if (this.isUseIndentation()) {
+			if (suffix != null && this.isUseIndentation()) {
 				this.println();
 			}
 		} else {
+			// act as if "this.isUseIndentation()" is false
+			if (prefix == null) {
+				this.print(" ");
+			}
 			this.printCommaListSingleLine(iterable);
 			this.dedent();
 		}
-		this.print(suffix);
+		if (suffix != null) {
+			this.print(suffix);
+		}
 	}
 
 	private void leftParAssoc(final Node node, final Node right) {
@@ -812,8 +825,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAFreetype(AFreetype node) {
 		node.getName().apply(this);
 		printParameterListOpt(node.getParameters());
-		print(" = ");
-		printDelimitedCommaList(node.getConstructors(), "", "", ENUMERATED_MULTILINE_THRESHOLD);
+		print(" =");
+		printDelimitedCommaList(node.getConstructors(), null, null, ENUMERATED_MULTILINE_THRESHOLD);
 	}
 
 	@Override

@@ -189,7 +189,7 @@ public class PrettyMachinePrinterTest {
 	public void testPrettyPrint_SetLineBreak() {
 		// do not line break when not using indentation
 		final String testMachine = "MACHINE Test\n" +
-			"SETS Foo = {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z}\n" +
+			"SETS Foo = {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z}; Bar = {x, y, z}\n" +
 			"END";
 		final String result1 = Helpers.getPrettyPrint(testMachine);
 
@@ -229,7 +229,60 @@ public class PrettyMachinePrinterTest {
 			"            x,\n" +
 			"            y,\n" +
 			"            z\n" +
-			"        }\n" +
+			"        };\n" +
+			"        Baz = {x, y, z}\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrintWithIndentation(testMachine);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
+	}
+
+	@Test
+	public void testPrettyPrint_SetLineBreak_FreeTypes() {
+		// do not line break when not using indentation
+		final String testMachine = "MACHINE Test\n" +
+			"FREETYPES Foo = a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z; Bar = x, y, z\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
+	}
+
+	@Test
+	public void testPrettyPrint_Indent_SetLineBreak_FreeTypes() {
+		// do use line breaks with long freetypes and enabled indentations
+		final String testMachine = "MACHINE Test\n" +
+			"    FREETYPES\n" +
+			"        Foo =\n" +
+			"            a,\n" +
+			"            b,\n" +
+			"            c,\n" +
+			"            d,\n" +
+			"            e,\n" +
+			"            f,\n" +
+			"            g,\n" +
+			"            h,\n" +
+			"            i,\n" +
+			"            j,\n" +
+			"            k,\n" +
+			"            l,\n" +
+			"            m,\n" +
+			"            n,\n" +
+			"            o,\n" +
+			"            p,\n" +
+			"            q,\n" +
+			"            r,\n" +
+			"            s,\n" +
+			"            t,\n" +
+			"            u,\n" +
+			"            v,\n" +
+			"            w,\n" +
+			"            x,\n" +
+			"            y,\n" +
+			"            z;\n" +
+			"        Bar = x, y, z\n" +
 			"END";
 		final String result1 = Helpers.getPrettyPrintWithIndentation(testMachine);
 
