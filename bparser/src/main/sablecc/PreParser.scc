@@ -213,9 +213,9 @@ Ignored Tokens
 Productions
 
 parse_unit {-> parse_unit} =
-  {defs_clause} [def_clause]:def_clause {-> New parse_unit.defs([def_clause.definition])} |
-  {something} kw_prefix no_def_something {-> New parse_unit.no_defs()} |
-  {nothing} {-> New parse_unit.no_defs()};
+  {defs_clause} [def_clause]:def_clause {-> New parse_unit([def_clause.definition])} |
+  {something} kw_prefix no_def_something {-> New parse_unit([])} |
+  {nothing} {-> New parse_unit([])};
 
 def_clause {-> definition*} = definitions [list]:definition_list semicolon? {-> [list.definition]};
 
@@ -238,9 +238,7 @@ identifier_list {-> identifier_literal*} =
  *******************************************************************/
 Abstract Syntax Tree
 
-parse_unit =
-  {defs} definition* |
-  {no_defs};
+parse_unit = definition*;
 
 definition =
   [def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
