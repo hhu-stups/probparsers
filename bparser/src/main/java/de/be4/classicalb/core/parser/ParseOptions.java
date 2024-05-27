@@ -16,7 +16,8 @@ public class ParseOptions {
 	private boolean ignoreCheckingValidCombinations = false;
 
 	/**
-	 * if true the lexer will ignore certain tokens (typically ignored tokens)
+	 * if true the lexer will ignore certain tokens (typically ignored tokens).
+	 * This option currently does nothing and will probably be removed in the future.
 	 */
 	private boolean ignoreUselessTokens = true;
 

@@ -20,8 +20,6 @@ import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
-import de.be4.classicalb.core.preparser.node.TSomeValue;
-import de.be4.classicalb.core.preparser.node.TSomething;
 import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
@@ -192,14 +190,6 @@ public class PreLexer extends Lexer {
 	private void optimizeToken() {
 		if (token instanceof TIdentifierLiteral) {
 			token.setText(token.getText().intern());
-		} else if (
-			token instanceof TSomeValue
-			|| token instanceof TSomething
-			// || token instanceof TCommentBody // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
-			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
-		) {
-			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
-			token = null;
 		}
 	}
 }

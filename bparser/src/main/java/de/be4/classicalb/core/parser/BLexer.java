@@ -513,16 +513,6 @@ public class BLexer extends Lexer {
 			|| token instanceof TMaplet
 		) {
 			token.setText(token.getText().intern());
-		} else if (
-			token instanceof TWhiteSpace
-			// || token instanceof TComment
-			// || token instanceof TLineComment // definitions.DefinitionsErrorsTest fails if we do this
-		) {
-			// The flag is useful for ProB2-UI BEditor, which currently needs to see all tokens
-			// TODO: check if we can also ignore TComment, TCommentBody, ...
-			if (parseOptions == null || parseOptions.isIgnoreUselessTokens()) {
-				token = null;
-			}
 		}
 	}
 
