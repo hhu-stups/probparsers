@@ -159,7 +159,7 @@ Tokens
   {definitions} comma = ',';
 
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
-  {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'] | string_literal;
+  {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'];
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
@@ -167,7 +167,7 @@ Tokens
   {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
   {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
-  {definitions} filename_string = string_literal;
+  {definitions, definitions_rhs} string_literal = string_literal;
 
   {definitions, definitions_rhs} white_space = line_break | layout_char+;
 
@@ -223,7 +223,7 @@ definition_list {-> definition*} =
 
 definition {-> definition} =
   [def_name]:identifier_literal [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New definition(def_name, [parameters.identifier_literal], rhs)} |
-  {file} [filename]:filename_string {-> New definition.file(filename)};
+  {file} [filename]:string_literal {-> New definition.file(filename)};
 
 def_parameters {-> identifier_literal*} = left_par [parameters]:identifier_list right_par {-> [parameters.identifier_literal]};
 
@@ -240,4 +240,4 @@ parse_unit = definition*;
 
 definition =
   [def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
-  {file} [filename]:filename_string;
+  {file} [filename]:string_literal;

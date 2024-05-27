@@ -8,7 +8,7 @@ import java.util.Map;
 import de.be4.classicalb.core.preparser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.preparser.node.ADefinition;
 import de.be4.classicalb.core.preparser.node.AFileDefinition;
-import de.be4.classicalb.core.preparser.node.TFilenameString;
+import de.be4.classicalb.core.preparser.node.TStringLiteral;
 import de.be4.classicalb.core.preparser.node.Token;
 
 /**
@@ -18,7 +18,7 @@ import de.be4.classicalb.core.preparser.node.Token;
 public class DefinitionPreCollector extends DepthFirstAdapter {
 
 	private final Map<Token, Token> definitions = new HashMap<>();
-	private final List<TFilenameString> fileDefinitions = new ArrayList<>();
+	private final List<TStringLiteral> fileDefinitions = new ArrayList<>();
 
 	@Override
 	public void inADefinition(final ADefinition node) {
@@ -41,7 +41,7 @@ public class DefinitionPreCollector extends DepthFirstAdapter {
 		return definitions;
 	}
 
-	public List<TFilenameString> getFileDefinitions() {
+	public List<TStringLiteral> getFileDefinitions() {
 		return fileDefinitions;
 	}
 }

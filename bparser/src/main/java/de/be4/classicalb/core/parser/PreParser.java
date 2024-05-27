@@ -40,7 +40,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
-import de.be4.classicalb.core.preparser.node.TFilenameString;
+import de.be4.classicalb.core.preparser.node.TStringLiteral;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
@@ -142,7 +142,7 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(List<TFilenameString> list)
+	private void evaluateDefinitionFiles(List<TStringLiteral> list)
 			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
@@ -150,7 +150,7 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (TFilenameString filenameString : list) {
+		for (TStringLiteral filenameString : list) {
 			final List<String> newDoneList = new ArrayList<>(doneDefFiles);
 			// Unquote and unescape the definition file name string.
 			String quotedFilename = filenameString.getText();
