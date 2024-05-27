@@ -83,8 +83,6 @@ Helpers
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator];
   layout_char = [[9 + 32] + 160];
 
-  word_chars = [[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'];
-
   single_line_string_char = [all_chars - line_break];
   string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
   // backquote to generate identifiers with special symbols or which clash with keywords
@@ -161,7 +159,7 @@ Tokens
   {definitions} comma = ',';
 
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
-  {definitions_rhs} rhs_body = [word_chars - '"'] | string_literal;
+  {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'] | string_literal;
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
