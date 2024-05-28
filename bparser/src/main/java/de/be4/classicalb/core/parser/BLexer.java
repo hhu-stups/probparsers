@@ -508,10 +508,7 @@ public class BLexer extends Lexer {
 	}
 
 	private void optimizeToken() {
-		if (
-			token instanceof TIdentifierLiteral
-			|| token instanceof TMaplet
-		) {
+		if (token instanceof TIdentifierLiteral) {
 			token.setText(token.getText().intern());
 		}
 	}
