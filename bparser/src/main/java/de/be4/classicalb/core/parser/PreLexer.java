@@ -101,8 +101,7 @@ public class PreLexer extends Lexer {
 					try {
 						unread(token);
 					} catch (IOException e) {
-
-						throw new IOException("Pushback buffer overflow on Token: " + token.getText());
+						throw new IOException("Pushback buffer overflow on Token: " + token.getText(), e);
 					}
 
 					// prepare rhs_body token to be the current one
