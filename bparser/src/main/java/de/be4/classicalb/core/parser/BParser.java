@@ -571,11 +571,16 @@ public class BParser {
 		this.definitions = definitions;
 	}
 
-	public List<String> getDoneDefFiles() {
+	/**
+	 * For internal use only by the {@link PreParser}.
+	 * 
+	 * @return the chain/stack of definition files via which the currently parsed definition file was reached, or an empty list when not parsing a definition file
+	 */
+	List<String> getDoneDefFiles() {
 		return doneDefFiles;
 	}
 
-	public void setDoneDefFiles(final List<String> doneDefFiles) {
+	void setDoneDefFiles(final List<String> doneDefFiles) {
 		this.doneDefFiles = doneDefFiles;
 	}
 
