@@ -55,7 +55,7 @@ public class BParser {
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
-	private final List<String> doneDefFiles = new ArrayList<>();
+	private final List<String> definitionFileIncludeStack = new ArrayList<>();
 
 	private final String fileName;
 
@@ -519,7 +519,7 @@ public class BParser {
 	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 			machineFile,
-			contentProvider, doneDefFiles, parseOptions, this.definitions
+			contentProvider, definitionFileIncludeStack, parseOptions, this.definitions
 		);
 		// scan for additional new definitions
 		preParser.setStartPosition(this.startLine, this.startColumn);
@@ -576,8 +576,8 @@ public class BParser {
 	 * 
 	 * @return the chain/stack of definition files via which the currently parsed definition file was reached, or an empty list when not parsing a definition file
 	 */
-	List<String> getDoneDefFiles() {
-		return doneDefFiles;
+	List<String> getDefinitionFileIncludeStack() {
+		return definitionFileIncludeStack;
 	}
 
 	public ParseOptions getOptions() {

@@ -82,19 +82,19 @@ public class PreParser {
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
-	private final List<String> doneDefFiles;
+	private final List<String> definitionFileIncludeStack;
 
 	private int startLine;
 	private int startColumn;
 
 	public PreParser(PushbackReader pushbackReader, File modelFile,
 			IFileContentProvider contentProvider,
-			List<String> doneDefFiles,
+			List<String> definitionFileIncludeStack,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
 		this.modelFile = modelFile;
 		this.contentProvider = contentProvider;
-		this.doneDefFiles = doneDefFiles;
+		this.definitionFileIncludeStack = definitionFileIncludeStack;
 		this.parseOptions = parseOptions;
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
@@ -157,9 +157,9 @@ public class PreParser {
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def
 			try {
-				if (doneDefFiles.contains(fileName)) {
+				if (definitionFileIncludeStack.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
-					for (String string : doneDefFiles) {
+					for (String string : definitionFileIncludeStack) {
 						sb.append(string).append(" -> ");
 					}
 					sb.append(fileName);
@@ -176,8 +176,8 @@ public class PreParser {
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
-					parser.getDoneDefFiles().addAll(doneDefFiles);
-					parser.getDoneDefFiles().add(fileName);
+					parser.getDefinitionFileIncludeStack().addAll(definitionFileIncludeStack);
+					parser.getDefinitionFileIncludeStack().add(fileName);
 					parser.setDefinitions(new Definitions(file));
 					parser.parseMachine(content, file);
 					definitions = parser.getDefinitions();
