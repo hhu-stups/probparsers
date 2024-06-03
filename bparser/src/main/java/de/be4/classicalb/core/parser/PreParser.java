@@ -151,7 +151,6 @@ public class PreParser {
 		}
 
 		for (TStringLiteral filenameString : list) {
-			final List<String> newDoneList = new ArrayList<>(doneDefFiles);
 			// Unquote and unescape the definition file name string.
 			String quotedFilename = filenameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
@@ -172,13 +171,13 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					newDoneList.add(fileName);
 					File directory = modelFile == null ? null : modelFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
-					parser.setDoneDefFiles(newDoneList);
+					parser.getDoneDefFiles().addAll(doneDefFiles);
+					parser.getDoneDefFiles().add(fileName);
 					parser.setDefinitions(new Definitions(file));
 					parser.parseMachine(content, file);
 					definitions = parser.getDefinitions();

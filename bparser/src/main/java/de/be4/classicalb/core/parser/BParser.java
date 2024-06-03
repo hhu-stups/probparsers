@@ -55,7 +55,7 @@ public class BParser {
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
-	private List<String> doneDefFiles = new ArrayList<>();
+	private final List<String> doneDefFiles = new ArrayList<>();
 
 	private final String fileName;
 
@@ -578,10 +578,6 @@ public class BParser {
 	 */
 	List<String> getDoneDefFiles() {
 		return doneDefFiles;
-	}
-
-	void setDoneDefFiles(final List<String> doneDefFiles) {
-		this.doneDefFiles = doneDefFiles;
 	}
 
 	public ParseOptions getOptions() {
