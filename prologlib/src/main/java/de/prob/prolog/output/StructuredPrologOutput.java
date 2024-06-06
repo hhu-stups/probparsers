@@ -1,44 +1,33 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.*;
+import de.prob.prolog.term.PrologTerm;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public final class StructuredPrologOutput implements IPrologTermOutput {
+public final class StructuredPrologOutput extends BaseStructuredPrologOutput {
 
 	private final List<PrologTerm> sentences = new ArrayList<>();
-	private final Deque<TermBuilder> termBuilderStack = new ArrayDeque<>();
 	private PrologTerm finishedTerm;
 
-	private void checkTerm() {
-		if (this.finishedTerm != null) {
-			throw new IllegalStateException("expected fullstop");
-		}
-	}
-
-	private void addTerm(PrologTerm term) {
-		Objects.requireNonNull(term, "term");
-		this.checkTerm();
-		if (this.termBuilderStack.isEmpty()) {
-			this.finishedTerm = term;
+	@Override
+	protected void addFinishedTerm(PrologTerm term) {
+		if (this.hasFinishedTerm()) {
+			throw new IllegalStateException("cannot add term, expected fullstop");
 		} else {
-			this.termBuilderStack.peek().addArgument(term);
+			this.finishedTerm = term;
 		}
 	}
 
 	@Override
-	public IPrologTermOutput closeList() {
-		PrologTerm term = this.termBuilderStack.pop().buildList();
-		this.addTerm(term);
-		return this;
-	}
+	protected void fullStopImpl() {
+		if (!this.hasFinishedTerm()) {
+			throw new IllegalStateException("cannot end sentence, expected term");
+		}
 
-	@Override
-	public IPrologTermOutput closeTerm() {
-		PrologTerm term = this.termBuilderStack.pop().buildTerm();
-		this.addTerm(term);
-		return this;
+		this.sentences.add(this.finishedTerm);
+		this.finishedTerm = null;
 	}
 
 	@Override
@@ -46,80 +35,12 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 		return this;
 	}
 
-	@Override
-	public IPrologTermOutput fullstop() {
-		if (this.finishedTerm == null) {
-			throw new IllegalStateException("expected term");
-		} else if (!this.termBuilderStack.isEmpty()) {
-			throw new IllegalArgumentException(this.termBuilderStack.size() + " unclosed term(s) or list(s)");
-		}
-
-		this.sentences.add(this.finishedTerm);
-		this.finishedTerm = null;
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput openList() {
-		this.checkTerm();
-		this.termBuilderStack.push(new TermBuilder(null));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput openTerm(final String functor, final boolean ignoreIndentation) {
-		this.checkTerm();
-		this.termBuilderStack.push(new TermBuilder(Objects.requireNonNull(functor, "functor")));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printAtom(final String content) {
-		this.addTerm(new CompoundPrologTerm(content));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printNumber(final long number) {
-		this.addTerm(AIntegerPrologTerm.create(number));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printNumber(final BigInteger number) {
-		this.addTerm(AIntegerPrologTerm.create(number));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printNumber(final double number) {
-		this.addTerm(new FloatPrologTerm(number));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printString(final String content) {
-		return this.printAtom(content);
-	}
-
-	@Override
-	public IPrologTermOutput printVariable(final String var) {
-		this.addTerm(new VariablePrologTerm(var));
-		return this;
-	}
-
-	@Override
-	public IPrologTermOutput printTerm(final PrologTerm term) {
-		this.addTerm(term);
-		return this;
-	}
-
 	public List<PrologTerm> getSentences() {
-		return new ArrayList<>(this.sentences);
+		return Collections.unmodifiableList(this.sentences);
 	}
 
 	public PrologTerm getFinishedTerm() {
-		if (this.finishedTerm != null) {
+		if (this.hasFinishedTerm()) {
 			return this.finishedTerm;
 		} else {
 			throw new IllegalStateException("no finished term");
@@ -127,7 +48,7 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public PrologTerm getLastSentence() {
-		if (!this.sentences.isEmpty()) {
+		if (this.hasSentences()) {
 			return this.sentences.get(this.sentences.size() - 1);
 		} else {
 			throw new IllegalStateException("no sentence");
@@ -135,9 +56,9 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public PrologTerm getLastTerm() {
-		if (this.finishedTerm != null) {
+		if (this.hasFinishedTerm()) {
 			return this.finishedTerm;
-		} else if (!this.sentences.isEmpty()) {
+		} else if (this.hasSentences()) {
 			return this.sentences.get(this.sentences.size() - 1);
 		} else {
 			throw new IllegalStateException("no finished term or sentence");
@@ -145,8 +66,8 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 	}
 
 	public void reset() {
+		super.reset();
 		this.clearSentences();
-		this.termBuilderStack.clear();
 		this.finishedTerm = null;
 	}
 
@@ -164,39 +85,5 @@ public final class StructuredPrologOutput implements IPrologTermOutput {
 
 	public boolean hasSentences() {
 		return !this.sentences.isEmpty();
-	}
-
-	private static final class TermBuilder {
-
-		final String functor;
-		List<PrologTerm> args;
-
-		TermBuilder(String functor) {
-			this.functor = functor;
-		}
-
-		PrologTerm buildList() {
-			if (this.functor != null) {
-				throw new IllegalStateException("expected list");
-			}
-
-			return ListPrologTerm.fromCollection(this.args);
-		}
-
-		PrologTerm buildTerm() {
-			if (this.functor == null) {
-				throw new IllegalStateException("expected term");
-			}
-
-			return CompoundPrologTerm.fromCollection(this.functor, this.args);
-		}
-
-		void addArgument(PrologTerm term) {
-			if (this.args == null) {
-				this.args = new ArrayList<>();
-			}
-
-			this.args.add(term);
-		}
 	}
 }

@@ -1,18 +1,19 @@
-package de.be4.classicalb.core.parser;
+package de.prob.prolog.output;
+
+import de.prob.prolog.term.PrologTerm;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import de.prob.prolog.output.StructuredPrologOutput;
-import de.prob.prolog.term.PrologTerm;
-
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class FastWriteTest {
+
 	private final StructuredPrologOutput spo = new StructuredPrologOutput();
-	
+
 	@Test
 	public void testSingleNumber() {
 		spo.printNumber(42);
@@ -42,7 +43,7 @@ public class FastWriteTest {
 	public void testSimpleFunctor2() {
 		spo.openTerm("C").printAtom("a").closeTerm();
 		spo.fullstop();
-		String expected ="DSC\0\1Aa\0"; 
+		String expected = "DSC\0\1Aa\0";
 		check(expected);
 	}
 
@@ -51,6 +52,30 @@ public class FastWriteTest {
 		spo.printVariable("Foo");
 		spo.fullstop();
 		String expected = "D_0\0";
+		check(expected);
+	}
+
+	@Test
+	public void testMultiVariable() {
+		spo.openList();
+		spo.printVariable("Foo");
+		spo.printVariable("Foo");
+		spo.closeList();
+		spo.fullstop();
+		String expected = "D[_0\0[_0\0]";
+		check(expected);
+	}
+
+	@Test
+	public void testDifferentVariables() {
+		spo.openList();
+		spo.printVariable("Foo");
+		spo.printVariable("Foo");
+		spo.printVariable("Bar");
+		spo.printVariable("Bar");
+		spo.closeList();
+		spo.fullstop();
+		String expected = "D[_0\0[_0\0[_0\0[_0\0]";
 		check(expected);
 	}
 
@@ -97,25 +122,25 @@ public class FastWriteTest {
 		String expected = "DSa\0\1[AG\0[Sf\0\1][[[Aw\0]]]";
 		check(expected);
 	}
-	
+
 	@Test
 	public void testLargeCompound() {
 		spo.openTerm("large");
 		// SICStus max_arity is 255, which is also the maximum possible in the fastrw format.
 		for (int i = 0; i < 255; i++) {
-			spo.openList();
-			spo.closeList();
+			spo.emptyList();
 		}
 		spo.closeTerm();
 		spo.fullstop();
+		// 377oct is 255dec
 		// Append 255 ']' characters at the end:
 		final String expected = "DSlarge\0\377" + new String(new char[255]).replace('\0', ']');
 		check(expected);
 	}
-	
+
 	private void check(String expected) {
 		assert spo.getSentences().size() == 1;
-		final PrologTerm term = spo.getSentences().get(0);
+		final PrologTerm term = spo.getLastSentence();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			new FastReadWriter(out).fastwrite(term);
@@ -126,7 +151,6 @@ public class FastWriteTest {
 		// This is functionally identical to comparing raw byte arrays,
 		// but gives more readable errors when there is a mismatch,
 		// because fastrw data is mostly valid ASCII.
-		Assert.assertEquals(expected, new String(out.toByteArray(), StandardCharsets.ISO_8859_1));
+		assertEquals(expected, new String(out.toByteArray(), StandardCharsets.ISO_8859_1));
 	}
-
 }
