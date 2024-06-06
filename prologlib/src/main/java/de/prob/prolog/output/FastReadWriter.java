@@ -84,22 +84,16 @@ public final class FastReadWriter {
 				String text;
 				if (t instanceof AIntegerPrologTerm) {
 					b = 'I';
-					text = t.getFunctor();
+					text = t.getFunctor(); // '-'-prefix is supported
 				} else if (t instanceof FloatPrologTerm) {
 					b = 'F';
 					text = t.getFunctor(); // this even works with numbers like 1.337E101
 				} else if (t.isAtom()) {
 					b = 'A';
-					// TODO: investigate non-ascii atoms
-					text = t.getFunctor();
+					text = t.getFunctor(); // this should work with non-ascii chars as well
 				} else if (t.isVariable()) {
-					int index = varCache.computeIfAbsent(t.getFunctor(), k -> varCache.size());
-					if (index > 0xff) {
-						throw new IllegalArgumentException("can only write terms with 255 different variables, but got index " + index);
-					}
-
 					b = '_';
-					text = String.valueOf(index);
+					text = String.valueOf(varCache.computeIfAbsent(t.getFunctor(), k -> varCache.size()));
 				} else {
 					throw new IllegalArgumentException("unsupported prolog term " + t.getClass().getSimpleName());
 				}
