@@ -1,9 +1,9 @@
 package de.be4.classicalb.core.parser;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.io.IOException;
 import java.io.OutputStream;
+
+import de.prob.prolog.term.PrologTerm;
 
 /**
  * @deprecated please use {@link de.prob.prolog.output.FastReadWriter}

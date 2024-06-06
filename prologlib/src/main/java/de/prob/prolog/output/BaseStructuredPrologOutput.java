@@ -1,9 +1,18 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.*;
-
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Objects;
+
+import de.prob.prolog.term.AIntegerPrologTerm;
+import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.FloatPrologTerm;
+import de.prob.prolog.term.ListPrologTerm;
+import de.prob.prolog.term.PrologTerm;
+import de.prob.prolog.term.VariablePrologTerm;
 
 abstract class BaseStructuredPrologOutput implements IPrologTermOutput {
 

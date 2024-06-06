@@ -1,12 +1,12 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import de.prob.prolog.term.PrologTerm;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -75,7 +75,7 @@ public class FastWriteTest {
 		spo.printVariable("Bar");
 		spo.closeList();
 		spo.fullstop();
-		String expected = "D[_0\0[_0\0[_0\0[_0\0]";
+		String expected = "D[_0\0[_0\0[_1\0[_1\0]";
 		check(expected);
 	}
 

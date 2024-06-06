@@ -1,10 +1,10 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+
+import de.prob.prolog.term.PrologTerm;
 
 public final class FastTermOutput extends BaseStructuredPrologOutput {
 

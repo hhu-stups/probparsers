@@ -1,10 +1,10 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import de.prob.prolog.term.PrologTerm;
 
 public final class StructuredPrologOutput extends BaseStructuredPrologOutput {
 

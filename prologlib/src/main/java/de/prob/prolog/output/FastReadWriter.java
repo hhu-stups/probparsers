@@ -1,17 +1,18 @@
 package de.prob.prolog.output;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import de.prob.prolog.term.AIntegerPrologTerm;
 import de.prob.prolog.term.CompoundPrologTerm;
 import de.prob.prolog.term.FloatPrologTerm;
 import de.prob.prolog.term.PrologTerm;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Objects;
 
 /**
  * Writes Prolog terms in SICStus (undocumented) fastrw format.
@@ -39,6 +40,8 @@ public final class FastReadWriter {
 	}
 
 	private void writeTerm(PrologTerm term) throws IOException {
+		// local variable name -> index table, it is impossible to share variables between different sentences
+		Map<String, Integer> varCache = new HashMap<>();
 		Deque<PrologTerm> q = new ArrayDeque<>();
 		q.addFirst(term);
 		while (!q.isEmpty()) {
@@ -68,6 +71,10 @@ public final class FastReadWriter {
 				writeNullTerminated(t.getFunctor());
 
 				int arity = t.getArity();
+				if (arity > 0xff) {
+					throw new IllegalArgumentException("can only write terms with a max arity of 255, but got arity " + arity);
+				}
+
 				out.write(arity);
 				for (int i = arity; i >= 1; i--) {
 					q.addFirst(t.getArgument(i));
@@ -86,10 +93,13 @@ public final class FastReadWriter {
 					// TODO: investigate non-ascii atoms
 					text = t.getFunctor();
 				} else if (t.isVariable()) {
+					int index = varCache.computeIfAbsent(t.getFunctor(), k -> varCache.size());
+					if (index > 0xff) {
+						throw new IllegalArgumentException("can only write terms with 255 different variables, but got index " + index);
+					}
+
 					b = '_';
-					// TODO: investigate sicstus implementation, in tests all variables are different after a save/load roundtrip (saved as "_0\0")
-					// maybe forbid (shared) variable serialization?
-					text = "0";
+					text = String.valueOf(index);
 				} else {
 					throw new IllegalArgumentException("unsupported prolog term " + t.getClass().getSimpleName());
 				}
