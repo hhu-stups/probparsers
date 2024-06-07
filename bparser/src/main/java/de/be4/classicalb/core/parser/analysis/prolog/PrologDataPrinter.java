@@ -152,13 +152,16 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inASequenceExtensionExpression(ASequenceExtensionExpression node) {
-		// TODO: does this need to be coupled with indices?
+	public void caseASequenceExtensionExpression(ASequenceExtensionExpression node) {
 		pout.openList();
-	}
-
-	@Override
-	public void outASequenceExtensionExpression(ASequenceExtensionExpression node) {
+		int index = 1;
+		for (PExpression e : node.getExpression()) {
+			pout.openTerm(",");
+			pout.openTerm("int").printNumber(index).closeTerm();
+			e.apply(this);
+			pout.closeTerm();
+			index++;
+		}
 		pout.closeList();
 	}
 

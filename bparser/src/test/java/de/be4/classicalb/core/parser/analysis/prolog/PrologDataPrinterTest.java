@@ -25,10 +25,11 @@ class PrologDataPrinterTest {
 				arguments("FALSE", "pred_false"),
 				arguments("\"foobar\"", "string(foobar)"),
 				arguments("(1,2)", "','(int(1),int(2))"),
+				arguments("(1,2,3)", "','(int(1),int(2),int(3))"), // TODO: is this correct?
 				arguments("{}", "[]"),
 				arguments("{1,2}", "[int(1),int(2)]"),
 				arguments("[]", "[]"),
-				arguments("[1,2]", "[int(1),int(2)]"), // TODO: is this correct?
+				arguments("[1,2]", "[','(int(1),int(1)),','(int(2),int(2))]"),
 				arguments("rec(b:2,a:1)", "rec([field(a,int(1)),field(b,int(2))])")
 		);
 	}
