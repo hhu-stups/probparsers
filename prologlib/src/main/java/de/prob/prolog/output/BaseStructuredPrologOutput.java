@@ -83,7 +83,7 @@ abstract class BaseStructuredPrologOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printString(final String content) {
-		return this.printAtom(content);
+		throw new UnsupportedOperationException("Double-quoted string currently cannot be printed as a structured term");
 	}
 
 	@Override
