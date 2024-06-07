@@ -26,8 +26,8 @@ public final class PrologTermGenerator {
 		} else if (topnode instanceof AInterruptedResult) {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
-			String message = "ProB raised an exception: " + ((AExceptionResult) topnode).getParams().getText();
-			throw new ResultParserException(message);
+			term = toPrologTerm(((AExceptionResult) topnode).getTerm());
+			throw new ResultParserException("ProB raised an exception: " + term);
 		} else if (topnode instanceof AProgressResult) {
 			term = toPrologTerm(((AProgressResult) topnode).getTerm());
 		} else if (topnode instanceof ACallBackResult) {

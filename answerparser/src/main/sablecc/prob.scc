@@ -90,7 +90,7 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  init, normal, exception;
+  init, normal;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -105,7 +105,7 @@ Tokens
   {init->normal} interrupted = 'interrupted';
   {init->normal} progress = 'progress';
   {init->normal} call_back = 'call_back';
-  {init->exception} exception = 'exception';
+  {init->normal} exception = 'exception';
 
   // P R O L O G - S T U F F
   {normal} comma = ',';
@@ -119,9 +119,6 @@ Tokens
   {normal} name = solo_char | '{}' | '[]' | word | symbol | quoted_atom;
   {normal} string = string;
   {normal} variable = '_' alpha* | capital_letter alpha*;
-
-  // E X C E P T I O N S
-  {exception} raw_text = any_char*;
 
 /*******************************************************************
  * Ignored Tokens                                                  *
@@ -137,7 +134,7 @@ Productions
     {no} no |
     {yes} yes l_par term r_par |
     {interrupted} interrupted |
-    {exception} exception [params]:raw_text |
+    {exception} exception l_par term r_par |
     {progress} progress l_par term r_par |
     {call_back} call_back l_par term r_par;
 
