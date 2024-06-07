@@ -20,6 +20,7 @@ class PrologDataPrinterTest {
 	static Stream<Arguments> simpleDataProvider() {
 		return Stream.of(
 				arguments("42", "int(42)"),
+				// TODO: arguments("-42", "int(-42)"), minus is not part of the literal!
 				arguments("1.337", "term(floating(1.337))"),
 				arguments("TRUE", "pred_true"),
 				arguments("FALSE", "pred_false"),
