@@ -132,13 +132,21 @@ Ignored Tokens
  * Productions                                                     *
  *******************************************************************/
 Productions
-  result = {no} no
-        | {yes} yes l_par term r_par
-        | {interrupted} interrupted
-        | {exception} exception string
-        | {progress} progress l_par term r_par
-        | {call_back} call_back l_par term r_par;
-  term = {number} number | {variable} variable | {atom} name | {list} l_sq params r_sq | {compound} [functor]:name l_par params r_par;
+  result =
+    {no} no |
+    {yes} yes l_par term r_par |
+    {interrupted} interrupted |
+    {exception} exception string |
+    {progress} progress l_par term r_par |
+    {call_back} call_back l_par term r_par;
+
+  term =
+    {number} number |
+    {variable} variable |
+    {atom} name |
+    {list} l_sq params r_sq |
+    {compound} [functor]:name l_par params r_par;
+
   number = {float} float | {integer} integer;
   params = term more_params;
   more_params = {empty} | comma term more_params;
