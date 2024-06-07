@@ -30,6 +30,11 @@ public class RoundtripTest {
 	}
 
 	@Test
+	public void testAtomUppercase() {
+		testRoundtrip("yes('Foo')");
+	}
+
+	@Test(expected = ResultParserException.class)
 	public void testString() {
 		testRoundtrip("yes(\"foo\")");
 	}
@@ -51,7 +56,7 @@ public class RoundtripTest {
 
 	@Test
 	public void testList() {
-		testRoundtrip("yes([a,\"foo\",X,42,[],[a,\"foo\",X,42,g(h(i)),[]]])");
+		testRoundtrip("yes([a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]])");
 	}
 
 	@Test
@@ -62,13 +67,13 @@ public class RoundtripTest {
 	@Test
 	public void testDotListComplicated() {
 		assertEquals(
-			"yes([a,\"foo\",X,42,[],[a,\"foo\",X,42,g(h(i)),[]]])",
-			roundtrip("yes('.'(a,'.'(\"foo\",'.'(X,'.'(42,'.'([],'.'('.'(a,'.'(\"foo\",'.'(X,'.'(42,'.'(g(h(i)),'.'([],[])))))),[])))))))")
+			"yes([a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]])",
+			roundtrip("yes('.'(a,'.'('Foo','.'(X,'.'(42,'.'([],'.'('.'(a,'.'('Foo','.'(X,'.'(42,'.'(g(h(i)),'.'([],[])))))),[])))))))")
 		);
 	}
 
 	@Test
 	public void testTerm() {
-		testRoundtrip("yes(f(a,\"foo\",X,42,[],[a,\"foo\",X,42,g(h(i)),[]]))");
+		testRoundtrip("yes(f(a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]))");
 	}
 }

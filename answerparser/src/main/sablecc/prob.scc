@@ -116,7 +116,8 @@ Tokens
 
   {normal} integer = sign? ('0b' bin+ | '0o' octal+ | '0x' hex+ | '0' quote quoted_atom_item | digit+);
   {normal} float = sign? ((digit+ '.' digit+) | (digit+ ('.' digit+)? ['E' + 'e'] sign? digit+));
-  {normal} name =  solo_char | '{}' | '[]' | word | symbol | string | quoted_atom;
+  {normal} name = solo_char | '{}' | '[]' | word | symbol | quoted_atom;
+  {normal} string = string;
   {normal} variable = '_' alpha* | capital_letter alpha*;
 
   // E X C E P T I O N S
@@ -144,6 +145,7 @@ Productions
     {number} number |
     {variable} variable |
     {atom} name |
+    {string} string |
     {list} l_sq params r_sq |
     {compound} [functor]:name l_par params r_par;
 

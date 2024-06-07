@@ -66,6 +66,8 @@ public final class PrologTermGenerator {
 			} else {
 				term = new CompoundPrologTerm(text);
 			}
+		} else if (node instanceof AStringTerm) {
+			throw new ResultParserException("Double-quoted strings are currently not supported by answerparser");
 		} else if (node instanceof AListTerm) {
 			List<PrologTerm> args = extractArgs(((AListTerm) node).getParams());
 			term = ListPrologTerm.fromCollection(args);
