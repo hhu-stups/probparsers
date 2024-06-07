@@ -120,7 +120,7 @@ Tokens
   {normal} variable = '_' alpha* | capital_letter alpha*;
 
   // E X C E P T I O N S
-  {exception} string = any_char*;
+  {exception} raw_text = any_char*;
 
 /*******************************************************************
  * Ignored Tokens                                                  *
@@ -136,7 +136,7 @@ Productions
     {no} no |
     {yes} yes l_par term r_par |
     {interrupted} interrupted |
-    {exception} exception string |
+    {exception} exception [params]:raw_text |
     {progress} progress l_par term r_par |
     {call_back} call_back l_par term r_par;
 
