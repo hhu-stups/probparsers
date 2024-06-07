@@ -30,7 +30,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 public class PrologDataPrinter extends DepthFirstAdapter {
 
 	private final IPrologTermOutput pout;
-	private final Stack<SortedMap<String, PExpression>> currRecFields = new Stack<>();
+	private final Deque<SortedMap<String, PExpression>> currRecFields = new ArrayDeque<>();
 
 	public PrologDataPrinter(IPrologTermOutput pout) {
 		this.pout = pout;
@@ -177,7 +177,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARecExpression(ARecExpression node) {
-		this.currRecFields.push(new TreeMap<>());
+		this.currRecFields.addFirst(new TreeMap<>());
 
 		// collect all record fields
 		for (PRecEntry recEntry : node.getEntries()) {
@@ -188,7 +188,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 		pout.openList();
 
 		// record fields must be sorted!
-		for (Map.Entry<String, PExpression> entry : this.currRecFields.pop().entrySet()) {
+		for (Map.Entry<String, PExpression> entry : this.currRecFields.removeFirst().entrySet()) {
 			pout.openTerm("field");
 			pout.printAtom(entry.getKey());
 			entry.getValue().apply(this);
@@ -202,7 +202,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseARecEntry(ARecEntry node) {
 		String id = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
-		if (this.currRecFields.peek().put(id, node.getValue()) != null) {
+		if (this.currRecFields.getFirst().put(id, node.getValue()) != null) {
 			throw new IllegalArgumentException("duplicated rec entry " + id);
 		}
 	}

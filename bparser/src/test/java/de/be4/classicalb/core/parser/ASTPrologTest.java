@@ -264,6 +264,12 @@ public class ASTPrologTest {
 	}
 
 	@Test
+	public void testReal() throws BCompoundException {
+		// ProB expects an atom
+		checkExpression("1.337", "real($,'1.337')");
+	}
+
+	@Test
 	public void testString() throws BCompoundException {
 		checkExpression("\" \"", "string($,' ')");
 		checkExpression("\"\"", "string($,'')");
