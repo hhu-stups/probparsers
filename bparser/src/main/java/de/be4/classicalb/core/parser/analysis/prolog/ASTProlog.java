@@ -733,7 +733,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAIntegerExpression(final AIntegerExpression node) {
 		open(node);
 		final String text = node.getLiteral().getText();
-		if (text.length() < 17) {
+		if (text.length() <= 18) {
 			pout.printNumber(Long.parseLong(text));
 		} else {
 			pout.printNumber(new BigInteger(text));
