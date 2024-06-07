@@ -154,6 +154,8 @@ public class RulesParseUnit implements IModel {
 		pout.closeTerm();
 		if (withFullstops) {
 			pout.fullstop();
+		} else {
+			pout.flush();
 		}
 	}
 

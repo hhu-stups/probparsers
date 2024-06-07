@@ -81,7 +81,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void outStart(final Start node) {
-		pout.flush();
+		// intentionally left blank: don't write the start node.
 	}
 
 	/**

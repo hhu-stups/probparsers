@@ -211,6 +211,10 @@ public class RecursiveMachineLoader {
 				pout.fullstop();
 			}
 		}
+
+		if (!withFullstops) {
+			pout.flush();
+		}
 	}
 
 	/**

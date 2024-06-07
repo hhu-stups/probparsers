@@ -338,7 +338,6 @@ public class CliBParser {
 					getOptionOut.printAtom("unsupported");
 				}
 				getOptionOut.fullstop();
-				getOptionOut.flush();
 				break;
 			case setoption:
 				// Generic command for changing parser options.
@@ -357,7 +356,6 @@ public class CliBParser {
 					setOptionOut.printAtom("unsupported");
 				}
 				setOptionOut.fullstop();
-				setOptionOut.flush();
 				break;
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
@@ -475,7 +473,6 @@ public class CliBParser {
 		}
 
 		pout.fullstop();
-		pout.flush();
 	}
 
 	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
@@ -522,7 +519,6 @@ public class CliBParser {
 		}
 
 		pout.fullstop();
-		pout.flush();
 	}
 
 	private static void print(String output) {
