@@ -31,7 +31,8 @@ class PrologDataPrinterTest {
 				arguments("{1,2}", "[int(1),int(2)]"),
 				arguments("[]", "[]"),
 				arguments("[1,2]", "[','(int(1),int(1)),','(int(2),int(2))]"),
-				arguments("rec(b:2,a:1)", "rec([field(a,int(1)),field(b,int(2))])")
+				arguments("rec(b:2,a:1)", "rec([field(a,int(1)),field(b,int(2))])"),
+				arguments("rec(d:7,a:rec(b:5),c:rec(e:rec(f:0)))", "rec([field(a,rec([field(b,int(5))])),field(c,rec([field(e,rec([field(f,int(0))]))])),field(d,int(7))])")
 		);
 	}
 

@@ -1,9 +1,7 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
@@ -32,7 +30,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 public class PrologDataPrinter extends DepthFirstAdapter {
 
 	private final IPrologTermOutput pout;
-	private final SortedMap<String, PExpression> currRecFields = new TreeMap<>();
+	private final Stack<SortedMap<String, PExpression>> currRecFields = new Stack<>();
 
 	public PrologDataPrinter(IPrologTermOutput pout) {
 		this.pout = pout;
@@ -179,7 +177,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARecExpression(ARecExpression node) {
-		this.currRecFields.clear();
+		this.currRecFields.push(new TreeMap<>());
 
 		// collect all record fields
 		for (PRecEntry recEntry : node.getEntries()) {
@@ -190,7 +188,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 		pout.openList();
 
 		// record fields must be sorted!
-		for (Map.Entry<String, PExpression> entry : this.currRecFields.entrySet()) {
+		for (Map.Entry<String, PExpression> entry : this.currRecFields.pop().entrySet()) {
 			pout.openTerm("field");
 			pout.printAtom(entry.getKey());
 			entry.getValue().apply(this);
@@ -199,13 +197,12 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 
 		pout.closeList();
 		pout.closeTerm();
-		this.currRecFields.clear();
 	}
 
 	@Override
 	public void caseARecEntry(ARecEntry node) {
 		String id = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
-		if (this.currRecFields.put(id, node.getValue()) != null) {
+		if (this.currRecFields.peek().put(id, node.getValue()) != null) {
 			throw new IllegalArgumentException("duplicated rec entry " + id);
 		}
 	}
