@@ -152,12 +152,28 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
+		PExpression expr = node.getExpression();
+		if (expr instanceof AIntegerExpression) {
+			printInteger((AIntegerExpression) expr, true);
+		} else if (expr instanceof ARealExpression) {
+			printReal((ARealExpression) expr, true);
+		} else {
+			throw new AssertionError("unary minus only supported for integers and reals");
+		}
+	}
+
+	@Override
 	public void caseAIntegerExpression(AIntegerExpression node) {
+		printInteger(node, false);
+	}
+
+	private void printInteger(AIntegerExpression node, boolean negative) {
 		pout.openTerm("int");
 
 		// MAX_LONG for java is 9223372036854775807 which is 19 digits,
 		// so we set the max length to 18
-		String text = node.getLiteral().getText();
+		String text = (negative ? "-" : "") + node.getLiteral().getText();
 		if (text.length() <= 18) {
 			pout.printNumber(Long.parseLong(text));
 		} else {
@@ -169,11 +185,15 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARealExpression(ARealExpression node) {
-		pout.openTerm("term");
-		pout.openTerm("floating");
-		pout.printNumber(Double.parseDouble(node.getLiteral().getText()));
-		pout.closeTerm();
-		pout.closeTerm();
+		printReal(node, false);
+	}
+
+	private void printReal(ARealExpression node, boolean negative) {
+		String text = (negative ? "-" : "") + node.getLiteral().getText();
+
+		pout.openTerm("term").openTerm("floating");
+		pout.printNumber(Double.parseDouble(text));
+		pout.closeTerm().closeTerm();
 	}
 
 	@Override
