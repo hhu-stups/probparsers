@@ -3,6 +3,7 @@ package de.prob.prolog.output;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.util.Objects;
 
 import de.prob.prolog.term.PrologTerm;
 
@@ -12,7 +13,15 @@ public final class FastTermOutput extends BaseStructuredPrologOutput {
 	private PrologTerm finishedTerm;
 
 	public FastTermOutput(OutputStream out) {
-		this.out = new FastReadWriter(out);
+		this(new FastReadWriter(out));
+	}
+
+	public FastTermOutput(FastReadWriter.PrologSystem flavor, OutputStream out) {
+		this(new FastReadWriter(flavor, out));
+	}
+
+	public FastTermOutput(FastReadWriter out) {
+		this.out = Objects.requireNonNull(out, "out");
 	}
 
 	@Override
