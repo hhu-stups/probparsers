@@ -159,7 +159,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 		} else if (expr instanceof ARealExpression) {
 			printReal((ARealExpression) expr, true);
 		} else {
-			throw new AssertionError("unary minus only supported for integers and reals");
+			throw new IllegalArgumentException("unary minus only supported for integers and reals");
 		}
 	}
 
@@ -199,14 +199,22 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseACoupleExpression(ACoupleExpression node) {
 		List<PExpression> expressions = node.getList();
-		for (int i = 0; i < expressions.size() - 1; i++) {
+		int expressionCount = expressions.size();
+		if (expressionCount < 2) {
+			throw new IllegalArgumentException("couples need to have at least 2 elements, but got " + expressionCount);
+		}
+
+		for (int i = 1; i < expressionCount; i++) {
 			pout.openTerm(",");
 		}
 
-		for (int i = 0; i < expressions.size(); i++) {
-			expressions.get(i).apply(this);
-			if (i != 0) {
+		boolean first = true;
+		for (PExpression expression : expressions) {
+			expression.apply(this);
+			if (!first) {
 				pout.closeTerm();
+			} else {
+				first = false;
 			}
 		}
 	}
