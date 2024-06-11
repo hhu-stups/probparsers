@@ -197,14 +197,17 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inACoupleExpression(ACoupleExpression node) {
-		// TODO: does this work for couples with more than 2 elements?
-		pout.openTerm(",");
-	}
+	public void caseACoupleExpression(ACoupleExpression node) {
+		List<PExpression> expressions = node.getList();
+		for (int i = 0; i < expressions.size() - 1; i++) {
+			pout.openTerm(",");
+		}
 
-	@Override
-	public void outACoupleExpression(ACoupleExpression node) {
-		pout.closeTerm();
+		expressions.removeFirst().apply(this);
+		for (PExpression expression : expressions) {
+			expression.apply(this);
+			pout.closeTerm();
+		}
 	}
 
 	@Override

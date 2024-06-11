@@ -29,7 +29,8 @@ class PrologDataPrinterTest {
 				arguments("FALSE", "pred_false"),
 				arguments("\"foobar\"", "string(foobar)"),
 				arguments("(1,2)", "','(int(1),int(2))"),
-				arguments("(1,2,3)", "','(int(1),int(2),int(3))"), // TODO: is this correct?
+				arguments("(1,2,3)", "','(','(int(1),int(2)),int(3))"),
+				arguments("(1,(2,3))", "','(int(1),','(int(2),int(3)))"),
 				arguments("{}", "[]"),
 				arguments("{1,2}", "[int(1),int(2)]"),
 				arguments("[]", "[]"),
