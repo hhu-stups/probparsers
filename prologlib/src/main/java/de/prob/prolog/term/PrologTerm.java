@@ -79,6 +79,10 @@ public abstract class PrologTerm {
 		return false;
 	}
 
+	public boolean isCompound() {
+		return this.isTerm() && !this.isAtom();
+	}
+
 	public boolean isAtom() {
 		return false;
 	}
@@ -96,7 +100,7 @@ public abstract class PrologTerm {
 	}
 
 	public boolean isAtomic() {
-		return this.getArity() == 0 && !this.isVariable();
+		return !this.isVariable() && !this.isCompound();
 	}
 
 	public boolean hasFunctor(final String functor) {
