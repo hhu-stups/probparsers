@@ -203,10 +203,11 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 			pout.openTerm(",");
 		}
 
-		expressions.removeFirst().apply(this);
-		for (PExpression expression : expressions) {
-			expression.apply(this);
-			pout.closeTerm();
+		for (int i = 0; i < expressions.size(); i++) {
+			expressions.get(i).apply(this);
+			if (i != 0) {
+				pout.closeTerm();
+			}
 		}
 	}
 
