@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.node.PExpression;
  * This transformer will lift identifiers from a couple expression when a list of expressions is required.
  * This can happen in set comprehensions, because the grammar is very lenient to prevent conflicts.
  * <br>
- * Example: {(x,y)·x&lt;y&amp;x&lt;5|x+y} --> {x,y·x&lt;y&amp;x&lt;5|x+y}
+ * Example: {(x,y)·x&lt;y&amp;x&lt;5|x+y} --&gt; {x,y·x&lt;y&amp;x&lt;5|x+y}
  *
  * @see de.be4.classicalb.core.parser.analysis.checking.IdentListCheck
  */
