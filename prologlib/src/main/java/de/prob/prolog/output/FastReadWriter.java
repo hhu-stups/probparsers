@@ -436,7 +436,7 @@ public final class FastReadWriter {
 			// While on Linux UCS-4 (which is UTF-32) is used, but it depends on the system's endianness
 			return Charset.forName("UTF-32BE");
 		} else {
-			// Dito
+			// Ditto
 			return Charset.forName("UTF-32LE");
 		}
 	}
