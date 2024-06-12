@@ -40,6 +40,12 @@ public class FastReadWriterTest {
 	}
 
 	@Test
+	public void testSingleAtom4() {
+		pto.printAtom("\uD83D\uDE09");
+		check("DA\360\237\230\211\0");
+	}
+
+	@Test
 	public void testSimpleFunctor1() { // a(b)
 		pto.openTerm("a").printAtom("b").closeTerm();
 		check("DSa\0\1Ab\0");
@@ -123,6 +129,18 @@ public class FastReadWriterTest {
 	}
 
 	@Test
+	public void testSWISingleAtomUnicode() {
+		pto.printAtom("\uD83D\uDE09");
+		checkSWI(new byte[] { 0x7a, 0x0c, 0x04, 0x09, (byte) 0xf6, 0x01, 0x00 });
+	}
+
+	@Test
+	public void testSWISingleAtomUnicodeWindows() {
+		pto.printAtom("\uD83D\uDE09");
+		checkSWIWindows(new byte[] { 0x7a, 0x0c, 0x04, 0x3d, (byte) 0xd8, 0x09, (byte) 0xde });
+	}
+
+	@Test
 	public void testSWISingleEmptyList() {
 		pto.emptyList();
 		checkSWI(new byte[] { 0x7a, 0x09 });
@@ -189,6 +207,23 @@ public class FastReadWriterTest {
 					.withTarget64bit()
 					.withTargetLittleEndian()
 					.withTargetNoWindows()
+					.fastwrite(term);
+		} catch (IOException e) {
+			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
+		}
+		byte[] actual = out.toByteArray();
+		assertArrayEquals(expected, actual);
+	}
+
+	private void checkSWIWindows(byte[] expected) {
+		final PrologTerm term = pto.getLastTerm();
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			// target a 64bit windows system
+			new FastReadWriter(FastReadWriter.PrologSystem.SWI, out)
+					.withTarget64bit()
+					.withTargetLittleEndian()
+					.withTargetWindows()
 					.fastwrite(term);
 		} catch (IOException e) {
 			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
