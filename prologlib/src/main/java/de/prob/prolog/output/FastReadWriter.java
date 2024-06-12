@@ -14,6 +14,7 @@ import java.nio.charset.UnmappableCharacterException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,10 +30,6 @@ import de.prob.prolog.term.PrologTerm;
  */
 public final class FastReadWriter {
 
-	private static final int WORD_BYTES = 8; // assume 64bit
-	private static final int SWI_TERM_SIZE = WORD_BYTES;
-	private static final Charset SWI_WATOM_CHARSET = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN ? Charset.forName("UTF-32BE") : Charset.forName("UTF-32LE");
-
 	public enum PrologSystem {
 		SICSTUS, SWI
 	}
@@ -40,13 +37,103 @@ public final class FastReadWriter {
 	private final PrologSystem flavor;
 	private final OutputStream out;
 
-	public FastReadWriter(OutputStream out) {
-		this(PrologSystem.SICSTUS, out);
-	}
+	private int wordBytes;
+	private ByteOrder endianness;
+	private boolean windows;
+	private boolean allowWAtom;
+	private Charset cachedWAtomCharset;
 
 	public FastReadWriter(PrologSystem flavor, OutputStream out) {
 		this.flavor = Objects.requireNonNull(flavor, "flavor");
 		this.out = Objects.requireNonNull(out, "out");
+		this.wordBytes = is64Bit() ? 8 : 4;
+		this.endianness = ByteOrder.nativeOrder();
+		this.windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("windows");
+		this.allowWAtom = true;
+		this.cachedWAtomCharset = null;
+	}
+
+	public FastReadWriter(OutputStream out) {
+		this(PrologSystem.SICSTUS, out);
+	}
+
+	/**
+	 * Enables wide (non latin characters) atom support on SWI.
+	 */
+	public FastReadWriter withWAtomSupport() {
+		this.allowWAtom = true;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Disables wide (non latin characters) atom support on SWI.
+	 */
+	public FastReadWriter withoutWAtomSupport() {
+		this.allowWAtom = false;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Sets the wide (non latin characters) atom charset on SWI.
+	 * This needs to be set last, as other with-ers might reset the charset.
+	 */
+	public FastReadWriter withWAtomCharset(Charset charset) {
+		this.cachedWAtomCharset = charset;
+		return this;
+	}
+
+	/**
+	 * Set the target word size to 64bit on SWI.
+	 */
+	public FastReadWriter withTarget64bit() {
+		this.wordBytes = 8;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Set the target word size to 32bit on SWI.
+	 */
+	public FastReadWriter withTarget32bit() {
+		this.wordBytes = 4;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Set the target endianness to big on SWI.
+	 */
+	public FastReadWriter withTargetBigEndian() {
+		this.endianness = ByteOrder.BIG_ENDIAN;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Set the target endianness to little on SWI.
+	 */
+	public FastReadWriter withTargetLittleEndian() {
+		this.endianness = ByteOrder.LITTLE_ENDIAN;
+		this.cachedWAtomCharset = null;
+		return this;
+	}
+
+	/**
+	 * Set the target OS to windows on SWI.
+	 */
+	public FastReadWriter withTargetWindows() {
+		this.windows = true;
+		return this;
+	}
+
+	/**
+	 * Set the target OS to mac/linux on SWI.
+	 */
+	public FastReadWriter withTargetNoWindows() {
+		this.windows = false;
+		return this;
 	}
 
 	public void fastwrite(PrologTerm term) throws IOException {
@@ -137,12 +224,12 @@ public final class FastReadWriter {
 		final int REC_32 = 0x01;
 		final int REC_64 = 0x02;
 		final int REC_SZ;
-		if (WORD_BYTES == 8) {
+		if (this.wordBytes == 8) {
 			REC_SZ = REC_64;
-		} else if (WORD_BYTES == 4) {
+		} else if (this.wordBytes == 4) {
 			REC_SZ = REC_32;
 		} else {
-			throw new IllegalStateException();
+			throw new AssertionError();
 		}
 		final int REC_INT = 0x04;
 		final int REC_ATOM = 0x08;
@@ -155,7 +242,7 @@ public final class FastReadWriter {
 		final int PL_TYPE_EXT_COMPOUND = 13; /* External (inlined) functor */
 		final int PL_TYPE_EXT_FLOAT = 14;    /* float in standard-byte order */
 
-		final int WORDS_PER_DOUBLE = (Double.BYTES + WORD_BYTES - 1) / WORD_BYTES;
+		final int WORDS_PER_DOUBLE = (Double.BYTES + wordBytes - 1) / wordBytes;
 
 		// fast path for primitives
 		if (term instanceof AIntegerPrologTerm) {
@@ -169,7 +256,7 @@ public final class FastReadWriter {
 			} catch (ArithmeticException ignored) {}
 		} else if (term.isAtom()) { // also includes the empty list
 			this.out.write(REC_HDR | REC_ATOM | REC_GROUND);
-			writeAtomSWI(this.out, term);
+			this.writeAtomSWI(this.out, term);
 			return;
 		}
 
@@ -187,9 +274,9 @@ public final class FastReadWriter {
 				int varIndex = varCache.computeIfAbsent(t.getFunctor(), k -> varCache.size());
 				writeSizeSWI(data, varIndex);
 			} else if (t.isAtom()) { // also includes the empty list
-				writeAtomSWI(data, t);
+				this.writeAtomSWI(data, t);
 			} else if (t instanceof AIntegerPrologTerm) {
-				writeIntSWI(data, (AIntegerPrologTerm) t);
+				this.writeIntSWI(data, (AIntegerPrologTerm) t);
 			} else if (t instanceof FloatPrologTerm) {
 				data.write(PL_TYPE_EXT_FLOAT);
 				double value = ((FloatPrologTerm) t).getValue();
@@ -211,7 +298,7 @@ public final class FastReadWriter {
 				data.write(PL_TYPE_EXT_COMPOUND);
 				int arity = t.getArity();
 				writeSizeSWI(data, arity);
-				writeAtomSWI(data, t);
+				this.writeAtomSWI(data, t);
 				size += 1 + arity; // functor + arguments
 				for (int i = arity; i >= 1; i--) {
 					q.addFirst(t.getArgument(i));
@@ -243,9 +330,68 @@ public final class FastReadWriter {
 		this.out.write(data.toByteArray());
 	}
 
+	private void writeAtomSWI(OutputStream os, PrologTerm t) throws IOException {
+		final int PL_TYPE_NIL = 9;        /* [] */
+		final int PL_TYPE_EXT_ATOM = 11;  /* External (inlined) atom */
+		final int PL_TYPE_EXT_WATOM = 12; /* External (inlined) wide atom */
+
+		if (t.isList() && ((ListPrologTerm) t).isEmpty()) {
+			os.write(PL_TYPE_NIL);
+			return;
+		}
+
+		String atom = t.getFunctor();
+		CharsetEncoder extendedAsciiEncoder = StandardCharsets.ISO_8859_1.newEncoder()
+				.onMalformedInput(CodingErrorAction.REPORT)
+				.onUnmappableCharacter(CodingErrorAction.REPORT);
+		try {
+			ByteBuffer result = extendedAsciiEncoder.encode(CharBuffer.wrap(atom));
+			os.write(PL_TYPE_EXT_ATOM);
+
+			int len = result.remaining();
+			writeSizeSWI(os, len);
+			os.write(result.array(), result.arrayOffset(), len);
+		} catch (UnmappableCharacterException e) {
+			if (this.allowWAtom) {
+				os.write(PL_TYPE_EXT_WATOM);
+				if (this.cachedWAtomCharset == null) {
+					this.cachedWAtomCharset = this.wcharCharset();
+				}
+				byte[] bytes = atom.getBytes(this.cachedWAtomCharset);
+				writeSizeSWI(os, bytes.length);
+				os.write(bytes);
+			} else {
+				throw new IllegalArgumentException("atom contains non-latin characters", e);
+			}
+		}
+	}
+
+	private void writeIntSWI(OutputStream os, AIntegerPrologTerm t) throws IOException {
+		final int TAG_BITS = 7;
+		final int SIGN_BITS = 1;
+		final long MAX_TAGGED_INT = (1L << (this.wordBytes * 8 - TAG_BITS - SIGN_BITS)) - 1;
+		final long MIN_TAGGED_INT = -(1L << (this.wordBytes * 8 - TAG_BITS - SIGN_BITS));
+
+		final int PL_TYPE_TAGGED_INTEGER = 4; /* tagged integer */
+
+		long value;
+		try {
+			value = t.longValueExact();
+			if (value <= MAX_TAGGED_INT && value >= MIN_TAGGED_INT) {
+				os.write(PL_TYPE_TAGGED_INTEGER);
+				writeInt64SWI(os, value);
+				return;
+			}
+		} catch (ArithmeticException ignored) {
+		}
+
+		// TODO: support bigger integers
+		throw new IllegalArgumentException("int out of range (" + t.getFunctor() + ")");
+	}
+
 	private static void writeSizeSWI(OutputStream os, int val) throws IOException {
 		// this routine takes size_t in C and thus is dependent on the word size
-		// here it takes int, so we can hardcode the integer size
+		// here it takes int, so we can hardcode the integer size in the definition of "zips"
 		if ((val & ~0x7f) == 0) { // fast path and 0: just a single byte
 			os.write(val);
 		} else {
@@ -281,51 +427,22 @@ public final class FastReadWriter {
 		}
 	}
 
-	private static void writeAtomSWI(OutputStream os, PrologTerm t) throws IOException {
-		final int PL_TYPE_NIL = 9;        /* [] */
-		final int PL_TYPE_EXT_ATOM = 11;  /* External (inlined) atom */
-		final int PL_TYPE_EXT_WATOM = 12; /* External (inlined) wide atom */
-
-		if (t.isList() && ((ListPrologTerm) t).isEmpty()) {
-			os.write(PL_TYPE_NIL);
-			return;
-		}
-
-		String atom = t.getFunctor();
-		CharsetEncoder extendedAsciiEncoder = StandardCharsets.ISO_8859_1.newEncoder()
-			.onMalformedInput(CodingErrorAction.REPORT)
-			.onUnmappableCharacter(CodingErrorAction.REPORT);
-		try {
-			ByteBuffer result = extendedAsciiEncoder.encode(CharBuffer.wrap(atom));
-			os.write(PL_TYPE_EXT_ATOM);
-
-			int len = result.remaining();
-			writeSizeSWI(os, len);
-			os.write(result.array(), result.arrayOffset(), len);
-		} catch (UnmappableCharacterException e) {
-			os.write(PL_TYPE_EXT_WATOM);
-			// TODO: investigate UCS/wchar on different platforms, this might be UTF-16 on Windows?
-			os.write(atom.getBytes(SWI_WATOM_CHARSET));
+	private Charset wcharCharset() {
+		if (this.windows) {
+			// https://learn.microsoft.com/en-us/cpp/cpp/char-wchar-t-char16-t-char32-t?view=msvc-170
+			// Windows always uses UTF-16LE
+			return StandardCharsets.UTF_16LE;
+		} else if (this.endianness == ByteOrder.BIG_ENDIAN) {
+			// While on Linux UCS-4 (which is UTF-32) is used, but it depends on the system's endianness
+			return Charset.forName("UTF-32BE");
+		} else {
+			// Dito
+			return Charset.forName("UTF-32LE");
 		}
 	}
 
-	private static void writeIntSWI(OutputStream os, AIntegerPrologTerm t) throws IOException {
-		final int TAG_BITS = 7;
-		final int SIGN_BITS = 1;
-		final long MAX_TAGGED_INT = (1L << (SWI_TERM_SIZE * 8 - TAG_BITS - SIGN_BITS)) - 1;
-		final long MIN_TAGGED_INT = -(1L << (SWI_TERM_SIZE * 8 - TAG_BITS - SIGN_BITS));
-
-		long value;
-		try {
-			value = t.longValueExact();
-			if (value <= MAX_TAGGED_INT && value >= MIN_TAGGED_INT) {
-				writeInt64SWI(os, value);
-				return;
-			}
-		} catch (ArithmeticException ignored) {
-		}
-
-		// TODO: support bigger integers
-		throw new IllegalArgumentException("int out of range (" + t.getFunctor() + ")");
+	private static boolean is64Bit() {
+		String bits = System.getProperty("sun.arch.data.model", System.getProperty("com.ibm.vm.bitmode", System.getProperty("os.arch", "")));
+		return bits.contains("64");
 	}
 }

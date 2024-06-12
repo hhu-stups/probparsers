@@ -1,11 +1,12 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import de.prob.prolog.term.PrologTerm;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -170,20 +171,25 @@ public class FastReadWriterTest {
 	}
 
 	@Test
-	public void testSWIComplex() { // a(['G',f([]),[[w]]]).
+	public void testSWIComplex() { // a(['G',f([]),[[w, 42]]]).
 		pto.openTerm("a").openList();
 		pto.printAtom("G");
 		pto.openTerm("f").openList().closeList().closeTerm();
-		pto.openList().openList().printAtom("w").closeList().closeList();
+		pto.openList().openList().printAtom("w").printNumber(42).closeList().closeList();
 		pto.closeList().closeTerm();
-		checkSWI(new byte[] {0x72, 0x19, 0x13, 0x0d, 0x01, 0x0b, 0x01, 0x61, 0x08, 0x0b, 0x01, 0x47, 0x08, 0x0d, 0x01, 0x0b, 0x01, 0x66, 0x09, 0x08, 0x08, 0x08, 0x0b, 0x01, 0x77, 0x09, 0x09, 0x09});
+		checkSWI(new byte[] {0x72, 0x1d, 0x16, 0x0d, 0x01, 0x0b, 0x01, 0x61, 0x08, 0x0b, 0x01, 0x47, 0x08, 0x0d, 0x01, 0x0b, 0x01, 0x66, 0x09, 0x08, 0x08, 0x08, 0x0b, 0x01, 0x77, 0x08, 0x04, 0x01, 0x2a, 0x09, 0x09, 0x09});
 	}
 
 	private void checkSWI(byte[] expected) {
 		final PrologTerm term = pto.getLastTerm();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			new FastReadWriter(FastReadWriter.PrologSystem.SWI, out).fastwrite(term);
+			// target a 64bit *nix system
+			new FastReadWriter(FastReadWriter.PrologSystem.SWI, out)
+					.withTarget64bit()
+					.withTargetLittleEndian()
+					.withTargetNoWindows()
+					.fastwrite(term);
 		} catch (IOException e) {
 			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
 		}
