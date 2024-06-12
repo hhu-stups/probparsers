@@ -1471,9 +1471,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		print("{");
+		print("{(");
 		printCommaListCompact(node.getIdentifiers());
-		print("·"); // Currently has to be a non-ASCII dot (e. g. U+00B7 MIDDLE DOT) for our parser to recognize it.
+		print(").");
 		node.getPredicates().apply(this);
 		print("|");
 		node.getExpression().apply(this);

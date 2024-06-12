@@ -1,6 +1,12 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PushbackReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +19,7 @@ import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
+import de.be4.classicalb.core.parser.analysis.transforming.CoupleToIdentifierTransformation;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -537,6 +544,8 @@ public class BParser {
 		} catch (CheckException e) {
 			list.add(e);
 		}
+
+		rootNode.apply(new CoupleToIdentifierTransformation());
 
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());

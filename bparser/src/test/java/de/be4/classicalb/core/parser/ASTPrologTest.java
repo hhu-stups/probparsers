@@ -160,6 +160,57 @@ public class ASTPrologTest {
 	}
 
 	@Test
+	public void testEmptySet() throws BCompoundException {
+		checkExpression("{}", "empty_set($)");
+	}
+
+	@Test
+	public void testSetExtension() throws BCompoundException {
+		checkExpression("{x}", "set_extension($,[identifier($,x)])");
+		checkExpression("{(x)}", "set_extension($,[identifier($,x)])");
+		checkExpression("{x,y}", "set_extension($,[identifier($,x),identifier($,y)])");
+		checkExpression("{(x,y)}", "set_extension($,[couple($,[identifier($,x),identifier($,y)])])");
+		checkExpression("{x,y,z}", "set_extension($,[identifier($,x),identifier($,y),identifier($,z)])");
+		checkExpression("{(x,y,z)}", "set_extension($,[couple($,[identifier($,x),identifier($,y),identifier($,z)])])");
+	}
+
+	@Test
+	public void testComprehensionSet1() throws BCompoundException {
+		checkExpression("{x|x<5}", "comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+		checkExpression("{(x)|x<5}", "comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testComprehensionSet2() throws BCompoundException {
+		checkExpression("{x,y|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y)|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicComprehensionSet1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x|x<5}", "symbolic_comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+		checkExpression("/*@symbolic*/ {(x)|x<5}", "symbolic_comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicComprehensionSet2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y)|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testEventBComprehensionSet1() throws BCompoundException {
+		checkExpression("{x·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+		checkExpression("{(x)·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testEventBComprehensionSet2() throws BCompoundException {
+		checkExpression("{x,y·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y)·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
 	public void testSubstitutions() throws BCompoundException {
 		checkSubstitution("x,y :: BOOL", "becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
 	}
