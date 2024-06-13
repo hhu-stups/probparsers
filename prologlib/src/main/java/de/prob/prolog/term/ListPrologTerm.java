@@ -52,15 +52,6 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		return EMPTY_LIST;
 	}
 
-	// Note: this functor and arity are not entirely correct, they don't match the structure of Prolog lists properly.
-	// A Prolog list is either the atom [] or a term of the form .(Head, Tail), where Tail is another list.
-	// However, we incorrectly use the list's elements as the arguments of the list term, which creates a "flat" list
-	// rather than a linked list.
-	// For example, the list [1, 2, 3] is incorrectly represented as .(1, 2, 3) rather than .(1, .(2, .(3, []))).
-	// This doesn't seem to matter in practice though, nobody uses getArity/getArgument on ListPrologTerms.
-	// Constructing a proper linked list structure would be expensive, and nobody would use it, so we'll keep using
-	// this somewhat incorrect structure.
-
 	@Override
 	public String getFunctor() {
 		return isEmpty() ? "[]" : ".";
