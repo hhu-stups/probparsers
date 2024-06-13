@@ -24,8 +24,10 @@ public final class CoupleToIdentifierTransformation extends OptimizedTraversingA
 		if (identifiers.size() == 1) {
 			Node child = identifiers.get(0);
 			if (child instanceof ACoupleExpression) {
-				// this extensive copying is required for the transformation to work correctly
-				return new ArrayList<>(((ACoupleExpression) child).clone().getList());
+				// The list of expressions has to be copied and cannot be returned directly.
+				// Adding the expressions to another node will remove them from their previous parent node,
+				// which mutates the list returned by getList()!
+				return new ArrayList<>(((ACoupleExpression) child).getList());
 			}
 		}
 		return null;
