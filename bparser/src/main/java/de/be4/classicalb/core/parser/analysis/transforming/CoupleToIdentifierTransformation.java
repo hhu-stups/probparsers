@@ -3,7 +3,7 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ACoupleExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
@@ -19,8 +19,7 @@ import de.be4.classicalb.core.parser.node.PExpression;
  *
  * @see de.be4.classicalb.core.parser.analysis.checking.IdentListCheck
  */
-public final class CoupleToIdentifierTransformation extends DepthFirstAdapter {
-
+public final class CoupleToIdentifierTransformation extends OptimizedTraversingAdapter {
 	private static List<PExpression> tryLift(List<? extends Node> identifiers) {
 		if (identifiers.size() == 1) {
 			Node child = identifiers.get(0);
