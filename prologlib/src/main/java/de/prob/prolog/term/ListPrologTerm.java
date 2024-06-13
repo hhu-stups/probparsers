@@ -6,10 +6,16 @@
 
 package de.prob.prolog.term;
 
-import de.prob.prolog.output.IPrologTermOutput;
-
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+
+import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a Prolog list.
@@ -62,7 +68,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 
 	@Override
 	public int getArity() {
-		return size();
+		return this.isEmpty() ? 0 : 2;
 	}
 
 	@Override
@@ -72,17 +78,31 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 	}
 
 	@Override
+	public boolean isCompound() {
+		return !this.isAtom();
+	}
+
+	@Override
 	public boolean isList() {
 		return true;
 	}
 
 	@Override
 	public PrologTerm getArgument(final int index) {
-		if (isEmpty()) {
+		if (this.isEmpty()) {
 			throw new IndexOutOfBoundsException("List has no arguments");
+		} else if (index == 1) {
+			return this.head();
+		} else if (index == 2) {
+			return this.tail();
 		} else {
-			return get(index - 1);
+			throw new IndexOutOfBoundsException("Argument index out of bounds");
 		}
+	}
+
+	@Override
+	public boolean hasFunctor(String functor) {
+		return this.isEmpty() ? "[]".equals(functor) : (".".equals(functor) || "[|]".equals(functor));
 	}
 
 	@Override
@@ -117,6 +137,7 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 		if (this == obj) {
 			return true;
 		} else if (!(obj instanceof List<?>)) {
+			// does not work with the atom [] or the term .(H, T)
 			return false;
 		}
 
@@ -139,7 +160,11 @@ public final class ListPrologTerm extends PrologTerm implements List<PrologTerm>
 
 	@Override
 	public int hashCode() {
-		return 31 * Objects.hash(start, end) + Arrays.hashCode(elements);
+		int result = 1;
+		for (int i = start; i < end; i++) {
+			result = 31 * result + elements[i].hashCode();
+		}
+		return result;
 	}
 
 	@Override

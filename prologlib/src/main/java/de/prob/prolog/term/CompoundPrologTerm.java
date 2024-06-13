@@ -6,11 +6,11 @@
 
 package de.prob.prolog.term;
 
-import de.prob.prolog.output.IPrologTermOutput;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+
+import de.prob.prolog.output.IPrologTermOutput;
 
 /**
  * Represents a prolog term that consists of a functor and an (optional) list of
@@ -51,8 +51,14 @@ public final class CompoundPrologTerm extends PrologTerm {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean isTerm() {
 		return true;
+	}
+
+	@Override
+	public boolean isCompound() {
+		return !this.isAtom();
 	}
 
 	@Override
@@ -83,17 +89,13 @@ public final class CompoundPrologTerm extends PrologTerm {
 	}
 
 	@Override
-	public boolean hasFunctor(final String functor, final int arity) {
-		return this.functor.equals(functor) && getArity() == arity;
-	}
-
-	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		} else if (!(obj instanceof CompoundPrologTerm)) {
 			// Note: this will not consider the atom "[]" to be equal to the empty list
 			// But then: comparing longer lists with equivalent compound terms would require quite a bit of code
+			// hashCode() would have to be changed as well
 			return false;
 		}
 		CompoundPrologTerm other = (CompoundPrologTerm) obj;

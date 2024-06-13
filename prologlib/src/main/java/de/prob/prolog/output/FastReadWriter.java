@@ -294,7 +294,7 @@ public final class FastReadWriter {
 				q.addFirst(l.tail());
 				q.addFirst(l.head());
 				size += 3; // cons functor + head + tail
-			} else if (t.isTerm()) {
+			} else if (t.isCompound()) {
 				data.write(PL_TYPE_EXT_COMPOUND);
 				int arity = t.getArity();
 				writeSizeSWI(data, arity);

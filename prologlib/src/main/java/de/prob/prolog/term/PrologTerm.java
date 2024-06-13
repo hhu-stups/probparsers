@@ -6,11 +6,11 @@
 
 package de.prob.prolog.term;
 
-import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermStringOutput;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 /**
  * This is the abstract base class for Prolog terms
@@ -75,12 +75,21 @@ public abstract class PrologTerm {
 		return atomsToStrings(terms);
 	}
 
+	/**
+	 * @return true iff this is a compound term or atom but not a list
+	 * @deprecated use {@link #isCompound()} and {@link #isAtom()} instead
+	 */
+	@Deprecated
 	public boolean isTerm() {
 		return false;
 	}
 
+	/**
+	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 * @return true iff this is a functor with an arity greater than zero (might be a non-empty list)
+	 */
 	public boolean isCompound() {
-		return this.isTerm() && !this.isAtom();
+		return false;
 	}
 
 	public boolean isAtom() {
@@ -95,20 +104,40 @@ public abstract class PrologTerm {
 		return false;
 	}
 
+	public boolean isInteger() {
+		return false;
+	}
+
+	public boolean isFloat() {
+		return false;
+	}
+
+	/**
+	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 */
 	public boolean isVariable() {
 		return false;
 	}
 
+	/**
+	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 */
 	public boolean isAtomic() {
 		return !this.isVariable() && !this.isCompound();
 	}
 
+	/**
+	 * Only works for atoms and compound terms.
+	 */
 	public boolean hasFunctor(final String functor) {
 		return false;
 	}
 
+	/**
+	 * Only works for atoms and compound terms.
+	 */
 	public boolean hasFunctor(final String functor, final int arity) {
-		return false;
+		return this.hasFunctor(functor) && this.getArity() == arity;
 	}
 
 	public abstract void toTermOutput(IPrologTermOutput pto);
