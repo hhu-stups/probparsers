@@ -894,38 +894,28 @@ public class RulesTransformation extends DepthFirstAdapter {
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_TUPLE)));
-			assign.setRhsExpressions(createExpressionList(
-					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(set))));
+			assign.setRhsExpressions(createExpressionList(callExternalFunction(FORCE, set)));
 			subList.add(assign);
 		}
 		{
-			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression();
 			final String STRING_PARAM = "$String";
-			stringSet.setIdentifiers(createExpressionList(createIdentifier(STRING_PARAM)));
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
 			for (PExpression id : identifiers) {
-				PExpression clonedId = id.clone();
-				list.add(clonedId);
-				PExpression clonedId2 = id.clone();
-				list2.add(clonedId2);
+				list.add(id.clone());
+				list2.add(id.clone());
 			}
-			final AExistsPredicate exists = new AExistsPredicate();
-			exists.setIdentifiers(list);
-			PExpression couple;
-			if (list2.size() > 1) {
-				couple = new ACoupleExpression(list2);
-			} else {
-				couple = list2.get(0);
-			}
+			PExpression couple = list2.size() > 1 ? new ACoupleExpression(list2) : list2.get(0);
 			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
 			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), message);
-			exists.setPredicate(new AConjunctPredicate(member, equal));
-			stringSet.setPredicates(exists);
+
+			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression(
+				createExpressionList(createIdentifier(STRING_PARAM)),
+				new AExistsPredicate(list, new AConjunctPredicate(member, equal))
+			);
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_STRINGS)));
-			assign.setRhsExpressions(createExpressionList(
-					new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(stringSet))));
+			assign.setRhsExpressions(createExpressionList(callExternalFunction(FORCE, stringSet)));
 			subList.add(assign);
 		}
 
