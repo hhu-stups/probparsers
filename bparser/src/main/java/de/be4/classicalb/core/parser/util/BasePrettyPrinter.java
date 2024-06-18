@@ -1481,6 +1481,17 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
+		print("{(");
+		printCommaListCompact(node.getIdentifiers());
+		print(").");
+		node.getPredicates().apply(this);
+		print("|");
+		node.getExpression().apply(this);
+		print("}");
+	}
+
+	@Override
 	public void caseAPowSubsetExpression(final APowSubsetExpression node) {
 		print("POW");
 		printParameterListOpt(Collections.singletonList(node.getExpression()));

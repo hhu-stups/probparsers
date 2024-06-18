@@ -8,6 +8,7 @@ import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ACoupleExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 
@@ -51,6 +52,14 @@ public final class CoupleToIdentifierTransformation extends OptimizedTraversingA
 
 	@Override
 	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		List<PExpression> lifted = tryLift(node.getIdentifiers());
+		if (lifted != null) {
+			node.setIdentifiers(lifted);
+		}
+	}
+	
+	@Override
+	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
 		List<PExpression> lifted = tryLift(node.getIdentifiers());
 		if (lifted != null) {
 			node.setIdentifiers(lifted);

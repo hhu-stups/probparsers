@@ -657,6 +657,15 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicEventBComprehensionSetExpression(final ASymbolicEventBComprehensionSetExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		node.getExpression().apply(this);
+		node.getPredicates().apply(this);
+		close(node);
+	}
+
+	@Override
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		printOCAsList(node, node.getExpressions());
 	}

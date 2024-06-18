@@ -980,8 +980,14 @@ expression_keyword {-> expression} =
   {symbolic_comprehension_set} pragma_symbolic pragma_end left_brace [identifiers]:expression_list_in_par vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
   |
   // because of possible conflicts this requires parentheses around identifiers when using the dot as a separator!
-  {event_b_comprehension_set} left_brace [identifiers]:comprehension_set_identifiers_with_parentheses dot [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
-  {event_b_comprehension_set2} left_brace [identifiers]:expression_list_in_par dot2 [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)}
+  {event_b_comprehension_set} left_brace [identifiers]:comprehension_set_identifiers_with_parentheses dot [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+   {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {symbolic_event_b_comprehension_set}  pragma_symbolic pragma_end left_brace [identifiers]:comprehension_set_identifiers_with_parentheses dot [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+   {-> New expression.symbolic_event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {event_b_comprehension_set2} left_brace [identifiers]:expression_list_in_par dot2 [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+    {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {symbolic_event_b_comprehension_set2} pragma_symbolic pragma_end left_brace [identifiers]:expression_list_in_par dot2 [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+    {-> New expression.symbolic_event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)}
   |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_union2} quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
@@ -1433,7 +1439,8 @@ expression =
   {couple} [list]:expression* |
   {comprehension_set} [identifiers]:expression* [predicates]:predicate |
   {symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB only
+  {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB style
+  {symbolic_event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate |
   {pow_subset} [expression]:expression |
   {pow1_subset} [expression]:expression |
   {fin_subset} [expression]:expression |
