@@ -13,6 +13,7 @@ import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -57,6 +58,11 @@ public final class IdentListCheck extends OptimizedTraversingAdapter implements 
 
 	@Override
 	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		checkForNonIdentifiers(node.getIdentifiers());
+	}
+
+	@Override
+	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 

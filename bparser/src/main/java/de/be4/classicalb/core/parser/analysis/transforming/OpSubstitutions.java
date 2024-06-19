@@ -33,6 +33,7 @@ import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.AVarSubstitution;
@@ -336,6 +337,16 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 	@Override
 	public void outAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		leaveScope(node.getIdentifiers());
+	}
+
+	@Override
+	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
+		enterScope(node.getIdentifiers());
+	}
+
+	@Override
+	public void outASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
 		leaveScope(node.getIdentifiers());
 	}
 

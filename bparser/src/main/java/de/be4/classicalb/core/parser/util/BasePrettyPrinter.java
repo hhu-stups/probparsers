@@ -1482,6 +1482,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
+		print("/*@symbolic*/ ");
 		print("{(");
 		printCommaListCompact(node.getIdentifiers());
 		print(").");

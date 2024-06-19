@@ -214,12 +214,6 @@ public class ASTPrologTest {
 		checkExpression("{x·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
 		checkExpression("{(x)·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
 	}
-	
-	@Test
-	public void testSymbolicEventBComprehensionSet1() throws BCompoundException {
-		checkExpression("/*@symbolic*/ {x·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
-		checkExpression("/*@symbolic*/ {(x)·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
-	}
 
 	@Test
 	public void testEventBComprehensionSet2() throws BCompoundException {
@@ -246,6 +240,39 @@ public class ASTPrologTest {
 	@Test
 	public void testEventBComprehensionSetDot3() throws BCompoundException {
 		checkExpression("{(x,y,z).x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+		checkExpression("/*@symbolic*/ {(x)·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y)·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet3() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y,z·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y,z)·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x).x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x,y).x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot3() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x,y,z).x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
 	}
 
 	@Test
