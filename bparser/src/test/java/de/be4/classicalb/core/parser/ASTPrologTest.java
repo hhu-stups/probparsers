@@ -214,6 +214,12 @@ public class ASTPrologTest {
 		checkExpression("{x·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
 		checkExpression("{(x)·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
 	}
+	
+	@Test
+	public void testSymbolicEventBComprehensionSet1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+		checkExpression("/*@symbolic*/ {(x)·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
 
 	@Test
 	public void testEventBComprehensionSet2() throws BCompoundException {
