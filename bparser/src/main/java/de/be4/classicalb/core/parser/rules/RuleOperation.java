@@ -12,6 +12,7 @@ public class RuleOperation extends AbstractOperation {
 	private AIntegerExpression errorTypes;
 	private String counterExampleVariableName;
 	private String classification;
+	private String successfulVariableName;
 
 	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName,
 			List<MachineReference> machineReferences) {
@@ -57,6 +58,14 @@ public class RuleOperation extends AbstractOperation {
 
 	public String getClassification() {
 		return this.classification;
+	}
+
+	public void setSuccessfulVariableName(String name) {
+		this.successfulVariableName = name;
+	}
+
+	public String getSuccessfulVariableName() {
+		return this.successfulVariableName;
 	}
 
 }
