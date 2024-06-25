@@ -821,23 +821,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 			newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(), null,
 					node.getMessage(), node.getErrorType()), node);
 		} else {
-			int errorType = 1; // default value if no value is provided
-			if (node.getErrorType() != null) {
-				errorType = Integer.parseInt(node.getErrorType().getText());
-			}
+			// default value is 1 if no value is provided
+			int errorType = node.getErrorType() != null ? Integer.parseInt(node.getErrorType().getText()) : 1;
 			PSubstitution sub = createCounterExampleSubstitution(errorType,
-					createSetOfPExpression(node.getMessage(), node.getMessage()), false);
-			if (node.getWhen() != null) {
-				// there is a when predicate but no parameters
-				newNode = new AIfSubstitution(node.getWhen(), sub, new ArrayList<>(), null);
-			} else {
-				// no parameters and no when predicate
-				newNode = sub;
-			}
-
+					createSetOfPExpression(node.getMessage(), node.getMessage()), false, false);
+			// 1st case: there is a when predicate but no parameters
+			// 2nd case: no parameters and no when predicate
+			newNode = node.getWhen() != null ? new AIfSubstitution(node.getWhen(), sub, new ArrayList<>(), null) : sub;
 		}
 		node.replaceBy(newNode);
-
 	}
 
 	// @Override
@@ -877,13 +869,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 			set.setPredicates(condition);
 		}
 		addToStringDefinition(this.iDefinitions);
-		int errorType;
-		if (errorTypeNode != null) {
-			errorType = Integer.parseInt(errorTypeNode.getText());
-		} else {
-			// default value
-			errorType = 1;
-		}
+		// default error type: 1
+		int errorType = errorTypeNode != null ? Integer.parseInt(errorTypeNode.getText()) : 1;
 		AVarSubstitution var = new AVarSubstitution();
 
 		final String RESULT_STRINGS = "$ResultStrings";
@@ -892,7 +879,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_TUPLE)));
-			assign.setRhsExpressions(createExpressionList(callExternalFunction(FORCE, set)));
+			// don't use FORCE here to allow infinitely many counter examples
+			// enumeration warnings are then handled by RuleResult in prob_java
+			assign.setRhsExpressions(createExpressionList(set));
 			subList.add(assign);
 		}
 		{
@@ -913,7 +902,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 			);
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(RESULT_STRINGS)));
-			assign.setRhsExpressions(createExpressionList(callExternalFunction(FORCE, stringSet)));
+			// don't use FORCE here to allow infinitely many counter examples
+			// enumeration warnings are then handled by RuleResult in prob_java
+			assign.setRhsExpressions(createExpressionList(stringSet));
 			subList.add(assign);
 		}
 
