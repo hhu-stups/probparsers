@@ -112,8 +112,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.computationMap.get(node);
 	}
 
-	private boolean isInRule() {
-		return currentOperation != null && currentOperation instanceof RuleOperation;
+	private boolean isNotInRule() {
+		return currentOperation == null || !(currentOperation instanceof RuleOperation);
 	}
 
 	public FunctionOperation getFunctionOperation(AFunctionOperation funcOp) {
@@ -525,7 +525,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			checkGetRuleCounterExamplesOperator(node, parameters);
 			return;
 		default:
-			throw new AssertionError("Unkown expression operator: " + operatorName);
+			throw new AssertionError("Unknown expression operator: " + operatorName);
 		}
 	}
 
@@ -771,7 +771,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
-		if (!isInRule()) {
+		if (isNotInRule()) {
 			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation.", node));
 			return;
 		}
@@ -805,7 +805,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		if (!isInRule()) {
+		if (isNotInRule()) {
 			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation.", node));
 			return;
 		}

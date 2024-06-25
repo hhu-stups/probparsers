@@ -169,7 +169,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 				initialisationMachineClause.setSubstitutions(seqSubstitution);
 			}
 		}
-
 	}
 
 	static class ClauseFinder extends DepthFirstAdapter {
@@ -489,8 +488,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final List<PExpression> seqList = new ArrayList<>();
 		for (int i = 1; i < parameters.size(); i++) {
 			PExpression param = parameters.get(i);
-			ADefinitionExpression toStringCall = new ADefinitionExpression(new TIdentifierLiteral(TO_STRING),
-					createExpressionList(param));
+			ADefinitionExpression toStringCall = callExternalFunction(TO_STRING, param);
 			toStringCall.setStartPos(param.getStartPos());
 			toStringCall.setEndPos(param.getEndPos());
 			seqList.add(toStringCall);
@@ -557,7 +555,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = node.getValue();
 		} else {
 			addForceDefinition(iDefinitions);
-			value = new ADefinitionExpression(new TIdentifierLiteral(FORCE), createExpressionList(node.getValue()));
+			value = callExternalFunction(FORCE, node.getValue());
 			value.setStartPos(node.getValue().getStartPos());
 			value.setEndPos(node.getValue().getEndPos());
 		}

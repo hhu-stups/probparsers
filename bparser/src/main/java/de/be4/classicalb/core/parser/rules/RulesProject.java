@@ -260,7 +260,7 @@ public class RulesProject {
 					if (operationReplacementMap.containsValue(replacedOperationName)) {
 						this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 								new CheckException(
-										"Operation '" + replacedOperationName + "' is replcaed more than once.",
+										"Operation '" + replacedOperationName + "' is replaced more than once.",
 										abstractOperation.getNameLiteral())));
 					} else {
 						this.operationReplacementMap.put(name, replacedOperationName);
@@ -280,24 +280,24 @@ public class RulesProject {
 	}
 
 	private void checkFunctionCalls(AbstractOperation abstractOperation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
 			final String functionName = tIdentifierLiteral.getText();
 			if (!allOperations.containsKey(functionName)
 					|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
 				this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 						new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
-				errorOccured = true;
+				errorOccurred = true;
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfTIdentifierList(abstractOperation, abstractOperation.getFunctionCalls());
 		}
 
 	}
 
 	private void checkDependsOnRules(AbstractOperation operation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnRulesList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
@@ -305,21 +305,21 @@ public class RulesProject {
 				if (!(abstractOperation instanceof RuleOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
-					errorOccured = true;
+					errorOccurred = true;
 				}
 			} else {
-				errorOccured = true;
+				errorOccurred = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnRulesList());
 		}
 	}
 
 	private void checkDependsOnComputations(AbstractOperation operation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnComputationList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
@@ -327,15 +327,15 @@ public class RulesProject {
 				if (!(abstractOperation instanceof ComputationOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
-					errorOccured = true;
+					errorOccurred = true;
 				}
 			} else {
-				errorOccured = true;
+				errorOccurred = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnComputationList());
 		}
 	}
@@ -381,7 +381,7 @@ public class RulesProject {
 		while (!todoList.isEmpty()) {
 			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
 				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
-				deps.removeAll(resultList);
+				resultList.forEach(deps::remove);
 				if (deps.isEmpty()) {
 					resultList.add(abstractOperation);
 					todoList.remove(abstractOperation);
@@ -446,7 +446,7 @@ public class RulesProject {
 	private void checkIdentifiers() {
 		if (this.hasErrors()) {
 			/*
-			 * if there is already an error such as an parse error in one
+			 * if there is already an error such as a parse error in one
 			 * machine, it makes no sense to check for invalid identifiers
 			 * because all declarations of this machine are missing.
 			 */

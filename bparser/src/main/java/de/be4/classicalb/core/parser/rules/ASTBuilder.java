@@ -30,6 +30,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.hhu.stups.sablecc.patch.PositionedNode;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class ASTBuilder {
 
@@ -132,25 +133,20 @@ public final class ASTBuilder {
 	}
 
 	public static AIdentifierExpression createIdentifier(String name, PositionedNode positionNode) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		TIdentifierLiteral literal = new TIdentifierLiteral(name);
-		// literal.setStartPos(positionNode.getStartPos());
-		// literal.setEndPos(positionNode.getEndPos());
-		list.add(literal);
-		AIdentifierExpression result = new AIdentifierExpression(list);
-		result.setStartPos(positionNode.getStartPos());
-		result.setEndPos(positionNode.getEndPos());
-		return result;
+		return createAIdentifierExpression(name, positionNode.getStartPos(), positionNode.getEndPos());
 	}
 
 	public static AIdentifierExpression createAIdentifierExpression(TIdentifierLiteral identifierLiteral) {
 		final String name = identifierLiteral.getText();
+		return createAIdentifierExpression(name, identifierLiteral.getStartPos(), identifierLiteral.getEndPos());
+	}
+
+	private static AIdentifierExpression createAIdentifierExpression(String name, SourcePosition startPos, SourcePosition endPos) {
 		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		TIdentifierLiteral literal = new TIdentifierLiteral(name);
-		list.add(literal);
+		list.add(new TIdentifierLiteral(name));
 		AIdentifierExpression result = new AIdentifierExpression(list);
-		result.setStartPos(identifierLiteral.getStartPos());
-		result.setEndPos(identifierLiteral.getEndPos());
+		result.setStartPos(startPos);
+		result.setEndPos(endPos);
 		return result;
 	}
 
@@ -202,13 +198,13 @@ public final class ASTBuilder {
 		definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 	}
 
-	public static void addPrintSubDefinitionToIdefinitions(IDefinitions definitions) {
+	public static void addPrintSubDefinitionToIDefinitions(IDefinitions definitions) {
 		if (definitions.containsDefinition(PRINT)) {
 			return;
 		}
 
 		/*-
-		 * PRINT(x) == skip; 
+		 * PRINT(x) == skip;
 		 * EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any type T
 		 */
 		ASubstitutionDefinitionDefinition printDef = new ASubstitutionDefinitionDefinition();

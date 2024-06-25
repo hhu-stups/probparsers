@@ -233,7 +233,7 @@ public abstract class AbstractOperation {
 			change = false;
 			for (AbstractOperation abstractOperation : new ArrayList<>(todo)) {
 				Set<AbstractOperation> transitiveDependencies = abstractOperation.getTransitiveDependencies();
-				transitiveDependencies.removeAll(result);
+				result.forEach(transitiveDependencies::remove);
 				if (transitiveDependencies.isEmpty()) {
 					result.add(abstractOperation);
 					todo.remove(abstractOperation);
