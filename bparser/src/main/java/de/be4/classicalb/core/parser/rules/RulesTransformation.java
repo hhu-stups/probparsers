@@ -901,21 +901,23 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AVarSubstitution var = new AVarSubstitution();
 
 		List<PExpression> varIdentifiers = createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(COUNTEREXAMPLE_STRINGS));
-		if (onSuccessMessage != null) {
+		if (expectPredicate != null) {
 			varIdentifiers.add(createIdentifier(ALL_TUPLE));
+		}
+		if (onSuccessMessage != null) {
 			varIdentifiers.add(createIdentifier(ON_SUCCESS_STRINGS));
 		}
 		var.setIdentifiers(varIdentifiers);
 		List<PSubstitution> subList = new ArrayList<>();
-		// if EXPECT clause exists (only RULE_FORALL): first assign allTuples without EXPECT clause
+		// if ON_SUCCESS clause exists (only RULE_FORALL): first assign allTuples without EXPECT clause
 		// else: directly assign RESULT_TUPLE (only RULE_FAIL)
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(onSuccessMessage != null ? ALL_TUPLE : RESULT_TUPLE)));
+			assign.setLhsExpression(createExpressionList(createIdentifier(expectPredicate != null ? ALL_TUPLE : RESULT_TUPLE)));
 			assign.setRhsExpressions(createExpressionList(setWithoutExpect));
 			subList.add(assign);
 		}
-		if (onSuccessMessage != null) {
+		if (expectPredicate != null) {
 			final AComprehensionSetExpression setWithExpect = new AComprehensionSetExpression();
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
@@ -947,9 +949,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 				list2.add(id.clone());
 			}
 
-			PExpression couple = list.size() > 1 ? new ACoupleExpression(list) : list.get(0);
 			AMemberPredicate member = new AMemberPredicate(
-				couple,
+				list.size() > 1 ? new ACoupleExpression(list) : list.get(0),
 				new AMinusOrSetSubtractExpression(
 					createIdentifier(ALL_TUPLE),
 					createIdentifier(RESULT_TUPLE)
