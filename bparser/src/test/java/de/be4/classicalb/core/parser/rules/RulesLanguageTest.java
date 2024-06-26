@@ -128,6 +128,12 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testRuleOnSuccess() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FORALL x WHERE x : 1..100 EXPECT x : 1..10 ON_SUCCESS \"success\" COUNTEREXAMPLE \"fail\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+	}
+
+	@Test
 	public void testRuleCounterexamples() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"fail\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);

@@ -851,8 +851,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		addForceDefinition(iDefinitions);
 		Node newNode;
 		if (!node.getIdentifiers().isEmpty()) {
-			newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(), null,
-					node.getMessage(), node.getErrorType()), node);
+			newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(),
+				null, null, node.getMessage(), node.getErrorType()), node);
 		} else {
 			// default value is 1 if no value is provided
 			int errorType = node.getErrorType() != null ? Integer.parseInt(node.getErrorType().getText()) : 1;
@@ -880,8 +880,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 	// }
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
-			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression message,
-			final TIntegerLiteral errorTypeNode) {
+			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression onSuccessMessage,
+			final PExpression counterExampleMessage, final TIntegerLiteral errorTypeNode) {
 
 		final String ON_SUCCESS_STRINGS = "$OnSuccessStrings";
 		final String COUNTEREXAMPLE_STRINGS = "$CounterexampleStrings";
@@ -901,9 +901,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AVarSubstitution var = new AVarSubstitution();
 
 		List<PExpression> varIdentifiers = createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(COUNTEREXAMPLE_STRINGS));
-		if (expectPredicate != null) {
+		if (onSuccessMessage != null) {
 			varIdentifiers.add(createIdentifier(ALL_TUPLE));
-			// TODO: if ON_SUCCESS != null
 			varIdentifiers.add(createIdentifier(ON_SUCCESS_STRINGS));
 		}
 		var.setIdentifiers(varIdentifiers);
@@ -912,11 +911,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// else: directly assign RESULT_TUPLE (only RULE_FAIL)
 		{
 			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(expectPredicate != null ? ALL_TUPLE : RESULT_TUPLE)));
+			assign.setLhsExpression(createExpressionList(createIdentifier(onSuccessMessage != null ? ALL_TUPLE : RESULT_TUPLE)));
 			assign.setRhsExpressions(createExpressionList(setWithoutExpect));
 			subList.add(assign);
 		}
-		if (expectPredicate != null) {
+		if (onSuccessMessage != null) {
 			final AComprehensionSetExpression setWithExpect = new AComprehensionSetExpression();
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
@@ -939,16 +938,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 			assign.setRhsExpressions(createExpressionList(setWithExpect));
 			subList.add(assign);
 		}
-		if (expectPredicate != null) {
+		if (onSuccessMessage != null) {
 			final String STRING_PARAM = "$String";
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
-			final List<PExpression> list3 = new ArrayList<>();
 			for (PExpression id : identifiers) {
 				list.add(id.clone());
 				list2.add(id.clone());
-				list3.add(id.clone());
 			}
+
 			PExpression couple = list.size() > 1 ? new ACoupleExpression(list) : list.get(0);
 			AMemberPredicate member = new AMemberPredicate(
 				couple,
@@ -957,15 +955,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 					createIdentifier(RESULT_TUPLE)
 				)
 			);
-
-			PExpression couple2 = list2.size() > 1 ? new ACoupleExpression(list2) : list2.get(0);
-			// TODO: use ON_SUCCESS messages instead of TO_STRING
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), callExternalFunction(TO_STRING, couple2));
-
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), onSuccessMessage);
 			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression(
 				createExpressionList(createIdentifier(STRING_PARAM)),
-				new AExistsPredicate(list3, new AConjunctPredicate(member, equal))
+				new AExistsPredicate(list2, new AConjunctPredicate(member, equal))
 			);
+
 			AAssignSubstitution assign = new AAssignSubstitution();
 			assign.setLhsExpression(createExpressionList(createIdentifier(ON_SUCCESS_STRINGS)));
 			// don't use FORCE(.); successful applications can be infinite many!
@@ -982,7 +977,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			}
 			PExpression couple = list2.size() > 1 ? new ACoupleExpression(list2) : list2.get(0);
 			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), message);
+			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), counterExampleMessage);
 
 			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression(
 				createExpressionList(createIdentifier(STRING_PARAM)),
@@ -1000,7 +995,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createIdentifier(COUNTEREXAMPLE_STRINGS), true);
 		subList.add(counterExampleSubstitution);
 
-		if (expectPredicate != null) {
+		if (onSuccessMessage != null) {
 			PSubstitution successfulSubstitution = createSuccessfulSubstitution(createIdentifier(ON_SUCCESS_STRINGS));
 			subList.add(successfulSubstitution);
 		}
@@ -1015,7 +1010,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		this.ruleBodyCount++;
 		addForceDefinition(iDefinitions);
 		PSubstitution newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
-				node.getWhere(), node.getExpect(), node.getMessage(), node.getErrorType()), node);
+				node.getWhere(), node.getExpect(), node.getOnSuccess(), node.getMessage(), node.getErrorType()), node);
 		node.replaceBy(newNode);
 	}
 

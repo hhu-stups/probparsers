@@ -813,6 +813,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);
+		if (node.getOnSuccess() != null)
+			node.getOnSuccess().apply(this);
 		node.getMessage().apply(this);
 		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
