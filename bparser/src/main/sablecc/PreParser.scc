@@ -136,7 +136,9 @@ Tokens
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
-  {start -> definitions, normal -> definitions} definitions = 'DEFINITIONS';
+  {start -> definitions, normal -> definitions, definitions -> definitions} definitions = 'DEFINITIONS';
+   // definitions -> definitions is an error, which will be caught later,
+   // generating Clause 'DEFINITIONS' is used more than once error message
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
     'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE' |
