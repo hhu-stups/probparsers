@@ -944,6 +944,22 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
