@@ -50,8 +50,8 @@ public final class CompoundPrologTerm extends PrologTerm {
 		return arguments == null || arguments.length == 0;
 	}
 
+	@Deprecated
 	@Override
-	@SuppressWarnings("deprecation")
 	public boolean isTerm() {
 		return true;
 	}
