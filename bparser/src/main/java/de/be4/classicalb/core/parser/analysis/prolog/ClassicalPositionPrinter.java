@@ -72,6 +72,7 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 
 	@Override
 	public void printPosition(final Node node) {
+		@SuppressWarnings("deprecation")
 		final Integer id = nodeIds.lookup(node);
 		if (!printSourcePositions || uselessPositionInfo(node)) {
 			// only print the id

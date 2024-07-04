@@ -31,7 +31,10 @@ public final class NodeFileNumbers implements INodeIds {
 	 *
 	 * @param node the node of which we want to have the ID
 	 * @return {@code null}
+	 * @deprecated The unique ID mechanism is deprecated and will be removed in the future.
+	 *     There is no planned replacement.
 	 */
+	@Deprecated
 	@Override
 	public Integer lookup(final Node node) {
 		return null;
