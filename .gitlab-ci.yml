@@ -6,7 +6,7 @@ stages:
 
 variables:
   GRADLE_ARGS_NO_PARALLEL: --no-daemon --stacktrace --warning-mode=all
-  GRADLE_ARGS: ${GRADLE_ARGS} --parallel
+  GRADLE_ARGS: $GRADLE_ARGS --parallel
   DEBIAN_FRONTEND: noninteractive
 
 cache:
