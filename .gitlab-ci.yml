@@ -5,7 +5,8 @@ stages:
   - trigger
 
 variables:
-  GRADLE_ARGS: --no-daemon --parallel --stacktrace --warning-mode=all
+  GRADLE_ARGS_NO_PARALLEL: --no-daemon --stacktrace --warning-mode=all
+  GRADLE_ARGS: ${GRADLE_ARGS} --parallel
   DEBIAN_FRONTEND: noninteractive
 
 cache:
@@ -68,7 +69,12 @@ publish:
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in gradle.properties.enc -out gradle.properties
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in pubring.gpg.enc -out pubring.gpg
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in secring.gpg.enc -out secring.gpg
-    - ./gradlew ${GRADLE_ARGS} publish
+    - ./gradlew ${GRADLE_ARGS} classes
+    # Uploading to Maven Central seems to be unreliable with parallel builds
+    # (multiple staging repositories are created even though Gradle was only run once,
+    # and none of these staging repositories contain the complete set of files),
+    # so run the publish task in non-parallel mode.
+    - ./gradlew ${GRADLE_ARGS_NO_PARALLEL} publish
   only: 
     - master 
     - develop
