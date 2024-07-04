@@ -85,7 +85,7 @@ public abstract class PrologTerm {
 	}
 
 	/**
-	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 * Every Prolog term is either an unbound variable, atomic or compound.
 	 * @return true iff this is a functor with an arity greater than zero (might be a non-empty list)
 	 */
 	public boolean isCompound() {
@@ -113,14 +113,14 @@ public abstract class PrologTerm {
 	}
 
 	/**
-	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 * Every Prolog term is either an unbound variable, atomic or compound.
 	 */
 	public boolean isVariable() {
 		return false;
 	}
 
 	/**
-	 * Every Prolog term is either a (fresh) variable, atomic or compound.
+	 * Every Prolog term is either an unbound variable, atomic or compound.
 	 */
 	public boolean isAtomic() {
 		return !this.isVariable() && !this.isCompound();
