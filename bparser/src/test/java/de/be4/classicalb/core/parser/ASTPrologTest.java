@@ -1,19 +1,12 @@
 package de.be4.classicalb.core.parser;
 
-import static org.junit.Assert.*;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
-
-import org.junit.Test;
 
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PositionPrinter;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.AAssignSubstitution;
@@ -41,21 +34,24 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.output.PrologTermOutput;
+import de.prob.prolog.output.PrologTermStringOutput;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class ASTPrologTest {
 	private static String printAST(final Node node, final INodeIds nodeids) {
-		final StringWriter swriter = new StringWriter();
-		IPrologTermOutput pout = new PrologTermOutput(new PrintWriter(swriter), false);
+		IPrologTermOutput pout = new PrologTermStringOutput();
 		PositionPrinter pprinter = new ClassicalPositionPrinter(nodeids);
 		ASTProlog prolog = new ASTProlog(pout, pprinter);
 		node.apply(prolog);
-		swriter.flush();
-		return swriter.toString();
+		return pout.toString();
 	}
 
 	private static void checkAST(final int counter, final String expected, final Node ast) {
-		final NodeIdAssignment nodeids = new NodeIdAssignment();
+		@SuppressWarnings("deprecation")
+		de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment nodeids = new de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment();
 		ast.apply(nodeids);
 		assertEquals(insertNumbers(counter, expected), printAST(ast, nodeids));
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
@@ -109,8 +105,10 @@ public class ASTPrologTest {
 
 	@Test
 	public void testMachine() throws BCompoundException {
-		String m = "MACHINE name" + "  OPERATIONS op=skip END";
-		// todo: warum taucht hier die 5 zweimal auf?
+		String m = "MACHINE name OPERATIONS op=skip END";
+		// TODO: warum taucht hier die 5 zweimal auf?
+		// antwort: weil "identifier(...)" kein Knoten im AST ist, sondern eine Liste an Literalen
+		// NodeIdAssignment kann nur AST-Knoten eine ID zuweisen und somit verwendet ASTProlog einfach den Op-Knoten nochmal
 		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(%,op),[],[],skip($))])])";
 		checkProlog(1, m, expected);
 	}
@@ -160,6 +158,124 @@ public class ASTPrologTest {
 	}
 
 	@Test
+	public void testEmptySet() throws BCompoundException {
+		checkExpression("∅", "empty_set($)");
+		checkExpression("{}", "empty_set($)");
+	}
+
+	@Test
+	public void testSetExtension() throws BCompoundException {
+		checkExpression("{x}", "set_extension($,[identifier($,x)])");
+		checkExpression("{(x)}", "set_extension($,[identifier($,x)])");
+		checkExpression("{x,y}", "set_extension($,[identifier($,x),identifier($,y)])");
+		checkExpression("{(x,y)}", "set_extension($,[couple($,[identifier($,x),identifier($,y)])])");
+		checkExpression("{x,y,z}", "set_extension($,[identifier($,x),identifier($,y),identifier($,z)])");
+		checkExpression("{(x,y,z)}", "set_extension($,[couple($,[identifier($,x),identifier($,y),identifier($,z)])])");
+	}
+
+	@Test
+	public void testComprehensionSet1() throws BCompoundException {
+		checkExpression("{x|x<5}", "comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+		checkExpression("{(x)|x<5}", "comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testComprehensionSet2() throws BCompoundException {
+		checkExpression("{x,y|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y)|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testComprehensionSet3() throws BCompoundException {
+		checkExpression("{x,y,z|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y,z)|x<y&y<5}", "comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicComprehensionSet1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x|x<5}", "symbolic_comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+		checkExpression("/*@symbolic*/ {(x)|x<5}", "symbolic_comprehension_set($,[identifier($,x)],less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicComprehensionSet2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y)|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicComprehensionSet3() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y,z|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y,z)|x<y&y<5}", "symbolic_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testEventBComprehensionSet1() throws BCompoundException {
+		checkExpression("{x·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+		checkExpression("{(x)·x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testEventBComprehensionSet2() throws BCompoundException {
+		checkExpression("{x,y·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y)·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testEventBComprehensionSet3() throws BCompoundException {
+		checkExpression("{x,y,z·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("{(x,y,z)·x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testEventBComprehensionSetDot1() throws BCompoundException {
+		checkExpression("{(x).x<5|x*x}", "event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testEventBComprehensionSetDot2() throws BCompoundException {
+		checkExpression("{(x,y).x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testEventBComprehensionSetDot3() throws BCompoundException {
+		checkExpression("{(x,y,z).x<y&y<5|x+y}", "event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+		checkExpression("/*@symbolic*/ {(x)·x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y)·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSet3() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {x,y,z·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+		checkExpression("/*@symbolic*/ {(x,y,z)·x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot1() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x).x<5|x*x}", "symbolic_event_b_comprehension_set($,[identifier($,x)],mult_or_cart($,identifier($,x),identifier($,x)),less($,identifier($,x),integer($,5)))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot2() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x,y).x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
+	public void testSymbolicEventBComprehensionSetDot3() throws BCompoundException {
+		checkExpression("/*@symbolic*/ {(x,y,z).x<y&y<5|x+y}", "symbolic_event_b_comprehension_set($,[identifier($,x),identifier($,y),identifier($,z)],add($,identifier($,x),identifier($,y)),conjunct($,[less($,identifier($,x),identifier($,y)),less($,identifier($,y),integer($,5))]))");
+	}
+
+	@Test
 	public void testSubstitutions() throws BCompoundException {
 		checkSubstitution("x,y :: BOOL", "becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
 	}
@@ -201,6 +317,11 @@ public class ASTPrologTest {
 		disjunction.setRight(new AFalsityPredicate());
 
 		checkAST(0, "disjunct($,truth($),falsity($))", disjunction);
+	}
+
+	@Test
+	public void testBTrue() throws BCompoundException {
+		checkPredicate("btrue", "truth($)");
 	}
 
 	@Test
@@ -264,6 +385,12 @@ public class ASTPrologTest {
 	}
 
 	@Test
+	public void testReal() throws BCompoundException {
+		// ProB expects an atom
+		checkExpression("1.337", "real($,'1.337')");
+	}
+
+	@Test
 	public void testString() throws BCompoundException {
 		checkExpression("\" \"", "string($,' ')");
 		checkExpression("\"\"", "string($,'')");
@@ -278,18 +405,19 @@ public class ASTPrologTest {
 	@Test
 	public void testFreeType() throws BCompoundException {
 		final AConstructorFreetypeConstructor multi = new AConstructorFreetypeConstructor(
-
-				new TIdentifierLiteral("multi"), new APowSubsetExpression(new AIntegerSetExpression()));
-
+				new TIdentifierLiteral("multi"),
+				new APowSubsetExpression(new AIntegerSetExpression())
+		);
 		final AConstructorFreetypeConstructor single = new AConstructorFreetypeConstructor(
 				new TIdentifierLiteral("single"),
-
-				new AIntegerSetExpression());
-
-		final AFreetype freetype = new AFreetype(new TIdentifierLiteral("T"), Collections.emptyList(),
-				Arrays.asList(multi, single));
-
-		AFreetypesMachineClause clause = new AFreetypesMachineClause(Collections.singletonList(freetype));
+				new AIntegerSetExpression()
+		);
+		final AFreetype freetype = new AFreetype(
+				new TIdentifierLiteral("T"),
+				Collections.emptyList(),
+				Arrays.asList(multi, single)
+		);
+		final AFreetypesMachineClause clause = new AFreetypesMachineClause(Collections.singletonList(freetype));
 
 		checkAST(0, "freetypes($,[freetype($,'T',[],[constructor($,multi,pow_subset($,integer_set($))),constructor($,single,integer_set($))])])", clause);
 	}

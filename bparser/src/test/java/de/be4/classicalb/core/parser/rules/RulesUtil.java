@@ -17,7 +17,6 @@ public class RulesUtil {
 
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		project.printProjectAsPrologTerm(pout);
-		pout.flush();
 		return pout.toString();
 	}
 
@@ -57,7 +56,6 @@ public class RulesUtil {
 
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		unit.printAsProlog(pout, new NodeFileNumbers());
-		pout.flush();
 		return pout.toString();
 	}
 

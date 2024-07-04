@@ -81,7 +81,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void outStart(final Start node) {
-		pout.flush();
+		// intentionally left blank: don't write the start node.
 	}
 
 	/**
@@ -657,6 +657,15 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicEventBComprehensionSetExpression(final ASymbolicEventBComprehensionSetExpression node) {
+		open(node);
+		printAsList(node.getIdentifiers());
+		node.getExpression().apply(this);
+		node.getPredicates().apply(this);
+		close(node);
+	}
+
+	@Override
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		printOCAsList(node, node.getExpressions());
 	}
@@ -733,7 +742,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAIntegerExpression(final AIntegerExpression node) {
 		open(node);
 		final String text = node.getLiteral().getText();
-		if (text.length() < 17) {
+		if (text.length() <= 18) {
 			pout.printNumber(Long.parseLong(text));
 		} else {
 			pout.printNumber(new BigInteger(text));

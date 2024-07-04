@@ -24,6 +24,11 @@ public final class FloatPrologTerm extends PrologTerm {
 		return true;
 	}
 
+	@Override
+	public boolean isFloat() {
+		return true;
+	}
+
 	public double getValue() {
 		return this.value;
 	}

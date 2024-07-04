@@ -16,8 +16,10 @@ public class ParseOptions {
 	private boolean ignoreCheckingValidCombinations = false;
 
 	/**
-	 * if true the lexer will ignore certain tokens (typically ignored tokens)
+	 * if true the lexer will ignore certain tokens (typically ignored tokens).
+	 * This option does nothing anymore and will be removed in the future.
 	 */
+	@Deprecated
 	private boolean ignoreUselessTokens = true;
 
 	/**
@@ -67,10 +69,20 @@ public class ParseOptions {
 		this.ignoreCheckingValidCombinations = ignoreCheckingValidCombinations;
 	}
 
+	/**
+	 * @return whether ignoring useless tokens is enabled
+	 * @deprecated This option does nothing anymore and will be removed in the future.
+	 */
+	@Deprecated
 	public boolean isIgnoreUselessTokens() {
 		return ignoreUselessTokens;
 	}
 
+	/**
+	 * @param ignoreUselessTokens whether to ignore useless tokens
+	 * @deprecated This option does nothing anymore and will be removed in the future.
+	 */
+	@Deprecated
 	public void setIgnoreUselessTokens(boolean ignoreUselessTokens) {
 		this.ignoreUselessTokens = ignoreUselessTokens;
 	}

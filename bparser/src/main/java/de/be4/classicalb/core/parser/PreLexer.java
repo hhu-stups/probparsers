@@ -20,8 +20,6 @@ import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
-import de.be4.classicalb.core.preparser.node.TSomeValue;
-import de.be4.classicalb.core.preparser.node.TSomething;
 import de.be4.classicalb.core.preparser.node.Token;
 
 public class PreLexer extends Lexer {
@@ -103,8 +101,7 @@ public class PreLexer extends Lexer {
 					try {
 						unread(token);
 					} catch (IOException e) {
-
-						throw new IOException("Pushback buffer overflow on Token: " + token.getText());
+						throw new IOException("Pushback buffer overflow on Token: " + token.getText(), e);
 					}
 
 					// prepare rhs_body token to be the current one
@@ -134,15 +131,15 @@ public class PreLexer extends Lexer {
 			return State.NORMAL;
 		}
 
-		// check for parenthesis first
+		// Update nesting levels when there is a parenthesis or a keyword that begins/ends a block.
 		if (token instanceof TLeftPar) {
 			parenNestingLevel++;
 		} else if (token instanceof TRightPar) {
 			parenNestingLevel--;
-		}
-		// then check other tokens which start/end nestings
-		else {
-			otherNestingLevel += changeNesting();
+		} else if (token instanceof TBeginNesting) {
+			otherNestingLevel++;
+		} else if (token instanceof TEndNesting) {
+			otherNestingLevel--;
 		}
 
 		if (otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon) {
@@ -157,29 +154,10 @@ public class PreLexer extends Lexer {
 		return null;
 	}
 
-	private int changeNesting() {
-		// default if no nesting is started/ended
-		int result = 0;
-
-		// is the token starting a nesting?
-		if (token instanceof TBeginNesting) {
-			result++;
-		}
-
-		// is the token ending a nesting?
-		if (token instanceof TEndNesting) {
-			result--;
-		}
-
-		/*
-		 * A token can start and end a nesting at the same time. Example
-		 * "(PP=TRUE)". So both calls above are needed.
-		 */
-		return result;
-	}
-
 	private void checkComment() {
-		// switch to special COMMENT state and back
+		// Switch to special COMMENT state for block comments
+		// and switch back to the previous state after the comment ends.
+		// This special logic is necessary because the previous state may be NORMAL, DEFINITIONS, or DEFINITIONS_RHS.
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.BLOCK_COMMENT;
@@ -190,8 +168,9 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void checkMultiLineString() throws LexerException {
-		// TODO: check if we need to do this for multiline templates as well
-		// switch to special multiline_string_state state and back
+		// Switch to special states for multiline strings
+		// and switch back to the previous state after the string ends.
+		// This special logic is necessary because the previous state may be NORMAL or DEFINITIONS_RHS.
 		if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
@@ -210,14 +189,6 @@ public class PreLexer extends Lexer {
 	private void optimizeToken() {
 		if (token instanceof TIdentifierLiteral) {
 			token.setText(token.getText().intern());
-		} else if (
-			token instanceof TSomeValue
-			|| token instanceof TSomething
-			// || token instanceof TCommentBody // checkForErrorPositionInDefinitionWithMultilineComments fails if we do this
-			// || token instanceof TWhiteSpace // definitions.DefinitionsErrorsTest fails if do this
-		) {
-			// we do not use isIgnoreUselessTokens from ParsingOptions; only in the main lexer
-			token = null;
 		}
 	}
 }

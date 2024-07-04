@@ -3,12 +3,11 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import de.be4.classicalb.core.parser.node.Node;
 
 /**
- * Interface for assigning file numbers and unique identifiers to AST nodes and looking them up later.
+ * Interface for assigning file numbers to AST nodes and looking them up later.
  */
 public interface INodeIds {
 	/**
-	 * <p>Assign a file number and unique IDs to all elements of the syntax tree.</p>
-	 * <p>We are planning to remove the unique ID mechanism. Some implementations of this method may only set the file number and not assign any unique IDs.</p>
+	 * Assign a file number to all elements of the syntax tree.
 	 * 
 	 * @param fileNumber the file number which will be assigned to {@code node} and its child nodes
 	 * @param node the node from which to start assigning IDs
@@ -16,12 +15,15 @@ public interface INodeIds {
 	void assignIdentifiers(int fileNumber, Node node);
 	
 	/**
-	 * <p>Looks up the ID of the given node.</p>
-	 * <p>We are planning to remove the unique ID mechanism. Some implementations of this method may always return {@code null}.</p>
+	 * Looks up the ID of the given node.
 	 * 
 	 * @param node the node of which we want to have the ID
 	 * @return the ID of the node, or {@code null} if no ID is available
+	 * @deprecated The unique ID mechanism is deprecated and will be removed in the future.
+	 *     There is no planned replacement.
+	 *     Expect this method to always return {@code null} now.
 	 */
+	@Deprecated
 	Integer lookup(Node node);
 	
 	/**

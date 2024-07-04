@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser.rules;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +18,7 @@ import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -31,6 +30,12 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
+
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addBooleanPreferenceDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addChooseDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addFormatToStringDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addSortDefinition;
+import static de.be4.classicalb.core.parser.rules.ASTBuilder.addToStringDefinition;
 
 public class RulesProject {
 	private File mainFile;
@@ -82,9 +87,9 @@ public class RulesProject {
 			this.bExceptionList.addAll(compound.getBExceptions());
 		}
 		bModels.add(mainModel);
-		final LinkedList<RulesMachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
+		final LinkedList<MachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
-			final RulesMachineReference modelReference = fifo.pollFirst();
+			final MachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
 				final IModel bModel = parseRulesMachine(modelReference);
 				if (bModel.hasError()) {
@@ -255,7 +260,7 @@ public class RulesProject {
 					if (operationReplacementMap.containsValue(replacedOperationName)) {
 						this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 								new CheckException(
-										"Operation '" + replacedOperationName + "' is replcaed more than once.",
+										"Operation '" + replacedOperationName + "' is replaced more than once.",
 										abstractOperation.getNameLiteral())));
 					} else {
 						this.operationReplacementMap.put(name, replacedOperationName);
@@ -275,24 +280,24 @@ public class RulesProject {
 	}
 
 	private void checkFunctionCalls(AbstractOperation abstractOperation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
 			final String functionName = tIdentifierLiteral.getText();
 			if (!allOperations.containsKey(functionName)
 					|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
 				this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 						new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
-				errorOccured = true;
+				errorOccurred = true;
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfTIdentifierList(abstractOperation, abstractOperation.getFunctionCalls());
 		}
 
 	}
 
 	private void checkDependsOnRules(AbstractOperation operation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnRulesList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
@@ -300,21 +305,21 @@ public class RulesProject {
 				if (!(abstractOperation instanceof RuleOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
-					errorOccured = true;
+					errorOccurred = true;
 				}
 			} else {
-				errorOccured = true;
+				errorOccurred = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnRulesList());
 		}
 	}
 
 	private void checkDependsOnComputations(AbstractOperation operation) {
-		boolean errorOccured = false;
+		boolean errorOccurred = false;
 		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnComputationList()) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
 			if (allOperations.containsKey(name)) {
@@ -322,15 +327,15 @@ public class RulesProject {
 				if (!(abstractOperation instanceof ComputationOperation)) {
 					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
 							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
-					errorOccured = true;
+					errorOccurred = true;
 				}
 			} else {
-				errorOccured = true;
+				errorOccurred = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
 			}
 		}
-		if (!errorOccured) {
+		if (!errorOccurred) {
 			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnComputationList());
 		}
 	}
@@ -376,7 +381,7 @@ public class RulesProject {
 		while (!todoList.isEmpty()) {
 			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
 				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
-				deps.removeAll(resultList);
+				resultList.forEach(deps::remove);
 				if (deps.isEmpty()) {
 					resultList.add(abstractOperation);
 					todoList.remove(abstractOperation);
@@ -441,7 +446,7 @@ public class RulesProject {
 	private void checkIdentifiers() {
 		if (this.hasErrors()) {
 			/*
-			 * if there is already an error such as an parse error in one
+			 * if there is already an error such as a parse error in one
 			 * machine, it makes no sense to check for invalid identifiers
 			 * because all declarations of this machine are missing.
 			 */
@@ -455,8 +460,8 @@ public class RulesProject {
 		for (IModel model : bModels) {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			HashSet<String> knownIdentifiers = new HashSet<>();
-			List<RulesMachineReference> machineReferences = parseUnit.getMachineReferences();
-			for (RulesMachineReference rulesMachineReference : machineReferences) {
+			List<MachineReference> machineReferences = parseUnit.getMachineReferences();
+			for (MachineReference rulesMachineReference : machineReferences) {
 				String referenceName = rulesMachineReference.getName();
 				RulesParseUnit rulesParseUnit = map.get(referenceName);
 				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
@@ -494,7 +499,7 @@ public class RulesProject {
 				for (RuleOperation ruleOperation : rulesParseUnit.getRulesMachineChecker().getRuleOperations()) {
 					knownRules.add(ruleOperation.getOriginalName());
 				}
-				for (RulesMachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
+				for (MachineReference rulesMachineReference : rulesParseUnit.getMachineReferences()) {
 					String referenceName = rulesMachineReference.getName();
 					RulesParseUnit otherParseUnit = map.get(referenceName);
 					for (RuleOperation ruleOperation : otherParseUnit.getRulesMachineChecker().getRuleOperations()) {
@@ -596,8 +601,8 @@ public class RulesProject {
 		return this.rulesMachineRunConfiguration;
 	}
 
-	private IModel parseRulesMachine(RulesMachineReference reference) {
-		File file = reference.getFile();
+	private IModel parseRulesMachine(MachineReference reference) {
+		File file = new File(reference.getPath());
 		RulesParseUnit unit = new RulesParseUnit(reference.getName());
 		unit.setParsingBehaviour(this.parsingBehaviour);
 		unit.readMachineFromFile(file);
@@ -613,7 +618,7 @@ public class RulesProject {
 		return bParseUnit;
 	}
 
-	protected boolean isANewModel(RulesMachineReference reference) {
+	protected boolean isANewModel(MachineReference reference) {
 		for (IModel iModel : bModels) {
 			if (iModel.getMachineName().equals(reference.getName())) {
 				return false;
@@ -631,26 +636,38 @@ public class RulesProject {
 	}
 
 	public void printProjectAsPrologTerm(final IPrologTermOutput pout) {
+		this.printAsPrologTermWithFullstops(pout, true);
+	}
+
+	public void printProjectAsPrologTermDirect(final IPrologTermOutput pout) {
+		this.printAsPrologTermWithFullstops(pout, false);
+	}
+
+	public void printAsPrologTermWithFullstops(final IPrologTermOutput pout, final boolean withFullstops) {
 		// parser version
 		pout.openTerm("parser_version");
 		pout.printAtom(BParser.getGitSha());
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 
-		// machine
+		// machine metadata
 		pout.openTerm("classical_b");
 		pout.printAtom(MAIN_MACHINE_NAME);
 		pout.openList();
-
 		for (File file : this.filesLoaded) {
 			pout.printAtom(file.getAbsolutePath());
 		}
 		pout.closeList();
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 
+		// machines
 		for (IModel iModel : bModels) {
-			iModel.printAsProlog(pout, this.nodeIdAssignment);
+			iModel.printAsPrologWithFullstops(pout, this.nodeIdAssignment, withFullstops);
 		}
 	}
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
@@ -16,7 +17,7 @@ public class ComputationOperation extends AbstractOperation {
 	private final Map<String, TIdentifierLiteral> defineMap = new HashMap<>();
 
 	public ComputationOperation(TIdentifierLiteral computationName, String fileName, String machineName,
-			List<RulesMachineReference> machineReferences) {
+			List<MachineReference> machineReferences) {
 		super(computationName, fileName, machineName, machineReferences);
 	}
 

@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -43,7 +44,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
 	private final HashSet<String> definitions = new HashSet<>();
 	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
-	private final List<RulesMachineReference> machineReferences;
+	private final List<MachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
 
@@ -52,7 +53,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final Start start;
 	private TIdentifierLiteral nameLiteral;
 
-	public RulesMachineChecker(final File file, List<RulesMachineReference> machineReferences, Start start) {
+	public RulesMachineChecker(final File file, List<MachineReference> machineReferences, Start start) {
 		this.file = file;
 		this.machineReferences = machineReferences;
 		this.start = start;
@@ -111,8 +112,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.computationMap.get(node);
 	}
 
-	private boolean isInRule() {
-		return currentOperation != null && currentOperation instanceof RuleOperation;
+	private boolean isNotInRule() {
+		return currentOperation == null || !(currentOperation instanceof RuleOperation);
 	}
 
 	public FunctionOperation getFunctionOperation(AFunctionOperation funcOp) {
@@ -323,7 +324,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			final RuleOperation rule = (RuleOperation) currentOperation;
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
 				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(0);
-				rule.setErrrorTypes(intExpr);
+				rule.setErrorTypes(intExpr);
 			} else {
 				errorList.add(
 						new CheckException("Expected exactly one integer after ERROR_TYPES.", pOperationAttribute));
@@ -524,7 +525,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			checkGetRuleCounterExamplesOperator(node, parameters);
 			return;
 		default:
-			throw new AssertionError("Unkown expression operator: " + operatorName);
+			throw new AssertionError("Unknown expression operator: " + operatorName);
 		}
 	}
 
@@ -770,7 +771,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
-		if (!isInRule()) {
+		if (isNotInRule()) {
 			errorList.add(new CheckException("RULE_FAIL used outside of a RULE operation.", node));
 			return;
 		}
@@ -804,7 +805,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
-		if (!isInRule()) {
+		if (isNotInRule()) {
 			errorList.add(new CheckException("RULE_FORALL used outside of a RULE operation.", node));
 			return;
 		}
@@ -812,6 +813,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);
+		if (node.getOnSuccess() != null)
+			node.getOnSuccess().apply(this);
 		node.getMessage().apply(this);
 		this.identifierScope.removeScope();
 		checkErrorType(node.getErrorType());
@@ -937,6 +940,22 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
 	}
 

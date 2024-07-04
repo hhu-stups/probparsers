@@ -14,7 +14,7 @@ public final class DotListConversion {
 	public static PrologTerm asListTerm(PrologTerm term) {
 		Objects.requireNonNull(term, "term");
 
-		if (term.isAtom() && "[]".equals(term.getFunctor())) {
+		if (term.hasFunctor("[]", 0)) {
 			return ListPrologTerm.emptyList();
 		} else if (term.isList()) {
 			ListPrologTerm listTerm = (ListPrologTerm) term;
@@ -28,7 +28,7 @@ public final class DotListConversion {
 
 				return ListPrologTerm.fromCollection(args);
 			}
-		} else if (!term.isAtom() && term.isTerm()) {
+		} else if (term.isCompound()) {
 			List<PrologTerm> args = new ArrayList<>();
 			args.add(asListTerm(term.getArgument(1)));
 
@@ -57,23 +57,15 @@ public final class DotListConversion {
 
 	public static PrologTerm asListTermNonRecursive(PrologTerm term) {
 		Objects.requireNonNull(term, "term");
-
-		if (term.isAtom() && "[]".equals(term.getFunctor())) {
+		if (term.hasFunctor("[]", 0)) {
 			return ListPrologTerm.emptyList();
-		}
-
-		int arity = term.getArity();
-		if (arity == 2 && term.isTerm()) {
-			String functor = term.getFunctor();
-			if (".".equals(functor) || "[|]".equals(functor)) {
-				PrologTerm tail = term.getArgument(2);
-				if (tail.isList()) {
-					// assume arity = list size
-					List<PrologTerm> args = new ArrayList<>(arity + 1);
-					args.add(term.getArgument(1));
-					args.addAll((ListPrologTerm) tail);
-					return ListPrologTerm.fromCollection(args);
-				}
+		} else if (term.hasFunctor(".", 2) || term.hasFunctor("[|]", 2)) {
+			PrologTerm tail = term.getArgument(2);
+			if (tail.isList()) {
+				List<PrologTerm> args = new ArrayList<>();
+				args.add(term.getArgument(1));
+				args.addAll((ListPrologTerm) tail);
+				return ListPrologTerm.fromCollection(args);
 			}
 		}
 
@@ -92,7 +84,7 @@ public final class DotListConversion {
 		Objects.requireNonNull(term, "term");
 		Objects.requireNonNull(listConcatFunctor, "listConcatFunctor");
 
-		if (term.isAtom() && "[]".equals(term.getFunctor())) {
+		if (term.hasFunctor("[]", 0)) {
 			return EMPTY_LIST_ATOM;
 		} else if (term.isList()) {
 			ListPrologTerm listTerm = (ListPrologTerm) term;
@@ -106,7 +98,7 @@ public final class DotListConversion {
 			}
 
 			return dotTerm;
-		} else if (!term.isAtom() && term.isTerm()) {
+		} else if (term.isCompound()) {
 			List<PrologTerm> args = new ArrayList<>();
 			for (int i = 1, arity = term.getArity(); i <= arity; i++) {
 				args.add(asListConcatTerm(term.getArgument(i), listConcatFunctor));

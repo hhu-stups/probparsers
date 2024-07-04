@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.util.List;
 
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIntegerExpression;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
@@ -11,9 +12,10 @@ public class RuleOperation extends AbstractOperation {
 	private AIntegerExpression errorTypes;
 	private String counterExampleVariableName;
 	private String classification;
+	private String successfulVariableName;
 
 	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName,
-			List<RulesMachineReference> machineReferences) {
+			List<MachineReference> machineReferences) {
 		super(ruleName, fileName, machineName, machineReferences);
 	}
 
@@ -30,7 +32,7 @@ public class RuleOperation extends AbstractOperation {
 		this.ruleId = ruleId;
 	}
 
-	public void setErrrorTypes(AIntegerExpression aIntegerExpression) {
+	public void setErrorTypes(AIntegerExpression aIntegerExpression) {
 		this.errorTypes = aIntegerExpression;
 	}
 
@@ -56,6 +58,14 @@ public class RuleOperation extends AbstractOperation {
 
 	public String getClassification() {
 		return this.classification;
+	}
+
+	public void setSuccessfulVariableName(String name) {
+		this.successfulVariableName = name;
+	}
+
+	public String getSuccessfulVariableName() {
+		return this.successfulVariableName;
 	}
 
 }

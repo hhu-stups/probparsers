@@ -94,37 +94,14 @@ Helpers
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
-
-  //all_chars_without_quote_and_newline = [[all_chars - '"'] - line_break];
-  all_chars_without_quote_newline_slash = [[[all_chars - '"'] - line_break] - '\'];
-  all_chars_without_newline = [all_chars - line_break];
-  string_literal = '"' (all_chars_without_quote_newline_slash | '\' all_chars_without_newline)* '"';
-
-  all_chars_without_single_quote = [all_chars - 39];  // 39 is the single quote char
-  multiline_string_literal = (all_chars_without_single_quote |
-                              39 all_chars_without_single_quote |  // single quote does not end string
-                              39 39 all_chars_without_single_quote | // double quote does not end string
-                               '\' 39 // escaped quote also does not count towards end
-                               )*;
-
-  all_chars_without_single_back_quote = [all_chars - '`'];
-  multiline_template_literal = (all_chars_without_single_back_quote |
-                              '`' all_chars_without_single_back_quote |  // single quote does not end string
-                              '``' all_chars_without_single_back_quote | // double quote does not end string
-                               '\`' // escaped quote also does not count towards end
-                               )*;
-
-  // layout_char = [[[9 + 32] + 160] + [8232 .. 8233]];
   layout_char = [[9 + 32] + 160];
   // 160: non-breaking space
-  // 8206: Left-To_Right_Mark, 8207: Right-To-Left Mark, [now no longer accepted by the parser]
-  // 8232 is Unicode line separator, 8233 is paragraph separator
   white_space = line_break | layout_char+;
 
-
-  all_chars_without_back_quote_newline_slash = [[[all_chars - '`'] - line_break] - '\'];
-  quoted_identifier_literal = '`' (all_chars_without_back_quote_newline_slash | '\' all_chars_without_newline)* '`'; // backquote to generate identifiers with special symbols or which clash with keywords
-
+  single_line_string_char = [all_chars - line_break];
+  string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
+  // backquote to generate identifiers with special symbols or which clash with keywords
+  quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
 
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
   regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
@@ -198,11 +175,13 @@ Tokens
 
   {normal->multiline_string} multiline_string_start = triple_quote;
   {multiline_string->normal} multiline_string_end = triple_quote;
-  {multiline_string} multiline_string_content = multiline_string_literal;
+  // One or two single quotes followed by a different character don't terminate the string.
+  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [all_chars - [single_quote + '\']] | '\' all_chars)*;
 
   {normal->multiline_template} multiline_template_start = '```';
   {multiline_template->normal} multiline_template_end = '```';
-  {multiline_template} multiline_template_content = multiline_template_literal;
+  // One or two backquotes followed by a different character don't terminate the string.
+  {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - ['`' + '\']] | '\' all_chars)*;
 
   {normal} string_literal = string_literal;
   {normal} for_any = '!' | 0x2200;
@@ -466,6 +445,7 @@ Tokens
   {normal} kw_value = 'VALUE';
   {normal} kw_body = 'BODY';
   {normal} kw_dummy_value = 'DUMMY_VALUE';
+  {normal} kw_on_success = 'ON_SUCCESS';
   {normal} kw_counterexample = 'COUNTEREXAMPLE';
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
@@ -580,9 +560,6 @@ expression_def {-> expression_definition} = [name]:identifier_literal [parameter
 predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
-  definition_x {-> definition_x.definition};
-
-definition_x {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
@@ -814,7 +791,7 @@ predicate_atomic {-> predicate} =
   {bracketed} left_par [predicate]:predicate_top right_par {-> predicate.predicate} |
   {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
   {finite} finite left_par [set]:expression_in_par right_par {-> New predicate.finite(set.expression)} |
-  {partition} partition left_par [set]:expression_top [elements]:expression_list_tail? right_par {-> New predicate.partition(set.expression, [elements.expression])} |
+  {partition} partition left_par [set]:expression_top [elements]:comma_expression_list? right_par {-> New predicate.partition(set.expression, [elements.expression])} |
   {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
   | // check in typechecker: predicate must be an implication predicate
   {forall2} for_any [identifiers]:quantified_variables_list dot2 left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
@@ -997,27 +974,33 @@ expression_keyword {-> expression} =
   |
   {iteration} iterate left_par [left]:expression_in_par comma [right]:expression_in_par right_par {-> New expression.iteration(left.expression, right.expression)}
   |
-  // The identifier lists in all comprehension sets should really be identifier_list and not expression_list,
+  // The identifier lists in all comprehension sets should really be quantified_variables_list and not expression_list(_in_par),
   // but that causes reduce/reduce conflicts with set extensions (literals).
   // Instead, IdentListCheck later enforces that only identifiers are used.
-  {comprehension_set} left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)}
+  {comprehension_set} left_brace [identifiers]:expression_list_in_par vertical_bar [predicates]:predicate_top right_brace {-> New expression.comprehension_set([identifiers.expression], predicates.predicate)} |
+  {symbolic_comprehension_set} pragma_symbolic pragma_end left_brace [identifiers]:expression_list_in_par vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
   |
-  {event_b_comprehension_set} left_brace [identifiers]:expression_list dot2 [predicates]:predicate_top  vertical_bar [expression]:expression_top right_brace {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression,predicates.predicate)}
-  |
-  {symbolic_comprehension_set} pragma_symbolic pragma_end left_brace [identifiers]:expression_list vertical_bar [predicates]:predicate_top right_brace {-> New expression.symbolic_comprehension_set([identifiers.expression], predicates.predicate)}
+  // because of possible conflicts this requires parentheses around identifiers when using the dot as a separator!
+  {event_b_comprehension_set} left_brace [identifiers]:comprehension_set_identifiers_with_parentheses dot [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+   {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {symbolic_event_b_comprehension_set}  pragma_symbolic pragma_end left_brace [identifiers]:comprehension_set_identifiers_with_parentheses dot [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+   {-> New expression.symbolic_event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {event_b_comprehension_set2} left_brace [identifiers]:expression_list_in_par dot2 [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+    {-> New expression.event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)} |
+  {symbolic_event_b_comprehension_set2} pragma_symbolic pragma_end left_brace [identifiers]:expression_list_in_par dot2 [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_brace
+    {-> New expression.symbolic_event_b_comprehension_set([identifiers.expression], expression.expression, predicates.predicate)}
   |
   {quantified_union} quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_union2} quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {symbolic_quantified_union} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)} |
   {symbolic_quantified_union2} pragma_symbolic pragma_end quantified_union [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.symbolic_quantified_union([identifiers.expression], predicates.predicate, expression.expression)}
   |
-  {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
-  |
+  {quantified_intersection} quantified_inter [identifiers]:quantified_variables_list dot left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)} |
   {quantified_intersection2} quantified_inter [identifiers]:quantified_variables_list dot2 left_par [predicates]:predicate_top vertical_bar [expression]:expression_in_par right_par {-> New expression.quantified_intersection([identifiers.expression], predicates.predicate, expression.expression)}
   |
-  {set_extension} left_brace [expressions]:expression_list right_brace {-> New expression.set_extension([expressions.expression])} |
+  {set_extension} left_brace [expressions]:expression_list_in_par right_brace {-> New expression.set_extension([expressions.expression])} |
   {sequence_extension} left_bracket [expressions]:expression_list right_bracket {-> New expression.sequence_extension([expressions.expression])} |
-  {couple2} left_par [first]:expression_in_par comma [rest]:expression_list right_par {-> New expression.couple([first.expression, rest.expression])} | // Klammern notwendig
+  {couple2} [expression]:couple2 {-> expression.expression} |
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
@@ -1074,15 +1057,27 @@ if_elseif_expression {-> expression} =
   elsif [condition]:predicate_top then [expr]:expression_top {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
 
 expression_list {-> expression*} =
-  {single} [expression]:expression_top {-> [expression.expression]} |
-  {multiple} [rest]:expression_list comma [last]:expression_top {-> [rest.expression, last.expression]};
+  [first]:expression_top [rest]:expression_list_tail* {-> [first.expression, rest.expression]};
 
-expression_list_tail {-> expression*} = comma expression_list {-> [expression_list.expression]};
+expression_list_tail {-> expression} =
+  comma [expr]:expression_top {-> expr.expression};
 
-/*expression_list_in_par {-> expression*} =
-  {single} [expression]:expression_in_par {-> [expression.expression]} |
-  {multiple} [rest]:expression_list_in_par comma [last]:expression_in_par {-> [rest.expression, last.expression]};
-*/
+// used for partition(First[, Rest])
+comma_expression_list {-> expression*} =
+  comma expression_list {-> [expression_list.expression]};
+
+expression_list_in_par {-> expression*} =
+  [first]:expression_in_par [rest]:expression_list_in_par_tail* {-> [first.expression, rest.expression]};
+
+expression_list_in_par_tail {-> expression} =
+  comma [expr]:expression_in_par {-> expr.expression};
+
+couple2 {-> expression} =
+  left_par [first]:expression_in_par comma [rest]:expression_list_in_par right_par {-> New expression.couple([first.expression, rest.expression])}; // Klammern notwendig
+
+comprehension_set_identifiers_with_parentheses {-> expression*} =
+  {single} left_par [identifier]:expression_in_par right_par {-> [identifier.expression]} |
+  {multi} [identifiers]:couple2 {-> [identifiers.expression]}; // will be unpacked by CoupleToIdentifierTransformation
 
 
 /* Substitutions */
@@ -1139,8 +1134,8 @@ substitution_l3 {-> substitution} =
   // extensions for rules
   {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
     {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
-  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? kw_counterexample [message]:expression_top end
-    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, message.expression)} |
+  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? [on_success]:on_success? kw_counterexample [message]:expression_top end
+    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, message.expression)} |
   {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate? [error_type]:error_type? kw_counterexample [message]:expression_top end
     {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
@@ -1151,6 +1146,7 @@ when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate};
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id};
+on_success {-> expression} = kw_on_success [expr]:expression_top {-> expr.expression};
 
 choice_or {-> substitution} =
   or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)};
@@ -1445,7 +1441,8 @@ expression =
   {couple} [list]:expression* |
   {comprehension_set} [identifiers]:expression* [predicates]:predicate |
   {symbolic_comprehension_set} [identifiers]:expression* [predicates]:predicate |
-  {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB only
+  {event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate | // EventB style
+  {symbolic_event_b_comprehension_set} [identifiers]:expression* [expression]:expression [predicates]:predicate |
   {pow_subset} [expression]:expression |
   {pow1_subset} [expression]:expression |
   {fin_subset} [expression]:expression |
@@ -1578,7 +1575,7 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
-  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [message]:expression | // extension for rules
+  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [on_success]:expression? [message]:expression | // extension for rules
   {rule_fail_sub} [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | // extension for rules
   {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | // extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | // extension for rules

@@ -6,13 +6,18 @@
 
 package de.prob.parser;
 
-import de.prob.core.sablecc.node.Start;
-import de.prob.prolog.term.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import de.prob.core.sablecc.node.Start;
+import de.prob.prolog.term.AIntegerPrologTerm;
+import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.IntegerPrologTerm;
+import de.prob.prolog.term.ListPrologTerm;
+import de.prob.prolog.term.PrologTerm;
+import de.prob.prolog.term.VariablePrologTerm;
 
 /**
  * Takes a Prolog term of the form (only its canonical form) "[x=a,y=b,z=c]" and
@@ -46,8 +51,7 @@ public final class BindingGenerator {
 		if (term == null) {
 			result = null;
 		} else if (term.isList()) {
-			ListPrologTerm list = (ListPrologTerm) term;
-			result = createBinding(list);
+			result = createBinding((ListPrologTerm) term);
 		} else {
 			throw new IllegalArgumentException("Expected Prolog list, but was " + term);
 		}
@@ -55,32 +59,23 @@ public final class BindingGenerator {
 	}
 
 	private static Map<String, PrologTerm> createBinding(final ListPrologTerm list) {
-		Map<String, PrologTerm> result;
-		result = new HashMap<>();
+		Map<String, PrologTerm> result = new HashMap<>();
 		for (PrologTerm element : list) {
-			if (element.isTerm()) {
-				CompoundPrologTerm binding = (CompoundPrologTerm) element;
-				if (binding.getArity() == 2 && "=".equals(binding.getFunctor())) {
-					extractBinding(result, binding);
-				} else {
-					throw new IllegalArgumentException("Expected binding (=/2), but was " + binding.getFunctor() + "/" + binding.getArity());
-				}
-			} else {
-				throw new IllegalArgumentException("Expected binding but was not a term");
-			}
+			CompoundPrologTerm binding = getCompoundTerm(element, "=", 2);
+			result.put(
+					binding.getArgument(1).atomToString(),
+					binding.getArgument(2)
+			);
 		}
 		return Collections.unmodifiableMap(result);
 	}
 
-	private static void extractBinding(final Map<String, PrologTerm> result, final CompoundPrologTerm binding) {
-		PrologTerm varterm = binding.getArgument(1);
-		if (varterm.isAtom()) {
-			String name = varterm.getFunctor();
-			PrologTerm value = binding.getArgument(2);
-			result.put(name, value);
-		} else {
-			throw new IllegalArgumentException("Expected atomic variable name, but found " + varterm);
-		}
+	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term, final String functor) {
+		return checkFunctor(checkComponentType(term), functor);
+	}
+
+	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term, final int arity) {
+		return checkArity(checkComponentType(term), arity);
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term, final String functor, final int arity) {
@@ -93,14 +88,6 @@ public final class BindingGenerator {
 			throw new ResultParserException(message);
 		}
 		return (CompoundPrologTerm) term;
-	}
-
-	public static CompoundPrologTerm getCompoundTerm(final PrologTerm term, final int arity) {
-		if ((term instanceof CompoundPrologTerm)) {
-			return checkArity((CompoundPrologTerm) term, arity);
-		}
-		final String message = "Expected CompoundPrologTerm, but got " + term.getClass().getSimpleName();
-		throw new ResultParserException(message);
 	}
 
 	public static CompoundPrologTerm getCompoundTerm(final Map<String, PrologTerm> bindings, final String name, final String functor, final int arity) {

@@ -36,13 +36,13 @@ public class DotListTest {
 	public void testListComplicated() {
 		test(pto -> pto.list(l1 -> {
 			l1.printAtom("a");
-			l1.printString("foo");
+			l1.printAtom("Foo");
 			l1.printVariable("X");
 			l1.printNumber(42);
 			l1.emptyList();
 			l1.list(l2 -> {
 				l2.printAtom("a");
-				l2.printString("foo");
+				l2.printAtom("Foo");
 				l2.printVariable("X");
 				l2.printNumber(42);
 				l2.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));

@@ -1,6 +1,12 @@
 package de.be4.classicalb.core.parser;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PushbackReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +19,7 @@ import de.be4.classicalb.core.parser.analysis.checking.IdentListCheck;
 import de.be4.classicalb.core.parser.analysis.checking.RefinedOperationCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemanticCheck;
 import de.be4.classicalb.core.parser.analysis.checking.SemicolonCheck;
+import de.be4.classicalb.core.parser.analysis.transforming.CoupleToIdentifierTransformation;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.analysis.transforming.SyntaxExtensionTranslator;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -55,7 +62,7 @@ public class BParser {
 	private IDefinitions definitions = new Definitions();
 	private ParseOptions parseOptions;
 
-	private List<String> doneDefFiles = new ArrayList<>();
+	private final List<String> definitionFileIncludeStack = new ArrayList<>();
 
 	private final String fileName;
 
@@ -519,7 +526,7 @@ public class BParser {
 	) throws IOException, PreParseException, BCompoundException {
 		final PreParser preParser = new PreParser(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 			machineFile,
-			contentProvider, doneDefFiles, parseOptions, this.definitions
+			contentProvider, definitionFileIncludeStack, parseOptions, this.definitions
 		);
 		// scan for additional new definitions
 		preParser.setStartPosition(this.startLine, this.startColumn);
@@ -537,6 +544,8 @@ public class BParser {
 		} catch (CheckException e) {
 			list.add(e);
 		}
+
+		rootNode.apply(new CoupleToIdentifierTransformation());
 
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
@@ -571,12 +580,13 @@ public class BParser {
 		this.definitions = definitions;
 	}
 
-	public List<String> getDoneDefFiles() {
-		return doneDefFiles;
-	}
-
-	public void setDoneDefFiles(final List<String> doneDefFiles) {
-		this.doneDefFiles = doneDefFiles;
+	/**
+	 * For internal use only by the {@link PreParser}.
+	 * 
+	 * @return the chain/stack of definition files via which the currently parsed definition file was reached, or an empty list when not parsing a definition file
+	 */
+	List<String> getDefinitionFileIncludeStack() {
+		return definitionFileIncludeStack;
 	}
 
 	public ParseOptions getOptions() {

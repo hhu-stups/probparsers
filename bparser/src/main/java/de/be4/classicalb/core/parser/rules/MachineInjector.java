@@ -130,7 +130,6 @@ public final class MachineInjector extends DepthFirstAdapter {
 				setsClause = node;
 				clausesList.add(node);
 			} else {
-
 				LinkedList<PSet> sets = setsClause.getSetDefinitions();
 				sets.addAll(node.getSetDefinitions());
 			}
@@ -202,7 +201,6 @@ public final class MachineInjector extends DepthFirstAdapter {
 				AConjunctPredicate con = new AConjunctPredicate(invariantClause.getPredicates(), node.getPredicates());
 				invariantClause.setPredicates(con);
 			}
-
 		}
 
 		@Override
@@ -213,7 +211,6 @@ public final class MachineInjector extends DepthFirstAdapter {
 			} else {
 				assertionsClause.getPredicates().addAll(node.getPredicates());
 			}
-
 		}
 
 		@Override
@@ -238,7 +235,6 @@ public final class MachineInjector extends DepthFirstAdapter {
 			} else {
 				operationClause.getOperations().addAll(0, node.getOperations());
 			}
-
 		}
 
 		@Override
@@ -266,7 +262,6 @@ public final class MachineInjector extends DepthFirstAdapter {
 					mainMachineDefinitions.add(def);
 				}
 			}
-
 		}
 
 		@Override

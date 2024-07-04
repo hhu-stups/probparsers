@@ -24,14 +24,12 @@ public final class PrologExceptionPrinter {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		printException(pto, e);
 		pto.fullstop();
-		pto.flush();
 	}
 
 	public static void printException(final PrintWriter out, final IOException e) {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		printException(pto, e);
 		pto.fullstop();
-		pto.flush();
 	}
 
 	public static void printException(final IPrologTermOutput pto, final IOException e) {
@@ -44,14 +42,12 @@ public final class PrologExceptionPrinter {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		printException(pto, e);
 		pto.fullstop();
-		pto.flush();
 	}
 
 	public static void printException(final PrintWriter out, final BCompoundException e) {
 		IPrologTermOutput pto = new PrologTermOutput(out, false);
 		printException(pto, e);
 		pto.fullstop();
-		pto.flush();
 	}
 
 	public static void printException(final IPrologTermOutput pto, final BCompoundException e) {

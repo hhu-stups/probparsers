@@ -39,8 +39,11 @@ public class AnswerTest {
 
 	@Test
 	public void testException() {
-		final String testString = "exception(ERR-UNKNOWNerror(syntax_error() cannot start an expression),syntax_error(read_term($stream(23185648),_9067,[variable_names(_9074)]),1,) cannot start an expression,[atom(getOperations)-1,(-1,)" +
-			"-1,.-1],2)))";
+		// Note: This error term can be produced with this code in SICStus:
+		// catch(read_term(Stream, Term, [variable_names(Names)]), E, write_canonical(exception(E))).
+		// with Stream containing the following input:
+		// getOperations().
+		final String testString = "exception(error(syntax_error(') cannot start an expression'),syntax_error(read_term('$stream'(23185648),_9067,'.'(variable_names(_9074),[])),1,') cannot start an expression','.'(-(atom(getOperations),1),'.'(-('(',1),'.'(-(')',1),'.'(-('.',1),[])))),2)))";
 		final Start rootNode = ProBResultParser.parse(testString);
 		assertNotNull(PARSETREE_WAS_NULL, rootNode);
 	}

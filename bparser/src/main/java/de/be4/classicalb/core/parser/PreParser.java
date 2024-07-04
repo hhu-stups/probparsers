@@ -40,6 +40,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
+import de.be4.classicalb.core.preparser.node.TStringLiteral;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
@@ -81,19 +82,19 @@ public class PreParser {
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
 	private final IFileContentProvider contentProvider;
-	private final List<String> doneDefFiles;
+	private final List<String> definitionFileIncludeStack;
 
 	private int startLine;
 	private int startColumn;
 
 	public PreParser(PushbackReader pushbackReader, File modelFile,
 			IFileContentProvider contentProvider,
-			List<String> doneDefFiles,
+			List<String> definitionFileIncludeStack,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
 		this.modelFile = modelFile;
 		this.contentProvider = contentProvider;
-		this.doneDefFiles = doneDefFiles;
+		this.definitionFileIncludeStack = definitionFileIncludeStack;
 		this.parseOptions = parseOptions;
 		this.defFileDefinitions = definitions;
 		this.definitionTypes = new DefinitionTypes();
@@ -141,7 +142,7 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(final List<Token> list)
+	private void evaluateDefinitionFiles(List<TStringLiteral> list)
 			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
@@ -149,19 +150,20 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (final Token fileNameToken : list) {
-			final List<String> newDoneList = new ArrayList<>(doneDefFiles);
+		for (TStringLiteral filenameString : list) {
+			// Unquote and unescape the definition file name string.
+			String quotedFilename = filenameString.getText();
+			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def
-			final String fileName = fileNameToken.getText();
 			try {
-				if (doneDefFiles.contains(fileName)) {
+				if (definitionFileIncludeStack.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
-					for (String string : doneDefFiles) {
+					for (String string : definitionFileIncludeStack) {
 						sb.append(string).append(" -> ");
 					}
 					sb.append(fileName);
-					throw new PreParseException(fileNameToken,
+					throw new PreParseException(filenameString,
 							"Cyclic references in definition files: " + sb);
 				}
 
@@ -169,13 +171,13 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					newDoneList.add(fileName);
 					File directory = modelFile == null ? null : modelFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
-					parser.setDoneDefFiles(newDoneList);
+					parser.getDefinitionFileIncludeStack().addAll(definitionFileIncludeStack);
+					parser.getDefinitionFileIncludeStack().add(fileName);
 					parser.setDefinitions(new Definitions(file));
 					parser.parseMachine(content, file);
 					definitions = parser.getDefinitions();
@@ -186,9 +188,9 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(fileNameToken, "Definition file cannot be read: " + e, e);
+				throw new PreParseException(filenameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
-				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, fileNameToken)));
+				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, filenameString)));
 			}
 		}
 	}

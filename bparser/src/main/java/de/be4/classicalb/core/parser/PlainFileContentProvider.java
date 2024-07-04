@@ -12,10 +12,8 @@ public class PlainFileContentProvider implements IFileContentProvider {
 
 	@Override
 	public String getFileContent(File directory, String filename) throws IOException {
-		// TODO caching could help for speed up if files are used more than
-		// once
-		final File file;
-		file = this.getFile(directory, filename);
+		// TODO: caching could help for speed up if files are used more than once
+		File file = this.getFile(directory, filename);
 		return Utils.readFile(file);
 	}
 

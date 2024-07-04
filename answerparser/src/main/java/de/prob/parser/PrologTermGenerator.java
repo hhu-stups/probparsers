@@ -26,8 +26,8 @@ public final class PrologTermGenerator {
 		} else if (topnode instanceof AInterruptedResult) {
 			term = null;
 		} else if (topnode instanceof AExceptionResult) {
-			String message = "ProB raised an exception: " + ((AExceptionResult) topnode).getString().getText();
-			throw new ResultParserException(message);
+			term = toPrologTerm(((AExceptionResult) topnode).getTerm());
+			throw new ResultParserException("ProB raised an exception: " + term);
 		} else if (topnode instanceof AProgressResult) {
 			term = toPrologTerm(((AProgressResult) topnode).getTerm());
 		} else if (topnode instanceof ACallBackResult) {
@@ -66,6 +66,8 @@ public final class PrologTermGenerator {
 			} else {
 				term = new CompoundPrologTerm(text);
 			}
+		} else if (node instanceof AStringTerm) {
+			throw new ResultParserException("Double-quoted strings are currently not supported by answerparser");
 		} else if (node instanceof AListTerm) {
 			List<PrologTerm> args = extractArgs(((AListTerm) node).getParams());
 			term = ListPrologTerm.fromCollection(args);

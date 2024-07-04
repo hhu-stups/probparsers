@@ -90,7 +90,7 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  init, normal, exception;
+  init, normal;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -105,7 +105,7 @@ Tokens
   {init->normal} interrupted = 'interrupted';
   {init->normal} progress = 'progress';
   {init->normal} call_back = 'call_back';
-  {init->exception} exception = 'exception';
+  {init->normal} exception = 'exception';
 
   // P R O L O G - S T U F F
   {normal} comma = ',';
@@ -116,11 +116,9 @@ Tokens
 
   {normal} integer = sign? ('0b' bin+ | '0o' octal+ | '0x' hex+ | '0' quote quoted_atom_item | digit+);
   {normal} float = sign? ((digit+ '.' digit+) | (digit+ ('.' digit+)? ['E' + 'e'] sign? digit+));
-  {normal} name =  solo_char | '{}' | '[]' | word | symbol | string | quoted_atom;
+  {normal} name = solo_char | '{}' | '[]' | word | symbol | quoted_atom;
+  {normal} string = string;
   {normal} variable = '_' alpha* | capital_letter alpha*;
-
-  // E X C E P T I O N S
-  {exception} string = any_char*;
 
 /*******************************************************************
  * Ignored Tokens                                                  *
@@ -132,13 +130,22 @@ Ignored Tokens
  * Productions                                                     *
  *******************************************************************/
 Productions
-  result = {no} no
-        | {yes} yes l_par term r_par
-        | {interrupted} interrupted
-        | {exception} exception string
-        | {progress} progress l_par term r_par
-        | {call_back} call_back l_par term r_par;
-  term = {number} number | {variable} variable | {atom} name | {list} l_sq params r_sq | {compound} [functor]:name l_par params r_par;
+  result =
+    {no} no |
+    {yes} yes l_par term r_par |
+    {interrupted} interrupted |
+    {exception} exception l_par term r_par |
+    {progress} progress l_par term r_par |
+    {call_back} call_back l_par term r_par;
+
+  term =
+    {number} number |
+    {variable} variable |
+    {atom} name |
+    {string} string |
+    {list} l_sq params r_sq |
+    {compound} [functor]:name l_par params r_par;
+
   number = {float} float | {integer} integer;
   params = term more_params;
   more_params = {empty} | comma term more_params;

@@ -173,7 +173,9 @@ public class EventBLexer extends Lexer {
 			try {
 				endStringToken();
 			} catch (LexerException e) {
-				throw new EventBLexerException(token, e.getMessage());
+				EventBLexerException e2 = new EventBLexerException(token, e.getMessage());
+				e2.initCause(e);
+				throw e2;
 			}
 		}
 	}
@@ -192,8 +194,9 @@ public class EventBLexer extends Lexer {
 			// create text for string token
 			string.setText(createString());
 		} catch (final IOException e) {
-			throw new LexerException("IOException occured: "
-					+ e.getLocalizedMessage());
+			LexerException e2 = new LexerException("IOException occured: " + e.getLocalizedMessage());
+			e2.initCause(e);
+			throw e2;
 		}
 
 		token = string;

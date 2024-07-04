@@ -38,7 +38,7 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	private boolean lazyParenthesis = false;
 
 	public PrologTermOutput(Writer out, boolean useIndentation) {
-		this.out = out;
+		this.out = Objects.requireNonNull(out, "out");
 		this.useIndentation = useIndentation;
 	}
 

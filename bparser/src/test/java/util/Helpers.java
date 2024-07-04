@@ -119,7 +119,6 @@ public class Helpers {
 		start.apply(prolog);
 		pout.closeTerm();
 		pout.fullstop();
-		pout.flush();
 	}
 
 	/**

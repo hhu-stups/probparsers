@@ -3,28 +3,7 @@ package de.be4.classicalb.core.parser.grammars;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TKwAttributeIdentifier;
-import de.be4.classicalb.core.parser.node.TKwBody;
-import de.be4.classicalb.core.parser.node.TKwComputation;
-import de.be4.classicalb.core.parser.node.TKwCounterexample;
-import de.be4.classicalb.core.parser.node.TKwDefine;
-import de.be4.classicalb.core.parser.node.TKwDummyValue;
-import de.be4.classicalb.core.parser.node.TKwExpect;
-import de.be4.classicalb.core.parser.node.TKwExpressionOperator;
-import de.be4.classicalb.core.parser.node.TKwFor;
-import de.be4.classicalb.core.parser.node.TKwFunction;
-import de.be4.classicalb.core.parser.node.TKwPredicateAttribute;
-import de.be4.classicalb.core.parser.node.TKwPredicateOperator;
-import de.be4.classicalb.core.parser.node.TKwReferences;
-import de.be4.classicalb.core.parser.node.TKwRule;
-import de.be4.classicalb.core.parser.node.TKwRuleErrorType;
-import de.be4.classicalb.core.parser.node.TKwRuleFail;
-import de.be4.classicalb.core.parser.node.TKwRuleForAll;
-import de.be4.classicalb.core.parser.node.TKwType;
-import de.be4.classicalb.core.parser.node.TKwValue;
-import de.be4.classicalb.core.parser.node.TMachine;
-import de.be4.classicalb.core.parser.node.Token;
+import de.be4.classicalb.core.parser.node.*;
 
 public class RulesGrammar implements IGrammar {
 
@@ -70,6 +49,7 @@ public class RulesGrammar implements IGrammar {
 	static {
 		add(TKwRule.class);
 		add(TKwExpect.class);
+		add(TKwOnSuccess.class);
 		add(TKwCounterexample.class);
 		add(TKwRuleForAll.class);
 		add(TKwFor.class);

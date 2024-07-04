@@ -63,14 +63,7 @@ public class RecursiveMachineLoader {
 					new BException(null, new IOException("Directory does not exist: " + directory)));
 		}
 
-		// In the compact position format, node IDs are not used,
-		// so generate them only if the old non-compact format is requested.
-		if (parsingBehaviour.isCompactPrologPositions()) {
-			this.nodeIds = new NodeFileNumbers();
-		} else {
-			this.nodeIds = new NodeIdAssignment();
-		}
-
+		this.nodeIds = new NodeFileNumbers();
 		this.contentProvider = contentProvider;
 	}
 
@@ -169,22 +162,31 @@ public class RecursiveMachineLoader {
 	}
 
 	public void printAsProlog(final IPrologTermOutput pout) {
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(getNodeIdMapping());
-		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(), parsingBehaviour.isCompactPrologPositions());
-		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		this.printAsPrologWithFullstops(pout, true);
+	}
 
+	/**
+	 * Same as {@link #printAsProlog(IPrologTermOutput)}, but does not print fullstops.
+	 * Can be used to directly print the machines into an existing {@link IPrologTermOutput}.
+	 */
+	public void printAsPrologDirect(final IPrologTermOutput pout) {
+		this.printAsPrologWithFullstops(pout, false);
+	}
+
+	private void printAsPrologWithFullstops(final IPrologTermOutput pout, final boolean withFullstops) {
 		// parser version
 		pout.openTerm("parser_version");
 		pout.printAtom(BParser.getGitSha());
 		pout.closeTerm();
-		pout.fullstop();
+		if (withFullstops) {
+			pout.fullstop();
+		}
 
-		// machine
+		// machine metadata
 		pout.openTerm("classical_b");
-		pout.printAtom(main);
+		pout.printAtom(this.getMainMachineName());
 		pout.openList();
-
-		for (final File file : machineFilesLoaded) {
+		for (final File file : this.getMachineFilesLoaded()) {
 			try {
 				pout.printAtom(file.getCanonicalPath());
 			} catch (IOException e) {
@@ -193,15 +195,26 @@ public class RecursiveMachineLoader {
 		}
 		pout.closeList();
 		pout.closeTerm();
-		pout.fullstop();
-		for (final Map.Entry<String, Start> entry : getParsedMachines().entrySet()) {
-			pout.openTerm("machine");
-			entry.getValue().apply(prolog);
-			pout.closeTerm();
+		if (withFullstops) {
 			pout.fullstop();
 		}
 
-		pout.flush();
+		// machines
+		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(this.getNodeIdMapping());
+		pprinter.setPrintSourcePositions(this.parsingBehaviour.isAddLineNumbers(), this.parsingBehaviour.isCompactPrologPositions());
+		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		for (final Map.Entry<String, Start> entry : this.getParsedMachines().entrySet()) {
+			pout.openTerm("machine");
+			entry.getValue().apply(prolog);
+			pout.closeTerm();
+			if (withFullstops) {
+				pout.fullstop();
+			}
+		}
+
+		if (!withFullstops) {
+			pout.flush();
+		}
 	}
 
 	/**

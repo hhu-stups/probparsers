@@ -8,20 +8,13 @@ import java.util.List;
 
 import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.analysis.prolog.PackageName;
+import de.be4.classicalb.core.parser.analysis.prolog.ReferenceType;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.AFileMachineReference;
-import de.be4.classicalb.core.parser.node.AImportPackage;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AMachineReference;
-import de.be4.classicalb.core.parser.node.APackageParseUnit;
-import de.be4.classicalb.core.parser.node.AReferencesMachineClause;
-import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PImportPackage;
-import de.be4.classicalb.core.parser.node.PMachineReference;
-import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
+import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class RulesMachineReferencesFinder extends MachineClauseAdapter {
@@ -32,7 +25,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 	private String machineName;
 	private PackageName packageName;
 	private File rootDirectory;
-	private final List<RulesMachineReference> references;
+	private final List<MachineReference> references;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
 
 	public RulesMachineReferencesFinder(File machineFile, Node node) {
@@ -61,7 +54,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		return this.rootDirectory;
 	}
 
-	public List<RulesMachineReference> getReferences() {
+	public List<MachineReference> getReferences() {
 		return Collections.unmodifiableList(this.references);
 	}
 
@@ -172,7 +165,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		}
 		try {
 			final File file = lookupFile(mainFile.getParentFile(), name, mchRef);
-			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name, mchRef);
+			MachineReference rulesMachineReference = new MachineReference(ReferenceType.REFERENCES, name, null, mchRef, file.getAbsolutePath());
 			references.add(rulesMachineReference);
 		} catch (CheckException e) {
 			errorList.add(e);
@@ -201,8 +194,7 @@ public class RulesMachineReferencesFinder extends MachineClauseAdapter {
 		} else if (file == null) {
 			errorList.add(new CheckException(String.format("File '%s' does not exist.", filePath), fileNode.getFile()));
 		} else {
-			RulesMachineReference rulesMachineReference = new RulesMachineReference(file, name,
-					fileNode.getReference());
+			MachineReference rulesMachineReference = new MachineReference(ReferenceType.REFERENCES, name, null, fileNode.getReference(), file.getAbsolutePath());
 			references.add(rulesMachineReference);
 		}
 	}

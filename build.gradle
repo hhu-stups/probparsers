@@ -10,7 +10,7 @@ buildscript {
 		// So as a workaround,
 		// enable the GraalVM plugin only when explicitly requested (see below).
 		if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
-			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.9.28")
+			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.10.1")
 		}
 	}
 }
@@ -28,14 +28,14 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.13.2'
+project.version = '2.13.3'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 ext {
-	sableCCVersion = '3.7.0'
+	sableCCVersion = '3.8.0'
 	sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
 	sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
@@ -71,8 +71,9 @@ subprojects {
 	}
 
 	dependencies {
-		testImplementation platform('org.junit:junit-bom:5.10.1')
+		testImplementation platform('org.junit:junit-bom:5.10.2')
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
+		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
 		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
 		testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
 		testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'

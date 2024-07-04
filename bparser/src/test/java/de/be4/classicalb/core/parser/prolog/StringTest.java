@@ -88,6 +88,27 @@ public class StringTest {
 	}
 
 	@Test
+	public void testBackslashAtEnd1() throws BCompoundException {
+		final String testMachine = "MACHINE Test PROPERTIES '''\\'''' = \"'\" END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("[properties(none,equal(none,string(none,'\\''),string(none,'\\'')))]"));
+	}
+
+	@Test
+	public void testBackslashAtEnd2() throws BCompoundException {
+		final String testMachine = "MACHINE Test PROPERTIES '''\\\\''' = \"\\\\\" END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("equal(none,string(none,'\\\\'),string(none,'\\\\'))"));
+	}
+
+	@Test
+	public void testBackslashAtEnd3() throws BCompoundException {
+		final String testMachine = "MACHINE Test PROPERTIES '''\\\\\\'''' = \"\\\\'\" END";
+		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		assertTrue(result.contains("[properties(none,equal(none,string(none,'\\\\\\''),string(none,'\\\\\\'')))]"));
+	}
+
+	@Test
 	public void testMultiLineString() throws BCompoundException {
 		final String testMachine = "MACHINE Test PROPERTIES k = ''' adfa \"a\" ''' END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);

@@ -80,6 +80,11 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 		return true;
 	}
 
+	@Override
+	public boolean isInteger() {
+		return true;
+	}
+
 	public abstract BigInteger getValue();
 
 	/**

@@ -18,14 +18,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
-import de.be4.classicalb.core.parser.FastReadWriter;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.MockedDefinitions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
@@ -33,7 +31,6 @@ import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
 import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeIdAssignment;
 import de.be4.classicalb.core.parser.analysis.prolog.PrologExceptionPrinter;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -48,9 +45,9 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.parserbase.UnparsedParserBase;
+import de.prob.prolog.output.FastTermOutput;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
-import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
 public class CliBParser {
@@ -341,7 +338,6 @@ public class CliBParser {
 					getOptionOut.printAtom("unsupported");
 				}
 				getOptionOut.fullstop();
-				getOptionOut.flush();
 				break;
 			case setoption:
 				// Generic command for changing parser options.
@@ -360,7 +356,6 @@ public class CliBParser {
 					setOptionOut.printAtom("unsupported");
 				}
 				setOptionOut.fullstop();
-				setOptionOut.flush();
 				break;
 			// new commands to change parsingBehaviour, analog to command-line switches
 			case fastprolog:
@@ -478,7 +473,6 @@ public class CliBParser {
 		}
 
 		pout.fullstop();
-		pout.flush();
 	}
 
 	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
@@ -510,22 +504,9 @@ public class CliBParser {
 					throw new AssertionError("Unhandled parsing command: " + command);
 			}
 
-			// In the compact position format, node IDs are not used,
-			// so generate them only if the old non-compact format is requested.
-			final INodeIds nodeIds;
-			if (behaviour.isCompactPrologPositions()) {
-				nodeIds = new NodeFileNumbers();
-				if (behaviour.getDefaultFileNumber() != -1) {
-					nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
-				}
-			} else {
-				final NodeIdAssignment na = new NodeIdAssignment();
-				if (behaviour.getDefaultFileNumber() == -1) {
-					start.apply(na);
-				} else {
-					na.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
-				}
-				nodeIds = na;
+			INodeIds nodeIds = new NodeFileNumbers();
+			if (behaviour.getDefaultFileNumber() != -1) {
+				nodeIds.assignIdentifiers(behaviour.getDefaultFileNumber(), start);
 			}
 
 			ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
@@ -538,7 +519,6 @@ public class CliBParser {
 		}
 
 		pout.fullstop();
-		pout.flush();
 	}
 
 	private static void print(String output) {
@@ -608,15 +588,13 @@ public class CliBParser {
 		}
 	}
 
-	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
+	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
 		final long startOutput = System.currentTimeMillis();
 		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
 			printASTasFastProlog(out, printer);
 		} else { // -prolog flag in CliBParser
-			final PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-			final IPrologTermOutput pout = new PrologTermOutput(writer, false);
-			printer.accept(pout);
-			pout.flush();
+			IPrologTermOutput pto = new PrologTermOutput(new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)), false);
+			printer.accept(pto);
 		}
 		final long endOutput = System.currentTimeMillis();
 
@@ -679,22 +657,10 @@ public class CliBParser {
 	fast_read(S,ParserVersionTerm),
 	fast_read(S,FilesTerm), ... until end_of_file
 	close(S)
-	
-	TODO: catch StackOverflowError here and then empty/delete the file (to avoid partial terms)
 	*/
-	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) throws IOException {
-		StructuredPrologOutput structuredPrologOutput = new StructuredPrologOutput();
-		printer.accept(structuredPrologOutput);
-		Collection<PrologTerm> sentences = structuredPrologOutput.getSentences();
-
-		final BufferedOutputStream bufOut = new BufferedOutputStream(out);
-		FastReadWriter fwriter = new FastReadWriter(bufOut);
-		
-		for (PrologTerm term : sentences) {
-			fwriter.fastwrite(term);
-		}
-		
-		bufOut.flush();
+	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) {
+		IPrologTermOutput pto = new FastTermOutput(new BufferedOutputStream(out));
+		printer.accept(pto);
 	}
 
 	private static void parseRulesProject(final File mainFile, final ParsingBehaviour parsingBehaviour, final OutputStream out) throws IOException, BCompoundException {

@@ -5,7 +5,7 @@ stages:
   - trigger
 
 variables:
-  GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
+  GRADLE_ARGS: --no-daemon --parallel --stacktrace --warning-mode=all
   DEBIAN_FRONTEND: noninteractive
 
 cache:
@@ -58,20 +58,16 @@ tests:macos:
 tests:windows64:
   extends: .tests
   before_script: []
-  script: gradlew.bat %GRADLE_ARGS% check jacocoTestReport
+  script: cmd /c ".\gradlew.bat %GRADLE_ARGS% check jacocoTestReport"
   tags:
     - windows
 
 publish:
   stage: deploy
-  before_script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-    - apt-get update
-    - apt-get install -y git
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in secring.gpg.enc       -out secring.gpg 
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in pubring.gpg.enc       -out pubring.gpg
-    - openssl aes-256-cbc -pass "env:ENCRYPTION_PASSWORD" -d -a -md md5 -in gradle.properties.enc -out gradle.properties
   script:
+    - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in gradle.properties.enc -out gradle.properties
+    - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in pubring.gpg.enc -out pubring.gpg
+    - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in secring.gpg.enc -out secring.gpg
     - ./gradlew ${GRADLE_ARGS} publish
   only: 
     - master 
@@ -79,13 +75,9 @@ publish:
 
 prob_snapshot_parser_tests:
   stage: trigger
-  image: alpine:3.9
-  before_script:
-    - apk add --update curl
-  dependencies: []
   variables:
-    GIT_STRATEGY: none
-  script:
-    - curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=develop" -F "variables[BUILD_TYPE]=snapshot-parser-build" https://gitlab.cs.uni-duesseldorf.de/api/v4/projects/897/trigger/pipeline
+    BUILD_TYPE: snapshot-parser-build
+  trigger:
+    project: stups/prob/prob_prolog
   only:
     - develop

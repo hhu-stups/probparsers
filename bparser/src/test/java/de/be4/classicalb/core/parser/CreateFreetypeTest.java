@@ -98,8 +98,6 @@ public class CreateFreetypeTest {
 			test.printProlog(pto);
 			pto.closeTerm();
 			pto.fullstop();
-
-			pto.flush();
 		}
 	}
 

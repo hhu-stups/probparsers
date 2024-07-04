@@ -1,90 +1,79 @@
 package de.prob.parser;
 
-import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.core.sablecc.node.AYesResult;
+import de.prob.core.sablecc.node.Start;
 import de.prob.prolog.output.PrologTermStringOutput;
-import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
+
 import org.junit.Test;
 
-import java.util.function.Consumer;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RoundtripTest {
-
-	private static void testRoundtrip(PrologTerm expected) {
+	private static String roundtrip(String source) {
+		Start ast = ProBResultParser.parse(source);
+		PrologTerm parsedTerm = PrologTermGenerator.toPrologTerm(ast);
+		assertTrue(ast.getPResult() instanceof AYesResult);
 		PrologTermStringOutput pto = new PrologTermStringOutput();
-		pto.term("yes", t1 -> t1.printTerm(expected));
-		PrologTerm actual = PrologTermGenerator.toPrologTerm(ProBResultParser.parse(pto.toString()));
-		assertEquals(expected, actual);
+		pto.term("yes", t1 -> t1.printTerm(parsedTerm));
+		return pto.toString();
 	}
 
-	private static void testRoundtrip(Consumer<? super IPrologTermOutput> termGenerator) {
-		StructuredPrologOutput spto = new StructuredPrologOutput();
-		termGenerator.accept(spto);
-		testRoundtrip(spto.getLastTerm());
+	private static void testRoundtrip(String source) {
+		assertEquals(source, roundtrip(source));
 	}
 
 	@Test
 	public void testAtom() {
-		testRoundtrip(pto -> pto.printAtom("a"));
+		testRoundtrip("yes(a)");
 	}
 
 	@Test
+	public void testAtomUppercase() {
+		testRoundtrip("yes('Foo')");
+	}
+
+	@Test(expected = ResultParserException.class)
 	public void testString() {
-		testRoundtrip(pto -> pto.printString("foo"));
+		testRoundtrip("yes(\"foo\")");
 	}
 
 	@Test
 	public void testVariable() {
-		testRoundtrip(pto -> pto.printVariable("X"));
+		testRoundtrip("yes(X)");
 	}
 
 	@Test
 	public void testInt() {
-		testRoundtrip(pto -> pto.printNumber(42));
+		testRoundtrip("yes(42)");
 	}
 
 	@Test
 	public void testEmptyList() {
-		testRoundtrip(IPrologTermOutput::emptyList);
+		testRoundtrip("yes([])");
 	}
 
 	@Test
 	public void testList() {
-		testRoundtrip(pto -> pto.list(l1 -> {
-			l1.printAtom("a");
-			l1.printString("foo");
-			l1.printVariable("X");
-			l1.printNumber(42);
-			l1.emptyList();
-			l1.list(l2 -> {
-				l2.printAtom("a");
-				l2.printString("foo");
-				l2.printVariable("X");
-				l2.printNumber(42);
-				l2.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));
-				l2.emptyList();
-			});
-		}));
+		testRoundtrip("yes([a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]])");
+	}
+
+	@Test
+	public void testDotList1() {
+		assertEquals("yes([a])", roundtrip("yes('.'(a,[]))"));
+	}
+
+	@Test
+	public void testDotListComplicated() {
+		assertEquals(
+			"yes([a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]])",
+			roundtrip("yes('.'(a,'.'('Foo','.'(X,'.'(42,'.'([],'.'('.'(a,'.'('Foo','.'(X,'.'(42,'.'(g(h(i)),'.'([],[])))))),[])))))))")
+		);
 	}
 
 	@Test
 	public void testTerm() {
-		testRoundtrip(pto -> pto.term("f", t1 -> {
-			t1.printAtom("a");
-			t1.printString("foo");
-			t1.printVariable("X");
-			t1.printNumber(42);
-			t1.emptyList();
-			t1.list(l1 -> {
-				l1.printAtom("a");
-				l1.printString("foo");
-				l1.printVariable("X");
-				l1.printNumber(42);
-				l1.term("g", t2 -> t2.term("h", t3 -> t3.printAtom("i")));
-				l1.emptyList();
-			});
-		}));
+		testRoundtrip("yes(f(a,'Foo',X,42,[],[a,'Foo',X,42,g(h(i)),[]]))");
 	}
 }

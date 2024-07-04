@@ -12,22 +12,24 @@ import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
+import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
  * <p>
  * In several constructs the BParser only checks if a list of identifiers is a
  * valid list of expressions instead of checking if each entry is an identifier
- * expression. Thus it excepts to many expressions in these cases.
+ * expression. Thus it accepts too many expressions in these cases.
  * </p>
  * <p>
  * This class finds those constructs and checks if the identifier lists only
  * contain {@link AIdentifierExpression} nodes.
  * </p>
+ * @see de.be4.classicalb.core.parser.analysis.transforming.CoupleToIdentifierTransformation
  */
-public class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
+public final class IdentListCheck extends OptimizedTraversingAdapter implements SemanticCheck {
 
 	private final Set<Node> nonIdentifiers = new HashSet<>();
 	private final List<CheckException> exceptions = new ArrayList<>();
@@ -40,8 +42,7 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 
 		if (!nonIdentifiers.isEmpty()) {
 			// at least one error was found
-			exceptions.add(
-					new CheckException("Identifier expected", new ArrayList<>(nonIdentifiers)));
+			exceptions.add(new CheckException("Identifier expected", new ArrayList<>(nonIdentifiers)));
 		}
 	}
 
@@ -51,7 +52,17 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	}
 
 	@Override
+	public void inASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
+		checkForNonIdentifiers(node.getIdentifiers());
+	}
+
+	@Override
 	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
+		checkForNonIdentifiers(node.getIdentifiers());
+	}
+
+	@Override
+	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
 		checkForNonIdentifiers(node.getIdentifiers());
 	}
 
@@ -72,8 +83,8 @@ public class IdentListCheck extends OptimizedTraversingAdapter implements Semant
 	 * @param identifiers
 	 *            {@link List} to check
 	 */
-	private void checkForNonIdentifiers(final List<PExpression> identifiers) {
-		for (final PExpression expression : identifiers) {
+	private void checkForNonIdentifiers(final List<? extends Node> identifiers) {
+		for (Node expression : identifiers) {
 			if (!(expression instanceof AIdentifierExpression)) {
 				nonIdentifiers.add(expression);
 			}
