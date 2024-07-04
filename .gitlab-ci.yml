@@ -5,8 +5,7 @@ stages:
   - trigger
 
 variables:
-  GRADLE_ARGS_NO_PARALLEL: --no-daemon --stacktrace --warning-mode=all
-  GRADLE_ARGS: $GRADLE_ARGS --parallel
+  GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
   DEBIAN_FRONTEND: noninteractive
 
 cache:
@@ -22,7 +21,7 @@ before_script:
 
 .tests:
   stage: test
-  script: ./gradlew ${GRADLE_ARGS} check jacocoTestReport
+  script: ./gradlew ${GRADLE_ARGS} --parallel check jacocoTestReport
   artifacts:
     paths:
       - "*/build/jacoco"
@@ -59,7 +58,7 @@ tests:macos:
 tests:windows64:
   extends: .tests
   before_script: []
-  script: cmd /c ".\gradlew.bat %GRADLE_ARGS% check jacocoTestReport"
+  script: cmd /c ".\gradlew.bat %GRADLE_ARGS% --parallel check jacocoTestReport"
   tags:
     - windows
 
@@ -69,12 +68,12 @@ publish:
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in gradle.properties.enc -out gradle.properties
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in pubring.gpg.enc -out pubring.gpg
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in secring.gpg.enc -out secring.gpg
-    - ./gradlew ${GRADLE_ARGS} classes
+    - ./gradlew ${GRADLE_ARGS} --parallel classes
     # Uploading to Maven Central seems to be unreliable with parallel builds
     # (multiple staging repositories are created even though Gradle was only run once,
     # and none of these staging repositories contain the complete set of files),
     # so run the publish task in non-parallel mode.
-    - ./gradlew ${GRADLE_ARGS_NO_PARALLEL} publish
+    - ./gradlew ${GRADLE_ARGS} publish
   only: 
     - master 
     - develop
