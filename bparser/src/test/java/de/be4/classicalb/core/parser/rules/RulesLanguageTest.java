@@ -128,6 +128,14 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testDefineEventBComprehensionSet() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION computeM1 BODY DEFINE foo TYPE POW(INTEGER) VALUE {x•x:1..3|x} END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Missing DEFINE variable",
+			result.contains("variables(none,[identifier(none,computeM1),identifier(none,foo)])"));
+	}
+
+	@Test
 	public void testRuleOnSuccess() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FORALL x WHERE x : 1..100 EXPECT x : 1..10 ON_SUCCESS \"success\" COUNTEREXAMPLE \"fail\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);

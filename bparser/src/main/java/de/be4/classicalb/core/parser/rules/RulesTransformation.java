@@ -942,14 +942,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 			subList.add(assign);
 		}
 		if (onSuccessMessage != null) {
-			final String STRING_PARAM = "$String";
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
 			for (PExpression id : identifiers) {
 				list.add(id.clone());
 				list2.add(id.clone());
 			}
-
 			AMemberPredicate member = new AMemberPredicate(
 				list.size() > 1 ? new ACoupleExpression(list) : list.get(0),
 				new AMinusOrSetSubtractExpression(
@@ -957,40 +955,29 @@ public class RulesTransformation extends DepthFirstAdapter {
 					createIdentifier(RESULT_TUPLE)
 				)
 			);
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), onSuccessMessage);
-			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression(
-				createExpressionList(createIdentifier(STRING_PARAM)),
-				new AExistsPredicate(list2, new AConjunctPredicate(member, equal))
-			);
 
-			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(ON_SUCCESS_STRINGS)));
-			// don't use FORCE(.); successful applications can be infinite many!
-			assign.setRhsExpressions(createExpressionList(stringSet));
-			subList.add(assign);
+			// don't use FORCE(.); successful applications can be infinitely many!
+			subList.add(new AAssignSubstitution(
+				createExpressionList(createIdentifier(ON_SUCCESS_STRINGS)),
+				createExpressionList(new AEventBComprehensionSetExpression(list2, onSuccessMessage, member))
+			));
 		}
 		{
-			final String STRING_PARAM = "$String";
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
 			for (PExpression id : identifiers) {
 				list.add(id.clone());
 				list2.add(id.clone());
 			}
-			PExpression couple = list2.size() > 1 ? new ACoupleExpression(list2) : list2.get(0);
+			PExpression couple = list.size() > 1 ? new ACoupleExpression(list) : list.get(0);
 			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
-			AEqualPredicate equal = new AEqualPredicate(createIdentifier(STRING_PARAM), counterExampleMessage);
 
-			final AComprehensionSetExpression stringSet = new AComprehensionSetExpression(
-				createExpressionList(createIdentifier(STRING_PARAM)),
-				new AExistsPredicate(list, new AConjunctPredicate(member, equal))
-			);
-			AAssignSubstitution assign = new AAssignSubstitution();
-			assign.setLhsExpression(createExpressionList(createIdentifier(COUNTEREXAMPLE_STRINGS)));
 			// don't use FORCE here to allow infinitely many counter examples
 			// enumeration warnings are then handled by RuleResult in prob_java
-			assign.setRhsExpressions(createExpressionList(stringSet));
-			subList.add(assign);
+			subList.add(new AAssignSubstitution(
+				createExpressionList(createIdentifier(COUNTEREXAMPLE_STRINGS)),
+				createExpressionList(new AEventBComprehensionSetExpression(list2, counterExampleMessage, member))
+			));
 		}
 
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
