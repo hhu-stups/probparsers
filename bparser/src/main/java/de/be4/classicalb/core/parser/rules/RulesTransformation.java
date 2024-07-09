@@ -2,6 +2,8 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 import de.be4.classicalb.core.parser.BParser;
@@ -255,8 +257,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			operation.setOpName(operationNameList);
 		}
 
-		AEqualPredicate grd1 = new AEqualPredicate(nameIdentifier.clone(),
-				new AStringExpression(new TStringLiteral(COMPUTATION_NOT_EXECUTED)));
+		AEqualPredicate grd1 = new AEqualPredicate(nameIdentifier.clone(), createStringExpression(COMPUTATION_NOT_EXECUTED));
 		ASelectSubstitution select = new ASelectSubstitution();
 		{
 			// guard
@@ -286,11 +287,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		 * create predicate in INVARIANT
 		 * Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED","COMPUTATION_DISABLED" }
 		 */
-		final List<PExpression> list = new ArrayList<>();
-		list.add(createStringExpression(COMPUTATION_EXECUTED));
-		list.add(createStringExpression(COMPUTATION_NOT_EXECUTED));
-		list.add(createStringExpression(COMPUTATION_DISABLED));
-		final ASetExtensionExpression set = new ASetExtensionExpression(list);
+		final ASetExtensionExpression set = new ASetExtensionExpression(
+			Stream.of(COMPUTATION_EXECUTED, COMPUTATION_NOT_EXECUTED, COMPUTATION_DISABLED)
+				.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
 		final AMemberPredicate member = new AMemberPredicate(nameIdentifier.clone(), set);
 
 		invariantList.add(member);
@@ -439,19 +438,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final AAssignSubstitution sfAssign = createAssignNode(createIdentifier(sfName, node.getRuleName().clone()),
 			new AEmptySetExpression());
 		initialisationList.add(sfAssign);
-
-	}
-
-	private AAssignSubstitution createAssignNode(PExpression id, PExpression value) {
-		ArrayList<PExpression> nameList = new ArrayList<>();
-		nameList.add(id);
-		ArrayList<PExpression> exprList = new ArrayList<>();
-		exprList.add(value);
-		return new AAssignSubstitution(nameList, exprList);
-	}
-
-	private ADefinitionExpression callExternalFunction(String name, PExpression... expressions) {
-		return new ADefinitionExpression(new TIdentifierLiteral(name), createExpressionList(expressions));
 	}
 
 	@Override
@@ -459,14 +445,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String operatorName = node.getName().getText();
 		final LinkedList<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
-		case RulesGrammar.STRING_FORMAT:
-			translateStringFormatOperator(node, parameters);
-			return;
-		case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
-			translateGetRuleCounterExamplesOperator(node);
-			return;
-		default:
-			throw new AssertionError("Unsupported operator " + operatorName);
+			case RulesGrammar.STRING_FORMAT:
+				translateStringFormatOperator(node, parameters);
+				return;
+			case RulesGrammar.GET_RULE_COUNTEREXAMPLES:
+				translateGetRuleCounterExamplesOperator(node);
+				return;
+			default:
+				throw new AssertionError("Unsupported operator " + operatorName);
 		}
 	}
 
@@ -496,24 +482,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
 		addFormatToStringDefinition(iDefinitions);
 		addToStringDefinition(iDefinitions);
-		final TIdentifierLiteral format = new TIdentifierLiteral(FORMAT_TO_STRING);
-		format.setStartPos(node.getName().getStartPos());
-		format.setEndPos(node.getName().getEndPos());
-		PExpression stringValue = parameters.get(0);
-		final List<PExpression> list = new ArrayList<>();
-		list.add(stringValue);
 		final List<PExpression> seqList = new ArrayList<>();
 		for (int i = 1; i < parameters.size(); i++) {
 			PExpression param = parameters.get(i);
-			ADefinitionExpression toStringCall = callExternalFunction(TO_STRING, param);
-			toStringCall.setStartPos(param.getStartPos());
-			toStringCall.setEndPos(param.getEndPos());
-			seqList.add(toStringCall);
+			seqList.add(createPositionedNode(callExternalFunction(TO_STRING, param), param));
 		}
-		final ASequenceExtensionExpression seq = new ASequenceExtensionExpression(seqList);
-		list.add(seq);
-		final ADefinitionExpression def = new ADefinitionExpression(format, list);
-		node.replaceBy(def);
+		node.replaceBy(createPositionedNode(
+			callExternalFunction(FORMAT_TO_STRING, parameters.get(0), new ASequenceExtensionExpression(seqList)),
+			node));
 	}
 
 	private AAssignSubstitution createRuleSuccessAssignment(final TIdentifierLiteral ruleLiteral) {
@@ -557,8 +533,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PPredicate compExecuted = new AEqualPredicate(createAIdentifierExpression(computationIdentifierLiteral),
 				createStringExpression(COMPUTATION_EXECUTED));
 		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
-		final AImplicationPredicate impl = new AImplicationPredicate(compExecuted, member);
-		invariantList.add(impl);
+		invariantList.add(new AImplicationPredicate(compExecuted, member));
 
 		if (node.getDummyValue() != null) {
 			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), node.getDummyValue()));
@@ -573,13 +548,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = node.getValue();
 		} else {
 			addForceDefinition(iDefinitions);
-			value = callExternalFunction(FORCE, node.getValue());
-			value.setStartPos(node.getValue().getStartPos());
-			value.setEndPos(node.getValue().getEndPos());
+			value = createPositionedNode(callExternalFunction(FORCE, node.getValue()), node.getValue());
 		}
 
-		PSubstitution assign = createAssignNode(createRuleIdentifier(node.getName()), value);
-		node.replaceBy(assign);
+		node.replaceBy(createAssignNode(createRuleIdentifier(node.getName()), value));
 	}
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples, boolean conditionalFail) {
@@ -605,7 +577,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		final AUnionExpression union = new AUnionExpression(createIdentifier(sfName),
 			createPositionedNode(new AMultOrCartExpression(
-					new ASetExtensionExpression(createExpressionList(createAIntegerExpression(ruleBodyCount))),
+					new ASetExtensionExpression(createExpressionList(createIntegerExpression(ruleBodyCount))),
 					setOfSuccessMessages.clone()
 				),
 				setOfSuccessMessages
@@ -629,30 +601,26 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		PSubstitution body = node.getBody();
 		if (null != func.getPostconditionPredicate()) {
-			AAssertionSubstitution assertSub = new AAssertionSubstitution(func.getPostconditionPredicate(),
-					new ASkipSubstitution());
-			body = createSequenceSubstitution(body, assertSub);
+			body = createSequenceSubstitution(body, new AAssertionSubstitution(func.getPostconditionPredicate(),
+				new ASkipSubstitution()));
 		}
 
 		if (!preConditionList.isEmpty()) {
 			body = new APreconditionSubstitution(createConjunction(preConditionList), body);
 		}
-		List<TIdentifierLiteral> nameList = new ArrayList<>();
-		nameList.add(node.getName());
-		AOperation operation = new AOperation(node.getReturnValues(), nameList, new ArrayList<>(node.getParameters()),
-				body);
-		node.replaceBy(operation);
+		node.replaceBy(new AOperation(node.getReturnValues(), Collections.singletonList(node.getName()),
+			new ArrayList<>(node.getParameters()), body));
 	}
 
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,
 			int numberOfErrorTypes) {
-		final ALambdaExpression lambda = new ALambdaExpression();
 		final String LAMBDA_IDENTIFIER = "$x";
-		lambda.setIdentifiers(createExpressionList(createIdentifier(LAMBDA_IDENTIFIER)));
-		lambda.setPredicate(new AMemberPredicate(createIdentifier(LAMBDA_IDENTIFIER),
-				new AIntervalExpression(createAIntegerExpression(1), createAIntegerExpression(numberOfErrorTypes))));
-		lambda.setExpression(new AImageExpression(createIdentifier(name),
-				createSetOfPExpression(createIdentifier(LAMBDA_IDENTIFIER))));
+		final ALambdaExpression lambda = new ALambdaExpression(
+			createExpressionList(createIdentifier(LAMBDA_IDENTIFIER)),
+			new AMemberPredicate(createIdentifier(LAMBDA_IDENTIFIER),
+				new AIntervalExpression(createIntegerExpression(1), createIntegerExpression(numberOfErrorTypes))),
+			new AImageExpression(createIdentifier(name), createSetOfPExpression(createIdentifier(LAMBDA_IDENTIFIER)))
+		);
 		return new AFunctionExpression(lambda, createExpressionList(errorTypeNode));
 	}
 
@@ -671,29 +639,29 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		final RuleOperation rule = (RuleOperation) operation;
 		switch (operatorName) {
-		case RulesGrammar.SUCCEEDED_RULE:
-			replacePredicateOperator(node, arguments, RULE_SUCCESS);
-			return;
-		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
-			replaceSucceededRuleErrorTypeOperator(node, ruleName, rule);
-			return;
-		case RulesGrammar.FAILED_RULE:
-			replacePredicateOperator(node, arguments, RULE_FAIL);
-			return;
-		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
-			replaceFailedRuleAllErrorTypesOperator(node, rule);
-			return;
-		case RulesGrammar.FAILED_RULE_ERROR_TYPE:
-			replaceFailedRuleErrorTypeOperator(node, rule);
-			return;
-		case RulesGrammar.NOT_CHECKED_RULE:
-			replacePredicateOperator(node, arguments, RULE_NOT_CHECKED);
-			return;
-		case RulesGrammar.DISABLED_RULE:
-			replacePredicateOperator(node, arguments, RULE_DISABLED);
-			return;
-		default:
-			throw new AssertionError("should not happen: " + operatorName);
+			case RulesGrammar.SUCCEEDED_RULE:
+				replacePredicateOperator(node, arguments, RULE_SUCCESS);
+				return;
+			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
+				replaceSucceededRuleErrorTypeOperator(node, ruleName, rule);
+				return;
+			case RulesGrammar.FAILED_RULE:
+				replacePredicateOperator(node, arguments, RULE_FAIL);
+				return;
+			case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
+				replaceFailedRuleAllErrorTypesOperator(node, rule);
+				return;
+			case RulesGrammar.FAILED_RULE_ERROR_TYPE:
+				replaceFailedRuleErrorTypeOperator(node, rule);
+				return;
+			case RulesGrammar.NOT_CHECKED_RULE:
+				replacePredicateOperator(node, arguments, RULE_NOT_CHECKED);
+				return;
+			case RulesGrammar.DISABLED_RULE:
+				replacePredicateOperator(node, arguments, RULE_DISABLED);
+				return;
+			default:
+				throw new AssertionError("should not happen: " + operatorName);
 		}
 	}
 
@@ -702,16 +670,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		String name = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1),
 				rule.getNumberOfErrorTypes());
-		AEqualPredicate equal = new AEqualPredicate(funcCall, new AEmptySetExpression());
-		node.replaceBy(equal);
+		node.replaceBy(new AEqualPredicate(funcCall, new AEmptySetExpression()));
 	}
 
 	private void replaceFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final RuleOperation rule) {
 		// dom(rule_cts) = 1..n
 		String name = rule.getOriginalName() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		AEqualPredicate equal = new AEqualPredicate(new ADomainExpression(createIdentifier(name)),
-				new AIntervalExpression(createAIntegerExpression(1),
-						createAIntegerExpression(rule.getNumberOfErrorTypes())));
+				new AIntervalExpression(createIntegerExpression(1),
+						createIntegerExpression(rule.getNumberOfErrorTypes())));
 		node.replaceBy(equal);
 	}
 
@@ -721,26 +688,16 @@ public class RulesTransformation extends DepthFirstAdapter {
 		String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1),
 				rule.getNumberOfErrorTypes());
-		ANotEqualPredicate notEqual = new ANotEqualPredicate(funcCall, new AEmptySetExpression());
-		node.replaceBy(notEqual);
+		node.replaceBy(new ANotEqualPredicate(funcCall, new AEmptySetExpression()));
 	}
 
 	private void replacePredicateOperator(final AOperatorPredicate node, List<PExpression> copy,
 			final String stringValue) {
 		final List<PPredicate> predList = new ArrayList<>();
 		for (PExpression e : copy) {
-			final AEqualPredicate equal = new AEqualPredicate(e,
-					new AStringExpression(new TStringLiteral(stringValue)));
-			equal.setStartPos(e.getStartPos());
-			equal.setEndPos(e.getEndPos());
-			predList.add(equal);
+			predList.add(createPositionedNode(new AEqualPredicate(e, createStringExpression(stringValue)), e));
 		}
-		final PPredicate conjunction = createConjunction(predList);
-		node.replaceBy(conjunction);
-	}
-
-	private AIntegerExpression createAIntegerExpression(int i) {
-		return new AIntegerExpression(new TIntegerLiteral(Integer.toString(i)));
+		node.replaceBy(createConjunction(predList));
 	}
 
 	@Override
@@ -782,9 +739,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final ANotEqualPredicate whileCon = new ANotEqualPredicate(
 				createIdentifier(localSetVariableName, node.getSet()), new AEmptySetExpression());
 		whileSub.setCondition(whileCon);
-		// INVARIANT 1=1
-		AEqualPredicate eq = new AEqualPredicate(createAIntegerExpression(1), createAIntegerExpression(1));
-		whileSub.setInvariant(eq);
+		// INVARIANT btrue
+		whileSub.setInvariant(new ATruthPredicate());
 
 		// VARIANT card(set)
 		whileSub.setVariant(createIdentifier(localLoopCounter));
@@ -835,14 +791,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
 						createIdentifier(localLoopCounter)),
 				createExpressionList(rhs, new AMinusOrSetSubtractExpression(createIdentifier(localLoopCounter),
-						createAIntegerExpression(1))));
+						createIntegerExpression(1))));
 
-		List<PSubstitution> var2List = new ArrayList<>();
-		var2List.add(assignSub);
-		var2List.add(node.getDoSubst());
-		var2List.add(assignSetVariable2);
-		varSub2.setSubstitution(new ASequenceSubstitution(var2List));
-
+		varSub2.setSubstitution(new ASequenceSubstitution(Arrays.asList(assignSub, node.getDoSubst(), assignSetVariable2)));
 		node.replaceBy(varSub);
 	}
 

@@ -3,32 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import java.util.*;
 
 import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.node.ABooleanFalseExpression;
-import de.be4.classicalb.core.parser.node.ABooleanTrueExpression;
-import de.be4.classicalb.core.parser.node.AConjunctPredicate;
-import de.be4.classicalb.core.parser.node.ACoupleExpression;
-import de.be4.classicalb.core.parser.node.AEmptySequenceExpression;
-import de.be4.classicalb.core.parser.node.AEqualPredicate;
-import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.AIntegerExpression;
-import de.be4.classicalb.core.parser.node.AMultOrCartExpression;
-import de.be4.classicalb.core.parser.node.APowSubsetExpression;
-import de.be4.classicalb.core.parser.node.ASeqExpression;
-import de.be4.classicalb.core.parser.node.ASequenceSubstitution;
-import de.be4.classicalb.core.parser.node.ASetExtensionExpression;
-import de.be4.classicalb.core.parser.node.ASkipSubstitution;
-import de.be4.classicalb.core.parser.node.AStringExpression;
-import de.be4.classicalb.core.parser.node.AStringSetExpression;
-import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ATotalFunctionExpression;
-import de.be4.classicalb.core.parser.node.PExpression;
-import de.be4.classicalb.core.parser.node.PPredicate;
-import de.be4.classicalb.core.parser.node.PSubstitution;
-import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TIntegerLiteral;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
@@ -105,6 +80,10 @@ public final class ASTBuilder {
 		return new AStringExpression(new TStringLiteral(string));
 	}
 
+	public static AIntegerExpression createIntegerExpression(int i) {
+		return new AIntegerExpression(new TIntegerLiteral(Integer.toString(i)));
+	}
+
 	public static AIdentifierExpression createRuleIdentifier(TIdentifierLiteral ruleLiteral) {
 		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
 		list.add(ruleLiteral.clone());
@@ -160,12 +139,15 @@ public final class ASTBuilder {
 
 	public static AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
 		TIdentifierLiteral e = old.clone();
-		AIdentifierExpression aIdentifier = createAIdentifierExpression(e);
-		final AEqualPredicate equal = new AEqualPredicate(aIdentifier,
-				new AStringExpression(new TStringLiteral(value)));
-		equal.setStartPos(e.getStartPos());
-		equal.setEndPos(e.getEndPos());
-		return equal;
+		return createPositionedNode(new AEqualPredicate(createAIdentifierExpression(e), createStringExpression(value)), e);
+	}
+
+	public static AAssignSubstitution createAssignNode(PExpression id, PExpression value) {
+		return new AAssignSubstitution(Collections.singletonList(id), Collections.singletonList(value));
+	}
+
+	public static ADefinitionExpression callExternalFunction(String name, PExpression... parameters) {
+		return new ADefinitionExpression(new TIdentifierLiteral(name), createExpressionList(parameters));
 	}
 
 	private static List<PExpression> createExpressionList(String... names) {
