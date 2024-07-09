@@ -15,13 +15,13 @@ public final class PrettyPrinter extends BasePrettyPrinter {
 		return this.getWriter().toString();
 	}
 
-	public static String getPrettyPrint(Node node) {
+	public static String getCompactPrettyPrint(Node node) {
 		PrettyPrinter pp = new PrettyPrinter();
 		node.apply(pp);
 		return pp.getPrettyPrint();
 	}
 
-	public static String getIndentedPrettyPrint(Node node) {
+	public static String getPrettyPrint(Node node) {
 		PrettyPrinter pp = new PrettyPrinter();
 		pp.setUseIndentation(true);
 		node.apply(pp);
