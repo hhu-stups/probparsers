@@ -27,8 +27,6 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.add(prefix);
 		searchPath.addAll(paths);
 		searchPath.addAll(getLibraryPath());
-		// TODO: should we add "" as path to enable absolute filenames?
-		// there is currently a check in PlainFileContentProvider.java to this effect
 	}
 
 	private List<String> getLibraryPath() {
@@ -43,6 +41,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	@Override
 	public Iterator<File> iterator() {
+		File file = new File(this.fileName);
+		if (file.isAbsolute()) {
+			// If the given file name is absolute, return it unchanged.
+			// This case must be handled explicitly,
+			// because the File(File, String) constructor always interprets the second path as relative,
+			// even if it's an absolute path.
+			return Collections.singletonList(file).iterator();
+		}
+
 		return this.searchPath.stream()
 			.map(base -> new File(base, this.getFilename()))
 			.iterator();
