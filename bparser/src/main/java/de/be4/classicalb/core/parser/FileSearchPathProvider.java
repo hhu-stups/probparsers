@@ -27,6 +27,8 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.add(prefix);
 		searchPath.addAll(paths);
 		searchPath.addAll(getLibraryPath());
+		// TODO: should we add "" as path to enable absolute filenames?
+		// there is currently a check in PlainFileContentProvider.java to this effect
 	}
 
 	private List<String> getLibraryPath() {

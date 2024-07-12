@@ -155,7 +155,7 @@ public class PreParser {
 			String quotedFilename = filenameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
-			// ./foo/bar/defs.def
+			// ./foo/bar/defs.def or an absolute path
 			try {
 				if (definitionFileIncludeStack.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
