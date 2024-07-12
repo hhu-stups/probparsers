@@ -22,8 +22,8 @@ public class PlainFileContentProvider implements IFileContentProvider {
 	public File getFile(final File directory, final String filename) throws IOException {
 		FileSearchPathProvider provider;
 		if ((new File(filename).isAbsolute())) {
-		    // FileSearchPathPathProvider/2 and java.io.File/2 constructor are not capable on their own to detect when filename is absolute
-		    // maybe we should add isAbsolute check to FileSearchPathProvider/3 constructor
+			// FileSearchPathPathProvider/2 and java.io.File/2 constructor are not capable on their own to detect when filename is absolute
+			// maybe we should add isAbsolute check to FileSearchPathProvider/3 constructor
 			provider = new FileSearchPathProvider("",filename);
 		} else if (directory == null) {
 			provider = new FileSearchPathProvider(filename); // this will use "." as parentPath
