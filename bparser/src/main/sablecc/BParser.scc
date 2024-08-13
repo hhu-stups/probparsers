@@ -339,6 +339,7 @@ Tokens
   {normal} when = 'WHEN';
   {normal} where = 'WHERE';
   {normal} while = 'WHILE';
+  {normal} witness_kw = 'WITNESS';
   {normal} left_bracket = '[';
   {normal} right_bracket = ']';
   {normal} union = '\/' | 0x222a;
@@ -1104,16 +1105,27 @@ parallel_subst_tail {-> substitution*} =
   {multi} double_vertical_bar [substitution]:substitution_l3 [rest]:parallel_subst_tail {-> [substitution.substitution, rest.substitution]};
 
 substitution_l3 {-> substitution} =
-  {block} begin [substitution]:substitution_l0 end {-> New substitution.block(substitution.substitution)} |
+  {block} begin [substitution]:substitution_l0 end
+           {-> New substitution.block(substitution.substitution)} |
   {skip} skip {-> New substitution.skip()} |
-  {assign} [lhs_expression]:assign_list assign [rhs_expressions]:expression_list {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
-  {precondition} pre [predicate]:predicate_top then [substitution]:substitution_l0 end {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
-  {assertion} assert [predicate]:predicate_top then [substitution]:substitution_l0 end {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
-  {choice} choice [first]:substitution_l0 [rest]:choice_or* end {-> New substitution.choice([first.substitution, rest.substitution])} |
-  {if} if [condition]:predicate_top then [then_subst]:substitution_l0 [elsifs]:if_elsif* [else]:if_else? end {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
-  {select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
-  {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
-  {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
+  {assign} [lhs_expression]:assign_list assign [rhs_expressions]:expression_list
+           {-> New substitution.assign([lhs_expression.expression], [rhs_expressions.expression])} |
+  {precondition} pre [predicate]:predicate_top then [substitution]:substitution_l0 end
+           {-> New substitution.precondition(predicate.predicate, substitution.substitution)} |
+  {assertion} assert [predicate]:predicate_top then [substitution]:substitution_l0 end
+           {-> New substitution.assertion(predicate.predicate, substitution.substitution)} |
+  {witness_then} witness_kw [predicate]:predicate_top then [substitution]:substitution_l0 end
+           {-> New substitution.witness_then(predicate.predicate, substitution.substitution)} |
+  {choice} choice [first]:substitution_l0 [rest]:choice_or* end
+           {-> New substitution.choice([first.substitution, rest.substitution])} |
+  {if} if [condition]:predicate_top then [then_subst]:substitution_l0 [elsifs]:if_elsif* [else]:if_else? end
+           {-> New substitution.if(condition.predicate, then_subst.substitution, [elsifs.substitution], else.substitution)} |
+  {select} select [condition]:predicate_top then [then_subst]:substitution_l0 [whens]:select_when* [else]:select_else? end
+           {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
+  {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end
+           {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
+  {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end
+           {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
   // According to the Atelier-B reference manual,
   // the LHS of "becomes element of" and "becomes such that" substitutions can only contain (possibly dotted) identifiers.
   // assign_list allows a bit more than that (namely function calls and record fields),
@@ -1121,15 +1133,23 @@ substitution_l3 {-> substitution} =
   // because it would cause reduce/reduce conflicts with assignment substitutions.
   // Instead, IdentListCheck later enforces that only identifiers are used.
   // TODO Could/should we allow function calls and record fields here as an extension?
-  {becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
-  {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
-  {var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end {-> New substitution.var([identifiers.expression], substitution.substitution)} |
+  {becomes_element_of} [identifiers]:assign_list double_colon [set]:expression_top
+           {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
+  {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par
+           {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
+  {var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end
+           {-> New substitution.var([identifiers.expression], substitution.substitution)} |
   //{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
-  {operation_call_without_parameter} [op]:identifier_or_function {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
-  {operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params? {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
-  {while} while [condition]:predicate_top do [do_subst]:substitution_l0 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
-  {let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l0 end {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
-  {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params? {-> New substitution.definition(def_literal, [parameters.expression])} |
+  {operation_call_without_parameter} [op]:identifier_or_function
+           {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
+  {operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params?
+           {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
+  {while} while [condition]:predicate_top do [do_subst]:substitution_l0 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end
+           {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
+  {let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l0 end
+           {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
+  {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params?
+           {-> New substitution.definition(def_literal, [parameters.expression])} |
 
   // extensions for rules
   {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
@@ -1554,6 +1574,7 @@ substitution =
   {assign} [lhs_expression]:expression* [rhs_expressions]:expression* |
   {precondition} [predicate]:predicate [substitution]:substitution |
   {assertion} [predicate]:predicate [substitution]:substitution |
+  {witness_then} [predicate]:predicate [substitution]:substitution |
   {choice} [substitutions]:substitution* |
   {choice_or} [substitution]:substitution |
   {if} [condition]:predicate [then]:substitution [elsif_substitutions]:substitution* [else]:substitution? |
