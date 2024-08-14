@@ -2484,6 +2484,21 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseAWitnessThenSubstitution(AWitnessThenSubstitution node) {
+		indent();
+		printlnOpt("WITNESS");
+		node.getPredicate().apply(this);
+		dedent();
+		printlnOpt();
+		indent();
+		printlnOpt("THEN");
+		node.getSubstitution().apply(this);
+		dedent();
+		printlnOpt();
+		print("END");
+	}
+
+	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
 		print(this.renaming.renameIdentifier(node.getText()));
 	}
