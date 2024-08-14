@@ -511,6 +511,7 @@ public class PrettyPrinterTest {
 				"BEGIN skip; BEGIN x := 42 END END",
 				"BEGIN BEGIN skip END; x := 42 END",
 				"BEGIN BEGIN skip END; BEGIN x := 42 END END",
+				"WITNESS 1=1 THEN skip END",
 			};
 		}
 
