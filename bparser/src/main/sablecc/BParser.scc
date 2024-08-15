@@ -1188,20 +1188,25 @@ substitution_l3 {-> substitution} =
 
   // extensions for rules
   {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
-    {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
-  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top kw_expect [expect_pred]:predicate_top [error_type]:error_type? [on_success]:on_success? kw_counterexample [message]:expression_top end
-    {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, message.expression)} |
-  {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate? [error_type]:error_type? kw_counterexample [message]:expression_top end
-    {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
-  {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params? {-> New substitution.operator(name, [arguments.expression])} |
-  {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par [dummy]:dummy_value? kw_value [value]:expression_in_par end
-    {-> New substitution.define(name, type.expression, dummy.expression, value.expression)};
+          {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
+  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top
+                       kw_expect [expect_pred]:predicate_top [error_type]:error_type?
+                       [on_success]:on_success? kw_counterexample [message]:expression_top_with_opt_desc end
+          {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, message.expression)} |
+  {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate?
+                  [error_type]:error_type? kw_counterexample [message]:expression_top_with_opt_desc end
+           {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
+  {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params?
+           {-> New substitution.operator(name, [arguments.expression])} |
+  {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par
+           [dummy]:dummy_value? kw_value [value]:expression_in_par end
+           {-> New substitution.define(name, type.expression, dummy.expression, value.expression)};
 
 when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate};
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id};
-on_success {-> expression} = kw_on_success [expr]:expression_top {-> expr.expression};
+on_success {-> expression} = kw_on_success [expr]:expression_top_with_opt_desc {-> expr.expression};
 
 choice_or {-> substitution} =
   or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)};
