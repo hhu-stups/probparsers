@@ -471,9 +471,9 @@ parse_unit {-> parse_unit} =
   {machine} shebang? P.machine {-> machine.parse_unit} |
   {definition_file} shebang? [clause]:definitions_clause {-> New parse_unit.definition_file(clause.machine_clause)} |
   {predicate} kw_predicate [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
-  {expression} kw_expression [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
+  {expression} kw_expression [expr]:expression_top_with_opt_desc {-> New parse_unit.expression(expr.expression)} |
   {predformula} kw_formula [pred]:predicate_top {-> New parse_unit.predicate(pred.predicate)} |
-  {exprformula} kw_formula [expr]:expression_top {-> New parse_unit.expression(expr.expression)} |
+  {exprformula} kw_formula [expr]:expression_top_with_opt_desc {-> New parse_unit.expression(expr.expression)} |
   {substitution} kw_substitution [subst]:substitution_l1 {-> New parse_unit.substitution(subst.substitution)} |
   {oppattern} kw_oppattern [pattern]:operation_pattern {-> pattern.parse_unit} |
   {machine_clause} kw_machine_clause [clause]:machine_clause {-> New parse_unit.machine_clause(clause.machine_clause)}; // used to single machine clauses
@@ -540,8 +540,10 @@ machine_clause {-> machine_clause} =
   {expressions} [clause]:expressions_clause {-> clause.machine_clause} |
   {predicate} [clause]:predicates_clause {-> clause.machine_clause};
 
-expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon? {-> New machine_clause.expressions([expression_def_list.expression_definition])};
-predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon? {-> New machine_clause.predicates([predicate_def_list.predicate_definition])};
+expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon?
+   {-> New machine_clause.expressions([expression_def_list.expression_definition])};
+predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon?
+   {-> New machine_clause.predicates([predicate_def_list.predicate_definition])};
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])};
 
@@ -565,13 +567,17 @@ predicate_def {-> predicate_definition} =
      {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
-  {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
-  {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3 {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
-  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
+  {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
+      {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
+  {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3
+      {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)} |
+  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top_with_opt_desc
+      {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)} |
   // attempt to allow identifier lists in DEFINITIONs, but leads to conflicts:
   //{couplewopar} [name]:identifier_literal double_equal [first]:expression_in_par comma [rest]:expression_list {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))} |
   //{couplewopar} [name]:identifier_literal double_equal [rest]:identifier_list {-> New definition.expression_definition(name, [], New expression.couple([rest.expression]))} |
-  {file} [filename]:string_literal {-> New definition.file_definition(filename)};
+  {file} [filename]:string_literal
+      {-> New definition.file_definition(filename)};
 
 def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]};
 
