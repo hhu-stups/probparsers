@@ -557,8 +557,12 @@ definition_list {-> definition*} =
   {single} [def]:definition {-> [def.definition]} |
   {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
 
-expression_def {-> expression_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top {-> New expression_definition(name, [parameters.expression], rhs.expression)};
-predicate_def {-> predicate_definition} = [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
+expression_def {-> expression_definition} =
+  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top
+     {-> New expression_definition(name, [parameters.expression], rhs.expression)};
+predicate_def {-> predicate_definition} =
+  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top
+     {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)} |
@@ -736,8 +740,10 @@ predicate_x40 {-> predicate} =
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
-  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text {-> New predicate.description(content,predicate.predicate)} |
-  {next_level} [pred]:predicate_x42 {-> pred.predicate};
+  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text
+      {-> New predicate.description(content,predicate.predicate)} |
+  {next_level} [pred]:predicate_x42
+      {-> pred.predicate};
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
@@ -817,10 +823,17 @@ if_elseif_predicate {-> predicate} =
 /* expression_in_par contains the priority level 20, it is not considered as expression_top
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
-  {composition} [left]:expression_in_par semicolon [right]:expression_top {-> New expression.composition(left.expression, right.expression)} |
-  {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top {-> New expression.symbolic_composition(left.expression, right.expression)} |
-  {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top {-> New expression.parallel_product(left.expression, right.expression)} |
-  {next_level} [expr]:expression_top {-> expr.expression};
+  {description} [expression]:expression_top pragma_description [content]:pragma_free_text
+        /* we allow descriptions for expressions inside parentheses, no ambiguity with predicates possible */
+      {-> New expression.description(content,expression.expression)} |
+  {composition} [left]:expression_in_par semicolon [right]:expression_top
+     {-> New expression.composition(left.expression, right.expression)} |
+  {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top
+     {-> New expression.symbolic_composition(left.expression, right.expression)} |
+  {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top
+     {-> New expression.parallel_product(left.expression, right.expression)} |
+  {next_level} [expr]:expression_top
+     {-> expr.expression};
 
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
 
