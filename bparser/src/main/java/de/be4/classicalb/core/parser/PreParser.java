@@ -155,7 +155,7 @@ public class PreParser {
 			String quotedFilename = filenameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
-			// ./foo/bar/defs.def
+			// ./foo/bar/defs.def or an absolute path
 			try {
 				if (definitionFileIncludeStack.contains(fileName)) {
 					StringBuilder sb = new StringBuilder();
@@ -408,14 +408,17 @@ public class PreParser {
 		de.be4.classicalb.core.parser.node.Start start;
 		de.be4.classicalb.core.parser.node.Token errorToken;
 		try {
+			// Try parsing the RHS as a Formula, i.e., either expression or predicate
 			start = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
-			// Predicate?
+			// check if the result is a Predicate?
 			PParseUnit parseunit = start.getPParseUnit();
+			
 			if (parseunit instanceof APredicateParseUnit) {
 				return new DefinitionType(IDefinitions.Type.Predicate);
 			}
 
-			// Expression or Expression/Substituion (e.g. f(x))?
+			// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
+
 			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
 
 			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
@@ -437,6 +440,7 @@ public class PreParser {
 		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
 			errorToken = e.getToken();
 			try {
+			    // try parsing the RHS now as a substitution:
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {

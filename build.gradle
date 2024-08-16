@@ -28,7 +28,7 @@ apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.13.3'
+project.version = '2.13.4'
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
@@ -71,7 +71,7 @@ subprojects {
 	}
 
 	dependencies {
-		testImplementation platform('org.junit:junit-bom:5.10.2')
+		testImplementation platform('org.junit:junit-bom:5.10.3')
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
 		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'

@@ -278,6 +278,7 @@ public class ASTPrologTest {
 	@Test
 	public void testSubstitutions() throws BCompoundException {
 		checkSubstitution("x,y :: BOOL", "becomes_element_of($,[identifier($,x),identifier($,y)],bool_set($))");
+		checkSubstitution("WITNESS 1=1 THEN skip END", "witness_then($,equal($,integer($,1),integer($,1)),skip($))");
 	}
 
 	@Test

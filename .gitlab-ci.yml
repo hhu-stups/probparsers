@@ -68,7 +68,9 @@ publish:
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in gradle.properties.enc -out gradle.properties
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in pubring.gpg.enc -out pubring.gpg
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in secring.gpg.enc -out secring.gpg
-    - ./gradlew ${GRADLE_ARGS} --parallel classes
+    # Run all of the publishing process except for the actual upload.
+    # This part is safe to run with --parallel enabled (see below).
+    - ./gradlew ${GRADLE_ARGS} --parallel signMavenJavaPublication
     # Uploading to Maven Central seems to be unreliable with parallel builds
     # (multiple staging repositories are created even though Gradle was only run once,
     # and none of these staging repositories contain the complete set of files),

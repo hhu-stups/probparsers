@@ -41,6 +41,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	@Override
 	public Iterator<File> iterator() {
+		File file = new File(this.fileName);
+		if (file.isAbsolute()) {
+			// If the given file name is absolute, return it unchanged.
+			// This case must be handled explicitly,
+			// because the File(File, String) constructor always interprets the second path as relative,
+			// even if it's an absolute path.
+			return Collections.singletonList(file).iterator();
+		}
+
 		return this.searchPath.stream()
 			.map(base -> new File(base, this.getFilename()))
 			.iterator();

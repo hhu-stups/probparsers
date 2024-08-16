@@ -57,6 +57,7 @@ public final class FastTermOutput extends BaseStructuredPrologOutput {
 		return this;
 	}
 
+	@Override
 	public void reset() {
 		super.reset();
 		this.finishedTerm = null;

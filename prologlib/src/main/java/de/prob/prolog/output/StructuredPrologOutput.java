@@ -65,6 +65,7 @@ public final class StructuredPrologOutput extends BaseStructuredPrologOutput {
 		}
 	}
 
+	@Override
 	public void reset() {
 		super.reset();
 		this.clearSentences();
