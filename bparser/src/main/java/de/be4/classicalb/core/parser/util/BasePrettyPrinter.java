@@ -880,6 +880,14 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseADescriptionOperation(ADescriptionOperation node) {
+		node.getOperation().apply(this);
+		print(" /*@desc ");
+		print(node.getContent().getText());
+		print(" */");
+	}
+
+	@Override
 	public void caseARuleOperation(ARuleOperation node) {
 		print("RULE ");
 		node.getRuleName().apply(this);
