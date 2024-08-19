@@ -20,7 +20,6 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	static {
 		final Map<Class<? extends Node>, Integer> prio = new HashMap<>();
-		prio.put(ADescriptionExpression.class, -1); // always put parentheses around desc expressions
 		prio.put(AParallelProductExpression.class, 20);
 		prio.put(AImplicationPredicate.class, 30);
 		prio.put(ADisjunctPredicate.class, 40);
@@ -75,6 +74,10 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	private IIdentifierRenaming renaming;
 	private int indentLevel;
 	private boolean hasWrittenSomething;
+	/**
+	 * Uses to check if we are printing an identifier_list right now.
+	 */
+	private boolean identifierList;
 
 	public BasePrettyPrinter(Writer writer) {
 		this.writer = writer;
@@ -82,6 +85,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		this.renaming = IIdentifierRenaming.QUOTE_INVALID;
 		this.indentLevel = 0;
 		this.hasWrittenSomething = false;
+		this.identifierList = false;
 	}
 
 	public Writer getWriter() {
@@ -390,6 +394,17 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		this.rightParAssoc(node, right);
 	}
 
+	private void openIdentifierList() {
+		if (this.identifierList) {
+			throw new IllegalStateException();
+		}
+		this.identifierList = true;
+	}
+
+	private void closeIdentifierList() {
+		this.identifierList = false;
+	}
+
 	@Override
 	public void caseStart(final Start node) {
 		node.getPParseUnit().apply(this);
@@ -592,7 +607,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAVariablesMachineClause(AVariablesMachineClause node) {
 		indent();
 		printlnOpt("VARIABLES");
+		openIdentifierList();
 		printCommaList(node.getIdentifiers());
+		closeIdentifierList();
 		dedent();
 	}
 
@@ -600,7 +617,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAConcreteVariablesMachineClause(AConcreteVariablesMachineClause node) {
 		indent();
 		printlnOpt("CONCRETE_VARIABLES");
+		openIdentifierList();
 		printCommaList(node.getIdentifiers());
+		closeIdentifierList();
 		dedent();
 	}
 
@@ -608,7 +627,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAAbstractConstantsMachineClause(AAbstractConstantsMachineClause node) {
 		indent();
 		printlnOpt("ABSTRACT_CONSTANTS");
+		openIdentifierList();
 		printCommaList(node.getIdentifiers());
+		closeIdentifierList();
 		dedent();
 	}
 
@@ -616,7 +637,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAConstantsMachineClause(AConstantsMachineClause node) {
 		indent();
 		printlnOpt("CONSTANTS");
+		openIdentifierList();
 		printCommaList(node.getIdentifiers());
+		closeIdentifierList();
 		dedent();
 	}
 
@@ -761,7 +784,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		node.getName().apply(this);
+		openIdentifierList();
 		printParameterListOpt(node.getParameters());
+		closeIdentifierList();
 		print(" == ");
 		indent();
 		node.getRhs().apply(this);
@@ -771,7 +796,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
 		node.getName().apply(this);
+		openIdentifierList();
 		printParameterListOpt(node.getParameters());
+		closeIdentifierList();
 		print(" == ");
 		indent();
 		node.getRhs().apply(this);
@@ -781,7 +808,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
 		node.getName().apply(this);
+		openIdentifierList();
 		printParameterListOpt(node.getParameters());
+		closeIdentifierList();
 		print(" == ");
 		indent();
 		node.getRhs().apply(this);
@@ -812,7 +841,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
 		printDottedList(node.getIdentifier());
 		print(" = ");
+		openIdentifierList();
 		printDelimitedCommaList(node.getElements(), "{", "}", ENUMERATED_MULTILINE_THRESHOLD);
+		closeIdentifierList();
 	}
 
 	@Override
@@ -851,7 +882,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAOperation(AOperation node) {
 		if (!node.getReturnValues().isEmpty()) {
+			openIdentifierList();
 			printCommaListCompact(node.getReturnValues());
+			closeIdentifierList();
 			print(" <-- ");
 		}
 		printDottedList(node.getOpName());
@@ -865,7 +898,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseARefinedOperation(ARefinedOperation node) {
 		if (!node.getReturnValues().isEmpty()) {
+			openIdentifierList();
 			printCommaListCompact(node.getReturnValues());
+			closeIdentifierList();
 			print(" <-- ");
 		}
 		printDottedList(node.getOpName());
@@ -921,7 +956,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAFunctionOperation(AFunctionOperation node) {
 		print("FUNCTION ");
+		openIdentifierList();
 		printCommaListCompact(node.getReturnValues());
+		closeIdentifierList();
 		print(" <-- ");
 		node.getName().apply(this);
 		printParameterListOpt(node.getParameters());
@@ -1003,7 +1040,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAForallPredicate(final AForallPredicate node) {
 		print("!(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getImplication().apply(this);
 		print(")");
@@ -1012,7 +1051,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAExistsPredicate(final AExistsPredicate node) {
 		print("#(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicate().apply(this);
 		print(")");
@@ -1109,7 +1150,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseALetPredicatePredicate(final ALetPredicatePredicate node) {
 		print("LET ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" BE");
 		node.getAssignment().apply(this);
@@ -1159,10 +1202,16 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseADescriptionExpression(ADescriptionExpression node) {
+		if (!this.identifierList) {
+			print("(");
+		}
 		node.getExpression().apply(this);
 		print(" /*@desc ");
 		print(node.getContent().getText());
 		print(" */");
+		if (!this.identifierList) {
+			print(")");
+		}
 	}
 
 	@Override
@@ -1362,7 +1411,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseALetExpressionExpression(final ALetExpressionExpression node) {
 		print("LET ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" BE");
 		node.getAssignment().apply(this);
@@ -1435,7 +1486,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAGeneralSumExpression(final AGeneralSumExpression node) {
 		print("SIGMA(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicates().apply(this);
 		print("|");
@@ -1446,7 +1499,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAGeneralProductExpression(final AGeneralProductExpression node) {
 		print("PI(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicates().apply(this);
 		print("|");
@@ -1462,6 +1517,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAComprehensionSetExpression(final AComprehensionSetExpression node) {
 		print("{");
+		// this is not an identifier_list in the grammar, see comments in BParser.scc
 		printCommaListCompact(node.getIdentifiers());
 		print("|");
 		node.getPredicates().apply(this);
@@ -1472,6 +1528,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
 		print("/*@symbolic*/ ");
 		print("{");
+		// this is not an identifier_list in the grammar, see comments in BParser.scc
 		printCommaListCompact(node.getIdentifiers());
 		print("|");
 		node.getPredicates().apply(this);
@@ -1481,6 +1538,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
 		print("{(");
+		// this is not an identifier_list in the grammar, see comments in BParser.scc
 		printCommaListCompact(node.getIdentifiers());
 		print(").");
 		node.getPredicates().apply(this);
@@ -1493,6 +1551,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
 		print("/*@symbolic*/ ");
 		print("{(");
+		// this is not an identifier_list in the grammar, see comments in BParser.scc
 		printCommaListCompact(node.getIdentifiers());
 		print(").");
 		node.getPredicates().apply(this);
@@ -1565,7 +1624,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAQuantifiedUnionExpression(final AQuantifiedUnionExpression node) {
 		print("UNION(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicates().apply(this);
 		print("|");
@@ -1577,7 +1638,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
 		print("/*@symbolic*/ ");
 		print("UNION(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicates().apply(this);
 		print("|");
@@ -1588,7 +1651,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAQuantifiedIntersectionExpression(final AQuantifiedIntersectionExpression node) {
 		print("INTER(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicates().apply(this);
 		print("|");
@@ -1810,7 +1875,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseALambdaExpression(final ALambdaExpression node) {
 		print("%(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicate().apply(this);
 		print("|");
@@ -1821,7 +1888,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
 		print("/*@symbolic*/ %(");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		print(").(");
 		node.getPredicate().apply(this);
 		print("|");
@@ -2267,7 +2336,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAAnySubstitution(AAnySubstitution node) {
 		print("ANY ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" WHERE");
 		node.getWhere().apply(this);
@@ -2284,7 +2355,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
 		print("LET ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" BE");
 		node.getPredicate().apply(this);
@@ -2316,7 +2389,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAVarSubstitution(AVarSubstitution node) {
 		print("VAR ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" IN");
 		node.getSubstitution().apply(this);
@@ -2390,7 +2465,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAForallSubMessageSubstitution(AForallSubMessageSubstitution node) {
 		print("RULE_FORALL ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt();
 		indent();
@@ -2420,7 +2497,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseARuleFailSubSubstitution(ARuleFailSubSubstitution node) {
 		print("RULE_FAIL ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt();
 		if (node.getWhen() != null) {
@@ -2447,7 +2526,9 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
 		print("FOR ");
+		openIdentifierList();
 		printCommaListCompact(node.getIdentifiers());
+		closeIdentifierList();
 		indent();
 		printlnOpt(" IN");
 		node.getSet().apply(this);
