@@ -75,7 +75,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	private int indentLevel;
 	private boolean hasWrittenSomething;
 	/**
-	 * Uses to check if we are printing an identifier_list right now.
+	 * Used to check if we are printing an identifier_list right now.
 	 */
 	private boolean identifierList;
 
