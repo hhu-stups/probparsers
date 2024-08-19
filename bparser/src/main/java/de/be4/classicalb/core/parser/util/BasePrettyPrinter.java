@@ -20,6 +20,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	static {
 		final Map<Class<? extends Node>, Integer> prio = new HashMap<>();
+		prio.put(ADescriptionExpression.class, -1); // always put parentheses around desc expressions
 		prio.put(AParallelProductExpression.class, 20);
 		prio.put(AImplicationPredicate.class, 30);
 		prio.put(ADisjunctPredicate.class, 40);
@@ -1659,10 +1660,12 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseASymbolicCompositionExpression(ASymbolicCompositionExpression node) {
+		print("(");
 		node.getLeft().apply(this);
 		print(" /*@symbolic*/ ");
 		print(";");
 		node.getRight().apply(this);
+		print(")");
 	}
 
 	@Override

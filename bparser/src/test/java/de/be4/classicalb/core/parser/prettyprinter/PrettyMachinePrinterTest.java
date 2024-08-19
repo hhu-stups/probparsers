@@ -321,6 +321,23 @@ public class PrettyMachinePrinterTest {
 	}
 
 	@Test
+	public void testPrettyPrintDescPragma() {
+		final String testMachine = "MACHINE Test\n" +
+		                           "VARIABLES x /*@desc var x */, y /*@desc var y */\n" +
+		                           "INVARIANT x:INTEGER & y:INTEGER\n" +
+		                           "INITIALISATION x := 1 || y := 2\n" +
+		                           "OPERATIONS\n" +
+		                           "foo = x := (42+(x+y/2 /*@desc x+y/2 description */) /*@desc 42+(...) description */)*2 /*@desc foo operation description */\n" +
+		                           "END";
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+		final String result2 = Helpers.getPrettyPrint(result1);
+
+		assertFalse(result1.isEmpty());
+		assertEquals(testMachine, result1);
+		assertEquals(result1, result2);
+	}
+
+	@Test
 	public void testPrettyPrintFileDefinition() throws Exception {
 		final String testMachine = "MACHINE Test\n" +
 				                           "DEFINITIONS\n\"LibraryStrings.def\"\n" +

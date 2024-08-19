@@ -150,6 +150,7 @@ public class PrettyPrinterTest {
 				"A(b)(c)",
 				"(A||B)",
 				"(f;g)",
+				"(f /*@symbolic*/ ;g)",
 				"g∘f",
 				"bool(x<0)",
 				"max({1,2,3})",
