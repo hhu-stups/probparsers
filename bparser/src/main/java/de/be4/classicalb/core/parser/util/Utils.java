@@ -124,9 +124,12 @@ public final class Utils {
 			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
+			|| identifier.startsWith("MAX_OPERATIONS_")
+			|| identifier.startsWith("OPERATION_REUSE_OFF_")
 			|| identifier.equals("SCOPE")
 			|| identifier.startsWith("scope_")
 			|| identifier.startsWith("SET_PREF_")
+			|| identifier.startsWith("SEQUENCE_CHART_")
 			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
 			;
 	}
