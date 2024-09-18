@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
@@ -119,15 +117,12 @@ public class PreParser {
 			rootNode = preParser.parse();
 		} catch (final ParserException e) {
 			if (e.getToken() instanceof de.be4.classicalb.core.preparser.node.TDefinitions) {
-				final Token errorToken = e.getToken();
-				final String message = "[" + errorToken.getLine() + "," + errorToken.getPos() + "] "
-						+ "Clause 'DEFINITIONS' is used more than once";
-				throw new PreParseException(e.getToken(), message);
+				throw new PreParseException(e.getToken(), "Clause 'DEFINITIONS' is used more than once", e);
 			} else {
-				throw new PreParseException(e.getToken(), e.getLocalizedMessage(), e);
+				throw new PreParseException(e.getToken(), e.getRealMsg(), e);
 			}
 		} catch (final LexerException e) {
-			throw new PreParseException(e.getLocalizedMessage(), e);
+			throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 		}
 
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
@@ -245,11 +240,10 @@ public class PreParser {
 				if (modelFile != null) {
 					message += " in file: " + modelFile;
 				}
-				throw new PreParseException(message);
+				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message);
 			} else {
 				// fall back message
-				throw new PreParseException(definition, "[" + definition.getLine() + "," + definition.getPos()
-						+ "] expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
+				throw new PreParseException(definition, "expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
 			}
 		}
 	}
@@ -322,13 +316,10 @@ public class PreParser {
 				throw new PreParseException("Error while parsing", e);
 			} catch (BLexerException e) {
 				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
-				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(nameToken, rhsToken,
-						errorToken, e.getMessage());
-				throw new PreParseException(newMessage, e);
+				correctErrorTokenPosition(nameToken, rhsToken, errorToken);
+				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-						nameToken, rhsToken, e.getMessage());
-				throw new PreParseException(newMessage, e);
+				throw wrapLexerExceptionAndCorrectPosition(nameToken, rhsToken, e, e);
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
@@ -447,69 +438,68 @@ public class PreParser {
 				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex.getToken();
 				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
 						&& errorToken.getPos() >= errorToken2.getPos())) {
-					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
-							rhsToken, errorToken, e.getMessage());
-					return new DefinitionType(newMessage, errorToken);
+					correctErrorTokenPosition(definition, rhsToken, errorToken);
+					return new DefinitionType(adjustErrorMessage(e.getRealMsg()), errorToken);
 				} else {
-					final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
-							rhsToken, errorToken2, ex.getMessage());
-					return new DefinitionType(newMessage, errorToken2);
+					correctErrorTokenPosition(definition, rhsToken, errorToken2);
+					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
 				}
 			} catch (BLexerException e1) {
 				errorToken = e1.getLastToken();
-				final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition,
-						rhsToken, errorToken, e.getMessage());
-				throw new PreParseException(newMessage);
+				correctErrorTokenPosition(definition, rhsToken, errorToken);
+				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
-				throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-						definition, rhsToken, e3.getMessage()), e);
+				// FIXME Is the cause really supposed to be different here?
+				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e3, e);
 			} catch (IOException e1) {
 				throw new PreParseException(e.toString(), e);
 			}
 		} catch (BLexerException e) {
 			errorToken = e.getLastToken();
-			final String newMessage = determineNewErrorMessageWithCorrectedPositionInformations(definition, rhsToken,
-					errorToken, e.getMessage());
-			throw new PreParseException(newMessage, e);
+			correctErrorTokenPosition(definition, rhsToken, errorToken);
+			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			throw new PreParseException(determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(
-					definition, rhsToken, e.getMessage()), e);
+			throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e, e);
 		} catch (IOException e) {
 			throw new PreParseException(e.toString(), e);
 		}
 
 	}
 
-	private String determineNewErrorMessageWithCorrectedPositionInformations(Token definition, Token rhsToken,
-			de.be4.classicalb.core.parser.node.Token errorToken, String oldMessage) {
+	private static void correctErrorTokenPosition(
+		Token definition,
+		Token rhsToken,
+		de.be4.classicalb.core.parser.node.Token errorToken
+	) {
 		// the parsed string starts in the second line, e.g. #formula\n ...
 		int line = errorToken.getLine();
 		int pos = errorToken.getPos();
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf(']');
-		String message = oldMessage.substring(index + 1);
-		if (oldMessage.contains("expecting: EOF")) {
-			message = "expecting end of definition";
-		}
 		errorToken.setLine(line);
 		errorToken.setPos(pos);
-		return "[" + line + "," + pos + "] " + message;
 	}
 
-	private String determineNewErrorMessageWithCorrectedPositionInformationsWithoutToken(Token definition,
-			Token rhsToken, String oldMessage) {
-		Pattern pattern = Pattern.compile("\\d+");
-		Matcher m = pattern.matcher(oldMessage);
-		m.find();
-		int line = Integer.parseInt(m.group());
-		m.find();
-		int pos = Integer.parseInt(m.group());
+	private static String adjustErrorMessage(String message) {
+		if (message.contains("expecting: EOF")) {
+			return "expecting end of definition";
+		} else {
+			return message;
+		}
+	}
+
+	private static PreParseException wrapLexerExceptionAndCorrectPosition(
+		Token definition,
+		Token rhsToken,
+		de.be4.classicalb.core.parser.lexer.LexerException exc,
+		Throwable cause
+	) {
+		// the parsed string starts in the second line, e.g. #formula\n ...
+		int line = exc.getLine();
+		int pos = exc.getPos();
 		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
 		line = definition.getLine() + line - 2;
-		final int index = oldMessage.indexOf(']');
-		String message = oldMessage.substring(index + 1);
-		return "[" + line + "," + pos + "]" + message;
+		return new PreParseException(line, pos, exc.getRealMsg(), cause);
 	}
 
 	private de.be4.classicalb.core.parser.node.Start tryParsing(final String prefix, final String definitionRhs)

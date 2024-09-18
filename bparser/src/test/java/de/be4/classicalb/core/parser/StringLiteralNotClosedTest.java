@@ -17,7 +17,8 @@ public class StringLiteralNotClosedTest {
 	public void testStringLiteralNotClosedShortString() {
 		final String testMachine = "MACHINE Test CONSTANTS the_string PROPERTIES the_string = \"not closed END";
 		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("[1,59] Unknown token: \"not closed END", e.getMessage());
+		assertEquals("Unknown token: \"not closed END", e.getMessage());
+		Helpers.assertParseErrorLocation(e, 1, 59, 1, 59);
 	}
 
 	@Test

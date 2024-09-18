@@ -5,8 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -76,10 +74,9 @@ public class BException extends Exception {
 	}
 
 	public BException(String filename, LexerException e) {
-		this(filename, e.getMessage(), e);
-		final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
-		if (location != null) {
-			locations.add(location);
+		this(filename, e.getRealMsg(), e);
+		if (e.getLine() != 0 && e.getPos() != 0) {
+			locations.add(new Location(filename, e.getLine(), e.getPos(), e.getLine(), e.getPos()));
 		}
 	}
 
@@ -90,7 +87,7 @@ public class BException extends Exception {
 	}
 
 	public BException(String filename, BParseException e) {
-		this(filename, e.getMessage(), e);
+		this(filename, e.getRealMsg(), e);
 		if (e.getToken() != null) {
 			final Location location = Location.fromNode(filename, e.getToken());
 			if (location != null) {
@@ -102,14 +99,8 @@ public class BException extends Exception {
 	public BException(String filename, PreParseException e) {
 		this(filename, e.getMessage(), e);
 		if (e.getTokensList().isEmpty()) {
-			// Fallback for LexerException wrapped in PreParseException.
-			// In this case there are no tokens attached to the exception
-			// (it's a lexer error, so there can be no token for the error location),
-			// but there is position information in the message,
-			// which can be extracted.
-			final Location location = Location.parseFromSableCCMessage(filename, e.getMessage());
-			if (location != null) {
-				locations.add(location);
+			if (e.getLine() != 0 && e.getPos() != 0) {
+				locations.add(new Location(filename, e.getLine(), e.getPos(), e.getLine(), e.getPos()));
 			}
 		} else {
 			e.getTokensList().forEach(token -> {
@@ -167,8 +158,6 @@ public class BException extends Exception {
 
 		private static final long serialVersionUID = -7391092302311266417L;
 
-		private static final Pattern SABLECC_MESSAGE_LOCATION_PATTERN = Pattern.compile("\\[(\\d+),(\\d+)\\].*", Pattern.DOTALL);
-
 		private final String filename;
 		private final int startLine;
 		private final int startColumn;
@@ -205,21 +194,6 @@ public class BException extends Exception {
 				endPos.getLine(),
 				endPos.getPos()
 			);
-		}
-
-		private static Location parseFromSableCCMessage(final String filename, final String message) {
-			if (message == null) {
-				return null;
-			}
-
-			final Matcher matcher = SABLECC_MESSAGE_LOCATION_PATTERN.matcher(message);
-			if (matcher.lookingAt()) {
-				final int line = Integer.parseInt(matcher.group(1));
-				final int pos = Integer.parseInt(matcher.group(2));
-				return new Location(filename, line, pos, line, pos);
-			} else {
-				return null;
-			}
 		}
 
 		public String getFilename() {
