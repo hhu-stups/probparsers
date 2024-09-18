@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser.exceptions;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,11 +56,10 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * </li>
  * </ul>
  */
+@SuppressWarnings("serial")
 public class BException extends Exception {
-	private static final long serialVersionUID = 1L;
-
 	private final String filename;
-	private final transient List<Location> locations = new ArrayList<>();
+	private final List<Location> locations = new ArrayList<>();
 
 	public BException(final String filename, final List<Location> locations, final String message, final Throwable cause) {
 		super(message, cause);
@@ -154,10 +152,7 @@ public class BException extends Exception {
 		return new BException(this.getFilename(), offsetLocations, this.getMessage(), this);
 	}
 
-	public static final class Location implements Serializable {
-
-		private static final long serialVersionUID = -7391092302311266417L;
-
+	public static final class Location {
 		private final String filename;
 		private final int startLine;
 		private final int startColumn;
