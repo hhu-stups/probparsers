@@ -46,10 +46,10 @@ public final class PackageName {
 		final List<String> nameParts = Arrays.asList(name.split("\\."));
 		for (final String part : nameParts) {
 			if (!VALID_IDENTIFIER.matcher(part).matches()) {
-			    if(part.contains("\\") || part.contains("/")) {
-				     throw new IllegalArgumentException("Invalid package name " + name + ": name part " + part + " is not a valid package identifier (use dots and not slashes to specify paths)");
+				if (part.contains("\\") || part.contains("/")) {
+					throw new IllegalArgumentException("Invalid package name " + name + ": name part " + part + " is not a valid package identifier (use dots and not slashes to specify paths)");
 				} else {
-				     throw new IllegalArgumentException("Invalid package name " + name + ": name part " + part + " is not a valid package identifier");
+					throw new IllegalArgumentException("Invalid package name " + name + ": name part " + part + " is not a valid package identifier");
 				}
 			}
 		}
