@@ -87,9 +87,9 @@ public final class IdentListCheck extends OptimizedTraversingAdapter implements 
 	private void checkForNonIdentifiers(final List<? extends Node> identifiers) {
 		for (Node expression : identifiers) {
 			if (!(expression instanceof AIdentifierExpression)) {
-			    // we now also allow Definitions which could be rewritten to identifiers
-			    if (!(expression instanceof ADefinitionExpression)) {
-				     nonIdentifiers.add(expression);
+				// we now also allow Definitions which could be rewritten to identifiers
+				if (!(expression instanceof ADefinitionExpression)) {
+					nonIdentifiers.add(expression);
 				}
 			}
 		}
