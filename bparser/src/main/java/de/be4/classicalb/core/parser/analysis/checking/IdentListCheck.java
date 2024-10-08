@@ -26,7 +26,8 @@ import de.be4.classicalb.core.parser.node.Start;
  * </p>
  * <p>
  * This class finds those constructs and checks if the identifier lists only
- * contain {@link AIdentifierExpression} nodes.
+ * contain {@link AIdentifierExpression} nodes
+ * (or {@link ADefinitionExpression} nodes, which may expand to identifier lists).
  * </p>
  * @see de.be4.classicalb.core.parser.analysis.transforming.CoupleToIdentifierTransformation
  */
@@ -79,18 +80,16 @@ public final class IdentListCheck extends OptimizedTraversingAdapter implements 
 
 	/**
 	 * Adds all elements of the {@link List} to {@link #nonIdentifiers} that are
-	 * not an instance of {@link AIdentifierExpression}.
+	 * not an instance of {@link AIdentifierExpression} or {@link ADefinitionExpression}.
 	 * 
 	 * @param identifiers
 	 *            {@link List} to check
 	 */
 	private void checkForNonIdentifiers(final List<? extends Node> identifiers) {
 		for (Node expression : identifiers) {
-			if (!(expression instanceof AIdentifierExpression)) {
-				// we now also allow Definitions which could be rewritten to identifiers
-				if (!(expression instanceof ADefinitionExpression)) {
-					nonIdentifiers.add(expression);
-				}
+			// we now also allow Definitions which could be rewritten to identifiers
+			if (!(expression instanceof AIdentifierExpression) && !(expression instanceof ADefinitionExpression)) {
+				nonIdentifiers.add(expression);
 			}
 		}
 	}
