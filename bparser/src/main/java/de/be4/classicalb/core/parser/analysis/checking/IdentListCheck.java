@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.node.ABecomesSuchSubstitution;
 import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
+import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.Node;
@@ -86,7 +87,10 @@ public final class IdentListCheck extends OptimizedTraversingAdapter implements 
 	private void checkForNonIdentifiers(final List<? extends Node> identifiers) {
 		for (Node expression : identifiers) {
 			if (!(expression instanceof AIdentifierExpression)) {
-				nonIdentifiers.add(expression);
+			    // we now also allow Definitions which could be rewritten to identifiers
+			    if (!(expression instanceof ADefinitionExpression)) {
+				     nonIdentifiers.add(expression);
+				}
 			}
 		}
 	}
