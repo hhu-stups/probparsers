@@ -51,13 +51,13 @@ public class PreLexer extends Lexer {
 		} catch (LexerException e) {
 			// System.out.println("Exception: " + e.toString());
 			// printState();
-			String msg = e.getMessage();
+			String msg = e.getRealMsg();
 			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
 				String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
 				if(last.equals("="))
-					throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
+					throw new LexerException(e.getLine(), e.getPos(), msg + " in DEFINITIONS clause (use == to define a DEFINITION)", e);
 				else
-					throw new LexerException(msg + " in DEFINITIONS clause");
+					throw new LexerException(e.getLine(), e.getPos(), msg + " in DEFINITIONS clause", e);
 			} else {
 				throw e;
 			}

@@ -200,6 +200,14 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		// now contains Invalid combination of symbols: PLUS OF is not allowed. '
 	}
 
+	@Test
+	public void testLexerErrorInIncludedDefinitionFile() {
+		String file = "definitions/errors/LexerErrorInIncludedDefinitionFile.mch";
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.parseFile(file));
+		assertEquals("Unknown token: | in DEFINITIONS clause", e.getMessage());
+		Helpers.assertParseErrorLocation(e, 4, 67, 4, 67);
+	}
+
 	static class CountingDefinitionFileProvider implements IDefinitionFileProvider {
 		int getStoredCounter = 0;
 		int storeCounter = 0;
