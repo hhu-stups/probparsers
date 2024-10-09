@@ -126,6 +126,7 @@ public final class Utils {
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
 			|| identifier.startsWith("MAX_OPERATIONS_")
 			|| identifier.startsWith("OPERATION_REUSE_OFF_")
+			|| identifier.equals("PROB_REQUIRED_VERSION")
 			|| identifier.equals("SCOPE")
 			|| identifier.startsWith("scope_")
 			|| identifier.startsWith("SET_PREF_")
