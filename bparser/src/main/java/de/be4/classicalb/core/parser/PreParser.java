@@ -442,7 +442,7 @@ public class PreParser {
 					correctErrorTokenPosition(definition, rhsToken, errorToken);
 					return new DefinitionType(adjustErrorMessage(e.getRealMsg()), errorToken);
 				} else {
-				    // use error message from Expression/Predicate parsing:
+					// use error message from Expression/Predicate parsing:
 					correctErrorTokenPosition(definition, rhsToken, errorToken2);
 					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
 				}
