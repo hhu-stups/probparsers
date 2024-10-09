@@ -560,13 +560,8 @@ definition_list {-> definition*} =
   {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
 
 expression_def {-> expression_definition} =
-  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top_with_opt_desc
-     {-> New expression_definition(name, [parameters.expression], rhs.expression)}
-       |
-  // attempt to allow identifier lists in DEFINITIONs without parentheses:
-   {couple_wo_par} [name]:identifier_literal double_equal
-                   [first]:normal_identifier_expression comma [rest]: normal_identifier_expression_list
-       {-> New expression_definition(name, [], New expression.couple([first.expression, rest.expression]))};
+  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
+     {-> New expression_definition(name, [parameters.expression], rhs.expression)};
 
 predicate_def {-> predicate_definition} =
   [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top
@@ -579,16 +574,8 @@ definition {-> definition} =
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_l3
       {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)}
        |
-  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_top_with_opt_desc
+  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
       {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)}
-       |
-  // allow identifier lists in DEFINITIONs:
-  // note: expression_list instead of normal_identifier_expression_list also works
-  // Note: it is also important to adapt kw_formula grammar rule to allow identifier lists
-  //       as PreParser.java method determineType will parse rhs using this to determine type of definition
-  {couple_wo_par} [name]:identifier_literal double_equal
-                   [first]:normal_identifier_expression  comma [rest]: normal_identifier_expression_list
-       {-> New definition.expression_definition(name, [], New expression.couple([first.expression, rest.expression]))}
         |
   {file} [filename]:string_literal
       {-> New definition.file_definition(filename)};
@@ -600,6 +587,10 @@ normal_identifier_expression_list_tail {-> expression} =
     comma [expr]:normal_identifier_expression {-> expr.expression};
 
 // allow either a top-level expression (with optional desc pragmas) or an identifier list (treated as a couple)
+  // Idea to allow identifier lists in DEFINITIONs:
+  // note: expression_list instead of normal_identifier_expression_list also works
+  // Note: it is also important to adapt kw_formula grammar rule to allow identifier lists
+  //       as PreParser.java method determineType will parse rhs using this to determine type of definition
 expression_or_id_list {-> expression} =
   {id_list} [first]:normal_identifier_expression comma [rest]:normal_identifier_expression_list
             {->  New expression.couple([first.expression, rest.expression])} |
