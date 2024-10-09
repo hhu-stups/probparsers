@@ -688,6 +688,7 @@ values_entries_list {-> values_entry*} =
   {multi} [rest]:values_entries_list semicolon [entry]:values_entry {-> [rest.values_entry, entry.values_entry]};
 
 values_entry = [identifier]:composed_identifier equal [value]:expression_top_with_opt_desc
+  // one could allow expression_or_id_list here w/o creating shift/reduce conflicts
      {-> New values_entry([identifier.identifier_literal], value.expression)};
 
 local_operations_clause {-> machine_clause} = local_operations [operation_list]:operation_list {-> New machine_clause.local_operations([operation_list.operation])};
@@ -861,7 +862,7 @@ expression_in_par2 {-> expression} =
      {-> New expression.symbolic_composition(left.expression, right.expression)} |
   {parallel_product} [left]:expression_in_par double_vertical_bar [right]:expression_top
      {-> New expression.parallel_product(left.expression, right.expression)} |
-  {next_level} [expr]:expression_top_with_opt_desc
+  {next_level} [expr]:expression_top_with_opt_desc // using expression_or_id_list here leads to shit/reduce conflict
         /* we allow descriptions for expressions inside parentheses, no ambiguity with predicates possible */
      {-> expr.expression};
 
@@ -1101,6 +1102,7 @@ expression_atomic {-> expression} =
   {int_set} int {-> New expression.int_set()} |
   {bool_set} bool {-> New expression.bool_set()} |
   {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elseif_expression* else [else_expr]:expression_top_with_opt_desc end
+     // Note: one could allow expression_or_id_list here w/o creating shift/reduce conflicts
     {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
   {let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top_with_opt_desc end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
