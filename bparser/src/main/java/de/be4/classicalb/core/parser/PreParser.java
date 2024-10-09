@@ -438,9 +438,11 @@ public class PreParser {
 				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex.getToken();
 				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
 						&& errorToken.getPos() >= errorToken2.getPos())) {
+					// use error message from Substitution
 					correctErrorTokenPosition(definition, rhsToken, errorToken);
 					return new DefinitionType(adjustErrorMessage(e.getRealMsg()), errorToken);
 				} else {
+				    // use error message from Expression/Predicate parsing:
 					correctErrorTokenPosition(definition, rhsToken, errorToken2);
 					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
 				}
