@@ -36,7 +36,7 @@ public class OpPatternTest {
 
 	private void checkParser(final String description, final String oppattern,
 			final String expected) throws BCompoundException {
-		final String parsed = Helpers.getMachineAsPrologTerm(BParser.OPERATION_PATTERN_PREFIX + oppattern);
+		String parsed = Helpers.getTransitionAsPrologTerm(oppattern);
 		assertEquals(description, "machine(" + expected + ").", parsed);
 	}
 }

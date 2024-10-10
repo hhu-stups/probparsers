@@ -8,26 +8,26 @@ public class FormulaTest {
 
 	@Test
 	public void testFomulaExpression() throws Exception {
-		final String formula = "#FORMULA 3 + y";
-		BParser.parse(formula);
+		String formula = "3 + y";
+		new BParser().parseFormula(formula);
 	}
 
 	@Test
 	public void testFomulaPredicate() throws Exception {
-		final String formula = "#FORMULA 3 = y";
-		BParser.parse(formula);
+		String formula = "3 = y";
+		new BParser().parseFormula(formula);
 	}
 
 	@Test(expected = BCompoundException.class)
 	public void testBuggyFomulaExpression() throws Exception {
-		final String formula = "#FORMULA 3 + y - ";
-		BParser.parse(formula);
+		String formula = "3 + y - ";
+		new BParser().parseFormula(formula);
 	}
 
 	@Test(expected = BCompoundException.class)
 	public void testBuggyFomulaPredicate() throws Exception {
-		final String formula = "#FORMULA 3 = ";
-		BParser.parse(formula);
+		String formula = "3 = ";
+		new BParser().parseFormula(formula);
 	}
 
 }

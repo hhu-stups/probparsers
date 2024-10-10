@@ -13,7 +13,7 @@ public class ConsoleTest {
 
 	@Test
 	public void testFormulaOutput() throws BCompoundException {
-		Start start = BParser.parse("#FORMULA 1+1");
+		Start start = new BParser().parseFormula("1+1");
 		PrologTermStringOutput strOutput = new PrologTermStringOutput();
 		ASTProlog printer = new ASTProlog(strOutput, null);
 		start.apply(printer);

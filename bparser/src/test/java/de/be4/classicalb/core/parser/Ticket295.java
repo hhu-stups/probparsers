@@ -12,12 +12,12 @@ public class Ticket295 {
 	@Test
 	public void ticker295() throws Exception {
 
-		// String input = "#FORMULA #x. /* comment */ (x>1000 & x<2**10)";
-		String input1 = "#FORMULA #x. /*buh */ (  x>1000 & x<2**10)";
-		String input2 = "#FORMULA #x.(/*buh */ x>1000 & x<2**10)";
+		// String input = "#x. /* comment */ (x>1000 & x<2**10)";
+		String input1 = "#x. /*buh */ (  x>1000 & x<2**10)";
+		String input2 = "#x.(/*buh */ x>1000 & x<2**10)";
 
-		final String result1 = Helpers.getMachineAsPrologTerm(input1);
-		final String result2 = Helpers.getMachineAsPrologTerm(input2);
+		String result1 = Helpers.getFormulaAsPrologTerm(input1);
+		String result2 = Helpers.getFormulaAsPrologTerm(input2);
 
 		assertEquals(result1, result2);
 
