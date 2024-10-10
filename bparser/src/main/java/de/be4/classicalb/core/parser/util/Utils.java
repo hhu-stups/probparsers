@@ -122,6 +122,7 @@ public final class Utils {
 			|| identifier.startsWith("ASSERT_LTL")
 			|| identifier.equals("CUSTOM_GRAPH")
 			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
+			|| identifier.startsWith("FORCE_SYMMETRY_")
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
 			|| identifier.startsWith("MAX_OPERATIONS_")
