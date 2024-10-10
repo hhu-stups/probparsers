@@ -54,6 +54,19 @@ public final class BinaryOperator {
 		this.name = name;
 	}
 
+	public static String createTripleExpr(final String op1, final String op2) {
+		return "(A " + op1 + " B " + op2 + " C)";
+	}
+
+	public static String createTripleExprLeft(final String op1, final String op2) {
+		return "((A " + op1 + " B) " + op2 + " C)";
+	}
+
+	public static String createTripleExprRight(final String op1,
+			final String op2) {
+		return "(A " + op1 + " (B " + op2 + " C))";
+	}
+
 	public String getSymbol() {
 		return symbol;
 	}

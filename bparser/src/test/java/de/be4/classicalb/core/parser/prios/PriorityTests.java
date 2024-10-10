@@ -9,10 +9,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
 import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExpr;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprRight;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)

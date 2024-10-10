@@ -13,17 +13,4 @@ public class ParseTestUtil {
 	public static String parseExpr(final String input) throws BCompoundException {
 		return Helpers.getTreeAsPrologTerm(new BParser().parseExpression(input));
 	}
-
-	public static String createTripleExpr(final String op1, final String op2) {
-		return "(A " + op1 + " B " + op2 + " C)";
-	}
-
-	public static String createTripleExprLeft(final String op1, final String op2) {
-		return "((A " + op1 + " B) " + op2 + " C)";
-	}
-
-	public static String createTripleExprRight(final String op1,
-			final String op2) {
-		return "(A " + op1 + " (B " + op2 + " C))";
-	}
 }
