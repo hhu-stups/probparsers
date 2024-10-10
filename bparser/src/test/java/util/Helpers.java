@@ -97,6 +97,20 @@ public class Helpers {
 		return postprocessPrologTerm(pout.toString());
 	}
 
+	private static void ensureNoParsingPrefix(String input) {
+		for (String prefix : new String[] {
+			BParser.EXPRESSION_PREFIX,
+			BParser.PREDICATE_PREFIX,
+			BParser.FORMULA_PREFIX,
+			BParser.SUBSTITUTION_PREFIX,
+			BParser.OPERATION_PATTERN_PREFIX,
+		}) {
+			if (input.startsWith(prefix)) {
+				throw new AssertionError("Input code contains an explicit parsing mode prefix: " + prefix);
+			}
+		}
+	}
+
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
 		final BParser parser = new BParser("Test");
 		Start start = parser.parseMachine(input);
@@ -104,30 +118,35 @@ public class Helpers {
 	}
 
 	public static String getExpressionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parseExpression(input);
 		return getTreeAsPrologTerm(start);
 	}
 
 	public static String getPredicateAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parsePredicate(input);
 		return getTreeAsPrologTerm(start);
 	}
 
 	public static String getFormulaAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parseFormula(input);
 		return getTreeAsPrologTerm(start);
 	}
 
 	public static String getSubstitutionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parseSubstitution(input);
 		return getTreeAsPrologTerm(start);
 	}
 
 	public static String getTransitionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parseTransition(input);
 		return getTreeAsPrologTerm(start);
