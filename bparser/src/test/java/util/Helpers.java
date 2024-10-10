@@ -8,9 +8,6 @@ import java.util.stream.Stream;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -159,10 +156,7 @@ public class Helpers {
 	}
 
 	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
-		final INodeIds nodeIds = new NodeFileNumbers();
-		nodeIds.assignIdentifiers(1, start);
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
-		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		ASTProlog prolog = new ASTProlog(pout, null);
 
 		pout.openTerm("machine");
 		start.apply(prolog);
