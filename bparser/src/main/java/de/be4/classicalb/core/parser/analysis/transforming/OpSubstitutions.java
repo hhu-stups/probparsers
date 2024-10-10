@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -173,7 +174,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			} else {
 				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
 			}
-			AOperationCallSubstitution opSubst = new AOperationCallSubstitution(Collections.emptyList(), operationName, parameters);
+			AOperationCallSubstitution opSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), parameters);
 			opSubst.setStartPos(idExpr.getStartPos());
 			opSubst.setEndPos(idExpr.getEndPos());
 			node.replaceBy(opSubst);
@@ -497,10 +498,10 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			} else {
 				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
 			}
-			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), operationName, new LinkedList<>(rhsFunction.getParameters()));
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), new LinkedList<>(rhsFunction.getParameters()));
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
-			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), rhsIdent.getIdentifier(), new LinkedList<>());
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(rhsIdent.getIdentifier()), new LinkedList<>());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", node));

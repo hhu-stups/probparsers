@@ -109,6 +109,17 @@ public class SubstitutionTest {
 	}
 
 	@Test
+	public void testOperationQualified() throws BCompoundException {
+		String testMachine = "#SUBSTITUTION M1.op1(x); M2.M3.M4.op2(y)";
+		String result = Helpers.getMachineAsPrologTerm(testMachine);
+
+		assertEquals(
+			"machine(sequence(none,[operation_call(none,identifier(none,'M1.op1'),[],[identifier(none,x)]),operation_call(none,identifier(none,'M2.M3.M4.op2'),[],[identifier(none,y)])])).",
+			result
+		);
+	}
+
+	@Test
 	public void testFunctionSubstitution() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION\nf(x) := y";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
