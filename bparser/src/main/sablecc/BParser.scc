@@ -1194,7 +1194,7 @@ substitution_l3 {-> substitution} =
   {var} var [identifiers]:identifier_declaration_list in [substitution]:substitution_l0 end
            {-> New substitution.var([identifiers.expression], substitution.substitution)} |
   //{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
-  {operation_call_without_parameter} [op]:identifier_or_function
+  {operation_call_without_parameter} [op]:identifier_or_function_expression
            {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
   {operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params?
            {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
@@ -1263,16 +1263,16 @@ identifier_declaration_list {-> expression*} =
 
 /* a,b,f(1),g(1)(2) := ... */
 assign_list {-> expression*} =
-  {single} [name]:record_or_else {-> [name.expression]} |
-  {multi} [rest]:assign_list comma [name]:record_or_else {-> [rest.expression, name.expression]};
+  {single} [name]:assignment_target {-> [name.expression]} |
+  {multi} [rest]:assign_list comma [name]:assignment_target {-> [rest.expression, name.expression]};
 
-record_or_else {-> expression} =
-  {record} [record]:record_or_else single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
-  {else} [else]:identifier_or_function {-> else.expression};
+assignment_target {-> expression} =
+  {record} [record]:assignment_target single_quotation [name]:normal_identifier_expression {-> New expression.record_field(record.expression, name.expression)} |
+  {next_level} [expr]:identifier_or_function_expression {-> expr.expression};
 
-identifier_or_function {-> expression} =
-  {single} [name]:composed_identifier {-> New expression.identifier([name.identifier_literal])} |
-  {function} [name]:identifier_or_function [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
+identifier_or_function_expression {-> expression} =
+  {identifier} [name]:composed_identifier {-> New expression.identifier([name.identifier_literal])} |
+  {function} [name]:identifier_or_function_expression [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
 
 normal_identifier_expression {-> expression} =
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
