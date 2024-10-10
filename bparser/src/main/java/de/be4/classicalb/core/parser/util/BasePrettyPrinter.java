@@ -2411,12 +2411,6 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAOpSubstitution(AOpSubstitution node) {
-		node.getName().apply(this);
-		printParameterListOpt(node.getParameters());
-	}
-
-	@Override
 	public void caseAOperationCallSubstitution(AOperationCallSubstitution node) {
 		if (!node.getResultIdentifiers().isEmpty()) {
 			printCommaListCompact(node.getResultIdentifiers());

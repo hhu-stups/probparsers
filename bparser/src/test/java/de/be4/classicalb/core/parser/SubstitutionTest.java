@@ -102,7 +102,7 @@ public class SubstitutionTest {
 				result);
 	}
 
-	@Test
+	@Test(expected = BCompoundException.class)
 	public void testOperation2() throws BCompoundException {
 		final String testMachine = "#SUBSTITUTION function(x)(y)";
 		Helpers.getMachineAsPrologTerm(testMachine);

@@ -198,8 +198,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
-	 * grammar for non-Java front-ends. One magic case here: "op" -&gt; "operation_call"
-	 * Todo: do remove magic special cases DO NOT add extra special cases here !!
+	 * grammar for non-Java front-ends. Please DO NOT add any magic special cases here!
 	 * 
 	 * @return Prolog functor name
 	 */
@@ -215,11 +214,7 @@ public class ASTProlog extends DepthFirstAdapter {
 				return camelName;
 			for (String checkend : SUM_TYPE)
 				if (camelName.endsWith(checkend)) {
-					String shortName = camelName.substring(0, camelName.length() - checkend.length() - 1);
-					// hard-coded renamings
-					if (shortName.equals("op"))
-						return "operation_call";
-					return shortName;
+					return camelName.substring(0, camelName.length() - checkend.length() - 1);
 				}
 		}
 		// There is no rule to translate the class name to a prolog functor.
@@ -860,15 +855,6 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseASequenceSubstitution(final ASequenceSubstitution node) {
 		printOCAsList(node, node.getSubstitutions());
-	}
-
-	@Override
-	public void caseAOpSubstitution(final AOpSubstitution node) {
-		open(node);
-		node.getName().apply(this);
-		pout.emptyList();
-		printAsList(node.getParameters());
-		close(node);
 	}
 
 	@Override

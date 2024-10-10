@@ -1671,7 +1671,6 @@ substitution =
   {var} [identifiers]:expression* [substitution]:substitution |
   {sequence} [substitutions]:substitution* |
   {operation_or_definition_call} [expression]:expression |
-  {op} [name]:expression [parameters]:expression* |
   {operation_call} [result_identifiers]:expression* [operation]:identifier_literal* [parameters]:expression* |
   {while} [condition]:predicate [do_subst]:substitution [invariant]:predicate [variant]:expression |
   {parallel} [substitutions]:substitution* |

@@ -332,7 +332,7 @@ public class ASTPrologTest {
 
 	@Test
 	public void testOperationCalls() throws BCompoundException {
-		checkSubstitution("do(x)", "operation_call($,identifier($,do),[],[identifier($,x)])");
+		checkSubstitution("do(x)", "operation_call($,identifier(%,do),[],[identifier($,x)])");
 		checkSubstitution("r <-- do(x)", "operation_call($,identifier(%,do),[identifier($,r)],[identifier($,x)])");
 	}
 

@@ -1,5 +1,6 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,7 @@ import de.be4.classicalb.core.parser.node.ALambdaExpression;
 import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
 import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AOpSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperationOrDefinitionCallSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
@@ -61,7 +62,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  * without return values are recognized as {@link AOperationOrDefinitionCallSubstitution}
  * (as a workaround to avoid shift/reduce conflicts).
  * This visitor finds all {@link AOperationOrDefinitionCallSubstitution} nodes and replaces them
- * with a corresponding {@link AOpSubstitution} or {@link ADefinitionSubstitution} node.
+ * with a corresponding {@link AOperationCallSubstitution} or {@link ADefinitionSubstitution} node.
  * </p>
  * <p>
  * If an {@link AOperationOrDefinitionCallSubstitution} contains an {@link AFunctionExpression},
@@ -166,7 +167,13 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			}
 		} else {
 			// no def, no problem ;-)
-			final AOpSubstitution opSubst = new AOpSubstitution(idExpr, parameters);
+			List<TIdentifierLiteral> operationName;
+			if (idExpr instanceof AIdentifierExpression) {
+				operationName = ((AIdentifierExpression)idExpr).getIdentifier();
+			} else {
+				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
+			}
+			AOperationCallSubstitution opSubst = new AOperationCallSubstitution(Collections.emptyList(), operationName, parameters);
 			opSubst.setStartPos(idExpr.getStartPos());
 			opSubst.setEndPos(idExpr.getEndPos());
 			node.replaceBy(opSubst);
@@ -483,11 +490,17 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 		if (defRhs instanceof AFunctionExpression) {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
-			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
-					new LinkedList<>(rhsFunction.getParameters()));
+			PExpression idExpr = rhsFunction.getIdentifier();
+			List<TIdentifierLiteral> operationName;
+			if (idExpr instanceof AIdentifierExpression) {
+				operationName = ((AIdentifierExpression)idExpr).getIdentifier();
+			} else {
+				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
+			}
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), operationName, new LinkedList<>(rhsFunction.getParameters()));
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
-			rhsSubst = new AOpSubstitution(rhsIdent, new LinkedList<>());
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), rhsIdent.getIdentifier(), new LinkedList<>());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", node));
