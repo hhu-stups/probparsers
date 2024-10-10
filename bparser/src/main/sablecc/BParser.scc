@@ -596,7 +596,7 @@ expression_or_id_list {-> expression} =
             {->  New expression.couple([first.expression, rest.expression])} |
   {expr} [expr]:expression_top_with_opt_desc  {-> expr.expression};
 
-def_parameters {-> expression*} = left_par [parameters]:identifier_list right_par {-> [parameters.expression]};
+def_parameters {-> expression*} = left_par [parameters]:identifier_declaration_list right_par {-> [parameters.expression]};
 
 sees_clause {-> machine_clause} = sees [machine_names]:machine_reference_no_params_list {-> New machine_clause.sees([machine_names.machine_reference_no_params])};
 
@@ -642,16 +642,16 @@ operation_reference_list {-> operation_reference*} =
 operation_reference {-> operation_reference} = [operation_name]:composed_identifier {-> New operation_reference([operation_name.identifier_literal])};
 
 variables_clause {-> machine_clause} =
-  {abstract} abstract_variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])} |
-  variables [identifiers]:identifier_list {-> New machine_clause.variables([identifiers.expression])};
+  {abstract} abstract_variables [identifiers]:identifier_declaration_list {-> New machine_clause.variables([identifiers.expression])} |
+  variables [identifiers]:identifier_declaration_list {-> New machine_clause.variables([identifiers.expression])};
 
 constants_clause {-> machine_clause} =
-  {concrete} concrete_constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])} |
-  constants [identifiers]:identifier_list {-> New machine_clause.constants([identifiers.expression])};
+  {concrete} concrete_constants [identifiers]:identifier_declaration_list {-> New machine_clause.constants([identifiers.expression])} |
+  constants [identifiers]:identifier_declaration_list {-> New machine_clause.constants([identifiers.expression])};
 
-concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_list {-> New machine_clause.concrete_variables([identifiers.expression])};
+concrete_variables_clause {-> machine_clause} = concrete_variables [identifiers]:identifier_declaration_list {-> New machine_clause.concrete_variables([identifiers.expression])};
 
-abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_list {-> New machine_clause.abstract_constants([identifiers.expression])};
+abstract_constants_clause {-> machine_clause} = abstract_constants [identifiers]:identifier_declaration_list {-> New machine_clause.abstract_constants([identifiers.expression])};
 
 sets_clause {-> machine_clause} = sets [set_definitions]:set_def_list {-> New machine_clause.sets([set_definitions.set])};
 
@@ -662,7 +662,7 @@ set_def_list {-> set*} =
 set {-> set} =
   {description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
-  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
+  {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_declaration_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
   {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
           {-> New set.enumerated_set_via_def([identifier.identifier_literal], [elem_def.identifier_literal])};
   // TO DO: allow description pragmas for enumerated set elements
@@ -732,7 +732,7 @@ operation_attribute {-> operation_attribute} =
   {predicate_attribute} [name]:kw_predicate_attribute [predicate]:predicate_top {-> New operation_attribute.predicate_attribute(name, predicate.predicate)};
 
 operation_return_values {-> expression*} =
-  [return_values]:identifier_list output_parameters {-> [return_values.expression]};
+  [return_values]:identifier_declaration_list output_parameters {-> [return_values.expression]};
 
 freetypes_clause {-> machine_clause} = kw_freetypes [freetype_list]:freetype_list {-> New machine_clause.freetypes([freetype_list.freetype])};
 freetype_list {-> freetype*} =
@@ -836,7 +836,7 @@ predicate_atomic {-> predicate} =
   |
   {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elseif_predicate* else [else_pred]:predicate_top end
     {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, [elsifs.predicate], else_pred.predicate)} |
-  {let_predicate} let [identifiers]:identifier_list be [definition]:predicate_top in [pred]:predicate_top end
+  {let_predicate} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
   {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
 
@@ -1104,7 +1104,7 @@ expression_atomic {-> expression} =
   {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elseif_expression* else [else_expr]:expression_top_with_opt_desc end
      // Note: one could allow expression_or_id_list here w/o creating shift/reduce conflicts
     {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
-  {let_expression} let [identifiers]:identifier_list be [definition]:predicate_top in [expr]:expression_top_with_opt_desc end
+  {let_expression} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [expr]:expression_top_with_opt_desc end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
   {string_set} string {-> New expression.string_set()};
 
@@ -1178,7 +1178,7 @@ substitution_l3 {-> substitution} =
            {-> New substitution.select(condition.predicate, then_subst.substitution, [whens.substitution], else.substitution)} |
   {case} case [case_expr]:expression_in_par of either [either_expr]:expression_list then [either_subst]:substitution_l0 [or_substitutions]:case_or* [else]:case_else? [end1]:end [end2]:end
            {-> New substitution.case(case_expr.expression, [either_expr.expression], either_subst.substitution, [or_substitutions.substitution], else.substitution)} |
-  {any} any [identifiers]:identifier_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end
+  {any} any [identifiers]:identifier_declaration_list where [where_pred]:predicate_top then [then_subst]:substitution_l0 end
            {-> New substitution.any([identifiers.expression], where_pred.predicate, then_subst.substitution)} |
   // According to the Atelier-B reference manual,
   // the LHS of "becomes element of" and "becomes such that" substitutions can only contain (possibly dotted) identifiers.
@@ -1191,7 +1191,7 @@ substitution_l3 {-> substitution} =
            {-> New substitution.becomes_element_of([identifiers.expression], set.expression)} |
   {becomes_such} [identifiers]:assign_list element_of left_par [predicate]:predicate_top right_par
            {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
-  {var} var [identifiers]:identifier_list in [substitution]:substitution_l0 end
+  {var} var [identifiers]:identifier_declaration_list in [substitution]:substitution_l0 end
            {-> New substitution.var([identifiers.expression], substitution.substitution)} |
   //{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
   {operation_call_without_parameter} [op]:identifier_or_function
@@ -1200,19 +1200,19 @@ substitution_l3 {-> substitution} =
            {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
   {while} while [condition]:predicate_top do [do_subst]:substitution_l0 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end
            {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
-  {let} let [identifiers]:identifier_list be [predicate]:predicate_top in [substitution]:substitution_l0 end
+  {let} let [identifiers]:identifier_declaration_list be [predicate]:predicate_top in [substitution]:substitution_l0 end
            {-> New substitution.let([identifiers.expression], predicate.predicate, substitution.substitution)} |
   {definition} [def_literal]:def_literal_substitution [parameters]:def_call_params?
            {-> New substitution.definition(def_literal, [parameters.expression])} |
 
   // extensions for rules
-  {for_loop} kw_for [identifiers]:identifier_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
+  {for_loop} kw_for [identifiers]:identifier_declaration_list in [set]:expression_in_par do [do_subst]:substitution_l0 end
           {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
-  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_list where [where_pred]:predicate_top
+  {forall_sub_message} kw_rule_for_all [identifiers]:identifier_declaration_list where [where_pred]:predicate_top
                        kw_expect [expect_pred]:predicate_top [error_type]:error_type?
                        [on_success]:on_success? kw_counterexample [message]:expression_top_with_opt_desc end
           {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, message.expression)} |
-  {rule_fail_sub} kw_rule_fail [identifiers]:identifier_list? [when_pred]:when_predicate?
+  {rule_fail_sub} kw_rule_fail [identifiers]:identifier_declaration_list? [when_pred]:when_predicate?
                   [error_type]:error_type? kw_counterexample [message]:expression_top_with_opt_desc end
            {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params?
@@ -1257,9 +1257,9 @@ composed_identifier {-> identifier_literal*} =
   {multi} [rest]:composed_identifier dot [first]:identifier_literal {-> [rest.identifier_literal, first]};
   // To do: maybe the only place where we do not want to also admit the second kind of dot '·' (generated by Rodin for quantifiers)
 
-identifier_list {-> expression*} =
-  {single} [identifier]:identifier_declaration_expression {-> [identifier.expression]} |
-  {multi} [rest]:identifier_list comma [identifier]:identifier_declaration_expression {-> [rest.expression, identifier.expression]};
+identifier_declaration_list {-> expression*} =
+  {single} [identifier]:identifier_declaration {-> [identifier.expression]} |
+  {multi} [rest]:identifier_declaration_list comma [identifier]:identifier_declaration {-> [rest.expression, identifier.expression]};
 
 /* a,b,f(1),g(1)(2) := ... */
 assign_list {-> expression*} =
@@ -1278,10 +1278,10 @@ normal_identifier_expression {-> expression} =
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 quantified_variables_list {-> expression*} =
-  {parentheses} left_par [id]:identifier_list right_par {-> [id.expression]} |
-  {no_parentheses} [id]:identifier_list {-> [id.expression]};
+  {parentheses} left_par [id]:identifier_declaration_list right_par {-> [id.expression]} |
+  {no_parentheses} [id]:identifier_declaration_list {-> [id.expression]};
 
-identifier_declaration_expression {-> expression} =
+identifier_declaration {-> expression} =
   {description} [identifier]:identifier_literal pragma_description [content]:pragma_free_text {-> New expression.description(content, New expression.identifier([identifier]))} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
