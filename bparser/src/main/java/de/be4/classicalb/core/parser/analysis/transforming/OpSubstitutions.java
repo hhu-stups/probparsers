@@ -485,17 +485,15 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
 					new LinkedList<>(rhsFunction.getParameters()));
-			rhsSubst.setStartPos(rhsFunction.getStartPos());
-			rhsSubst.setEndPos(rhsFunction.getEndPos());
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
 			rhsSubst = new AOpSubstitution(rhsIdent, new LinkedList<>());
-			rhsSubst.setStartPos(rhsIdent.getStartPos());
-			rhsSubst.setEndPos(rhsIdent.getEndPos());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", node));
 		}
+		rhsSubst.setStartPos(defRhs.getStartPos());
+		rhsSubst.setEndPos(defRhs.getEndPos());
 
 		final TIdentifierLiteral oldDefId = oldDefinition.getName();
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(oldDefId.getText(), oldDefId.getLine(),
