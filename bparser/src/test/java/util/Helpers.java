@@ -103,6 +103,36 @@ public class Helpers {
 		return getTreeAsPrologTerm(start);
 	}
 
+	public static String getExpressionAsPrologTerm(String input) throws BCompoundException {
+		BParser parser = new BParser("Test");
+		Start start = parser.parseExpression(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getPredicateAsPrologTerm(String input) throws BCompoundException {
+		BParser parser = new BParser("Test");
+		Start start = parser.parsePredicate(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getFormulaAsPrologTerm(String input) throws BCompoundException {
+		BParser parser = new BParser("Test");
+		Start start = parser.parseFormula(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getSubstitutionAsPrologTerm(String input) throws BCompoundException {
+		BParser parser = new BParser("Test");
+		Start start = parser.parseSubstitution(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getTransitionAsPrologTerm(String input) throws BCompoundException {
+		BParser parser = new BParser("Test");
+		Start start = parser.parseTransition(input);
+		return getTreeAsPrologTerm(start);
+	}
+
 	public static String getTreeAsPrologTerm(final Start ast) {
 		final PrologTermStringOutput pout = new PrologTermStringOutput();
 		printAsProlog(ast, pout);

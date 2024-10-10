@@ -1,12 +1,13 @@
 package de.be4.classicalb.core.parser;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parsePred;
-import static org.junit.Assert.*;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import org.junit.Test;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import util.Helpers;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * The English manual of AtelierB (version 1.8.6) has wrong priorities. This
@@ -37,9 +38,9 @@ public class EnglishVsFrenchManual {
 
 	private void checkPred(final String pred, final String english,
 			final String french) throws BCompoundException {
-		final String parsedPred = parsePred(pred);
-		final String parsedEnglish = parsePred(english);
-		final String parsedFrench = parsePred(french);
+		String parsedPred = Helpers.getPredicateAsPrologTerm(pred);
+		String parsedEnglish = Helpers.getPredicateAsPrologTerm(english);
+		String parsedFrench = Helpers.getPredicateAsPrologTerm(french);
 
 		assertEquals(parsedFrench, parsedPred);
 		assertNotEquals(parsedPred, parsedEnglish);
@@ -53,9 +54,9 @@ public class EnglishVsFrenchManual {
 		final String english = "A <+ (B <-> B)";
 		final String french = "(A <+ B) <-> B";
 
-		final String parsedExpr = parseExpr(expr);
-		final String parsedEnglish = parseExpr(english);
-		final String parsedFrench = parseExpr(french);
+		String parsedExpr = Helpers.getExpressionAsPrologTerm(expr);
+		String parsedEnglish = Helpers.getExpressionAsPrologTerm(english);
+		String parsedFrench = Helpers.getExpressionAsPrologTerm(french);
 
 		assertEquals(parsedFrench, parsedExpr);
 		assertNotEquals(parsedExpr, parsedEnglish);
