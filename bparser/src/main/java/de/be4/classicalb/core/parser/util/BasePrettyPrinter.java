@@ -2406,8 +2406,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAFuncOpSubstitution(AFuncOpSubstitution node) {
-		node.getFunction().apply(this);
+	public void caseAOperationOrDefinitionCallSubstitution(AOperationOrDefinitionCallSubstitution node) {
+		node.getExpression().apply(this);
 	}
 
 	@Override

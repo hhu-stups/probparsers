@@ -19,7 +19,6 @@ import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AFuncOpSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
 import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
 import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
@@ -29,6 +28,7 @@ import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
 import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
 import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AOpSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationOrDefinitionCallSubstitution;
 import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
 import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
@@ -57,21 +57,18 @@ import de.be4.classicalb.core.parser.util.Utils;
  * error is thrown.
  * </p>
  * <p>
- * During parsing substitutions that are operation calls without return values
- * are recognized as {@link AFuncOpSubstitution}. These
- * {@link AFuncOpSubstitution} nodes can contain any expression. So the parser
- * accepts any expression as substitution here.
+ * During parsing, substitutions that are operation/definition calls
+ * without return values are recognized as {@link AOperationOrDefinitionCallSubstitution}
+ * (as a workaround to avoid shift/reduce conflicts).
+ * This visitor finds all {@link AOperationOrDefinitionCallSubstitution} nodes and replaces them
+ * with a corresponding {@link AOpSubstitution} or {@link ADefinitionSubstitution} node.
  * </p>
  * <p>
- * This visitor checks any {@link AFuncOpSubstitution} if the child of the node
- * is of type {@link AFunctionExpression} (i.e. operation call with parameters)
- * or {@link AIdentifierExpression} (i.e. operation call without parameters).
- * Then the {@link AFuncOpSubstitution} node is replaced by a corresponding
- * {@link AOpSubstitution} node.
- * </p>
- * <p>
- * If the child is any other expression type, a {@link BParseException} is
- * thrown.
+ * If an {@link AOperationOrDefinitionCallSubstitution} contains an {@link AFunctionExpression},
+ * it's an operation/definition call with arguments.
+ * If an {@link AOperationOrDefinitionCallSubstitution} contains an {@link AIdentifierExpression},
+ * it's an operation/definition call without arguments.
+ * Other expression types inside {@link AOperationOrDefinitionCallSubstitution} are not allowed by the grammar.
  * </p>
  * <p>
  * Definitions with type Expression are not recognized during parsing. In the
@@ -107,8 +104,8 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	}
 
 	@Override
-	public void caseAFuncOpSubstitution(final AFuncOpSubstitution node) {
-		final PExpression expression = node.getFunction();
+	public void caseAOperationOrDefinitionCallSubstitution(AOperationOrDefinitionCallSubstitution node) {
+		PExpression expression = node.getExpression();
 		PExpression idExpr;
 		LinkedList<PExpression> parameters;
 		Type type;
@@ -478,7 +475,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		}
 	}
 
-	private void setTypeSubstDef(final AFuncOpSubstitution node, final String idString) {
+	private void setTypeSubstDef(AOperationOrDefinitionCallSubstitution node, String idString) {
 		final AExpressionDefinitionDefinition oldDefinition = (AExpressionDefinitionDefinition) definitions
 				.getDefinition(idString);
 		final Node defRhs = oldDefinition.getRhs();

@@ -1193,11 +1193,33 @@ substitution_l3 {-> substitution} =
            {-> New substitution.becomes_such([identifiers.expression], predicate.predicate)} |
   {var} var [identifiers]:identifier_declaration_list in [substitution]:substitution_l0 end
            {-> New substitution.var([identifiers.expression], substitution.substitution)} |
-  //{func_op} [expr]:expression_func {-> New substitution.func_op(expr.expression)} | // (old) check in semantic check if expression is a function
-  {operation_call_without_parameter} [op]:identifier_or_function_expression
-           {-> New substitution.func_op(op.expression)} | // check in semantic check if expression is a function
-  {operation_call} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params?
+
+  // Ambiguous call: either an operation call without return values
+  // or a definition call of a definition of type ExprOrSubst
+  // (i. e. it was uncertain whether the RHS is an expression or a substitution).
+  // In both cases, the call may have arguments (parsed as a function call expression)
+  // or it may have no arguments (parsed as an identifier expression).
+  // The OpSubstitutions visitor will transform the resulting operation_or_definition_call node
+  // into an operation_call or definition substitution as appropriate.
+  //
+  // Definition calls of a definition of type Substitution
+  // (i. e. the RHS is unambiguously a substitution)
+  // are *not* handled by this alternative.
+  // The PreParser transforms the definition call identifier into a def_literal_substitution token,
+  // which will be handled by a different alternative that directly produces a definition substitution.
+  //
+  // Unrelated to this ambiguity, the call must be parsed as identifier_or_function_expression
+  // to avoid shift/reduce conflicts with operation calls *with* return values:
+  // without unlimited lookahead, it's impossible to tell whether "f(a,b,c,d,...)"
+  // is part of a return value assignment ("f(a,b,c,d,...) <-- op(x,y,z)")
+  // or an operation call ("f(a,b,c,d,...); skip").
+  {operation_or_definition_call} [op]:identifier_or_function_expression
+           {-> New substitution.operation_or_definition_call(op.expression)} | // check in semantic check if expression is a definition
+  // Unambiguous call: the '<--' syntax for return values is only used for operation calls.
+  // (Definition call substitutions cannot have return values.)
+  {operation_call_with_return_values} [return_values]:assign_list output_parameters [op_name]:composed_identifier [parameters]:op_params?
            {-> New substitution.operation_call([return_values.expression], [op_name.identifier_literal], [parameters.expression])} |
+
   {while} while [condition]:predicate_top do [do_subst]:substitution_l0 invariant [invariant_pred]:predicate_top variant [variant_expr]:expression_in_par end
            {-> New substitution.while(condition.predicate, do_subst.substitution, invariant_pred.predicate, variant_expr.expression)} |
   {let} let [identifiers]:identifier_declaration_list be [predicate]:predicate_top in [substitution]:substitution_l0 end
@@ -1648,7 +1670,7 @@ substitution =
   {becomes_such} [identifiers]:expression* [predicate]:predicate |
   {var} [identifiers]:expression* [substitution]:substitution |
   {sequence} [substitutions]:substitution* |
-  {func_op} [function]:expression |
+  {operation_or_definition_call} [expression]:expression |
   {op} [name]:expression [parameters]:expression* |
   {operation_call} [result_identifiers]:expression* [operation]:identifier_literal* [parameters]:expression* |
   {while} [condition]:predicate [do_subst]:substitution [invariant]:predicate [variant]:expression |
