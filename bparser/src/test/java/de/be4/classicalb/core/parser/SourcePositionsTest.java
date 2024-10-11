@@ -18,6 +18,7 @@ import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
 import de.hhu.stups.sablecc.patch.PositionedNode;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +32,89 @@ import static org.junit.Assert.fail;
 public class SourcePositionsTest {
 
 	private BParser parser;
+
+	// TODO This test case should go into the sablecc-stups project instead
+	@Test
+	public void testSourcePositionComparable() {
+		SourcePosition p1 = new SourcePosition(1, 5);
+		SourcePosition p2 = new SourcePosition(2, 10);
+		SourcePosition p3 = new SourcePosition(3, 1);
+		SourcePosition p4 = new SourcePosition(3, 11);
+		
+		assertEquals(0, p1.compareTo(p1));
+		assertTrue(p1.compareTo(p2) < 0);
+		assertTrue(p2.compareTo(p1) > 0);
+		assertTrue(p1.compareTo(p3) < 0);
+		assertTrue(p1.compareTo(p4) < 0);
+		assertTrue(p2.compareTo(p3) < 0);
+		assertTrue(p2.compareTo(p4) < 0);
+		assertTrue(p3.compareTo(p4) < 0);
+		
+		
+	}
+
+	@Test
+	public void testSimpleNode() throws Exception {
+		String testExpression = "x";
+		Start startNode = parser.parseExpression(testExpression);
+		PExpression expression = ((AExpressionParseUnit) startNode.getPParseUnit()).getExpression();
+
+		SourcePosition startPos = expression.getStartPos();
+		SourcePosition endPos = expression.getEndPos();
+
+		assertNotNull(startNode);
+		assertNotNull(endPos);
+
+		assertEquals(1, startPos.getLine());
+		assertEquals(1, startPos.getPos());
+		assertEquals(1, endPos.getLine());
+		assertEquals(2, endPos.getPos());
+	}
+
+	@Test
+	public void testComposedNode() throws Exception {
+		String testExpression = "x+1";
+		Start startNode = parser.parseExpression(testExpression);
+
+		// test top node
+		PExpression expression = ((AExpressionParseUnit) startNode.getPParseUnit()).getExpression();
+		SourcePosition startPos = expression.getStartPos();
+		SourcePosition endPos = expression.getEndPos();
+
+		assertNotNull(startNode);
+		assertNotNull(endPos);
+
+		assertEquals(1, startPos.getLine());
+		assertEquals(1, startPos.getPos());
+		assertEquals(1, endPos.getLine());
+		assertEquals(4, endPos.getPos());
+
+		// test left child: 1-2
+		PExpression leftExpr = ((AAddExpression) expression).getLeft();
+		startPos = leftExpr.getStartPos();
+		endPos = leftExpr.getEndPos();
+
+		assertNotNull(startNode);
+		assertNotNull(endPos);
+
+		assertEquals(1, startPos.getLine());
+		assertEquals(1, startPos.getPos());
+		assertEquals(1, endPos.getLine());
+		assertEquals(2, endPos.getPos());
+
+		// test right child: 3-4
+		PExpression rightExpr = ((AAddExpression) expression).getRight();
+		startPos = rightExpr.getStartPos();
+		endPos = rightExpr.getEndPos();
+
+		assertNotNull(startNode);
+		assertNotNull(endPos);
+
+		assertEquals(1, startPos.getLine());
+		assertEquals(3, startPos.getPos());
+		assertEquals(1, endPos.getLine());
+		assertEquals(4, endPos.getPos());
+	}
 
 	@Test
 	public void testTokenAsPositionedNode() throws Exception {
