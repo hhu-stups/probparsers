@@ -3,8 +3,10 @@ package de.be4.classicalb.core.parser;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Test;
@@ -28,38 +30,42 @@ public class ParseableButProblematicOnWindows {
 		this.machine = machine;
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static File[] data() {
-		return Helpers.getMachines(PATH);
+	private static void convertLineSeparators(File original, File destination, String lineSeparator) throws IOException {
+		try (
+			BufferedReader in = Files.newBufferedReader(original.toPath());
+			BufferedWriter out = Files.newBufferedWriter(destination.toPath());
+		) {
+			String line;
+			while ((line = in.readLine()) != null) {
+				out.write(line + lineSeparator);
+			}
+		}
 	}
 
-	@Test
-	public void parsableWithOriginalLineSeparators() throws Exception {
+	private static void assertParsable(File machine) throws BCompoundException {
 		final BParser parser = new BParser(machine.getName());
 		Start start = parser.parseFile(machine);
 		start.apply(new PositionTester());
 		assertNotNull(start);
 	}
 
+	@Parameterized.Parameters(name = "{0}")
+	public static File[] data() {
+		return Helpers.getMachines(PATH);
+	}
+
 	@Test
-	public void parsableWithUnixLineSeparators() throws Exception {
+	public void parsableWithOriginalLineSeparators() throws BCompoundException {
+		assertParsable(machine);
+	}
+
+	@Test
+	public void parsableWithUnixLineSeparators() throws BCompoundException, IOException {
 		File unixMachine = File.createTempFile(machine.getName().replace(".mch", "_unix"), ".mch");
 
 		try {
-			try (
-				BufferedReader in = Files.newBufferedReader(machine.toPath());
-				BufferedWriter out = Files.newBufferedWriter(unixMachine.toPath());
-			) {
-				String zeile;
-				while ((zeile = in.readLine()) != null) {
-					out.write(zeile + "\n");
-				}
-			}
-
-			final BParser parser = new BParser(unixMachine.getName());
-			Start start = parser.parseFile(unixMachine);
-			start.apply(new PositionTester());
-			assertNotNull(start);
+			convertLineSeparators(machine, unixMachine, "\n");
+			assertParsable(unixMachine);
 		} finally {
 			boolean success = unixMachine.delete();
 			assertTrue("Failed to delete temporary machine file", success);
@@ -67,24 +73,12 @@ public class ParseableButProblematicOnWindows {
 	}
 
 	@Test
-	public void parsableWithWindowsLineSeparators() throws Exception {
+	public void parsableWithWindowsLineSeparators() throws BCompoundException, IOException {
 		File windowsMachine = File.createTempFile(machine.getName().replace(".mch", "_win"), ".mch");
 
 		try {
-			try (
-				BufferedReader in = Files.newBufferedReader(machine.toPath());
-				BufferedWriter out = Files.newBufferedWriter(windowsMachine.toPath());
-			) {
-				String zeile;
-				while ((zeile = in.readLine()) != null) {
-					out.write(zeile + "\r\n");
-				}
-			}
-
-			final BParser parser = new BParser(windowsMachine.getName());
-			Start start = parser.parseFile(windowsMachine);
-			start.apply(new PositionTester());
-			assertNotNull(start);
+			convertLineSeparators(machine, windowsMachine, "\r\n");
+			assertParsable(windowsMachine);
 		} finally {
 			boolean success = windowsMachine.delete();
 			assertTrue("Failed to delete temporary machine file", success);
