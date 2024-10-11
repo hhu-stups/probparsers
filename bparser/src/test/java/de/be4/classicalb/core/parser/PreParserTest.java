@@ -16,7 +16,7 @@ public class PreParserTest {
 			throws ParserException, LexerException, IOException {
 		final Parser parser = new Parser(
 				new PreLexer(
-						new PushbackReader(new StringReader(testMachine), 99)));
+						new PushbackReader(new StringReader(testMachine), BLexer.PUSHBACK_BUFFER_SIZE)));
 		parser.parse();
 	}
 
