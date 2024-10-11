@@ -15,9 +15,9 @@ import static org.junit.Assert.assertNotNull;
 public class PositionAspectTest {
 	@Test
 	public void testSimpleNode() throws Exception {
-		final String testMachine = "#EXPRESSION x";
+		final String testExpression = "x";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parseMachine(testMachine);
+		final Start startNode = parser.parseExpression(testExpression);
 		final PExpression expression = ((AExpressionParseUnit) startNode
 				.getPParseUnit()).getExpression();
 
@@ -28,16 +28,16 @@ public class PositionAspectTest {
 		assertNotNull(endPos);
 
 		assertEquals(1, startPos.getLine());
-		assertEquals(13, startPos.getPos());
+		assertEquals(1, startPos.getPos());
 		assertEquals(1, endPos.getLine());
-		assertEquals(14, endPos.getPos());
+		assertEquals(2, endPos.getPos());
 	}
 
 	@Test
 	public void testComposedNode() throws Exception {
-		final String testMachine = "#EXPRESSION x+1";
+		final String testExpression = "x+1";
 		final BParser parser = new BParser("testcase");
-		final Start startNode = parser.parseMachine(testMachine);
+		final Start startNode = parser.parseExpression(testExpression);
 
 		// test top node
 		final PExpression expression = ((AExpressionParseUnit) startNode
@@ -49,11 +49,11 @@ public class PositionAspectTest {
 		assertNotNull(endPos);
 
 		assertEquals(1, startPos.getLine());
-		assertEquals(13, startPos.getPos());
+		assertEquals(1, startPos.getPos());
 		assertEquals(1, endPos.getLine());
-		assertEquals(16, endPos.getPos());
+		assertEquals(4, endPos.getPos());
 
-		// test left child: 13-14
+		// test left child: 1-2
 		final PExpression leftExpr = ((AAddExpression) expression).getLeft();
 		startPos = leftExpr.getStartPos();
 		endPos = leftExpr.getEndPos();
@@ -62,11 +62,11 @@ public class PositionAspectTest {
 		assertNotNull(endPos);
 
 		assertEquals(1, startPos.getLine());
-		assertEquals(13, startPos.getPos());
+		assertEquals(1, startPos.getPos());
 		assertEquals(1, endPos.getLine());
-		assertEquals(14, endPos.getPos());
+		assertEquals(2, endPos.getPos());
 
-		// test right child: 15-16
+		// test right child: 3-4
 		final PExpression rightExpr = ((AAddExpression) expression).getRight();
 		startPos = rightExpr.getStartPos();
 		endPos = rightExpr.getEndPos();
@@ -75,8 +75,8 @@ public class PositionAspectTest {
 		assertNotNull(endPos);
 
 		assertEquals(1, startPos.getLine());
-		assertEquals(15, startPos.getPos());
+		assertEquals(3, startPos.getPos());
 		assertEquals(1, endPos.getLine());
-		assertEquals(16, endPos.getPos());
+		assertEquals(4, endPos.getPos());
 	}
 }
