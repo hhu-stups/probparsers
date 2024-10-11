@@ -1,14 +1,14 @@
 package de.be4.classicalb.core.parser;
 
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.StringReader;
+
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
-import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PushbackReader;
+import org.junit.Test;
 
 public class PreParserTest {
 
@@ -16,10 +16,7 @@ public class PreParserTest {
 			throws ParserException, LexerException, IOException {
 		final Parser parser = new Parser(
 				new PreLexer(
-						new PushbackReader(
-								new InputStreamReader(
-										new ByteArrayInputStream(
-												testMachine.getBytes())), 99)));
+						new PushbackReader(new StringReader(testMachine), 99)));
 		parser.parse();
 	}
 
