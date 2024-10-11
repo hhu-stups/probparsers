@@ -20,13 +20,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class ParseableButProblematicOnWindows {
+public class ParsableButProblematicOnWindowsTest {
 
 	private static final String PATH = "problematicOnWindows";
 
 	private final File machine;
 
-	public ParseableButProblematicOnWindows(File machine) {
+	public ParsableButProblematicOnWindowsTest(File machine) {
 		this.machine = machine;
 	}
 
