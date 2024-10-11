@@ -606,8 +606,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void checkThatIdentifiersAreLocalVariables(List<PExpression> copy) {
-		for (PExpression e : copy) {
+	private void checkThatIdentifiersAreLocalVariables(List<PExpression> identifiers) {
+		for (PExpression e : identifiers) {
 			if (e instanceof AIdentifierExpression) {
 				AIdentifierExpression id = (AIdentifierExpression) e;
 				String name = id.getIdentifier().get(0).getText();

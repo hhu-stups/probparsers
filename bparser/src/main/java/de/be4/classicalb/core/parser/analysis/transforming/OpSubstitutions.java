@@ -230,8 +230,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 				 */
 				final ADefinitionExpression newNode = replaceWithDefExpression(node, identifier, paramList);
 
-				final List<PExpression> copy = newNode.getParameters();
-				for (final PExpression e : copy) {
+				for (final PExpression e : newNode.getParameters()) {
 					e.apply(this);
 				}
 
@@ -245,8 +244,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		 * (by declaration), so we asume the parameters belong to some other
 		 * construct (for example a function a level higher in the AST).
 		 */
-		final List<PExpression> copy = node.getParameters();
-		for (final PExpression e : copy) {
+		for (final PExpression e : node.getParameters()) {
 			e.apply(this);
 		}
 	}
