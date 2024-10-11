@@ -81,9 +81,6 @@ public class SourcePositionsTest {
 		SourcePosition startPos = expression.getStartPos();
 		SourcePosition endPos = expression.getEndPos();
 
-		assertNotNull(startNode);
-		assertNotNull(endPos);
-
 		assertEquals(1, startPos.getLine());
 		assertEquals(1, startPos.getPos());
 		assertEquals(1, endPos.getLine());
@@ -94,9 +91,6 @@ public class SourcePositionsTest {
 		startPos = leftExpr.getStartPos();
 		endPos = leftExpr.getEndPos();
 
-		assertNotNull(startNode);
-		assertNotNull(endPos);
-
 		assertEquals(1, startPos.getLine());
 		assertEquals(1, startPos.getPos());
 		assertEquals(1, endPos.getLine());
@@ -106,9 +100,6 @@ public class SourcePositionsTest {
 		PExpression rightExpr = ((AAddExpression) expression).getRight();
 		startPos = rightExpr.getStartPos();
 		endPos = rightExpr.getEndPos();
-
-		assertNotNull(startNode);
-		assertNotNull(endPos);
 
 		assertEquals(1, startPos.getLine());
 		assertEquals(3, startPos.getPos());
@@ -124,13 +115,11 @@ public class SourcePositionsTest {
 		final AAddExpression addExpression = (AAddExpression) exprParseUnit.getExpression();
 		final AIntegerExpression intExpression = (AIntegerExpression) addExpression.getRight();
 
-		assertTrue(intExpression instanceof PositionedNode);
 		assertNotNull(intExpression.getStartPos());
 		assertNotNull(intExpression.getEndPos());
 
 		final TIntegerLiteral intLiteral = intExpression.getLiteral();
 
-		assertTrue(intLiteral instanceof PositionedNode);
 		assertNotNull(((PositionedNode) intLiteral).getStartPos());
 		assertNotNull(((PositionedNode) intLiteral).getEndPos());
 	}
