@@ -110,6 +110,7 @@ public class Helpers {
 	}
 
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		final BParser parser = new BParser("Test");
 		Start start = parser.parseMachine(input);
 		return getTreeAsPrologTerm(start);
