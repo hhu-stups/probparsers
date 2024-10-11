@@ -104,7 +104,7 @@ public class Helpers {
 			BParser.MACHINE_CLAUSE_PREFIX,
 		}) {
 			if (input.startsWith(prefix)) {
-				throw new AssertionError("Input code contains an explicit parsing mode prefix: " + prefix);
+				throw new AssertionError("Input code contains an explicit parsing kind prefix: " + prefix);
 			}
 		}
 	}
