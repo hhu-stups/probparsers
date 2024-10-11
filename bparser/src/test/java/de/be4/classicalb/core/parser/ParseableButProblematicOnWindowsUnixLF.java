@@ -30,32 +30,27 @@ public class ParseableButProblematicOnWindowsUnixLF {
 
 	@Test
 	public void testParsable() throws Exception {
-		final BParser parser = new BParser(machine.getName());
-		Start start = parser.parseFile(machine);
+		File unixMachine = File.createTempFile(machine.getName().replace(".mch", "_unix"), ".mch");
+
+		try (
+			BufferedReader in = Files.newBufferedReader(machine.toPath());
+			BufferedWriter out = Files.newBufferedWriter(unixMachine.toPath());
+		) {
+			String zeile;
+			while ((zeile = in.readLine()) != null) {
+				out.write(zeile + "\n");
+			}
+		}
+
+		final BParser parser = new BParser(unixMachine.getName());
+		Start start = parser.parseFile(unixMachine);
 		start.apply(new PositionTester());
 		assertNotNull(start);
 	}
 
 	@Parameterized.Parameters(name = "{0}")
 	public static File[] data() throws IOException {
-		final File[] machines = Helpers.getMachines(PATH);
-		final File[] unixMachines = new File[machines.length];
-
-		for (int i = 0; i < machines.length; i++) {
-			unixMachines[i] = File.createTempFile(machines[i].getName().replace(".mch", "_unix"), ".mch");
-
-			try (
-				BufferedReader in = Files.newBufferedReader(machines[i].toPath());
-				BufferedWriter out = Files.newBufferedWriter(unixMachines[i].toPath());
-			) {
-				String zeile;
-				while ((zeile = in.readLine()) != null) {
-					out.write(zeile + "\n");
-				}
-			}
-		}
-
-		return unixMachines;
+		return Helpers.getMachines(PATH);
 	}
 
 }
