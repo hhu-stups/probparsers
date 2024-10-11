@@ -10,7 +10,6 @@ public class ParsingBehaviour {
 	private boolean fastPrologOutput = false; // -fastprolog flag in CliBParser
 	private boolean compactPositions = true; // false means use old style pos/5 positions
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
-	private boolean printLocalStackSize = false; // -printstacksize flag
 	private int defaultFileNumber = -1;
 	private int startLineNumber = 1;
 	private int startColumnNumber = 1;
@@ -77,14 +76,6 @@ public class ParsingBehaviour {
 
 	public void setMachineNameMustMatchFileName(boolean machineNameMustMatchFileName) {
 		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
-	}
-
-	public boolean isPrintLocalStackSize() {
-		return printLocalStackSize;
-	}
-	
-	public void setPrintLocalStackSize(boolean printLocalStackSize) {
-		this.printLocalStackSize = printLocalStackSize;
 	}
 
 	public int getDefaultFileNumber() {

@@ -161,7 +161,6 @@ public class CliBParser {
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
-		behaviour.setPrintLocalStackSize(options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE));
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
@@ -209,8 +208,6 @@ public class CliBParser {
 				return String.valueOf(behaviour.getStartLineNumber());
 			case "startColumnNumber":
 				return String.valueOf(behaviour.getStartColumnNumber());
-			case "printstacksize":
-				return String.valueOf(behaviour.isPrintLocalStackSize());
 			default:
 				// Unknown/unsupported option
 				return null;
@@ -242,9 +239,6 @@ public class CliBParser {
 				break;
 			case "startColumnNumber": // default in ParsingBehaviour.java: 1
 				behaviour.setStartColumnNumber(Integer.parseInt(value));
-				break;
-			case "printstacksize":
-				behaviour.setPrintLocalStackSize(Boolean.parseBoolean(value));
 				break;
 			default:
 				// Unknown/unsupported option
