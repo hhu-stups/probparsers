@@ -101,6 +101,7 @@ public class Helpers {
 			BParser.FORMULA_PREFIX,
 			BParser.SUBSTITUTION_PREFIX,
 			BParser.OPERATION_PATTERN_PREFIX,
+			BParser.MACHINE_CLAUSE_PREFIX,
 		}) {
 			if (input.startsWith(prefix)) {
 				throw new AssertionError("Input code contains an explicit parsing mode prefix: " + prefix);
@@ -146,6 +147,13 @@ public class Helpers {
 		ensureNoParsingPrefix(input);
 		BParser parser = new BParser("Test");
 		Start start = parser.parseTransition(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getMachineClauseAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseMachineClause(input);
 		return getTreeAsPrologTerm(start);
 	}
 

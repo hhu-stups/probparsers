@@ -43,6 +43,7 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
+	public static final String MACHINE_CLAUSE_PREFIX = "#MACHINECLAUSE";
 
 	private static final Properties buildProperties;
 	static {
@@ -228,37 +229,45 @@ public class BParser {
 		return parser.parseMachine(input);
 	}
 
-	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
+	private Start parseWithKindPrefix(String input, String prefix, boolean withPreParsing) throws BCompoundException {
 		final String theFormula = prefix + " " + input;
 		final int oldStartColumn = this.startColumn;
 		try {
 			// Decrease the start column by the size of the implicitly added prefix
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
-			return this.parseWithoutPreParsing(new StringReader(theFormula));
+			if (withPreParsing) {
+				return this.parseMachine(theFormula);
+			} else {
+				return this.parseWithoutPreParsing(new StringReader(theFormula));
+			}
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
 	}
 
 	public Start parseFormula(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, FORMULA_PREFIX);
+		return this.parseWithKindPrefix(input, FORMULA_PREFIX, false);
 	}
 
 	public Start parseExpression(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX);
+		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX, false);
 	}
 
 	public Start parseSubstitution(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX);
+		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX, false);
 	}
 
 	public Start parseTransition(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX);
+		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX, false);
 	}
 
 	public Start parsePredicate(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
+		return this.parseWithKindPrefix(input, PREDICATE_PREFIX, false);
+	}
+
+	public Start parseMachineClause(String input) throws BCompoundException {
+		return this.parseWithKindPrefix(input, MACHINE_CLAUSE_PREFIX, true);
 	}
 
 	// Don't delete this deprecated method too soon!

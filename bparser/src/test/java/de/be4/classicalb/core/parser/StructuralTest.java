@@ -118,23 +118,23 @@ public class StructuralTest {
 
 	@Test
 	public void testClause2() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE VARIABLES xx, Ab, cD";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "VARIABLES xx, Ab, cD";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(variables(none,[identifier(none,xx),identifier(none,'Ab'),identifier(none,cD)])).",
 				result);
 
-		final String testMachine2 = "#MACHINECLAUSE ABSTRACT_VARIABLES xx, Ab, cD";
-		final String result2 = Helpers.getMachineAsPrologTerm(testMachine2);
+		String testClause2 = "ABSTRACT_VARIABLES xx, Ab, cD";
+		String result2 = Helpers.getMachineClauseAsPrologTerm(testClause2);
 
 		assertEquals(result, result2);
 	}
 
 	@Test
 	public void testClause3() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd))";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "INCLUDES MachineA, MachineB (aa, bb, MAXINT, cc(dd))";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(includes(none,[machine_reference(none,'MachineA',[]),machine_reference(none,'MachineB',[identifier(none,aa),identifier(none,bb),max_int(none),function(none,identifier(none,cc),[identifier(none,dd)])])])).",

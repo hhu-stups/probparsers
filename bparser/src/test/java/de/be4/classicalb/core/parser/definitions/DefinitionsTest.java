@@ -119,8 +119,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testDefClause() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS def2 == y;\ndef1 == xx";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS def2 == y;\ndef1 == xx";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[expression_definition(none,def2,[],identifier(none,y)),expression_definition(none,def1,[],identifier(none,xx))])).",
@@ -129,8 +129,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef1() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS def1 == (f;g); def2 == skip";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS def1 == (f;g); def2 == skip";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[expression_definition(none,def1,[],composition(none,identifier(none,f),identifier(none,g))),substitution_definition(none,def2,[],skip(none))])).",
@@ -139,8 +139,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef2() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[predicate_definition(none,law6,[],subset(none,domain(none,composition(none,identifier(none,ff),reverse(none,identifier(none,gg)))),domain(none,identifier(none,ff))))])).",
@@ -149,32 +149,32 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef3() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting1() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting2() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to);\n FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to);\n FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting3() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting4() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
