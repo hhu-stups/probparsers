@@ -45,17 +45,14 @@ public class ParseableButProblematicOnWindowsWindowsLF {
 		for (int i = 0; i < machines.length; i++) {
 			unixMachines[i] = File.createTempFile(machines[i].getName().replace(".mch", "_win"), ".mch");
 
-			try (FileReader in2 = new FileReader(machines[i])) {
-				BufferedReader in = new BufferedReader(in2);
+			try (
+				BufferedReader in = new BufferedReader(new FileReader(machines[i]));
 				BufferedWriter out = new BufferedWriter(new FileWriter(unixMachines[i]));
-
+			) {
 				String zeile;
 				while ((zeile = in.readLine()) != null) {
 					out.write(zeile + "\r\n");
 				}
-
-				in.close();
-				out.close();
 			}
 
 		}
