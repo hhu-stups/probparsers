@@ -3,9 +3,8 @@ package de.be4.classicalb.core.parser;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import de.be4.classicalb.core.parser.node.Start;
 
@@ -46,8 +45,8 @@ public class ParseableButProblematicOnWindowsWindowsLF {
 			unixMachines[i] = File.createTempFile(machines[i].getName().replace(".mch", "_win"), ".mch");
 
 			try (
-				BufferedReader in = new BufferedReader(new FileReader(machines[i]));
-				BufferedWriter out = new BufferedWriter(new FileWriter(unixMachines[i]));
+				BufferedReader in = Files.newBufferedReader(machines[i].toPath());
+				BufferedWriter out = Files.newBufferedWriter(unixMachines[i].toPath());
 			) {
 				String zeile;
 				while ((zeile = in.readLine()) != null) {
