@@ -11,7 +11,6 @@ import util.Helpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 public class DefinitionsTest {
 
@@ -262,15 +261,57 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	public void testParamsCount1() {
+	public void testMissingParamsSubst() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertEquals(1, e.getNodesList().size());
 		assertNotNull(e.getNodesList().get(0));
-		String result = e.getLocalizedMessage();
-		assertTrue(result.contains("Number of parameters"));
-		assertTrue(result.contains("doesn't match declaration of definition"));
-		assertTrue(result.contains("defExpr"));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsSubst() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr(1,2) END\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testMissingParamsExpr() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nPROPERTIES\ndefExpr = 1\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsExpr() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nPROPERTIES\ndefExpr(1,2) = 3\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testMissingParamsPred() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefPred(x)==1=1\nPROPERTIES\ndefPred\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defPred (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsPred() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefPred(x)==1=1\nPROPERTIES\ndefPred(1,2)\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defPred (1)", e.getMessage());
 	}
 
 	@Test

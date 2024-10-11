@@ -220,7 +220,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 			final TIdentifierLiteral identifier = ((ADefinitionExpression) node.getIdentifier()).getDefLiteral();
 
-			if (paramList.size() <= definitions.getParameterCount(identifier.getText())) {
+			if (definitions.getParameterCount(identifier.getText()) != 0) {
 				/*
 				 * The parameters seem to belong to this definition, so we need
 				 * to replace the FunctionExpression by a
@@ -241,7 +241,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 		/*
 		 * Reached in case that: Identifier of this FunctionExpression is not a
-		 * definition or there were more parameters than the definition needs
+		 * definition or the definition doesn't have any parameters
 		 * (by declaration), so we asume the parameters belong to some other
 		 * construct (for example a function a level higher in the AST).
 		 */
