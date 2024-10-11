@@ -163,7 +163,7 @@ Tokens
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
   {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'];
   {definitions_rhs} begin_nesting =
-    'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
+    'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' | 'WITNESS' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
   {definitions_rhs} end_nesting = 'END';
   {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
