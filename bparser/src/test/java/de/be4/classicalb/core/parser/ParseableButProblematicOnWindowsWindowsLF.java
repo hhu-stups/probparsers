@@ -16,6 +16,7 @@ import util.Helpers;
 import util.PositionTester;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class ParseableButProblematicOnWindowsWindowsLF {
@@ -32,20 +33,25 @@ public class ParseableButProblematicOnWindowsWindowsLF {
 	public void testParsable() throws Exception {
 		File windowsMachine = File.createTempFile(machine.getName().replace(".mch", "_win"), ".mch");
 
-		try (
-			BufferedReader in = Files.newBufferedReader(machine.toPath());
-			BufferedWriter out = Files.newBufferedWriter(windowsMachine.toPath());
-		) {
-			String zeile;
-			while ((zeile = in.readLine()) != null) {
-				out.write(zeile + "\r\n");
+		try {
+			try (
+				BufferedReader in = Files.newBufferedReader(machine.toPath());
+				BufferedWriter out = Files.newBufferedWriter(windowsMachine.toPath());
+			) {
+				String zeile;
+				while ((zeile = in.readLine()) != null) {
+					out.write(zeile + "\r\n");
+				}
 			}
-		}
 
-		final BParser parser = new BParser(windowsMachine.getName());
-		Start start = parser.parseFile(windowsMachine);
-		start.apply(new PositionTester());
-		assertNotNull(start);
+			final BParser parser = new BParser(windowsMachine.getName());
+			Start start = parser.parseFile(windowsMachine);
+			start.apply(new PositionTester());
+			assertNotNull(start);
+		} finally {
+			boolean success = windowsMachine.delete();
+			assertTrue("Failed to delete temporary machine file", success);
+		}
 	}
 
 	@Parameterized.Parameters(name = "{0}")
