@@ -245,7 +245,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		return out.toString();
 	}
 
-	private void printIdentifier(final LinkedList<TIdentifierLiteral> list) {
+	private void printIdentifier(List<TIdentifierLiteral> list) {
 		pout.printAtom(Utils.getTIdentifierListAsString(list));
 	}
 
