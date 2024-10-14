@@ -44,10 +44,9 @@ public final class Utils {
 	}
 
 	public static String getTIdentifierListAsString(final List<TIdentifierLiteral> idElements) {
-		final String string;
 		if (idElements.size() == 1) {
 			// faster version for the simple case
-			string = idElements.get(0).getText();
+			return idElements.get(0).getText();
 		} else {
 			final StringBuilder idName = new StringBuilder();
 
@@ -60,9 +59,8 @@ public final class Utils {
 				}
 				idName.append(e.getText());
 			}
-			string = idName.toString();
+			return idName.toString();
 		}
-		return string.trim();
 	}
 
 	/**
