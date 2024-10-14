@@ -987,7 +987,7 @@ public class ASTProlog extends DepthFirstAdapter {
 		open(node);
 		pout.openTerm("identifier");
 		printPosition(node);
-		pout.printAtom(node.getName().getText().trim());
+		pout.printAtom(node.getName().getText());
 		pout.closeTerm();
 		node.getPredicate().apply(this);
 		close(node);
