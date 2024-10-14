@@ -366,7 +366,7 @@ public class ASTPrologTest {
 				"event_b_model($,mm,[events($,["
 						+ "event($,testevent,[abstract1,abstract2],[identifier($,param)],[truth($)],[],"
 						+ "[assign($,[identifier($,x)],[identifier($,param)])],"
-						+ "[witness($,identifier(%,ab),equal($,identifier($,ab),identifier($,y)))])])])",
+						+ "[witness($,identifier(none,ab),equal($,identifier($,ab),identifier($,y)))])])])",
 				model);
 	}
 

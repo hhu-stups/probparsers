@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -266,11 +265,13 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * Print a {@link TIdentifierLiteral} exactly as if it was an {@link AIdentifierExpression}.
 	 * 
-	 * @param parent the node containing the identifier, currently used for position and file number information
 	 * @param identifier the identifier token to print
 	 */
-	private void printPositionedIdentifier(Node parent, TIdentifierLiteral identifier) {
-		printPositionedIdentifier(parent, Collections.singletonList(identifier));
+	private void printPositionedIdentifier(TIdentifierLiteral identifier) {
+		pout.openTerm("identifier");
+		printPosition(identifier);
+		pout.printAtom(identifier.getText());
+		pout.closeTerm();
 	}
 
 	private void printNullSafeSubstitution(final Node subst) {
@@ -991,7 +992,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAWitness(final AWitness node) {
 		open(node);
-		printPositionedIdentifier(node, node.getName());
+		printPositionedIdentifier(node.getName());
 		node.getPredicate().apply(this);
 		close(node);
 	}
