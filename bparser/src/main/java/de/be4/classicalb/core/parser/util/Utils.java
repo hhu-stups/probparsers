@@ -138,6 +138,7 @@ public final class Utils {
 			|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
+	@Deprecated
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
 		return "[" + sourcePos.getLine() + "," + sourcePos.getPos() + "]";
 	}
