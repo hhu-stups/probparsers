@@ -5,7 +5,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -48,18 +55,9 @@ public final class Utils {
 			// faster version for the simple case
 			return idElements.get(0).getText();
 		} else {
-			final StringBuilder idName = new StringBuilder();
-
-			boolean first = true;
-			for (final TIdentifierLiteral e : idElements) {
-				if (first) {
-					first = false;
-				} else {
-					idName.append('.');
-				}
-				idName.append(e.getText());
-			}
-			return idName.toString();
+			return idElements.stream()
+				.map(Token::getText)
+				.collect(Collectors.joining("."));
 		}
 	}
 
