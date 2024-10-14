@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -249,6 +250,29 @@ public class ASTProlog extends DepthFirstAdapter {
 		pout.printAtom(Utils.getTIdentifierListAsString(list));
 	}
 
+	/**
+	 * Print a {@link TIdentifierLiteral} list exactly as if it was an {@link AIdentifierExpression}.
+	 * 
+	 * @param parent the node containing the identifier, currently used for position and file number information
+	 * @param identifierParts the identifier to print (a list of identifier tokens that will be joined using dots)
+	 */
+	private void printPositionedIdentifier(Node parent, List<TIdentifierLiteral> identifierParts) {
+		pout.openTerm("identifier");
+		printPosition(parent);
+		printIdentifier(identifierParts);
+		pout.closeTerm();
+	}
+
+	/**
+	 * Print a {@link TIdentifierLiteral} exactly as if it was an {@link AIdentifierExpression}.
+	 * 
+	 * @param parent the node containing the identifier, currently used for position and file number information
+	 * @param identifier the identifier token to print
+	 */
+	private void printPositionedIdentifier(Node parent, TIdentifierLiteral identifier) {
+		printPositionedIdentifier(parent, Collections.singletonList(identifier));
+	}
+
 	private void printNullSafeSubstitution(final Node subst) {
 		if (subst == null) {
 			pout.openTerm("skip");
@@ -423,10 +447,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAMachineReferenceNoParams(final AMachineReferenceNoParams node) {
 		// Keep this functor for compatibility with previous versions
 		// (SEES/USES names were previously parsed as identifier expressions).
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getMachineName());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getMachineName());
 	}
 
 	@Override
@@ -441,10 +462,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAOperationReference(final AOperationReference node) {
 		// Keep this functor for compatibility with previous versions
 		// (PROMOTES names were previously parsed as identifier expressions).
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperationName());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getOperationName());
 	}
 
 	// definition
@@ -491,10 +509,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperation(final AOperation node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOpName());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getOperationBody().apply(this);
@@ -504,10 +519,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseARefinedOperation(final ARefinedOperation node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOpName());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getAbOpName().apply(this);
@@ -860,10 +872,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationCallSubstitution(final AOperationCallSubstitution node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperation());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getOperation());
 		printAsList(node.getResultIdentifiers());
 		printAsList(node.getParameters());
 		close(node);
@@ -872,10 +881,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationCallExpression(AOperationCallExpression node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperation());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getOperation());
 		printAsList(node.getParameters());
 		close(node);
 	}
@@ -985,10 +991,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAWitness(final AWitness node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		pout.printAtom(node.getName().getText());
-		pout.closeTerm();
+		printPositionedIdentifier(node, node.getName());
 		node.getPredicate().apply(this);
 		close(node);
 	}
