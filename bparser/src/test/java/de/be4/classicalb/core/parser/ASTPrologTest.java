@@ -99,6 +99,10 @@ public class ASTPrologTest {
 				case '%':
 					buf.append(counter - 1);
 					break;
+				case '#':
+					buf.append("none");
+					counter++;
+					break;
 				default:
 					buf.append(value);
 					break;
@@ -108,16 +112,13 @@ public class ASTPrologTest {
 	}
 
 	private static String insertNonePositions(final String string) {
-		return string.replaceAll("[$%]", "none");
+		return string.replaceAll("[$%#]", "none");
 	}
 
 	@Test
 	public void testMachine() throws BCompoundException {
 		String m = "MACHINE name OPERATIONS op=skip END";
-		// TODO: warum taucht hier die 5 zweimal auf?
-		// antwort: weil "identifier(...)" kein Knoten im AST ist, sondern eine Liste an Literalen
-		// NodeIdAssignment kann nur AST-Knoten eine ID zuweisen und somit verwendet ASTProlog einfach den Op-Knoten nochmal
-		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(%,op),[],[],skip($))])])";
+		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(none,op),[],[],skip($))])])";
 		checkMachine(1, m, expected);
 	}
 
@@ -128,11 +129,11 @@ public class ASTPrologTest {
 		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
-				+ "sees($,[identifier($,see),identifier($,'s.see2')])," + "variables($,[identifier($,x)]),"
+				+ "sees($,[identifier(#,see),identifier($,'s.see2')])," + "variables($,[identifier($,x)]),"
 				+ "invariant($,member($,identifier($,x),nat_set($))),"
 				+ "initialisation($,assign($,[identifier($,x)],[integer($,5)])),"
-				+ "operations($,[operation($,identifier(%,op),[],[],skip($)),"
-				+ "operation($,identifier(%,op2),[identifier($,r),identifier($,s)],"
+				+ "operations($,[operation($,identifier(none,op),[],[],skip($)),"
+				+ "operation($,identifier(none,op2),[identifier($,r),identifier($,s)],"
 				+ "[identifier($,a),identifier($,b)],skip($))])])";
 
 		checkMachine(1, m, expected);
@@ -302,7 +303,7 @@ public class ASTPrologTest {
 				+ "variables($,[identifier($,x)]),"
 				+ "invariant($,conjunct($,[definition($,'INV',[]),definition($,lt,[integer($,7)])])),"
 				+ "initialisation($,assign($,[identifier($,x)],[definition($,dbl,[integer($,3)])])),"
-				+ "operations($,[operation($,identifier(%,op1),[],[],definition($,ax,[integer($,6)]))])])";
+				+ "operations($,[operation($,identifier(none,op1),[],[],definition($,ax,[integer($,6)]))])])";
 		checkMachine(1, m, expected);
 	}
 
@@ -340,8 +341,8 @@ public class ASTPrologTest {
 
 	@Test
 	public void testOperationCalls() throws BCompoundException {
-		checkSubstitution("do(x)", "operation_call($,identifier(%,do),[],[identifier($,x)])");
-		checkSubstitution("r <-- do(x)", "operation_call($,identifier(%,do),[identifier($,r)],[identifier($,x)])");
+		checkSubstitution("do(x)", "operation_call($,identifier(none,do),[],[identifier($,x)])");
+		checkSubstitution("r <-- do(x)", "operation_call($,identifier(none,do),[identifier($,r)],[identifier($,x)])");
 	}
 
 	@Test

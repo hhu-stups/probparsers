@@ -252,12 +252,19 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * Print a {@link TIdentifierLiteral} list exactly as if it was an {@link AIdentifierExpression}.
 	 * 
-	 * @param parent the node containing the identifier, currently used for position and file number information
+	 * @param parent the node containing the identifier, currently used for position and file number information for qualified/dotted identifiers (more than one token)
 	 * @param identifierParts the identifier to print (a list of identifier tokens that will be joined using dots)
 	 */
 	private void printPositionedIdentifier(Node parent, List<TIdentifierLiteral> identifierParts) {
 		pout.openTerm("identifier");
-		printPosition(parent);
+		if (identifierParts.size() == 1) {
+			printPosition(identifierParts.get(0));
+		} else {
+			// TODO It would be nice to use the start position of the first identifier and the end position of the last identifier here.
+			// Unfortunately, this cannot be implemented with the current PositionPrinter interface,
+			// at least not without losing file number information for the identifier.
+			printPosition(parent);
+		}
 		printIdentifier(identifierParts);
 		pout.closeTerm();
 	}
