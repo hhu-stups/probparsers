@@ -96,15 +96,29 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		final String text = node.getText();
+		checkNoDotsInQuotedIdentifier(node);
+	}
+
+	@Override
+	public void caseTDefLiteralPredicate(final TDefLiteralPredicate node) {
+		checkNoDotsInQuotedIdentifier(node);
+	}
+
+	@Override
+	public void caseTDefLiteralSubstitution(final TDefLiteralSubstitution node) {
+		checkNoDotsInQuotedIdentifier(node);
+	}
+
+	private static void checkNoDotsInQuotedIdentifier(final Token token) {
+		final String text = token.getText();
 		// Unquote and unescape backquoted identifiers
 		if (Utils.isQuoted(text, '`')) {
 			if (text.indexOf('.') != -1) {
 				final String fixed = String.join("`.`", text.split("\\."));
-				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, node));
+				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, token));
 			}
 			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
-			node.setText(unescapedText);
+			token.setText(unescapedText);
 		}
 	}
 

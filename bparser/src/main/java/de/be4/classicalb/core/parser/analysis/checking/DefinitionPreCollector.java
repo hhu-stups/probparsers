@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.preparser.node.ADefinition;
 import de.be4.classicalb.core.preparser.node.AFileDefinition;
@@ -22,7 +23,9 @@ public class DefinitionPreCollector extends DepthFirstAdapter {
 
 	@Override
 	public void inADefinition(final ADefinition node) {
-		definitions.put(node.getDefName(), node.getRhs());
+		Token defName = node.getDefName();
+		defName.setText(Utils.unquoteIdentifier(defName.getText()));
+		definitions.put(defName, node.getRhs());
 	}
 
 	@Override

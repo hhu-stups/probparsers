@@ -87,6 +87,7 @@ Helpers
   string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
   // backquote to generate identifiers with special symbols or which clash with keywords
   quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
+  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
 
   safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':' |
                  '<' | '.' | '|' | '(' | ')' | '[' | ']' | '%'; // safe to skip in normal mode
@@ -154,7 +155,7 @@ Tokens
   {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
   {no_definitions} no_def_something = all_chars*;
 
-  {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
+  {definitions} identifier_literal = regular_identifier_literal | quoted_identifier_literal;
   {definitions, definitions_rhs} left_par = '(';
   {definitions, definitions_rhs} right_par = ')';
   {definitions, definitions_rhs} slash = '/';
