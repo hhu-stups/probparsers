@@ -144,7 +144,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedPredicateDefinitionWithArgs2() throws BCompoundException {
 		final String testMachine = "MACHINE Test DEFINITIONS `def!pred`(a,`b!`) == a=`b!` PROPERTIES `def!pred`(1,1) END\n";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertEquals("machine(abstract_machine(none,machine(none),maichine_header(none,'Test',[]),[definitions(none,[predicate_definition(none,'def!pred',[identifier(none,a),identifier(none,'b!')],equal(none,identifier(none,a),identifier(none,'b!')))]),properties(none,definition(none,'def!pred',[integer(none,1),integer(none,1)]))])).",
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[predicate_definition(none,'def!pred',[identifier(none,a),identifier(none,'b!')],equal(none,identifier(none,a),identifier(none,'b!')))]),properties(none,definition(none,'def!pred',[integer(none,1),integer(none,1)]))])).",
 				result);
 	}
 
