@@ -199,18 +199,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseARecordFieldExpression(ARecordFieldExpression node) {
-		node.getRecord().apply(this);
-		// do not visit the field identifier
-	}
-
-	@Override
-	public void caseARecEntry(ARecEntry node) {
-		// do not visit the field identifier
-		node.getValue().apply(this);
-	}
-
-	@Override
 	public void caseAEnumeratedSetSet(AEnumeratedSetSet node) {
 		List<TIdentifierLiteral> copy = new ArrayList<>(node.getIdentifier());
 		this.knownIdentifier.addKnownIdentifier(copy.get(0));

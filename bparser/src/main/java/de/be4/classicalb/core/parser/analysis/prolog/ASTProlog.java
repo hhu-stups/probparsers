@@ -757,6 +757,14 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseARecordFieldExpression(ARecordFieldExpression node) {
+		open(node);
+		node.getRecord().apply(this);
+		printPositionedIdentifier(node.getIdentifier());
+		close(node);
+	}
+
+	@Override
 	public void caseAIntegerExpression(final AIntegerExpression node) {
 		open(node);
 		final String text = node.getLiteral().getText();
@@ -773,6 +781,14 @@ public class ASTProlog extends DepthFirstAdapter {
 		open(node);
 		node.getDefLiteral().apply(this);
 		printAsList(node.getParameters());
+		close(node);
+	}
+
+	@Override
+	public void caseARecEntry(ARecEntry node) {
+		open(node);
+		printPositionedIdentifier(node.getIdentifier());
+		node.getValue().apply(this);
 		close(node);
 	}
 
