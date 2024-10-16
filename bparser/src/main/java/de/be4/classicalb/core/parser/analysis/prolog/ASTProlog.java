@@ -125,6 +125,14 @@ public class ASTProlog extends DepthFirstAdapter {
 		}
 	}
 
+	private void printPositionRange(Node startNode, Node endNode) {
+		if (positionPrinter != null) {
+			positionPrinter.printPositionRange(startNode, endNode);
+		} else {
+			pout.printAtom("none");
+		}
+	}
+
 	/**
 	 * The counterpart to {@link #open(Node)}, prints the closing parenthesis of
 	 * the term.
@@ -252,19 +260,14 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * Print a {@link TIdentifierLiteral} list exactly as if it was an {@link AIdentifierExpression}.
 	 * 
-	 * @param parent the node containing the identifier, currently used for position and file number information for qualified/dotted identifiers (more than one token)
 	 * @param identifierParts the identifier to print (a list of identifier tokens that will be joined using dots)
 	 */
-	private void printPositionedIdentifier(Node parent, List<TIdentifierLiteral> identifierParts) {
-		pout.openTerm("identifier");
-		if (identifierParts.size() == 1) {
-			printPosition(identifierParts.get(0));
-		} else {
-			// TODO It would be nice to use the start position of the first identifier and the end position of the last identifier here.
-			// Unfortunately, this cannot be implemented with the current PositionPrinter interface,
-			// at least not without losing file number information for the identifier.
-			printPosition(parent);
+	private void printPositionedIdentifier(List<TIdentifierLiteral> identifierParts) {
+		if (identifierParts.isEmpty()) {
+			throw new IllegalArgumentException("There must be at least one token in a dotted identifier list");
 		}
+		pout.openTerm("identifier");
+		printPositionRange(identifierParts.get(0), identifierParts.get(identifierParts.size() - 1));
 		printIdentifier(identifierParts);
 		pout.closeTerm();
 	}
@@ -455,7 +458,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAMachineReferenceNoParams(final AMachineReferenceNoParams node) {
 		// Keep this functor for compatibility with previous versions
 		// (SEES/USES names were previously parsed as identifier expressions).
-		printPositionedIdentifier(node, node.getMachineName());
+		printPositionedIdentifier(node.getMachineName());
 	}
 
 	@Override
@@ -470,7 +473,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAOperationReference(final AOperationReference node) {
 		// Keep this functor for compatibility with previous versions
 		// (PROMOTES names were previously parsed as identifier expressions).
-		printPositionedIdentifier(node, node.getOperationName());
+		printPositionedIdentifier(node.getOperationName());
 	}
 
 	// definition
@@ -517,7 +520,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperation(final AOperation node) {
 		open(node);
-		printPositionedIdentifier(node, node.getOpName());
+		printPositionedIdentifier(node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getOperationBody().apply(this);
@@ -527,7 +530,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseARefinedOperation(final ARefinedOperation node) {
 		open(node);
-		printPositionedIdentifier(node, node.getOpName());
+		printPositionedIdentifier(node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getAbOpName().apply(this);
@@ -880,7 +883,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationCallSubstitution(final AOperationCallSubstitution node) {
 		open(node);
-		printPositionedIdentifier(node, node.getOperation());
+		printPositionedIdentifier(node.getOperation());
 		printAsList(node.getResultIdentifiers());
 		printAsList(node.getParameters());
 		close(node);
@@ -889,7 +892,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationCallExpression(AOperationCallExpression node) {
 		open(node);
-		printPositionedIdentifier(node, node.getOperation());
+		printPositionedIdentifier(node.getOperation());
 		printAsList(node.getParameters());
 		close(node);
 	}

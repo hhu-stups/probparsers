@@ -129,7 +129,7 @@ public class ASTPrologTest {
 		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
-				+ "sees($,[identifier(#,see),identifier($,'s.see2')])," + "variables($,[identifier($,x)]),"
+				+ "sees($,[identifier(#,see),identifier(#,'s.see2')])," + "variables($,[identifier($,x)]),"
 				+ "invariant($,member($,identifier($,x),nat_set($))),"
 				+ "initialisation($,assign($,[identifier($,x)],[integer($,5)])),"
 				+ "operations($,[operation($,identifier(none,op),[],[],skip($)),"

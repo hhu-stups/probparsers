@@ -71,10 +71,15 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 	}
 
 	@Override
-	public void printPosition(final Node node) {
+	public void printPosition(Node node) {
+		this.printPositionRange(node, node);
+	}
+
+	@Override
+	public void printPositionRange(Node startNode, Node endNode) {
 		@SuppressWarnings("deprecation")
-		final Integer id = nodeIds.lookup(node);
-		if (!printSourcePositions || uselessPositionInfo(node)) {
+		final Integer id = nodeIds.lookup(startNode);
+		if (!printSourcePositions || uselessPositionInfo(startNode)) {
 			// only print the id
 			if (id == null) {
 				pout.printAtom("none");
@@ -83,8 +88,8 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 			}
 		} else {
 			// print full source positions
-			int fileNr = nodeIds.lookupFileNumber(node);
-			if (id == null && fileNr == -1 && node.getStartPos() == null && node.getEndPos() == null) {
+			int fileNr = nodeIds.lookupFileNumber(startNode);
+			if (id == null && fileNr == -1 && startNode.getStartPos() == null && endNode.getEndPos() == null) {
 				// Workaround for errors about overridden main machine name when loading rules projects.
 				// The translated AST has no file numbers associated with it,
 				// so probcli incorrectly thinks that it comes from a non-main file.
@@ -93,35 +98,35 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 				pout.printAtom("none");
 				return;
 			}
-			int startLine = getStartLine(node);
-			int endLine = getEndLine(node);
+			int startLine = getStartLine(startNode);
+			int endLine = getEndLine(endNode);
 			if (!compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 				pout.openTerm("pos", true);
 				pout.printNumber(id == null ? -1 : id);
 				pout.printNumber(fileNr);
 				pout.printNumber(startLine);
-				pout.printNumber(getStartColumn(node));
+				pout.printNumber(getStartColumn(startNode));
 				pout.printNumber(endLine);
 			} else { // new terms with no UniqueID and with less infos if possible
 				if (fileNr == 1 && startLine == endLine) {
 					pout.openTerm("p3", true);
 					pout.printNumber(startLine);
-					pout.printNumber(getStartColumn(node));
+					pout.printNumber(getStartColumn(startNode));
 					// we could also provide one case where fileNr=1 and startLine !== endLine
 				} else if (startLine == endLine) {
 					pout.openTerm("p4", true);
 					pout.printNumber(fileNr);
 					pout.printNumber(startLine);
-					pout.printNumber(getStartColumn(node));
+					pout.printNumber(getStartColumn(startNode));
 				} else {
 					pout.openTerm("p5", true);
 					pout.printNumber(fileNr);
 					pout.printNumber(startLine);
-					pout.printNumber(getStartColumn(node));
+					pout.printNumber(getStartColumn(startNode));
 					pout.printNumber(endLine);
 				}
 			}
-			pout.printNumber(getEndColumn(node));
+			pout.printNumber(getEndColumn(endNode));
 			pout.closeTerm();
 		}
 	}
