@@ -195,7 +195,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
 
 				if (wbaseName.equals(name)) { // the replace transformation worked
-					System.out.println("WARNING: you are using Windows backslashes in a path, please use forward slashes as follows:  " + wpath);
+					//System.out.println("WARNING: you are using Windows backslashes in a path, please use forward slashes as follows:  " + wpath);
 					return new MachineReference(type, name, renamedName, node, wpath);
 				} else {
 					throw new VisitorException(new CheckException(
