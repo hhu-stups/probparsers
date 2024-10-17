@@ -124,7 +124,9 @@ public class BException extends Exception {
 	}
 
 	public BException(final String filename, final IOException e) {
-		this(filename, e.getMessage(), e);
+	    this(filename, "File cannot be read: "+e.getMessage(), e);
+	    // somehow e.getMessage() just returns the file name without any information about
+	    // what went wrong; typical value would be java.nio.file.NoSuchFileException
 	}
 
 	public List<Location> getLocations() {
