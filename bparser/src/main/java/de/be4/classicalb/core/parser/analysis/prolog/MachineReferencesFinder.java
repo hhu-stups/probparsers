@@ -191,7 +191,10 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		if (path != null) {
 			final String baseName = Utils.getFileWithoutExtension(Paths.get(path).getFileName().toString());
 			if (!baseName.equals(name)) {
-				String wpath = path.replace("\\", "/"); // try replacing windows backslashes by forward slashes
+				// try replacing windows backslashes by forward slashes
+				// FIXME This special case is not nice! We should remove it as soon as it is not needed anymore! Machines that rely on this are faulty!
+				// The correct fix is to change the machines to use forward slashes, which work on all systems, including Windows.
+				String wpath = path.replace("\\", "/");
 				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
 
 				if (wbaseName.equals(name)) { // the replace transformation worked
