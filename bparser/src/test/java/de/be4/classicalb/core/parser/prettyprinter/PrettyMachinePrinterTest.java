@@ -6,10 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.IDefinitionFileProvider;
-import de.be4.classicalb.core.parser.IDefinitions;
-import de.be4.classicalb.core.parser.MockedDefinitions;
-import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
@@ -341,44 +337,24 @@ public class PrettyMachinePrinterTest {
 	}
 
 	@Test
-	public void testPrettyPrintFileDefinition() throws Exception {
-		final String testMachine = "MACHINE Test\n" +
-			"DEFINITIONS\n\"LibraryStrings.def\"\n" +
-			"END";
-		BParser parser = new BParser(null);
+	public void testPrettyPrintFileDefinition() throws BCompoundException, IOException, URISyntaxException {
+		URI uri = this.getClass()
+			.getResource("/prettyprinter/DefinitionFileTest.mch")
+			.toURI();
+		File file = new File(uri);
+		String testMachine = Utils.readFile(file);
 
-		// very hacky way to make sure that "LibraryStrings.def" is not being parsed because it doesn't exist
-		parser.setContentProvider(new IDefinitionFileProvider() {
-
-			@Override
-			public IDefinitions getDefinitions(String filename) {
-				if (filename.equals("LibraryStrings.def")) {
-					return new MockedDefinitions();
-				} else {
-					return null;
-				}
-			}
-
-			@Override
-			public void storeDefinition(String filename, IDefinitions definitions) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public String getFileContent(File directory, String fileName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public File getFile(File directory, String fileName) {
-				throw new UnsupportedOperationException();
-			}
-		});
+		BParser parser = new BParser(file.toString());
 		Start start = parser.parseMachine(testMachine);
 		PrettyPrinter pp = new PrettyPrinter();
 		start.apply(pp);
 		String result = pp.getPrettyPrint();
 
-		assertEquals(testMachine, result);
+		String expected = testMachine.replace("\r\n", "\n");
+		// PrettyPrinter doesn't add a trailing newline, but the original file has one
+		if (expected.endsWith("\n")) {
+			expected = expected.substring(0, expected.length() - 1);
+		}
+		assertEquals(expected, result);
 	}
 }
