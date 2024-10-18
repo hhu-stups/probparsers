@@ -325,13 +325,13 @@ public class PrettyMachinePrinterTest {
 		// this test makes sure that there are parentheses around expression @desc-pragmas,
 		// but not in identifier lists (for example VARIABLES)
 		final String testMachine = "MACHINE Test\n" +
-		                           "VARIABLES x /*@desc var x */, y /*@desc var y */\n" +
-		                           "INVARIANT x:INTEGER & y:INTEGER\n" +
-		                           "INITIALISATION x := 1 || y := 2\n" +
-		                           "OPERATIONS\n" +
-		                           "foo = x := (42+(x+y/2 /*@desc x+y/2 description */) /*@desc 42+(...) description */) /*@desc foo operation description */;\n" +
-				                   "bar = y := (x /*@desc x description */) /*@desc bar operation description */\n" +
-		                           "END";
+			"VARIABLES x /*@desc var x */, y /*@desc var y */\n" +
+			"INVARIANT x:INTEGER & y:INTEGER\n" +
+			"INITIALISATION x := 1 || y := 2\n" +
+			"OPERATIONS\n" +
+			"foo = x := (42+(x+y/2 /*@desc x+y/2 description */) /*@desc 42+(...) description */) /*@desc foo operation description */;\n" +
+			"bar = y := (x /*@desc x description */) /*@desc bar operation description */\n" +
+			"END";
 		final String result1 = Helpers.getPrettyPrint(testMachine);
 		final String result2 = Helpers.getPrettyPrint(result1);
 
@@ -343,8 +343,8 @@ public class PrettyMachinePrinterTest {
 	@Test
 	public void testPrettyPrintFileDefinition() throws Exception {
 		final String testMachine = "MACHINE Test\n" +
-				                           "DEFINITIONS\n\"LibraryStrings.def\"\n" +
-				                           "END";
+			"DEFINITIONS\n\"LibraryStrings.def\"\n" +
+			"END";
 		ParseOptions options = new ParseOptions();
 		options.setCollectDefinitions(false);
 		BParser parser = new BParser(null, options);
