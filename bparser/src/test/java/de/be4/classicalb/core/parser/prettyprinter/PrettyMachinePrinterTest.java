@@ -345,9 +345,7 @@ public class PrettyMachinePrinterTest {
 		final String testMachine = "MACHINE Test\n" +
 			"DEFINITIONS\n\"LibraryStrings.def\"\n" +
 			"END";
-		ParseOptions options = new ParseOptions();
-		options.setCollectDefinitions(false);
-		BParser parser = new BParser(null, options);
+		BParser parser = new BParser(null);
 
 		// very hacky way to make sure that "LibraryStrings.def" is not being parsed because it doesn't exist
 		parser.setContentProvider(new IDefinitionFileProvider() {
