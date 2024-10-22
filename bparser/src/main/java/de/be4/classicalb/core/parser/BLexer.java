@@ -2,6 +2,8 @@ package de.be4.classicalb.core.parser;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,8 +19,27 @@ public class BLexer extends Lexer {
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
 
+	private static final Set<Class<? extends Token>> CLAUSE_TOKEN_CLASSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		// Beginning or end of a section:
+		TAssertions.class,
+		TConstants.class,
+		TAbstractConstants.class,
+		TConcreteConstants.class,
+		TProperties.class,
+		TConstraints.class,
+		TVariables.class,
+		TAbstractVariables.class,
+		TConcreteVariables.class,
+		TInvariant.class,
+		TInitialisation.class,
+		TLocalOperations.class,
+		TOperations.class,
+		//TEnd.class, // can be end of expression or predicate with IF-THEN-ELSE
+		EOF.class
+		// ...
+	)));
+
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static final Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
 	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
 	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
 	private static final Set<Class<? extends Token>> literalTokenClasses;
@@ -41,25 +62,7 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
-		// Beginning or end of a section:
-		clauseTokenClasses.add(TAssertions.class);
-		clauseTokenClasses.add(TConstants.class);
-		clauseTokenClasses.add(TAbstractConstants.class);
-		clauseTokenClasses.add(TConcreteConstants.class);
-		clauseTokenClasses.add(TProperties.class);
-		clauseTokenClasses.add(TConstraints.class);
-		clauseTokenClasses.add(TVariables.class);
-		clauseTokenClasses.add(TAbstractVariables.class);
-		clauseTokenClasses.add(TConcreteVariables.class);
-		clauseTokenClasses.add(TInvariant.class);
-		clauseTokenClasses.add(TInitialisation.class);
-		clauseTokenClasses.add(TLocalOperations.class);
-		clauseTokenClasses.add(TOperations.class);
-		//clauseTokenClasses.add(TEnd.class); // can be end of expression or predicate with IF-THEN-ELSE
-		clauseTokenClasses.add(EOF.class);
-		// ...
-
-		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+		for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
 			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
@@ -114,7 +117,7 @@ public class BLexer extends Lexer {
 			}
 			
 			// now rules for beginning/end of sections:
-			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+			for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
 				String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 				addInvalid(binOpTokenClass,clauseTokenClass,"Argument to binary operator is missing.");
 				addInvalid(clauseTokenClass,binOpTokenClass,"Argument to binary operator is missing.");
@@ -209,7 +212,7 @@ public class BLexer extends Lexer {
 			for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
 				addInvalid(funOpClass, binOpTokenClass, Errmsg);
 			}
-			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+			for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
 				addInvalid(funOpClass,clauseTokenClass, Errmsg);
 			}
 			
