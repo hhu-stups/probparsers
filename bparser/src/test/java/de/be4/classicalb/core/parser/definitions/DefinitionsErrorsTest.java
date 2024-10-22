@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import util.Helpers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -70,6 +72,16 @@ public class DefinitionsErrorsTest {
 		String s = "MACHINE Definitions \n DEFINITIONS\n foo(xx) == (xx : OBJECTS -->(1..card(OBJECTS))\n; \nEND";
 		final BCompoundException e = assertThrows(BCompoundException.class, () -> parseString(s));
 		assertTrue(e.getMessage().contains("expecting: ')'"));
+		Helpers.assertParseErrorLocation(e, 4, 1, 4, 1);
+	}
+
+	@Test
+	public void checkForInvalidFormula4() {
+		String s = "MACHINE Definitions \n DEFINITIONS\n foo(xx) == /*@label bla*/\n; \nEND";
+		final BCompoundException e = assertThrows(BCompoundException.class, () -> parseString(s));
+		assertTrue(e.getMessage().contains("Invalid combination of symbols"));
+		assertTrue(e.getMessage().contains("before the end of definition"));
+		assertFalse(e.getMessage().contains("before the end of file"));
 		Helpers.assertParseErrorLocation(e, 4, 1, 4, 1);
 	}
 

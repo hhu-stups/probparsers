@@ -8,6 +8,7 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SyntaxErrorsDetectedOnTokenStreamTest {
@@ -19,6 +20,15 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		assertTrue(e.getMessage().contains("Two succeeding"));
 	}
 	
+	@Test
+	public void checkForBeginAtEOF() {
+		String s = "MACHINE BeginAtEOF\nOPERATIONS\n Foo = BEGIN";
+		BLexerException e = Helpers.assertThrowsCompound(BLexerException.class, () -> Helpers.getMachineAsPrologTerm(s));
+		assertTrue(e.getMessage().contains("Invalid combination of symbols"));
+		assertTrue(e.getMessage().contains("BEGIN"));
+		assertTrue(e.getMessage().contains("before the end of file"));
+		assertFalse(e.getMessage().contains("before the end of definition"));
+	}
 	
 	@Test
 	public void checkForClauseAfterConjunction() {
