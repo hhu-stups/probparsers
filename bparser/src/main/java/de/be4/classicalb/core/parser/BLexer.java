@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +20,7 @@ public class BLexer extends Lexer {
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
 
-	private static final Set<Class<? extends Token>> CLAUSE_TOKEN_CLASSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	private static final Collection<Class<? extends Token>> CLAUSE_TOKEN_CLASSES = Collections.unmodifiableCollection(Arrays.asList(
 		// Beginning or end of a section:
 		TAssertions.class,
 		TConstants.class,
@@ -37,9 +38,9 @@ public class BLexer extends Lexer {
 		//TEnd.class, // can be end of expression or predicate with IF-THEN-ELSE
 		EOF.class
 		// ...
-	)));
+	));
 
-	private static final Set<Class<? extends Token>> BIN_EXPR_OPERATORS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	private static final Collection<Class<? extends Token>> BIN_EXPR_OPERATORS = Collections.unmodifiableCollection(Arrays.asList(
 		TEqual.class,
 		TNotEqual.class,
 		TInclusion.class,
@@ -67,9 +68,9 @@ public class BLexer extends Lexer {
 		TRangeSubtraction.class,
 		TDomainRestriction.class,
 		TDomainSubtraction.class
-	)));
+	));
 
-	private static final Set<Class<? extends Token>> FUNCTION_OPERATOR_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	private static final Collection<Class<? extends Token>> FUNCTION_OPERATOR_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList(
 		// real operators floor(.), ceiling(.), real(.)
 		TConvertIntFloor.class,
 		TConvertIntCeiling.class,
@@ -100,14 +101,14 @@ public class BLexer extends Lexer {
 		TLast.class,
 		TRev.class, // ( [[1,2]] ; rev)  not accepted in Atelier-B
 		TConc.class
-	)));
+	));
 
-	private static final Set<Class<? extends Token>> LITERAL_TOKEN_CLASSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	private static final Collection<Class<? extends Token>> LITERAL_TOKEN_CLASSES = Collections.unmodifiableCollection(Arrays.asList(
 		TIntegerLiteral.class,
 		TStringLiteral.class,
 		TRealLiteral.class,
 		THexLiteral.class
-	)));
+	));
 
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
