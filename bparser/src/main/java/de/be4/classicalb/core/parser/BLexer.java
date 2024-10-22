@@ -250,31 +250,31 @@ public class BLexer extends Lexer {
 			} else if( funOpClass == TBoolCast.class) {
 				opName = "bool";
 			}
-			String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
-			addInvalid(funOpClass, TRightPar.class, Errmsg);
-			addInvalid(funOpClass, TRightBrace.class, Errmsg);
-			addInvalid(funOpClass, TRightBracket.class, Errmsg);
-			addInvalid(funOpClass, TSemicolon.class, Errmsg);
-			addInvalid(funOpClass, TWhere.class, Errmsg);
-			addInvalid(funOpClass, TThen.class, Errmsg);
-			addInvalid(funOpClass, TElse.class, Errmsg);
-			addInvalid(funOpClass, TEnd.class, Errmsg);
+			String message = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
+			addInvalid(funOpClass, TRightPar.class, message);
+			addInvalid(funOpClass, TRightBrace.class, message);
+			addInvalid(funOpClass, TRightBracket.class, message);
+			addInvalid(funOpClass, TSemicolon.class, message);
+			addInvalid(funOpClass, TWhere.class, message);
+			addInvalid(funOpClass, TThen.class, message);
+			addInvalid(funOpClass, TElse.class, message);
+			addInvalid(funOpClass, TEnd.class, message);
 			for (Class<? extends Token> binOpTokenClass : BIN_EXPR_OPERATORS) {
-				addInvalid(funOpClass, binOpTokenClass, Errmsg);
+				addInvalid(funOpClass, binOpTokenClass, message);
 			}
 			for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
-				addInvalid(funOpClass,clauseTokenClass, Errmsg);
+				addInvalid(funOpClass,clauseTokenClass, message);
 			}
 			
-			String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
-			addInvalid(TAny.class,funOpClass, Errmsg2);
-			addInvalid(TConstants.class,funOpClass, Errmsg2);
-			addInvalid(TAbstractConstants.class,funOpClass, Errmsg2);
-			addInvalid(TConcreteConstants.class,funOpClass, Errmsg2);
-			addInvalid(TVariables.class,funOpClass, Errmsg2);
-			addInvalid(TAbstractVariables.class,funOpClass, Errmsg2);
-			addInvalid(TConcreteVariables.class,funOpClass, Errmsg2);
-			addInvalid(TOperations.class,funOpClass, Errmsg2);
+			String message2 = "This keyword (" + opName + ") cannot be used as an identifier";
+			addInvalid(TAny.class,funOpClass, message2);
+			addInvalid(TConstants.class,funOpClass, message2);
+			addInvalid(TAbstractConstants.class,funOpClass, message2);
+			addInvalid(TConcreteConstants.class,funOpClass, message2);
+			addInvalid(TVariables.class,funOpClass, message2);
+			addInvalid(TAbstractVariables.class,funOpClass, message2);
+			addInvalid(TConcreteVariables.class,funOpClass, message2);
+			addInvalid(TOperations.class,funOpClass, message2);
 		}
 		
 		// Other rules:
