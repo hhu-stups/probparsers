@@ -16,8 +16,6 @@ public class BLexer extends Lexer {
 
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
-	
-	private boolean parse_definition=false; // a flag to indicate when the lexer is used to parse Definitions
 
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
 	private static final Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
@@ -25,12 +23,6 @@ public class BLexer extends Lexer {
 	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
 	private static final Set<Class<? extends Token>> literalTokenClasses;
 	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
-
-	// called by PreParser
-	public void setLexerPreparse(){
-		parse_definition = true; 
-	}
-	
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -389,11 +381,7 @@ public class BLexer extends Lexer {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				if (token instanceof EOF ) {
-					if(parse_definition) {
-						throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
-					} else {
-						throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
-					}
+					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string, string);
 				} else {
 					throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
 				}

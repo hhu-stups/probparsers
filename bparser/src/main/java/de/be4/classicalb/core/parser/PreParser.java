@@ -297,7 +297,6 @@ public class PreParser {
 			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
 					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
-			lexer.setLexerPreparse();
 			Set<String> set = new HashSet<>();
 			de.be4.classicalb.core.parser.node.Token next;
 			try {
@@ -486,7 +485,7 @@ public class PreParser {
 		if (message.contains("expecting: EOF")) {
 			return "expecting end of definition";
 		} else {
-			return message;
+			return message.replace("the end of file", "the end of definition");
 		}
 	}
 
