@@ -363,9 +363,9 @@ public class BLexer extends Lexer {
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
 			String specificMessage = invalidUnicodeSymbolMessages.get(symbol);
 			if (specificMessage != null) {
-				ThrowDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
+				throw makeDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
 			} else {
-				ThrowDefaultLexerException(defaultMessage, defaultMessage);
+				throw makeDefaultLexerException(defaultMessage, defaultMessage);
 			}
 		}
 
@@ -390,21 +390,22 @@ public class BLexer extends Lexer {
 			if (string != null) {
 				if (token instanceof EOF ) {
 					if(parse_definition) {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
+						throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
 					} else {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
+						throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
 					}
-				} else
-					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
+				} else {
+					throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
+				}
 			}
 		}
 
 	}
 	
-	private void ThrowDefaultLexerException(String msg, String string) throws LexerException {
+	private LexerException makeDefaultLexerException(String msg, String string) {
 		int l = token.getLine();
 		int c = token.getPos();
-		throw new BLexerException(token, msg, string, l, c);
+		return new BLexerException(token, msg, string, l, c);
 	
 	}
 
@@ -423,7 +424,7 @@ public class BLexer extends Lexer {
 
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
-			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
+			throw makeDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
 		}
 
 		if (token instanceof TCommentEnd) {
@@ -433,7 +434,7 @@ public class BLexer extends Lexer {
 			comment = null;
 			commentBuffer = null;
 		} else if (token instanceof TShebang && token.getLine() != 1) {
-			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
+			throw makeDefaultLexerException("#! only allowed in first line of the file","#!");
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
