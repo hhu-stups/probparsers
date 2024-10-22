@@ -110,8 +110,23 @@ public class BLexer extends Lexer {
 		THexLiteral.class
 	));
 
+	private static final Map<String, String> INVALID_UNICODE_SYMBOL_MESSAGES;
+	static {
+		Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
+		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
+		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
+		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
+		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		INVALID_UNICODE_SYMBOL_MESSAGES = Collections.unmodifiableMap(invalidUnicodeSymbolMessages);
+	}
+
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -305,17 +320,6 @@ public class BLexer extends Lexer {
 		// addInvalid(TIdentifierLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between identifier and identifier.");
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
-		
-		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
-		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
-		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
-		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
-		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
-		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
 	}
 
 	private ParseOptions parseOptions = null;
@@ -356,7 +360,7 @@ public class BLexer extends Lexer {
 		if (token instanceof TIllegalUnicodeSymbol) {
 			String symbol = token.getText();
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
-			String specificMessage = invalidUnicodeSymbolMessages.get(symbol);
+			String specificMessage = INVALID_UNICODE_SYMBOL_MESSAGES.get(symbol);
 			if (specificMessage != null) {
 				throw makeDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
 			} else {
