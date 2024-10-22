@@ -69,9 +69,47 @@ public class BLexer extends Lexer {
 		TDomainSubtraction.class
 	)));
 
+	private static final Set<Class<? extends Token>> FUNCTION_OPERATOR_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		// real operators floor(.), ceiling(.), real(.)
+		TConvertIntFloor.class,
+		TConvertIntCeiling.class,
+		TConvertReal.class,
+		// regular operators
+		TBoolCast.class,
+		TCard.class,
+		TIterate.class,
+		TClosure.class,
+		TClosure1.class,
+		TRel.class,
+		TFnc.class,
+		TPerm.class,
+		TMin.class,
+		TMax.class,
+		TDom.class,
+		TRan.class,
+		TId.class, // ( {2} ; id) not allowed
+		// TO DO: prj1, prj2
+		// Record operators:
+		TStruct.class,
+		TRec.class,
+		// sequence operators:
+		TSize.class,
+		TFront.class,
+		TFirst.class, //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
+		TTail.class,
+		TLast.class,
+		TRev.class, // ( [[1,2]] ; rev)  not accepted in Atelier-B
+		TConc.class
+	)));
+
+	private static final Set<Class<? extends Token>> LITERAL_TOKEN_CLASSES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		TIntegerLiteral.class,
+		TStringLiteral.class,
+		TRealLiteral.class,
+		THexLiteral.class
+	)));
+
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
-	private static final Set<Class<? extends Token>> literalTokenClasses;
 	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
@@ -184,38 +222,7 @@ public class BLexer extends Lexer {
 		
 		
 		// a few rules for keywords which are unary functions and require an opening parenthesis afterwards
-		// real operators floor(.), ceiling(.), real(.)
-		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
-		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
-		funOpKeywordTokenClasses.add(TConvertReal.class);
-		// regular operators
-		funOpKeywordTokenClasses.add(TBoolCast.class);
-		funOpKeywordTokenClasses.add(TCard.class);
-		funOpKeywordTokenClasses.add(TIterate.class);
-		funOpKeywordTokenClasses.add(TClosure.class);
-		funOpKeywordTokenClasses.add(TClosure1.class);
-		funOpKeywordTokenClasses.add(TRel.class);
-		funOpKeywordTokenClasses.add(TFnc.class);
-		funOpKeywordTokenClasses.add(TPerm.class);
-		funOpKeywordTokenClasses.add(TMin.class);
-		funOpKeywordTokenClasses.add(TMax.class);
-		funOpKeywordTokenClasses.add(TDom.class);
-		funOpKeywordTokenClasses.add(TRan.class);
-		funOpKeywordTokenClasses.add(TId.class); // ( {2} ; id) not allowed
-		// TO DO:  prj1, prj2
-		// Record operators:
-		funOpKeywordTokenClasses.add(TStruct.class);
-		funOpKeywordTokenClasses.add(TRec.class);
-		// sequence operators:
-		funOpKeywordTokenClasses.add(TSize.class);
-		funOpKeywordTokenClasses.add(TFront.class);
-		funOpKeywordTokenClasses.add(TFirst.class); //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
-		funOpKeywordTokenClasses.add(TTail.class);
-		funOpKeywordTokenClasses.add(TLast.class);
-		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
-		funOpKeywordTokenClasses.add(TConc.class);
-		
-		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
+		for (Class<? extends Token> funOpClass : FUNCTION_OPERATOR_KEYWORDS) {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 			if (funOpClass == TConvertIntFloor.class) {
@@ -287,16 +294,10 @@ public class BLexer extends Lexer {
 		addInvalid(TPragmaLabel.class, TSemicolon.class, "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-
-		literalTokenClasses = new HashSet<>();
-		literalTokenClasses.add(TIntegerLiteral.class);
-		literalTokenClasses.add(TStringLiteral.class);
-		literalTokenClasses.add(TRealLiteral.class);
-		literalTokenClasses.add(THexLiteral.class);
-		for (Class<? extends Token> litClass : literalTokenClasses) {
+		for (Class<? extends Token> litClass : LITERAL_TOKEN_CLASSES) {
 			addInvalid(TIdentifierLiteral.class, litClass, "Missing operator or separator between identifier and literal.");
 			addInvalid(litClass,TIdentifierLiteral.class, "Missing operator or separator between literal and identifier.");
-			for (Class<? extends Token> litClass2 : literalTokenClasses) {
+			for (Class<? extends Token> litClass2 : LITERAL_TOKEN_CLASSES) {
 				addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
 			}
 		}
