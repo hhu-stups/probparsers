@@ -392,8 +392,7 @@ public class BParser {
 			if (parseOptions.isApplyASTTransformations()) {
 				// perform AST transformations that don't require definitions
 				// important for unquoting of definition identifiers before collecting them
-				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
-				for (CheckException checkException : checkExceptions) {
+				for (CheckException checkException : applyAstTransformations(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
 			}
@@ -405,24 +404,21 @@ public class BParser {
 				 */
 				final DefinitionCollector collector = new DefinitionCollector(this.definitions);
 				collector.collectDefinitions(rootNode);
-				List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
-				for (CheckException checkException : definitionsCollectorExceptions) {
+				for (CheckException checkException : collector.getExceptions()) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
 			}
 
 			if (parseOptions.isApplyASTTransformations()) {
 				// perform AST transformations that can't be done by SableCC
-				List<CheckException> checkExceptions = applyAstTransformationsWithDefinitions(rootNode);
-				for (CheckException checkException : checkExceptions) {
+				for (CheckException checkException : applyAstTransformationsWithDefinitions(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
 			}
 
 			if (parseOptions.isApplySemanticChecks()) {
 				// perform some semantic checks which are not done in the parser
-				List<CheckException> checkExceptions = performSemanticChecks(rootNode);
-				for (CheckException checkException : checkExceptions) {
+				for (CheckException checkException : performSemanticChecks(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
 			}
