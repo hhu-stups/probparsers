@@ -389,26 +389,7 @@ public class BParser {
 			final Start rootNode = parser.parse();
 
 			if (parseOptions.isApplyASTTransformations()) {
-				List<CheckException> checkExceptions = new ArrayList<>();
-
-				// perform AST transformations that don't require definitions
-				// important for unquoting of definition identifiers before collecting them
-				checkExceptions.addAll(applyAstTransformations(rootNode));
-
-				/*
-				 * Collect available definition declarations. Needs to be done now
-				 * because they are needed by the following transformations.
-				 */
-				final DefinitionCollector collector = new DefinitionCollector(this.definitions);
-				collector.collectDefinitions(rootNode);
-				checkExceptions.addAll(collector.getExceptions());
-
-				// perform AST transformations that can't be done by SableCC
-				checkExceptions.addAll(applyAstTransformationsWithDefinitions(rootNode));
-
-				// perform some semantic checks which are not done in the parser
-				checkExceptions.addAll(performSemanticChecks(rootNode));
-
+				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
 				if (!checkExceptions.isEmpty()) {
 					throw new BCompoundException(checkExceptions.stream()
 						.map(checkException -> new BException(machineFilePath, checkException))
@@ -538,8 +519,11 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private List<CheckException> applyAstTransformations(final Start rootNode) {
-		final List<CheckException> list = new ArrayList<>();
+	private List<CheckException> applyAstTransformations(Start rootNode) {
+		List<CheckException> checkExceptions = new ArrayList<>();
+
+		// perform AST transformations that don't require definitions
+		// important for unquoting of definition identifiers before collecting them
 
 		// default transformations
 		rootNode.apply(new CoupleToIdentifierTransformation());
@@ -547,35 +531,34 @@ public class BParser {
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
 		} catch (VisitorException e) {
-			list.add(e.getException());
+			checkExceptions.add(e.getException());
 		}
 
-		return list;
-	}
+		// Collect available definition declarations. Needs to be done now
+		// because they are needed by the following transformations.
+		DefinitionCollector collector = new DefinitionCollector(this.definitions);
+		collector.collectDefinitions(rootNode);
+		checkExceptions.addAll(collector.getExceptions());
 
-	private List<CheckException> applyAstTransformationsWithDefinitions(final Start rootNode) {
-		final List<CheckException> list = new ArrayList<>();
+		// perform AST transformations that can't be done by SableCC
 		try {
 			OpSubstitutions.transform(rootNode, getDefinitions());
 		} catch (CheckException e) {
-			list.add(e);
+			checkExceptions.add(e);
 		}
 		// more AST transformations?
-		return list;
-	}
 
-	private List<CheckException> performSemanticChecks(final Start rootNode) {
-		final List<CheckException> list = new ArrayList<>();
+		// perform some semantic checks which are not done in the parser
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {
 			check.runChecks(rootNode);
-			list.addAll(check.getCheckExceptions());
+			checkExceptions.addAll(check.getCheckExceptions());
 		}
 
-		return list;
+		return checkExceptions;
 	}
 
 	public IDefinitions getDefinitions() {
