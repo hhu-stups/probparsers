@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
@@ -387,14 +388,12 @@ public class BParser {
 			Parser parser = new Parser(lexer);
 			final Start rootNode = parser.parse();
 
-			final List<BException> bExceptionList = new ArrayList<>();
-
 			if (parseOptions.isApplyASTTransformations()) {
+				List<CheckException> checkExceptions = new ArrayList<>();
+
 				// perform AST transformations that don't require definitions
 				// important for unquoting of definition identifiers before collecting them
-				for (CheckException checkException : applyAstTransformations(rootNode)) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
+				checkExceptions.addAll(applyAstTransformations(rootNode));
 
 				/*
 				 * Collect available definition declarations. Needs to be done now
@@ -402,23 +401,19 @@ public class BParser {
 				 */
 				final DefinitionCollector collector = new DefinitionCollector(this.definitions);
 				collector.collectDefinitions(rootNode);
-				for (CheckException checkException : collector.getExceptions()) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
+				checkExceptions.addAll(collector.getExceptions());
 
 				// perform AST transformations that can't be done by SableCC
-				for (CheckException checkException : applyAstTransformationsWithDefinitions(rootNode)) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
+				checkExceptions.addAll(applyAstTransformationsWithDefinitions(rootNode));
 
 				// perform some semantic checks which are not done in the parser
-				for (CheckException checkException : performSemanticChecks(rootNode)) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
-			}
+				checkExceptions.addAll(performSemanticChecks(rootNode));
 
-			if (!bExceptionList.isEmpty()) {
-				throw new BCompoundException(bExceptionList);
+				if (!checkExceptions.isEmpty()) {
+					throw new BCompoundException(checkExceptions.stream()
+						.map(checkException -> new BException(machineFilePath, checkException))
+						.collect(Collectors.toList()));
+				}
 			}
 
 			return rootNode;
