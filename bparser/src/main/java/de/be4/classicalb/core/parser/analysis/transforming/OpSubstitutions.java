@@ -140,7 +140,8 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			parameters = new LinkedList<>();
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, "Expecting operation");
+			String message = "Expecting operation";
+			throw new BParseException(null, message, message);
 		}
 
 		if (type != Type.NoDefinition && idToken != null) {
