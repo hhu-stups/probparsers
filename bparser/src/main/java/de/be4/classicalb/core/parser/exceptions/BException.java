@@ -38,9 +38,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * </li>
  * <li>
  * {@link LexerException}: Thrown if any error occurs in the SableCC-generated lexer.
- * This class doesn't have any direct way to get the error position,
- * but {@link BException} tries to parse this information from the exception message
- * and provides it via the generic interface if possible.
+ * Includes the source code position for the error.
  * </li>
  * <li>
  * {@link BParseException}: If the parser throws a {@link ParserException},
