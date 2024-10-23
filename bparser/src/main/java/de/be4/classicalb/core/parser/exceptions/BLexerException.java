@@ -15,6 +15,10 @@ public class BLexerException extends LexerException {
 		this.lastText = lastText;
 	}
 
+	public BLexerException(Token lastToken, String message) {
+		this(lastToken, message, lastToken.getText(), lastToken.getLine(), lastToken.getPos());
+	}
+
 	public String getLastText() {
 		return lastText;
 	}

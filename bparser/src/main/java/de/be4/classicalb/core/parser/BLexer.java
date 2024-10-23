@@ -363,9 +363,9 @@ public class BLexer extends Lexer {
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
 			String specificMessage = INVALID_UNICODE_SYMBOL_MESSAGES.get(symbol);
 			if (specificMessage != null) {
-				throw makeDefaultLexerException(defaultMessage + " " + specificMessage);
+				throw new BLexerException(token, defaultMessage + " " + specificMessage);
 			} else {
-				throw makeDefaultLexerException(defaultMessage);
+				throw new BLexerException(token, defaultMessage);
 			}
 		}
 
@@ -389,20 +389,13 @@ public class BLexer extends Lexer {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				if (token instanceof EOF ) {
-					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string);
+					throw new BLexerException(token, "Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string);
 				} else {
-					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string);
+					throw new BLexerException(token, "Invalid combination of symbols: '" + lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string);
 				}
 			}
 		}
 
-	}
-	
-	private LexerException makeDefaultLexerException(String msg) {
-		int l = token.getLine();
-		int c = token.getPos();
-		return new BLexerException(token, msg, token.getText(), l, c);
-	
 	}
 
 	private void applyGrammarExtension() {
@@ -420,7 +413,7 @@ public class BLexer extends Lexer {
 
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
-			throw makeDefaultLexerException("Pragma '" + token.getText() + "' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.");
+			throw new BLexerException(token, "Pragma '" + token.getText() + "' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.");
 		}
 
 		if (token instanceof TCommentEnd) {
@@ -459,7 +452,7 @@ public class BLexer extends Lexer {
 				definitionName = Utils.unquoteIdentifier(token.getText());
 			} catch (IllegalArgumentException exc) {
 				// FIXME Include cause in BLexerException
-				throw makeDefaultLexerException(exc.getMessage());
+				throw new BLexerException(token, exc.getMessage());
 			}
 			Definitions.Type type = definitions.getType(definitionName);
 
@@ -498,8 +491,7 @@ public class BLexer extends Lexer {
 	private void collectComment() throws LexerException {
 		if (token instanceof EOF) {
 			// make sure we don't loose this token, needed for error message
-			final String text = token.getText();
-			throw new BLexerException(comment, "Comment not closed.", text, comment.getLine(), comment.getPos());
+			throw new BLexerException(comment, "Comment not closed.");
 		}
 
 		// starting a new comment
