@@ -96,20 +96,20 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		checkNoDotsInQuotedIdentifier(node);
+		unquoteIdentifierToken(node);
 	}
 
 	@Override
 	public void caseTDefLiteralPredicate(final TDefLiteralPredicate node) {
-		checkNoDotsInQuotedIdentifier(node);
+		unquoteIdentifierToken(node);
 	}
 
 	@Override
 	public void caseTDefLiteralSubstitution(final TDefLiteralSubstitution node) {
-		checkNoDotsInQuotedIdentifier(node);
+		unquoteIdentifierToken(node);
 	}
 
-	private static void checkNoDotsInQuotedIdentifier(final Token token) {
+	private static void unquoteIdentifierToken(final Token token) {
 		final String text = token.getText();
 		// Unquote and unescape backquoted identifiers
 		if (Utils.isQuoted(text, '`')) {
