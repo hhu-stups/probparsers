@@ -10,7 +10,6 @@ import java.util.Map;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.AAnySubstitution;
@@ -140,8 +139,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			parameters = new LinkedList<>();
 		} else {
 			// some other expression was parsed (NOT allowed)
-			String message = "Expecting operation";
-			throw new BParseException(null, message, message);
+			throw new VisitorException(new CheckException("Expecting operation", expression));
 		}
 
 		if (type != Type.NoDefinition && idToken != null) {

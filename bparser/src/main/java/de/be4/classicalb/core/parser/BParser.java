@@ -400,8 +400,6 @@ public class BParser {
 			return rootNode;
 		} catch (final BLexerException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
-		} catch (final BParseException e) {
-			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final IOException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final ParserException e) {

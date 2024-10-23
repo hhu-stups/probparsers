@@ -43,13 +43,11 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  * and provides it via the generic interface if possible.
  * </li>
  * <li>
- * {@link BParseException}: This exception is thrown in two situations.
- * On the one hand, if the parser throws a {@link ParserException},
+ * {@link BParseException}: If the parser throws a {@link ParserException},
  * we convert it into a {@link BParseException}.
- * On the other hand it can be thrown if any error is found during the AST transformations after the parser has finished.
  * </li>
  * <li>
- * {@link CheckException}: Thrown if any problem occurs while performing semantic checks.
+ * {@link CheckException}: Thrown if any problem occurs while performing AST transformations or semantic checks.
  * We provide one or more nodes that are involved in the problem.
  * For example, if we find duplicate machine clauses,
  * we will list all occurrences in the exception.
