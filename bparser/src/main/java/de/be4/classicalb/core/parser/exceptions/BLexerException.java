@@ -9,14 +9,26 @@ public class BLexerException extends LexerException {
 	private final Token lastToken;
 	private final String lastText;
 
-	public BLexerException(Token lastToken, String message, String lastText, int line, int pos) {
-		super(line, pos, message);
+	public BLexerException(Token lastToken, String message, String lastText, int line, int pos, Throwable cause) {
+		super(line, pos, message, cause);
 		this.lastToken = lastToken;
 		this.lastText = lastText;
 	}
 
+	public BLexerException(Token lastToken, String message, String lastText, int line, int pos) {
+		this(lastToken, message, lastText, line, pos, null);
+	}
+
+	public BLexerException(Token lastToken, String message, Throwable cause) {
+		this(lastToken, message, lastToken.getText(), lastToken.getLine(), lastToken.getPos(), cause);
+	}
+
 	public BLexerException(Token lastToken, String message) {
-		this(lastToken, message, lastToken.getText(), lastToken.getLine(), lastToken.getPos());
+		this(lastToken, message, null);
+	}
+
+	public BLexerException(Token lastToken, Throwable cause) {
+		this(lastToken, cause.getMessage(), cause);
 	}
 
 	public String getLastText() {

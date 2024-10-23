@@ -451,8 +451,7 @@ public class BLexer extends Lexer {
 			try {
 				definitionName = Utils.unquoteIdentifier(token.getText());
 			} catch (IllegalArgumentException exc) {
-				// FIXME Include cause in BLexerException
-				throw new BLexerException(token, exc.getMessage());
+				throw new BLexerException(token, exc);
 			}
 			Definitions.Type type = definitions.getType(definitionName);
 
