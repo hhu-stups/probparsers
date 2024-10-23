@@ -14,6 +14,7 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.Utils;
 
 public class BLexer extends Lexer {
 
@@ -451,7 +452,10 @@ public class BLexer extends Lexer {
 
 	private void replaceDefTokens() {
 		if (token instanceof TIdentifierLiteral) {
-			final Definitions.Type type = definitions.getType(token.getText());
+			// The identifier might be backquoted and needs to be unquoted before looking up the definition type.
+			// This does *not* replace the token text yet - that happens later in SyntaxExtensionTranslator.
+			String definitionName = Utils.unquoteIdentifier(token.getText());
+			Definitions.Type type = definitions.getType(definitionName);
 
 			/*
 			 * If no type is set, something went wrong during preparsing.

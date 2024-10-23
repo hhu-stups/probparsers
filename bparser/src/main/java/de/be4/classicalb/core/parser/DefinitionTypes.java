@@ -1,7 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import de.be4.classicalb.core.parser.util.Utils;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +17,7 @@ public final class DefinitionTypes {
 	}
 
 	public void addTyping(final String definitionName, final Definitions.Type type) {
-		types.put(Utils.unquoteIdentifier(definitionName), type);
+		types.put(definitionName, type);
 	}
 
 	public void addAll(final Map<String, Definitions.Type> newTypes) {
@@ -27,7 +25,7 @@ public final class DefinitionTypes {
 	}
 
 	public Definitions.Type getType(final String definitionName) {
-		return types.getOrDefault(Utils.unquoteIdentifier(definitionName), IDefinitions.Type.NoDefinition);
+		return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
 	}
 	
 	@Override
