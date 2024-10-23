@@ -363,9 +363,9 @@ public class BLexer extends Lexer {
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
 			String specificMessage = INVALID_UNICODE_SYMBOL_MESSAGES.get(symbol);
 			if (specificMessage != null) {
-				throw makeDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
+				throw makeDefaultLexerException(defaultMessage + " " + specificMessage, token.getText());
 			} else {
-				throw makeDefaultLexerException(defaultMessage, defaultMessage);
+				throw makeDefaultLexerException(defaultMessage, token.getText());
 			}
 		}
 
@@ -389,19 +389,19 @@ public class BLexer extends Lexer {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				if (token instanceof EOF ) {
-					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string, string);
+					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string, token.getText());
 				} else {
-					throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
+					throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, token.getText());
 				}
 			}
 		}
 
 	}
 	
-	private LexerException makeDefaultLexerException(String msg, String string) {
+	private LexerException makeDefaultLexerException(String msg, String lastText) {
 		int l = token.getLine();
 		int c = token.getPos();
-		return new BLexerException(token, msg, string, l, c);
+		return new BLexerException(token, msg, lastText, l, c);
 	
 	}
 
