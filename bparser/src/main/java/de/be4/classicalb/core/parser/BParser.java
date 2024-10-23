@@ -395,9 +395,7 @@ public class BParser {
 				for (CheckException checkException : applyAstTransformations(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
-			}
 
-			if (parseOptions.isCollectDefinitions()) {
 				/*
 				 * Collect available definition declarations. Needs to be done now
 				 * because they are needed by the following transformations.
@@ -407,16 +405,12 @@ public class BParser {
 				for (CheckException checkException : collector.getExceptions()) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
-			}
 
-			if (parseOptions.isApplyASTTransformations()) {
 				// perform AST transformations that can't be done by SableCC
 				for (CheckException checkException : applyAstTransformationsWithDefinitions(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
-			}
 
-			if (parseOptions.isApplySemanticChecks()) {
 				// perform some semantic checks which are not done in the parser
 				for (CheckException checkException : performSemanticChecks(rootNode)) {
 					bExceptionList.add(new BException(machineFilePath, checkException));

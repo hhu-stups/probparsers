@@ -35,9 +35,7 @@ public class PrettyPrinterTest {
 
 	private static void testRoundtripRaw(String code, Parser parser) throws BCompoundException {
 		ParseOptions parseOptions = new ParseOptions();
-		parseOptions.setCollectDefinitions(false);
 		parseOptions.setApplyASTTransformations(false);
-		parseOptions.setApplySemanticChecks(false);
 		Start rawParse = parser.parse(code, parseOptions);
 		PrettyPrinter prettyprinter = new PrettyPrinter();
 		rawParse.apply(prettyprinter);
