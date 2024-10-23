@@ -363,9 +363,9 @@ public class BLexer extends Lexer {
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
 			String specificMessage = INVALID_UNICODE_SYMBOL_MESSAGES.get(symbol);
 			if (specificMessage != null) {
-				throw makeDefaultLexerException(defaultMessage + " " + specificMessage, token.getText());
+				throw makeDefaultLexerException(defaultMessage + " " + specificMessage);
 			} else {
-				throw makeDefaultLexerException(defaultMessage, token.getText());
+				throw makeDefaultLexerException(defaultMessage);
 			}
 		}
 
@@ -389,19 +389,19 @@ public class BLexer extends Lexer {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				if (token instanceof EOF ) {
-					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string, token.getText());
+					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string);
 				} else {
-					throw makeDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, token.getText());
+					throw makeDefaultLexerException("Invalid combination of symbols: '" + lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string);
 				}
 			}
 		}
 
 	}
 	
-	private LexerException makeDefaultLexerException(String msg, String lastText) {
+	private LexerException makeDefaultLexerException(String msg) {
 		int l = token.getLine();
 		int c = token.getPos();
-		return new BLexerException(token, msg, lastText, l, c);
+		return new BLexerException(token, msg, token.getText(), l, c);
 	
 	}
 
@@ -420,7 +420,7 @@ public class BLexer extends Lexer {
 
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
-			throw makeDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
+			throw makeDefaultLexerException("Pragma '" + token.getText() + "' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.");
 		}
 
 		if (token instanceof TCommentEnd) {
@@ -430,7 +430,7 @@ public class BLexer extends Lexer {
 			comment = null;
 			commentBuffer = null;
 		} else if (token instanceof TShebang && token.getLine() != 1) {
-			throw makeDefaultLexerException("#! only allowed in first line of the file","#!");
+			throw new BLexerException(token, "#! only allowed in first line of the file", "#!", token.getLine(), token.getPos());
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
@@ -459,7 +459,7 @@ public class BLexer extends Lexer {
 				definitionName = Utils.unquoteIdentifier(token.getText());
 			} catch (IllegalArgumentException exc) {
 				// FIXME Include cause in BLexerException
-				throw makeDefaultLexerException(exc.getMessage(), token.getText());
+				throw makeDefaultLexerException(exc.getMessage());
 			}
 			Definitions.Type type = definitions.getType(definitionName);
 
