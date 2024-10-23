@@ -317,6 +317,10 @@ public final class Utils {
 
 	public static String unquoteIdentifier(final String name) {
 		if (isQuoted(name, '`')) {
+			if (name.indexOf('.') != -1) {
+				String fixed = name.replace(".", "`.`");
+				throw new IllegalArgumentException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed);
+			}
 			return unescapeStringContents(removeSurroundingQuotes(name, '`'));
 		}
 		return name;

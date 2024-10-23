@@ -21,7 +21,7 @@ public class QuotedDefinitionsTest {
 	@Test
 	public void testQuotedExpressionDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.expr`(a) == a END\n";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 
@@ -112,7 +112,7 @@ public class QuotedDefinitionsTest {
 	@Test
 	public void testQuotedPredicateDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.pred`(a,b) == a=b END\n";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 
@@ -203,7 +203,7 @@ public class QuotedDefinitionsTest {
 	@Test
 	public void testQuotedSubstitutionDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.sub`(a,b) == a:=b END\n";
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 

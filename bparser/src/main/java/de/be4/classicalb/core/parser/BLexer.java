@@ -450,11 +450,17 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void replaceDefTokens() {
+	private void replaceDefTokens() throws LexerException {
 		if (token instanceof TIdentifierLiteral) {
 			// The identifier might be backquoted and needs to be unquoted before looking up the definition type.
 			// This does *not* replace the token text yet - that happens later in SyntaxExtensionTranslator.
-			String definitionName = Utils.unquoteIdentifier(token.getText());
+			String definitionName;
+			try {
+				definitionName = Utils.unquoteIdentifier(token.getText());
+			} catch (IllegalArgumentException exc) {
+				// FIXME Include cause in BLexerException
+				throw makeDefaultLexerException(exc.getMessage(), token.getText());
+			}
 			Definitions.Type type = definitions.getType(definitionName);
 
 			/*

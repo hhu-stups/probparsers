@@ -113,12 +113,11 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		final String text = token.getText();
 		// Unquote and unescape backquoted identifiers
 		if (Utils.isQuoted(text, '`')) {
-			if (text.indexOf('.') != -1) {
-				String fixed = text.replace(".", "`.`");
-				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, token));
+			try {
+				token.setText(Utils.unquoteIdentifier(text));
+			} catch (IllegalArgumentException exc) {
+				throw new VisitorException(new CheckException(exc.getMessage(), token));
 			}
-			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
-			token.setText(unescapedText);
 		}
 	}
 

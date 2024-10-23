@@ -132,7 +132,11 @@ public class PreParser {
 		for (Token nameToken : definitions.keySet()) {
 			String name = nameToken.getText();
 			if (Utils.isQuoted(name, '`')) {
-				nameToken.setText(Utils.unquoteIdentifier(name));
+				try {
+					nameToken.setText(Utils.unquoteIdentifier(name));
+				} catch (IllegalArgumentException exc) {
+					throw new PreParseException(nameToken, exc.getMessage(), exc);
+				}
 			}
 		}
 
