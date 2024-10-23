@@ -77,7 +77,7 @@ public class BException extends Exception {
 
 	public BException(String filename, BLexerException e) {
 		this(filename, e.getMessage(), e);
-		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos()));
+		locations.add(new Location(filename, e.getLastLine(), e.getLastPos(), e.getLastLine(), e.getLastPos() + e.getLastText().length()));
 	}
 
 	public BException(String filename, BParseException e) {

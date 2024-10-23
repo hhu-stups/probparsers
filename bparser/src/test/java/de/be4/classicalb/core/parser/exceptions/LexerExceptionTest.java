@@ -24,12 +24,12 @@ public class LexerExceptionTest {
 	@Test
 	public void testLexerThrowsExceptionAndProvidesPositionInfo() {
 		final BCompoundException b = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/IfAndPredicates.mch"));
-		Helpers.assertParseErrorLocation(b, 18, 18, 18, 18);
+		Helpers.assertParseErrorLocation(b, 18, 18, 18, 21);
 	}
 
 	@Test
 	public void testLexerThrowsExceptionAndProvidesPositionInfoWindows() {
 		final BCompoundException b = Assert.assertThrows(BCompoundException.class, () -> Helpers.parseFile("exceptions/IfAndPredicates_win.mch"));
-		Helpers.assertParseErrorLocation(b, 18, 18, 18, 18);
+		Helpers.assertParseErrorLocation(b, 18, 18, 18, 21);
 	}
 }
