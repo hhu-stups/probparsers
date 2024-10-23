@@ -389,6 +389,15 @@ public class BParser {
 
 			final List<BException> bExceptionList = new ArrayList<>();
 
+			if (parseOptions.isApplyASTTransformations()) {
+				// perform AST transformations that don't require definitions
+				// important for unquoting of definition identifiers before collecting them
+				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
+				for (CheckException checkException : checkExceptions) {
+					bExceptionList.add(new BException(machineFilePath, checkException));
+				}
+			}
+
 			if (parseOptions.isCollectDefinitions()) {
 				/*
 				 * Collect available definition declarations. Needs to be done now
@@ -404,7 +413,7 @@ public class BParser {
 
 			if (parseOptions.isApplyASTTransformations()) {
 				// perform AST transformations that can't be done by SableCC
-				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
+				List<CheckException> checkExceptions = applyAstTransformationsWithDefinitions(rootNode);
 				for (CheckException checkException : checkExceptions) {
 					bExceptionList.add(new BException(machineFilePath, checkException));
 				}
@@ -548,12 +557,6 @@ public class BParser {
 		final List<CheckException> list = new ArrayList<>();
 
 		// default transformations
-		try {
-			OpSubstitutions.transform(rootNode, getDefinitions());
-		} catch (CheckException e) {
-			list.add(e);
-		}
-
 		rootNode.apply(new CoupleToIdentifierTransformation());
 
 		try {
@@ -562,8 +565,17 @@ public class BParser {
 			list.add(e.getException());
 		}
 
-		// more AST transformations?
+		return list;
+	}
 
+	private List<CheckException> applyAstTransformationsWithDefinitions(final Start rootNode) {
+		final List<CheckException> list = new ArrayList<>();
+		try {
+			OpSubstitutions.transform(rootNode, getDefinitions());
+		} catch (CheckException e) {
+			list.add(e);
+		}
+		// more AST transformations?
 		return list;
 	}
 

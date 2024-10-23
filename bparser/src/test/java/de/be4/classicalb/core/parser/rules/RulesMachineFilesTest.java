@@ -32,6 +32,9 @@ public class RulesMachineFilesTest {
 		String output = RulesUtil.getFileAsPrologTerm("project/project_with_def_file/Main.rmch", true);
 		assertTrue(output.contains("Defs.def"));
 		assertTrue(output.contains("expression_definition(p4(3,2,3,16),'FooValue'"));
+		// also check some quoted defs:
+		assertTrue(output.contains("predicate_definition(p4(3,3,3,24),'QuotedDef'"));
+		assertTrue(output.contains("substitution_definition(p4(-1,5,3,20),'MainDef'"));
 	}
 
 	@Test

@@ -314,4 +314,11 @@ public final class Utils {
 
 		return text;
 	}
+
+	public static String unquoteIdentifier(final String name) {
+		if (isQuoted(name, '`')) {
+			return unescapeStringContents(removeSurroundingQuotes(name, '`'));
+		}
+		return name;
+	}
 }
