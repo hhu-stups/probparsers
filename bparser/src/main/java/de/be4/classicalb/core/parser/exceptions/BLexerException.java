@@ -8,16 +8,11 @@ public class BLexerException extends LexerException {
 
 	private final Token lastToken;
 	private final String lastText;
-	private final int lastLine;
-	private final int lastPos;
 
-	public BLexerException(final Token lastToken, final String message,
-			final String lastText, final int lastLine, final int lastPos) {
-		super(message);
+	public BLexerException(Token lastToken, String message, String lastText, int line, int pos) {
+		super(line, pos, message);
 		this.lastToken = lastToken;
 		this.lastText = lastText;
-		this.lastLine = lastLine;
-		this.lastPos = lastPos;
 	}
 
 	public String getLastText() {
@@ -25,11 +20,11 @@ public class BLexerException extends LexerException {
 	}
 
 	public int getLastLine() {
-		return lastLine;
+		return this.getLine();
 	}
 
 	public int getLastPos() {
-		return lastPos;
+		return this.getPos();
 	}
 
 	public Token getLastToken() {
