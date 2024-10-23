@@ -38,6 +38,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
+import de.be4.classicalb.core.preparser.node.TDefinitions;
 import de.be4.classicalb.core.preparser.node.TStringLiteral;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
@@ -116,11 +117,13 @@ public class PreParser {
 		try {
 			rootNode = preParser.parse();
 		} catch (final ParserException e) {
-			if (e.getToken() instanceof de.be4.classicalb.core.preparser.node.TDefinitions) {
-				throw new PreParseException(e.getToken(), "Clause 'DEFINITIONS' is used more than once", e);
+			String message;
+			if (e.getToken() instanceof TDefinitions) {
+				message = "Clause 'DEFINITIONS' is used more than once";
 			} else {
-				throw new PreParseException(e.getToken(), e.getRealMsg(), e);
+				message = e.getRealMsg();
 			}
+			throw new PreParseException(e.getToken(), message, e);
 		} catch (final LexerException e) {
 			throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 		}
