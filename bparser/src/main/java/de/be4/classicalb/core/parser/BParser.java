@@ -378,6 +378,7 @@ public class BParser {
 
 	private Start parseInternal(Reader reader, File machineFile, DefinitionTypes defTypes) throws BCompoundException {
 		String machineFilePath = machineFile == null ? null : machineFile.getPath();
+		Start rootNode;
 		try {
 			/*
 			 * Main parser
@@ -386,18 +387,7 @@ public class BParser {
 			lexer.setPosition(this.startLine, this.startColumn);
 			lexer.setParseOptions(parseOptions);
 			Parser parser = new Parser(lexer);
-			final Start rootNode = parser.parse();
-
-			if (parseOptions.isApplyASTTransformations()) {
-				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
-				if (!checkExceptions.isEmpty()) {
-					throw new BCompoundException(checkExceptions.stream()
-						.map(checkException -> new BException(machineFilePath, checkException))
-						.collect(Collectors.toList()));
-				}
-			}
-
-			return rootNode;
+			rootNode = parser.parse();
 		} catch (final BLexerException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final IOException e) {
@@ -410,6 +400,17 @@ public class BParser {
 		} catch (LexerException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		}
+
+		if (parseOptions.isApplyASTTransformations()) {
+			List<CheckException> checkExceptions = applyAstTransformations(rootNode);
+			if (!checkExceptions.isEmpty()) {
+				throw new BCompoundException(checkExceptions.stream()
+					.map(checkException -> new BException(machineFilePath, checkException))
+					.collect(Collectors.toList()));
+			}
+		}
+
+		return rootNode;
 	}
 
 	private Start parseWithPreParsing(Reader reader, File machineFile, IFileContentProvider provider) throws BCompoundException {
