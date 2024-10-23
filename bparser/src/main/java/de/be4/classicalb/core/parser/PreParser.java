@@ -128,12 +128,19 @@ public class PreParser {
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
+		Map<Token, Token> definitions = new HashMap<>(collector.getDefinitions());
+		for (Token nameToken : definitions.keySet()) {
+			String name = nameToken.getText();
+			if (Utils.isQuoted(name, '`')) {
+				nameToken.setText(Utils.unquoteIdentifier(name));
+			}
+		}
+
 		evaluateDefinitionFiles(collector.getFileDefinitions());
 
-		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(
-				collector.getDefinitions());
+		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(definitions);
 
-		evaluateTypes(sortedDefinitionList, collector.getDefinitions());
+		evaluateTypes(sortedDefinitionList, definitions);
 
 	}
 
