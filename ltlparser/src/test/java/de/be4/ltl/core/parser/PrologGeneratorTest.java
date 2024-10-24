@@ -20,7 +20,6 @@ import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class PrologGeneratorTest {
@@ -588,19 +587,15 @@ public class PrologGeneratorTest {
 	}
 
 	@Test
-	@Ignore
 	public void testParserlib17() throws Exception {
-		// has to be ignored because the dummyparser can not parse the ap
-		// might check for the syntax error exception instead?
-		final PrologTerm none = new CompoundPrologTerm("none");
-		final PrologTerm stringl = new CompoundPrologTerm("string", none,
-				new CompoundPrologTerm("{"));
-		final PrologTerm stringr = new CompoundPrologTerm("string", none,
-				new CompoundPrologTerm("1"));
-		final PrologTerm eq = new CompoundPrologTerm("equal", none, stringl,
-				stringr);
-		final PrologTerm bpred = new CompoundPrologTerm("bpred", eq);
-		final PrologTerm ap = new CompoundPrologTerm("ap", bpred);
+		PrologTerm dpred = new CompoundPrologTerm("dpred", new CompoundPrologTerm("\"{\"=\"1\""));
+		// Non-dummy version, in case we ever stop using the DummyParser:
+		//final PrologTerm none = new CompoundPrologTerm("none");
+		//final PrologTerm stringl = new CompoundPrologTerm("string", none, new CompoundPrologTerm("{"));
+		//final PrologTerm stringr = new CompoundPrologTerm("string", none, new CompoundPrologTerm("1"));
+		//final PrologTerm eq = new CompoundPrologTerm("equal", none, stringl, stringr);
+		//final PrologTerm bpred = new CompoundPrologTerm("bpred", eq);
+		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
 		final PrologTerm expected = new CompoundPrologTerm("globally", ap);
 
 		check("G {\"{\"=\"1\"}", expected);
@@ -657,11 +652,12 @@ public class PrologGeneratorTest {
 				final boolean wrap, final String wrapper)
 				throws ProBParseException {
 			// TODO: cant we use the real B parser here?
-			for (int i = 0; i < text.length(); i++) {
-				final char ch = text.charAt(i);
-				if (!Character.isLowerCase(ch) && "()[]{}".indexOf(ch) == -1)
-					throw new ProBParseException("syntax error");
+			// Hardcoded cases for testing parse errors.
+			// Everything else is considered "successfully parsed".
+			if ("X".equals(text) || text.endsWith("{")) {
+				throw new ProBParseException("syntax error");
 			}
+
 			if (wrap) {
 				pto.openTerm(wrapper);
 			}
