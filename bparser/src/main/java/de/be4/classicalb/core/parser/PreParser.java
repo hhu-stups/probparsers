@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
@@ -39,7 +38,9 @@ import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
 import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
+import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
+import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
@@ -131,8 +132,8 @@ public class PreParser {
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
 		rootNode.apply(collector);
 
-		Map<Token, Token> definitions = new HashMap<>(collector.getDefinitions());
-		for (Token nameToken : definitions.keySet()) {
+		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>(collector.getDefinitions());
+		for (TPreParserIdentifier nameToken : definitions.keySet()) {
 			String name = nameToken.getText();
 			if (Utils.isQuoted(name, '`')) {
 				try {
@@ -145,7 +146,7 @@ public class PreParser {
 
 		evaluateDefinitionFiles(collector.getFileDefinitions());
 
-		List<Token> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(definitions);
+		List<TPreParserIdentifier> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(definitions);
 
 		evaluateTypes(sortedDefinitionList, definitions);
 
@@ -204,13 +205,13 @@ public class PreParser {
 		}
 	}
 
-	private void evaluateTypes(final List<Token> sortedDefinitionList, final Map<Token, Token> definitions)
+	private void evaluateTypes(List<TPreParserIdentifier> sortedDefinitionList, final Map<TPreParserIdentifier, TRhsBody> definitions)
 			throws PreParseException {
 		// use linked list as we rely on pop() and push()
-		final LinkedList<Token> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
-		final LinkedList<Token> currentlyUnparseableDefinitions = new LinkedList<>();
+		LinkedList<TPreParserIdentifier> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
+		LinkedList<TPreParserIdentifier> currentlyUnparseableDefinitions = new LinkedList<>();
 		Set<String> todoDefs = new HashSet<>();
-		for (Token token : remainingDefinitions) {
+		for (TPreParserIdentifier token : remainingDefinitions) {
 			todoDefs.add(token.getText());
 		}
 		// use main parser for the rhs of each definition to determine type
@@ -225,9 +226,9 @@ public class PreParser {
 			oneParsed = false;
 
 			while (!remainingDefinitions.isEmpty()) {
-				final Token definition = remainingDefinitions.pop();
+				TPreParserIdentifier definition = remainingDefinitions.pop();
 
-				final Token defRhs = definitions.get(definition);
+				TRhsBody defRhs = definitions.get(definition);
 				Definitions.Type type;
 				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 				type = definitionType.type;
@@ -246,8 +247,8 @@ public class PreParser {
 		}
 
 		if (!remainingDefinitions.isEmpty()) {
-			final Token definition = remainingDefinitions.pop();
-			final Token defRhs = definitions.get(definition);
+			TPreParserIdentifier definition = remainingDefinitions.pop();
+			TRhsBody defRhs = definitions.get(definition);
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
 				String message = definitionType.errorMessage;
@@ -262,11 +263,11 @@ public class PreParser {
 		}
 	}
 
-	private List<Token> sortDefinitionsByTopologicalOrderAndCheckForCycles(Map<Token, Token> definitions)
+	private List<TPreParserIdentifier> sortDefinitionsByTopologicalOrderAndCheckForCycles(Map<TPreParserIdentifier, TRhsBody> definitions)
 			throws PreParseException {
-		final Set<String> definitionNames = new HashSet<>();
-		final Map<String, Token> definitionMap = new HashMap<>();
-		for (Token token : definitions.keySet()) {
+		Set<String> definitionNames = new HashSet<>();
+		Map<String, TPreParserIdentifier> definitionMap = new HashMap<>();
+		for (TPreParserIdentifier token : definitions.keySet()) {
 			final String definitionName = token.getText();
 			definitionNames.add(definitionName);
 			definitionMap.put(definitionName, token);
@@ -284,10 +285,10 @@ public class PreParser {
 					sb.append(" -> ");
 				}
 			}
-			final Token firstDefinitionToken = definitionMap.get(cycle.get(0));
+			TPreParserIdentifier firstDefinitionToken = definitionMap.get(cycle.get(0));
 			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb);
 		} else {
-			List<Token> sortedDefinitionTokens = new ArrayList<>();
+			List<TPreParserIdentifier> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
 				sortedDefinitionTokens.add(definitionMap.get(name));
 			}
@@ -296,12 +297,12 @@ public class PreParser {
 
 	}
 
-	private Map<String, Set<String>> determineDependencies(Set<String> definitionNames, Map<Token, Token> definitions)
+	private Map<String, Set<String>> determineDependencies(Set<String> definitionNames, Map<TPreParserIdentifier, TRhsBody> definitions)
 			throws PreParseException {
 		HashMap<String, Set<String>> dependencies = new HashMap<>();
-		for (Entry<Token, Token> entry : definitions.entrySet()) {
-			Token nameToken = entry.getKey();
-			Token rhsToken = entry.getValue();
+		for (Map.Entry<TPreParserIdentifier, TRhsBody> entry : definitions.entrySet()) {
+			TPreParserIdentifier nameToken = entry.getKey();
+			TRhsBody rhsToken = entry.getValue();
 			// The FORMULA_PREFIX is needed to switch the lexer state from
 			// section to normal. Note, that we do not parse the right hand side
 			// of the definition here. Hence FORMULA_PREFIX has no further
@@ -380,7 +381,7 @@ public class PreParser {
 	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
 	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
 	 */
-	private DefinitionType determineType(final Token definition, final Token rhsToken,
+	private DefinitionType determineType(TPreParserIdentifier definition, TRhsBody rhsToken,
 			final Set<String> untypedDefinitions) throws PreParseException {
 
 		final String definitionRhs = rhsToken.getText();
@@ -458,8 +459,8 @@ public class PreParser {
 	}
 
 	private static void correctErrorTokenPosition(
-		Token definition,
-		Token rhsToken,
+		TPreParserIdentifier definition,
+		TRhsBody rhsToken,
 		de.be4.classicalb.core.parser.node.Token errorToken
 	) {
 		// the parsed string starts in the second line, e.g. #formula\n ...
@@ -480,8 +481,8 @@ public class PreParser {
 	}
 
 	private static PreParseException wrapLexerExceptionAndCorrectPosition(
-		Token definition,
-		Token rhsToken,
+		TPreParserIdentifier definition,
+		TRhsBody rhsToken,
 		de.be4.classicalb.core.parser.lexer.LexerException exc,
 		Throwable cause
 	) {

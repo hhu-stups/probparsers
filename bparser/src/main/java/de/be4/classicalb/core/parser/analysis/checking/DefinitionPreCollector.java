@@ -8,8 +8,9 @@ import java.util.Map;
 import de.be4.classicalb.core.preparser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.preparser.node.AFilePreParserDefinition;
 import de.be4.classicalb.core.preparser.node.APreParserDefinition;
+import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
-import de.be4.classicalb.core.preparser.node.Token;
+import de.be4.classicalb.core.preparser.node.TRhsBody;
 
 /**
  * Collects the {@link APreParserDefinition} nodes which were found by the PreParser and
@@ -17,7 +18,7 @@ import de.be4.classicalb.core.preparser.node.Token;
  */
 public class DefinitionPreCollector extends DepthFirstAdapter {
 
-	private final Map<Token, Token> definitions = new HashMap<>();
+	private final Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>();
 	private final List<TPreParserString> fileDefinitions = new ArrayList<>();
 
 	@Override
@@ -37,7 +38,7 @@ public class DefinitionPreCollector extends DepthFirstAdapter {
 	 * @return
 	 * 		a mapping "definition identifier" to "right hand side of definition"
 	 */
-	public Map<Token, Token> getDefinitions() {
+	public Map<TPreParserIdentifier, TRhsBody> getDefinitions() {
 		return definitions;
 	}
 
