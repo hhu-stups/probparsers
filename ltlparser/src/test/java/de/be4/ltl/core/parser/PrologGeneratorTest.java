@@ -582,14 +582,9 @@ public class PrologGeneratorTest {
 				"AG {taken= {}")))).parse();
 	}
 
-	@Test
-	public void testPredSyntaxError() throws Exception {
-		try {
-			parse("{X}");
-			Assert.fail("expected parser exception");
-		} catch (LtlParseException e) {
-			// ok
-		}
+	@Test(expected = LtlParseException.class)
+	public void testPredSyntaxError() throws LtlParseException {
+		parse("{X}");
 	}
 
 	@Test
