@@ -2,42 +2,22 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
-import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
-import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
 import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
 import de.be4.classicalb.core.parser.node.AOperationOrDefinitionCallSubstitution;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PSubstitution;
@@ -82,15 +62,9 @@ import de.be4.classicalb.core.parser.util.Utils;
  * definition. If such a node is found, it is replaced by a new node
  * {@link ADefinitionExpression}.
  * </p>
- * <p>
- * The visitor keeps track of scoped variables to ensure, that no node of a
- * scoped variable is replaced.
- * </p>
  */
 public class OpSubstitutions extends OptimizedTraversingAdapter {
-
 	private final IDefinitions definitions;
-	private final Map<String, Integer> scopedVariables = new HashMap<>();
 
 	private OpSubstitutions(final IDefinitions definitions) {
 		this.definitions = definitions;
@@ -184,10 +158,9 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
 		final String identifierString = Utils.getTIdentifierListAsString(node.getIdentifier());
-		final Integer number = scopedVariables.get(identifierString);
 		final Type type = definitions.getType(identifierString);
 
-		if (number == null && type != Type.NoDefinition) {
+		if (type != Type.NoDefinition) {
 			if (type == Type.Expression || type == Type.ExprOrSubst) {
 				/*
 				 * getFirst() is enough cause definitions cannot have composed
@@ -248,192 +221,6 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		}
 	}
 
-	// predicates
-
-	@Override
-	public void inAForallPredicate(AForallPredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAForallPredicate(AForallPredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAExistsPredicate(AExistsPredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAExistsPredicate(AExistsPredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALetPredicatePredicate(ALetPredicatePredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetPredicatePredicate(ALetPredicatePredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	// expressions
-
-	@Override
-	public void inALetExpressionExpression(ALetExpressionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetExpressionExpression(ALetExpressionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralSumExpression(AGeneralSumExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAGeneralSumExpression(AGeneralSumExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralProductExpression(AGeneralProductExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAGeneralProductExpression(AGeneralProductExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAComprehensionSetExpression(AComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAComprehensionSetExpression(AComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALambdaExpression(ALambdaExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALambdaExpression(ALambdaExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	// substitutions
-
-	@Override
-	public void inAAnySubstitution(final AAnySubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAAnySubstitution(final AAnySubstitution node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALetSubstitution(final ALetSubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetSubstitution(final ALetSubstitution node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAVarSubstitution(final AVarSubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAVarSubstitution(final AVarSubstitution node) {
-		leaveScope(node.getIdentifiers());
-	}
-
 	private ADefinitionExpression replaceWithDefExpression(final Node node, TIdentifierLiteral identifier,
 			final List<PExpression> paramList) {
 
@@ -450,34 +237,6 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		node.replaceBy(newNode);
 
 		return newNode;
-	}
-
-	private void enterScope(List<? extends Node> identifiers) {
-		for (Node node : identifiers) {
-			if (node instanceof AIdentifierExpression) {
-				String id = Utils.getTIdentifierListAsString(((AIdentifierExpression) node).getIdentifier());
-				scopedVariables.merge(id, 1, Integer::sum);
-			} else {
-				// IGNORE, typechecking is done later
-			}
-		}
-	}
-
-	private void leaveScope(List<? extends Node> identifiers) {
-		for (Node node : identifiers) {
-			if (node instanceof AIdentifierExpression) {
-				String id = Utils.getTIdentifierListAsString(((AIdentifierExpression) node).getIdentifier());
-				scopedVariables.computeIfPresent(id, (k, v) -> {
-					if (v > 1) {
-						return v - 1;
-					} else {
-						return null;
-					}
-				});
-			} else {
-				// IGNORE, typechecking is done later
-			}
-		}
 	}
 
 	private void setTypeSubstDef(AOperationOrDefinitionCallSubstitution node, String idString) {

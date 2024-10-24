@@ -65,32 +65,13 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	public void testScoping1() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE # def_expr1 . (def_expr1 < 43) THEN skip END END";
+	public void testDefInLocalScope() throws BCompoundException {
+		// DEFINITIONS cannot be shadowed by local variables
+		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == varname \n OPERATIONS op = PRE # def_expr1 . (def_expr1 < 43) THEN skip END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,exists(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),skip(none)))])])).",
-				result);
-	}
-
-	@Test
-	public void testScoping2() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE # def_expr1 . (# def_expr1 . (def_expr1 < 43) & def_expr1 > 41 ) & def_expr1 = 42 THEN skip END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-
-		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,conjunct(none,[exists(none,[identifier(none,def_expr1)],conjunct(none,[exists(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),greater(none,identifier(none,def_expr1),integer(none,41))])),equal(none,definition(none,def_expr1,[]),integer(none,42))]),skip(none)))])])).",
-				result);
-	}
-
-	@Test
-	public void testScoping3() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE ! def_expr1 . (def_expr1 < 43) THEN skip END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-
-		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,forall(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),skip(none)))])])).",
+				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],identifier(none,varname))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,exists(none,[definition(none,def_expr1,[])],less(none,definition(none,def_expr1,[]),integer(none,43))),skip(none)))])])).",
 				result);
 	}
 
