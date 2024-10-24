@@ -194,7 +194,7 @@ public class EventBLexer extends Lexer {
 			// create text for string token
 			string.setText(createString());
 		} catch (final IOException e) {
-			LexerException e2 = new LexerException("IOException occured: " + e.getLocalizedMessage());
+			LexerException e2 = new LexerException("IOException occured: " + e.getMessage());
 			e2.initCause(e);
 			throw e2;
 		}

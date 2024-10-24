@@ -463,7 +463,7 @@ public class CliBParser {
 			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
 			pout.openTerm("ltl").printTerm(term).closeTerm();
 		} catch (LtlParseException e) {
-			pout.openTerm("syntax_error").printAtom(e.getLocalizedMessage()).closeTerm();
+			pout.openTerm("syntax_error").printAtom(e.getMessage()).closeTerm();
 		}
 
 		pout.fullstop();
@@ -539,7 +539,7 @@ public class CliBParser {
 					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
-				err.println("Error reading input file: " + e.getLocalizedMessage());
+				err.println("Error reading input file: " + e.getMessage());
 			}
 			return -2;
 		} catch (final BCompoundException e) {
@@ -547,7 +547,7 @@ public class CliBParser {
 					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
-				err.println("Error parsing input file: " + e.getLocalizedMessage());
+				err.println("Error parsing input file: " + e.getMessage());
 			}
 			return -3;
 		} catch (final RuntimeException e) {
@@ -555,28 +555,28 @@ public class CliBParser {
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
 			} else {
-				err.println("Error reading input file: " + e.getLocalizedMessage());
+				err.println("Error reading input file: " + e.getMessage());
 			}
 			return -4;
 		} catch (final StackOverflowError e) { // inherits from VirtualMachineError, Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+				System.out.println("Error (StackOverflowError) in parser: " + e.getMessage());
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage() // message seems empty
 				, e)));
 				//e.printStackTrace(System.out); may produce itself a stack overflow??
 			} else {
-				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+				err.println("Error (StackOverflowError) in parser: " + e.getMessage());
 			}
 			return -5;
 		} catch (final VirtualMachineError e) { // inherits from Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+				System.out.println("Error (VirtualMachineError) in parser: " + e.getMessage());
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage() // message seems empty
 				, e)));
 			} else {
-				err.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+				err.println("Error (VirtualMachineError) in parser: " + e.getMessage());
 			}
 			return -6;
 		}
@@ -695,7 +695,7 @@ public class CliBParser {
 		try {
 			options.parseOptions(args);
 		} catch (final IllegalArgumentException e) {
-			System.err.println(e.getLocalizedMessage());
+			System.err.println(e.getMessage());
 			options.printUsage(System.err);
 			System.exit(-1);
 		}

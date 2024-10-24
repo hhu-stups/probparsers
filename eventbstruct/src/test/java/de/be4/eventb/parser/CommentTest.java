@@ -248,8 +248,7 @@ public class CommentTest {
 			final Exception cause = e.getCause();
 			assertTrue(cause instanceof EventBParseException);
 			assertTrue(((EventBParseException) cause).getToken() instanceof TComment);
-			assertEquals(EventBParser.MSG_COMMENT_PLACEMENT,
-					cause.getLocalizedMessage());
+			assertEquals(EventBParser.MSG_COMMENT_PLACEMENT, cause.getMessage());
 		}
 	}
 
@@ -261,19 +260,15 @@ public class CommentTest {
 		} catch (final BException e) {
 			final Exception cause = e.getCause();
 			assertTrue(
-					"Unexpected cause: " + e.getCause() + " - "
-							+ e.getLocalizedMessage(),
+					"Unexpected cause: " + e.getCause() + " - " + e.getMessage(),
 					cause instanceof EventBParseException);
 			assertTrue(
-					"Unexpected token: "
-							+ ((EventBParseException) cause).getToken()
-									.getClass().getSimpleName() + " - "
-							+ e.getLocalizedMessage(),
+					"Unexpected token: " + ((EventBParseException) cause).getToken().getClass().getSimpleName() + " - " + e.getMessage(),
 					((EventBParseException) cause).getToken() instanceof TComment);
-			assertEquals("Unexpected message: " + e.getLocalizedMessage()
-					+ " - " + e.getLocalizedMessage(),
+			assertEquals(
+					"Unexpected message: " + e.getMessage() + " - " + e.getMessage(),
 					EventBParser.MSG_COMMENT_PLACEMENT,
-					cause.getLocalizedMessage());
+					cause.getMessage());
 		}
 	}
 }

@@ -22,7 +22,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedExpressionDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.expr`(a) == a END\n";
 		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
+		assertTrue(e.getMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedExpressionDefinitionWithWrongNrOfArgs() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def!expr`(a,b) == a + b CONSTANTS x PROPERTIES x = `def!expr`(1) END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Number of parameters"));
+		assertTrue(e.getMessage().startsWith("Number of parameters"));
 	}
 
 	@Test
@@ -84,21 +84,21 @@ public class QuotedDefinitionsTest {
 	public void testQuotedExpressionDefinitionDuplicate() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_expr`(a,b) == a+b; `def_expr` == TRUE END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_expr"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_expr"));
 	}
 
 	@Test
 	public void testQuotedExpressionDefinitionDuplicateMixed1() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_expr`(a,b) == a+b; def_expr == TRUE END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_expr"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_expr"));
 	}
 
 	@Test
 	public void testQuotedExpressionDefinitionDuplicateMixed2() {
 		final String testMachine = "MACHINE Test DEFINITIONS def_expr(a,b) == a+b; `def_expr` == TRUE END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_expr"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_expr"));
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedPredicateDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.pred`(a,b) == a=b END\n";
 		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
+		assertTrue(e.getMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 
 	@Test
@@ -152,7 +152,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedPredicateDefinitionWithWrongNrOfArgs() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def!pred`(a,b) == a=b CONSTANTS x PROPERTIES `def!pred`(1) END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Number of parameters"));
+		assertTrue(e.getMessage().startsWith("Number of parameters"));
 	}
 
 	@Test
@@ -175,21 +175,21 @@ public class QuotedDefinitionsTest {
 	public void testQuotedPredicateDefinitionDuplicate() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_pred`(a,b) == a=b; `def_pred` == bfalse END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_pred"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_pred"));
 	}
 
 	@Test
 	public void testQuotedPredicateDefinitionDuplicateMixed1() {
 		final String testMachine = "MACHINE Test DEFINITIONS def_pred(a,b) == a=b; `def_pred` == bfalse END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_pred"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_pred"));
 	}
 
 	@Test
 	public void testQuotedPredicateDefinitionDuplicateMixed2() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_pred`(a,b) == a=b; def_pred == bfalse END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_pred"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_pred"));
 	}
 
 	@Test
@@ -204,7 +204,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedSubstitutionDefinitionWithDot() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def.sub`(a,b) == a:=b END\n";
 		BCompoundException e = assertThrows(BCompoundException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("A quoted identifier cannot contain a dot"));
+		assertTrue(e.getMessage().startsWith("A quoted identifier cannot contain a dot"));
 	}
 
 	@Test
@@ -243,7 +243,7 @@ public class QuotedDefinitionsTest {
 	public void testQuotedSubstitutionDefinitionWithWrongNrOfArgs() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def!sub`(a,b) == a:=b OPERATIONS op = `def!sub`(2) END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Number of parameters"));
+		assertTrue(e.getMessage().startsWith("Number of parameters"));
 	}
 
 	@Test
@@ -266,21 +266,21 @@ public class QuotedDefinitionsTest {
 	public void testQuotedSubstitutionDefinitionDuplicate() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_sub`(a,b) == a:=b; `def_sub` == skip END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_sub"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_sub"));
 	}
 
 	@Test
 	public void testQuotedSubstitutionDefinitionDuplicateMixed1() {
 		final String testMachine = "MACHINE Test DEFINITIONS `def_sub`(a,b) == a:=b; def_sub == skip END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_sub"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_sub"));
 	}
 
 	@Test
 	public void testQuotedSubstitutionDefinitionDuplicateMixed2() {
 		final String testMachine = "MACHINE Test DEFINITIONS def_sub(a,b) == a:=b; `def_sub` == skip END\n";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage().startsWith("Duplicate definition: def_sub"));
+		assertTrue(e.getMessage().startsWith("Duplicate definition: def_sub"));
 	}
 
 	@Test

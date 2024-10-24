@@ -394,7 +394,7 @@ public class BParser {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			final String msg = e.getLocalizedMessage();
+			final String msg = e.getMessage();
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(new BException(machineFilePath, new BParseException(token, msg, realMsg, e)));
 		} catch (LexerException e) {

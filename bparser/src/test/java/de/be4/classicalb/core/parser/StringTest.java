@@ -140,6 +140,6 @@ public class StringTest {
 				+ "12345678999911112334234234345236245634563456345635463465345634563456345346534563546 "
 				+ "END";
 		PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertTrue(e.getLocalizedMessage(),e.getLocalizedMessage().contains("Unknown token:"));
+		assertTrue(e.getMessage(), e.getMessage().contains("Unknown token:"));
 	}
 }

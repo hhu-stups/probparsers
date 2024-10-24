@@ -204,14 +204,14 @@ public class DefinitionsTest {
 	public void testExprOrSubst3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=PRE defExpr=42 THEN defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getMessage());
 	}
 
 	@Test
 	public void testExprOrSubst4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=BEGIN defExpr; a:=defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getMessage());
 	}
 
 	@Test
@@ -238,14 +238,14 @@ public class DefinitionsTest {
 	public void testExprOrSubstWParams3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=PRE defExpr(x)=42 THEN defExpr(x) END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getMessage());
 	}
 
 	@Test
 	public void testExprOrSubstWParams4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); a:=defExpr(x) END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getMessage());
 	}
 
 	@Test
