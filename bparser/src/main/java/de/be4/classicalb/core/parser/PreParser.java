@@ -34,6 +34,7 @@ import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.TDefLiteralPredicate;
 import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
@@ -41,7 +42,6 @@ import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
-import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
 
@@ -313,7 +313,7 @@ public class PreParser {
 					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
 			Set<String> set = new HashSet<>();
-			de.be4.classicalb.core.parser.node.Token next;
+			Token next;
 			try {
 				next = lexer.next();
 				while (!(next instanceof EOF)) {
@@ -329,7 +329,7 @@ public class PreParser {
 			} catch (IOException e) {
 				throw new PreParseException("Error while parsing", e);
 			} catch (BLexerException e) {
-				de.be4.classicalb.core.parser.node.Token errorToken = e.getLastToken();
+				Token errorToken = e.getLastToken();
 				correctErrorTokenPosition(nameToken, rhsToken, errorToken);
 				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
@@ -343,13 +343,13 @@ public class PreParser {
 	static class DefinitionType {
 		Definitions.Type type;
 		String errorMessage;
-		de.be4.classicalb.core.parser.node.Token errorToken;
+		Token errorToken;
 
 		DefinitionType() {
 
 		}
 
-		DefinitionType(Definitions.Type t, de.be4.classicalb.core.parser.node.Token n) {
+		DefinitionType(Definitions.Type t, Token n) {
 			this.type = t;
 			this.errorToken = n;
 		}
@@ -358,7 +358,7 @@ public class PreParser {
 			this.type = t;
 		}
 
-		DefinitionType(String errorMessage, de.be4.classicalb.core.parser.node.Token t) {
+		DefinitionType(String errorMessage, Token t) {
 			this.errorMessage = errorMessage;
 			this.errorToken = t;
 		}
@@ -387,7 +387,7 @@ public class PreParser {
 		final String definitionRhs = rhsToken.getText();
 
 		de.be4.classicalb.core.parser.node.Start start;
-		de.be4.classicalb.core.parser.node.Token errorToken;
+		Token errorToken;
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
 			start = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
@@ -425,7 +425,7 @@ public class PreParser {
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
-				final de.be4.classicalb.core.parser.node.Token errorToken2 = ex.getToken();
+				Token errorToken2 = ex.getToken();
 				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
 						&& errorToken.getPos() >= errorToken2.getPos())) {
 					// use error message from Substitution
@@ -461,7 +461,7 @@ public class PreParser {
 	private static void correctErrorTokenPosition(
 		TPreParserIdentifier definition,
 		TRhsBody rhsToken,
-		de.be4.classicalb.core.parser.node.Token errorToken
+		Token errorToken
 	) {
 		// the parsed string starts in the second line, e.g. #formula\n ...
 		int line = errorToken.getLine();
