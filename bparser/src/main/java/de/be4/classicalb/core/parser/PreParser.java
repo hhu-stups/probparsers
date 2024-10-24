@@ -37,7 +37,7 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
-import de.be4.classicalb.core.preparser.node.Start;
+import de.be4.classicalb.core.preparser.node.PPreParseUnit;
 import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
@@ -114,9 +114,9 @@ public class PreParser {
 		preLexer.setPosition(this.startLine, this.startColumn);
 
 		final Parser preParser = new Parser(preLexer);
-		Start rootNode;
+		PPreParseUnit preParseUnit;
 		try {
-			rootNode = preParser.parse();
+			preParseUnit = preParser.parse().getPPreParseUnit();
 		} catch (final ParserException e) {
 			String message;
 			if (e.getToken() instanceof TPreParserDefinitions) {
@@ -130,7 +130,7 @@ public class PreParser {
 		}
 
 		final DefinitionPreCollector collector = new DefinitionPreCollector();
-		rootNode.apply(collector);
+		preParseUnit.apply(collector);
 
 		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>(collector.getDefinitions());
 		for (TPreParserIdentifier nameToken : definitions.keySet()) {
@@ -386,14 +386,12 @@ public class PreParser {
 
 		final String definitionRhs = rhsToken.getText();
 
-		de.be4.classicalb.core.parser.node.Start start;
 		Token errorToken;
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
-			start = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
+			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
+
 			// check if the result is a Predicate?
-			PParseUnit parseunit = start.getPParseUnit();
-			
 			if (parseunit instanceof APredicateParseUnit) {
 				return new DefinitionType(IDefinitions.Type.Predicate);
 			}
@@ -494,7 +492,7 @@ public class PreParser {
 		return new PreParseException(line, pos, exc.getRealMsg(), cause);
 	}
 
-	private de.be4.classicalb.core.parser.node.Start tryParsing(final String prefix, final String definitionRhs)
+	private PParseUnit tryParsing(final String prefix, final String definitionRhs)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
 			de.be4.classicalb.core.parser.parser.ParserException, IOException {
 
@@ -502,7 +500,7 @@ public class PreParser {
 		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
 		lexer.setParseOptions(parseOptions);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
-		return parser.parse();
+		return parser.parse().getPParseUnit();
 	}
 
 	public IDefinitions getDefFileDefinitions() {
