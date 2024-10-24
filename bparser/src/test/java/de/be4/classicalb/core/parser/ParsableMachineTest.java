@@ -20,13 +20,13 @@ public class ParsableMachineTest {
 
 	private final File machine;
 
-	public ParsableMachineTest(File machine) {
+	public ParsableMachineTest(File machine, String ignoredRelativePath) {
 		this.machine = machine;
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static File[] data() {
-		return Helpers.getMachines(PATH);
+	@Parameterized.Parameters(name = "{1}")
+	public static Object[][] data() {
+		return Helpers.getMachinesForTestData(PATH);
 	}
 
 	@Test

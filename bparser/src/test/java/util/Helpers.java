@@ -18,6 +18,7 @@ import de.prob.prolog.output.PrologTermStringOutput;
 
 import org.junit.Assert;
 import org.junit.function.ThrowingRunnable;
+import org.junit.runners.Parameterized;
 
 public class Helpers {
 	public static File[] getMachines(String path) {
@@ -28,6 +29,23 @@ public class Helpers {
 			throw new RuntimeException(e);
 		}
 		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".sys", ".def").anyMatch(name::endsWith));
+	}
+
+	/**
+	 * Variant of {@link #getMachines(String)} for use in JUnit {@link Parameterized.Parameters} methods.
+	 * This returns file names in addition to full paths to allow displaying a shorter name for each test.
+	 * 
+	 * @param path the directory (relative to the test resources root) in which to find machine files
+	 * @return array of pairs for every found machine: the machine path as a {@link File}, and its file name as a {@link String}
+	 */
+	public static Object[][] getMachinesForTestData(String path) {
+		File[] machines = getMachines(path);
+		Object[][] res = new Object[machines.length][];
+		for (int i = 0; i < machines.length; i++) {
+			File machine = machines[i];
+			res[i] = new Object[] {machine, path + "/" + machine.getName()};
+		}
+		return res;
 	}
 
 	public static String getPrettyPrint(final String testMachine) {

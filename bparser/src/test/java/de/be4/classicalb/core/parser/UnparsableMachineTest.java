@@ -20,13 +20,13 @@ public class UnparsableMachineTest {
 
 	private final File machine;
 
-	public UnparsableMachineTest(File machine) {
+	public UnparsableMachineTest(File machine, String ignoredRelativePath) {
 		this.machine = machine;
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static File[] data() {
-		return Helpers.getMachines(PATH);
+	@Parameterized.Parameters(name = "{1}")
+	public static Object[][] data() {
+		return Helpers.getMachinesForTestData(PATH);
 	}
 
 	@Test(expected = BCompoundException.class)

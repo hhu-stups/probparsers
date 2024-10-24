@@ -26,7 +26,7 @@ public class ParsableButProblematicOnWindowsTest {
 
 	private final File machine;
 
-	public ParsableButProblematicOnWindowsTest(File machine) {
+	public ParsableButProblematicOnWindowsTest(File machine, String ignoredRelativePath) {
 		this.machine = machine;
 	}
 
@@ -49,9 +49,9 @@ public class ParsableButProblematicOnWindowsTest {
 		assertNotNull(start);
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static File[] data() {
-		return Helpers.getMachines(PATH);
+	@Parameterized.Parameters(name = "{1}")
+	public static Object[][] data() {
+		return Helpers.getMachinesForTestData(PATH);
 	}
 
 	@Test
