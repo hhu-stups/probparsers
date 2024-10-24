@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.prolog;
+package de.be4.classicalb.core.parser;
 
 import java.io.IOException;
 
