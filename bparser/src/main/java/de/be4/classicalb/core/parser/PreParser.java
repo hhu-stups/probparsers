@@ -38,8 +38,8 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
 import de.be4.classicalb.core.preparser.node.Start;
-import de.be4.classicalb.core.preparser.node.TDefinitions;
-import de.be4.classicalb.core.preparser.node.TStringLiteral;
+import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
+import de.be4.classicalb.core.preparser.node.TPreParserString;
 import de.be4.classicalb.core.preparser.node.Token;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
@@ -118,7 +118,7 @@ public class PreParser {
 			rootNode = preParser.parse();
 		} catch (final ParserException e) {
 			String message;
-			if (e.getToken() instanceof TDefinitions) {
+			if (e.getToken() instanceof TPreParserDefinitions) {
 				message = "Clause 'DEFINITIONS' is used more than once";
 			} else {
 				message = e.getRealMsg();
@@ -151,7 +151,7 @@ public class PreParser {
 
 	}
 
-	private void evaluateDefinitionFiles(List<TStringLiteral> list)
+	private void evaluateDefinitionFiles(List<TPreParserString> list)
 			throws PreParseException, BCompoundException {
 
 		IDefinitionFileProvider cache = null;
@@ -159,7 +159,7 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (TStringLiteral filenameString : list) {
+		for (TPreParserString filenameString : list) {
 			// Unquote and unescape the definition file name string.
 			String quotedFilename = filenameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));

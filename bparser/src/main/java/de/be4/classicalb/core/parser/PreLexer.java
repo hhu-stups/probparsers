@@ -10,13 +10,13 @@ import de.be4.classicalb.core.preparser.node.TBeginNesting;
 import de.be4.classicalb.core.preparser.node.TComment;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
-import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
+import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
@@ -187,7 +187,7 @@ public class PreLexer extends Lexer {
 	}
 	
 	private void optimizeToken() {
-		if (token instanceof TIdentifierLiteral) {
+		if (token instanceof TPreParserIdentifier) {
 			token.setText(token.getText().intern());
 		}
 	}
