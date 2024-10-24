@@ -1,8 +1,8 @@
 SYSTEM
-    main
+    system_main
     
 SEES
-    used
+    system_used
 
 VARIABLES
     s

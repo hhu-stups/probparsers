@@ -27,7 +27,7 @@ public class Helpers {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
-		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".def").anyMatch(name::endsWith));
+		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".sys", ".def").anyMatch(name::endsWith));
 	}
 
 	public static String getPrettyPrint(final String testMachine) {
