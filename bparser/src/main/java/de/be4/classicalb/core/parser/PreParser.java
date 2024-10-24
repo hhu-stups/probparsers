@@ -319,7 +319,12 @@ public class PreParser {
 				while (!(next instanceof EOF)) {
 					if (next instanceof TIdentifierLiteral) {
 						TIdentifierLiteral id = (TIdentifierLiteral) next;
-						String name = id.getText();
+						String name;
+						try {
+							name = Utils.unquoteIdentifier(id.getText());
+						} catch (IllegalArgumentException exc) {
+							throw new PreParseException(rhsToken, exc.getMessage(), exc);
+						}
 						if (definitionNames.contains(name)) {
 							set.add(name);
 						}
