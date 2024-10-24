@@ -2,11 +2,14 @@ package de.be4.classicalb.core.parser.definitions;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import org.junit.Ignore;
+
 import org.junit.Test;
+
 import util.Helpers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class QuotedDefinitionsTest {
 
@@ -292,13 +295,4 @@ public class QuotedDefinitionsTest {
 	}
 
 	// TODO: from def files
-
-	@Ignore
-	@Test
-	public void testMisleadingParseError() throws BCompoundException {
-		final String testMachine = "MACHINE foo \nDEFINITIONS \nCONSTANTS a \nPROPERTIES a = 1  END";
-		String output = Helpers.getMachineAsPrologTerm(testMachine);
-		//TODO
-	}
-
 }
