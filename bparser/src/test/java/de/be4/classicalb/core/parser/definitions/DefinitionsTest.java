@@ -1,7 +1,14 @@
 package de.be4.classicalb.core.parser.definitions;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -335,4 +342,16 @@ public class DefinitionsTest {
 		//TODO
 	}
 
+	@Test
+	public void testAddDefinitionsFromOtherParser() throws BCompoundException, PreParseException, URISyntaxException {
+		BParser parser = new BParser();
+		parser.parseFile(new File(this.getClass().getResource("/parsable/InfiniteParityFunction.mch").toURI()));
+
+		String code = "not(finite({x|x>2}))";
+		BParser parser2 = new BParser();
+
+		parser2.getDefinitions().addDefinitions(parser.getDefinitions());
+		Start parse = parser2.parseFormula(code);
+		assertNotNull(parse);
+	}
 }
