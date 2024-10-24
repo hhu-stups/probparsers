@@ -36,7 +36,7 @@ public class Helpers {
 	 * This returns file names in addition to full paths to allow displaying a shorter name for each test.
 	 * 
 	 * @param path the directory (relative to the test resources root) in which to find machine files
-	 * @return array of pairs for every found machine: the machine path as a {@link File}, and its file name as a {@link String}
+	 * @return array of pairs for every found machine: the machine path as a {@link File}, and its relative path as a {@link String}
 	 */
 	public static Object[][] getMachinesForTestData(String path) {
 		File[] machines = getMachines(path);
