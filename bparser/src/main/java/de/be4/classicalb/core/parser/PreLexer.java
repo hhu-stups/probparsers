@@ -16,7 +16,6 @@ import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
-import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
@@ -69,7 +68,6 @@ public class PreLexer extends Lexer {
 		//printState();
 		checkComment();
 		checkMultiLineString();
-		optimizeToken();
 
 		if (token != null) {
 			collectRhs();
@@ -183,12 +181,6 @@ public class PreLexer extends Lexer {
 			}
 			state = previousState;
 			previousState = null;
-		}
-	}
-	
-	private void optimizeToken() {
-		if (token instanceof TPreParserIdentifier) {
-			token.setText(token.getText().intern());
 		}
 	}
 }
