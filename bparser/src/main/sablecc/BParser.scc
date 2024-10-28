@@ -104,7 +104,7 @@ Helpers
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
   pragma_prefix = '/*@' layout_char*;
-  pragma_identifier_literal = ([[0x21 .. 0x7e] - ['"' + '*']] | unicode_letter)+;
+  pragma_identifier_literal = ([[0x21 .. 0x7e] - [['"' + '`'] + '*']] | unicode_letter)+;
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
   // versions below do not work:
