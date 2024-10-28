@@ -172,14 +172,19 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	 * @param node the function expression to transform
 	 */
 	@Override
-	public void outAFunctionExpression(final AFunctionExpression node) {
+	public void caseAFunctionExpression(AFunctionExpression node) {
+		// It is important that this transformation runs *before* its children are processed
+		// so that backquoted identifiers haven't been unquoted yet.
+		// Otherwise the special case for backquoted identifiers below will not work correctly.
 		if (!(node.getIdentifier() instanceof AIdentifierExpression)) {
+			super.caseAFunctionExpression(node);
 			return;
 		}
 
 		final String funcName = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
 		if (Utils.isQuoted(funcName, '`')) {
 			// Allow suppressing the built-in function by backquoting the function identifier.
+			super.caseAFunctionExpression(node);
 			return;
 		}
 
@@ -271,11 +276,13 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 				break;
 
 			default:
+				super.caseAFunctionExpression(node);
 				return;
 		}
 
 		replacement.setStartPos(node.getStartPos());
 		replacement.setEndPos(node.getEndPos());
 		node.replaceBy(replacement);
+		replacement.apply(this);
 	}
 }
