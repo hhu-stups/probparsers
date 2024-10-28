@@ -12,9 +12,7 @@ Helpers
   unicode_line_seperator = 8232;
   unicode_paragraph_seperator = 8233;
 
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
+  letter = ['a' .. 'z'] | ['A' .. 'Z'];
   digit = ['0' .. '9'];
 
   // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
@@ -167,7 +165,11 @@ Tokens
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' | 'WITNESS' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
   {definitions_rhs} end_nesting = 'END';
-  {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
+
+  // Lex identifiers as complete words to ignore keywords within identifiers.
+  // This only needs letter and not unicode_letter, because none of the keywords contain Unicode letters.
+  {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*;
+
   {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
   {definitions, definitions_rhs} pre_parser_string = string_literal;

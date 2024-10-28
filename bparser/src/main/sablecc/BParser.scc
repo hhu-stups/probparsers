@@ -17,10 +17,6 @@ Helpers
 
   minus = '-' | 0x2212;
 
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
-
   // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
   // but removed unicode lambda 0x03bb from [0x03a3..0x03ce]
   unicode_letter =
