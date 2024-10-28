@@ -108,8 +108,7 @@ Helpers
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
   pragma_prefix = '/*@' layout_char*;
-  //pragma_identifier_literal = (letter | digit | '_' | minus | '.' | '#' | '+' | '@' | '!' | '~' | '\' | '&' | '^'| '%'| '$' | '|' | ':' | '<'| '>' | '?' | '[' | ']' | '(' | ')'| ';' | [191 .. 254])+;
-  pragma_identifier_literal = ([[[[33 .. 33] + [35 .. 126]] + [191 .. 254]] - '*'])+; // Umlaute start at 191 ?
+  pragma_identifier_literal = ([[0x21 .. 0x7e] - ['"' + '*']] | unicode_letter)+;
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
   // versions below do not work:
@@ -166,7 +165,7 @@ Tokens
   {pragma_description_content} pragma_free_text = [all_chars - '*']*;
 
   // the pragma_content state collects attributes for label and file pragmas
-  {pragma_content} pragma_id_or_string = string_literal | identifier_literal | pragma_identifier_literal;
+  {pragma_content} pragma_id_or_string = string_literal | pragma_identifier_literal;
 
   {start->block_comment, normal->block_comment} comment = comment_start; // comment_start helper is a workaround to force SableCC to allow modifying text of comment tokens.
   {block_comment->normal,pragma_description_content->normal} comment_end = '*/';
