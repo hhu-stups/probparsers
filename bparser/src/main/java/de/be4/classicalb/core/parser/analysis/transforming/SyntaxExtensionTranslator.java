@@ -188,6 +188,7 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 			return;
 		}
 
+		// Note: When adding a new case here, please update the AMBIGUOUS_KEYWORDS list in the Utils class!
 		final Node replacement;
 		switch (funcName) {
 			case "tree":

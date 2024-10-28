@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,27 @@ import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
+	private static final Set<String> AMBIGUOUS_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		// Tree-related keywords/operators/functions - handled in SyntaxExtensionTranslator
+		"tree",
+		"btree",
+		"const",
+		"top",
+		"sons",
+		"prefix",
+		"postfix",
+		"sizet",
+		"mirror",
+		"rank",
+		"father",
+		"son",
+		"subtree",
+		"arity",
+		"bin",
+		"left",
+		"right",
+		"infix"
+	)));
 
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS_REVERSE;
@@ -62,6 +84,20 @@ public final class Utils {
 	}
 
 	/**
+	 * Check whether the given identifier is an ambiguous keyword.
+	 * Such a keyword can usually be used as a regular identifier,
+	 * but is recognized as a keyword in specific contexts.
+	 * To guarantee that such a keyword is unambiguously parsed as a regular identifier,
+	 * it must be backquoted, like when using any other keyword as an identifier.
+	 *
+	 * @param identifier the string to check
+	 * @return whether {@code identifier} is an ambiguous keyword
+	 */
+	public static boolean isAmbiguousKeyword(String identifier) {
+		return AMBIGUOUS_KEYWORDS.contains(identifier);
+	}
+
+	/**
 	 * Check whether the given identifier is a valid plain B identifier
 	 * that does not need to be quoted.
 	 *
@@ -69,6 +105,10 @@ public final class Utils {
 	 * @return whether {@code identifier} is a plain B identifier
 	 */
 	public static boolean isPlainBIdentifier(final String identifier) {
+		if (isAmbiguousKeyword(identifier)) {
+			return false;
+		}
+
 		// Try to parse the identifier string
 		// and check if it results in a single identifier expression
 		// with the same name as was passed in.
