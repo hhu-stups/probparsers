@@ -160,7 +160,7 @@ Tokens
   {start->pragma_content,normal->pragma_content} pragma_package = pragma_prefix 'package';
   {start->pragma_description_content,normal->pragma_description_content} pragma_description = pragma_prefix 'desc';
   {start->pragma_content,normal->pragma_content} pragma_import_package = pragma_prefix 'import-package';
-  {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix (string_literal | identifier_literal | pragma_identifier_literal);
+  {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix;
 
   // content of description pragma
   {pragma_description_content} pragma_free_text = [all_chars - '*']*;
