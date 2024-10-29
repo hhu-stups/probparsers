@@ -577,6 +577,9 @@ definition {-> definition} =
   {file} [filename]:string_literal
       {-> New definition.file_definition(filename)};
 
+normal_identifier_expression {-> expression} =
+  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
+
 // a list of normal identifiers (without dot prefixes)
 normal_identifier_expression_list {-> expression*} =
     [first]:normal_identifier_expression [rest]:normal_identifier_expression_list_tail* {-> [first.expression, rest.expression]};
@@ -1292,9 +1295,6 @@ assignment_target {-> expression} =
 identifier_or_function_expression {-> expression} =
   {identifier} [name]:composed_identifier {-> New expression.identifier([name.identifier_literal])} |
   {function} [name]:identifier_or_function_expression [parameters]:op_params {-> New expression.function(name.expression, [parameters.expression])};
-
-normal_identifier_expression {-> expression} =
-  {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])} ;
 
 quantified_variables_list {-> expression*} =
   {parentheses} left_par [id]:identifier_declaration_list right_par {-> [id.expression]} |
