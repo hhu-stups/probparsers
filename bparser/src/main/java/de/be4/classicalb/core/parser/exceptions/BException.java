@@ -208,7 +208,8 @@ public class BException extends Exception {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder(this.filename);
+			final StringBuilder sb = new StringBuilder();
+			sb.append(this.getFilename()); // filename may be null (do not merge into StringBuilder constructor or it will cause a NPE!)
 			sb.append(':');
 			sb.append(this.getStartLine());
 			sb.append(':');
