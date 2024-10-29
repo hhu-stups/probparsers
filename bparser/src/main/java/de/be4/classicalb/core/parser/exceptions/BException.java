@@ -108,9 +108,6 @@ public class BException extends Exception {
 
 	public BException(final String filename, final CheckException e) {
 		this(filename, e.getMessage(), e);
-		//super(e.getMessage());
-		//this.filename = filename;
-		//this.cause = e.getCause();
 		for (Node node : e.getNodesList()) {
 			final Location location = Location.fromNode(filename, node);
 			if (location != null) {
