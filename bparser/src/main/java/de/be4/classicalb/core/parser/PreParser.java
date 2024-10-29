@@ -200,7 +200,7 @@ public class PreParser {
 			} catch (final IOException e) {
 				throw new PreParseException(filenameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
-				throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(fileName, filenameString)));
+				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(filenameString)));
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.exceptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -9,7 +10,6 @@ import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
@@ -98,23 +98,13 @@ public class BException extends Exception {
 				locations.add(new Location(filename, e.getLine(), e.getPos(), e.getLine(), e.getPos()));
 			}
 		} else {
-			e.getTokensList().forEach(token -> {
-				final Location location = Location.fromNode(filename, token);
-				if (location != null) {
-					locations.add(location);
-				}
-			});
+			locations.addAll(Location.locationsFromNodes(filename, e.getTokensList()));
 		}
 	}
 
 	public BException(final String filename, final CheckException e) {
 		this(filename, e.getMessage(), e);
-		for (Node node : e.getNodesList()) {
-			final Location location = Location.fromNode(filename, node);
-			if (location != null) {
-				locations.add(location);
-			}
-		}
+		locations.addAll(Location.locationsFromNodes(filename, e.getNodesList()));
 	}
 
 	public BException(final String filename, final IOException e) {
@@ -185,6 +175,13 @@ public class BException extends Exception {
 				endPos.getLine(),
 				endPos.getPos()
 			);
+		}
+
+		public static List<BException.Location> locationsFromNodes(String filename, Collection<? extends PositionedNode> nodes) {
+			return nodes.stream()
+				.map(node -> fromNode(filename, node))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 		}
 
 		public String getFilename() {
