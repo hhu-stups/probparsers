@@ -1,5 +1,11 @@
 package de.be4.classicalb.core.parser.exceptions;
 
+import de.be4.classicalb.core.parser.node.ASkipSubstitution;
+import de.be4.classicalb.core.parser.node.Node;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.SourcePosition;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -76,5 +82,42 @@ public final class LocationTest {
 		BException.Location location = new BException.Location(null, 12, 34, 12, 50);
 		Assert.assertNull(location.getFilename());
 		Assert.assertEquals("null:12:34 to 12:50", location.toString());
+	}
+	
+	@Test
+	public void fromNodeWithoutPositions() {
+		Node node = new ASkipSubstitution();
+		Assert.assertNull(BException.Location.fromNode("unittest.mch", node));
+	}
+	
+	@Test
+	public void fromNodeWithOnlyStartPosition() {
+		// This case should really never happen, but we implement it, so let's test it...
+		Node node = new ASkipSubstitution();
+		node.setStartPos(new SourcePosition(12, 34));
+		Assert.assertEquals(
+			new BException.Location("unittest.mch", 12, 34, 12, 34),
+			BException.Location.fromNode("unittest.mch", node)
+		);
+	}
+	
+	@Test
+	public void fromNodeWithPositions() {
+		Node node = new ASkipSubstitution();
+		node.setStartPos(new SourcePosition(12, 34));
+		node.setEndPos(new SourcePosition(17, 22));
+		Assert.assertEquals(
+			new BException.Location("unittest.mch", 12, 34, 17, 22),
+			BException.Location.fromNode("unittest.mch", node)
+		);
+	}
+	
+	@Test
+	public void fromTokenWithPositions() {
+		Token token = new TIdentifierLiteral("identifier", 12, 34);
+		Assert.assertEquals(
+			new BException.Location("unittest.mch", 12, 34, 12, 44),
+			BException.Location.fromNode("unittest.mch", token)
+		);
 	}
 }
