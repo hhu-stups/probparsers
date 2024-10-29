@@ -4,6 +4,42 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public final class LocationTest {
+	@SuppressWarnings({"ConstantValue", "EqualsWithItself"})
+	@Test
+	public void equalsHashCode() {
+		BException.Location loc1a = new BException.Location("unittest.mch", 1, 2, 3, 4);
+		BException.Location loc1b = new BException.Location("unittest.mch", 1, 2, 3, 4);
+		BException.Location loc2a = new BException.Location(null, 1, 2, 3, 4);
+		BException.Location loc2b = new BException.Location(null, 1, 2, 3, 4);
+		BException.Location loc3 = new BException.Location(null, 9, 2, 3, 4);
+		BException.Location loc4 = new BException.Location(null, 1, 9, 3, 4);
+		BException.Location loc5 = new BException.Location(null, 1, 2, 9, 4);
+		BException.Location loc6 = new BException.Location(null, 1, 2, 3, 9);
+		
+		Assert.assertFalse(loc1a.equals(null));
+		Assert.assertTrue(loc1a.equals(loc1a));
+		Assert.assertEquals(loc1a.hashCode(), loc1a.hashCode());
+		Assert.assertTrue(loc1a.equals(loc1b));
+		Assert.assertEquals(loc1a.hashCode(), loc1b.hashCode());
+		
+		Assert.assertFalse(loc2a.equals(null));
+		Assert.assertTrue(loc2a.equals(loc2a));
+		Assert.assertEquals(loc2a.hashCode(), loc2a.hashCode());
+		Assert.assertTrue(loc2a.equals(loc2b));
+		Assert.assertEquals(loc2a.hashCode(), loc2b.hashCode());
+		
+		// Do not check non-equality of hashCode (technically, they're not strictly required to be different)
+		Assert.assertFalse(loc1a.equals(loc2a));
+		Assert.assertFalse(loc1a.equals(loc3));
+		Assert.assertFalse(loc2a.equals(loc3));
+		Assert.assertFalse(loc1a.equals(loc4));
+		Assert.assertFalse(loc2a.equals(loc4));
+		Assert.assertFalse(loc1a.equals(loc5));
+		Assert.assertFalse(loc2a.equals(loc5));
+		Assert.assertFalse(loc1a.equals(loc6));
+		Assert.assertFalse(loc2a.equals(loc6));
+	}
+	
 	@Test
 	public void toStringNoSpan() {
 		BException.Location location = new BException.Location("unittest.mch", 12, 34, 12, 34);

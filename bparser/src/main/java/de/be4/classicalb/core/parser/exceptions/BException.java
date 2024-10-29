@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -204,6 +205,33 @@ public class BException extends Exception {
 
 		public int getEndColumn() {
 			return this.endColumn;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof BException.Location)) {
+				return false;
+			}
+			BException.Location other = (BException.Location)obj;
+			return Objects.equals(this.getFilename(), other.getFilename())
+				&& this.getStartLine() == other.getStartLine()
+				&& this.getStartColumn() == other.getStartColumn()
+				&& this.getEndLine() == other.getEndLine()
+				&& this.getEndColumn() == other.getEndColumn();
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(
+				this.getFilename(),
+				this.getStartLine(),
+				this.getStartColumn(),
+				this.getEndLine(),
+				this.getEndColumn()
+			);
 		}
 
 		@Override
