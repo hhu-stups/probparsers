@@ -346,13 +346,11 @@ public class BLexer extends Lexer {
 	}
 
 	private void findSyntaxError() throws LexerException {
-		if (token == null) {
-			return;
-		}
 		if (
-			state.equals(State.BLOCK_COMMENT)
-			|| token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment
-			|| token instanceof TCommentEnd || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString || token instanceof TPragmaFreeText
+			token == null || state.equals(State.BLOCK_COMMENT)
+			|| token instanceof TWhiteSpace || token instanceof TLineComment
+			|| token instanceof TComment || token instanceof TCommentEnd
+			|| token instanceof TPragmaIdOrString || token instanceof TPragmaFreeText || token instanceof TPragmaEnd
 		) {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
