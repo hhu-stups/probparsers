@@ -323,12 +323,13 @@ public class BLexer extends Lexer {
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
 	}
 
+	private final DefinitionTypes definitions;
+
 	private ParseOptions parseOptions = null;
 
+	private Token lastToken;
 	private Token comment = null;
 	private StringBuilder commentBuffer = null;
-
-	private final DefinitionTypes definitions;
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
@@ -343,8 +344,6 @@ public class BLexer extends Lexer {
 		this.line = line - 1;
 		this.pos = column - 1;
 	}
-
-	private Token lastToken;
 
 	private void findSyntaxError() throws LexerException {
 		if (token == null) {
