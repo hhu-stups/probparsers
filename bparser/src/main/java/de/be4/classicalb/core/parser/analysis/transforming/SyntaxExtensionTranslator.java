@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -11,22 +12,27 @@ import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
-
-	private static String cleanDescriptionText(final String descriptionText) {
-		String formatted = descriptionText;
-		if (descriptionText.endsWith("*/")) {
-			formatted = formatted.substring(0, formatted.length() - 2);
-		}
-		return formatted.trim();
-	}
+	private static final Pattern LEADING_WHITESPACE_PATTERN = Pattern.compile("^\\s+");
+	private static final Pattern TRAILING_WHITESPACE_PATTERN = Pattern.compile("\\s+$");
 
 	/**
-	 * Cleans up the text contents of description pragma nodes by removing the end of comment symbols and any whitespace surrounding the description.
+	 * Cleans up the text contents of description pragma nodes by removing any whitespace surrounding the description.
 	 *
 	 * @param node the description pragma node to clean
 	 */
-	private static void cleanDescriptionNode(final TPragmaFreeText node) {
-		node.setText(cleanDescriptionText(node.getText()));
+	@Override
+	public void caseADescriptionPragma(ADescriptionPragma node) {
+		if (!node.getParts().isEmpty()) {
+			// Remove leading whitespace from first token.
+			// (can be replaced with String.stripLeading once we require Java 11)
+			TPragmaFreeText firstPart = node.getParts().get(0);
+			firstPart.setText(LEADING_WHITESPACE_PATTERN.matcher(firstPart.getText()).replaceAll(""));
+
+			// Remove trailing whitespace from last token.
+			// (can be replaced with String.stripTrailing once we require Java 11)
+			TPragmaFreeText lastPart = node.getParts().get(node.getParts().size() - 1);
+			lastPart.setText(TRAILING_WHITESPACE_PATTERN.matcher(lastPart.getText()).replaceAll(""));
+		}
 	}
 
 	private static void checkArgumentCount(final AFunctionExpression node, final int count) {
@@ -134,31 +140,6 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		intNode.setStartPos(node.getStartPos());
 		intNode.setEndPos(node.getEndPos());
 		node.replaceBy(intNode);
-	}
-
-	@Override
-	public void inADescriptionSet(final ADescriptionSet node) {
-		cleanDescriptionNode(node.getPragmaFreeText());
-	}
-
-	@Override
-	public void inADescriptionPredicate(final ADescriptionPredicate node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
-	@Override
-	public void inADescriptionExpression(final ADescriptionExpression node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
-	@Override
-	public void inADescriptionOperation(final ADescriptionOperation node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
-	@Override
-	public void inADescriptionEvent(ADescriptionEvent node) {
-		cleanDescriptionNode(node.getContent());
 	}
 
 	/**

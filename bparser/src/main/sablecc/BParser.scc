@@ -147,7 +147,7 @@ Tokens
 
   {start->normal,normal} line_comment = '//' [all_chars - line_break]* line_break?;
 
-  {pragma_content->normal} pragma_end = '*/';
+  {pragma_content->normal,pragma_description_content->normal} pragma_end = '*/';
   {start->pragma_content,normal->pragma_content} pragma_generated = pragma_prefix 'generated'; // we could enforce nothing follows it
   {start->pragma_content,normal->pragma_content} pragma_symbolic = pragma_prefix 'symbolic'; // ditto
   {start->pragma_content,normal->pragma_content} pragma_label = pragma_prefix 'label';
@@ -164,7 +164,7 @@ Tokens
   {pragma_content} pragma_id_or_string = string_literal | pragma_identifier_literal;
 
   {start->block_comment, normal->block_comment} comment = comment_start; // comment_start helper is a workaround to force SableCC to allow modifying text of comment tokens.
-  {block_comment->normal,pragma_description_content->normal} comment_end = '*/';
+  {block_comment->normal} comment_end = '*/';
   {block_comment} comment_body = [all_chars - '*']*;
   {block_comment} star = '*';
 
@@ -641,6 +641,9 @@ operation_reference_list {-> operation_reference*} =
 
 operation_reference {-> operation_reference} = [operation_name]:composed_identifier {-> New operation_reference([operation_name.identifier_literal])};
 
+description_pragma {-> description_pragma} =
+  pragma_description [parts]:pragma_free_text* pragma_end {-> New description_pragma([parts])};
+
 variables_clause {-> machine_clause} =
   {abstract} abstract_variables [identifiers]:identifier_declaration_list {-> New machine_clause.variables([identifiers.expression])} |
   variables [identifiers]:identifier_declaration_list {-> New machine_clause.variables([identifiers.expression])};
@@ -660,7 +663,7 @@ set_def_list {-> set*} =
   {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]};
 
 set {-> set} =
-  {description} [set]:set pragma_description [content]:pragma_free_text {-> New set.description(content,set)} |
+  {description} [set]:set [description]:description_pragma {-> New set.description(description.description_pragma, set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
   {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_declaration_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
   {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
@@ -703,7 +706,7 @@ operation_list {-> operation*} =
   {missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 operation {-> operation} =
-  {description} [operation]:operation pragma_description [content]:pragma_free_text {-> New operation.description(content,operation)}
+  {description} [operation]:operation [description]:description_pragma {-> New operation.description(description.description_pragma, operation)}
   // this allows description pragmas at the very end of an operation, not before the equal (=) sign
   |
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_l2
@@ -765,8 +768,8 @@ predicate_x40 {-> predicate} =
   {next_level} [pred]:predicate_x41 {-> pred.predicate};
 
 predicate_x41 {-> predicate} =
-  {description} [predicate]:predicate_p60 pragma_description [content]:pragma_free_text
-      {-> New predicate.description(content,predicate.predicate)} |
+  {description} [predicate]:predicate_p60 [description]:description_pragma
+      {-> New predicate.description(description.description_pragma, predicate.predicate)} |
   {next_level} [pred]:predicate_x42
       {-> pred.predicate};
 predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
@@ -848,9 +851,9 @@ if_elseif_predicate {-> predicate} =
 /* expression_in_par contains the priority level 20, it is not considered as expression_top
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
-  {description} [expression]:expression_in_par2 pragma_description [content]:pragma_free_text
+  {description} [expression]:expression_in_par2 [description]:description_pragma
         /* we allow descriptions for expressions in parentheses; no ambiguity possible */
-      {-> New expression.description(content,expression.expression)} |
+      {-> New expression.description(description.description_pragma, expression.expression)} |
   {next_level} [expr]:expression_in_par2
      {-> expr.expression};
 
@@ -868,9 +871,9 @@ expression_in_par2 {-> expression} =
 
 /* expressions top, with optional desc pragma, but without ; and || */
 expression_top_with_opt_desc {-> expression} =
-  {description} [expression]:expression_top pragma_description [content]:pragma_free_text
+  {description} [expression]:expression_top [description]:description_pragma
         /* we allow descriptions for expressions, can be used when no ambiguity (e.g., with predicate desc) possible */
-      {-> New expression.description(content,expression.expression)} |
+      {-> New expression.description(description.description_pragma, expression.expression)} |
   {next_level} [expr]:expression_p125
      {-> expr.expression};
 
@@ -1301,7 +1304,7 @@ quantified_variables_list {-> expression*} =
   {no_parentheses} [id]:identifier_declaration_list {-> [id.expression]};
 
 identifier_declaration {-> expression} =
-  {description} [identifier]:identifier_literal pragma_description [content]:pragma_free_text {-> New expression.description(content, New expression.identifier([identifier]))} |
+  {description} [identifier]:identifier_literal [description]:description_pragma {-> New expression.description(description.description_pragma, New expression.identifier([identifier]))} |
   {identifier} [identifier]:identifier_literal {-> New expression.identifier([identifier])};
 
 def_call_params {-> expression*} = left_par [params]:expression_list right_par {-> [params.expression]};
@@ -1405,6 +1408,8 @@ machine_reference_no_params =
 
 operation_reference = [operation_name]:identifier_literal*;
 
+description_pragma = [parts]:pragma_free_text*;
+
 expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
 predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate;
 
@@ -1415,7 +1420,7 @@ definition =
   {file_definition} [filename]:string_literal;
 
 set =
-  {description} T.pragma_free_text set |
+  {description} [description]:description_pragma set |
   {deferred_set} [identifier]:identifier_literal* |
   {enumerated_set} [identifier]:identifier_literal* [elements]:expression* |
   {enumerated_set_via_def} [identifier]:identifier_literal* [elements_def]:identifier_literal*;  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
@@ -1430,7 +1435,7 @@ values_entry = [identifier]:identifier_literal* [value]:expression;
 operation =
   [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [operation_body]:substitution |
   {missing_semicolon} operation |
-  {description} [content]:pragma_free_text [operation]:operation |
+  {description} [description]:description_pragma [operation]:operation |
   {refined} [return_values]:expression* [op_name]:identifier_literal* [parameters]:expression* [ref_kw]:identifier_literal [ab_op_name]:identifier_literal [operation_body]:substitution |
   {rule} [rule_name]:identifier_literal [attributes]:operation_attribute* [rule_body]:substitution |
   {computation} [name]:identifier_literal [attributes]:operation_attribute* [body]:substitution |
@@ -1444,7 +1449,7 @@ event =
   [event_name]:identifier_literal [status]:eventstatus [refines]:identifier_literal*
     [variables]:expression* [guards]:predicate* [theorems]:predicate* [assignments]:substitution* [witness]:witness*
   |
-  {description} [content]:pragma_free_text [event]:event;
+  {description} [description]:description_pragma [event]:event;
 witness = [name]:identifier_literal [predicate]:predicate;
 
 eventstatus = {ordinary} | {anticipated} | {convergent};
@@ -1452,7 +1457,7 @@ eventstatus = {ordinary} | {anticipated} | {convergent};
 /* Predicates */
 
 predicate =
-  {description} [content]:pragma_free_text [predicate]:predicate |
+  {description} [description]:description_pragma [predicate]:predicate |
   {label} [name]:pragma_id_or_string [predicate]:predicate |
   {substitution} [substitution]:substitution [predicate]:predicate |
   {conjunct} [left]:predicate [right]:predicate |
@@ -1487,7 +1492,7 @@ predicate =
 
 /* Expressions */
 expression =
-  {description} [content]:pragma_free_text [expression]:expression |
+  {description} [description]:description_pragma [expression]:expression |
   {identifier} [identifier]:identifier_literal* |
   {primed_identifier} [identifier]:identifier_literal* |
   {string} [content]:string_literal |

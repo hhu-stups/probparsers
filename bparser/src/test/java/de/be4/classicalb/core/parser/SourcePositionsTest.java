@@ -6,6 +6,7 @@ import java.util.List;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.AAddExpression;
 import de.be4.classicalb.core.parser.node.ADescriptionExpression;
+import de.be4.classicalb.core.parser.node.ADescriptionPragma;
 import de.be4.classicalb.core.parser.node.AExpressionParseUnit;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.AIfSubstitution;
@@ -267,8 +268,9 @@ public class SourcePositionsTest {
 		final List<PExpression> ids = variables.getIdentifiers();
 		assertEquals(3, ids.size());
 		final AIdentifierExpression x = (AIdentifierExpression) ids.get(0);
-		final ADescriptionExpression yDesc = (ADescriptionExpression) ids.get(1);
-		final AIdentifierExpression y = (AIdentifierExpression) yDesc.getExpression();
+		ADescriptionExpression yWithDesc = (ADescriptionExpression) ids.get(1);
+		AIdentifierExpression y = (AIdentifierExpression) yWithDesc.getExpression();
+		ADescriptionPragma yDesc = (ADescriptionPragma) yWithDesc.getDescription();
 		final AIdentifierExpression z = (AIdentifierExpression) ids.get(2);
 
 		// VARIABLES block
@@ -284,10 +286,10 @@ public class SourcePositionsTest {
 		assertEquals(4, x.getEndPos().getPos());
 
 		// variable y with description
-		assertEquals(4, yDesc.getStartPos().getLine());
-		assertEquals(3, yDesc.getStartPos().getPos());
-		assertEquals(4, yDesc.getEndPos().getLine());
-		assertEquals(34, yDesc.getEndPos().getPos());
+		assertEquals(4, yWithDesc.getStartPos().getLine());
+		assertEquals(3, yWithDesc.getStartPos().getPos());
+		assertEquals(4, yWithDesc.getEndPos().getLine());
+		assertEquals(34, yWithDesc.getEndPos().getPos());
 
 		// variable y itself
 		assertEquals(4, y.getStartPos().getLine());
@@ -296,6 +298,12 @@ public class SourcePositionsTest {
 		// Ideally this should be column 4, but the grammar parses the identifier and the pragma together,
 		// so the identifier gets the same end column as the entire pragma expression.
 		assertEquals(34, y.getEndPos().getPos());
+
+		// the description of variable y
+		assertEquals(4, yDesc.getStartPos().getLine());
+		assertEquals(5, yDesc.getStartPos().getPos());
+		assertEquals(4, yDesc.getEndPos().getLine());
+		assertEquals(34, yDesc.getEndPos().getPos());
 
 		// variable z
 		assertEquals(5, z.getStartPos().getLine());

@@ -353,7 +353,7 @@ public class BLexer extends Lexer {
 		if (
 			state.equals(State.BLOCK_COMMENT)
 			|| token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment
-			|| token instanceof TCommentEnd || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString
+			|| token instanceof TCommentEnd || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString || token instanceof TPragmaFreeText
 		) {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
@@ -428,8 +428,6 @@ public class BLexer extends Lexer {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.BLOCK_COMMENT)) {
-			collectComment();
-		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) && !(token instanceof TPragmaDescription)) {
 			collectComment();
 		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();

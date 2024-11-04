@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
@@ -474,6 +475,13 @@ public class ASTProlog extends DepthFirstAdapter {
 		// Keep this functor for compatibility with previous versions
 		// (PROMOTES names were previously parsed as identifier expressions).
 		printPositionedIdentifier(node.getOperationName());
+	}
+
+	@Override
+	public void caseADescriptionPragma(ADescriptionPragma node) {
+		// Print descriptions as a single atom for backwards compatibility.
+		// In the future, we may want to print position pragmas as proper nodes with position info.
+		pout.printAtom(node.getParts().stream().map(Token::getText).collect(Collectors.joining()));
 	}
 
 	// definition

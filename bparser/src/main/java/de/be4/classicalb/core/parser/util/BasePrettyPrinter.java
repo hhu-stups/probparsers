@@ -762,6 +762,15 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseADescriptionPragma(ADescriptionPragma node) {
+		print(" /*@desc ");
+		for (TPragmaFreeText part : node.getParts()) {
+			print(part.getText());
+		}
+		print(" */");
+	}
+
+	@Override
 	public void caseAExpressionDefinition(AExpressionDefinition node) {
 		node.getName().apply(this);
 		printParameterListOpt(node.getParameters());
@@ -827,9 +836,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseADescriptionSet(ADescriptionSet node) {
 		node.getSet().apply(this);
-		print(" /*@desc ");
-		print(node.getPragmaFreeText().getText());
-		print(" */");
+		node.getDescription().apply(this);
 	}
 
 	@Override
@@ -918,9 +925,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseADescriptionOperation(ADescriptionOperation node) {
 		node.getOperation().apply(this);
-		print(" /*@desc ");
-		print(node.getContent().getText());
-		print(" */");
+		node.getDescription().apply(this);
 	}
 
 	@Override
@@ -990,9 +995,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseADescriptionPredicate(ADescriptionPredicate node) {
 		node.getPredicate().apply(this);
-		print(" /*@desc ");
-		print(node.getContent().getText());
-		print(" */");
+		node.getDescription().apply(this);
 	}
 
 	@Override
@@ -1206,9 +1209,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 			print("(");
 		}
 		node.getExpression().apply(this);
-		print(" /*@desc ");
-		print(node.getContent().getText());
-		print(" */");
+		node.getDescription().apply(this);
 		if (!this.identifierList) {
 			print(")");
 		}
