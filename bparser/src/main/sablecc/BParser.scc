@@ -158,7 +158,7 @@ Tokens
   {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix;
 
   // content of description pragma
-  {pragma_description_content} pragma_free_text = [all_chars - '*']*;
+  {pragma_description_content} pragma_free_text = [all_chars - '*']* | '*';
 
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content} pragma_id_or_string = string_literal | pragma_identifier_literal;
@@ -166,7 +166,7 @@ Tokens
   {start->block_comment, normal->block_comment} comment = comment_start; // comment_start helper is a workaround to force SableCC to allow modifying text of comment tokens.
   {block_comment->normal,pragma_description_content->normal} comment_end = '*/';
   {block_comment} comment_body = [all_chars - '*']*;
-  {block_comment,pragma_description_content} star = '*';
+  {block_comment} star = '*';
 
   {normal->multiline_string} multiline_string_start = triple_quote;
   {multiline_string->normal} multiline_string_end = triple_quote;
@@ -453,7 +453,7 @@ Tokens
  *******************************************************************/
 Ignored Tokens
   white_space,
-  comment, comment_body, comment_end,
+  comment, comment_body, star, comment_end,
   unrecognised_pragma,
   line_comment;
 
