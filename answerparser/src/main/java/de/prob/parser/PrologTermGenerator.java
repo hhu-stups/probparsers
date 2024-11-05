@@ -9,8 +9,8 @@ package de.prob.parser;
 import de.prob.core.sablecc.node.*;
 import de.prob.prolog.term.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * This generator extracts prolog terms from a SableCC syntax tree.
@@ -53,36 +53,166 @@ public final class PrologTermGenerator {
 		return toPrologTerm(((AYesResult) topnode).getTerm());
 	}
 
-	public static PrologTerm toPrologTerm(PTerm node) {
-		PrologTerm term;
-		if (node instanceof ANumberTerm) {
-			term = extractNumber((ANumberTerm) node);
-		} else if (node instanceof AVariableTerm) {
-			term = new VariablePrologTerm(((AVariableTerm) node).getVariable().getText());
-		} else if (node instanceof AAtomTerm) {
-			String text = removeQuotes(((AAtomTerm) node).getName().getText());
-			if ("[]".equals(text)) {
-				term = ListPrologTerm.emptyList();
-			} else {
-				term = new CompoundPrologTerm(text);
-			}
-		} else if (node instanceof AStringTerm) {
-			throw new ResultParserException("Double-quoted strings are currently not supported by answerparser");
-		} else if (node instanceof AListTerm) {
-			List<PrologTerm> args = extractArgs(((AListTerm) node).getParams());
-			term = ListPrologTerm.fromCollection(args);
-		} else if (node instanceof ACompoundTerm) {
-			ACompoundTerm acompound = (ACompoundTerm) node;
-			String functor = removeQuotes(acompound.getFunctor().getText());
-			List<PrologTerm> args = extractArgs(acompound.getParams());
-			CompoundPrologTerm compoundTerm = CompoundPrologTerm.fromCollection(functor, args);
+	public static PrologTerm toPrologTerm(PTerm topNode) {
+		abstract class TermBuilder {
+			abstract PrologTerm build();
 
-			term = DotListConversion.asListTermNonRecursive(compoundTerm);
-		} else {
-			throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
+			abstract boolean isFinished();
+
+			abstract void addArg(PrologTerm term);
 		}
 
-		return term;
+		class Finished extends TermBuilder {
+			final PrologTerm term;
+
+			Finished(PrologTerm term) {
+				this.term = term;
+			}
+
+			@Override
+			PrologTerm build() {
+				return this.term;
+			}
+
+			@Override
+			boolean isFinished() {
+				return true;
+			}
+
+			@Override
+			void addArg(PrologTerm term) {
+				throw new IllegalStateException();
+			}
+		}
+
+		class ListBuilder extends TermBuilder {
+			final int arity;
+			final Deque<PrologTerm> args;
+
+			ListBuilder(int arity) {
+				this.arity = arity;
+				this.args = new ArrayDeque<>(arity);
+			}
+
+			@Override
+			PrologTerm build() {
+				return ListPrologTerm.fromCollection(this.args);
+			}
+
+			@Override
+			boolean isFinished() {
+				return this.args.size() >= this.arity;
+			}
+
+			@Override
+			void addArg(PrologTerm term) {
+				this.args.push(term);
+			}
+		}
+
+		class CompoundBuilder extends TermBuilder {
+			final String functor;
+			final int arity;
+			final Deque<PrologTerm> args;
+
+			CompoundBuilder(String functor, int arity) {
+				this.functor = functor;
+				this.arity = arity;
+				this.args = new ArrayDeque<>(arity);
+			}
+
+			@Override
+			PrologTerm build() {
+				return DotListConversion.asListTermNonRecursive(CompoundPrologTerm.fromCollection(this.functor, this.args));
+			}
+
+			@Override
+			boolean isFinished() {
+				return this.args.size() >= this.arity;
+			}
+
+			@Override
+			void addArg(PrologTerm term) {
+				this.args.push(term);
+			}
+		}
+
+		Deque<TermBuilder> termStack = new ArrayDeque<>();
+		Deque<PTerm> nodeStack = new ArrayDeque<>();
+		nodeStack.push(topNode);
+
+		while (!nodeStack.isEmpty()) {
+			PTerm node = nodeStack.pop();
+			TermBuilder term;
+			if (node instanceof ANumberTerm) {
+				term = new Finished(extractNumber((ANumberTerm) node));
+			} else if (node instanceof AVariableTerm) {
+				term = new Finished(new VariablePrologTerm(((AVariableTerm) node).getVariable().getText()));
+			} else if (node instanceof AAtomTerm) {
+				String text = removeQuotes(((AAtomTerm) node).getName().getText());
+				if ("[]".equals(text)) {
+					term = new Finished(ListPrologTerm.emptyList());
+				} else {
+					term = new Finished(new CompoundPrologTerm(text));
+				}
+			} else if (node instanceof AStringTerm) {
+				throw new ResultParserException("Double-quoted strings are currently not supported by answerparser");
+			} else if (node instanceof AListTerm) {
+				int arity = 1;
+				AParams aparams = (AParams) ((AListTerm) node).getParams();
+				nodeStack.push(aparams.getTerm());
+
+				PMoreParams more = aparams.getMoreParams();
+				while (more instanceof AMoreParams) {
+					AMoreParams amore = (AMoreParams) more;
+					nodeStack.push(amore.getTerm());
+					more = amore.getMoreParams();
+					arity++;
+				}
+
+				term = new ListBuilder(arity);
+			} else if (node instanceof ACompoundTerm) {
+				ACompoundTerm acompound = (ACompoundTerm) node;
+				String functor = removeQuotes(acompound.getFunctor().getText());
+
+				int arity = 1;
+				AParams aparams = (AParams) acompound.getParams();
+				nodeStack.push(aparams.getTerm());
+
+				PMoreParams more = aparams.getMoreParams();
+				while (more instanceof AMoreParams) {
+					AMoreParams amore = (AMoreParams) more;
+					nodeStack.push(amore.getTerm());
+					more = amore.getMoreParams();
+					arity++;
+				}
+
+				term = new CompoundBuilder(functor, arity);
+			} else {
+				throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
+			}
+
+			if (termStack.isEmpty()) {
+				termStack.push(term);
+			} else {
+				if (term.isFinished()) {
+					TermBuilder top = termStack.peek();
+					top.addArg(term.build());
+
+					while (termStack.size() > 1 && top.isFinished()) {
+						TermBuilder finished = termStack.pop();
+						top = termStack.peek();
+						top.addArg(finished.build());
+					}
+				} else {
+					termStack.push(term);
+				}
+			}
+		}
+
+		TermBuilder term = termStack.pop();
+		assert term.isFinished() && termStack.isEmpty() && nodeStack.isEmpty();
+		return term.build();
 	}
 
 	private static PrologTerm extractNumber(ANumberTerm node) {
@@ -145,21 +275,6 @@ public final class PrologTermGenerator {
 		} else {
 			throw new IllegalStateException("Unexpected subclass of PNumber: " + number.getClass().getCanonicalName());
 		}
-	}
-
-	private static List<PrologTerm> extractArgs(PParams params) {
-		AParams aparams = (AParams) params;
-		List<PrologTerm> terms = new ArrayList<>();
-		terms.add(toPrologTerm(aparams.getTerm()));
-
-		PMoreParams more = aparams.getMoreParams();
-		while (more instanceof AMoreParams) {
-			AMoreParams amore = (AMoreParams) more;
-			terms.add(toPrologTerm(amore.getTerm()));
-			more = amore.getMoreParams();
-		}
-
-		return terms;
 	}
 
 	private static String removeQuotes(String text) {
