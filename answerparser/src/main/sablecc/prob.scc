@@ -139,14 +139,14 @@ Productions
     {call_back} call_back l_par term r_par;
 
   term =
-    {number} number |
+    {integer} integer |
+    {float} float |
     {variable} variable |
     {atom} name |
     {string} string |
     {list} l_sq params r_sq |
     {compound} [functor]:name l_par params r_par;
 
-  number = {float} float | {integer} integer;
   params = term more_params;
   more_params = {empty} | comma term more_params;
 

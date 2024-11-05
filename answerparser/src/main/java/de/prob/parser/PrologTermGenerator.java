@@ -144,8 +144,12 @@ public final class PrologTermGenerator {
 		while (!nodeStack.isEmpty()) {
 			PTerm node = nodeStack.pop();
 			TermBuilder term;
-			if (node instanceof ANumberTerm) {
-				term = new Finished(extractNumber((ANumberTerm) node));
+			if (node instanceof AIntegerTerm) {
+				term = new Finished(extractInteger((AIntegerTerm) node));
+			} else if (node instanceof AFloatTerm) {
+				String text = ((AFloatTerm)node).getFloat().getText();
+				double d = Double.parseDouble(text);
+				term = new Finished(new FloatPrologTerm(d));
 			} else if (node instanceof AVariableTerm) {
 				term = new Finished(new VariablePrologTerm(((AVariableTerm) node).getVariable().getText()));
 			} else if (node instanceof AAtomTerm) {
@@ -215,65 +219,54 @@ public final class PrologTermGenerator {
 		return term.build();
 	}
 
-	private static PrologTerm extractNumber(ANumberTerm node) {
-		PNumber number = node.getNumber();
-		if (number instanceof AIntegerNumber) {
-			AIntegerNumber intNumber = (AIntegerNumber) number;
-			String text = intNumber.getInteger().getText();
+	private static PrologTerm extractInteger(AIntegerTerm node) {
+		String text = node.getInteger().getText();
 
-			char first = text.charAt(0);
-			int signOffset = first == '-' || first == '+' ? 1 : 0;
-			boolean neg = first == '-';
-			if (text.startsWith("0'", signOffset)) {
-				char c = text.charAt(2 + signOffset);
-				int cp;
-				if (c == '\\') {
-					// TODO: remove need for StringBuilder allocation
-					StringBuilder b = new StringBuilder(1);
-					unescapeCharacter(b, text, 3 + signOffset);
-					cp = b.codePointAt(0);
-				} else {
-					cp = c;
-				}
-
-				if (neg) {
-					cp = -cp;
-				}
-
-				return AIntegerPrologTerm.create(cp);
+		char first = text.charAt(0);
+		int signOffset = first == '-' || first == '+' ? 1 : 0;
+		boolean neg = first == '-';
+		if (text.startsWith("0'", signOffset)) {
+			char c = text.charAt(2 + signOffset);
+			int cp;
+			if (c == '\\') {
+				// TODO: remove need for StringBuilder allocation
+				StringBuilder b = new StringBuilder(1);
+				unescapeCharacter(b, text, 3 + signOffset);
+				cp = b.codePointAt(0);
 			} else {
-				int radix;
-				if (text.startsWith("0b", signOffset)) {
-					radix = 2;
-					text = text.substring(2 + signOffset);
-					if (neg) {
-						text = "-" + text;
-					}
-				} else if (text.startsWith("0o", signOffset)) {
-					radix = 8;
-					text = text.substring(2 + signOffset);
-					if (neg) {
-						text = "-" + text;
-					}
-				} else if (text.startsWith("0x", signOffset)) {
-					radix = 16;
-					text = text.substring(2 + signOffset);
-					if (neg) {
-						text = "-" + text;
-					}
-				} else {
-					radix = 10;
-				}
-
-				return AIntegerPrologTerm.create(text, radix);
+				cp = c;
 			}
-		} else if (number instanceof AFloatNumber) {
-			AFloatNumber floatNumber = (AFloatNumber) number;
-			String text = floatNumber.getFloat().getText();
-			double d = Double.parseDouble(text);
-			return new FloatPrologTerm(d);
+
+			if (neg) {
+				cp = -cp;
+			}
+
+			return AIntegerPrologTerm.create(cp);
 		} else {
-			throw new IllegalStateException("Unexpected subclass of PNumber: " + number.getClass().getCanonicalName());
+			int radix;
+			if (text.startsWith("0b", signOffset)) {
+				radix = 2;
+				text = text.substring(2 + signOffset);
+				if (neg) {
+					text = "-" + text;
+				}
+			} else if (text.startsWith("0o", signOffset)) {
+				radix = 8;
+				text = text.substring(2 + signOffset);
+				if (neg) {
+					text = "-" + text;
+				}
+			} else if (text.startsWith("0x", signOffset)) {
+				radix = 16;
+				text = text.substring(2 + signOffset);
+				if (neg) {
+					text = "-" + text;
+				}
+			} else {
+				radix = 10;
+			}
+
+			return AIntegerPrologTerm.create(text, radix);
 		}
 	}
 
