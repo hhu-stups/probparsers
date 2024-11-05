@@ -35,7 +35,10 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
 			"description_event", // for ADescriptionEvent
-			"description_operation", "event", "freetype",
+			"description_operation",
+			"description_pragma",
+			"event",
+			"freetype",
 			"machine_header", "machine_reference", "operation",
 			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
@@ -479,9 +482,10 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseADescriptionPragma(ADescriptionPragma node) {
-		// Print descriptions as a single atom for backwards compatibility.
-		// In the future, we may want to print position pragmas as proper nodes with position info.
+		open(node);
+		// Print all description parts as a single atom for now, until we support parsing template parameters.
 		pout.printAtom(node.getParts().stream().map(Token::getText).collect(Collectors.joining()));
+		close(node);
 	}
 
 	// definition
