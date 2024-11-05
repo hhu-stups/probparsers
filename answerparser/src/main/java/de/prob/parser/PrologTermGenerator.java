@@ -162,36 +162,22 @@ public final class PrologTermGenerator {
 			} else if (node instanceof AStringTerm) {
 				throw new ResultParserException("Double-quoted strings are currently not supported by answerparser");
 			} else if (node instanceof AListTerm) {
-				int arity = 1;
-				AParams aparams = (AParams) ((AListTerm) node).getParams();
-				nodeStack.push(aparams.getTerm());
+				AListTerm list = (AListTerm) node;
 
-				PMoreParams more = aparams.getMoreParams();
-				while (more instanceof AMoreParams) {
-					AMoreParams amore = (AMoreParams) more;
-					nodeStack.push(amore.getTerm());
-					more = amore.getMoreParams();
-					arity++;
+				for (PTerm element : list.getElements()) {
+					nodeStack.push(element);
 				}
 
-				term = new ListBuilder(arity);
+				term = new ListBuilder(list.getElements().size());
 			} else if (node instanceof ACompoundTerm) {
 				ACompoundTerm acompound = (ACompoundTerm) node;
 				String functor = removeQuotes(acompound.getFunctor().getText());
 
-				int arity = 1;
-				AParams aparams = (AParams) acompound.getParams();
-				nodeStack.push(aparams.getTerm());
-
-				PMoreParams more = aparams.getMoreParams();
-				while (more instanceof AMoreParams) {
-					AMoreParams amore = (AMoreParams) more;
-					nodeStack.push(amore.getTerm());
-					more = amore.getMoreParams();
-					arity++;
+				for (PTerm element : acompound.getParameters()) {
+					nodeStack.push(element);
 				}
 
-				term = new CompoundBuilder(functor, arity);
+				term = new CompoundBuilder(functor, acompound.getParameters().size());
 			} else {
 				throw new IllegalStateException("Unexpected subclass of PTerm: " + node.getClass().getCanonicalName());
 			}
