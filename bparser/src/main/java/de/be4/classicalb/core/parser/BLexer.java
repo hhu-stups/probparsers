@@ -328,8 +328,7 @@ public class BLexer extends Lexer {
 	private ParseOptions parseOptions = null;
 
 	private Token lastToken;
-	private Token comment = null;
-	private StringBuilder commentBuffer = null;
+	private TComment currentBlockCommentStart;
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
@@ -349,7 +348,7 @@ public class BLexer extends Lexer {
 		if (
 			token == null || state.equals(State.BLOCK_COMMENT)
 			|| token instanceof TWhiteSpace || token instanceof TLineComment
-			|| token instanceof TComment || token instanceof TCommentEnd
+			|| token instanceof TComment || token instanceof TCommentBody || token instanceof TStar || token instanceof TCommentEnd
 			|| token instanceof TPragmaIdOrString || token instanceof TPragmaFreeText || token instanceof TPragmaEnd
 		) {
 			return; // we ignore these tokens for checking for invalid combinations
@@ -414,18 +413,20 @@ public class BLexer extends Lexer {
 		}
 
 		if (token instanceof TCommentEnd) {
-			commentBuffer.append(token.getText());
-			comment.setText(commentBuffer.toString());
-			token = comment;
-			comment = null;
-			commentBuffer = null;
+			// Note: The lexer state is changed before filter gets called,
+			// so the state is no longer BLOCK_COMMENT when TCommentEnd is handled here.
+			currentBlockCommentStart = null;
 		} else if (token instanceof TShebang && token.getLine() != 1) {
 			throw new BLexerException(token, "#! only allowed in first line of the file", "#!", token.getLine(), token.getPos());
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.BLOCK_COMMENT)) {
-			collectComment();
+			if (token instanceof TComment) {
+				currentBlockCommentStart = (TComment)token;
+			} else if (token instanceof EOF) {
+				throw new BLexerException(currentBlockCommentStart, "Comment not closed.");
+			}
 		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
 		}
@@ -480,23 +481,6 @@ public class BLexer extends Lexer {
 				}
 			}
 		}
-	}
-
-	private void collectComment() throws LexerException {
-		if (token instanceof EOF) {
-			// make sure we don't loose this token, needed for error message
-			throw new BLexerException(comment, "Comment not closed.");
-		}
-
-		// starting a new comment
-		if (comment == null) {
-			commentBuffer = new StringBuilder(token.getText());
-			comment = token;
-		} else {
-			commentBuffer.append(token.getText());
-			assert !(token instanceof TCommentEnd); // end of comment now handled in filter
-		}
-		token = null;
 	}
 
 	private void optimizeToken() {
