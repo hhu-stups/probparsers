@@ -42,24 +42,25 @@ You can also use the JAR probcliparser.jar built for ProB and distributed with P
 Here is how to obtain help for using the command-line parser:
 ```
 $ java -jar probcliparser.jar --help
-BParser (version 2.12.3, commit 99a64151f3bc82f987258619161831a8b9a7df01)
-usage: BParser [options] <BMachine file>
+BParser (version 2.13.5-SNAPSHOT, commit bab2ba06ace23f4460d63fdbc94b06c916ca6f30)
+usage: java -jar probcliparser.jar [options] <BMachine file>
 
 Available options are:
--v          Verbose output during lexing and parsing
--time       Output time used for complete parsing process
--pp         Pretty Print in B format on standard output
--prolog     Show AST as Prolog term
--lineno     Put line numbers into prolog terms
--out        Specify output file
--version    Print the parser version and exit
--h          Print the parser help and exit
--help       Print the parser help and exit
---help      Print the parser help and exit
--compactpos Use new more compact Prolog position terms
--fastprolog Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
--prepl      Enter parser-repl. Should only be used from inside ProB's Prolog Core.
--checkname  The name of a machine have to match file name (except for the file name extension)
+-v              Verbose output during lexing and parsing
+-time           Output time used for complete parsing process
+-pp             Pretty Print in B format on standard output
+-prolog         Show AST as Prolog term
+-lineno         Put line numbers into prolog terms
+-out            Specify output file
+-version        Print the parser version and exit
+-h              Print the parser help and exit
+-help           Print the parser help and exit
+--help          Print the parser help and exit
+-compactpos     Use new more compact Prolog position terms
+-fastprolog     Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
+-prepl          Enter parser-repl. Should only be used from inside ProB's Prolog Core.
+-checkname      The name of a machine have to match file name (except for the file name extension)
+-printstacksize print the locally available size of the call stack at runtime
 ```
 
 You probably also want to set the path to the stdlib folder of ProB (containing files like LibraryStrings.def):
