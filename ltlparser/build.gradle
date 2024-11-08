@@ -2,6 +2,8 @@ apply plugin: 'jacoco'
 apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
+description = "ProB's parsers for LTL and CTL formulas"
+
 dependencies {
 	sableCC(rootProject.sableCCDependency)
 	api(rootProject.sableCCRuntimeDependency)

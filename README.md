@@ -5,14 +5,14 @@
 This is an umbrella project for the following parsers and libraries used by ProB:
 
 * bparser: Parser for classical B.
-* ltlparser: Parser for LTL formulas. The parser delegates formulas in `{ }` to a formalism specific parser, e.g. to the classical B parser. Also contains a parser for CTL.
+* ltlparser: Parsers for LTL and CTL formulas. The parsers delegate formulas in `{ }` to a formalism specific parser, e.g. to the classical B parser.
 * parserbase: Library for uniform access to the formal language parsers. This is used to allow embedding different languages into LTL formulas.
 * unicode: Lexer that transforms Event-B expressions and predicates between ASCII, Unicode and LaTeX syntax.
-* eventbstruct: Parser for the Camille structural syntax.
+* eventbstruct: Parser for the Camille structural syntax for Event-B.
 * theorymapping: Parser for theory mapping files (translation of Event-B operators to Prolog predicates).
 * prologlib: Library to construct and manipulate well-formed Prolog terms.
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
-* answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
+* answerparser: Parser for a subset of Prolog term syntax, used to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB Java API](https://github.com/hhu-stups/prob2_kernel) and the [ProB plugin for Rodin](https://github.com/hhu-stups/prob-rodinplugin).
 
 The following subprojects were formerly part of this repo:
 

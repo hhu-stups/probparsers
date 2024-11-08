@@ -2,6 +2,8 @@ apply plugin: 'jacoco'
 apply plugin: 'java-library'
 apply plugin: 'de.hhu.stups.sablecc'
 
+description = "ProB's parser for theory mapping files (translation of Event-B operators to Prolog predicates)"
+
 dependencies {
 	sableCC(rootProject.sableCCDependency)
 	api(rootProject.sableCCRuntimeDependency)

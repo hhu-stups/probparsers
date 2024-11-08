@@ -27,6 +27,7 @@ apply plugin: 'java-library'
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
 project.version = '2.13.5-SNAPSHOT'
+project.description = "The ProB parser libraries"
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
@@ -124,7 +125,7 @@ subprojects {
 
 				pom {
 					name = project.name
-					description = 'Part of the ProB Parser library'
+					description = provider {project.description}
 					url = 'https://github.com/bendisposto/probparsers'
 
 					licenses {
