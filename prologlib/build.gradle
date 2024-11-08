@@ -1,6 +1,9 @@
-apply plugin: 'jacoco'
-apply plugin: 'java-library'
-apply plugin: 'me.champeau.jmh'
+plugins {
+	id("jacoco")
+	id("java-library")
+
+	id("me.champeau.jmh")
+}
 
 description = "Library to construct and manipulate well-formed Prolog terms"
 
