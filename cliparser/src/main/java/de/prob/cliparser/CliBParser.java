@@ -673,7 +673,7 @@ public class CliBParser {
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
 		final ConsoleOptions options = new ConsoleOptions();
 		options.setIntro("BParser (version " + BParser.getVersion() + ", commit " + BParser.getGitSha()
-				+ ")\nusage: BParser [options] <BMachine file>\n\nAvailable options are:");
+				+ ")\nusage: java -jar probcliparser.jar [options] <BMachine file>\n\nAvailable options are:");
 		options.addOption(CLI_SWITCH_VERBOSE, "Verbose output during lexing and parsing");
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
