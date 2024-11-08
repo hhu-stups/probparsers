@@ -14,24 +14,24 @@ public class MultipleRecordsAssignment {
 
 	@Test
 	public void testTipple() throws BCompoundException {
-		final String testMachine = "#SUBSTITUTION xx'aa'bb := 4 ";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testSubstitution = "xx'aa'bb := 4 ";
+		String result = Helpers.getSubstitutionAsPrologTerm(testSubstitution);
 		assertEquals("machine(assign(none,[record_field(none,record_field(none,identifier(none,xx),identifier(none,aa)),identifier(none,bb))],[integer(none,4)])).", result);
 	}
 
 
 	@Test
 	public void testDouble() throws BCompoundException {
-		final String testMachine = "#SUBSTITUTION xx'aa := 4 ";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testSubstitution = "xx'aa := 4 ";
+		String result = Helpers.getSubstitutionAsPrologTerm(testSubstitution);
 		assertEquals("machine(assign(none,[record_field(none,identifier(none,xx),identifier(none,aa))],[integer(none,4)])).", result);
 	}
 
 
 	@Test
 	public void moreContext() throws BCompoundException {
-		final String testMachine = "#SUBSTITUTION xx'aa'bb := 5 ||" + System.lineSeparator() + " out := xx'aa'bb";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testSubstitution = "xx'aa'bb := 5 ||" + System.lineSeparator() + " out := xx'aa'bb";
+		String result = Helpers.getSubstitutionAsPrologTerm(testSubstitution);
 		assertEquals("machine(parallel(none,[assign(none,[record_field(none,record_field(none,identifier(none,xx),identifier(none,aa)),identifier(none,bb))],[integer(none,5)]),assign(none,[identifier(none,out)],[record_field(none,record_field(none,identifier(none,xx),identifier(none,aa)),identifier(none,bb))])])).", result);
 	}
 

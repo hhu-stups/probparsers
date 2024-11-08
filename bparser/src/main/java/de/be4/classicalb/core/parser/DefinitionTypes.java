@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefinitionTypes {
+public final class DefinitionTypes {
 	private final Map<String, Definitions.Type> types;
 
 	public DefinitionTypes() {
@@ -12,11 +12,11 @@ public class DefinitionTypes {
 	}
 
 	public DefinitionTypes(final Map<String, Definitions.Type> newTypes) {
-		this.types = new HashMap<>(newTypes);
+		this.types = new HashMap<>();
+		newTypes.forEach(this::addTyping);
 	}
 
-	public void addTyping(final String definitionName,
-			final Definitions.Type type) {
+	public void addTyping(final String definitionName, final Definitions.Type type) {
 		types.put(definitionName, type);
 	}
 

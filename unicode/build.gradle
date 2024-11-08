@@ -1,6 +1,11 @@
-apply plugin: 'jacoco'
-apply plugin: 'java-library'
-apply plugin: 'de.hhu.stups.sablecc'
+plugins {
+	id("jacoco")
+	id("java-library")
+
+	id("de.hhu.stups.sablecc")
+}
+
+description = "Lexer that transforms Event-B expressions and predicates between ASCII, Unicode and LaTeX syntax"
 
 dependencies {
 	sableCC(rootProject.sableCCDependency)

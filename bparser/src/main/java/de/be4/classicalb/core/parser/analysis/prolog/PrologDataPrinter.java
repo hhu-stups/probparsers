@@ -298,7 +298,7 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 
 	@Override
 	public void caseARecEntry(ARecEntry node) {
-		String id = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
+		String id = node.getIdentifier().getText();
 		if (this.currRecFields.getFirst().put(id, node.getValue()) != null) {
 			throw new IllegalArgumentException("duplicated rec entry " + id);
 		}

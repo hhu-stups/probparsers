@@ -21,13 +21,13 @@ public class PragmaMachineTest {
 
 	private final File machine;
 
-	public PragmaMachineTest(File machine) {
+	public PragmaMachineTest(File machine, String ignoredRelativePath) {
 		this.machine = machine;
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static File[] data() {
-		return Helpers.getMachines(PATH);
+	@Parameterized.Parameters(name = "{1}")
+	public static Object[][] data() {
+		return Helpers.getMachinesForTestData(PATH);
 	}
 
 	@Test

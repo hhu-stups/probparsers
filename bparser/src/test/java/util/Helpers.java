@@ -8,9 +8,6 @@ import java.util.stream.Stream;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
-import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
 import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -21,6 +18,7 @@ import de.prob.prolog.output.PrologTermStringOutput;
 
 import org.junit.Assert;
 import org.junit.function.ThrowingRunnable;
+import org.junit.runners.Parameterized;
 
 public class Helpers {
 	public static File[] getMachines(String path) {
@@ -30,7 +28,24 @@ public class Helpers {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
-		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".def").anyMatch(name::endsWith));
+		return dir.listFiles((d, name) -> Stream.of(".mch", ".imp", ".ref", ".sys", ".def").anyMatch(name::endsWith));
+	}
+
+	/**
+	 * Variant of {@link #getMachines(String)} for use in JUnit {@link Parameterized.Parameters} methods.
+	 * This returns file names in addition to full paths to allow displaying a shorter name for each test.
+	 * 
+	 * @param path the directory (relative to the test resources root) in which to find machine files
+	 * @return array of pairs for every found machine: the machine path as a {@link File}, and its relative path as a {@link String}
+	 */
+	public static Object[][] getMachinesForTestData(String path) {
+		File[] machines = getMachines(path);
+		Object[][] res = new Object[machines.length][];
+		for (int i = 0; i < machines.length; i++) {
+			File machine = machines[i];
+			res[i] = new Object[] {machine, path + "/" + machine.getName()};
+		}
+		return res;
 	}
 
 	public static String getPrettyPrint(final String testMachine) {
@@ -97,9 +112,67 @@ public class Helpers {
 		return postprocessPrologTerm(pout.toString());
 	}
 
+	private static void ensureNoParsingPrefix(String input) {
+		for (String prefix : new String[] {
+			BParser.EXPRESSION_PREFIX,
+			BParser.PREDICATE_PREFIX,
+			BParser.FORMULA_PREFIX,
+			BParser.SUBSTITUTION_PREFIX,
+			BParser.OPERATION_PATTERN_PREFIX,
+			BParser.MACHINE_CLAUSE_PREFIX,
+		}) {
+			if (input.startsWith(prefix)) {
+				throw new AssertionError("Input code contains an explicit parsing kind prefix: " + prefix);
+			}
+		}
+	}
+
 	public static String getMachineAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
 		final BParser parser = new BParser("Test");
 		Start start = parser.parseMachine(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getExpressionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseExpression(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getPredicateAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parsePredicate(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getFormulaAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseFormula(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getSubstitutionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseSubstitution(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getTransitionAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseTransition(input);
+		return getTreeAsPrologTerm(start);
+	}
+
+	public static String getMachineClauseAsPrologTerm(String input) throws BCompoundException {
+		ensureNoParsingPrefix(input);
+		BParser parser = new BParser("Test");
+		Start start = parser.parseMachineClause(input);
 		return getTreeAsPrologTerm(start);
 	}
 
@@ -110,10 +183,7 @@ public class Helpers {
 	}
 
 	public static void printAsProlog(final Start start, final IPrologTermOutput pout) {
-		final INodeIds nodeIds = new NodeFileNumbers();
-		nodeIds.assignIdentifiers(1, start);
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIds);
-		final ASTProlog prolog = new ASTProlog(pout, pprinter);
+		ASTProlog prolog = new ASTProlog(pout, null);
 
 		pout.openTerm("machine");
 		start.apply(prolog);

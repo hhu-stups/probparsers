@@ -581,14 +581,24 @@ public class PrologGeneratorTest {
 				"AG {taken= {}")))).parse();
 	}
 
+	@Test(expected = LtlParseException.class)
+	public void testPredSyntaxError() throws LtlParseException {
+		parse("{X}");
+	}
+
 	@Test
-	public void testPredSyntaxError() throws Exception {
-		try {
-			parse("{X}");
-			Assert.fail("expected parser exception");
-		} catch (LtlParseException e) {
-			// ok
-		}
+	public void testParserlib17() throws Exception {
+		PrologTerm dpred = new CompoundPrologTerm("dpred", new CompoundPrologTerm("\"{\"=\"1\""));
+		// Non-dummy version, in case we ever stop using the DummyParser:
+		//final PrologTerm none = new CompoundPrologTerm("none");
+		//final PrologTerm stringl = new CompoundPrologTerm("string", none, new CompoundPrologTerm("{"));
+		//final PrologTerm stringr = new CompoundPrologTerm("string", none, new CompoundPrologTerm("1"));
+		//final PrologTerm eq = new CompoundPrologTerm("equal", none, stringl, stringr);
+		//final PrologTerm bpred = new CompoundPrologTerm("bpred", eq);
+		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
+		final PrologTerm expected = new CompoundPrologTerm("globally", ap);
+
+		check("G {\"{\"=\"1\"}", expected);
 	}
 
 	private void check(final String input, final PrologTerm expectedTerm)
@@ -641,11 +651,13 @@ public class PrologGeneratorTest {
 		private void parse(final IPrologTermOutput pto, final String text,
 				final boolean wrap, final String wrapper)
 				throws ProBParseException {
-			for (int i = 0; i < text.length(); i++) {
-				final char ch = text.charAt(i);
-				if (!Character.isLowerCase(ch) && "()[]{}".indexOf(ch) == -1)
-					throw new ProBParseException("syntax error");
+			// TODO: cant we use the real B parser here?
+			// Hardcoded cases for testing parse errors.
+			// Everything else is considered "successfully parsed".
+			if ("X".equals(text) || text.endsWith("{")) {
+				throw new ProBParseException("syntax error");
 			}
+
 			if (wrap) {
 				pto.openTerm(wrapper);
 			}

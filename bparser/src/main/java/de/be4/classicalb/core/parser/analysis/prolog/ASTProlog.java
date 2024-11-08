@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.*;
@@ -34,7 +35,10 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
 			"description_event", // for ADescriptionEvent
-			"description_operation", "event", "freetype",
+			"description_operation",
+			"description_pragma",
+			"event",
+			"freetype",
 			"machine_header", "machine_reference", "operation",
 			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
@@ -125,6 +129,24 @@ public class ASTProlog extends DepthFirstAdapter {
 		}
 	}
 
+	private void printPositionRange(Node startNode, Node endNode) {
+		if (positionPrinter != null) {
+			positionPrinter.printPositionRange(startNode, endNode);
+		} else {
+			pout.printAtom("none");
+		}
+	}
+
+	private void printPositionRange(List<? extends Node> nodes, Node fallback) {
+		if (!nodes.isEmpty()) {
+			printPositionRange(nodes.get(0), nodes.get(nodes.size() - 1));
+		} else if (fallback != null) {
+			printPosition(fallback);
+		} else {
+			pout.printAtom("none");
+		}
+	}
+
 	/**
 	 * The counterpart to {@link #open(Node)}, prints the closing parenthesis of
 	 * the term.
@@ -198,8 +220,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	/**
 	 * The translation from the names in the SableCC grammar to prolog functors
 	 * must be systematic. Otherwise it will not be possible to reuse the
-	 * grammar for non-Java front-ends. One magic case here: "op" -&gt; "operation_call"
-	 * Todo: do remove magic special cases DO NOT add extra special cases here !!
+	 * grammar for non-Java front-ends. Please DO NOT add any magic special cases here!
 	 * 
 	 * @return Prolog functor name
 	 */
@@ -215,11 +236,7 @@ public class ASTProlog extends DepthFirstAdapter {
 				return camelName;
 			for (String checkend : SUM_TYPE)
 				if (camelName.endsWith(checkend)) {
-					String shortName = camelName.substring(0, camelName.length() - checkend.length() - 1);
-					// hard-coded renamings
-					if (shortName.equals("op"))
-						return "operation_call";
-					return shortName;
+					return camelName.substring(0, camelName.length() - checkend.length() - 1);
 				}
 		}
 		// There is no rule to translate the class name to a prolog functor.
@@ -250,8 +267,35 @@ public class ASTProlog extends DepthFirstAdapter {
 		return out.toString();
 	}
 
-	private void printIdentifier(final LinkedList<TIdentifierLiteral> list) {
+	private void printIdentifier(List<TIdentifierLiteral> list) {
 		pout.printAtom(Utils.getTIdentifierListAsString(list));
+	}
+
+	/**
+	 * Print a {@link TIdentifierLiteral} list exactly as if it was an {@link AIdentifierExpression}.
+	 * 
+	 * @param identifierParts the identifier to print (a list of identifier tokens that will be joined using dots)
+	 */
+	private void printPositionedIdentifier(List<TIdentifierLiteral> identifierParts) {
+		if (identifierParts.isEmpty()) {
+			throw new IllegalArgumentException("There must be at least one token in a dotted identifier list");
+		}
+		pout.openTerm("identifier");
+		printPositionRange(identifierParts, null);
+		printIdentifier(identifierParts);
+		pout.closeTerm();
+	}
+
+	/**
+	 * Print a {@link TIdentifierLiteral} exactly as if it was an {@link AIdentifierExpression}.
+	 * 
+	 * @param identifier the identifier token to print
+	 */
+	private void printPositionedIdentifier(TIdentifierLiteral identifier) {
+		pout.openTerm("identifier");
+		printPosition(identifier);
+		pout.printAtom(identifier.getText());
+		pout.closeTerm();
 	}
 
 	private void printNullSafeSubstitution(final Node subst) {
@@ -428,10 +472,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAMachineReferenceNoParams(final AMachineReferenceNoParams node) {
 		// Keep this functor for compatibility with previous versions
 		// (SEES/USES names were previously parsed as identifier expressions).
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getMachineName());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getMachineName());
 	}
 
 	@Override
@@ -446,9 +487,17 @@ public class ASTProlog extends DepthFirstAdapter {
 	public void caseAOperationReference(final AOperationReference node) {
 		// Keep this functor for compatibility with previous versions
 		// (PROMOTES names were previously parsed as identifier expressions).
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperationName());
+		printPositionedIdentifier(node.getOperationName());
+	}
+
+	@Override
+	public void caseADescriptionPragma(ADescriptionPragma node) {
+		pout.openTerm("description_text");
+		// If possible, print the position of the description text itself,
+		// not the entire description pragma.
+		printPositionRange(node.getParts(), node);
+		// Print all description parts as a single atom for now, until we support parsing template parameters.
+		pout.printAtom(node.getParts().stream().map(Token::getText).collect(Collectors.joining()));
 		pout.closeTerm();
 	}
 
@@ -496,10 +545,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperation(final AOperation node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOpName());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getOperationBody().apply(this);
@@ -509,10 +555,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseARefinedOperation(final ARefinedOperation node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOpName());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
 		node.getAbOpName().apply(this);
@@ -739,6 +782,14 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseARecordFieldExpression(ARecordFieldExpression node) {
+		open(node);
+		node.getRecord().apply(this);
+		printPositionedIdentifier(node.getIdentifier());
+		close(node);
+	}
+
+	@Override
 	public void caseAIntegerExpression(final AIntegerExpression node) {
 		open(node);
 		final String text = node.getLiteral().getText();
@@ -755,6 +806,14 @@ public class ASTProlog extends DepthFirstAdapter {
 		open(node);
 		node.getDefLiteral().apply(this);
 		printAsList(node.getParameters());
+		close(node);
+	}
+
+	@Override
+	public void caseARecEntry(ARecEntry node) {
+		open(node);
+		printPositionedIdentifier(node.getIdentifier());
+		node.getValue().apply(this);
 		close(node);
 	}
 
@@ -863,21 +922,9 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAOpSubstitution(final AOpSubstitution node) {
-		open(node);
-		node.getName().apply(this);
-		pout.emptyList();
-		printAsList(node.getParameters());
-		close(node);
-	}
-
-	@Override
 	public void caseAOperationCallSubstitution(final AOperationCallSubstitution node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperation());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getOperation());
 		printAsList(node.getResultIdentifiers());
 		printAsList(node.getParameters());
 		close(node);
@@ -886,10 +933,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationCallExpression(AOperationCallExpression node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		printIdentifier(node.getOperation());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getOperation());
 		printAsList(node.getParameters());
 		close(node);
 	}
@@ -999,10 +1043,7 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAWitness(final AWitness node) {
 		open(node);
-		pout.openTerm("identifier");
-		printPosition(node);
-		pout.printAtom(node.getName().getText().trim());
-		pout.closeTerm();
+		printPositionedIdentifier(node.getName());
 		node.getPredicate().apply(this);
 		close(node);
 	}

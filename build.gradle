@@ -16,26 +16,27 @@ buildscript {
 }
 
 plugins {
+	id("java-library")
+
+	// Declare version numbers for all third-party plugins here
+	// so that all subprojects use the same plugin versions.
 	// The plugins are declared as .apply(false) here
-	// and only applied in the subprojects that actually need them.
+	// and re-declared without .apply(false) in the subprojects that actually need them.
 	id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
 	id("me.champeau.jmh").version("0.7.2").apply(false)
 }
 
-apply plugin: 'java-library'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = '2.13.4'
+project.version = "2.13.5"
+project.description = "The ProB parser libraries"
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 final SOURCE_ENCODING = "UTF-8"
 
 ext {
-	sableCCVersion = '3.8.0'
+	sableCCVersion = "3.9.0"
 	sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
 	sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
 }
@@ -126,7 +127,7 @@ subprojects {
 
 				pom {
 					name = project.name
-					description = 'Part of the ProB Parser library'
+					description = provider {project.description}
 					url = 'https://github.com/bendisposto/probparsers'
 
 					licenses {

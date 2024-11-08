@@ -26,7 +26,12 @@ public class ParseOptions {
 	 * if true the parser will collect definitions.
 	 * <br>
 	 * when disabled some checks/transformations will no longer work!
+	 * 
+	 * @deprecated Use only {@link #applyASTTransformations} instead,
+	 *     which now controls all post-processing of the AST,
+	 *     including collecting definitions.
 	 */
+	@Deprecated
 	private boolean collectDefinitions = true;
 
 	/**
@@ -40,7 +45,12 @@ public class ParseOptions {
 	 * if true the parser will apply some semantic checks.
 	 * <br>
 	 * when disabled some errors will not be caught!
+	 * 
+	 * @deprecated Use only {@link #applyASTTransformations} instead,
+	 *     which now controls all post-processing of the AST,
+	 *     including semantic checks.
 	 */
+	@Deprecated
 	private boolean applySemanticChecks = true;
 
 	private IGrammar grammar = new DefaultGrammar();
@@ -87,10 +97,12 @@ public class ParseOptions {
 		this.ignoreUselessTokens = ignoreUselessTokens;
 	}
 
+	@Deprecated
 	public boolean isCollectDefinitions() {
 		return collectDefinitions;
 	}
 
+	@Deprecated
 	public void setCollectDefinitions(boolean collectDefinitions) {
 		this.collectDefinitions = collectDefinitions;
 	}
@@ -103,10 +115,12 @@ public class ParseOptions {
 		this.applyASTTransformations = applyASTTransformations;
 	}
 
+	@Deprecated
 	public boolean isApplySemanticChecks() {
 		return applySemanticChecks;
 	}
 
+	@Deprecated
 	public void setApplySemanticChecks(boolean applySemanticChecks) {
 		this.applySemanticChecks = applySemanticChecks;
 	}

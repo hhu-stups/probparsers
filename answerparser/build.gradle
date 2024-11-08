@@ -1,7 +1,12 @@
-apply plugin: 'jacoco'
-apply plugin: 'java-library'
-apply plugin: 'de.hhu.stups.sablecc'
-apply plugin: 'me.champeau.jmh'
+plugins {
+	id("jacoco")
+	id("java-library")
+
+	id("de.hhu.stups.sablecc")
+	id("me.champeau.jmh")
+}
+
+description = "Parser for a subset of Prolog term syntax, used to read answers from the ProB Prolog core (probcli) in socket-server mode. For internal use only by the ProB Java API and the ProB plugin for Rodin!"
 
 dependencies {
 	sableCC(rootProject.sableCCDependency)

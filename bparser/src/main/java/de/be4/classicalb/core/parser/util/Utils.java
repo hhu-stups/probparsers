@@ -5,7 +5,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -13,6 +21,27 @@ import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
+	private static final Set<String> AMBIGUOUS_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		// Tree-related keywords/operators/functions - handled in SyntaxExtensionTranslator
+		"tree",
+		"btree",
+		"const",
+		"top",
+		"sons",
+		"prefix",
+		"postfix",
+		"sizet",
+		"mirror",
+		"rank",
+		"father",
+		"son",
+		"subtree",
+		"arity",
+		"bin",
+		"left",
+		"right",
+		"infix"
+	)));
 
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS;
 	private static final Map<Character, Character> STRING_ESCAPE_REPLACEMENTS_REVERSE;
@@ -44,25 +73,28 @@ public final class Utils {
 	}
 
 	public static String getTIdentifierListAsString(final List<TIdentifierLiteral> idElements) {
-		final String string;
 		if (idElements.size() == 1) {
 			// faster version for the simple case
-			string = idElements.get(0).getText();
+			return idElements.get(0).getText();
 		} else {
-			final StringBuilder idName = new StringBuilder();
-
-			boolean first = true;
-			for (final TIdentifierLiteral e : idElements) {
-				if (first) {
-					first = false;
-				} else {
-					idName.append('.');
-				}
-				idName.append(e.getText());
-			}
-			string = idName.toString();
+			return idElements.stream()
+				.map(Token::getText)
+				.collect(Collectors.joining("."));
 		}
-		return string.trim();
+	}
+
+	/**
+	 * Check whether the given identifier is an ambiguous keyword.
+	 * Such a keyword can usually be used as a regular identifier,
+	 * but is recognized as a keyword in specific contexts.
+	 * To guarantee that such a keyword is unambiguously parsed as a regular identifier,
+	 * it must be backquoted, like when using any other keyword as an identifier.
+	 *
+	 * @param identifier the string to check
+	 * @return whether {@code identifier} is an ambiguous keyword
+	 */
+	public static boolean isAmbiguousKeyword(String identifier) {
+		return AMBIGUOUS_KEYWORDS.contains(identifier);
 	}
 
 	/**
@@ -73,6 +105,10 @@ public final class Utils {
 	 * @return whether {@code identifier} is a plain B identifier
 	 */
 	public static boolean isPlainBIdentifier(final String identifier) {
+		if (isAmbiguousKeyword(identifier)) {
+			return false;
+		}
+
 		// Try to parse the identifier string
 		// and check if it results in a single identifier expression
 		// with the same name as was passed in.
@@ -122,11 +158,16 @@ public final class Utils {
 			|| identifier.startsWith("ASSERT_LTL")
 			|| identifier.equals("CUSTOM_GRAPH")
 			|| identifier.startsWith("CUSTOM_GRAPH_") // CUSTOM_GRAPH_NODES, CUSGOM_GRAPH_EDGES
+			|| identifier.startsWith("FORCE_SYMMETRY_")
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
+			|| identifier.startsWith("MAX_OPERATIONS_")
+			|| identifier.startsWith("OPERATION_REUSE_OFF_")
+			|| identifier.equals("PROB_REQUIRED_VERSION")
 			|| identifier.equals("SCOPE")
 			|| identifier.startsWith("scope_")
 			|| identifier.startsWith("SET_PREF_")
+			|| identifier.startsWith("SEQUENCE_CHART_")
 			|| identifier.startsWith("VISB_SVG_") // VISB_SVG_OBJECTS, VISB_SVG_UPDATES, VISB_SVG_HOVERS, VISB_SVG_BOX, ...
 			;
 	}
@@ -137,6 +178,7 @@ public final class Utils {
 			|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
 	}
 
+	@Deprecated
 	public static String getSourcePositionAsString(SourcePosition sourcePos) {
 		return "[" + sourcePos.getLine() + "," + sourcePos.getPos() + "]";
 	}
@@ -306,10 +348,19 @@ public final class Utils {
 	public static String unquotePragmaIdentifier(String text) {
 		if (isQuoted(text, '"')) {
 			return unescapeStringContents(removeSurroundingQuotes(text, '"'));
-		} else if (isQuoted(text, '`')) {
-			return unescapeStringContents(removeSurroundingQuotes(text, '`'));
 		}
 
 		return text;
+	}
+
+	public static String unquoteIdentifier(final String name) {
+		if (isQuoted(name, '`')) {
+			if (name.indexOf('.') != -1) {
+				String fixed = name.replace(".", "`.`");
+				throw new IllegalArgumentException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed);
+			}
+			return unescapeStringContents(removeSurroundingQuotes(name, '`'));
+		}
+		return name;
 	}
 }

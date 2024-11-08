@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.analysis.checking.ClausesCheck;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
@@ -43,6 +44,7 @@ public class BParser {
 	public static final String FORMULA_PREFIX = "#FORMULA";
 	public static final String SUBSTITUTION_PREFIX = "#SUBSTITUTION";
 	public static final String OPERATION_PATTERN_PREFIX = "#OPPATTERN";
+	public static final String MACHINE_CLAUSE_PREFIX = "#MACHINECLAUSE";
 
 	private static final Properties buildProperties;
 	static {
@@ -228,37 +230,45 @@ public class BParser {
 		return parser.parseMachine(input);
 	}
 
-	private Start parseWithKindPrefix(final String input, final String prefix) throws BCompoundException {
+	private Start parseWithKindPrefix(String input, String prefix, boolean withPreParsing) throws BCompoundException {
 		final String theFormula = prefix + " " + input;
 		final int oldStartColumn = this.startColumn;
 		try {
 			// Decrease the start column by the size of the implicitly added prefix
 			// so that the actual user input starts at the desired position.
 			this.startColumn -= prefix.length() + 1;
-			return this.parseWithoutPreParsing(new StringReader(theFormula));
+			if (withPreParsing) {
+				return this.parseMachine(theFormula);
+			} else {
+				return this.parseWithoutPreParsing(new StringReader(theFormula));
+			}
 		} finally {
 			this.startColumn = oldStartColumn;
 		}
 	}
 
 	public Start parseFormula(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, FORMULA_PREFIX);
+		return this.parseWithKindPrefix(input, FORMULA_PREFIX, false);
 	}
 
 	public Start parseExpression(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX);
+		return this.parseWithKindPrefix(input, EXPRESSION_PREFIX, false);
 	}
 
 	public Start parseSubstitution(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX);
+		return this.parseWithKindPrefix(input, SUBSTITUTION_PREFIX, false);
 	}
 
 	public Start parseTransition(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX);
+		return this.parseWithKindPrefix(input, OPERATION_PATTERN_PREFIX, false);
 	}
 
 	public Start parsePredicate(final String input) throws BCompoundException {
-		return this.parseWithKindPrefix(input, PREDICATE_PREFIX);
+		return this.parseWithKindPrefix(input, PREDICATE_PREFIX, false);
+	}
+
+	public Start parseMachineClause(String input) throws BCompoundException {
+		return this.parseWithKindPrefix(input, MACHINE_CLAUSE_PREFIX, true);
 	}
 
 	// Don't delete this deprecated method too soon!
@@ -368,6 +378,7 @@ public class BParser {
 
 	private Start parseInternal(Reader reader, File machineFile, DefinitionTypes defTypes) throws BCompoundException {
 		String machineFilePath = machineFile == null ? null : machineFile.getPath();
+		Start rootNode;
 		try {
 			/*
 			 * Main parser
@@ -376,58 +387,30 @@ public class BParser {
 			lexer.setPosition(this.startLine, this.startColumn);
 			lexer.setParseOptions(parseOptions);
 			Parser parser = new Parser(lexer);
-			final Start rootNode = parser.parse();
-
-			final List<BException> bExceptionList = new ArrayList<>();
-
-			if (parseOptions.isCollectDefinitions()) {
-				/*
-				 * Collect available definition declarations. Needs to be done now
-				 * because they are needed by the following transformations.
-				 */
-				final DefinitionCollector collector = new DefinitionCollector(this.definitions);
-				collector.collectDefinitions(rootNode);
-				List<CheckException> definitionsCollectorExceptions = collector.getExceptions();
-				for (CheckException checkException : definitionsCollectorExceptions) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
-			}
-
-			if (parseOptions.isApplyASTTransformations()) {
-				// perform AST transformations that can't be done by SableCC
-				List<CheckException> checkExceptions = applyAstTransformations(rootNode);
-				for (CheckException checkException : checkExceptions) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
-			}
-
-			if (parseOptions.isApplySemanticChecks()) {
-				// perform some semantic checks which are not done in the parser
-				List<CheckException> checkExceptions = performSemanticChecks(rootNode);
-				for (CheckException checkException : checkExceptions) {
-					bExceptionList.add(new BException(machineFilePath, checkException));
-				}
-			}
-
-			if (!bExceptionList.isEmpty()) {
-				throw new BCompoundException(bExceptionList);
-			}
-
-			return rootNode;
+			rootNode = parser.parse();
 		} catch (final BLexerException e) {
-			throw new BCompoundException(new BException(machineFilePath, e));
-		} catch (final BParseException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final IOException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		} catch (final ParserException e) {
 			final Token token = e.getToken();
-			final String msg = e.getLocalizedMessage();
+			final String msg = e.getMessage();
 			final String realMsg = e.getRealMsg();
 			throw new BCompoundException(new BException(machineFilePath, new BParseException(token, msg, realMsg, e)));
 		} catch (LexerException e) {
 			throw new BCompoundException(new BException(machineFilePath, e));
 		}
+
+		if (parseOptions.isApplyASTTransformations()) {
+			List<CheckException> checkExceptions = applyAstTransformations(rootNode);
+			if (!checkExceptions.isEmpty()) {
+				throw new BCompoundException(checkExceptions.stream()
+					.map(checkException -> new BException(machineFilePath, checkException))
+					.collect(Collectors.toList()));
+			}
+		}
+
+		return rootNode;
 	}
 
 	private Start parseWithPreParsing(Reader reader, File machineFile, IFileContentProvider provider) throws BCompoundException {
@@ -535,41 +518,46 @@ public class BParser {
 		return preParser.getDefinitionTypes();
 	}
 
-	private List<CheckException> applyAstTransformations(final Start rootNode) {
-		final List<CheckException> list = new ArrayList<>();
+	private List<CheckException> applyAstTransformations(Start rootNode) {
+		List<CheckException> checkExceptions = new ArrayList<>();
+
+		// perform AST transformations that don't require definitions
+		// important for unquoting of definition identifiers before collecting them
 
 		// default transformations
-		try {
-			OpSubstitutions.transform(rootNode, getDefinitions());
-		} catch (CheckException e) {
-			list.add(e);
-		}
-
 		rootNode.apply(new CoupleToIdentifierTransformation());
 
 		try {
 			rootNode.apply(new SyntaxExtensionTranslator());
 		} catch (VisitorException e) {
-			list.add(e.getException());
+			checkExceptions.add(e.getException());
 		}
 
+		// Collect available definition declarations. Needs to be done now
+		// because they are needed by the following transformations.
+		DefinitionCollector collector = new DefinitionCollector(this.definitions);
+		collector.collectDefinitions(rootNode);
+		checkExceptions.addAll(collector.getExceptions());
+
+		// perform AST transformations that can't be done by SableCC
+		try {
+			OpSubstitutions.transform(rootNode, getDefinitions());
+		} catch (CheckException e) {
+			checkExceptions.add(e);
+		}
 		// more AST transformations?
 
-		return list;
-	}
-
-	private List<CheckException> performSemanticChecks(final Start rootNode) {
-		final List<CheckException> list = new ArrayList<>();
+		// perform some semantic checks which are not done in the parser
 		final SemanticCheck[] checks = { new ClausesCheck(), new SemicolonCheck(), new IdentListCheck(),
 				new DefinitionUsageCheck(getDefinitions()), new RefinedOperationCheck() };
 		// apply more checks?
 
 		for (SemanticCheck check : checks) {
 			check.runChecks(rootNode);
-			list.addAll(check.getCheckExceptions());
+			checkExceptions.addAll(check.getCheckExceptions());
 		}
 
-		return list;
+		return checkExceptions;
 	}
 
 	public IDefinitions getDefinitions() {

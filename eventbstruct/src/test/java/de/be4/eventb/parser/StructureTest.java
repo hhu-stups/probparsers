@@ -81,12 +81,10 @@ public class StructureTest {
 			final Exception cause = e.getCause();
 
 			assertTrue(
-					"Unexpected cause: " + e.getCause() + " - "
-							+ e.getLocalizedMessage(),
+					"Unexpected cause: " + e.getCause() + " - " + e.getMessage(),
 					cause instanceof EventBParseException);
-			assertTrue("Unexpected token: "
-					+ ((EventBParseException) cause).getToken().getClass()
-							.getSimpleName() + " - " + e.getLocalizedMessage(),
+			assertTrue(
+					"Unexpected token: " + ((EventBParseException) cause).getToken().getClass().getSimpleName() + " - " + e.getMessage(),
 					((EventBParseException) cause).getToken() instanceof TAt);
 		}
 	}
@@ -110,8 +108,7 @@ public class StructureTest {
 			final Exception cause = e.getCause();
 
 			assertTrue(
-					"Unexpected cause: " + e.getCause() + " - "
-							+ e.getLocalizedMessage(),
+					"Unexpected cause: " + e.getCause() + " - " + e.getMessage(),
 					cause instanceof EventBParseException);
 
 			final EventBParseException exception = (EventBParseException) cause;

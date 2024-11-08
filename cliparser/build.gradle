@@ -1,7 +1,10 @@
-apply plugin: 'application'
-apply plugin: 'jacoco'
-apply plugin: 'java'
-apply plugin: 'eclipse'
+plugins {
+	id("application")
+	id("jacoco")
+	id("java")
+}
+
+description = "Command-line interface for ProB's B and LTL parsers. For internal use only by ProB's Prolog core (probcli)!"
 
 dependencies {
 	implementation project(":bparser")

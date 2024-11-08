@@ -7,6 +7,13 @@ public class BParseException extends RuntimeException {
 	private final Token token;
 	private final String realMsg;
 
+	/**
+	 * @param token the token at which the parse error occurred
+	 * @param message parse error message, possibly including SableCC line/column info at the start
+	 * @deprecated Use {@link #BParseException(Token, String, String)} instead,
+	 *     which doesn't attempt to remove SableCC line/column info from the message.
+	 */
+	@Deprecated
 	public BParseException(final Token token, final String message) {
 		this(token, message, message.substring(message.indexOf(']') + 1));
 	}

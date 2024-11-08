@@ -1,6 +1,9 @@
-apply plugin: 'java-library'
-apply plugin: 'eclipse'
-apply plugin: 'jacoco'
+plugins {
+	id("java-library")
+	id("jacoco")
+}
+
+description = "Library for uniform access to the formal language parsers (used by ltlparser)"
 
 dependencies {
 	api project(":prologlib")

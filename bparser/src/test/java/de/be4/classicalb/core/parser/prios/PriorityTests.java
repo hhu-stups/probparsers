@@ -9,10 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import util.Helpers;
+
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExpr;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprRight;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -49,10 +50,10 @@ public class PriorityTests {
 		final String expectedA = createTripleExprLeft(symH, symL);
 		final String expectedB = createTripleExprRight(symL, symH);
 
-		final String pExprA = parseExpr(exprA);
-		final String pExprB = parseExpr(exprB);
-		final String pExpectedA = parseExpr(expectedA);
-		final String pExpectedB = parseExpr(expectedB);
+		String pExprA = Helpers.getExpressionAsPrologTerm(exprA);
+		String pExprB = Helpers.getExpressionAsPrologTerm(exprB);
+		String pExpectedA = Helpers.getExpressionAsPrologTerm(expectedA);
+		String pExpectedB = Helpers.getExpressionAsPrologTerm(expectedB);
 
 		assertEquals(pExpectedA, pExprA);
 		assertEquals(pExpectedB, pExprB);

@@ -130,24 +130,42 @@ Ignored Tokens
  * Productions                                                     *
  *******************************************************************/
 Productions
+  result {-> result} =
+    {no} no {-> New result.no()} |
+    {yes} yes l_par term r_par {-> New result.yes(term.term)} |
+    {interrupted} interrupted {-> New result.interrupted()} |
+    {exception} exception l_par term r_par {-> New result.exception(term.term)} |
+    {progress} progress l_par term r_par {-> New result.progress(term.term)} |
+    {call_back} call_back l_par term r_par {-> New result.call_back(term.term)};
+
+  term {-> term} =
+    {integer} integer {-> New term.integer(integer)} |
+    {float} float {-> New term.float(float)} |
+    {variable} variable {-> New term.variable(variable)} |
+    {atom} name {-> New term.atom(name)} |
+    {string} string {-> New term.string(string)} |
+    {list} l_sq params r_sq {-> New term.list([params.term])} |
+    {compound} [functor]:name l_par params r_par {-> New term.compound(functor, [params.term])};
+
+  params {-> term*} = term more_params {-> [term.term, more_params.term]};
+  more_params {-> term*} =
+    {empty} {-> []}
+    | comma term more_params {-> [term.term, more_params.term]};
+
+Abstract Syntax Tree
   result =
-    {no} no |
-    {yes} yes l_par term r_par |
-    {interrupted} interrupted |
-    {exception} exception l_par term r_par |
-    {progress} progress l_par term r_par |
-    {call_back} call_back l_par term r_par;
+    {no} |
+    {yes} term |
+    {interrupted} |
+    {exception} term |
+    {progress} term |
+    {call_back} term;
 
   term =
-    {number} number |
+    {integer} integer |
+    {float} float |
     {variable} variable |
     {atom} name |
     {string} string |
-    {list} l_sq params r_sq |
-    {compound} [functor]:name l_par params r_par;
-
-  number = {float} float | {integer} integer;
-  params = term more_params;
-  more_params = {empty} | comma term more_params;
-
-// end of grammar
+    {list} [elements]:term* |
+    {compound} [functor]:name [parameters]:term*;

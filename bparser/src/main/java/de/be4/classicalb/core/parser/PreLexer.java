@@ -10,7 +10,6 @@ import de.be4.classicalb.core.preparser.node.TBeginNesting;
 import de.be4.classicalb.core.preparser.node.TComment;
 import de.be4.classicalb.core.preparser.node.TCommentEnd;
 import de.be4.classicalb.core.preparser.node.TEndNesting;
-import de.be4.classicalb.core.preparser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.preparser.node.TLeftPar;
 import de.be4.classicalb.core.preparser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
@@ -51,13 +50,13 @@ public class PreLexer extends Lexer {
 		} catch (LexerException e) {
 			// System.out.println("Exception: " + e.toString());
 			// printState();
-			String msg = e.getMessage();
+			String msg = e.getRealMsg();
 			if (state.equals(State.DEFINITIONS) && msg.length()>3) {
 				String last = msg.substring(msg.length() - 3).trim(); // string has at least 3 chars
 				if(last.equals("="))
-					throw new LexerException(msg + " in DEFINITIONS clause (use == to define a DEFINITION)");
+					throw new LexerException(e.getLine(), e.getPos(), msg + " in DEFINITIONS clause (use == to define a DEFINITION)", e);
 				else
-					throw new LexerException(msg + " in DEFINITIONS clause");
+					throw new LexerException(e.getLine(), e.getPos(), msg + " in DEFINITIONS clause", e);
 			} else {
 				throw e;
 			}
@@ -69,7 +68,6 @@ public class PreLexer extends Lexer {
 		//printState();
 		checkComment();
 		checkMultiLineString();
-		optimizeToken();
 
 		if (token != null) {
 			collectRhs();
@@ -183,12 +181,6 @@ public class PreLexer extends Lexer {
 			}
 			state = previousState;
 			previousState = null;
-		}
-	}
-	
-	private void optimizeToken() {
-		if (token instanceof TIdentifierLiteral) {
-			token.setText(token.getText().intern());
 		}
 	}
 }

@@ -1,6 +1,11 @@
-apply plugin: 'jacoco'
-apply plugin: 'java-library'
-apply plugin: 'de.hhu.stups.sablecc'
+plugins {
+	id("jacoco")
+	id("java-library")
+
+	id("de.hhu.stups.sablecc")
+}
+
+description = "ProB's parsers for LTL and CTL formulas"
 
 dependencies {
 	sableCC(rootProject.sableCCDependency)

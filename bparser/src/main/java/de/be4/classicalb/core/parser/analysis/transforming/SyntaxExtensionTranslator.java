@@ -11,22 +11,24 @@ import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
-
-	private static String cleanDescriptionText(final String descriptionText) {
-		String formatted = descriptionText;
-		if (descriptionText.endsWith("*/")) {
-			formatted = formatted.substring(0, formatted.length() - 2);
-		}
-		return formatted.trim();
-	}
-
 	/**
-	 * Cleans up the text contents of description pragma nodes by removing the end of comment symbols and any whitespace surrounding the description.
+	 * Cleans up the text contents of description pragma nodes by removing any whitespace surrounding the description.
 	 *
 	 * @param node the description pragma node to clean
 	 */
-	private static void cleanDescriptionNode(final TPragmaFreeText node) {
-		node.setText(cleanDescriptionText(node.getText()));
+	@Override
+	public void caseADescriptionPragma(ADescriptionPragma node) {
+		// Note: The grammar is defined so that a single TPragmaFreeText token is either all whitespace or all non-whitespace.
+
+		// Remove leading whitespace tokens.
+		while (!node.getParts().isEmpty() && node.getParts().get(0).getText().trim().isEmpty()) {
+			node.getParts().remove(0);
+		}
+
+		// Remove trailing whitespace tokens.
+		while (!node.getParts().isEmpty() && node.getParts().get(node.getParts().size() - 1).getText().trim().isEmpty()) {
+			node.getParts().remove(node.getParts().size() - 1);
+		}
 	}
 
 	private static void checkArgumentCount(final AFunctionExpression node, final int count) {
@@ -96,15 +98,28 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
-		final String text = node.getText();
+		unquoteIdentifierToken(node);
+	}
+
+	@Override
+	public void caseTDefLiteralPredicate(final TDefLiteralPredicate node) {
+		unquoteIdentifierToken(node);
+	}
+
+	@Override
+	public void caseTDefLiteralSubstitution(final TDefLiteralSubstitution node) {
+		unquoteIdentifierToken(node);
+	}
+
+	private static void unquoteIdentifierToken(final Token token) {
+		final String text = token.getText();
 		// Unquote and unescape backquoted identifiers
 		if (Utils.isQuoted(text, '`')) {
-			if (text.indexOf('.') != -1) {
-				final String fixed = String.join("`.`", text.split("\\."));
-				throw new VisitorException(new CheckException("A quoted identifier cannot contain a dot. Please quote only the identifiers before and after the dot, but not the dot itself, e. g.: " + fixed, node));
+			try {
+				token.setText(Utils.unquoteIdentifier(text));
+			} catch (IllegalArgumentException exc) {
+				throw new VisitorException(new CheckException(exc.getMessage(), token));
 			}
-			final String unescapedText = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(text, '`'));
-			node.setText(unescapedText);
 		}
 	}
 
@@ -123,26 +138,6 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		node.replaceBy(intNode);
 	}
 
-	@Override
-	public void inADescriptionSet(final ADescriptionSet node) {
-		cleanDescriptionNode(node.getPragmaFreeText());
-	}
-
-	@Override
-	public void inADescriptionPredicate(final ADescriptionPredicate node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
-	@Override
-	public void inADescriptionExpression(final ADescriptionExpression node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
-	@Override
-	public void inADescriptionOperation(final ADescriptionOperation node) {
-		cleanDescriptionNode(node.getContent());
-	}
-
 	/**
 	 * Recognize calls to built-in functions that are not declared as keywords.
 	 * This allows using the keywords as regular identifiers
@@ -154,17 +149,23 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	 * @param node the function expression to transform
 	 */
 	@Override
-	public void outAFunctionExpression(final AFunctionExpression node) {
+	public void caseAFunctionExpression(AFunctionExpression node) {
+		// It is important that this transformation runs *before* its children are processed
+		// so that backquoted identifiers haven't been unquoted yet.
+		// Otherwise the special case for backquoted identifiers below will not work correctly.
 		if (!(node.getIdentifier() instanceof AIdentifierExpression)) {
+			super.caseAFunctionExpression(node);
 			return;
 		}
 
 		final String funcName = Utils.getAIdentifierAsString((AIdentifierExpression) node.getIdentifier());
 		if (Utils.isQuoted(funcName, '`')) {
 			// Allow suppressing the built-in function by backquoting the function identifier.
+			super.caseAFunctionExpression(node);
 			return;
 		}
 
+		// Note: When adding a new case here, please update the AMBIGUOUS_KEYWORDS list in the Utils class!
 		final Node replacement;
 		switch (funcName) {
 			case "tree":
@@ -253,11 +254,13 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 				break;
 
 			default:
+				super.caseAFunctionExpression(node);
 				return;
 		}
 
 		replacement.setStartPos(node.getStartPos());
 		replacement.setEndPos(node.getEndPos());
 		node.replaceBy(replacement);
+		replacement.apply(this);
 	}
 }

@@ -51,6 +51,7 @@ public class RecursiveMachineLoader {
 	private final List<File> machineFilesLoaded = new ArrayList<>();
 	private final IFileContentProvider contentProvider;
 	private final ParsingBehaviour parsingBehaviour;
+	private PositionPrinter positionPrinter;
 	private String main;
 
 
@@ -69,6 +70,10 @@ public class RecursiveMachineLoader {
 
 	public RecursiveMachineLoader(String path, IFileContentProvider contentProvider) throws BCompoundException {
 		this(path, contentProvider, new ParsingBehaviour());
+	}
+
+	public void setPositionPrinter(final PositionPrinter positionPrinter) {
+		this.positionPrinter = positionPrinter;
 	}
 
 	private static void printLoadProgress(File machineFile) {
@@ -200,8 +205,14 @@ public class RecursiveMachineLoader {
 		}
 
 		// machines
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(this.getNodeIdMapping());
-		pprinter.setPrintSourcePositions(this.parsingBehaviour.isAddLineNumbers(), this.parsingBehaviour.isCompactPrologPositions());
+		PositionPrinter pprinter;
+		if (this.positionPrinter != null) {
+			pprinter = this.positionPrinter;
+		} else {
+			final ClassicalPositionPrinter classicalPositionPrinter = new ClassicalPositionPrinter(this.getNodeIdMapping());
+			classicalPositionPrinter.setPrintSourcePositions(this.parsingBehaviour.isAddLineNumbers(), this.parsingBehaviour.isCompactPrologPositions());
+			pprinter = classicalPositionPrinter;
+		}
 		final ASTProlog prolog = new ASTProlog(pout, pprinter);
 		for (final Map.Entry<String, Start> entry : this.getParsedMachines().entrySet()) {
 			pout.openTerm("machine");
@@ -346,7 +357,7 @@ public class RecursiveMachineLoader {
 				try {
 					loadMachine(newAncestors, referencedFile);
 				} catch (BCompoundException e) {
-					throw e.withMissingLocations(Collections.singletonList(BException.Location.fromNode(machineFile.getAbsolutePath(), refMachine.getNode())));
+					throw e.withMissingLocations(BException.Location.locationsFromNodes(machineFile.getAbsolutePath(), Collections.singletonList(refMachine.getNode())));
 				}
 			}
 		}

@@ -1,7 +1,14 @@
 package de.be4.classicalb.core.parser.definitions;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.node.Start;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -11,7 +18,6 @@ import util.Helpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 public class DefinitionsTest {
 
@@ -66,32 +72,13 @@ public class DefinitionsTest {
 	}
 
 	@Test
-	public void testScoping1() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE # def_expr1 . (def_expr1 < 43) THEN skip END END";
+	public void testDefInLocalScope() throws BCompoundException {
+		// DEFINITIONS cannot be shadowed by local variables
+		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == varname \n OPERATIONS op = PRE # def_expr1 . (def_expr1 < 43) THEN skip END END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
 
 		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,exists(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),skip(none)))])])).",
-				result);
-	}
-
-	@Test
-	public void testScoping2() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE # def_expr1 . (# def_expr1 . (def_expr1 < 43) & def_expr1 > 41 ) & def_expr1 = 42 THEN skip END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-
-		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,conjunct(none,[exists(none,[identifier(none,def_expr1)],conjunct(none,[exists(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),greater(none,identifier(none,def_expr1),integer(none,41))])),equal(none,definition(none,def_expr1,[]),integer(none,42))]),skip(none)))])])).",
-				result);
-	}
-
-	@Test
-	public void testScoping3() throws BCompoundException {
-		final String testMachine = "MACHINE Test\nDEFINITIONS def_expr1 == 42 \n OPERATIONS op = PRE ! def_expr1 . (def_expr1 < 43) THEN skip END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-
-		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],integer(none,42))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,forall(none,[identifier(none,def_expr1)],less(none,identifier(none,def_expr1),integer(none,43))),skip(none)))])])).",
+				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[definitions(none,[expression_definition(none,def_expr1,[],identifier(none,varname))]),operations(none,[operation(none,identifier(none,op),[],[],precondition(none,exists(none,[definition(none,def_expr1,[])],less(none,definition(none,def_expr1,[]),integer(none,43))),skip(none)))])])).",
 				result);
 	}
 
@@ -119,8 +106,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testDefClause() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS def2 == y;\ndef1 == xx";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS def2 == y;\ndef1 == xx";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[expression_definition(none,def2,[],identifier(none,y)),expression_definition(none,def1,[],identifier(none,xx))])).",
@@ -129,8 +116,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef1() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS def1 == (f;g); def2 == skip";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS def1 == (f;g); def2 == skip";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[expression_definition(none,def1,[],composition(none,identifier(none,f),identifier(none,g))),substitution_definition(none,def2,[],skip(none))])).",
@@ -139,8 +126,8 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef2() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS law6 ==  (dom((ff ; (gg~))) <: dom(ff))";
+		String result = Helpers.getMachineClauseAsPrologTerm(testClause);
 
 		assertEquals(
 				"machine(definitions(none,[predicate_definition(none,law6,[],subset(none,domain(none,composition(none,identifier(none,ff),reverse(none,identifier(none,gg)))),domain(none,identifier(none,ff))))])).",
@@ -149,32 +136,32 @@ public class DefinitionsTest {
 
 	@Test
 	public void testSemicolonInDef3() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\n  law1 ==  (dom(ff\\/gg) = dom(ff) \\/ dom(gg));\n  law2 ==  (ran(ff\\/gg) = ran(ff) \\/ ran(gg));\n  law3 ==  (dom(ff/\\gg) <: dom(ff) /\\ dom(gg));\n  law4 ==  (ran(ff/\\gg) <: ran(ff) /\\ ran(gg));\n  law5 ==  ( (ff \\/ gg)~ = ff~ \\/ gg~);\n  law6 ==  (dom((ff ; (gg~))) <: dom(ff));\n  law7 ==  (!(xx,yy).(xx:setX & yy:setY & xx|->yy : ff  =>  yy: ran(gg))\n              =>  (dom((ff ; (gg~))) = dom(ff)));\n  law8 ==  (ff : setX --> setY  <=>  (ff: setX +-> setY & dom(ff) = setX));\n  ff_is_pf == (!(xx,yy,zz).((xx:setX & yy:setY & zz:setY &\n                    xx|->yy:ff & xx|->zz:ff) => (yy=zz)));\n  law9 ==  (ff : setX +-> setY  <=> ff_is_pf);\n  law10 == (ff : setX >->> setY  <=>  (ff : setX >-> setY  &  ff~: setY >-> setX));\n  law11 == (ff : setX >+> setY  <=> (ff: setX +-> setY &\n                                !(xx,yy).(xx:setX & yy:setX & xx/=yy & xx:dom(ff) & yy: dom(ff)  => ff(xx)/=ff(yy)))) ;\n  law12 == (ff : setX +->> setY  <=>  (ff: setX +-> setY &\n                                    !yy.(yy:setY => yy: ran(ff))))";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting1() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS CONSTR3 == (!(f,p).(f:FLIGHTS & f<NRF-1 & p:PERSONNEL &  f|->p:assign & (f+1)|->p:assign => (f+2)|->p /: assign))";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting2() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to);\n FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS FT_TYPE == (from:NODES & to:NODES & from/=to);\n FTE_TYPE == (FT_TYPE & packet:PACKETS & type:TYPE)";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting3() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\nFaileSafeIsOn == (sw>0);\nTurnFailSafeOff == BEGIN sw := 0 END;\nTurnFailSafeOn == BEGIN sw := (sw + 1) mod 256\nEND";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
 	public void testDefWithNesting4() throws BCompoundException {
-		final String testMachine = "#MACHINECLAUSE DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
-		Helpers.getMachineAsPrologTerm(testMachine);
+		String testClause = "DEFINITIONS\nlaw1 ==  (SS \\/ SS = SS  &  SS = SS \\/ {}  &  SS = SS /\\ SS  &  SS = SS \\ {})";
+		Helpers.getMachineClauseAsPrologTerm(testClause);
 	}
 
 	@Test
@@ -217,14 +204,14 @@ public class DefinitionsTest {
 	public void testExprOrSubst3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=PRE defExpr=42 THEN defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getMessage());
 	}
 
 	@Test
 	public void testExprOrSubst4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr==g(x)\nOPERATIONS\nop=BEGIN defExpr; a:=defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getMessage());
 	}
 
 	@Test
@@ -251,26 +238,68 @@ public class DefinitionsTest {
 	public void testExprOrSubstWParams3() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=PRE defExpr(x)=42 THEN defExpr(x) END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getLocalizedMessage());
+		assertEquals("Expecting substitution here but found definition with type 'Expression'", e.getMessage());
 	}
 
 	@Test
 	public void testExprOrSubstWParams4() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); a:=defExpr(x) END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
-		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getLocalizedMessage());
+		assertEquals("Expecting expression here but found definition with type 'Substitution'", e.getMessage());
 	}
 
 	@Test
-	public void testParamsCount1() {
+	public void testMissingParamsSubst() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr END\nEND";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
 		assertEquals(1, e.getNodesList().size());
 		assertNotNull(e.getNodesList().get(0));
-		String result = e.getLocalizedMessage();
-		assertTrue(result.contains("Number of parameters"));
-		assertTrue(result.contains("doesn't match declaration of definition"));
-		assertTrue(result.contains("defExpr"));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsSubst() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nOPERATIONS\nop=BEGIN defExpr(x); defExpr(1,2) END\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testMissingParamsExpr() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nPROPERTIES\ndefExpr = 1\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsExpr() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefExpr(x)==g(x)\nPROPERTIES\ndefExpr(1,2) = 3\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defExpr (1)", e.getMessage());
+	}
+
+	@Test
+	public void testMissingParamsPred() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefPred(x)==1=1\nPROPERTIES\ndefPred\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (0) doesn't match declaration of definition defPred (1)", e.getMessage());
+	}
+
+	@Test
+	public void testTooManyParamsPred() {
+		final String testMachine = "MACHINE Test\nDEFINITIONS\ndefPred(x)==1=1\nPROPERTIES\ndefPred(1,2)\nEND";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		assertEquals(1, e.getNodesList().size());
+		assertNotNull(e.getNodesList().get(0));
+		assertEquals("Number of parameters (2) doesn't match declaration of definition defPred (1)", e.getMessage());
 	}
 
 	@Test
@@ -313,4 +342,16 @@ public class DefinitionsTest {
 		//TODO
 	}
 
+	@Test
+	public void testAddDefinitionsFromOtherParser() throws BCompoundException, PreParseException, URISyntaxException {
+		BParser parser = new BParser();
+		parser.parseFile(new File(this.getClass().getResource("/parsable/InfiniteParityFunction.mch").toURI()));
+
+		String code = "not(finite({x|x>2}))";
+		BParser parser2 = new BParser();
+
+		parser2.getDefinitions().addDefinitions(parser.getDefinitions());
+		Start parse = parser2.parseFormula(code);
+		assertNotNull(parse);
+	}
 }

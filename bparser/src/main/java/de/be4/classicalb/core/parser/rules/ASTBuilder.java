@@ -180,28 +180,6 @@ public final class ASTBuilder {
 		definitions.addDefinition(toStringTypeDef, IDefinitions.Type.Expression);
 	}
 
-	public static void addPrintSubDefinitionToIDefinitions(IDefinitions definitions) {
-		if (definitions.containsDefinition(PRINT)) {
-			return;
-		}
-
-		/*-
-		 * PRINT(x) == skip;
-		 * EXTERNAL_SUBSTITUTION_PRINT(T) == T; /* declare as external for any type T
-		 */
-		ASubstitutionDefinitionDefinition printDef = new ASubstitutionDefinitionDefinition();
-		printDef.setName(new TDefLiteralSubstitution(PRINT));
-		printDef.setParameters(createIdentifierList("value"));
-		printDef.setRhs(new ASkipSubstitution());
-		definitions.addDefinition(printDef, IDefinitions.Type.Substitution);
-
-		AExpressionDefinitionDefinition forceDefType = new AExpressionDefinitionDefinition();
-		forceDefType.setName(new TIdentifierLiteral("EXTERNAL_SUBSTITUTION_" + PRINT));
-		forceDefType.setParameters(createIdentifierList("T"));
-		forceDefType.setRhs(createIdentifier("T"));
-		definitions.addDefinition(forceDefType, IDefinitions.Type.Expression);
-	}
-
 	public static void addForceDefinition(IDefinitions iDefinitions) {
 		if (iDefinitions.containsDefinition(FORCE)) {
 			return;

@@ -161,7 +161,6 @@ public class CliBParser {
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
-		behaviour.setPrintLocalStackSize(options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE));
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
@@ -209,8 +208,6 @@ public class CliBParser {
 				return String.valueOf(behaviour.getStartLineNumber());
 			case "startColumnNumber":
 				return String.valueOf(behaviour.getStartColumnNumber());
-			case "printstacksize":
-				return String.valueOf(behaviour.isPrintLocalStackSize());
 			default:
 				// Unknown/unsupported option
 				return null;
@@ -242,9 +239,6 @@ public class CliBParser {
 				break;
 			case "startColumnNumber": // default in ParsingBehaviour.java: 1
 				behaviour.setStartColumnNumber(Integer.parseInt(value));
-				break;
-			case "printstacksize":
-				behaviour.setPrintLocalStackSize(Boolean.parseBoolean(value));
 				break;
 			default:
 				// Unknown/unsupported option
@@ -469,7 +463,7 @@ public class CliBParser {
 			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
 			pout.openTerm("ltl").printTerm(term).closeTerm();
 		} catch (LtlParseException e) {
-			pout.openTerm("syntax_error").printAtom(e.getLocalizedMessage()).closeTerm();
+			pout.openTerm("syntax_error").printAtom(e.getMessage()).closeTerm();
 		}
 
 		pout.fullstop();
@@ -545,7 +539,7 @@ public class CliBParser {
 					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
-				err.println("Error reading input file: " + e.getLocalizedMessage());
+				err.println("Error reading input file: " + e.getMessage());
 			}
 			return -2;
 		} catch (final BCompoundException e) {
@@ -553,7 +547,7 @@ public class CliBParser {
 					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
-				err.println("Error parsing input file: " + e.getLocalizedMessage());
+				err.println("Error parsing input file: " + e.getMessage());
 			}
 			return -3;
 		} catch (final RuntimeException e) {
@@ -561,28 +555,28 @@ public class CliBParser {
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
 			} else {
-				err.println("Error reading input file: " + e.getLocalizedMessage());
+				err.println("Error reading input file: " + e.getMessage());
 			}
 			return -4;
 		} catch (final StackOverflowError e) { // inherits from VirtualMachineError, Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+				System.out.println("Error (StackOverflowError) in parser: " + e.getMessage());
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage() // message seems empty
 				, e)));
 				//e.printStackTrace(System.out); may produce itself a stack overflow??
 			} else {
-				err.println("Error (StackOverflowError) in parser: " + e.getLocalizedMessage());
+				err.println("Error (StackOverflowError) in parser: " + e.getMessage());
 			}
 			return -5;
 		} catch (final VirtualMachineError e) { // inherits from Throwable
 			if (behaviour.isPrologOutput() ||
 				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+				System.out.println("Error (VirtualMachineError) in parser: " + e.getMessage());
 				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage() // message seems empty
 				, e)));
 			} else {
-				err.println("Error (VirtualMachineError) in parser: " + e.getLocalizedMessage());
+				err.println("Error (VirtualMachineError) in parser: " + e.getMessage());
 			}
 			return -6;
 		}
@@ -679,7 +673,7 @@ public class CliBParser {
 	private static ConsoleOptions createConsoleOptions(final String[] args) {
 		final ConsoleOptions options = new ConsoleOptions();
 		options.setIntro("BParser (version " + BParser.getVersion() + ", commit " + BParser.getGitSha()
-				+ ")\nusage: BParser [options] <BMachine file>\n\nAvailable options are:");
+				+ ")\nusage: java -jar probcliparser.jar [options] <BMachine file>\n\nAvailable options are:");
 		options.addOption(CLI_SWITCH_VERBOSE, "Verbose output during lexing and parsing");
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
@@ -701,7 +695,7 @@ public class CliBParser {
 		try {
 			options.parseOptions(args);
 		} catch (final IllegalArgumentException e) {
-			System.err.println(e.getLocalizedMessage());
+			System.err.println(e.getMessage());
 			options.printUsage(System.err);
 			System.exit(-1);
 		}

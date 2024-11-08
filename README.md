@@ -5,14 +5,14 @@
 This is an umbrella project for the following parsers and libraries used by ProB:
 
 * bparser: Parser for classical B.
-* ltlparser: Parser for LTL formulas. The parser delegates formulas in `{ }` to a formalism specific parser, e.g. to the classical B parser. Also contains a parser for CTL.
+* ltlparser: Parsers for LTL and CTL formulas. The parsers delegate formulas in `{ }` to a formalism specific parser, e.g. to the classical B parser.
 * parserbase: Library for uniform access to the formal language parsers. This is used to allow embedding different languages into LTL formulas.
 * unicode: Lexer that transforms Event-B expressions and predicates between ASCII, Unicode and LaTeX syntax.
-* eventbstruct: Parser for the Camille structural syntax.
+* eventbstruct: Parser for the Camille structural syntax for Event-B.
 * theorymapping: Parser for theory mapping files (translation of Event-B operators to Prolog predicates).
 * prologlib: Library to construct and manipulate well-formed Prolog terms.
 * cliparser: Command-line interface for the B and LTL parsers. **For internal use only** by ProB's Prolog core (probcli).
-* answerparser: Parser to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB 2 Java API](https://github.com/hhu-stups/prob2_kernel).
+* answerparser: Parser for a subset of Prolog term syntax, used to read answers from the ProB Prolog core (probcli) in socket-server mode. **For internal use only** by the [ProB Java API](https://github.com/hhu-stups/prob2_kernel) and the [ProB plugin for Rodin](https://github.com/hhu-stups/prob-rodinplugin).
 
 The following subprojects were formerly part of this repo:
 
@@ -28,7 +28,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.13.4"
+final parserVersion = "2.13.5"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
@@ -42,24 +42,25 @@ You can also use the JAR probcliparser.jar built for ProB and distributed with P
 Here is how to obtain help for using the command-line parser:
 ```
 $ java -jar probcliparser.jar --help
-BParser (version 2.12.3, commit 99a64151f3bc82f987258619161831a8b9a7df01)
-usage: BParser [options] <BMachine file>
+BParser (version 2.13.5-SNAPSHOT, commit bab2ba06ace23f4460d63fdbc94b06c916ca6f30)
+usage: java -jar probcliparser.jar [options] <BMachine file>
 
 Available options are:
--v          Verbose output during lexing and parsing
--time       Output time used for complete parsing process
--pp         Pretty Print in B format on standard output
--prolog     Show AST as Prolog term
--lineno     Put line numbers into prolog terms
--out        Specify output file
--version    Print the parser version and exit
--h          Print the parser help and exit
--help       Print the parser help and exit
---help      Print the parser help and exit
--compactpos Use new more compact Prolog position terms
--fastprolog Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
--prepl      Enter parser-repl. Should only be used from inside ProB's Prolog Core.
--checkname  The name of a machine have to match file name (except for the file name extension)
+-v              Verbose output during lexing and parsing
+-time           Output time used for complete parsing process
+-pp             Pretty Print in B format on standard output
+-prolog         Show AST as Prolog term
+-lineno         Put line numbers into prolog terms
+-out            Specify output file
+-version        Print the parser version and exit
+-h              Print the parser help and exit
+-help           Print the parser help and exit
+--help          Print the parser help and exit
+-compactpos     Use new more compact Prolog position terms
+-fastprolog     Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)
+-prepl          Enter parser-repl. Should only be used from inside ProB's Prolog Core.
+-checkname      The name of a machine have to match file name (except for the file name extension)
+-printstacksize print the locally available size of the call stack at runtime
 ```
 
 You probably also want to set the path to the stdlib folder of ProB (containing files like LibraryStrings.def):

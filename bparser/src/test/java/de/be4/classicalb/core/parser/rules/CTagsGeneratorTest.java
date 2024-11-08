@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 public class CTagsGeneratorTest {
 
 	@Test
@@ -13,8 +15,13 @@ public class CTagsGeneratorTest {
 		rulesProject.parseRulesMachines(machine1);
 		rulesProject.checkAndTranslateProject();
 		File file = File.createTempFile("ctags", ".tags");
-		CTagsGenerator.generateCtagsFile(rulesProject, file);
-		// no error occurred
+		try {
+			CTagsGenerator.generateCtagsFile(rulesProject, file);
+			// no error occurred
+		} finally {
+			boolean success = file.delete();
+			assertTrue("Failed to delete temporary ctags file", success);
+		}
 	}
 
 	@Test
@@ -24,7 +31,12 @@ public class CTagsGeneratorTest {
 		rulesProject.parseRulesMachines(machine1);
 		rulesProject.checkAndTranslateProject();
 		File file = File.createTempFile("ctags", ".tags");
-		CTagsGenerator.generateCtagsFile(rulesProject, file);
+		try {
+			CTagsGenerator.generateCtagsFile(rulesProject, file);
+		} finally {
+			boolean success = file.delete();
+			assertTrue("Failed to delete temporary ctags file", success);
+		}
 	}
 
 }

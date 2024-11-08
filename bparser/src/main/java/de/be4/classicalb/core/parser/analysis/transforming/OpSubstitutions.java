@@ -1,42 +1,23 @@
 package de.be4.classicalb.core.parser.analysis.transforming;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.node.AAnySubstitution;
-import de.be4.classicalb.core.parser.node.AComprehensionSetExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionSubstitution;
-import de.be4.classicalb.core.parser.node.AEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.AExistsPredicate;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AForallPredicate;
-import de.be4.classicalb.core.parser.node.AFuncOpSubstitution;
 import de.be4.classicalb.core.parser.node.AFunctionExpression;
-import de.be4.classicalb.core.parser.node.AGeneralProductExpression;
-import de.be4.classicalb.core.parser.node.AGeneralSumExpression;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
-import de.be4.classicalb.core.parser.node.ALambdaExpression;
-import de.be4.classicalb.core.parser.node.ALetExpressionExpression;
-import de.be4.classicalb.core.parser.node.ALetPredicatePredicate;
-import de.be4.classicalb.core.parser.node.ALetSubstitution;
-import de.be4.classicalb.core.parser.node.AOpSubstitution;
-import de.be4.classicalb.core.parser.node.AQuantifiedIntersectionExpression;
-import de.be4.classicalb.core.parser.node.AQuantifiedUnionExpression;
+import de.be4.classicalb.core.parser.node.AOperationCallSubstitution;
+import de.be4.classicalb.core.parser.node.AOperationOrDefinitionCallSubstitution;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.ASymbolicComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicEventBComprehensionSetExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicLambdaExpression;
-import de.be4.classicalb.core.parser.node.ASymbolicQuantifiedUnionExpression;
-import de.be4.classicalb.core.parser.node.AVarSubstitution;
 import de.be4.classicalb.core.parser.node.Node;
 import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PSubstitution;
@@ -57,21 +38,18 @@ import de.be4.classicalb.core.parser.util.Utils;
  * error is thrown.
  * </p>
  * <p>
- * During parsing substitutions that are operation calls without return values
- * are recognized as {@link AFuncOpSubstitution}. These
- * {@link AFuncOpSubstitution} nodes can contain any expression. So the parser
- * accepts any expression as substitution here.
+ * During parsing, substitutions that are operation/definition calls
+ * without return values are recognized as {@link AOperationOrDefinitionCallSubstitution}
+ * (as a workaround to avoid shift/reduce conflicts).
+ * This visitor finds all {@link AOperationOrDefinitionCallSubstitution} nodes and replaces them
+ * with a corresponding {@link AOperationCallSubstitution} or {@link ADefinitionSubstitution} node.
  * </p>
  * <p>
- * This visitor checks any {@link AFuncOpSubstitution} if the child of the node
- * is of type {@link AFunctionExpression} (i.e. operation call with parameters)
- * or {@link AIdentifierExpression} (i.e. operation call without parameters).
- * Then the {@link AFuncOpSubstitution} node is replaced by a corresponding
- * {@link AOpSubstitution} node.
- * </p>
- * <p>
- * If the child is any other expression type, a {@link BParseException} is
- * thrown.
+ * If an {@link AOperationOrDefinitionCallSubstitution} contains an {@link AFunctionExpression},
+ * it's an operation/definition call with arguments.
+ * If an {@link AOperationOrDefinitionCallSubstitution} contains an {@link AIdentifierExpression},
+ * it's an operation/definition call without arguments.
+ * Other expression types inside {@link AOperationOrDefinitionCallSubstitution} are not allowed by the grammar.
  * </p>
  * <p>
  * Definitions with type Expression are not recognized during parsing. In the
@@ -84,15 +62,9 @@ import de.be4.classicalb.core.parser.util.Utils;
  * definition. If such a node is found, it is replaced by a new node
  * {@link ADefinitionExpression}.
  * </p>
- * <p>
- * The visitor keeps track of scoped variables to ensure, that no node of a
- * scoped variable is replaced.
- * </p>
  */
 public class OpSubstitutions extends OptimizedTraversingAdapter {
-
 	private final IDefinitions definitions;
-	private final Map<String, Integer> scopedVariables = new HashMap<>();
 
 	private OpSubstitutions(final IDefinitions definitions) {
 		this.definitions = definitions;
@@ -107,8 +79,8 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	}
 
 	@Override
-	public void caseAFuncOpSubstitution(final AFuncOpSubstitution node) {
-		final PExpression expression = node.getFunction();
+	public void caseAOperationOrDefinitionCallSubstitution(AOperationOrDefinitionCallSubstitution node) {
+		PExpression expression = node.getExpression();
 		PExpression idExpr;
 		LinkedList<PExpression> parameters;
 		Type type;
@@ -141,7 +113,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			parameters = new LinkedList<>();
 		} else {
 			// some other expression was parsed (NOT allowed)
-			throw new BParseException(null, "Expecting operation");
+			throw new VisitorException(new CheckException("Expecting operation", expression));
 		}
 
 		if (type != Type.NoDefinition && idToken != null) {
@@ -169,7 +141,13 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			}
 		} else {
 			// no def, no problem ;-)
-			final AOpSubstitution opSubst = new AOpSubstitution(idExpr, parameters);
+			List<TIdentifierLiteral> operationName;
+			if (idExpr instanceof AIdentifierExpression) {
+				operationName = ((AIdentifierExpression)idExpr).getIdentifier();
+			} else {
+				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
+			}
+			AOperationCallSubstitution opSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), parameters);
 			opSubst.setStartPos(idExpr.getStartPos());
 			opSubst.setEndPos(idExpr.getEndPos());
 			node.replaceBy(opSubst);
@@ -180,10 +158,9 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
 		final String identifierString = Utils.getTIdentifierListAsString(node.getIdentifier());
-		final Integer number = scopedVariables.get(identifierString);
 		final Type type = definitions.getType(identifierString);
 
-		if (number == null && type != Type.NoDefinition) {
+		if (type != Type.NoDefinition) {
 			if (type == Type.Expression || type == Type.ExprOrSubst) {
 				/*
 				 * getFirst() is enough cause definitions cannot have composed
@@ -215,7 +192,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 			final TIdentifierLiteral identifier = ((ADefinitionExpression) node.getIdentifier()).getDefLiteral();
 
-			if (paramList.size() <= definitions.getParameterCount(identifier.getText())) {
+			if (definitions.getParameterCount(identifier.getText()) != 0) {
 				/*
 				 * The parameters seem to belong to this definition, so we need
 				 * to replace the FunctionExpression by a
@@ -225,8 +202,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 				 */
 				final ADefinitionExpression newNode = replaceWithDefExpression(node, identifier, paramList);
 
-				final List<PExpression> copy = newNode.getParameters();
-				for (final PExpression e : copy) {
+				for (final PExpression e : newNode.getParameters()) {
 					e.apply(this);
 				}
 
@@ -236,200 +212,13 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 		/*
 		 * Reached in case that: Identifier of this FunctionExpression is not a
-		 * definition or there were more parameters than the definition needs
+		 * definition or the definition doesn't have any parameters
 		 * (by declaration), so we asume the parameters belong to some other
 		 * construct (for example a function a level higher in the AST).
 		 */
-		final List<PExpression> copy = node.getParameters();
-		for (final PExpression e : copy) {
+		for (final PExpression e : node.getParameters()) {
 			e.apply(this);
 		}
-	}
-
-	// predicates
-
-	@Override
-	public void inAForallPredicate(AForallPredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAForallPredicate(AForallPredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAExistsPredicate(AExistsPredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAExistsPredicate(AExistsPredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALetPredicatePredicate(ALetPredicatePredicate node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetPredicatePredicate(ALetPredicatePredicate node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	// expressions
-
-	@Override
-	public void inALetExpressionExpression(ALetExpressionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetExpressionExpression(ALetExpressionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralSumExpression(AGeneralSumExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAGeneralSumExpression(AGeneralSumExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAGeneralProductExpression(AGeneralProductExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAGeneralProductExpression(AGeneralProductExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAComprehensionSetExpression(AComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAComprehensionSetExpression(AComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALambdaExpression(ALambdaExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALambdaExpression(ALambdaExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	// substitutions
-
-	@Override
-	public void inAAnySubstitution(final AAnySubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAAnySubstitution(final AAnySubstitution node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inALetSubstitution(final ALetSubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outALetSubstitution(final ALetSubstitution node) {
-		leaveScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void inAVarSubstitution(final AVarSubstitution node) {
-		enterScope(node.getIdentifiers());
-	}
-
-	@Override
-	public void outAVarSubstitution(final AVarSubstitution node) {
-		leaveScope(node.getIdentifiers());
 	}
 
 	private ADefinitionExpression replaceWithDefExpression(final Node node, TIdentifierLiteral identifier,
@@ -450,35 +239,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		return newNode;
 	}
 
-	private void enterScope(List<? extends Node> identifiers) {
-		for (Node node : identifiers) {
-			if (node instanceof AIdentifierExpression) {
-				String id = Utils.getTIdentifierListAsString(((AIdentifierExpression) node).getIdentifier());
-				scopedVariables.merge(id, 1, Integer::sum);
-			} else {
-				// IGNORE, typechecking is done later
-			}
-		}
-	}
-
-	private void leaveScope(List<? extends Node> identifiers) {
-		for (Node node : identifiers) {
-			if (node instanceof AIdentifierExpression) {
-				String id = Utils.getTIdentifierListAsString(((AIdentifierExpression) node).getIdentifier());
-				scopedVariables.computeIfPresent(id, (k, v) -> {
-					if (v > 1) {
-						return v - 1;
-					} else {
-						return null;
-					}
-				});
-			} else {
-				// IGNORE, typechecking is done later
-			}
-		}
-	}
-
-	private void setTypeSubstDef(final AFuncOpSubstitution node, final String idString) {
+	private void setTypeSubstDef(AOperationOrDefinitionCallSubstitution node, String idString) {
 		final AExpressionDefinitionDefinition oldDefinition = (AExpressionDefinitionDefinition) definitions
 				.getDefinition(idString);
 		final Node defRhs = oldDefinition.getRhs();
@@ -486,19 +247,23 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 		if (defRhs instanceof AFunctionExpression) {
 			final AFunctionExpression rhsFunction = (AFunctionExpression) defRhs;
-			rhsSubst = new AOpSubstitution(rhsFunction.getIdentifier(),
-					new LinkedList<>(rhsFunction.getParameters()));
-			rhsSubst.setStartPos(rhsFunction.getStartPos());
-			rhsSubst.setEndPos(rhsFunction.getEndPos());
+			PExpression idExpr = rhsFunction.getIdentifier();
+			List<TIdentifierLiteral> operationName;
+			if (idExpr instanceof AIdentifierExpression) {
+				operationName = ((AIdentifierExpression)idExpr).getIdentifier();
+			} else {
+				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
+			}
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), new LinkedList<>(rhsFunction.getParameters()));
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
-			rhsSubst = new AOpSubstitution(rhsIdent, new LinkedList<>());
-			rhsSubst.setStartPos(rhsIdent.getStartPos());
-			rhsSubst.setEndPos(rhsIdent.getEndPos());
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(rhsIdent.getIdentifier()), new LinkedList<>());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", node));
 		}
+		rhsSubst.setStartPos(defRhs.getStartPos());
+		rhsSubst.setEndPos(defRhs.getEndPos());
 
 		final TIdentifierLiteral oldDefId = oldDefinition.getName();
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(oldDefId.getText(), oldDefId.getLine(),

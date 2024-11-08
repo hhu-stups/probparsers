@@ -191,10 +191,21 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		if (path != null) {
 			final String baseName = Utils.getFileWithoutExtension(Paths.get(path).getFileName().toString());
 			if (!baseName.equals(name)) {
-				throw new VisitorException(new CheckException(
-					"Declared name in file pragma does not match with the name of the machine referenced: " + name + " vs. " + baseName + " in " + path,
-					node
-				));
+				// try replacing windows backslashes by forward slashes
+				// FIXME This special case is not nice! We should remove it as soon as it is not needed anymore! Machines that rely on this are faulty!
+				// The correct fix is to change the machines to use forward slashes, which work on all systems, including Windows.
+				String wpath = path.replace("\\", "/");
+				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
+
+				if (wbaseName.equals(name)) { // the replace transformation worked
+					//System.out.println("WARNING: you are using Windows backslashes in a path, please use forward slashes as follows:  " + wpath);
+					return new MachineReference(type, name, renamedName, node, wpath);
+				} else {
+					throw new VisitorException(new CheckException(
+						"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
+						node
+					));
+				}
 			}
 		}
 		return new MachineReference(type, name, renamedName, node, path);

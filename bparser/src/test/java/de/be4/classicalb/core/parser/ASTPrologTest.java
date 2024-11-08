@@ -57,26 +57,34 @@ public class ASTPrologTest {
 		assertEquals(insertNonePositions(expected), printAST(ast, new NodeFileNumbers()));
 	}
 
-	private static void checkProlog(final int counter, final String bspec, final String expected) throws BCompoundException {
+	private static void checkMachine(final int counter, final String bspec, final String expected) throws BCompoundException {
 		final BParser parser = new BParser("testcase");
 		final Start startNode = parser.parseMachine(bspec);
 		checkAST(counter, expected, startNode);
 	}
 
 	private static void checkPredicate(final String pred, final String expected) throws BCompoundException {
-		checkProlog(2, BParser.PREDICATE_PREFIX + pred, expected);
+		BParser parser = new BParser("testcase");
+		Start startNode = parser.parsePredicate(pred);
+		checkAST(2, expected, startNode);
 	}
 
 	private static void checkExpression(final String expr, final String expected) throws BCompoundException {
-		checkProlog(2, BParser.EXPRESSION_PREFIX + expr, expected);
+		BParser parser = new BParser("testcase");
+		Start startNode = parser.parseExpression(expr);
+		checkAST(2, expected, startNode);
 	}
 
 	private static void checkSubstitution(final String subst, final String expected) throws BCompoundException {
-		checkProlog(2, BParser.SUBSTITUTION_PREFIX + subst, expected);
+		BParser parser = new BParser("testcase");
+		Start startNode = parser.parseSubstitution(subst);
+		checkAST(2, expected, startNode);
 	}
 
 	private static void checkOppatterns(final String pattern, final String expected) throws BCompoundException {
-		checkProlog(1, BParser.OPERATION_PATTERN_PREFIX + pattern, expected);
+		BParser parser = new BParser("testcase");
+		Start startNode = parser.parseTransition(pattern);
+		checkAST(1, expected, startNode);
 	}
 
 	private static String insertNumbers(int counter, final String string) {
@@ -91,6 +99,10 @@ public class ASTPrologTest {
 				case '%':
 					buf.append(counter - 1);
 					break;
+				case '#':
+					buf.append("none");
+					counter++;
+					break;
 				default:
 					buf.append(value);
 					break;
@@ -100,17 +112,14 @@ public class ASTPrologTest {
 	}
 
 	private static String insertNonePositions(final String string) {
-		return string.replaceAll("[$%]", "none");
+		return string.replaceAll("[$%#]", "none");
 	}
 
 	@Test
 	public void testMachine() throws BCompoundException {
 		String m = "MACHINE name OPERATIONS op=skip END";
-		// TODO: warum taucht hier die 5 zweimal auf?
-		// antwort: weil "identifier(...)" kein Knoten im AST ist, sondern eine Liste an Literalen
-		// NodeIdAssignment kann nur AST-Knoten eine ID zuweisen und somit verwendet ASTProlog einfach den Op-Knoten nochmal
-		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(%,op),[],[],skip($))])])";
-		checkProlog(1, m, expected);
+		String expected = "abstract_machine($,machine($),machine_header($,name,[]),[operations($,[operation($,identifier(none,op),[],[],skip($))])])";
+		checkMachine(1, m, expected);
 	}
 
 	@Test
@@ -120,21 +129,21 @@ public class ASTPrologTest {
 		String expected = "abstract_machine($,machine($),machine_header($,mname,[identifier($,'P')]),"
 				+ "[sets($,[deferred_set($,'S'),enumerated_set($,'E',[identifier($,e1),identifier($,e2)])]),"
 				+ "includes($,[machine_reference($,inc,[identifier($,x)]),machine_reference($,'rn.inc2',[])]),"
-				+ "sees($,[identifier($,see),identifier($,'s.see2')])," + "variables($,[identifier($,x)]),"
+				+ "sees($,[identifier(#,see),identifier(#,'s.see2')])," + "variables($,[identifier($,x)]),"
 				+ "invariant($,member($,identifier($,x),nat_set($))),"
 				+ "initialisation($,assign($,[identifier($,x)],[integer($,5)])),"
-				+ "operations($,[operation($,identifier(%,op),[],[],skip($)),"
-				+ "operation($,identifier(%,op2),[identifier($,r),identifier($,s)],"
+				+ "operations($,[operation($,identifier(none,op),[],[],skip($)),"
+				+ "operation($,identifier(none,op2),[identifier($,r),identifier($,s)],"
 				+ "[identifier($,a),identifier($,b)],skip($))])])";
 
-		checkProlog(1, m, expected);
+		checkMachine(1, m, expected);
 	}
 
 	@Test
 	public void testRefinement() throws BCompoundException {
 		String ref = "REFINEMENT ref REFINES abstract VARIABLES x END";
 		String expected = "refinement_machine($,machine_header($,ref,[]),abstract,[variables($,[identifier($,x)])])";
-		checkProlog(1, ref, expected);
+		checkMachine(1, ref, expected);
 	}
 
 	@Test
@@ -294,8 +303,8 @@ public class ASTPrologTest {
 				+ "variables($,[identifier($,x)]),"
 				+ "invariant($,conjunct($,[definition($,'INV',[]),definition($,lt,[integer($,7)])])),"
 				+ "initialisation($,assign($,[identifier($,x)],[definition($,dbl,[integer($,3)])])),"
-				+ "operations($,[operation($,identifier(%,op1),[],[],definition($,ax,[integer($,6)]))])])";
-		checkProlog(1, m, expected);
+				+ "operations($,[operation($,identifier(none,op1),[],[],definition($,ax,[integer($,6)]))])])";
+		checkMachine(1, m, expected);
 	}
 
 	@Test
@@ -332,8 +341,8 @@ public class ASTPrologTest {
 
 	@Test
 	public void testOperationCalls() throws BCompoundException {
-		checkSubstitution("do(x)", "operation_call($,identifier($,do),[],[identifier($,x)])");
-		checkSubstitution("r <-- do(x)", "operation_call($,identifier(%,do),[identifier($,r)],[identifier($,x)])");
+		checkSubstitution("do(x)", "operation_call($,identifier(none,do),[],[identifier($,x)])");
+		checkSubstitution("r <-- do(x)", "operation_call($,identifier(none,do),[identifier($,r)],[identifier($,x)])");
 	}
 
 	@Test
@@ -358,7 +367,7 @@ public class ASTPrologTest {
 				"event_b_model($,mm,[events($,["
 						+ "event($,testevent,[abstract1,abstract2],[identifier($,param)],[truth($)],[],"
 						+ "[assign($,[identifier($,x)],[identifier($,param)])],"
-						+ "[witness($,identifier(%,ab),equal($,identifier($,ab),identifier($,y)))])])])",
+						+ "[witness($,identifier(none,ab),equal($,identifier($,ab),identifier($,y)))])])])",
 				model);
 	}
 

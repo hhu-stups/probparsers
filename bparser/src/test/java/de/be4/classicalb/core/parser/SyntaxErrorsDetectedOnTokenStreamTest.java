@@ -8,6 +8,7 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SyntaxErrorsDetectedOnTokenStreamTest {
@@ -19,6 +20,15 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		assertTrue(e.getMessage().contains("Two succeeding"));
 	}
 	
+	@Test
+	public void checkForBeginAtEOF() {
+		String s = "MACHINE BeginAtEOF\nOPERATIONS\n Foo = BEGIN";
+		BLexerException e = Helpers.assertThrowsCompound(BLexerException.class, () -> Helpers.getMachineAsPrologTerm(s));
+		assertTrue(e.getMessage().contains("Invalid combination of symbols"));
+		assertTrue(e.getMessage().contains("BEGIN"));
+		assertTrue(e.getMessage().contains("before the end of file"));
+		assertFalse(e.getMessage().contains("before the end of definition"));
+	}
 	
 	@Test
 	public void checkForClauseAfterConjunction() {
@@ -60,18 +70,18 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	public void checkForDublicateAndInDefinitionsClause() {
 		String s = "MACHINE Definitions\nDEFINITIONS\n foo == 1=1 && 2=2  \nEND";
 		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(s));
-		// there is no token available, hence the position is in the text
-		assertTrue(e.getMessage().contains("[3,14]"));
 		assertTrue(e.getMessage().contains("'&' and '&'"));
+		assertEquals(3, e.getLine());
+		assertEquals(14, e.getPos());
 	}
 	
 	@Test
 	public void checkForDublicateAndInDefinitionsClause2() {
 		String s = "MACHINE Definitions \n DEFINITIONS\n foo == \n \n 1=1 \n&    & 2=2  \nEND";
 		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(s));
-		// there is no token available, hence the position is in the text
-		assertTrue(e.getMessage().contains("[6,6]"));
 		assertTrue(e.getMessage().contains("'&' and '&'"));
+		assertEquals(6, e.getLine());
+		assertEquals(6, e.getPos());
 	}
 	
 	
@@ -79,6 +89,8 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	public void checkForDublicateDefinitionClause() {
 		String s = "MACHINE Definitions \n DEFINITIONS\n foo == 1\n CONSTANTS k \n DEFINITIONS\n bar == 1  \nEND";
 		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(s));
-		assertTrue(e.getMessage().contains("[5,2] Clause 'DEFINITIONS' is used more than once"));
+		assertEquals("Clause 'DEFINITIONS' is used more than once", e.getMessage());
+		assertEquals(5, e.getLine());
+		assertEquals(2, e.getPos());
 	}
 }

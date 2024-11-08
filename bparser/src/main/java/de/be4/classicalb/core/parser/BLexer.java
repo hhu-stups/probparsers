@@ -2,6 +2,9 @@ package de.be4.classicalb.core.parser;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,26 +14,120 @@ import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.lexer.Lexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.Utils;
 
 public class BLexer extends Lexer {
 
 	// PUSHBACK_BUFFER_SIZE should be more than the max length of any keyword
 	public static final int PUSHBACK_BUFFER_SIZE = 99;
-	
-	private boolean parse_definition=false; // a flag to indicate when the lexer is used to parse Definitions
+
+	private static final Collection<Class<? extends Token>> CLAUSE_TOKEN_CLASSES = Collections.unmodifiableCollection(Arrays.asList(
+		// Beginning or end of a section:
+		TAssertions.class,
+		TConstants.class,
+		TAbstractConstants.class,
+		TConcreteConstants.class,
+		TProperties.class,
+		TConstraints.class,
+		TVariables.class,
+		TAbstractVariables.class,
+		TConcreteVariables.class,
+		TInvariant.class,
+		TInitialisation.class,
+		TLocalOperations.class,
+		TOperations.class,
+		//TEnd.class, // can be end of expression or predicate with IF-THEN-ELSE
+		EOF.class
+		// ...
+	));
+
+	private static final Collection<Class<? extends Token>> BIN_EXPR_OPERATORS = Collections.unmodifiableCollection(Arrays.asList(
+		TEqual.class,
+		TNotEqual.class,
+		TInclusion.class,
+		TNonInclusion.class,
+		TElementOf.class,
+		TNotBelonging.class,
+		TIntersection.class,
+		TUnion.class,
+		TSetSubtraction.class,
+		TPlus.class,
+		// Note: TMinus is also unary! x = -1 or x : -1..10 is possible
+		TDivision.class,
+		TMod.class,
+		TProduct.class,
+		TPowerOf.class,
+		TLessEqual.class,
+		TGreaterEqual.class,
+		TLess.class, // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible; but we now treat <> as a single token
+		TGreater.class,
+		TOverwriteRelation.class,
+		TInterval.class,
+		TConcatSequence.class,
+		TMaplet.class,
+		TRangeRestriction.class,
+		TRangeSubtraction.class,
+		TDomainRestriction.class,
+		TDomainSubtraction.class
+	));
+
+	private static final Collection<Class<? extends Token>> FUNCTION_OPERATOR_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList(
+		// real operators floor(.), ceiling(.), real(.)
+		TConvertIntFloor.class,
+		TConvertIntCeiling.class,
+		TConvertReal.class,
+		// regular operators
+		TBoolCast.class,
+		TCard.class,
+		TIterate.class,
+		TClosure.class,
+		TClosure1.class,
+		TRel.class,
+		TFnc.class,
+		TPerm.class,
+		TMin.class,
+		TMax.class,
+		TDom.class,
+		TRan.class,
+		TId.class, // ( {2} ; id) not allowed
+		// TO DO: prj1, prj2
+		// Record operators:
+		TStruct.class,
+		TRec.class,
+		// sequence operators:
+		TSize.class,
+		TFront.class,
+		TFirst.class, //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
+		TTail.class,
+		TLast.class,
+		TRev.class, // ( [[1,2]] ; rev)  not accepted in Atelier-B
+		TConc.class
+	));
+
+	private static final Collection<Class<? extends Token>> LITERAL_TOKEN_CLASSES = Collections.unmodifiableCollection(Arrays.asList(
+		TIntegerLiteral.class,
+		TStringLiteral.class,
+		TRealLiteral.class,
+		THexLiteral.class
+	));
+
+	private static final Map<String, String> INVALID_UNICODE_SYMBOL_MESSAGES;
+	static {
+		Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
+		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
+		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
+		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
+		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
+		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
+		INVALID_UNICODE_SYMBOL_MESSAGES = Collections.unmodifiableMap(invalidUnicodeSymbolMessages);
+	}
 
 	private static final Map<Class<? extends Token>, Map<Class<? extends Token>, String>> invalid = new HashMap<>();
-	private static final Set<Class<? extends Token>> clauseTokenClasses = new HashSet<>();
-	private static Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
-	private static final Set<Class<? extends Token>> funOpKeywordTokenClasses = new HashSet<>();
-	private static final Set<Class<? extends Token>> literalTokenClasses;
-	private static final Map<String, String> invalidUnicodeSymbolMessages = new HashMap<>();
-
-	// called by PreParser
-	public void setLexerPreparse(){
-		parse_definition = true; 
-	}
-	
 
 	private static void addInvalid(Class<? extends Token> f, Class<? extends Token> s, String message) {
 		Map<Class<? extends Token>, String> secs = invalid.get(f);
@@ -49,25 +146,7 @@ public class BLexer extends Lexer {
 		addInvalid(TSetSubtraction.class, TInclusion.class, "You need to use /<: for not subset and not \\<:.");
 		addInvalid(TSetSubtraction.class, TStrictInclusion.class, "You need to use /<<: for not strict subset and not \\<<:.");
 
-		// Beginning or end of a section:
-		clauseTokenClasses.add(TAssertions.class);
-		clauseTokenClasses.add(TConstants.class);
-		clauseTokenClasses.add(TAbstractConstants.class);
-		clauseTokenClasses.add(TConcreteConstants.class);
-		clauseTokenClasses.add(TProperties.class);
-		clauseTokenClasses.add(TConstraints.class);
-		clauseTokenClasses.add(TVariables.class);
-		clauseTokenClasses.add(TAbstractVariables.class);
-		clauseTokenClasses.add(TConcreteVariables.class);
-		clauseTokenClasses.add(TInvariant.class);
-		clauseTokenClasses.add(TInitialisation.class);
-		clauseTokenClasses.add(TLocalOperations.class);
-		clauseTokenClasses.add(TOperations.class);
-		//clauseTokenClasses.add(TEnd.class); // can be end of expression or predicate with IF-THEN-ELSE
-		clauseTokenClasses.add(EOF.class);
-		// ...
-
-		for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+		for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
 			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
@@ -93,6 +172,7 @@ public class BLexer extends Lexer {
 		addInvalid(TBegin.class, TRightBracket.class, "Closing END is missing.");
 		
 		// add some rules for the binary infix logical operators:
+		Set<Class<? extends Token>> binOpTokenClasses = new HashSet<>();
 		binOpTokenClasses.add(TConjunction.class);
 		binOpTokenClasses.add(TLogicalOr.class);
 		binOpTokenClasses.add(TImplies.class);
@@ -107,7 +187,7 @@ public class BLexer extends Lexer {
 		}
 		
 		// now treat rules that apply to binary infix logical and binary expression operators
-		AddBinExprOperators();
+		binOpTokenClasses.addAll(BIN_EXPR_OPERATORS);
 		binOpTokenClasses.add(TComma.class); // this has multiple uses: tuples, definition arguments, separating ids
 		
 		
@@ -122,7 +202,7 @@ public class BLexer extends Lexer {
 			}
 			
 			// now rules for beginning/end of sections:
-			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
+			for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
 				String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 				addInvalid(binOpTokenClass,clauseTokenClass,"Argument to binary operator is missing.");
 				addInvalid(clauseTokenClass,binOpTokenClass,"Argument to binary operator is missing.");
@@ -143,10 +223,7 @@ public class BLexer extends Lexer {
 		}
 		
 		// now treat rules for only binary infix expression operators
-		binOpTokenClasses = new HashSet<>();
-		AddBinExprOperators();
-		
-		for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
+		for (Class<? extends Token> binOpTokenClass : BIN_EXPR_OPERATORS) {
 			addInvalid(TPragmaLabel.class, binOpTokenClass, "A label pragma must be put *before* a predicate, not inside it.");
 			addInvalid(binOpTokenClass, TPragmaLabel.class, "A label pragma must be put before a *predicate*, it cannot be put before expressions.");
 			addInvalid(binOpTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier.");
@@ -162,38 +239,7 @@ public class BLexer extends Lexer {
 		
 		
 		// a few rules for keywords which are unary functions and require an opening parenthesis afterwards
-		// real operators floor(.), ceiling(.), real(.)
-		funOpKeywordTokenClasses.add(TConvertIntFloor.class);
-		funOpKeywordTokenClasses.add(TConvertIntCeiling.class);
-		funOpKeywordTokenClasses.add(TConvertReal.class);
-		// regular operators
-		funOpKeywordTokenClasses.add(TBoolCast.class);
-		funOpKeywordTokenClasses.add(TCard.class);
-		funOpKeywordTokenClasses.add(TIterate.class);
-		funOpKeywordTokenClasses.add(TClosure.class);
-		funOpKeywordTokenClasses.add(TClosure1.class);
-		funOpKeywordTokenClasses.add(TRel.class);
-		funOpKeywordTokenClasses.add(TFnc.class);
-		funOpKeywordTokenClasses.add(TPerm.class);
-		funOpKeywordTokenClasses.add(TMin.class);
-		funOpKeywordTokenClasses.add(TMax.class);
-		funOpKeywordTokenClasses.add(TDom.class);
-		funOpKeywordTokenClasses.add(TRan.class);
-		funOpKeywordTokenClasses.add(TId.class); // ( {2} ; id) not allowed
-		// TO DO:  prj1, prj2
-		// Record operators:
-		funOpKeywordTokenClasses.add(TStruct.class);
-		funOpKeywordTokenClasses.add(TRec.class);
-		// sequence operators:
-		funOpKeywordTokenClasses.add(TSize.class);
-		funOpKeywordTokenClasses.add(TFront.class);
-		funOpKeywordTokenClasses.add(TFirst.class); //  ( [ [1,2] ] ; first) = [ [1] ] not accepted in Atelier-B
-		funOpKeywordTokenClasses.add(TTail.class);
-		funOpKeywordTokenClasses.add(TLast.class);
-		funOpKeywordTokenClasses.add(TRev.class);  // ( [[1,2]] ; rev)  not accepted in Atelier-B
-		funOpKeywordTokenClasses.add(TConc.class);
-		
-		for (Class<? extends Token> funOpClass : funOpKeywordTokenClasses) {
+		for (Class<? extends Token> funOpClass : FUNCTION_OPERATOR_KEYWORDS) {
 			addInvalid(funOpClass, TPragmaDescription.class, "A description pragma must be put after a predicate or identifier, not a keyword.");
 			String opName = funOpClass.getSimpleName().substring(1).toLowerCase(); // TO DO: get real keyword name
 			if (funOpClass == TConvertIntFloor.class) {
@@ -205,31 +251,31 @@ public class BLexer extends Lexer {
 			} else if( funOpClass == TBoolCast.class) {
 				opName = "bool";
 			}
-			String Errmsg = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
-			addInvalid(funOpClass, TRightPar.class, Errmsg);
-			addInvalid(funOpClass, TRightBrace.class, Errmsg);
-			addInvalid(funOpClass, TRightBracket.class, Errmsg);
-			addInvalid(funOpClass, TSemicolon.class, Errmsg);
-			addInvalid(funOpClass, TWhere.class, Errmsg);
-			addInvalid(funOpClass, TThen.class, Errmsg);
-			addInvalid(funOpClass, TElse.class, Errmsg);
-			addInvalid(funOpClass, TEnd.class, Errmsg);
-			for (Class<? extends Token> binOpTokenClass : binOpTokenClasses) {
-				addInvalid(funOpClass, binOpTokenClass, Errmsg);
+			String message = "This keyword (" + opName + ") must be followed by an opening parenthesis.";
+			addInvalid(funOpClass, TRightPar.class, message);
+			addInvalid(funOpClass, TRightBrace.class, message);
+			addInvalid(funOpClass, TRightBracket.class, message);
+			addInvalid(funOpClass, TSemicolon.class, message);
+			addInvalid(funOpClass, TWhere.class, message);
+			addInvalid(funOpClass, TThen.class, message);
+			addInvalid(funOpClass, TElse.class, message);
+			addInvalid(funOpClass, TEnd.class, message);
+			for (Class<? extends Token> binOpTokenClass : BIN_EXPR_OPERATORS) {
+				addInvalid(funOpClass, binOpTokenClass, message);
 			}
-			for (Class<? extends Token> clauseTokenClass : clauseTokenClasses) {
-				addInvalid(funOpClass,clauseTokenClass, Errmsg);
+			for (Class<? extends Token> clauseTokenClass : CLAUSE_TOKEN_CLASSES) {
+				addInvalid(funOpClass,clauseTokenClass, message);
 			}
 			
-			String Errmsg2 = "This keyword (" + opName + ") cannot be used as an identifier";
-			addInvalid(TAny.class,funOpClass, Errmsg2);
-			addInvalid(TConstants.class,funOpClass, Errmsg2);
-			addInvalid(TAbstractConstants.class,funOpClass, Errmsg2);
-			addInvalid(TConcreteConstants.class,funOpClass, Errmsg2);
-			addInvalid(TVariables.class,funOpClass, Errmsg2);
-			addInvalid(TAbstractVariables.class,funOpClass, Errmsg2);
-			addInvalid(TConcreteVariables.class,funOpClass, Errmsg2);
-			addInvalid(TOperations.class,funOpClass, Errmsg2);
+			String message2 = "This keyword (" + opName + ") cannot be used as an identifier";
+			addInvalid(TAny.class,funOpClass, message2);
+			addInvalid(TConstants.class,funOpClass, message2);
+			addInvalid(TAbstractConstants.class,funOpClass, message2);
+			addInvalid(TConcreteConstants.class,funOpClass, message2);
+			addInvalid(TVariables.class,funOpClass, message2);
+			addInvalid(TAbstractVariables.class,funOpClass, message2);
+			addInvalid(TConcreteVariables.class,funOpClass, message2);
+			addInvalid(TOperations.class,funOpClass, message2);
 		}
 		
 		// Other rules:
@@ -265,70 +311,24 @@ public class BLexer extends Lexer {
 		addInvalid(TPragmaLabel.class, TSemicolon.class, "A label pragma must be put *before* a predicate.");
 		
 		// invalid literal combinations:
-
-		literalTokenClasses = new HashSet<>();
-		literalTokenClasses.add(TIntegerLiteral.class);
-		literalTokenClasses.add(TStringLiteral.class);
-		literalTokenClasses.add(TRealLiteral.class);
-		literalTokenClasses.add(THexLiteral.class);
-		for (Class<? extends Token> litClass : literalTokenClasses) {
+		for (Class<? extends Token> litClass : LITERAL_TOKEN_CLASSES) {
 			addInvalid(TIdentifierLiteral.class, litClass, "Missing operator or separator between identifier and literal.");
 			addInvalid(litClass,TIdentifierLiteral.class, "Missing operator or separator between literal and identifier.");
-			for (Class<? extends Token> litClass2 : literalTokenClasses) {
+			for (Class<? extends Token> litClass2 : LITERAL_TOKEN_CLASSES) {
 				addInvalid(litClass, litClass2, "Missing operator or separator between literals.");
 			}
 		}
 		// addInvalid(TIdentifierLiteral.class, TIdentifierLiteral.class,  "Missing operator or separator between identifier and identifier.");
 		// we treat ref in languagextension not as keyword but as identifier; hence we cannot add this rule
 		// see test de.be4.classicalb.core.parser.languageextension.RefinedOperationTest
-		
-		invalidUnicodeSymbolMessages.put("⋀", "N-ary conjunction not allowed, use '∀' instead - or did you mean '∧' for binary conjunction?");
-		invalidUnicodeSymbolMessages.put("⋁", "N-ary disjunction not allowed, use '∃' instead - or did you mean '∨' for binary disjunction?");
-		invalidUnicodeSymbolMessages.put("∊", "Small element-of not allowed, use '∈' instead");
-		invalidUnicodeSymbolMessages.put("∍", "Small contains as member not allowed, reorder arguments and use '∈' instead");
-		invalidUnicodeSymbolMessages.put("∄", "Not-exists not supported, use '¬' and '∃' instead");
-		invalidUnicodeSymbolMessages.put("⊢", "Operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⊧", "Operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⊦", "operator not allowed, use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⇐", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
-		invalidUnicodeSymbolMessages.put("⟸", "Inverse implication not supported, reorder arguments and use implication '⇒' instead");
 	}
-	
-	private static void AddBinExprOperators() {
-		binOpTokenClasses.add(TEqual.class);
-		binOpTokenClasses.add(TNotEqual.class);
-		binOpTokenClasses.add(TInclusion.class);
-		binOpTokenClasses.add(TNonInclusion.class);
-		binOpTokenClasses.add(TElementOf.class);
-		binOpTokenClasses.add(TNotBelonging.class);
-		binOpTokenClasses.add(TIntersection.class);
-		binOpTokenClasses.add(TUnion.class);
-		binOpTokenClasses.add(TSetSubtraction.class);
-		binOpTokenClasses.add(TPlus.class); // Note: TMinus is also unary !  x = -1  or x : -1..10 is possible
-		binOpTokenClasses.add(TDivision.class);
-		binOpTokenClasses.add(TMod.class);
-		binOpTokenClasses.add(TProduct.class);
-		binOpTokenClasses.add(TPowerOf.class);
-		binOpTokenClasses.add(TLessEqual.class);
-		binOpTokenClasses.add(TGreaterEqual.class);
-		binOpTokenClasses.add(TLess.class);  // The parser currently allows <> for empty sequence, hence x = <> or <> = .. are all possible; but we now treat <> as a single token
-		binOpTokenClasses.add(TGreater.class);
-		binOpTokenClasses.add(TOverwriteRelation.class);
-		binOpTokenClasses.add(TInterval.class);
-		binOpTokenClasses.add(TConcatSequence.class);
-		binOpTokenClasses.add(TMaplet.class);
-		binOpTokenClasses.add(TRangeRestriction.class);
-		binOpTokenClasses.add(TRangeSubtraction.class);
-		binOpTokenClasses.add(TDomainRestriction.class);
-		binOpTokenClasses.add(TDomainSubtraction.class);
-	}
+
+	private final DefinitionTypes definitions;
 
 	private ParseOptions parseOptions = null;
 
-	private Token comment = null;
-	private StringBuilder commentBuffer = null;
-
-	private final DefinitionTypes definitions;
+	private Token lastToken;
+	private TComment currentBlockCommentStart;
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
@@ -344,16 +344,12 @@ public class BLexer extends Lexer {
 		this.pos = column - 1;
 	}
 
-	private Token lastToken;
-
 	private void findSyntaxError() throws LexerException {
-		if (token == null) {
-			return;
-		}
 		if (
-			state.equals(State.BLOCK_COMMENT)
-			|| token instanceof TWhiteSpace || token instanceof TLineComment || token instanceof TComment
-			|| token instanceof TCommentEnd || token instanceof TPragmaEnd || token instanceof TPragmaIdOrString
+			token == null || state.equals(State.BLOCK_COMMENT)
+			|| token instanceof TWhiteSpace || token instanceof TLineComment
+			|| token instanceof TComment || token instanceof TCommentBody || token instanceof TStar || token instanceof TCommentEnd
+			|| token instanceof TPragmaIdOrString || token instanceof TPragmaFreeText || token instanceof TPragmaEnd
 		) {
 			return; // we ignore these tokens for checking for invalid combinations
 		}
@@ -361,11 +357,11 @@ public class BLexer extends Lexer {
 		if (token instanceof TIllegalUnicodeSymbol) {
 			String symbol = token.getText();
 			String defaultMessage = "Invalid Unicode symbol: '" + symbol + "'.";
-			String specificMessage = invalidUnicodeSymbolMessages.get(symbol);
+			String specificMessage = INVALID_UNICODE_SYMBOL_MESSAGES.get(symbol);
 			if (specificMessage != null) {
-				ThrowDefaultLexerException(defaultMessage + " " + specificMessage, specificMessage);
+				throw new BLexerException(token, defaultMessage + " " + specificMessage);
 			} else {
-				ThrowDefaultLexerException(defaultMessage, defaultMessage);
+				throw new BLexerException(token, defaultMessage);
 			}
 		}
 
@@ -389,23 +385,13 @@ public class BLexer extends Lexer {
 			String string = map.get(tokenClass);
 			if (string != null) {
 				if (token instanceof EOF ) {
-					if(parse_definition) {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of definition. " + string, string);
-					} else {
-						ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' before the end of file. " + string, string);
-					}
-				} else
-					ThrowDefaultLexerException("Invalid combination of symbols: '"+ lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string, string);
+					throw new BLexerException(token, "Invalid combination of symbols: '" + lastToken.getText().trim() + "' before the end of file. " + string);
+				} else {
+					throw new BLexerException(token, "Invalid combination of symbols: '" + lastToken.getText().trim() + "' and '" + token.getText().trim() + "'. " + string);
+				}
 			}
 		}
 
-	}
-	
-	private void ThrowDefaultLexerException(String msg, String string) throws LexerException {
-		int l = token.getLine();
-		int c = token.getPos();
-		throw new BLexerException(token, msg, string, l, c);
-	
 	}
 
 	private void applyGrammarExtension() {
@@ -423,24 +409,24 @@ public class BLexer extends Lexer {
 
 		if (parseOptions != null && this.parseOptions.isStrictPragmaChecking() &&
 			token instanceof TUnrecognisedPragma) {
-			ThrowDefaultLexerException("Pragma '" + token.getText() +"' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.",token.getText());
+			throw new BLexerException(token, "Pragma '" + token.getText() + "' not recognised; supported pragmas are label, desc, symbolic, generated, package, import-package, file.");
 		}
 
 		if (token instanceof TCommentEnd) {
-			commentBuffer.append(token.getText());
-			comment.setText(commentBuffer.toString());
-			token = comment;
-			comment = null;
-			commentBuffer = null;
+			// Note: The lexer state is changed before filter gets called,
+			// so the state is no longer BLOCK_COMMENT when TCommentEnd is handled here.
+			currentBlockCommentStart = null;
 		} else if (token instanceof TShebang && token.getLine() != 1) {
-			ThrowDefaultLexerException("#! only allowed in first line of the file","#!");
+			throw new BLexerException(token, "#! only allowed in first line of the file", "#!", token.getLine(), token.getPos());
 		} else if (state.equals(State.NORMAL)) {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.BLOCK_COMMENT)) {
-			collectComment();
-		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) && !(token instanceof TPragmaDescription)) {
-			collectComment();
+			if (token instanceof TComment) {
+				currentBlockCommentStart = (TComment)token;
+			} else if (token instanceof EOF) {
+				throw new BLexerException(currentBlockCommentStart, "Comment not closed.");
+			}
 		} else if (state.equals(State.PRAGMA_DESCRIPTION_CONTENT) || state.equals(State.PRAGMA_CONTENT)) {
 			findSyntaxError();
 		}
@@ -453,9 +439,17 @@ public class BLexer extends Lexer {
 		}
 	}
 
-	private void replaceDefTokens() {
+	private void replaceDefTokens() throws LexerException {
 		if (token instanceof TIdentifierLiteral) {
-			final Definitions.Type type = definitions.getType(token.getText());
+			// The identifier might be backquoted and needs to be unquoted before looking up the definition type.
+			// This does *not* replace the token text yet - that happens later in SyntaxExtensionTranslator.
+			String definitionName;
+			try {
+				definitionName = Utils.unquoteIdentifier(token.getText());
+			} catch (IllegalArgumentException exc) {
+				throw new BLexerException(token, exc);
+			}
+			Definitions.Type type = definitions.getType(definitionName);
 
 			/*
 			 * If no type is set, something went wrong during preparsing.
@@ -487,24 +481,6 @@ public class BLexer extends Lexer {
 				}
 			}
 		}
-	}
-
-	private void collectComment() throws LexerException {
-		if (token instanceof EOF) {
-			// make sure we don't loose this token, needed for error message
-			final String text = token.getText();
-			throw new BLexerException(comment, "Comment not closed.", text, comment.getLine(), comment.getPos());
-		}
-
-		// starting a new comment
-		if (comment == null) {
-			commentBuffer = new StringBuilder(token.getText());
-			comment = token;
-		} else {
-			commentBuffer.append(token.getText());
-			assert !(token instanceof TCommentEnd); // end of comment now handled in filter
-		}
-		token = null;
 	}
 
 	private void optimizeToken() {

@@ -91,4 +91,32 @@ public class SyntaxExtensionTest {
 				result);
 	}
 
+	@Test
+	public void testTreeKeywords() throws BCompoundException {
+		assertEquals(
+			"machine(abstract_machine(none,machine(none),machine_header(none,'TreeKeywords',[]),[constants(none,[identifier(none,t)]),properties(none,conjunct(none,[member(none,identifier(none,t),btree(none,integer_set(none))),equal(none,identifier(none,t),bin(none,bin(none,integer(none,1)),integer(none,0),bin(none,integer(none,2)))),equal(none,top(none,identifier(none,t)),integer(none,0)),equal(none,top(none,left(none,identifier(none,t))),integer(none,1)),equal(none,top(none,right(none,identifier(none,t))),integer(none,2))]))])).",
+			Helpers.getMachineAsPrologTerm("MACHINE TreeKeywords CONSTANTS t PROPERTIES t : btree(INTEGER) & t = bin(bin(1), 0, bin(2)) & top(t) = 0 & top(left(t)) = 1 & top(right(t)) = 2 END")
+		);
+	}
+
+	@Test
+	public void testTreeKeywordsAsRegularIdentifiers() throws BCompoundException {
+		String expected = "machine(abstract_machine(none,machine(none),machine_header(none,'TreeKeywords',[]),[sets(none,[enumerated_set(none,'DIRECTION',[identifier(none,top),identifier(none,left),identifier(none,right)])]),constants(none,[identifier(none,bin)]),properties(none,equal(none,identifier(none,bin),set_extension(none,[identifier(none,left),identifier(none,right)])))])).";
+		assertEquals(
+			expected,
+			Helpers.getMachineAsPrologTerm("MACHINE TreeKeywords SETS DIRECTION = {top, left, right} CONSTANTS bin PROPERTIES bin = {left, right} END")
+		);
+		assertEquals(
+			expected,
+			Helpers.getMachineAsPrologTerm("MACHINE TreeKeywords SETS DIRECTION = {`top`, `left`, `right`} CONSTANTS `bin` PROPERTIES `bin` = {`left`, `right`} END")
+		);
+	}
+
+	@Test
+	public void testTreeKeywordsAsFunctionIdentifiers() throws BCompoundException {
+		assertEquals(
+			"machine(abstract_machine(none,machine(none),machine_header(none,'TreeKeywords',[]),[constants(none,[identifier(none,bin),identifier(none,top)]),properties(none,conjunct(none,[equal(none,identifier(none,bin),set_extension(none,[couple(none,[boolean_false(none),integer(none,0)]),couple(none,[boolean_true(none),integer(none,1)])])),equal(none,identifier(none,top),set_extension(none,[couple(none,[integer(none,0),integer(none,1)]),couple(none,[integer(none,1),integer(none,1)])])),equal(none,function(none,identifier(none,bin),[boolean_true(none)]),function(none,identifier(none,top),[integer(none,1)]))]))])).",
+			Helpers.getMachineAsPrologTerm("MACHINE TreeKeywords CONSTANTS bin, top PROPERTIES bin = {FALSE|->0, TRUE|->1} & top = {0|->1, 1|->1} & `bin`(TRUE) = `top`(1) END")
+		);
+	}
 }

@@ -9,10 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExpr;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprLeft;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.createTripleExprRight;
-import static de.be4.classicalb.core.parser.analysis.ParseTestUtil.parseExpr;
+import util.Helpers;
+
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExpr;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprLeft;
+import static de.be4.classicalb.core.parser.prios.BinaryOperator.createTripleExprRight;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
@@ -52,9 +53,9 @@ public class TwoBinopAssoziativityTests {
 		final String left = createTripleExprLeft(s1, s2);
 		final String right = createTripleExprRight(s1, s2);
 
-		final String pExpr = parseExpr(expr);
-		final String pLeft = parseExpr(left);
-		final String pRight = parseExpr(right);
+		String pExpr = Helpers.getExpressionAsPrologTerm(expr);
+		String pLeft = Helpers.getExpressionAsPrologTerm(left);
+		String pRight = Helpers.getExpressionAsPrologTerm(right);
 
 		final boolean isLeft = pExpr.equals(pLeft);
 		final boolean isRight = pExpr.equals(pRight);

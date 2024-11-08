@@ -35,9 +35,7 @@ public class PrettyPrinterTest {
 
 	private static void testRoundtripRaw(String code, Parser parser) throws BCompoundException {
 		ParseOptions parseOptions = new ParseOptions();
-		parseOptions.setCollectDefinitions(false);
 		parseOptions.setApplyASTTransformations(false);
-		parseOptions.setApplySemanticChecks(false);
 		Start rawParse = parser.parse(code, parseOptions);
 		PrettyPrinter prettyprinter = new PrettyPrinter();
 		rawParse.apply(prettyprinter);
@@ -150,6 +148,7 @@ public class PrettyPrinterTest {
 				"A(b)(c)",
 				"(A||B)",
 				"(f;g)",
+				"(f /*@symbolic*/ ;g)",
 				"g∘f",
 				"bool(x<0)",
 				"max({1,2,3})",
@@ -263,6 +262,27 @@ public class PrettyPrinterTest {
 				"left(x)",
 				"right(x)",
 				"infix(x)",
+				"`perm`([a,b,c])",
+				"`conc`(S)",
+				"`tree`(x)",
+				"`btree`(x)",
+				"`const`(x, y)",
+				"`top`(x)",
+				"`sons`(x)",
+				"`prefix`(x)",
+				"`postfix`(x)",
+				"`sizet`(x)",
+				"`mirror`(x)",
+				"`rank`(x, y)",
+				"`father`(x, y)",
+				"`son`(x, y, z)",
+				"`subtree`(x, y)",
+				"`arity`(x, y)",
+				"`bin`(x)",
+				"`bin`(x, y, z)",
+				"`left`(x)",
+				"`right`(x)",
+				"`infix`(x)",
 				"TRUE",
 				"MAXINT",
 				"MININT",

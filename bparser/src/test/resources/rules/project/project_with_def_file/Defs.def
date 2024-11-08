@@ -1,2 +1,3 @@
 DEFINITIONS
-  FooValue == 1
+  FooValue == 1;
+  `QuotedDef` == bfalse

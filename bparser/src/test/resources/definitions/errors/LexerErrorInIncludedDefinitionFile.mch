@@ -1,0 +1,10 @@
+MACHINE LexerErrorInIncludedDefinitionFile
+SETS
+ ID={aa,bb}
+DEFINITIONS
+    SET_PREF_SHOW_EVENTB_ANY_VALUES == TRUE;
+    "LexerError.def"
+CONSTANTS xx
+PROPERTIES
+ xx:NATURAL
+END

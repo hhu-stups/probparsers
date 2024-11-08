@@ -12,9 +12,7 @@ Helpers
   unicode_line_seperator = 8232;
   unicode_paragraph_seperator = 8233;
 
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
+  letter = ['a' .. 'z'] | ['A' .. 'Z'];
   digit = ['0' .. '9'];
 
   // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
@@ -87,6 +85,7 @@ Helpers
   string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
   // backquote to generate identifiers with special symbols or which clash with keywords
   quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
+  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
 
   safe_to_skip = ',' | '{' | '}' | '-' | '>'  | '+' | ':' |
                  '<' | '.' | '|' | '(' | ')' | '[' | ']' | '%'; // safe to skip in normal mode
@@ -136,7 +135,7 @@ Tokens
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
 
-  {start -> definitions, normal -> definitions, definitions -> definitions} definitions = 'DEFINITIONS';
+  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
    // definitions -> definitions is an error, which will be caught later,
    // generating Clause 'DEFINITIONS' is used more than once error message
 
@@ -154,7 +153,7 @@ Tokens
   {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
   {no_definitions} no_def_something = all_chars*;
 
-  {definitions} identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
+  {definitions} pre_parser_identifier = regular_identifier_literal | quoted_identifier_literal;
   {definitions, definitions_rhs} left_par = '(';
   {definitions, definitions_rhs} right_par = ')';
   {definitions, definitions_rhs} slash = '/';
@@ -163,13 +162,17 @@ Tokens
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
   {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'];
   {definitions_rhs} begin_nesting =
-    'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' |
+    'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' | 'WITNESS' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
   {definitions_rhs} end_nesting = 'END';
-  {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*; // lex identifiers as complete words to ignore keywords within identifiers
+
+  // Lex identifiers as complete words to ignore keywords within identifiers.
+  // This only needs letter and not unicode_letter, because none of the keywords contain Unicode letters.
+  {definitions_rhs} rhs_identifier = letter (letter | digit | '_')*;
+
   {definitions, definitions_rhs} semicolon = ';'; // returning to state definitions is done by PreLexer
 
-  {definitions, definitions_rhs} string_literal = string_literal;
+  {definitions, definitions_rhs} pre_parser_string = string_literal;
 
   {definitions, definitions_rhs} white_space = line_break | layout_char+;
 
@@ -212,34 +215,34 @@ Ignored Tokens
  *******************************************************************/
 Productions
 
-parse_unit {-> parse_unit} =
-  {defs_clause} [def_clause]:def_clause {-> New parse_unit([def_clause.definition])} |
-  {something} kw_prefix no_def_something {-> New parse_unit([])} |
-  {nothing} {-> New parse_unit([])};
+parse_unit {-> pre_parse_unit} =
+  {defs_clause} [def_clause]:def_clause {-> New pre_parse_unit([def_clause.pre_parser_definition])} |
+  {something} kw_prefix no_def_something {-> New pre_parse_unit([])} |
+  {nothing} {-> New pre_parse_unit([])};
 
-def_clause {-> definition*} = definitions [list]:definition_list semicolon? {-> [list.definition]};
+def_clause {-> pre_parser_definition*} = pre_parser_definitions [list]:definition_list semicolon? {-> [list.pre_parser_definition]};
 
-definition_list {-> definition*} =
-  {single} [def]:definition {-> [def.definition]} |
-  {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
+definition_list {-> pre_parser_definition*} =
+  {single} [def]:definition {-> [def.pre_parser_definition]} |
+  {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.pre_parser_definition, def.pre_parser_definition]};
 
-definition {-> definition} =
-  [def_name]:identifier_literal [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New definition(def_name, [parameters.identifier_literal], rhs)} |
-  {file} [filename]:string_literal {-> New definition.file(filename)};
+definition {-> pre_parser_definition} =
+  [def_name]:pre_parser_identifier [parameters]:def_parameters? begin_def_body [rhs]:rhs_body {-> New pre_parser_definition(def_name, [parameters.pre_parser_identifier], rhs)} |
+  {file} [filename]:pre_parser_string {-> New pre_parser_definition.file(filename)};
 
-def_parameters {-> identifier_literal*} = left_par [parameters]:identifier_list right_par {-> [parameters.identifier_literal]};
+def_parameters {-> pre_parser_identifier*} = left_par [parameters]:identifier_list right_par {-> [parameters.pre_parser_identifier]};
 
-identifier_list {-> identifier_literal*} =
-  {single} [parameter]:identifier_literal {-> [parameter]} |
-  {multi} [rest]:identifier_list comma [parameter]:identifier_literal {-> [rest.identifier_literal, parameter]};
+identifier_list {-> pre_parser_identifier*} =
+  {single} [parameter]:pre_parser_identifier {-> [parameter]} |
+  {multi} [rest]:identifier_list comma [parameter]:pre_parser_identifier {-> [rest.pre_parser_identifier, parameter]};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
  *******************************************************************/
 Abstract Syntax Tree
 
-parse_unit = definition*;
+pre_parse_unit = pre_parser_definition*;
 
-definition =
-  [def_name]:identifier_literal [parameters]:identifier_literal* [rhs]:rhs_body |
-  {file} [filename]:string_literal;
+pre_parser_definition =
+  [def_name]:pre_parser_identifier [parameters]:pre_parser_identifier* [rhs]:rhs_body |
+  {file} [filename]:pre_parser_string;

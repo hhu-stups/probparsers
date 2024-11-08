@@ -3,59 +3,44 @@ package de.be4.classicalb.core.parser.prios;
 import static de.be4.classicalb.core.parser.prios.EAssoc.LEFT;
 import static de.be4.classicalb.core.parser.prios.EAssoc.RIGHT;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public final class BinaryOperator {
-	static final List<BinaryOperator> OPS = createBinaryOperators();
-
-	private static void defineBinaryOperators(final Collection<BinaryOperator> ops) {
-		addOp(ops, "*", 190, LEFT, "multiplication or Cartesian product");
-		addOp(ops, "**", 200, RIGHT, "power");
-		addOp(ops, "+", 180, LEFT, "addition");
-		addOp(ops, "+->", 125, LEFT, "partial function");
-		addOp(ops, "+->>", 125, LEFT, "partial surjection");
-		addOp(ops, "-", 180, LEFT, "subtraction");
-		addOp(ops, "-->", 125, LEFT, "total function");
-		addOp(ops, "-->>", 125, LEFT, "total surjection");
-		addOp(ops, "->", 160, LEFT, "insertion at front");
-		addOp(ops, "..", 170, LEFT, "interval");
-		addOp(ops, "/", 190, LEFT, "division");
-		addOp(ops, "/\\", 160, LEFT, "intersection");
-		addOp(ops, "/|\\", 160, LEFT, "restriction at front");
-		addOp(ops, ";", 20, LEFT, "composition");
-		addOp(ops, "<+", 160, LEFT, "function override");
-		addOp(ops, "<->", 125, LEFT, "relations");
-		addOp(ops, "<-", 160, LEFT, "insertion at end");
-		addOp(ops, "<<|", 160, LEFT, "domain subtraction");
-		addOp(ops, "<|", 160, LEFT, "domain restriction");
-		addOp(ops, ">+>", 125, LEFT, "partial injection");
-		addOp(ops, ">->", 125, LEFT, "total injection");
-		addOp(ops, ">->>", 125, LEFT, "total bijection");
-		addOp(ops, "><", 160, LEFT, "direct relational product");
-		addOp(ops, "\\/", 160, LEFT, "union");
-		addOp(ops, "\\|/", 160, LEFT, "restriction of sequence");
-		addOp(ops, "^", 160, LEFT, "concatenation");
-		addOp(ops, "mod", 190, LEFT, "modulo");
-		addOp(ops, "|->", 160, LEFT, "maplet");
-		addOp(ops, "|>", 160, LEFT, "range restriction");
-		addOp(ops, "|>>", 160, LEFT, "range subtraction");
-		addOp(ops, "||", 20, LEFT, "relational parallel product");
-	}
-
-	private static void addOp(final Collection<BinaryOperator> ops, final String symbol, final int priority,
-			final EAssoc assoc, final String name) {
-		final BinaryOperator op = new BinaryOperator(symbol, priority, assoc, name);
-		ops.add(op);
-	}
-
-	private static List<BinaryOperator> createBinaryOperators() {
-		List<BinaryOperator> binOps = new ArrayList<>();
-		defineBinaryOperators(binOps);
-		return Collections.unmodifiableList(binOps);
-	}
+	static final List<BinaryOperator> OPS = Collections.unmodifiableList(Arrays.asList(
+		new BinaryOperator("*", 190, LEFT, "multiplication or Cartesian product"),
+		new BinaryOperator("**", 200, RIGHT, "power"),
+		new BinaryOperator("+", 180, LEFT, "addition"),
+		new BinaryOperator("+->", 125, LEFT, "partial function"),
+		new BinaryOperator("+->>", 125, LEFT, "partial surjection"),
+		new BinaryOperator("-", 180, LEFT, "subtraction"),
+		new BinaryOperator("-->", 125, LEFT, "total function"),
+		new BinaryOperator("-->>", 125, LEFT, "total surjection"),
+		new BinaryOperator("->", 160, LEFT, "insertion at front"),
+		new BinaryOperator("..", 170, LEFT, "interval"),
+		new BinaryOperator("/", 190, LEFT, "division"),
+		new BinaryOperator("/\\", 160, LEFT, "intersection"),
+		new BinaryOperator("/|\\", 160, LEFT, "restriction at front"),
+		new BinaryOperator(";", 20, LEFT, "composition"),
+		new BinaryOperator("<+", 160, LEFT, "function override"),
+		new BinaryOperator("<->", 125, LEFT, "relations"),
+		new BinaryOperator("<-", 160, LEFT, "insertion at end"),
+		new BinaryOperator("<<|", 160, LEFT, "domain subtraction"),
+		new BinaryOperator("<|", 160, LEFT, "domain restriction"),
+		new BinaryOperator(">+>", 125, LEFT, "partial injection"),
+		new BinaryOperator(">->", 125, LEFT, "total injection"),
+		new BinaryOperator(">->>", 125, LEFT, "total bijection"),
+		new BinaryOperator("><", 160, LEFT, "direct relational product"),
+		new BinaryOperator("\\/", 160, LEFT, "union"),
+		new BinaryOperator("\\|/", 160, LEFT, "restriction of sequence"),
+		new BinaryOperator("^", 160, LEFT, "concatenation"),
+		new BinaryOperator("mod", 190, LEFT, "modulo"),
+		new BinaryOperator("|->", 160, LEFT, "maplet"),
+		new BinaryOperator("|>", 160, LEFT, "range restriction"),
+		new BinaryOperator("|>>", 160, LEFT, "range subtraction"),
+		new BinaryOperator("||", 20, LEFT, "relational parallel product")
+	));
 
 	private final String symbol;
 	private final int priority;
@@ -67,6 +52,19 @@ public final class BinaryOperator {
 		this.priority = priority;
 		this.associatifity = associatifity;
 		this.name = name;
+	}
+
+	public static String createTripleExpr(final String op1, final String op2) {
+		return "(A " + op1 + " B " + op2 + " C)";
+	}
+
+	public static String createTripleExprLeft(final String op1, final String op2) {
+		return "((A " + op1 + " B) " + op2 + " C)";
+	}
+
+	public static String createTripleExprRight(final String op1,
+			final String op2) {
+		return "(A " + op1 + " (B " + op2 + " C))";
 	}
 
 	public String getSymbol() {

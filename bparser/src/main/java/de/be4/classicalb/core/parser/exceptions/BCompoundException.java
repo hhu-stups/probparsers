@@ -17,12 +17,12 @@ public class BCompoundException extends Exception {
 	private final List<BException> exceptions = new ArrayList<>();
 
 	public BCompoundException(List<BException> list) {
-		super(list.get(0).getLocalizedMessage(), list.get(0));
+		super(list.get(0).getMessage(), list.get(0));
 		this.exceptions.addAll(list);
 	}
 
 	public BCompoundException(BException bException) {
-		super(bException.getLocalizedMessage(), bException);
+		super(bException.getMessage(), bException);
 		this.exceptions.add(bException);
 	}
 
