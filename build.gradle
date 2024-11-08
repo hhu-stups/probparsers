@@ -23,8 +23,6 @@ plugins {
 }
 
 apply plugin: 'java-library'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
