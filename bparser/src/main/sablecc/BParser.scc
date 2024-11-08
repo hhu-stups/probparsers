@@ -158,7 +158,9 @@ Tokens
   {start->block_comment,normal->block_comment} unrecognised_pragma = pragma_prefix;
 
   // content of description pragma
-  {pragma_description_content} pragma_free_text = [all_chars - '*']* | '*';
+  // A single pragma_free_text token is either all whitespace or all non-whitespace.
+  // This simplifies removing leading/trailing whitespace from the description text later.
+  {pragma_description_content} pragma_free_text = [[all_chars - '*'] - [line_break + layout_char]]* | '*' | white_space;
 
   // the pragma_content state collects attributes for label and file pragmas
   {pragma_content} pragma_id_or_string = string_literal | pragma_identifier_literal;

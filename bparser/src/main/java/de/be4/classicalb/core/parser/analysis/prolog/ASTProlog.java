@@ -35,7 +35,10 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
 			"description_event", // for ADescriptionEvent
-			"description_operation", "event", "freetype",
+			"description_operation",
+			"description_pragma",
+			"event",
+			"freetype",
 			"machine_header", "machine_reference", "operation",
 			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
@@ -129,6 +132,16 @@ public class ASTProlog extends DepthFirstAdapter {
 	private void printPositionRange(Node startNode, Node endNode) {
 		if (positionPrinter != null) {
 			positionPrinter.printPositionRange(startNode, endNode);
+		} else {
+			pout.printAtom("none");
+		}
+	}
+
+	private void printPositionRange(List<? extends Node> nodes, Node fallback) {
+		if (!nodes.isEmpty()) {
+			printPositionRange(nodes.get(0), nodes.get(nodes.size() - 1));
+		} else if (fallback != null) {
+			printPosition(fallback);
 		} else {
 			pout.printAtom("none");
 		}
@@ -268,7 +281,7 @@ public class ASTProlog extends DepthFirstAdapter {
 			throw new IllegalArgumentException("There must be at least one token in a dotted identifier list");
 		}
 		pout.openTerm("identifier");
-		printPositionRange(identifierParts.get(0), identifierParts.get(identifierParts.size() - 1));
+		printPositionRange(identifierParts, null);
 		printIdentifier(identifierParts);
 		pout.closeTerm();
 	}
@@ -479,9 +492,13 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseADescriptionPragma(ADescriptionPragma node) {
-		// Print descriptions as a single atom for backwards compatibility.
-		// In the future, we may want to print position pragmas as proper nodes with position info.
+		pout.openTerm("description_text");
+		// If possible, print the position of the description text itself,
+		// not the entire description pragma.
+		printPositionRange(node.getParts(), node);
+		// Print all description parts as a single atom for now, until we support parsing template parameters.
 		pout.printAtom(node.getParts().stream().map(Token::getText).collect(Collectors.joining()));
+		pout.closeTerm();
 	}
 
 	// definition

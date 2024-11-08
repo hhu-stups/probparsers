@@ -14,7 +14,7 @@ public class PragmaTest {
 	public void testLexer() throws BCompoundException {
 		String input = "MACHINE foo CONSTANTS c /*@ desc konstante nummero uno */ PROPERTIES c = 5  VARIABLES x /*@ desc Hallo du variable */ INVARIANT x=1 INITIALISATION x:= 1 END";
 		final String result = Helpers.getMachineAsPrologTerm(input);
-		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,foo,[]),[constants(none,[description(none,'konstante nummero uno',identifier(none,c))]),properties(none,equal(none,identifier(none,c),integer(none,5))),variables(none,[description(none,'Hallo du variable',identifier(none,x))]),invariant(none,equal(none,identifier(none,x),integer(none,1))),initialisation(none,assign(none,[identifier(none,x)],[integer(none,1)]))])).", result);
+		assertEquals("machine(abstract_machine(none,machine(none),machine_header(none,foo,[]),[constants(none,[description(none,description_text(none,'konstante nummero uno'),identifier(none,c))]),properties(none,equal(none,identifier(none,c),integer(none,5))),variables(none,[description(none,description_text(none,'Hallo du variable'),identifier(none,x))]),invariant(none,equal(none,identifier(none,x),integer(none,1))),initialisation(none,assign(none,[identifier(none,x)],[integer(none,1)]))])).", result);
 	}
 
 	@Test

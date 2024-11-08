@@ -3,7 +3,6 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.analysis.OptimizedTraversingAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
@@ -12,9 +11,6 @@ import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
-	private static final Pattern LEADING_WHITESPACE_PATTERN = Pattern.compile("^\\s+");
-	private static final Pattern TRAILING_WHITESPACE_PATTERN = Pattern.compile("\\s+$");
-
 	/**
 	 * Cleans up the text contents of description pragma nodes by removing any whitespace surrounding the description.
 	 *
@@ -22,16 +18,16 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	 */
 	@Override
 	public void caseADescriptionPragma(ADescriptionPragma node) {
-		if (!node.getParts().isEmpty()) {
-			// Remove leading whitespace from first token.
-			// (can be replaced with String.stripLeading once we require Java 11)
-			TPragmaFreeText firstPart = node.getParts().get(0);
-			firstPart.setText(LEADING_WHITESPACE_PATTERN.matcher(firstPart.getText()).replaceAll(""));
+		// Note: The grammar is defined so that a single TPragmaFreeText token is either all whitespace or all non-whitespace.
 
-			// Remove trailing whitespace from last token.
-			// (can be replaced with String.stripTrailing once we require Java 11)
-			TPragmaFreeText lastPart = node.getParts().get(node.getParts().size() - 1);
-			lastPart.setText(TRAILING_WHITESPACE_PATTERN.matcher(lastPart.getText()).replaceAll(""));
+		// Remove leading whitespace tokens.
+		while (!node.getParts().isEmpty() && node.getParts().get(0).getText().trim().isEmpty()) {
+			node.getParts().remove(0);
+		}
+
+		// Remove trailing whitespace tokens.
+		while (!node.getParts().isEmpty() && node.getParts().get(node.getParts().size() - 1).getText().trim().isEmpty()) {
+			node.getParts().remove(node.getParts().size() - 1);
 		}
 	}
 
