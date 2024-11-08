@@ -137,6 +137,16 @@ public class ASTProlog extends DepthFirstAdapter {
 		}
 	}
 
+	private void printPositionRange(List<? extends Node> nodes, Node fallback) {
+		if (!nodes.isEmpty()) {
+			printPositionRange(nodes.get(0), nodes.get(nodes.size() - 1));
+		} else if (fallback != null) {
+			printPosition(fallback);
+		} else {
+			pout.printAtom("none");
+		}
+	}
+
 	/**
 	 * The counterpart to {@link #open(Node)}, prints the closing parenthesis of
 	 * the term.
@@ -271,7 +281,7 @@ public class ASTProlog extends DepthFirstAdapter {
 			throw new IllegalArgumentException("There must be at least one token in a dotted identifier list");
 		}
 		pout.openTerm("identifier");
-		printPositionRange(identifierParts.get(0), identifierParts.get(identifierParts.size() - 1));
+		printPositionRange(identifierParts, null);
 		printIdentifier(identifierParts);
 		pout.closeTerm();
 	}
@@ -482,10 +492,13 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseADescriptionPragma(ADescriptionPragma node) {
-		open(node);
+		pout.openTerm("description_text");
+		// If possible, print the position of the description text itself,
+		// not the entire description pragma.
+		printPositionRange(node.getParts(), node);
 		// Print all description parts as a single atom for now, until we support parsing template parameters.
 		pout.printAtom(node.getParts().stream().map(Token::getText).collect(Collectors.joining()));
-		close(node);
+		pout.closeTerm();
 	}
 
 	// definition

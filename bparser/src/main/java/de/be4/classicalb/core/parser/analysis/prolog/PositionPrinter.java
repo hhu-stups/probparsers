@@ -42,7 +42,7 @@ public interface PositionPrinter {
 		// (and probably implement printPosition(node) using printPositionRange(node, node), not the other way around).
 		// We use endNode instead of startNode as the fallback,
 		// because this gives better results for dotted identifiers,
-		// which are currently the only case where this method is used.
+		// which are currently the main use case for this method.
 		this.printPosition(endNode);
 	}
 }
