@@ -18,6 +18,7 @@ import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
@@ -299,11 +300,19 @@ public class SourcePositionsTest {
 		// so the identifier gets the same end column as the entire pragma expression.
 		assertEquals(34, y.getEndPos().getPos());
 
-		// the description of variable y
+		// the description pragma for variable y
 		assertEquals(4, yDesc.getStartPos().getLine());
 		assertEquals(5, yDesc.getStartPos().getPos());
 		assertEquals(4, yDesc.getEndPos().getLine());
 		assertEquals(34, yDesc.getEndPos().getPos());
+
+		// the description text for variable y
+		TPragmaFreeText yDescFirstPart = yDesc.getParts().get(0);
+		assertEquals(4, yDescFirstPart.getStartPos().getLine());
+		assertEquals(13, yDescFirstPart.getStartPos().getPos());
+		TPragmaFreeText yDescLastPart = yDesc.getParts().get(yDesc.getParts().size() - 1);
+		assertEquals(4, yDescLastPart.getEndPos().getLine());
+		assertEquals(31, yDescLastPart.getEndPos().getPos());
 
 		// variable z
 		assertEquals(5, z.getStartPos().getLine());
