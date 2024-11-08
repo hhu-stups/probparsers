@@ -42,7 +42,7 @@ You can also use the JAR probcliparser.jar built for ProB and distributed with P
 Here is how to obtain help for using the command-line parser:
 ```
 $ java -jar probcliparser.jar --help
-BParser (version 2.13.5-SNAPSHOT, commit bab2ba06ace23f4460d63fdbc94b06c916ca6f30)
+BParser (version 2.13.5, commit 0d922cf55c3d019b40f71170e97197979a02ae8e)
 usage: java -jar probcliparser.jar [options] <BMachine file>
 
 Available options are:
