@@ -781,16 +781,6 @@ predicate_p60 {-> predicate} =
   {next_level} [pred]:predicate_x60 {-> pred.predicate};
 predicate_x60 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
 
-/* The predicates of the following levels have completely moved down to the atomic level:
-predicate_p110 {-> predicate} =
-  {next_level} [pred]:predicate_x110 {-> pred.predicate};
-predicate_x110 {-> predicate} = [pred]:predicate_p160 {-> pred.predicate};
-
-predicate_p160 {-> predicate} =
-  {next_level} [pred]:predicate_x160 {-> pred.predicate};
-predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
-*/
-
 predicate_atomic {-> predicate} =
   // lhs_expression should really be assign_list and not expression_list,
   // but that causes reduce/reduce conflicts with sequence extensions.
@@ -881,11 +871,6 @@ expression_top_with_opt_desc {-> expression} =
 
 /* expressions top,  without ; and || */
 expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
-
-/*expression_p20 {-> expression} =
-  {parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschraenkt?!?
-  {next_level} [expr]:expression_x20 {-> expr.expression};
-expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */
 
 // Priority 125:
 expression_p125 {-> expression} =
