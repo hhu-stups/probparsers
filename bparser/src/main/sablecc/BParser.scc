@@ -772,14 +772,12 @@ predicate_x40 {-> predicate} =
 predicate_x41 {-> predicate} =
   {description} [predicate]:predicate_p60 [description]:description_pragma
       {-> New predicate.description(description.description_pragma, predicate.predicate)} |
-  {next_level} [pred]:predicate_x42
+  {next_level} [pred]:predicate_p60
       {-> pred.predicate};
-predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
-  {equivalence} [left]:predicate_p60 equivalence [right]:predicate_x60 {-> New predicate.equivalence(left.predicate, right.predicate)} |
-  {next_level} [pred]:predicate_x60 {-> pred.predicate};
-predicate_x60 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
+  {equivalence} [left]:predicate_p60 equivalence [right]:predicate_atomic {-> New predicate.equivalence(left.predicate, right.predicate)} |
+  {next_level} [pred]:predicate_atomic {-> pred.predicate};
 
 predicate_atomic {-> predicate} =
   // lhs_expression should really be assign_list and not expression_list,
