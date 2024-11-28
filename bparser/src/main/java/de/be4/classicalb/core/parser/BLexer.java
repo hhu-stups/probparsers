@@ -328,7 +328,7 @@ public class BLexer extends Lexer {
 	private ParseOptions parseOptions = null;
 
 	private Token lastToken;
-	private TComment currentBlockCommentStart;
+	private Token currentBlockCommentStart;
 
 	public BLexer(final PushbackReader in, final DefinitionTypes definitions) {
 		super(in);
@@ -422,8 +422,8 @@ public class BLexer extends Lexer {
 			applyGrammarExtension();
 			findSyntaxError(); // check for invalid combinations, ...
 		} else if (state.equals(State.BLOCK_COMMENT)) {
-			if (token instanceof TComment) {
-				currentBlockCommentStart = (TComment)token;
+			if (token instanceof TComment || token instanceof TUnrecognisedPragma) {
+				currentBlockCommentStart = token;
 			} else if (token instanceof EOF) {
 				throw new BLexerException(currentBlockCommentStart, "Comment not closed.");
 			}

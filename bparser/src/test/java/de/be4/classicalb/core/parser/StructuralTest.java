@@ -181,6 +181,16 @@ public class StructuralTest {
 	}
 
 	@Test
+	public void testUnclosedUnknownPragma() {
+		String testMachine = "MACHINE ClassicalB\n SETS pp ; qq\n /*@supercalifragilisticexpialidocious CONSTANTS ccc,ddd\n VARIABLES xxx,yyy\n OPERATIONS\n  op1 = BEGIN xxx := 1; v <-- op2(2) END;\n  op2 = ANY q WHERE q : NAT THEN yyy := ccc END\nEND";
+		BLexerException ex = Helpers.assertThrowsCompound(BLexerException.class, () -> Helpers.getMachineAsPrologTerm(testMachine));
+		// checking the start position of the comment
+		assertEquals(3, ex.getLastLine());
+		assertEquals(2, ex.getLastPos());
+		assertTrue(ex.getMessage().contains("Comment not closed."));
+	}
+
+	@Test
 	public void testList1() throws BCompoundException {
 		String testSubstitution = "IF 1=1 THEN skip ELSIF 1=2 THEN skip ELSIF 1=3 THEN skip END";
 		String result = Helpers.getSubstitutionAsPrologTerm(testSubstitution);
