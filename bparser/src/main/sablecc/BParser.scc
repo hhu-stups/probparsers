@@ -858,7 +858,7 @@ expression_top_with_opt_desc {-> expression} =
   {description} [expression]:expression_top [description]:description_pragma
         /* we allow descriptions for expressions, can be used when no ambiguity (e.g., with predicate desc) possible */
       {-> New expression.description(description.description_pragma, expression.expression)} |
-  {next_level} [expr]:expression_p125
+  {next_level} [expr]:expression_top
      {-> expr.expression};
 
 /* expressions top,  without ; and || */
