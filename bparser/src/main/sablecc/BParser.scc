@@ -843,14 +843,6 @@ if_elseif_predicate {-> predicate} =
 /* expression_in_par contains the priority level 20, it is not considered as expression_top
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
-  {description} [expression]:expression_in_par2 [description]:description_pragma
-        /* we allow descriptions for expressions in parentheses; no ambiguity possible */
-      {-> New expression.description(description.description_pragma, expression.expression)} |
-  {next_level} [expr]:expression_in_par2
-     {-> expr.expression};
-
-/* expressions inside (.) allowing ; and || operators */
-expression_in_par2 {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top
      {-> New expression.composition(left.expression, right.expression)} |
   {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top
