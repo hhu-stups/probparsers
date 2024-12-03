@@ -862,7 +862,19 @@ expression_top_with_opt_desc {-> expression} =
      {-> expr.expression};
 
 /* expressions top,  without ; and || */
-expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
+expression_top {-> expression} = [expr]:expression_oftype {-> expr.expression};
+
+expression_oftype {-> expression} =
+  // Event-B/Rodin oftype expression.
+  // Rodin's parsing rules for this operator are a bit complex -
+  // see class org.eventb.internal.core.parser.SubParsers.OftypeParser in the project org.eventb.core.ast in the Rodin source code.
+  // Rodin only allows typeof after a type-generic expression (∅, id, prj1, etc.).
+  // We cannot enforce this precisely at the parsing stage,
+  // so we allow the left side to be any expression_keyword (which contains @prj1 and @prj2).
+  // Rodin allows the right side to be any type expression unparenthesized,
+  // so typeof must have lower priority than the relation operator (A <-> B).
+  {typeof} [left]:expression_keyword oftype [right]:expression_p125 {-> New expression.typeof(left.expression, right.expression)} |
+  {next_level} [expr]:expression_p125 {-> expr.expression};
 
 // Priority 125:
 expression_p125 {-> expression} =
@@ -922,13 +934,8 @@ expression_p190 {-> expression} =
 // Priority 200:
 /* Attention: power_of is right-assoziative! */
 expression_p200 {-> expression} =
-  {power_of} [left]:expression_x200 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
-  {next_level} [expr]:expression_x200 {-> expr.expression};
-
-// Priority 201: CHECK IF Correct place for oftype
-expression_x200 {-> expression} =
-  {typeof} [left]:expression_p210 oftype [right]:expression_p210 {-> New expression.typeof(left.expression, right.expression)} | // TODO: check priority and nesting that should be allowed
-  [expr]:expression_p210 {-> expr.expression};
+  {power_of} [left]:expression_p210 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
+  {next_level} [expr]:expression_p210 {-> expr.expression};
 
 // Priority 210:
 expression_p210 {-> expression} =
