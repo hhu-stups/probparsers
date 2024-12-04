@@ -136,7 +136,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void writeInternal(String s) {
-		if (s == null || s.isEmpty()) {
+		if (s.isEmpty()) {
 			return;
 		}
 
@@ -158,7 +158,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void print(String s) {
-		if (s == null || s.isEmpty()) {
+		if (s.isEmpty()) {
 			return;
 		}
 
