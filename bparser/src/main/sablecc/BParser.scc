@@ -862,9 +862,12 @@ expression_top_with_opt_desc {-> expression} =
      {-> expr.expression};
 
 /* expressions top,  without ; and || */
-expression_top {-> expression} = [expr]:expression_oftype {-> expr.expression};
+expression_top {-> expression} = [expr]:expression_p120 {-> expr.expression};
 
-expression_oftype {-> expression} =
+// Note: In Atelier B, the comma has priority 115, so all expressions should have a higher priority than that.
+
+// Priority 120 (not supported by Atelier B)
+expression_p120 {-> expression} =
   // Event-B/Rodin oftype expression.
   // Rodin's parsing rules for this operator are a bit complex -
   // see class org.eventb.internal.core.parser.SubParsers.OftypeParser in the project org.eventb.core.ast in the Rodin source code.

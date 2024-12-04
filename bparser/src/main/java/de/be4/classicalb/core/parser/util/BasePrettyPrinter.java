@@ -25,7 +25,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		prio.put(ADisjunctPredicate.class, 40);
 		prio.put(AConjunctPredicate.class, 40);
 		prio.put(AEquivalencePredicate.class, 60);
-		prio.put(ATypeofExpression.class, 100);
+		prio.put(ATypeofExpression.class, 120);
 		prio.put(ARelationsExpression.class, 125);
 		prio.put(APartialFunctionExpression.class, 125);
 		prio.put(ATotalFunctionExpression.class, 125);
