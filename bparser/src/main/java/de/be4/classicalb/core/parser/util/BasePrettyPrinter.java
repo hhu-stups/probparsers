@@ -25,6 +25,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		prio.put(ADisjunctPredicate.class, 40);
 		prio.put(AConjunctPredicate.class, 40);
 		prio.put(AEquivalencePredicate.class, 60);
+		prio.put(ATypeofExpression.class, 100);
 		prio.put(ARelationsExpression.class, 125);
 		prio.put(APartialFunctionExpression.class, 125);
 		prio.put(ATotalFunctionExpression.class, 125);
@@ -2155,6 +2156,16 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseARecordFieldExpression(final ARecordFieldExpression node) {
 		applyLeftAssociative(node.getRecord(), node, node.getIdentifier(), "'");
+	}
+
+	@Override
+	public void caseATypeofExpression(ATypeofExpression node) {
+		// Technically, the oftype operator has no associativity in our parser,
+		// but there are no other operators on the same precedence level
+		// and chaining typeof operators in either direction is semantically invalid,
+		// so it doesn't really matter.
+		// Right associativity matches our grammar better though.
+		applyRightAssociative(node.getExpression(), node, node.getType(), "⦂");
 	}
 
 	@Override

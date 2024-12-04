@@ -405,6 +405,10 @@ public class PrettyPrinterTest {
 				"LET x /*@desc thing */ BE x=1 IN x END",
 				"x-x$0",
 				"1.0+2.3",
+				"{} ⦂ POW(INTEGER ** INTEGER)",
+				"{} ⦂ INTEGER <-> INTEGER",
+				"@prj1 ⦂ INTEGER <-> INTEGER",
+				"@prj2 ⦂ INTEGER <-> INTEGER",
 			};
 		}
 
