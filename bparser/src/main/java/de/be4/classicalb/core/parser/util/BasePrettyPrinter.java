@@ -135,7 +135,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		}
 	}
 
-	private void _write(String s) {
+	private void writeInternal(String s) {
 		if (s == null || s.isEmpty()) {
 			return;
 		}
@@ -166,13 +166,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 			this.printIndent();
 		}
 
-		this._write(s);
+		this.writeInternal(s);
 	}
 
 	private void printIndent() {
 		if (this.isUseIndentation()) {
 			for (int i = 0; i < this.indentLevel; i++) {
-				this._write(this.indent);
+				this.writeInternal(this.indent);
 			}
 		}
 	}
