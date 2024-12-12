@@ -157,16 +157,18 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
-		final String identifierString = Utils.getTIdentifierListAsString(node.getIdentifier());
+		if (node.getIdentifier().size() != 1) {
+			// If it's a composed identifier, it cannot be a definition name.
+			return;
+		}
+
+		TIdentifierLiteral identifier = node.getIdentifier().get(0);
+		String identifierString = identifier.getText();
 		final Type type = definitions.getType(identifierString);
 
 		if (type != Type.NoDefinition) {
 			if (type == Type.Expression || type == Type.ExprOrSubst) {
-				/*
-				 * getFirst() is enough cause definitions cannot have composed
-				 * identifiers
-				 */
-				replaceWithDefExpression(node, node.getIdentifier().getFirst(), null);
+				replaceWithDefExpression(node, identifier, null);
 
 				if (type == Type.ExprOrSubst) {
 					// type is determined now => set to Expression
