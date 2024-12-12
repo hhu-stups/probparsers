@@ -7,18 +7,15 @@ import java.util.List;
 import de.be4.classicalb.core.parser.Definitions;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.IDefinitions.Type;
+import de.be4.classicalb.core.parser.PreParser;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.node.ADefinitionExpression;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
-import de.be4.classicalb.core.parser.node.AFunctionExpression;
-import de.be4.classicalb.core.parser.node.AIdentifierExpression;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
-import de.be4.classicalb.core.parser.node.PExpression;
 import de.be4.classicalb.core.parser.node.Start;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
@@ -66,17 +63,7 @@ public class DefinitionCollector extends MachineClauseAdapter {
 			@Override
 			public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
 				final String defName = node.getName().getText();
-				final PExpression rhs = node.getRhs();
-				final Type type;
-				if (
-					rhs instanceof AIdentifierExpression
-					|| rhs instanceof AFunctionExpression
-					|| rhs instanceof ADefinitionExpression
-				) {
-					type = Type.ExprOrSubst;
-				} else {
-					type = Type.Expression;
-				}
+				Type type = PreParser.getExpressionDefinitionRhsType(node.getRhs());
 				addDefinition(node, type, defName);
 			}
 		});

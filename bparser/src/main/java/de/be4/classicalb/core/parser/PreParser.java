@@ -17,6 +17,7 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
+import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
@@ -370,6 +371,28 @@ public class PreParser {
 	}
 
 	/**
+	 * In some cases, we cannot decide during preparsing and parsing
+	 * whether the RHS of a definition is an expression or a substitution.
+	 * Function and operation calls are syntactically the same in most cases,
+	 * so a definition containing only an operation call will usually be detected as an expression.
+	 * Such definitions must have their type corrected later - see {@link OpSubstitutions}.
+	 * 
+	 * @param rhs the right-hand side of the expression definition to check
+	 * @return the type of the definition
+	 */
+	public static IDefinitions.Type getExpressionDefinitionRhsType(PExpression rhs) {
+		if (
+			rhs instanceof AIdentifierExpression
+			|| rhs instanceof AFunctionExpression
+			|| rhs instanceof ADefinitionExpression
+		) {
+			return IDefinitions.Type.ExprOrSubst;
+		} else {
+			return IDefinitions.Type.Expression;
+		}
+	}
+
+	/**
 	 * Try to determine the abstract type of the right-hand side of a definition,
 	 * i. e. whether it's an expression, a predicate, or a substitution.
 	 * If the right-hand side references other definitions,
@@ -413,14 +436,7 @@ public class PreParser {
 				return new DefinitionType();
 			}
 
-			PExpression expression = expressionParseUnit.getExpression();
-			if ((expression instanceof AIdentifierExpression) || (expression instanceof AFunctionExpression)
-					|| (expression instanceof ADefinitionExpression)) {
-				return new DefinitionType(IDefinitions.Type.ExprOrSubst);
-			}
-
-			return new DefinitionType(IDefinitions.Type.Expression);
-
+			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
 		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
 			errorToken = e.getToken();
 			try {
