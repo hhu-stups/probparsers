@@ -424,7 +424,7 @@ public class PreParser {
 		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
 			errorToken = e.getToken();
 			try {
-			    // try parsing the RHS now as a substitution:
+				// try parsing the RHS now as a substitution:
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
