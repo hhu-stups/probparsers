@@ -24,6 +24,8 @@ import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 
+import static de.be4.classicalb.core.parser.util.ASTBuilder.createAIdentifierExpression;
+
 /*
  * This class checks that all extensions for the rules language are used in a correct way
  */
@@ -173,14 +175,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		for (PFreetype freetype : node.getFreetypes()) {
 			if (freetype instanceof AFreetype) {
 				AFreetype aFreetype = (AFreetype) freetype;
-				identifiers.add(ASTBuilder.createAIdentifierExpression(aFreetype.getName()));
+				identifiers.add(createAIdentifierExpression(aFreetype.getName()));
 				for (PFreetypeConstructor freetypeConstructor : aFreetype.getConstructors()) {
 					if (freetypeConstructor instanceof AElementFreetypeConstructor) {
 						TIdentifierLiteral identifier = ((AElementFreetypeConstructor) freetypeConstructor).getName();
-						identifiers.add(ASTBuilder.createAIdentifierExpression(identifier));
+						identifiers.add(createAIdentifierExpression(identifier));
 					} else if (freetypeConstructor instanceof AConstructorFreetypeConstructor) {
 						TIdentifierLiteral identifier = ((AConstructorFreetypeConstructor) freetypeConstructor).getName();
-						identifiers.add(ASTBuilder.createAIdentifierExpression(identifier));
+						identifiers.add(createAIdentifierExpression(identifier));
 					}
 				}
 			}

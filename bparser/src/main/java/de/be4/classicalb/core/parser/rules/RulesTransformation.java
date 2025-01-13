@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -15,7 +14,10 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.ASTBuilder;
 import de.be4.classicalb.core.parser.util.Utils;
+
+import static de.be4.classicalb.core.parser.util.ASTBuilder.*;
 
 public class RulesTransformation extends DepthFirstAdapter {
 

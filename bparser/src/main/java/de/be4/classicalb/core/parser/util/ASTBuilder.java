@@ -1,4 +1,4 @@
-package de.be4.classicalb.core.parser.rules;
+package de.be4.classicalb.core.parser.util;
 
 import java.util.*;
 

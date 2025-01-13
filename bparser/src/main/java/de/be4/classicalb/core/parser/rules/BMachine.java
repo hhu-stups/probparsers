@@ -33,8 +33,8 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.prob.prolog.output.IPrologTermOutput;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.createConjunction;
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.createIdentifier;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.createConjunction;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.createIdentifier;
 
 public class BMachine implements IModel {
 	private final String machineName;
