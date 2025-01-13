@@ -8,6 +8,10 @@ import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+/**
+ * contains auxiliary methods for AST creation,
+ * used by rules transformation and TLA2B
+ */
 public final class ASTBuilder {
 
 	public static final String FORCE = "FORCE";
@@ -24,17 +28,29 @@ public final class ASTBuilder {
 	}
 
 	public static PPredicate createConjunction(List<PPredicate> predList) {
-		if (predList.isEmpty()) {
-			throw new AssertionError();
-		} else if (predList.size() == 1) {
-			return predList.get(0);
-		} else {
-			PPredicate p = predList.get(0);
-			for (int i = 1; i < predList.size(); i++) {
-				p = new AConjunctPredicate(p, predList.get(i));
-			}
-			return p;
+		if (predList.isEmpty())
+			throw new AssertionError("Conjunction list must contain at least one predicate.");
+		else if (predList.size() == 1)
+			return predList.get(0).clone();
+
+		PPredicate conj = new AConjunctPredicate(predList.get(0).clone(), predList.get(1).clone());
+		for (int i = 2; i < predList.size(); i++) {
+			conj = new AConjunctPredicate(conj, predList.get(i).clone());
 		}
+		return conj;
+	}
+
+	public static PPredicate createDisjunction(List<PPredicate> predList) {
+		if (predList.isEmpty())
+			throw new AssertionError("Disjunction list must contain at least one predicate.");
+		else if (predList.size() == 1)
+			return predList.get(0).clone();
+
+		PPredicate disjunction = new ADisjunctPredicate(predList.get(0).clone(), predList.get(1).clone());
+		for (int i = 2; i < predList.size(); i++) {
+			disjunction = new ADisjunctPredicate(disjunction, predList.get(i).clone());
+		}
+		return disjunction;
 	}
 
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
@@ -52,14 +68,25 @@ public final class ASTBuilder {
 	}
 
 	public static PExpression createNestedCouple(List<PExpression> pExpressions) {
-		if (pExpressions.size() == 1) {
-			return pExpressions.get(0);
+		if (pExpressions.isEmpty())
+			throw new AssertionError("Couple list must contain at least one expression.");
+		else if (pExpressions.size() == 1)
+			return pExpressions.get(0).clone();
+
+		return new ACoupleExpression(pExpressions.stream().map(PExpression::clone).collect(Collectors.toList()));
+	}
+
+	public static PExpression createNestedMultOrCard(List<PExpression> pExpressions) {
+		if (pExpressions.isEmpty())
+			throw new AssertionError("MultOrCard list must contain at least one expression.");
+		else if (pExpressions.size() == 1)
+			return pExpressions.get(0).clone();
+
+		AMultOrCartExpression card = new AMultOrCartExpression(pExpressions.get(0).clone(), pExpressions.get(1).clone());
+		for (int i = 2; i < pExpressions.size(); i++) {
+			card = new AMultOrCartExpression(card, pExpressions.get(i).clone());
 		}
-		final ArrayList<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add(pExpression.clone());
-		}
-		return new ACoupleExpression(list);
+		return card;
 	}
 
 	public static PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2,
