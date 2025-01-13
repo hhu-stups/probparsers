@@ -54,17 +54,11 @@ public final class ASTBuilder {
 	}
 
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add(pExpression.clone());
-		return createPositionedNode(new ASetExtensionExpression(list), pos);
+		return createPositionedNode(createSetOfPExpression(pExpression), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add(pExpression.clone());
-		}
-		return new ASetExtensionExpression(list);
+		return new ASetExtensionExpression(Arrays.stream(pExpressions).map(PExpression::clone).collect(Collectors.toList()));
 	}
 
 	public static PExpression createNestedCouple(List<PExpression> pExpressions) {
