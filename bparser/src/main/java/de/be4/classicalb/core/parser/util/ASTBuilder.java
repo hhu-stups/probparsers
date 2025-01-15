@@ -14,6 +14,7 @@ import de.hhu.stups.sablecc.patch.SourcePosition;
  */
 public final class ASTBuilder {
 
+	public static final String ASSERT_TRUE = "ASSERT_TRUE";
 	public static final String FORCE = "FORCE";
 	public static final String STRING_APPEND = "STRING_APPEND";
 	public static final String CHOOSE = "CHOOSE";
@@ -103,7 +104,15 @@ public final class ASTBuilder {
 	}
 
 	public static AIntegerExpression createIntegerExpression(int i) {
-		return new AIntegerExpression(new TIntegerLiteral(Integer.toString(i)));
+		return createIntegerExpression(Integer.toString(i));
+	}
+
+	public static AIntegerExpression createIntegerExpression(String i) {
+		return new AIntegerExpression(new TIntegerLiteral(i));
+	}
+
+	public static ARealExpression createRealExpression(String r) {
+		return new ARealExpression(new TRealLiteral(r));
 	}
 
 	public static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
@@ -260,6 +269,25 @@ public final class ASTBuilder {
 				new AMultOrCartExpression(new AStringSetExpression(), new ASeqExpression(createIdentifier("T"))),
 				new AStringSetExpression()));
 		iDefinitions.addDefinition(formatType, IDefinitions.Type.Expression);
+	}
+
+	public static void addAssertTrueDefinition(IDefinitions iDefinitions) {
+		if (iDefinitions.containsDefinition(ASSERT_TRUE)) {
+			return;
+		}
+		APredicateDefinitionDefinition assertDef = new APredicateDefinitionDefinition(
+				new TDefLiteralPredicate(ASSERT_TRUE),
+				Arrays.asList(createIdentifier("P"), createIdentifier("Msg")),
+				new ATruthPredicate()
+		);
+		iDefinitions.addDefinition(assertDef, IDefinitions.Type.Predicate);
+
+		AExpressionDefinitionDefinition assertType = new AExpressionDefinitionDefinition(
+				new TIdentifierLiteral("EXTERNAL_PREDICATE_" + ASSERT_TRUE),
+				new ArrayList<>(),
+				new AMultOrCartExpression(new ABoolSetExpression(), new AStringSetExpression())
+		);
+		iDefinitions.addDefinition(assertType, IDefinitions.Type.Expression);
 	}
 
 	private static void addPreferenceDefinition(IDefinitions iDefinitions, String name, PExpression value) {
