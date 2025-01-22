@@ -829,13 +829,13 @@ predicate_atomic {-> predicate} =
   |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
   |
-  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elseif_predicate* else [else_pred]:predicate_top end
+  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elsif_predicate* else [else_pred]:predicate_top end
     {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, [elsifs.predicate], else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
   {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
 
-if_elseif_predicate {-> predicate} =
+if_elsif_predicate {-> predicate} =
   elsif [condition]:predicate_top then [pred]:predicate_top {-> New predicate.if_elsif_predicate(condition.predicate, pred.predicate)};
 
 /* Expressions */
@@ -1093,14 +1093,14 @@ expression_atomic {-> expression} =
   {nat1_set} nat1 {-> New expression.nat1_set()} |
   {int_set} int {-> New expression.int_set()} |
   {bool_set} bool {-> New expression.bool_set()} |
-  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elseif_expression* else [else_expr]:expression_top_with_opt_desc end
+  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elsif_expr* else [else_expr]:expression_top_with_opt_desc end
      // Note: one could allow expression_or_id_list here w/o creating shift/reduce conflicts
     {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
   {let_expression} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [expr]:expression_top_with_opt_desc end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
   {string_set} string {-> New expression.string_set()};
 
-if_elseif_expression {-> expression} =
+if_elsif_expr {-> expression} =
   elsif [condition]:predicate_top then [expr]:expression_top_with_opt_desc {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
 
 expression_list {-> expression*} =
