@@ -2488,7 +2488,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		printlnOpt();
 		if (node.getErrorType() != null) {
 			print("ERROR_TYPE ");
-			node.getErrorType().apply(this);
+			print(node.getErrorType().getText());
 			printlnOpt();
 		}
 		indent();
@@ -2517,7 +2517,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		}
 		if (node.getErrorType() != null) {
 			print("ERROR_TYPE ");
-			node.getErrorType().apply(this);
+			print(node.getErrorType().getText());
 			printlnOpt();
 		}
 		indent();
@@ -2596,6 +2596,23 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		print("END");
 	}
 
+	// The following tokens are handled by their surrounding nodes,
+	// so they do *not* have a case below:
+	// * TPragmaFreeText
+	// * TMultilineStringContent
+	// * TStringLiteral
+	// * TIntegerLiteral
+	// * TRealLiteral
+	// * THexLiteral
+
+	@Override
+	public void caseTPragmaIdOrString(TPragmaIdOrString node) {
+		// These may be written with or without quotes.
+		// Unlike regular string literals, the parser doesn't unquote/unescape them though,
+		// so any required quotes are contained in the token and we can print it as-is.
+		print(node.getText());
+	}
+
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
 		print(this.renaming.renameIdentifier(node.getText()));
@@ -2611,12 +2628,35 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		print(this.renaming.renameIdentifier(node.getText()));
 	}
 
+	// The TKw* tokens behave like keywords, so they should not have identifier renaming applied.
+
+	@Override
+	public void caseTKwSubstitutionOperator(TKwSubstitutionOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwPredicateOperator(TKwPredicateOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwExpressionOperator(TKwExpressionOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwPredicateAttribute(TKwPredicateAttribute node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwAttributeIdentifier(TKwAttributeIdentifier node) {
+		print(node.getText());
+	}
+
 	@Override
 	public void defaultCase(final Node node) {
-		if (node instanceof Token) {
-			print(((Token) node).getText());
-		} else {
-			throw new IllegalArgumentException("Node type '" + node.getClass().getSimpleName() + "' not (yet) supported by PrettyPrinter: " + node);
-		}
+		throw new IllegalArgumentException("Node type '" + node.getClass().getSimpleName() + "' not (yet) supported by PrettyPrinter: " + node);
 	}
 }
