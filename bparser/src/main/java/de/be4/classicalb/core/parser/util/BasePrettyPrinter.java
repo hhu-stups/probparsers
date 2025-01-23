@@ -1352,8 +1352,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
-		// special handling because "<-" is recognized as a token
-		boolean par = node.parent() instanceof ALessPredicate;
+		// special handling because "<-" and "<--" are recognized as a token
+		boolean par = node.parent() instanceof ALessPredicate || node.parent() instanceof AInsertTailExpression;
 
 		if (par) {
 			print("(");

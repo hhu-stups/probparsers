@@ -410,6 +410,8 @@ public class PrettyPrinterTest {
 				"{} ⦂ INTEGER <-> INTEGER",
 				"@prj1 ⦂ INTEGER <-> INTEGER",
 				"@prj2 ⦂ INTEGER <-> INTEGER",
+				"[1,2] <- 3",
+				"[1,2] <- -3",
 			};
 		}
 
