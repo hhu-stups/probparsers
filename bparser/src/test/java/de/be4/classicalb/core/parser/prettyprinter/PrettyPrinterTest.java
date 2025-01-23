@@ -83,6 +83,7 @@ public class PrettyPrinterTest {
 				"-5+6",
 				"-5",
 				"-(-5)",
+				"-((-5) * 2)",
 				"-5-6",
 				"-4+5+6",
 				"-4+5-6",
@@ -432,6 +433,10 @@ public class PrettyPrinterTest {
 			return new Object[] {
 				"x<y",
 				"x<(-y)",
+				"x<((-y)*2)",
+				"x<(-((-y)*2))",
+				"x<(-(y*2))",
+				"x<(-(-(y*2)))",
 				"a<b&b<c",
 				"x=y",
 				"x:NAT",

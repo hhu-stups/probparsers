@@ -1110,7 +1110,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseALessPredicate(final ALessPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), "<");
+		// add spaces so there are no confusions with <- operator
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " < ");
 	}
 
 	@Override
@@ -1352,19 +1353,10 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
-		// special handling because "<-" and "<--" are recognized as a token
-		boolean par = node.parent() instanceof ALessPredicate || node.parent() instanceof AInsertTailExpression;
-
-		if (par) {
-			print("(");
-		}
 		print("-");
 		leftPar(node, node.getExpression());
 		node.getExpression().apply(this);
 		rightPar(node, node.getExpression());
-		if (par) {
-			print(")");
-		}
 	}
 
 	@Override
@@ -2009,7 +2001,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAInsertTailExpression(final AInsertTailExpression node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), "<-");
+		// add spaces so there are no confusions with <-- token
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " <- ");
 	}
 
 	@Override
