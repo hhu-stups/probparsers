@@ -436,8 +436,7 @@ public class BParser {
 	 * This is used to resolve definition files and displayed in error messages.
 	 * 
 	 * @param input B machine source code
-	 * @param machineFile file that the source code belongs to,
-	 *     or {@code null} to use the file name passed to the {@link #BParser(String)} constructor
+	 * @param machineFile file that the source code belongs to
 	 * @return the root node of the AST
 	 * @throws BCompoundException if the B code could not be parsed
 	 *     (see {@link BException} for details)
@@ -446,7 +445,7 @@ public class BParser {
 		if (this.contentProvider == null) {
 			this.contentProvider = new CachingDefinitionFileProvider();
 		}
-		return parseWithPreParsing(new StringReader(input), machineFile != null ? machineFile : this.getMachineFile(), this.contentProvider);
+		return parseWithPreParsing(new StringReader(input), machineFile, this.contentProvider);
 	}
 
 	/**
@@ -458,7 +457,7 @@ public class BParser {
 	 *     (see {@link BException} for details)
 	 */
 	public Start parseMachine(String input) throws BCompoundException {
-		return this.parseMachine(input, null);
+		return this.parseMachine(input, this.getMachineFile());
 	}
 
 	private File getMachineFile() {
