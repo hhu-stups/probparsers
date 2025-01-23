@@ -1351,11 +1351,20 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
+	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
+		// special handling because "<-" is recognized as a token
+		boolean par = node.parent() instanceof ALessPredicate;
+
+		if (par) {
+			print("(");
+		}
 		print("-");
-		leftParAssoc(node, node.getExpression());
+		leftPar(node, node.getExpression());
 		node.getExpression().apply(this);
-		rightParAssoc(node, node.getExpression());
+		rightPar(node, node.getExpression());
+		if (par) {
+			print(")");
+		}
 	}
 
 	@Override
