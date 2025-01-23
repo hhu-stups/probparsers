@@ -44,7 +44,7 @@ public class Definitions extends IDefinitions {
 		return getParameterCount(defNode);
 	}
 
-	private int getParameterCount(PDefinition defNode) {
+	private static int getParameterCount(PDefinition defNode) {
 		if (defNode instanceof APredicateDefinitionDefinition)
 			return ((APredicateDefinitionDefinition) defNode).getParameters().size();
 		else if (defNode instanceof ASubstitutionDefinitionDefinition)
@@ -94,7 +94,7 @@ public class Definitions extends IDefinitions {
 		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
-	private String getErrorMessageDefinitionDoesNotExist(String defName) {
+	private static String getErrorMessageDefinitionDoesNotExist(String defName) {
 		return String.format("Definition %s does not exist.", defName);
 	}
 
