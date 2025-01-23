@@ -78,7 +78,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
-	private final File modelFile;
+	private final File machineFile;
 	private final DefinitionTypes definitionTypes;
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
@@ -88,12 +88,12 @@ public class PreParser {
 	private int startLine;
 	private int startColumn;
 
-	public PreParser(PushbackReader pushbackReader, File modelFile,
+	public PreParser(PushbackReader pushbackReader, File machineFile,
 			IFileContentProvider contentProvider,
 			List<String> definitionFileIncludeStack,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
-		this.modelFile = modelFile;
+		this.machineFile = machineFile;
 		this.contentProvider = contentProvider;
 		this.definitionFileIncludeStack = definitionFileIncludeStack;
 		this.parseOptions = parseOptions;
@@ -182,7 +182,7 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					File directory = modelFile == null ? null : modelFile.getParentFile();
+					File directory = machineFile == null ? null : machineFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(fileName, parseOptions);
@@ -253,8 +253,8 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
 				String message = definitionType.errorMessage;
-				if (modelFile != null) {
-					message += " in file: " + modelFile;
+				if (machineFile != null) {
+					message += " in file: " + machineFile;
 				}
 				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message);
 			} else {
