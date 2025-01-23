@@ -172,14 +172,14 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals(2, provider.getContentCounter);
 	}
 
-	public String getFileContent(final String filename) throws IOException {
-		return defFileContents.get(filename);
+	public String getFileContent(final String fileName) throws IOException {
+		return defFileContents.get(fileName);
 	}
 
 	@Override
-	public String getFileContent(File directory, String filename)
+	public String getFileContent(File directory, String fileName)
 			throws IOException {
-		return defFileContents.get(filename);
+		return defFileContents.get(fileName);
 	}
 
 	@Test
@@ -215,25 +215,25 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		private final Map<String, IDefinitions> store = new HashMap<>();
 
 		@Override
-		public IDefinitions getDefinitions(final String filename) {
+		public IDefinitions getDefinitions(final String fileName) {
 			getStoredCounter++;
-			return store.get(filename);
+			return store.get(fileName);
 		}
 
 		@Override
-		public void storeDefinition(final String filename,
+		public void storeDefinition(final String fileName,
 				final IDefinitions definitions) {
 			storeCounter++;
-			store.put(filename, definitions);
+			store.put(fileName, definitions);
 		}
 
 		@Override
-		public String getFileContent(File directory, String filename)
+		public String getFileContent(File directory, String fileName)
 				throws IOException {
 			getContentCounter++;
-			if ("DefFile1".equals(filename)) {
+			if ("DefFile1".equals(fileName)) {
 				return "DEFINITIONS \"DefFile2\"; def1 == 1";
-			} else if ("DefFile2".equals(filename)) {
+			} else if ("DefFile2".equals(fileName)) {
 				return "DEFINITIONS def2 == 2";
 			} else {
 				return "";

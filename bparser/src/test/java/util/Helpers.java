@@ -92,16 +92,16 @@ public class Helpers {
 		return termConv;
 	}
 
-	public static String parseFile(String filename) throws IOException, BCompoundException {
+	public static String parseFile(String fileName) throws IOException, BCompoundException {
 		final ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 		parsingBehaviour.setMachineNameMustMatchFileName(true);
-		return parseFile(filename, parsingBehaviour);
+		return parseFile(fileName, parsingBehaviour);
 	}
 
-	public static String parseFile(String filename, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
+	public static String parseFile(String fileName, ParsingBehaviour parsingBehaviour) throws IOException, BCompoundException {
 		final File machineFile;
 		try {
-			machineFile = new File(Helpers.class.getResource("/" + filename).toURI());
+			machineFile = new File(Helpers.class.getResource("/" + fileName).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

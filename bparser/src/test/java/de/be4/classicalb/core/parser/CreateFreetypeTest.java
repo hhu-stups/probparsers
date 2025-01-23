@@ -84,7 +84,7 @@ public class CreateFreetypeTest {
 			pto.closeTerm();
 			pto.fullstop();
 
-			// classical_b(machine_name, [filename])
+			// classical_b(machine_name, [file_name])
 			pto.openTerm("classical_b");
 			pto.printAtom(MACHINE_NAME);
 			pto.openList();

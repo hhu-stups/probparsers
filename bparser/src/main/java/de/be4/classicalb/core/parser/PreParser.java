@@ -161,9 +161,9 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (TPreParserString filenameString : list) {
+		for (TPreParserString fileNameString : list) {
 			// Unquote and unescape the definition file name string.
-			String quotedFilename = filenameString.getText();
+			String quotedFilename = fileNameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def or an absolute path
@@ -174,7 +174,7 @@ public class PreParser {
 						sb.append(string).append(" -> ");
 					}
 					sb.append(fileName);
-					throw new PreParseException(filenameString,
+					throw new PreParseException(fileNameString,
 							"Cyclic references in definition files: " + sb);
 				}
 
@@ -199,9 +199,9 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(filenameString, "Definition file cannot be read: " + e, e);
+				throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
-				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(filenameString)));
+				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(fileNameString)));
 			}
 		}
 	}

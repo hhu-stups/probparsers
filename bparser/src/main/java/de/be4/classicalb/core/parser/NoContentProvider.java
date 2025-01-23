@@ -6,7 +6,7 @@ import java.io.IOException;
 public class NoContentProvider implements IFileContentProvider {
 
 	@Override
-	public String getFileContent(File directory, String filename)
+	public String getFileContent(File directory, String fileName)
 			throws IOException {
 		throw new IOException("Loading of file content not supported.");
 	}
