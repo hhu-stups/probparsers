@@ -189,23 +189,24 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		}
 
 		if (path != null) {
-			final String baseName = Utils.getFileWithoutExtension(Paths.get(path).getFileName().toString());
-			if (!baseName.equals(name)) {
-				// try replacing windows backslashes by forward slashes
-				// FIXME This special case is not nice! We should remove it as soon as it is not needed anymore! Machines that rely on this are faulty!
-				// The correct fix is to change the machines to use forward slashes, which work on all systems, including Windows.
-				String wpath = path.replace("\\", "/");
-				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
+			Path parsedPath = Paths.get(path);
+			// Disallow backslashes in relative paths to discourage writing machines that only work on Windows.
+			// The portable solution is to use forward slashes, which work on Windows, Mac, and Linux.
+			// We still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
+			// absolute paths are inherently not portable between systems anyway.
+			if (!parsedPath.isAbsolute() && path.contains("\\")) {
+				throw new VisitorException(new CheckException(
+					"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
+					node
+				));
+			}
 
-				if (wbaseName.equals(name)) { // the replace transformation worked
-					//System.out.println("WARNING: you are using Windows backslashes in a path, please use forward slashes as follows:  " + wpath);
-					return new MachineReference(type, name, renamedName, node, wpath);
-				} else {
-					throw new VisitorException(new CheckException(
-						"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
-						node
-					));
-				}
+			String baseName = Utils.getFileWithoutExtension(parsedPath.getFileName().toString());
+			if (!baseName.equals(name)) {
+				throw new VisitorException(new CheckException(
+					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
+					node
+				));
 			}
 		}
 		return new MachineReference(type, name, renamedName, node, path);
