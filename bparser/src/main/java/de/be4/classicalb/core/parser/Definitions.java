@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
@@ -91,7 +92,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	private static String getErrorMessageDefinitionDoesNotExist(String defName) {
@@ -109,7 +110,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
@@ -140,7 +141,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
@@ -157,7 +158,7 @@ public class Definitions extends IDefinitions {
 				}
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
@@ -205,7 +206,7 @@ public class Definitions extends IDefinitions {
 	@Override
 	public void addDefinition(final PDefinition defNode, final Type type, final String key) {
 		if (this.containsDefinition(key)) {
-			throw new AssertionError("Duplicate definition \"" + key + "\". This should be handled by the caller.");
+			throw new IllegalArgumentException("Duplicate definition: " + key);
 		}
 		definitionsMap.put(key, defNode);
 		types.put(key, type);
