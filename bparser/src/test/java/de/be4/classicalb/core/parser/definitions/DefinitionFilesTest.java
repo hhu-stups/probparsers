@@ -172,10 +172,6 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals(2, provider.getContentCounter);
 	}
 
-	public String getFileContent(final String fileName) throws IOException {
-		return defFileContents.get(fileName);
-	}
-
 	@Override
 	public String getFileContent(File directory, String fileName)
 			throws IOException {
