@@ -38,13 +38,13 @@ public abstract class IDefinitions {
 
 	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type);
 
-	public abstract void addDefinition(PDefinition defNode, Type type, String key);
+	public abstract void addDefinition(PDefinition defNode, Type type, String defName);
 
 	public abstract void addDefinition(PDefinition defNode);
 
 	public abstract void addDefinitions(IDefinitions defs) throws PreParseException;
 
-	public abstract void replaceDefinition(final String key, final Type type, final PDefinition node);
+	public abstract void replaceDefinition(String defName, Type type, PDefinition node);
 
 	public abstract void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded);
 

@@ -204,12 +204,12 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(final PDefinition defNode, final Type type, final String key) {
-		if (this.containsDefinition(key)) {
-			throw new IllegalArgumentException("Duplicate definition: " + key);
+	public void addDefinition(final PDefinition defNode, final Type type, final String defName) {
+		if (this.containsDefinition(defName)) {
+			throw new IllegalArgumentException("Duplicate definition: " + defName);
 		}
-		definitionsMap.put(key, defNode);
-		types.put(key, type);
+		definitionsMap.put(defName, defNode);
+		types.put(defName, type);
 	}
 
 	@Override

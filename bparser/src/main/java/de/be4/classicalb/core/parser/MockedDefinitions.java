@@ -81,7 +81,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(PDefinition defNode, Type type, String key) {
+	public void addDefinition(PDefinition defNode, Type type, String defName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -108,7 +108,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void replaceDefinition(String key, Type type, PDefinition node) {
+	public void replaceDefinition(String defName, Type type, PDefinition node) {
 		throw new UnsupportedOperationException();
 	}
 
