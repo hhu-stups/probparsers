@@ -169,6 +169,8 @@ public class Definitions extends IDefinitions {
 			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
 		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
 			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
+		} else {
+			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
 		}
 	}
 
