@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,8 +16,6 @@ public abstract class IDefinitions {
 	public enum Type {
 		NoDefinition, Expression, Predicate, Substitution, ExprOrSubst
 	}
-
-	protected final List<IDefinitions> referencedDefinitions = new ArrayList<>();
 
 	public abstract PDefinition getDefinition(String defName);
 

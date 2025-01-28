@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Definitions extends IDefinitions {
 
 	private final Map<String, PDefinition> definitionsMap = new HashMap<>();
 	private final Map<String, Type> types = new HashMap<>();
+	private final List<IDefinitions> referencedDefinitions = new ArrayList<>();
 	private final File file;
 
 	public Definitions() {
@@ -230,7 +232,7 @@ public class Definitions extends IDefinitions {
 				nodeIdMapping.assignIdentifiers(fileNumber, def);
 			}
 		}
-		for (IDefinitions defintions : super.referencedDefinitions) {
+		for (IDefinitions defintions : referencedDefinitions) {
 			defintions.assignIdsToNodes(nodeIdMapping, machineFilesLoaded);
 		}
 	}
