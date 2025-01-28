@@ -129,14 +129,14 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void setDefinitionType(String defName, Type expression) {
+	public void setDefinitionType(String defName, Type type) {
 		if (this.types.containsKey(defName)) {
-			types.put(defName, expression);
+			types.put(defName, type);
 			return;
 		} else {
 			for (IDefinitions iDefinitions : referencedDefinitions) {
 				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.setDefinitionType(defName, expression);
+					iDefinitions.setDefinitionType(defName, type);
 					return;
 				}
 			}

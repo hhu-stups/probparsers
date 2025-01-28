@@ -103,7 +103,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void setDefinitionType(String identifierString, Type expression) {
+	public void setDefinitionType(String defName, Type type) {
 		throw new UnsupportedOperationException();
 	}
 
