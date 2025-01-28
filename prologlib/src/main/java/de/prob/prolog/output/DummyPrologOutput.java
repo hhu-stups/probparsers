@@ -1,8 +1,8 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.math.BigInteger;
+
+import de.prob.prolog.term.PrologTerm;
 
 /**
  * An implementation of {@link IPrologTermOutput} that does nothing.
@@ -36,6 +36,11 @@ public final class DummyPrologOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput openList() {
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput tailSeparator() {
 		return this;
 	}
 

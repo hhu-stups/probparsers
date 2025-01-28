@@ -1,10 +1,10 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import de.prob.prolog.term.PrologTerm;
 
 public interface IPrologTermOutput {
 
@@ -162,6 +162,24 @@ public interface IPrologTermOutput {
 	IPrologTermOutput closeList();
 
 	/**
+	 * This will print the '|' character to allow adding a list tail.
+	 *
+	 * @return the IPrologTermOutput
+	 */
+	IPrologTermOutput tailSeparator();
+
+	/**
+	 * This will print the '|' character and a list tail via the given scope.
+	 *
+	 * @param scope receiver of the scoped IPrologTermOutput, use this to add exactly one tail term
+	 * @return the IPrologTermOutput
+	 */
+	default IPrologTermOutput tail(Consumer<? super IPrologTermOutput> scope) {
+		scope.accept(this.tailSeparator());
+		return this;
+	}
+
+	/**
 	 * Print an empty list.
 	 *
 	 * @return the IPrologTermOutput
@@ -182,6 +200,29 @@ public interface IPrologTermOutput {
 	}
 
 	/**
+	 * Write and close a list. All following terms (atoms, numbers, etc.) are put into the list.
+	 *
+	 * @param scope     receiver of the scoped IPrologTermOutput, use this to add elements to the list
+	 * @param tailScope receiver of the scoped IPrologTermOutput, use this to add exactly one tail term
+	 * @return the IPrologTermOutput
+	 */
+	default IPrologTermOutput list(Consumer<? super IPrologTermOutput> scope, Consumer<? super IPrologTermOutput> tailScope) {
+		scope.accept(this.openList());
+		return this.closeList(tailScope);
+	}
+
+	/**
+	 * Finish a list that was started with {@link #openList()} after adding a tail via the given scope.
+	 *
+	 * @param scope receiver of the scoped IPrologTermOutput, use this to add exactly one tail term
+	 * @return the IPrologTermOutput
+	 */
+	default IPrologTermOutput closeList(Consumer<? super IPrologTermOutput> scope) {
+		scope.accept(this.tailSeparator());
+		return this.closeList();
+	}
+
+	/**
 	 * Print a Prolog variable. Variables should start with an upper case
 	 * character (or underscore) and should not contain spaces (and other
 	 * illegal characters). For variables, no escaping is done.
@@ -191,6 +232,16 @@ public interface IPrologTermOutput {
 	 * @throws IllegalArgumentException if the variable is not a syntactically valid Prolog variable.
 	 */
 	IPrologTermOutput printVariable(final String var);
+
+	/**
+	 * Print the anonymous Prolog variable.
+	 * Two instances of this will never be equivalent.
+	 *
+	 * @return the IPrologTermOutput
+	 */
+	default IPrologTermOutput printAnonVariable() {
+		return this.printVariable("_");
+	}
 
 	/**
 	 * Print a complete Term.

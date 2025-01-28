@@ -1,14 +1,20 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.*;
+import java.io.StringWriter;
+import java.math.BigInteger;
+
+import de.prob.prolog.term.AIntegerPrologTerm;
+import de.prob.prolog.term.CompoundPrologTerm;
+import de.prob.prolog.term.FloatPrologTerm;
+import de.prob.prolog.term.ListPrologTerm;
+import de.prob.prolog.term.PrologTerm;
+import de.prob.prolog.term.VariablePrologTerm;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.io.StringWriter;
-import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -80,6 +86,26 @@ public class PrologTermOutputTest {
 			pto.emptyList();
 			pto.closeTerm();
 			assertOutput("term([a,b,[c]],[],[])");
+		}
+
+		@Test
+		public void testTailSeparator() {
+			pto.openList();
+			pto.printVariable("H1");
+			pto.printVariable("H2");
+			pto.tailSeparator();
+			pto.printVariable("T");
+			pto.closeList();
+			assertOutput("[H1,H2|T]");
+		}
+
+		@Test
+		public void testAnonVariable() {
+			pto.openTerm("term");
+			pto.printAnonVariable();
+			pto.printAnonVariable();
+			pto.closeTerm();
+			assertOutput("term(_,_)");
 		}
 
 		@Test
