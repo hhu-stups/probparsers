@@ -29,15 +29,31 @@ public abstract class IDefinitions {
 
 	public abstract Set<String> getDefinitionNames();
 
-	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type);
-
-	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type);
-
-	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type);
-
 	public abstract void addDefinition(PDefinition defNode, Type type, String defName);
 
-	public abstract void addDefinition(PDefinition defNode);
+	public void addDefinition(APredicateDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
+
+	public void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
+
+	public void addDefinition(AExpressionDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
+
+	public void addDefinition(PDefinition defNode) {
+		if (defNode instanceof APredicateDefinitionDefinition) {
+			addDefinition((APredicateDefinitionDefinition) defNode, Type.Predicate);
+		} else if (defNode instanceof AExpressionDefinitionDefinition) {
+			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
+		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
+			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
+		} else {
+			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
+		}
+	}
 
 	public abstract void addDefinitions(IDefinitions defs) throws PreParseException;
 

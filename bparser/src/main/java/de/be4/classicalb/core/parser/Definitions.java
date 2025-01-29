@@ -164,19 +164,6 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(PDefinition defNode) {
-		if (defNode instanceof APredicateDefinitionDefinition) {
-			addDefinition((APredicateDefinitionDefinition) defNode, Type.Predicate);
-		} else if (defNode instanceof AExpressionDefinitionDefinition) {
-			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
-		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
-			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
-		} else {
-			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
-		}
-	}
-
-	@Override
 	public void addDefinitions(IDefinitions defs) throws PreParseException {
 		for (String def: defs.getDefinitionNames()) {
 			if (containsDefinition(def)) {
@@ -190,21 +177,6 @@ public class Definitions extends IDefinitions {
 			}
 		}
 		referencedDefinitions.add(defs);
-	}
-
-	@Override
-	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
-	}
-
-	@Override
-	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
-	}
-
-	@Override
-	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
 	}
 
 	@Override

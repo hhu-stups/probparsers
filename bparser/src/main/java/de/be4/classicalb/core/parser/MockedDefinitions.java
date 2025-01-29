@@ -66,21 +66,6 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(APredicateDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addDefinition(AExpressionDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void addDefinition(PDefinition defNode, Type type, String defName) {
 		throw new UnsupportedOperationException();
 	}
@@ -116,10 +101,4 @@ public class MockedDefinitions extends IDefinitions {
 	public File getFile(String defName) {
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public void addDefinition(PDefinition defNode) {
-		throw new UnsupportedOperationException();
-	}
-
 }
