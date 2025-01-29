@@ -88,11 +88,6 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void setDefinitionType(String defName, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void replaceDefinition(String defName, Type type, PDefinition node) {
 		throw new UnsupportedOperationException();
 	}

@@ -131,22 +131,6 @@ public class Definitions extends IDefinitions {
 	}
 
 	@Override
-	public void setDefinitionType(String defName, Type type) {
-		if (this.types.containsKey(defName)) {
-			types.put(defName, type);
-			return;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.setDefinitionType(defName, type);
-					return;
-				}
-			}
-		}
-		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
-	}
-
-	@Override
 	public void replaceDefinition(final String defName, final Type type, final PDefinition node) {
 		if (types.containsKey(defName)) {
 			types.put(defName, type);

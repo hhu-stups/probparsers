@@ -61,7 +61,9 @@ public abstract class IDefinitions {
 
 	public abstract void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded);
 
-	public abstract void setDefinitionType(String defName, Type type);
+	public void setDefinitionType(String defName, Type type) {
+		replaceDefinition(defName, type, getDefinition(defName));
+	}
 
 	public abstract File getFile(String defName);
 
