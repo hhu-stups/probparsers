@@ -144,7 +144,7 @@ public class RecursiveMachineLoader {
 
 	public void loadAllMachines(final File startFile, final Start start,
 								final IDefinitions definitions) throws BCompoundException {
-		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
+		recursivelyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
 	}
 
 	private void loadMachine(final List<Ancestor> ancestors, final File machineFile) throws BCompoundException {
@@ -157,7 +157,7 @@ public class RecursiveMachineLoader {
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		parser.setContentProvider(this.contentProvider);
 		Start tree = parser.parseFile(machineFile);
-		recursivlyLoadMachine(machineFile, tree, ancestors, false,
+		recursivelyLoadMachine(machineFile, tree, ancestors, false,
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
 
@@ -263,7 +263,7 @@ public class RecursiveMachineLoader {
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
-	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
+	private void recursivelyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
 			final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
