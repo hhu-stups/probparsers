@@ -48,15 +48,15 @@ public class Definitions extends IDefinitions {
 	}
 
 	private static int getParameterCount(PDefinition defNode) {
-		if (defNode instanceof APredicateDefinitionDefinition)
+		if (defNode instanceof APredicateDefinitionDefinition) {
 			return ((APredicateDefinitionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof ASubstitutionDefinitionDefinition)
+		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
 			return ((ASubstitutionDefinitionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof AExpressionDefinitionDefinition)
+		} else if (defNode instanceof AExpressionDefinitionDefinition) {
 			return ((AExpressionDefinitionDefinition) defNode).getParameters().size();
-		else
+		} else {
 			return -1;
-
+		}
 	}
 
 	@Override
