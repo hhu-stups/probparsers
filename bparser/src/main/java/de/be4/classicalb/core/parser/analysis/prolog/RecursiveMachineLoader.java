@@ -148,9 +148,6 @@ public class RecursiveMachineLoader {
 	}
 
 	private void loadMachine(final List<Ancestor> ancestors, final File machineFile) throws BCompoundException {
-		if (machineFilesLoaded.contains(machineFile)) {
-			return;
-		}
 		if (parsingBehaviour.isVerbose()) {
 			printLoadProgress(machineFile);
 		}
@@ -290,10 +287,24 @@ public class RecursiveMachineLoader {
 			Objects.requireNonNull(name, "name");
 		}
 
-		machineFilesLoaded.add(machineFile);
-		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
+		// Check if the machine file already has a file number.
+		int machineFileIndex = machineFilesLoaded.indexOf(machineFile);
+		if (machineFileIndex != -1) {
+			// This can only happen if a machine is both included as a definition file and referenced as a machine -
+			// see test case LoadingDefinitionFilesTest.testSeesAndIncludes.
+			// We are currently loading the file as a machine,
+			// so verify that its other use was as a definition file (i. e. *not* as a machine).
+			if (parsedFiles.containsValue(machineFile)) {
+				throw new BCompoundException(new BException(machineFile.toString(), "Machine " + name + " is being loaded more than once - this should never happen", null));
+			}
+		} else {
+			machineFilesLoaded.add(machineFile);
+			machineFileIndex = machineFilesLoaded.indexOf(machineFile);
+		}
+		int fileNumber = machineFileIndex + 1;
 		getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
 
+		// This also assigns file numbers to any definition files included (directly or indirectly) by this machine.
 		definitions.assignIdsToNodes(getNodeIdMapping(), machineFilesLoaded);
 
 		injectDefinitions(currentAst, definitions);

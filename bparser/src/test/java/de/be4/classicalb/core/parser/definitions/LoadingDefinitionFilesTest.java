@@ -95,6 +95,10 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/seesAndIncludes/";
 		String file = PATH + "A.mch";
 		String result = Helpers.parseFile(file);
+		assertTrue(result.contains("A.mch"));
+		assertTrue(result.contains("B.mch"));
+		assertTrue(result.contains("machine_header(none,'A',[])"));
+		assertTrue(result.contains("machine_header(none,'B',[])"));
 	}
 	
 }
