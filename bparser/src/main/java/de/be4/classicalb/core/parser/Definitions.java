@@ -55,7 +55,7 @@ public class Definitions extends IDefinitions {
 		} else if (defNode instanceof AExpressionDefinitionDefinition) {
 			return ((AExpressionDefinitionDefinition) defNode).getParameters().size();
 		} else {
-			return -1;
+			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
 		}
 	}
 
