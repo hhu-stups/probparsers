@@ -63,14 +63,15 @@ public class Definitions extends IDefinitions {
 	public Type getType(final String defName) {
 		if (types.containsKey(defName)) {
 			return types.get(defName);
-		} else {
-			for (IDefinitions definitions : this.referencedDefinitions) {
-				final Type type = definitions.getType(defName);
-				if (type != Type.NoDefinition) {
-					return type;
-				}
+		}
+
+		for (IDefinitions definitions : this.referencedDefinitions) {
+			final Type type = definitions.getType(defName);
+			if (type != Type.NoDefinition) {
+				return type;
 			}
 		}
+
 		return Type.NoDefinition;
 	}
 
@@ -87,13 +88,14 @@ public class Definitions extends IDefinitions {
 	public PDefinition getDefinition(final String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return definitionsMap.get(defName);
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					return iDefinitions.getDefinition(defName);
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				return iDefinitions.getDefinition(defName);
 			}
 		}
+
 		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
@@ -105,13 +107,14 @@ public class Definitions extends IDefinitions {
 	public File getFile(final String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return this.file;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					return iDefinitions.getFile(defName);
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				return iDefinitions.getFile(defName);
 			}
 		}
+
 		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
@@ -119,14 +122,15 @@ public class Definitions extends IDefinitions {
 	public boolean containsDefinition(String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return true;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.getDefinition(defName);
-					return true;
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				iDefinitions.getDefinition(defName);
+				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -136,28 +140,29 @@ public class Definitions extends IDefinitions {
 			types.put(defName, type);
 			definitionsMap.put(defName, node);
 			return;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.replaceDefinition(defName, type, node);
-					return;
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				iDefinitions.replaceDefinition(defName, type, node);
+				return;
 			}
 		}
+
 		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
 	public void addDefinitions(IDefinitions defs) throws PreParseException {
-		for (String def: defs.getDefinitionNames()) {
-			if (containsDefinition(def)) {
-				if(getFile(def)!=defs.getFile(def)) {
-					SourcePosition posfile1= getDefinition(def).getStartPos();
-					SourcePosition posfile2= defs.getDefinition(def).getStartPos();
-					throw new PreParseException("Duplicate definition: " + def + ".\n"+
-					"(First appearance at " + "Line: " + posfile1.getLine() + ", Column: " + posfile1.getPos() + " in file: " + getFile(def) +
-					" And redefinition at " + "Line: " + posfile2.getLine() + ", Column: " + posfile2.getPos() + " in file: " + defs.getFile(def) +")");
-				}
+		for (String def : defs.getDefinitionNames()) {
+			if (containsDefinition(def) && getFile(def) != defs.getFile(def)) {
+				SourcePosition posfile1 = getDefinition(def).getStartPos();
+				SourcePosition posfile2 = defs.getDefinition(def).getStartPos();
+				throw new PreParseException(
+					"Duplicate definition: " + def + ".\n"
+					+ "(First appearance at Line: " + posfile1.getLine() + ", Column: " + posfile1.getPos() + " in file: " + getFile(def)
+					+ " And redefinition at Line: " + posfile2.getLine() + ", Column: " + posfile2.getPos() + " in file: " + defs.getFile(def) + ")"
+				);
 			}
 		}
 		referencedDefinitions.add(defs);
