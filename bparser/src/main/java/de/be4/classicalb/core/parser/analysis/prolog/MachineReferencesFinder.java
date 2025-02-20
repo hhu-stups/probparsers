@@ -46,8 +46,8 @@ import de.be4.classicalb.core.parser.util.Utils;
  * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
  */
 final class MachineReferencesFinder extends MachineClauseAdapter {
-	private final Path mainFile;
-	private final boolean isMachineNameMustMatchFileName;
+	private final Path machineFile;
+	private final boolean machineNameMustMatchFileName;
 	private String machineName;
 	private MachineType machineType;
 	private PackageName packageName;
@@ -55,11 +55,11 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Map<PackageName, Path> importedPackages;
 	private final List<MachineReference> references;
 
-	private MachineReferencesFinder(Path machineFile, boolean isMachineNameMustMatchFileName) {
-		this.references = new ArrayList<>();
-		this.mainFile = machineFile;
-		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
+	private MachineReferencesFinder(Path machineFile, boolean machineNameMustMatchFileName) {
+		this.machineFile = machineFile;
+		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
 		this.importedPackages = new LinkedHashMap<>();
+		this.references = new ArrayList<>();
 	}
 
 	/**
@@ -103,8 +103,8 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new VisitorException(new CheckException("Machine name cannot contain dots", node.getName().get(1)));
 		}
 		machineName = Utils.getTIdentifierListAsString(node.getName());
-		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getFileName().toString());
-		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
+		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(machineFile.getFileName().toString());
+		if (machineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
 			CheckException ch = new CheckException(
 					String.format("Machine name does not match the file name: '%s' vs '%s'", machineName,
 							fileNameWithoutExtension),
@@ -149,7 +149,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		this.packageName = getPackageName(packageTerminal, node);
 		final Path packageDir;
 		try {
-			packageDir = mainFile.toRealPath().getParent();
+			packageDir = machineFile.toRealPath().getParent();
 		} catch (IOException e) {
 			throw new VisitorIOException(e);
 		}
