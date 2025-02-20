@@ -272,19 +272,12 @@ public class RecursiveMachineLoader {
 		}
 
 		String name = refMachines.getMachineName();
-		if (refMachines.getType() == MachineType.DEFINITION_FILE) {
-			assert name == null;
-			if (!isMain) {
-				throw new BCompoundException(new BException(machineFile.getName(),
-						"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'", null));
-			}
-			// Definition files can be loaded standalone.
-			// In this case we need to set a dummy machine name,
-			// because definition files don't contain a name in the source code.
-			// TODO Perhaps MachineReferenceFinder should instead extract the file name of the .def file?
-			name = "DEFINITION_FILE";
-		} else {
-			Objects.requireNonNull(name, "name");
+		if (!isMain && refMachines.getType() == MachineType.DEFINITION_FILE) {
+			throw new BCompoundException(new BException(
+				machineFile.getName(),
+				"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'",
+				null
+			));
 		}
 
 		// Check if the machine file already has a file number.

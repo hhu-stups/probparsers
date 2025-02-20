@@ -88,6 +88,9 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new BException(fileName, e.getException());
 		}
 		
+		if (referenceFinder.machineName == null) {
+			throw new BException(fileName, "Could not determine the machine's name. Parse unit class: " + node.getClass(), null);
+		}
 		if (referenceFinder.machineType == null) {
 			throw new BException(fileName, "Could not determine the machine's type. Parse unit class: " + node.getClass(), null);
 		}
@@ -333,6 +336,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	// DEFINITIONS in standalone definition file (.def)
 	@Override
 	public void caseADefinitionFileParseUnit(final ADefinitionFileParseUnit node) {
+		this.machineName = Utils.getFileWithoutExtension(this.machineFile.getFileName().toString());
 		this.machineType = MachineType.DEFINITION_FILE;
 	}
 }
