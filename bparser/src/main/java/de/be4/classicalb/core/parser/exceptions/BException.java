@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.hhu.stups.sablecc.patch.PositionedNode;
@@ -122,22 +121,6 @@ public class BException extends Exception {
 		return filename;
 	}
 
-	/**
-	 * @return a copy of this exception with all line numbers decremented by one
-	 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
-	 */
-	@Deprecated
-	public BException withLinesOneOff() {
-		if (this.getLocations().isEmpty()) {
-			return this;
-		}
-
-		final List<Location> offsetLocations = this.getLocations().stream()
-			.map(Location::withLineOneOff)
-			.collect(Collectors.toList());
-		return new BException(this.getFilename(), offsetLocations, this.getMessage(), this);
-	}
-
 	public static final class Location {
 		private final String filename;
 		private final int startLine;
@@ -248,15 +231,6 @@ public class BException extends Exception {
 			}
 
 			return sb.toString();
-		}
-
-		/**
-		 * @return a copy of this position with all line numbers decremented by one
-		 * @deprecated Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
-		 */
-		@Deprecated
-		public Location withLineOneOff() {
-			return new Location(this.getFilename(), this.getStartLine() - 1, this.getStartColumn(), this.getEndLine() - 1, this.getEndColumn());
 		}
 	}
 }

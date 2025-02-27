@@ -82,14 +82,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return new HashSet<>(this.rulesMap.values());
 	}
 
-	/**
-	 * @deprecated Use {@link #getFile()} instead.
-	 */
-	@Deprecated
-	public String getFileName() {
-		return this.getFile().getPath();
-	}
-
 	public TIdentifierLiteral getNameLiteral() {
 		return this.nameLiteral;
 	}

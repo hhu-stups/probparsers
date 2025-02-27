@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.node.*;
-import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public final class Utils {
 	private static final Set<String> AMBIGUOUS_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -178,11 +177,6 @@ public final class Utils {
 		final PParseUnit parseUnit = rootNode.getPParseUnit();
 		return (parseUnit instanceof AAbstractMachineParseUnit || parseUnit instanceof ARefinementMachineParseUnit
 			|| parseUnit instanceof AImplementationMachineParseUnit || parseUnit instanceof APackageParseUnit);
-	}
-
-	@Deprecated
-	public static String getSourcePositionAsString(SourcePosition sourcePos) {
-		return "[" + sourcePos.getLine() + "," + sourcePos.getPos() + "]";
 	}
 
 	public static <T> List<T> sortByTopologicalOrder(final Map<T, Set<T>> dependencies) {

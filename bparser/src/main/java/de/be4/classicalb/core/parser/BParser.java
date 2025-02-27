@@ -296,28 +296,6 @@ public class BParser {
 		return parse(input, debugOutput, new NoContentProvider());
 	}
 	
-	/**
-	 * Parses a complete B machine from a string.
-	 * 
-	 * @deprecated Use {@link #parseMachine(String)} instead.
-	 *     Note that this also enables loading of referenced files -
-	 *     use {@link #setContentProvider(IFileContentProvider)} to control this.
-	 *     The {@code debugOutput} parameter does nothing.
-	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
-	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
-	 *     that are not complete B machines and thus don't require pre-parsing.
-	 * @param input B machine source code
-	 * @param debugOutput ignored
-	 * @param preparseNecessary should pre-parsing be performed to detect DEFINITION types
-	 * @return the root node of the AST
-	 * @throws BCompoundException if the B code could not be parsed
-	 *     (see {@link BException} for details)
-	 */
-	@Deprecated
-	public Start parse(final String input, final boolean debugOutput, final boolean preparseNecessary) throws BCompoundException {
-		return parse(input, debugOutput, preparseNecessary, new NoContentProvider());
-	}
-	
 	// Don't delete this deprecated method too soon!
 	// It was one of the main parser APIs for a long time.
 	/**
@@ -338,42 +316,6 @@ public class BParser {
 		// Don't delete this deprecated method too soon!
 		// It was one of the main parser APIs for a long time.
 		return parseWithPreParsing(new StringReader(input), this.getMachineFile(), contentProvider);
-	}
-
-	/**
-	 * Parses the input string.
-	 * 
-	 * @deprecated Use {@link #parseMachine(String)} and {@link #setContentProvider(IFileContentProvider)} instead.
-	 *     The {@code debugOutput} parameter does nothing.
-	 *     The {@code preparseNecessary} parameter cannot be set directly anymore -
-	 *     use the methods {@link #parseFormula(String)}, etc. to parse things
-	 *     that are not complete B machines and thus don't require pre-parsing.
-	 * @param input
-	 *            The {@link String} to be parsed
-	 * @param debugOutput ignored
-	 * @param preparseNecessary
-	 *            should pre-parsing be performed to detect DEFINITION types
-	 * @param contentProvider
-	 *            A {@link IFileContentProvider} that is able to load content of
-	 *            referenced files during the parsing process. The content
-	 *            provider is used for referenced definition files for example.
-	 * @return the root node of the AST
-	 * @throws BCompoundException if the B code could not be parsed
-	 *     (see {@link BException} for details)
-	 */
-	@Deprecated
-	public Start parse(
-		final String input,
-		final boolean debugOutput,
-		final boolean preparseNecessary,
-		final IFileContentProvider contentProvider
-	) throws BCompoundException {
-		Reader reader = new StringReader(input);
-		if (preparseNecessary) {
-			return parseWithPreParsing(reader, this.getMachineFile(), contentProvider);
-		} else {
-			return parseWithoutPreParsing(reader);
-		}
 	}
 
 	private Start parseInternal(Reader reader, File machineFile, DefinitionTypes defTypes) throws BCompoundException {

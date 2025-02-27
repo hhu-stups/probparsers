@@ -1,12 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import de.be4.classicalb.core.parser.BParser;
-import de.be4.classicalb.core.parser.node.Node;
-import de.prob.prolog.output.IPrologTermOutput;
-
-
 import de.be4.classicalb.core.parser.node.AIfElsifSubstitution;
 import de.be4.classicalb.core.parser.node.ASelectWhenSubstitution;
+import de.be4.classicalb.core.parser.node.Node;
+import de.prob.prolog.output.IPrologTermOutput;
 
 public class ClassicalPositionPrinter implements PositionPrinter {
 
@@ -27,37 +24,9 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.nodeIds = nodeIds;
 	}
 
-	/**
-	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
-	 */
-	@Deprecated
-	public ClassicalPositionPrinter(final INodeIds nodeIds, int lineOffset, int columnOffset) {
-		this.nodeIds = nodeIds;
-		this.lineOffset = lineOffset;
-		this.columnOffset = columnOffset;
-		this.printSourcePositions = true;
-		this.compactPositions = false;
-	}
-
 	public void setPrintSourcePositions(boolean b, boolean compact) {
 		this.printSourcePositions = b;
 		this.compactPositions = compact;
-	}
-
-	/**
-	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
-	 */
-	@Deprecated
-	public void setLineOffset(int lineOffset) {
-		this.lineOffset = lineOffset;
-	}
-
-	/**
-	 * Use {@link BParser#setStartPosition(int, int)} to offset position info during parsing.
-	 */
-	@Deprecated
-	public void setColumnOffset(int columnOffset) {
-		this.columnOffset = columnOffset;
 	}
 
 	private static boolean uselessPositionInfo (final Node node) {
