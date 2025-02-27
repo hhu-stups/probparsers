@@ -77,19 +77,12 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 
 	@Override
 	public void printPositionRange(Node startNode, Node endNode) {
-		@SuppressWarnings("deprecation")
-		final Integer id = nodeIds.lookup(startNode);
 		if (!printSourcePositions || uselessPositionInfo(startNode)) {
-			// only print the id
-			if (id == null) {
-				pout.printAtom("none");
-			} else {
-				pout.printNumber(id);
-			}
+			pout.printAtom("none");
 		} else {
 			// print full source positions
 			int fileNr = nodeIds.lookupFileNumber(startNode);
-			if (id == null && fileNr == -1 && startNode.getStartPos() == null && endNode.getEndPos() == null) {
+			if (fileNr == -1 && startNode.getStartPos() == null && endNode.getEndPos() == null) {
 				// Workaround for errors about overridden main machine name when loading rules projects.
 				// The translated AST has no file numbers associated with it,
 				// so probcli incorrectly thinks that it comes from a non-main file.
@@ -102,7 +95,8 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 			int endLine = getEndLine(endNode);
 			if (!compactPositions) { // old pos(UniqueID,FileNr,StartLine,StartCol,Endline,EndCol) term
 				pout.openTerm("pos", true);
-				pout.printNumber(id == null ? -1 : id);
+				// Unique node IDs are no longer supported - all nodes get ID -1.
+				pout.printNumber(-1);
 				pout.printNumber(fileNr);
 				pout.printNumber(startLine);
 				pout.printNumber(getStartColumn(startNode));

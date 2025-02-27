@@ -6,10 +6,6 @@ import de.be4.classicalb.core.parser.node.Node;
 
 /**
  * <p>Allows assigning file numbers to AST nodes and looking them up later.</p>
- * <p>
- * Unlike {@link NodeIdAssignment}, this class does not assign unique identifiers.
- * This allows a much more efficient implementation, because it does not need to traverse the entire AST and assign an ID to each node.
- * </p>
  */
 public final class NodeFileNumbers implements INodeIds {
 
@@ -24,20 +20,6 @@ public final class NodeFileNumbers implements INodeIds {
 	@Override
 	public void assignIdentifiers(final int fileNumber, final Node node) {
 		this.nodeToFileNumberMap.put(node, fileNumber);
-	}
-	
-	/**
-	 * Always returns {@code null}. This implementation does not assign unique identifiers.
-	 *
-	 * @param node the node of which we want to have the ID
-	 * @return {@code null}
-	 * @deprecated The unique ID mechanism is deprecated and will be removed in the future.
-	 *     There is no planned replacement.
-	 */
-	@Deprecated
-	@Override
-	public Integer lookup(final Node node) {
-		return null;
 	}
 	
 	@Override
