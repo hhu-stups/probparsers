@@ -1,9 +1,9 @@
 package de.prob.prolog.output;
 
-import de.prob.prolog.term.PrologTerm;
-
 import java.math.BigInteger;
 import java.util.function.Consumer;
+
+import de.prob.prolog.term.PrologTerm;
 
 public class PrologTermDelegate implements IPrologTermOutput {
 
@@ -62,6 +62,30 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput list(final Consumer<? super IPrologTermOutput> scope) {
 		pto.list(scope);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput tailSeparator() {
+		pto.tailSeparator();
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput tail(Consumer<? super IPrologTermOutput> scope) {
+		pto.tail(scope);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput list(Consumer<? super IPrologTermOutput> scope, Consumer<? super IPrologTermOutput> tailScope) {
+		pto.list(scope, tailScope);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput closeList(Consumer<? super IPrologTermOutput> scope) {
+		pto.closeList(scope);
 		return this;
 	}
 
@@ -128,6 +152,12 @@ public class PrologTermDelegate implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printVariable(final String var) {
 		pto.printVariable(var);
+		return this;
+	}
+
+	@Override
+	public IPrologTermOutput printAnonVariable() {
+		pto.printAnonVariable();
 		return this;
 	}
 

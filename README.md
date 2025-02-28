@@ -18,7 +18,7 @@ The following subprojects were formerly part of this repo:
 
 * eventbalg: Extended version of the Camille eventbstruct parser, with added support for procedures. Now moved into the [ProB 2 Event-B Algorithm DSL](https://github.com/hhu-stups/prob2-eventb-algorithm-dsl) library. The last release as part of probparsers was version 2.12.5.
 * translator: Replaced by the [value-translator](https://github.com/hhu-stups/value-translator) project. The last release as part of probparsers was version 2.9.23.
-* typechecker: Java-based classical B typechecker. No longer maintained - last release was version 2.9.32. Note that the normal ProB typechecker is part of prob_prolog and is unrelated to this subproject.
+* typechecker: Java-based classical B typechecker. No longer maintained - last release was version 2.9.32. This subproject was derived from the typechecker in [tla2bAST](https://gitlab.cs.uni-duesseldorf.de/general/stups/tla2bAST), which is still maintained. A similar typechecker can also be found in our (experimental) [ANTLR-based B parser](https://github.com/hhu-stups/antlr-parser). Note that the normal ProB typechecker is part of prob_prolog and is unrelated to these Java-based typecheckers.
 * voparser: Now maintained in the separate [vo_parser](https://gitlab.cs.uni-duesseldorf.de/general/stups/vo_parser) repository.
 
 ## Using
@@ -28,7 +28,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.13.5"
+final parserVersion = "2.15.0"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
@@ -42,7 +42,7 @@ You can also use the JAR probcliparser.jar built for ProB and distributed with P
 Here is how to obtain help for using the command-line parser:
 ```
 $ java -jar probcliparser.jar --help
-BParser (version 2.13.5-SNAPSHOT, commit bab2ba06ace23f4460d63fdbc94b06c916ca6f30)
+BParser (version 2.13.5, commit 0d922cf55c3d019b40f71170e97197979a02ae8e)
 usage: java -jar probcliparser.jar [options] <BMachine file>
 
 Available options are:

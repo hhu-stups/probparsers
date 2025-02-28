@@ -25,25 +25,36 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-public class DefinitionFilesTest implements IFileContentProvider {
+public class DefinitionFilesTest {
+	private static final class TestFileContentProvider implements IFileContentProvider {
+		private static final Map<String, String> defFileContents = new HashMap<>();
 
-	private static final Map<String, String> defFileContents = new HashMap<>();
+		static {
+			defFileContents.put("DefFile", "DEFINITIONS def2 == yy; def3 == zz");
+			defFileContents.put("DefFile1", "DEFINITIONS \"DefFile2\"; def3 == bb");
+			defFileContents.put("DefFile2", "DEFINITIONS def2 == yy; def4 == zz");
+			defFileContents.put("DefFile3", "DEFINITIONS \"DefFile4\"");
+			defFileContents.put("DefFile4", "DEFINITIONS \"DefFile3\"");
+			defFileContents.put("DefFile5", "DEFINITIONS \"DefFile6\"");
+			defFileContents.put("DefFile6", "DEFINITIONS def == 5");
+		}
 
-	static {
-		defFileContents.put("DefFile", "DEFINITIONS def2 == yy; def3 == zz");
-		defFileContents.put("DefFile1", "DEFINITIONS \"DefFile2\"; def3 == bb");
-		defFileContents.put("DefFile2", "DEFINITIONS def2 == yy; def4 == zz");
-		defFileContents.put("DefFile3", "DEFINITIONS \"DefFile4\"");
-		defFileContents.put("DefFile4", "DEFINITIONS \"DefFile3\"");
-		defFileContents.put("DefFile5", "DEFINITIONS \"DefFile6\"");
-		defFileContents.put("DefFile6", "DEFINITIONS def == 5");
+		@Override
+		public String getFileContent(File directory, String fileName) throws IOException {
+			return defFileContents.get(fileName);
+		}
+
+		@Override
+		public File getFile(File directory, String fileName) throws IOException {
+			return null;
+		}
 	}
 
 	@Test
 	public void testOneDefinitionFile() throws BCompoundException {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile\"; def1 == xx\nINVARIANT def2 = def3\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.setContentProvider(this);
+		parser.setContentProvider(new TestFileContentProvider());
 		parser.parseMachine(testMachine);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -69,7 +80,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testRecursiveReference() throws Exception {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile1\"; def1 == xx; def02 == aa\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.setContentProvider(this);
+		parser.setContentProvider(new TestFileContentProvider());
 		parser.parseMachine(testMachine);
 
 		final IDefinitions definitions = parser.getDefinitions();
@@ -112,7 +123,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testCircleReference() {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile3\"\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.setContentProvider(this);
+		parser.setContentProvider(new TestFileContentProvider());
 		Helpers.assertThrowsCompound(PreParseException.class, () -> parser.parseMachine(testMachine));
 	}
 
@@ -123,7 +134,7 @@ public class DefinitionFilesTest implements IFileContentProvider {
 	public void testNonCircleReference() throws Exception {
 		final String testMachine = "MACHINE Test\nDEFINITIONS \"DefFile5\";\n\"DefFile6\"\nEND";
 		final BParser parser = new BParser("testcase");
-		parser.setContentProvider(this);
+		parser.setContentProvider(new TestFileContentProvider());
 		parser.parseMachine(testMachine);
 	}
 
@@ -172,16 +183,6 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		assertEquals(2, provider.getContentCounter);
 	}
 
-	public String getFileContent(final String filename) throws IOException {
-		return defFileContents.get(filename);
-	}
-
-	@Override
-	public String getFileContent(File directory, String filename)
-			throws IOException {
-		return defFileContents.get(filename);
-	}
-
 	@Test
 	public void testErrorInDefinitions() throws IOException, BCompoundException {
 		String file = "./definitions/errors/DefinitionErrorPosition.mch";
@@ -215,25 +216,25 @@ public class DefinitionFilesTest implements IFileContentProvider {
 		private final Map<String, IDefinitions> store = new HashMap<>();
 
 		@Override
-		public IDefinitions getDefinitions(final String filename) {
+		public IDefinitions getDefinitions(final String fileName) {
 			getStoredCounter++;
-			return store.get(filename);
+			return store.get(fileName);
 		}
 
 		@Override
-		public void storeDefinition(final String filename,
+		public void storeDefinition(final String fileName,
 				final IDefinitions definitions) {
 			storeCounter++;
-			store.put(filename, definitions);
+			store.put(fileName, definitions);
 		}
 
 		@Override
-		public String getFileContent(File directory, String filename)
+		public String getFileContent(File directory, String fileName)
 				throws IOException {
 			getContentCounter++;
-			if ("DefFile1".equals(filename)) {
+			if ("DefFile1".equals(fileName)) {
 				return "DEFINITIONS \"DefFile2\"; def1 == 1";
-			} else if ("DefFile2".equals(filename)) {
+			} else if ("DefFile2".equals(fileName)) {
 				return "DEFINITIONS def2 == 2";
 			} else {
 				return "";
@@ -245,10 +246,4 @@ public class DefinitionFilesTest implements IFileContentProvider {
 			return null;
 		}
 	}
-
-	@Override
-	public File getFile(File directory, String fileName) throws IOException {
-		return null;
-	}
-
 }

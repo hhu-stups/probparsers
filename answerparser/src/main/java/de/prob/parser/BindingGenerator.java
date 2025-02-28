@@ -29,18 +29,6 @@ public final class BindingGenerator {
 	private BindingGenerator() {
 	}
 
-	/**
-	 * @deprecated This method doesn't distinguish between callback/progress results and the actual final result.
-	 * Use {@link #createBinding(PrologTerm)} instead,
-	 * or use {@link #createBindingMustNotFail(String, Start)} if you don't want to handle callback/progress/error
-	 * results.
-	 */
-	@Deprecated
-	public static Map<String, PrologTerm> createBinding(final Start ast) {
-		PrologTerm term = PrologTermGenerator.toPrologTerm(ast);
-		return createBinding(term);
-	}
-
 	public static Map<String, PrologTerm> createBindingMustNotFail(final String query, final Start ast) {
 		PrologTerm term = PrologTermGenerator.toPrologTermMustNotFail(query, ast);
 		return createBinding(term);

@@ -26,7 +26,7 @@ public class RulesProjectExceptionTest {
 	}
 
 	@Test
-	public void testUnkownRuleInPredicateOperatorException() {
+	public void testUnknownRuleInPredicateOperatorException() {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE(foo) END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
 		assertEquals("Unknown rule 'foo'.", e.getMessage());

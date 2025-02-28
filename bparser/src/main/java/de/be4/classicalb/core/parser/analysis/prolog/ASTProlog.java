@@ -638,6 +638,8 @@ public class ASTProlog extends DepthFirstAdapter {
 		open(node);
 		node.getCondition().apply(this);
 		node.getThen().apply(this);
+		
+		// Rewrite ELSIF clauses to nested if_then_else expressions.
 		for (PExpression expr : node.getElsifs()) {
 			AIfElsifExprExpression elsIf = (AIfElsifExprExpression) expr;
 			pout.openTerm(simpleFormat(node));//if_then_else
@@ -645,10 +647,15 @@ public class ASTProlog extends DepthFirstAdapter {
 			elsIf.getCondition().apply(this);
 			elsIf.getThen().apply(this);
 		}
+		
 		node.getElse().apply(this);
-		for (int i = 1; i <= node.getElsifs().size()+1; i++) {
-			close(node);
+		
+		// Close all nested if_then_else expressions that were opened for the ELSIFs.
+		for (PExpression ignored : node.getElsifs()) {
+			pout.closeTerm();
 		}
+		
+		close(node);
 	}
 
 	@Override
@@ -671,6 +678,9 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
+		if (node.getList().size() < 2) {
+			throw new IllegalArgumentException("ACoupleExpression must have at least 2 elements, but got " + node.getList().size());
+		}
 		printOCAsList(node, node.getList());
 	}
 

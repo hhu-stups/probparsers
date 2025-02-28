@@ -24,7 +24,7 @@ public class MockedDefinitions extends IDefinitions {
 		} else if ("substitution".equals(type)) {
 			types.put(name, Type.Substitution);
 		} else {
-			throw new IllegalStateException("Unkown definition type: " + type);
+			throw new IllegalArgumentException("Unknown definition type: " + type);
 		}
 		arity.put(name, Integer.parseInt(parameterCount));
 	}
@@ -66,22 +66,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void addDefinition(APredicateDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addDefinition(AExpressionDefinitionDefinition defNode, Type type) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addDefinition(PDefinition defNode, Type type, String key) {
+	public void addDefinition(PDefinition defNode, Type type, String defName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -103,12 +88,7 @@ public class MockedDefinitions extends IDefinitions {
 	}
 
 	@Override
-	public void setDefinitionType(String identifierString, Type expression) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void replaceDefinition(String key, Type type, PDefinition node) {
+	public void replaceDefinition(String defName, Type type, PDefinition node) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -116,10 +96,4 @@ public class MockedDefinitions extends IDefinitions {
 	public File getFile(String defName) {
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public void addDefinition(PDefinition defNode) {
-		throw new UnsupportedOperationException();
-	}
-
 }

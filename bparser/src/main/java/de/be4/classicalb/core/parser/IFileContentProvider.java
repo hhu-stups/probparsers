@@ -8,11 +8,11 @@ public interface IFileContentProvider {
 	/**
 	 * <p>
 	 * Returns the content of the file described by the parameter
-	 * <code>filename</code>. The content may be necessary in the process of
+	 * <code>fileName</code>. The content may be necessary in the process of
 	 * parsing referenced definition files, for example.
 	 * </p>
 	 * <p>
-	 * If the <code>filename</code> is relative and not absolute the
+	 * If the <code>fileName</code> is relative and not absolute the
 	 * implementing class is responsible to resolve its position.
 	 * </p>
 	 * 

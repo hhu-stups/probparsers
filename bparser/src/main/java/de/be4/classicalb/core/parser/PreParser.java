@@ -17,6 +17,7 @@ import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
+import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
@@ -77,7 +78,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
 public class PreParser {
 
 	private final PushbackReader pushbackReader;
-	private final File modelFile;
+	private final File machineFile;
 	private final DefinitionTypes definitionTypes;
 	private final IDefinitions defFileDefinitions;
 	private final ParseOptions parseOptions;
@@ -87,12 +88,12 @@ public class PreParser {
 	private int startLine;
 	private int startColumn;
 
-	public PreParser(PushbackReader pushbackReader, File modelFile,
+	public PreParser(PushbackReader pushbackReader, File machineFile,
 			IFileContentProvider contentProvider,
 			List<String> definitionFileIncludeStack,
 			ParseOptions parseOptions, IDefinitions definitions) {
 		this.pushbackReader = pushbackReader;
-		this.modelFile = modelFile;
+		this.machineFile = machineFile;
 		this.contentProvider = contentProvider;
 		this.definitionFileIncludeStack = definitionFileIncludeStack;
 		this.parseOptions = parseOptions;
@@ -160,9 +161,9 @@ public class PreParser {
 			cache = (IDefinitionFileProvider) contentProvider;
 		}
 
-		for (TPreParserString filenameString : list) {
+		for (TPreParserString fileNameString : list) {
 			// Unquote and unescape the definition file name string.
-			String quotedFilename = filenameString.getText();
+			String quotedFilename = fileNameString.getText();
 			String fileName = Utils.unescapeStringContents(Utils.removeSurroundingQuotes(quotedFilename, '"'));
 			// Note, that the fileName could be a relative path, e.g.
 			// ./foo/bar/defs.def or an absolute path
@@ -173,7 +174,7 @@ public class PreParser {
 						sb.append(string).append(" -> ");
 					}
 					sb.append(fileName);
-					throw new PreParseException(filenameString,
+					throw new PreParseException(fileNameString,
 							"Cyclic references in definition files: " + sb);
 				}
 
@@ -181,7 +182,7 @@ public class PreParser {
 				if (cache != null && cache.getDefinitions(fileName) != null) {
 					definitions = cache.getDefinitions(fileName);
 				} else {
-					File directory = modelFile == null ? null : modelFile.getParentFile();
+					File directory = machineFile == null ? null : machineFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
 					final File file = contentProvider.getFile(directory, fileName);
 					final BParser parser = new BParser(fileName, parseOptions);
@@ -198,9 +199,9 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final IOException e) {
-				throw new PreParseException(filenameString, "Definition file cannot be read: " + e, e);
+				throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
-				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(filenameString)));
+				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(fileNameString)));
 			}
 		}
 	}
@@ -252,8 +253,8 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.errorMessage != null) {
 				String message = definitionType.errorMessage;
-				if (modelFile != null) {
-					message += " in file: " + modelFile;
+				if (machineFile != null) {
+					message += " in file: " + machineFile;
 				}
 				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message);
 			} else {
@@ -370,6 +371,28 @@ public class PreParser {
 	}
 
 	/**
+	 * In some cases, we cannot decide during preparsing and parsing
+	 * whether the RHS of a definition is an expression or a substitution.
+	 * Function and operation calls are syntactically the same in most cases,
+	 * so a definition containing only an operation call will usually be detected as an expression.
+	 * Such definitions must have their type corrected later - see {@link OpSubstitutions}.
+	 * 
+	 * @param rhs the right-hand side of the expression definition to check
+	 * @return the type of the definition
+	 */
+	public static IDefinitions.Type getExpressionDefinitionRhsType(PExpression rhs) {
+		if (
+			rhs instanceof AIdentifierExpression
+			|| rhs instanceof AFunctionExpression
+			|| rhs instanceof ADefinitionExpression
+		) {
+			return IDefinitions.Type.ExprOrSubst;
+		} else {
+			return IDefinitions.Type.Expression;
+		}
+	}
+
+	/**
 	 * Try to determine the abstract type of the right-hand side of a definition,
 	 * i. e. whether it's an expression, a predicate, or a substitution.
 	 * If the right-hand side references other definitions,
@@ -413,18 +436,11 @@ public class PreParser {
 				return new DefinitionType();
 			}
 
-			PExpression expression = expressionParseUnit.getExpression();
-			if ((expression instanceof AIdentifierExpression) || (expression instanceof AFunctionExpression)
-					|| (expression instanceof ADefinitionExpression)) {
-				return new DefinitionType(IDefinitions.Type.ExprOrSubst);
-			}
-
-			return new DefinitionType(IDefinitions.Type.Expression);
-
+			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
 		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
 			errorToken = e.getToken();
 			try {
-			    // try parsing the RHS now as a substitution:
+				// try parsing the RHS now as a substitution:
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {

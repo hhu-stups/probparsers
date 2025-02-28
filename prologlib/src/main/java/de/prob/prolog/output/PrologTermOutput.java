@@ -522,6 +522,18 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	@Override
+	public IPrologTermOutput tailSeparator() {
+		try {
+			out.write('|');
+		} catch (IOException exc) {
+			throw new UncheckedIOException(exc);
+		}
+
+		commaNeeded = false;
+		return this;
+	}
+
+	@Override
 	public IPrologTermOutput printVariable(final String var) {
 		Objects.requireNonNull(var, "Variable name is null");
 		if (!isValidPrologVariable(var)) {

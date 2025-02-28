@@ -26,14 +26,14 @@ public class RulesUtil {
 		return getParsedProjectAsPrologTerm(rulesProject);
 	}
 
-	public static String getFileAsPrologTerm(final String file) throws BCompoundException {
-		return getFileAsPrologTerm(file, false);
+	public static String getFileAsPrologTerm(final String fileName) throws BCompoundException {
+		return getFileAsPrologTerm(fileName, false);
 	}
 
-	public static String getFileAsPrologTerm(final String filename, boolean addLineNumbers) throws BCompoundException {
+	public static String getFileAsPrologTerm(final String fileName, boolean addLineNumbers) throws BCompoundException {
 		File file;
 		try {
-			file = new File(RulesUtil.class.getResource("/rules/" + filename).toURI());
+			file = new File(RulesUtil.class.getResource("/rules/" + fileName).toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

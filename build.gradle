@@ -10,7 +10,7 @@ buildscript {
 		// So as a workaround,
 		// enable the GraalVM plugin only when explicitly requested (see below).
 		if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
-			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.10.1")
+			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.10.5")
 		}
 	}
 }
@@ -22,13 +22,13 @@ plugins {
 	// so that all subprojects use the same plugin versions.
 	// The plugins are declared as .apply(false) here
 	// and re-declared without .apply(false) in the subprojects that actually need them.
-	id("de.hhu.stups.sablecc").version("1.1.0").apply(false)
-	id("me.champeau.jmh").version("0.7.2").apply(false)
+	id("de.hhu.stups.sablecc").version("1.2.0").apply(false)
+	id("me.champeau.jmh").version("0.7.3").apply(false)
 }
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = "2.13.5"
+project.version = "2.15.0"
 project.description = "The ProB parser libraries"
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
@@ -53,8 +53,8 @@ subprojects {
 		mavenCentral()
 		if (isSnapshot) {
 			maven {
-				name "snapshots"
-				url "https://oss.sonatype.org/content/repositories/snapshots/"
+				name = "snapshots"
+				url = "https://oss.sonatype.org/content/repositories/snapshots/"
 			}
 		}
 	}
@@ -72,7 +72,7 @@ subprojects {
 	}
 
 	dependencies {
-		testImplementation platform('org.junit:junit-bom:5.10.3')
+		testImplementation platform('org.junit:junit-bom:5.12.0')
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
 		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
@@ -163,11 +163,11 @@ subprojects {
 			maven {
 				final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
 				final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-				url isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+				url = isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
 				if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 					credentials {
-						username project.ossrhUsername
-						password project.ossrhPassword
+						username = project.ossrhUsername
+						password = project.ossrhPassword
 					}
 				}
 			}

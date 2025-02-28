@@ -1,14 +1,20 @@
-package de.be4.classicalb.core.parser.rules;
+package de.be4.classicalb.core.parser.util;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.node.*;
 import de.hhu.stups.sablecc.patch.PositionedNode;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
+/**
+ * contains auxiliary methods for AST creation,
+ * used by rules transformation and TLA2B
+ */
 public final class ASTBuilder {
 
+	public static final String ASSERT_TRUE = "ASSERT_TRUE";
 	public static final String FORCE = "FORCE";
 	public static final String STRING_APPEND = "STRING_APPEND";
 	public static final String CHOOSE = "CHOOSE";
@@ -23,42 +29,59 @@ public final class ASTBuilder {
 	}
 
 	public static PPredicate createConjunction(List<PPredicate> predList) {
-		if (predList.isEmpty()) {
-			throw new AssertionError();
-		} else if (predList.size() == 1) {
-			return predList.get(0);
-		} else {
-			PPredicate p = predList.get(0);
-			for (int i = 1; i < predList.size(); i++) {
-				p = new AConjunctPredicate(p, predList.get(i));
-			}
-			return p;
+		if (predList.isEmpty())
+			throw new AssertionError("Conjunction list must contain at least one predicate.");
+		else if (predList.size() == 1)
+			return predList.get(0).clone();
+
+		PPredicate conj = new AConjunctPredicate(predList.get(0).clone(), predList.get(1).clone());
+		for (int i = 2; i < predList.size(); i++) {
+			conj = new AConjunctPredicate(conj, predList.get(i).clone());
 		}
+		return conj;
+	}
+
+	public static PPredicate createDisjunction(List<PPredicate> predList) {
+		if (predList.isEmpty())
+			throw new AssertionError("Disjunction list must contain at least one predicate.");
+		else if (predList.size() == 1)
+			return predList.get(0).clone();
+
+		PPredicate disjunction = new ADisjunctPredicate(predList.get(0).clone(), predList.get(1).clone());
+		for (int i = 2; i < predList.size(); i++) {
+			disjunction = new ADisjunctPredicate(disjunction, predList.get(i).clone());
+		}
+		return disjunction;
 	}
 
 	public static PExpression createSetOfPExpression(PExpression pExpression, PositionedNode pos) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		list.add(pExpression.clone());
-		return createPositionedNode(new ASetExtensionExpression(list), pos);
+		return createPositionedNode(createSetOfPExpression(pExpression), pos);
 	}
 
 	public static PExpression createSetOfPExpression(PExpression... pExpressions) {
-		final ArrayList<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add(pExpression.clone());
-		}
-		return new ASetExtensionExpression(list);
+		return new ASetExtensionExpression(Arrays.stream(pExpressions).map(PExpression::clone).collect(Collectors.toList()));
 	}
 
 	public static PExpression createNestedCouple(List<PExpression> pExpressions) {
-		if (pExpressions.size() == 1) {
-			return pExpressions.get(0);
+		if (pExpressions.isEmpty())
+			throw new AssertionError("Couple list must contain at least one expression.");
+		else if (pExpressions.size() == 1)
+			return pExpressions.get(0).clone();
+
+		return new ACoupleExpression(pExpressions.stream().map(PExpression::clone).collect(Collectors.toList()));
+	}
+
+	public static PExpression createNestedMultOrCard(List<PExpression> pExpressions) {
+		if (pExpressions.isEmpty())
+			throw new AssertionError("MultOrCard list must contain at least one expression.");
+		else if (pExpressions.size() == 1)
+			return pExpressions.get(0).clone();
+
+		AMultOrCartExpression card = new AMultOrCartExpression(pExpressions.get(0).clone(), pExpressions.get(1).clone());
+		for (int i = 2; i < pExpressions.size(); i++) {
+			card = new AMultOrCartExpression(card, pExpressions.get(i).clone());
 		}
-		final ArrayList<PExpression> list = new ArrayList<>();
-		for (PExpression pExpression : pExpressions) {
-			list.add(pExpression.clone());
-		}
-		return new ACoupleExpression(list);
+		return card;
 	}
 
 	public static PSubstitution createSequenceSubstitution(PSubstitution sub1, PSubstitution sub2,
@@ -81,13 +104,15 @@ public final class ASTBuilder {
 	}
 
 	public static AIntegerExpression createIntegerExpression(int i) {
-		return new AIntegerExpression(new TIntegerLiteral(Integer.toString(i)));
+		return createIntegerExpression(Integer.toString(i));
 	}
 
-	public static AIdentifierExpression createRuleIdentifier(TIdentifierLiteral ruleLiteral) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add(ruleLiteral.clone());
-		return new AIdentifierExpression(list);
+	public static AIntegerExpression createIntegerExpression(String i) {
+		return new AIntegerExpression(new TIntegerLiteral(i));
+	}
+
+	public static ARealExpression createRealExpression(String r) {
+		return new ARealExpression(new TRealLiteral(r));
 	}
 
 	public static List<PSubstitution> createSubstitutionList(PSubstitution... pSubstitutions) {
@@ -95,51 +120,30 @@ public final class ASTBuilder {
 	}
 
 	public static List<PExpression> createExpressionList(PExpression... pExpressions) {
-		final List<PExpression> list = new ArrayList<>();
-		for (PExpression oldNode : pExpressions) {
-			PExpression node = oldNode.clone();
-			node.setStartPos(oldNode.getStartPos());
-			node.setEndPos(oldNode.getEndPos());
-			list.add(node);
-		}
-		return list;
+		return Arrays.stream(pExpressions)
+				.map(oldNode -> createPositionedNode(oldNode.clone(), oldNode))
+				.collect(Collectors.toList());
 	}
 
 	public static AIdentifierExpression createIdentifier(String name) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add(new TIdentifierLiteral(name));
-		return new AIdentifierExpression(list);
+		return new AIdentifierExpression(Collections.singletonList(new TIdentifierLiteral(name)));
 	}
 
 	public static AIdentifierExpression createIdentifier(String name, PositionedNode positionNode) {
-		return createAIdentifierExpression(name, positionNode.getStartPos(), positionNode.getEndPos());
+		return createPositionedNode(createIdentifier(name), positionNode);
 	}
 
-	public static AIdentifierExpression createAIdentifierExpression(TIdentifierLiteral identifierLiteral) {
-		final String name = identifierLiteral.getText();
-		return createAIdentifierExpression(name, identifierLiteral.getStartPos(), identifierLiteral.getEndPos());
+	public static AIdentifierExpression createIdentifier(TIdentifierLiteral identifierLiteral) {
+		return createIdentifier(identifierLiteral.getText(), identifierLiteral);
 	}
 
-	private static AIdentifierExpression createAIdentifierExpression(String name, SourcePosition startPos, SourcePosition endPos) {
-		ArrayList<TIdentifierLiteral> list = new ArrayList<>();
-		list.add(new TIdentifierLiteral(name));
-		AIdentifierExpression result = new AIdentifierExpression(list);
-		result.setStartPos(startPos);
-		result.setEndPos(endPos);
-		return result;
-	}
-
-	public static List<PExpression> createIdentifierList(String... strings) {
-		ArrayList<PExpression> list = new ArrayList<>();
-		for (String string : strings) {
-			list.add(createIdentifier(string));
-		}
-		return list;
+	public static List<PExpression> createIdentifierList(String... names) {
+		return Arrays.stream(names).map(ASTBuilder::createIdentifier).collect(Collectors.toList());
 	}
 
 	public static AEqualPredicate createEqualPredicate(TIdentifierLiteral old, final String value) {
 		TIdentifierLiteral e = old.clone();
-		return createPositionedNode(new AEqualPredicate(createAIdentifierExpression(e), createStringExpression(value)), e);
+		return createPositionedNode(new AEqualPredicate(createIdentifier(e), createStringExpression(value)), e);
 	}
 
 	public static AAssignSubstitution createAssignNode(PExpression id, PExpression value) {
@@ -148,14 +152,6 @@ public final class ASTBuilder {
 
 	public static ADefinitionExpression callExternalFunction(String name, PExpression... parameters) {
 		return new ADefinitionExpression(new TIdentifierLiteral(name), createExpressionList(parameters));
-	}
-
-	private static List<PExpression> createExpressionList(String... names) {
-		List<PExpression> list = new ArrayList<>();
-		for (String name : names) {
-			list.add(createIdentifier(name));
-		}
-		return list;
 	}
 
 	public static void addToStringDefinition(IDefinitions definitions) {
@@ -238,13 +234,13 @@ public final class ASTBuilder {
 		 */
 		AExpressionDefinitionDefinition sortDef = new AExpressionDefinitionDefinition();
 		sortDef.setName(new TIdentifierLiteral(SORT));
-		sortDef.setParameters(createExpressionList("X"));
+		sortDef.setParameters(createIdentifierList("X"));
 		sortDef.setRhs(new AEmptySequenceExpression());
 		iDefinitions.addDefinition(sortDef, IDefinitions.Type.Expression);
 
 		AExpressionDefinitionDefinition sortType = new AExpressionDefinitionDefinition();
 		sortType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_SORT"));
-		sortType.setParameters(createExpressionList("T"));
+		sortType.setParameters(createIdentifierList("T"));
 		sortType.setRhs(new ATotalFunctionExpression(new APowSubsetExpression(createIdentifier("T")),
 				new ASeqExpression(createIdentifier("T"))));
 		iDefinitions.addDefinition(sortType, IDefinitions.Type.Expression);
@@ -262,17 +258,36 @@ public final class ASTBuilder {
 
 		AExpressionDefinitionDefinition formatDef = new AExpressionDefinitionDefinition();
 		formatDef.setName(new TIdentifierLiteral(FORMAT_TO_STRING));
-		formatDef.setParameters(createExpressionList("S", "T"));
+		formatDef.setParameters(createIdentifierList("S", "T"));
 		formatDef.setRhs(new AStringExpression(new TStringLiteral("abc")));
 		iDefinitions.addDefinition(formatDef, IDefinitions.Type.Expression);
 
 		AExpressionDefinitionDefinition formatType = new AExpressionDefinitionDefinition();
 		formatType.setName(new TIdentifierLiteral("EXTERNAL_FUNCTION_FORMAT_TO_STRING"));
-		formatType.setParameters(createExpressionList("T"));
+		formatType.setParameters(createIdentifierList("T"));
 		formatType.setRhs(new ATotalFunctionExpression(
 				new AMultOrCartExpression(new AStringSetExpression(), new ASeqExpression(createIdentifier("T"))),
 				new AStringSetExpression()));
 		iDefinitions.addDefinition(formatType, IDefinitions.Type.Expression);
+	}
+
+	public static void addAssertTrueDefinition(IDefinitions iDefinitions) {
+		if (iDefinitions.containsDefinition(ASSERT_TRUE)) {
+			return;
+		}
+		APredicateDefinitionDefinition assertDef = new APredicateDefinitionDefinition(
+				new TDefLiteralPredicate(ASSERT_TRUE),
+				Arrays.asList(createIdentifier("P"), createIdentifier("Msg")),
+				new ATruthPredicate()
+		);
+		iDefinitions.addDefinition(assertDef, IDefinitions.Type.Predicate);
+
+		AExpressionDefinitionDefinition assertType = new AExpressionDefinitionDefinition(
+				new TIdentifierLiteral("EXTERNAL_PREDICATE_" + ASSERT_TRUE),
+				new ArrayList<>(),
+				new AMultOrCartExpression(new ABoolSetExpression(), new AStringSetExpression())
+		);
+		iDefinitions.addDefinition(assertType, IDefinitions.Type.Expression);
 	}
 
 	private static void addPreferenceDefinition(IDefinitions iDefinitions, String name, PExpression value) {

@@ -1,10 +1,12 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
@@ -19,6 +21,7 @@ public class Definitions extends IDefinitions {
 
 	private final Map<String, PDefinition> definitionsMap = new HashMap<>();
 	private final Map<String, Type> types = new HashMap<>();
+	private final List<IDefinitions> referencedDefinitions = new ArrayList<>();
 	private final File file;
 
 	public Definitions() {
@@ -44,30 +47,31 @@ public class Definitions extends IDefinitions {
 		return getParameterCount(defNode);
 	}
 
-	private int getParameterCount(PDefinition defNode) {
-		if (defNode instanceof APredicateDefinitionDefinition)
+	private static int getParameterCount(PDefinition defNode) {
+		if (defNode instanceof APredicateDefinitionDefinition) {
 			return ((APredicateDefinitionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof ASubstitutionDefinitionDefinition)
+		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
 			return ((ASubstitutionDefinitionDefinition) defNode).getParameters().size();
-		else if (defNode instanceof AExpressionDefinitionDefinition)
+		} else if (defNode instanceof AExpressionDefinitionDefinition) {
 			return ((AExpressionDefinitionDefinition) defNode).getParameters().size();
-		else
-			return -1;
-
+		} else {
+			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
+		}
 	}
 
 	@Override
 	public Type getType(final String defName) {
 		if (types.containsKey(defName)) {
 			return types.get(defName);
-		} else {
-			for (IDefinitions definitions : this.referencedDefinitions) {
-				final Type type = definitions.getType(defName);
-				if (type != Type.NoDefinition) {
-					return type;
-				}
+		}
+
+		for (IDefinitions definitions : this.referencedDefinitions) {
+			final Type type = definitions.getType(defName);
+			if (type != Type.NoDefinition) {
+				return type;
 			}
 		}
+
 		return Type.NoDefinition;
 	}
 
@@ -84,17 +88,18 @@ public class Definitions extends IDefinitions {
 	public PDefinition getDefinition(final String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return definitionsMap.get(defName);
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					return iDefinitions.getDefinition(defName);
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				return iDefinitions.getDefinition(defName);
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
-	private String getErrorMessageDefinitionDoesNotExist(String defName) {
+	private static String getErrorMessageDefinitionDoesNotExist(String defName) {
 		return String.format("Definition %s does not exist.", defName);
 	}
 
@@ -102,45 +107,31 @@ public class Definitions extends IDefinitions {
 	public File getFile(final String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return this.file;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					return iDefinitions.getFile(defName);
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				return iDefinitions.getFile(defName);
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
 	public boolean containsDefinition(String defName) {
 		if (definitionsMap.containsKey(defName)) {
 			return true;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.getDefinition(defName);
-					return true;
-				}
-			}
 		}
-		return false;
-	}
 
-	@Override
-	public void setDefinitionType(String defName, Type expression) {
-		if (this.types.containsKey(defName)) {
-			types.put(defName, expression);
-			return;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.setDefinitionType(defName, expression);
-					return;
-				}
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				iDefinitions.getDefinition(defName);
+				return true;
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
+
+		return false;
 	}
 
 	@Override
@@ -149,66 +140,41 @@ public class Definitions extends IDefinitions {
 			types.put(defName, type);
 			definitionsMap.put(defName, node);
 			return;
-		} else {
-			for (IDefinitions iDefinitions : referencedDefinitions) {
-				if (iDefinitions.containsDefinition(defName)) {
-					iDefinitions.replaceDefinition(defName, type, node);
-					return;
-				}
+		}
+
+		for (IDefinitions iDefinitions : referencedDefinitions) {
+			if (iDefinitions.containsDefinition(defName)) {
+				iDefinitions.replaceDefinition(defName, type, node);
+				return;
 			}
 		}
-		throw new AssertionError(getErrorMessageDefinitionDoesNotExist(defName));
-	}
 
-	@Override
-	public void addDefinition(PDefinition defNode) {
-		if (defNode instanceof APredicateDefinitionDefinition) {
-			addDefinition((APredicateDefinitionDefinition) defNode, Type.Predicate);
-		} else if (defNode instanceof AExpressionDefinitionDefinition) {
-			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
-		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
-			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
-		}
+		throw new NoSuchElementException(getErrorMessageDefinitionDoesNotExist(defName));
 	}
 
 	@Override
 	public void addDefinitions(IDefinitions defs) throws PreParseException {
-		for (String def: defs.getDefinitionNames()) {
-			if (containsDefinition(def)) {
-				if(getFile(def)!=defs.getFile(def)) {
-					SourcePosition posfile1= getDefinition(def).getStartPos();
-					SourcePosition posfile2= defs.getDefinition(def).getStartPos();
-					throw new PreParseException("Duplicate definition: " + def + ".\n"+
-					"(First appearance at " + "Line: " + posfile1.getLine() + ", Column: " + posfile1.getPos() + " in file: " + getFile(def) +
-					" And redefinition at " + "Line: " + posfile2.getLine() + ", Column: " + posfile2.getPos() + " in file: " + defs.getFile(def) +")");
-				}
+		for (String def : defs.getDefinitionNames()) {
+			if (containsDefinition(def) && getFile(def) != defs.getFile(def)) {
+				SourcePosition posfile1 = getDefinition(def).getStartPos();
+				SourcePosition posfile2 = defs.getDefinition(def).getStartPos();
+				throw new PreParseException(
+					"Duplicate definition: " + def + ".\n"
+					+ "(First appearance at Line: " + posfile1.getLine() + ", Column: " + posfile1.getPos() + " in file: " + getFile(def)
+					+ " And redefinition at Line: " + posfile2.getLine() + ", Column: " + posfile2.getPos() + " in file: " + defs.getFile(def) + ")"
+				);
 			}
 		}
 		referencedDefinitions.add(defs);
 	}
 
 	@Override
-	public void addDefinition(final APredicateDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
-	}
-
-	@Override
-	public void addDefinition(final ASubstitutionDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
-	}
-
-	@Override
-	public void addDefinition(final AExpressionDefinitionDefinition defNode, final Type type) {
-		addDefinition(defNode, type, defNode.getName().getText());
-	}
-
-	@Override
-	public void addDefinition(final PDefinition defNode, final Type type, final String key) {
-		if (this.containsDefinition(key)) {
-			throw new AssertionError("Duplicate definition \"" + key + "\". This should be handled by the caller.");
+	public void addDefinition(final PDefinition defNode, final Type type, final String defName) {
+		if (this.containsDefinition(defName)) {
+			throw new IllegalArgumentException("Duplicate definition: " + defName);
 		}
-		definitionsMap.put(key, defNode);
-		types.put(key, type);
+		definitionsMap.put(defName, defNode);
+		types.put(defName, type);
 	}
 
 	@Override
@@ -227,7 +193,7 @@ public class Definitions extends IDefinitions {
 				nodeIdMapping.assignIdentifiers(fileNumber, def);
 			}
 		}
-		for (IDefinitions defintions : super.referencedDefinitions) {
+		for (IDefinitions defintions : referencedDefinitions) {
 			defintions.assignIdsToNodes(nodeIdMapping, machineFilesLoaded);
 		}
 	}

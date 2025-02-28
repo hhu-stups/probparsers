@@ -144,20 +144,17 @@ public class RecursiveMachineLoader {
 
 	public void loadAllMachines(final File startFile, final Start start,
 								final IDefinitions definitions) throws BCompoundException {
-		recursivlyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
+		recursivelyLoadMachine(startFile, start, new ArrayList<>(), true, rootDirectory, definitions);
 	}
 
 	private void loadMachine(final List<Ancestor> ancestors, final File machineFile) throws BCompoundException {
-		if (machineFilesLoaded.contains(machineFile)) {
-			return;
-		}
 		if (parsingBehaviour.isVerbose()) {
 			printLoadProgress(machineFile);
 		}
 		final BParser parser = new BParser(machineFile.getAbsolutePath());
 		parser.setContentProvider(this.contentProvider);
 		Start tree = parser.parseFile(machineFile);
-		recursivlyLoadMachine(machineFile, tree, ancestors, false,
+		recursivelyLoadMachine(machineFile, tree, ancestors, false,
 				machineFile.getParentFile(), parser.getDefinitions());
 	}
 
@@ -263,7 +260,7 @@ public class RecursiveMachineLoader {
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
-	private void recursivlyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
+	private void recursivelyLoadMachine(final File machineFile, final Start currentAst, final List<Ancestor> ancestors,
 			final boolean isMain, File directory, final IDefinitions definitions)
 			throws BCompoundException {
 		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
@@ -275,25 +272,32 @@ public class RecursiveMachineLoader {
 		}
 
 		String name = refMachines.getMachineName();
-		if (refMachines.getType() == MachineType.DEFINITION_FILE) {
-			assert name == null;
-			if (!isMain) {
-				throw new BCompoundException(new BException(machineFile.getName(),
-						"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'", null));
-			}
-			// Definition files can be loaded standalone.
-			// In this case we need to set a dummy machine name,
-			// because definition files don't contain a name in the source code.
-			// TODO Perhaps MachineReferenceFinder should instead extract the file name of the .def file?
-			name = "DEFINITION_FILE";
-		} else {
-			Objects.requireNonNull(name, "name");
+		if (!isMain && refMachines.getType() == MachineType.DEFINITION_FILE) {
+			throw new BCompoundException(new BException(
+				machineFile.getName(),
+				"Expecting a B machine but was a definition file in file: '" + machineFile.getName() + "'",
+				null
+			));
 		}
 
-		machineFilesLoaded.add(machineFile);
-		final int fileNumber = machineFilesLoaded.indexOf(machineFile) + 1;
+		// Check if the machine file already has a file number.
+		int machineFileIndex = machineFilesLoaded.indexOf(machineFile);
+		if (machineFileIndex != -1) {
+			// This can only happen if a machine is both included as a definition file and referenced as a machine -
+			// see test case LoadingDefinitionFilesTest.testSeesAndIncludes.
+			// We are currently loading the file as a machine,
+			// so verify that its other use was as a definition file (i. e. *not* as a machine).
+			if (parsedFiles.containsValue(machineFile)) {
+				throw new BCompoundException(new BException(machineFile.toString(), "Machine " + name + " is being loaded more than once - this should never happen", null));
+			}
+		} else {
+			machineFilesLoaded.add(machineFile);
+			machineFileIndex = machineFilesLoaded.indexOf(machineFile);
+		}
+		int fileNumber = machineFileIndex + 1;
 		getNodeIdMapping().assignIdentifiers(fileNumber, currentAst);
 
+		// This also assigns file numbers to any definition files included (directly or indirectly) by this machine.
 		definitions.assignIdsToNodes(getNodeIdMapping(), machineFilesLoaded);
 
 		injectDefinitions(currentAst, definitions);

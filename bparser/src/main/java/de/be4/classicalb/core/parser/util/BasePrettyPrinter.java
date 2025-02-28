@@ -25,6 +25,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		prio.put(ADisjunctPredicate.class, 40);
 		prio.put(AConjunctPredicate.class, 40);
 		prio.put(AEquivalencePredicate.class, 60);
+		prio.put(ATypeofExpression.class, 120);
 		prio.put(ARelationsExpression.class, 125);
 		prio.put(APartialFunctionExpression.class, 125);
 		prio.put(ATotalFunctionExpression.class, 125);
@@ -134,8 +135,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		}
 	}
 
-	private void _write(String s) {
-		if (s == null || s.isEmpty()) {
+	private void writeInternal(String s) {
+		if (s.isEmpty()) {
 			return;
 		}
 
@@ -157,7 +158,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void print(String s) {
-		if (s == null || s.isEmpty()) {
+		if (s.isEmpty()) {
 			return;
 		}
 
@@ -165,13 +166,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 			this.printIndent();
 		}
 
-		this._write(s);
+		this.writeInternal(s);
 	}
 
 	private void printIndent() {
 		if (this.isUseIndentation()) {
 			for (int i = 0; i < this.indentLevel; i++) {
-				this._write(this.indent);
+				this.writeInternal(this.indent);
 			}
 		}
 	}
@@ -1109,7 +1110,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseALessPredicate(final ALessPredicate node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), "<");
+		// add spaces so there are no confusions with <- operator
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " < ");
 	}
 
 	@Override
@@ -1350,11 +1352,11 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAUnaryMinusExpression(final AUnaryMinusExpression node) {
+	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
 		print("-");
-		leftParAssoc(node, node.getExpression());
+		leftPar(node, node.getExpression());
 		node.getExpression().apply(this);
-		rightParAssoc(node, node.getExpression());
+		rightPar(node, node.getExpression());
 	}
 
 	@Override
@@ -1999,7 +2001,8 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseAInsertTailExpression(final AInsertTailExpression node) {
-		applyLeftAssociative(node.getLeft(), node, node.getRight(), "<-");
+		// add spaces so there are no confusions with <-- token
+		applyLeftAssociative(node.getLeft(), node, node.getRight(), " <- ");
 	}
 
 	@Override
@@ -2155,6 +2158,16 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseARecordFieldExpression(final ARecordFieldExpression node) {
 		applyLeftAssociative(node.getRecord(), node, node.getIdentifier(), "'");
+	}
+
+	@Override
+	public void caseATypeofExpression(ATypeofExpression node) {
+		// Technically, the oftype operator has no associativity in our parser,
+		// but there are no other operators on the same precedence level
+		// and chaining typeof operators in either direction is semantically invalid,
+		// so it doesn't really matter.
+		// Right associativity matches our grammar better though.
+		applyRightAssociative(node.getExpression(), node, node.getType(), "⦂");
 	}
 
 	@Override
@@ -2477,7 +2490,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		printlnOpt();
 		if (node.getErrorType() != null) {
 			print("ERROR_TYPE ");
-			node.getErrorType().apply(this);
+			print(node.getErrorType().getText());
 			printlnOpt();
 		}
 		indent();
@@ -2506,7 +2519,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		}
 		if (node.getErrorType() != null) {
 			print("ERROR_TYPE ");
-			node.getErrorType().apply(this);
+			print(node.getErrorType().getText());
 			printlnOpt();
 		}
 		indent();
@@ -2585,6 +2598,23 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		print("END");
 	}
 
+	// The following tokens are handled by their surrounding nodes,
+	// so they do *not* have a case below:
+	// * TPragmaFreeText
+	// * TMultilineStringContent
+	// * TStringLiteral
+	// * TIntegerLiteral
+	// * TRealLiteral
+	// * THexLiteral
+
+	@Override
+	public void caseTPragmaIdOrString(TPragmaIdOrString node) {
+		// These may be written with or without quotes.
+		// Unlike regular string literals, the parser doesn't unquote/unescape them though,
+		// so any required quotes are contained in the token and we can print it as-is.
+		print(node.getText());
+	}
+
 	@Override
 	public void caseTIdentifierLiteral(final TIdentifierLiteral node) {
 		print(this.renaming.renameIdentifier(node.getText()));
@@ -2600,12 +2630,35 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		print(this.renaming.renameIdentifier(node.getText()));
 	}
 
+	// The TKw* tokens behave like keywords, so they should not have identifier renaming applied.
+
+	@Override
+	public void caseTKwSubstitutionOperator(TKwSubstitutionOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwPredicateOperator(TKwPredicateOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwExpressionOperator(TKwExpressionOperator node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwPredicateAttribute(TKwPredicateAttribute node) {
+		print(node.getText());
+	}
+
+	@Override
+	public void caseTKwAttributeIdentifier(TKwAttributeIdentifier node) {
+		print(node.getText());
+	}
+
 	@Override
 	public void defaultCase(final Node node) {
-		if (node instanceof Token) {
-			print(((Token) node).getText());
-		} else {
-			throw new IllegalArgumentException("Node type '" + node.getClass().getSimpleName() + "' not (yet) supported by PrettyPrinter: " + node);
-		}
+		throw new IllegalArgumentException("Node type '" + node.getClass().getSimpleName() + "' not (yet) supported by PrettyPrinter: " + node);
 	}
 }

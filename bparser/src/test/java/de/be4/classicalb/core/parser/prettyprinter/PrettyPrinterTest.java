@@ -82,6 +82,8 @@ public class PrettyPrinterTest {
 				"4*5+6*7",
 				"-5+6",
 				"-5",
+				"-(-5)",
+				"-((-5) * 2)",
 				"-5-6",
 				"-4+5+6",
 				"-4+5-6",
@@ -405,6 +407,12 @@ public class PrettyPrinterTest {
 				"LET x /*@desc thing */ BE x=1 IN x END",
 				"x-x$0",
 				"1.0+2.3",
+				"{} ⦂ POW(INTEGER * INTEGER)",
+				"{} ⦂ INTEGER <-> INTEGER",
+				"@prj1 ⦂ INTEGER <-> INTEGER",
+				"@prj2 ⦂ INTEGER <-> INTEGER",
+				"[1,2] <- 3",
+				"[1,2] <- -3",
 			};
 		}
 
@@ -424,6 +432,11 @@ public class PrettyPrinterTest {
 		public static Object[] data() {
 			return new Object[] {
 				"x<y",
+				"x<(-y)",
+				"x<((-y)*2)",
+				"x<(-((-y)*2))",
+				"x<(-(y*2))",
+				"x<(-(-(y*2)))",
 				"a<b&b<c",
 				"x=y",
 				"x:NAT",

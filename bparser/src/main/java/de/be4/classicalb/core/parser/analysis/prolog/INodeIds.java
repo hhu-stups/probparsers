@@ -15,18 +15,6 @@ public interface INodeIds {
 	void assignIdentifiers(int fileNumber, Node node);
 	
 	/**
-	 * Looks up the ID of the given node.
-	 * 
-	 * @param node the node of which we want to have the ID
-	 * @return the ID of the node, or {@code null} if no ID is available
-	 * @deprecated The unique ID mechanism is deprecated and will be removed in the future.
-	 *     There is no planned replacement.
-	 *     Expect this method to always return {@code null} now.
-	 */
-	@Deprecated
-	Integer lookup(Node node);
-	
-	/**
 	 * Looks up the file number of the given node.
 	 * 
 	 * @param node the node of which we want to have the file number

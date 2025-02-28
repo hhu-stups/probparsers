@@ -1,7 +1,6 @@
 package de.be4.classicalb.core.parser;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +17,6 @@ public abstract class IDefinitions {
 		NoDefinition, Expression, Predicate, Substitution, ExprOrSubst
 	}
 
-	protected final List<IDefinitions> referencedDefinitions = new ArrayList<>();
-
 	public abstract PDefinition getDefinition(String defName);
 
 	public abstract boolean containsDefinition(String defName);
@@ -32,23 +29,41 @@ public abstract class IDefinitions {
 
 	public abstract Set<String> getDefinitionNames();
 
-	public abstract void addDefinition(APredicateDefinitionDefinition defNode, Type type);
+	public abstract void addDefinition(PDefinition defNode, Type type, String defName);
 
-	public abstract void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type);
+	public void addDefinition(APredicateDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
 
-	public abstract void addDefinition(AExpressionDefinitionDefinition defNode, Type type);
+	public void addDefinition(ASubstitutionDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
 
-	public abstract void addDefinition(PDefinition defNode, Type type, String key);
+	public void addDefinition(AExpressionDefinitionDefinition defNode, Type type) {
+		addDefinition(defNode, type, defNode.getName().getText());
+	}
 
-	public abstract void addDefinition(PDefinition defNode);
+	public void addDefinition(PDefinition defNode) {
+		if (defNode instanceof APredicateDefinitionDefinition) {
+			addDefinition((APredicateDefinitionDefinition) defNode, Type.Predicate);
+		} else if (defNode instanceof AExpressionDefinitionDefinition) {
+			addDefinition((AExpressionDefinitionDefinition) defNode, Type.Expression);
+		} else if (defNode instanceof ASubstitutionDefinitionDefinition) {
+			addDefinition((ASubstitutionDefinitionDefinition) defNode, Type.Substitution);
+		} else {
+			throw new AssertionError("Unhandled definition node type: " + defNode.getClass());
+		}
+	}
 
 	public abstract void addDefinitions(IDefinitions defs) throws PreParseException;
 
-	public abstract void replaceDefinition(final String key, final Type type, final PDefinition node);
+	public abstract void replaceDefinition(String defName, Type type, PDefinition node);
 
 	public abstract void assignIdsToNodes(INodeIds nodeIdMapping, List<File> machineFilesLoaded);
 
-	public abstract void setDefinitionType(String identifierString, Type expression);
+	public void setDefinitionType(String defName, Type type) {
+		replaceDefinition(defName, type, getDefinition(defName));
+	}
 
 	public abstract File getFile(String defName);
 

@@ -46,8 +46,8 @@ import de.be4.classicalb.core.parser.util.Utils;
  * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
  */
 final class MachineReferencesFinder extends MachineClauseAdapter {
-	private final Path mainFile;
-	private final boolean isMachineNameMustMatchFileName;
+	private final Path machineFile;
+	private final boolean machineNameMustMatchFileName;
 	private String machineName;
 	private MachineType machineType;
 	private PackageName packageName;
@@ -55,11 +55,11 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Map<PackageName, Path> importedPackages;
 	private final List<MachineReference> references;
 
-	private MachineReferencesFinder(Path machineFile, boolean isMachineNameMustMatchFileName) {
-		this.references = new ArrayList<>();
-		this.mainFile = machineFile;
-		this.isMachineNameMustMatchFileName = isMachineNameMustMatchFileName;
+	private MachineReferencesFinder(Path machineFile, boolean machineNameMustMatchFileName) {
+		this.machineFile = machineFile;
+		this.machineNameMustMatchFileName = machineNameMustMatchFileName;
 		this.importedPackages = new LinkedHashMap<>();
+		this.references = new ArrayList<>();
 	}
 
 	/**
@@ -88,6 +88,9 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new BException(fileName, e.getException());
 		}
 		
+		if (referenceFinder.machineName == null) {
+			throw new BException(fileName, "Could not determine the machine's name. Parse unit class: " + node.getClass(), null);
+		}
 		if (referenceFinder.machineType == null) {
 			throw new BException(fileName, "Could not determine the machine's type. Parse unit class: " + node.getClass(), null);
 		}
@@ -103,8 +106,8 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new VisitorException(new CheckException("Machine name cannot contain dots", node.getName().get(1)));
 		}
 		machineName = Utils.getTIdentifierListAsString(node.getName());
-		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(mainFile.getFileName().toString());
-		if (isMachineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
+		final String fileNameWithoutExtension = Utils.getFileWithoutExtension(machineFile.getFileName().toString());
+		if (machineNameMustMatchFileName && !machineName.equals(fileNameWithoutExtension)) {
 			CheckException ch = new CheckException(
 					String.format("Machine name does not match the file name: '%s' vs '%s'", machineName,
 							fileNameWithoutExtension),
@@ -149,7 +152,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		this.packageName = getPackageName(packageTerminal, node);
 		final Path packageDir;
 		try {
-			packageDir = mainFile.toRealPath().getParent();
+			packageDir = machineFile.toRealPath().getParent();
 		} catch (IOException e) {
 			throw new VisitorIOException(e);
 		}
@@ -189,23 +192,24 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 		}
 
 		if (path != null) {
-			final String baseName = Utils.getFileWithoutExtension(Paths.get(path).getFileName().toString());
-			if (!baseName.equals(name)) {
-				// try replacing windows backslashes by forward slashes
-				// FIXME This special case is not nice! We should remove it as soon as it is not needed anymore! Machines that rely on this are faulty!
-				// The correct fix is to change the machines to use forward slashes, which work on all systems, including Windows.
-				String wpath = path.replace("\\", "/");
-				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
+			Path parsedPath = Paths.get(path);
+			// Disallow backslashes in relative paths to discourage writing machines that only work on Windows.
+			// The portable solution is to use forward slashes, which work on Windows, Mac, and Linux.
+			// We still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
+			// absolute paths are inherently not portable between systems anyway.
+			if (!parsedPath.isAbsolute() && path.contains("\\")) {
+				throw new VisitorException(new CheckException(
+					"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
+					node
+				));
+			}
 
-				if (wbaseName.equals(name)) { // the replace transformation worked
-					//System.out.println("WARNING: you are using Windows backslashes in a path, please use forward slashes as follows:  " + wpath);
-					return new MachineReference(type, name, renamedName, node, wpath);
-				} else {
-					throw new VisitorException(new CheckException(
-						"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
-						node
-					));
-				}
+			String baseName = Utils.getFileWithoutExtension(parsedPath.getFileName().toString());
+			if (!baseName.equals(name)) {
+				throw new VisitorException(new CheckException(
+					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
+					node
+				));
 			}
 		}
 		return new MachineReference(type, name, renamedName, node, path);
@@ -332,6 +336,7 @@ final class MachineReferencesFinder extends MachineClauseAdapter {
 	// DEFINITIONS in standalone definition file (.def)
 	@Override
 	public void caseADefinitionFileParseUnit(final ADefinitionFileParseUnit node) {
+		this.machineName = Utils.getFileWithoutExtension(this.machineFile.getFileName().toString());
 		this.machineType = MachineType.DEFINITION_FILE;
 	}
 }

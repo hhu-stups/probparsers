@@ -31,11 +31,11 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.addBooleanPreferenceDefinition;
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.addChooseDefinition;
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.addFormatToStringDefinition;
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.addSortDefinition;
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.addToStringDefinition;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.addBooleanPreferenceDefinition;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.addChooseDefinition;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.addFormatToStringDefinition;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.addSortDefinition;
+import static de.be4.classicalb.core.parser.util.ASTBuilder.addToStringDefinition;
 
 public class RulesProject {
 	private File mainFile;

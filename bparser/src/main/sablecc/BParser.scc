@@ -772,38 +772,28 @@ predicate_x40 {-> predicate} =
 predicate_x41 {-> predicate} =
   {description} [predicate]:predicate_p60 [description]:description_pragma
       {-> New predicate.description(description.description_pragma, predicate.predicate)} |
-  {next_level} [pred]:predicate_x42
+  {next_level} [pred]:predicate_p60
       {-> pred.predicate};
-predicate_x42 {-> predicate} = [pred]:predicate_p60 {-> pred.predicate};
 
 predicate_p60 {-> predicate} =
-  {equivalence} [left]:predicate_p60 equivalence [right]:predicate_x60 {-> New predicate.equivalence(left.predicate, right.predicate)} |
-  {next_level} [pred]:predicate_x60 {-> pred.predicate};
-predicate_x60 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
-
-/* The predicates of the following levels have completely moved down to the atomic level:
-predicate_p110 {-> predicate} =
-  {next_level} [pred]:predicate_x110 {-> pred.predicate};
-predicate_x110 {-> predicate} = [pred]:predicate_p160 {-> pred.predicate};
-
-predicate_p160 {-> predicate} =
-  {next_level} [pred]:predicate_x160 {-> pred.predicate};
-predicate_x160 {-> predicate} = [pred]:predicate_atomic {-> pred.predicate};
-*/
+  {equivalence} [left]:predicate_p60 equivalence [right]:predicate_atomic {-> New predicate.equivalence(left.predicate, right.predicate)} |
+  {next_level} [pred]:predicate_atomic {-> pred.predicate};
 
 predicate_atomic {-> predicate} =
   // lhs_expression should really be assign_list and not expression_list,
   // but that causes reduce/reduce conflicts with sequence extensions.
   {subst} left_bracket [lhs_expression]:expression_list assign [rhs_expressions]:expression_list right_bracket [pred]:predicate_atomic
     {-> New predicate.substitution(New substitution.assign([lhs_expression.expression], [rhs_expressions.expression]), pred.predicate) } | //weakest precondition
-    /* The following predicates have a priority in the AtelierB manual.
-       But we (in contrast to AtelierB) distinguish between predicates and expression and
-       can put the predicates of the form EXPR*EXPR -> PRED here.
-       Thus fewer parenthesis can be used */
-    /* Original priority: 60 */
+  /* The following predicates have a priority in the AtelierB manual.
+     But we (in contrast to AtelierB) distinguish between predicates and expression and
+     can put the predicates of the form EXPR*EXPR -> PRED here.
+     Thus fewer parenthesis can be used */
+  // Original priority: 60
   {equal} [left]:expression_top equal [right]:expression_top {-> New predicate.equal(left.expression, right.expression)} |
+  // Original priority: 60 (according to English manual version 1.8.10) or 120 (according to French manual version 1.8.10)
   {member} [left]:expression_top element_of [right]:expression_top {-> New predicate.member(left.expression, right.expression)} |
-    /* Original priority: 110 */
+  {contains_element} [left]:expression_top contains_element [right]:expression_top {-> New predicate.member(right.expression, left.expression)} | // reverse arguments
+  // Original priority: 110
   {subset} [left]:expression_top inclusion[right]:expression_top {-> New predicate.subset(left.expression, right.expression)} |
   {subset_strict} [left]:expression_top strict_inclusion [right]:expression_top {-> New predicate.subset_strict(left.expression, right.expression)} |
   {not_subset} [left]:expression_top non_inclusion [right]:expression_top {-> New predicate.not_subset(left.expression, right.expression)} |
@@ -812,8 +802,7 @@ predicate_atomic {-> predicate} =
   {superset_strict} [left]:expression_top superset_strict[right]:expression_top {-> New predicate.subset_strict(right.expression, left.expression)} | // reverse arguments
   {not_superset_strict} [left]:expression_top not_superset_strict[right]:expression_top {-> New predicate.not_subset_strict(right.expression, left.expression)} | // reverse arguments
   {not_superset} [left]:expression_top not_superset[right]:expression_top {-> New predicate.not_subset(right.expression, left.expression)} | // reverse arguments
-  {contains_element} [left]:expression_top contains_element [right]:expression_top {-> New predicate.member(right.expression, left.expression)} | // reverse arguments
-    /* Original priority: 160 */
+  // Original priority: 160
   {not_equal} [left]:expression_top not_equal [right]:expression_top {-> New predicate.not_equal(left.expression, right.expression)} |
   {not_member} [left]:expression_top not_belonging [right]:expression_top {-> New predicate.not_member(left.expression, right.expression)} |
   {not_contains_element} [left]:expression_top not_contains_element [right]:expression_top {-> New predicate.not_member(right.expression, left.expression)} | // reverse arguments
@@ -829,6 +818,7 @@ predicate_atomic {-> predicate} =
   {negation} not left_par [predicate]:predicate_top right_par {-> New predicate.negation(predicate.predicate)} |
   {finite} finite left_par [set]:expression_in_par right_par {-> New predicate.finite(set.expression)} |
   {partition} partition left_par [set]:expression_top [elements]:comma_expression_list? right_par {-> New predicate.partition(set.expression, [elements.expression])} |
+  // According to the B Reference Manual by Clearsy, forall and exists are operators with priority 250.
   {forall} for_any [identifiers]:quantified_variables_list dot left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
   | // check in typechecker: predicate must be an implication predicate
   {forall2} for_any [identifiers]:quantified_variables_list dot2 left_par [implication]:predicate_top right_par {-> New predicate.forall([identifiers.expression], implication.predicate)}
@@ -839,13 +829,13 @@ predicate_atomic {-> predicate} =
   |
   {definition} [def_literal]:def_literal_predicate [parameters]:def_call_params? {-> New predicate.definition(def_literal, [parameters.expression])}
   |
-  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elseif_predicate* else [else_pred]:predicate_top end
+  {if_predicate} if [condition]:predicate_top then [then_pred]:predicate_top [elsifs]:if_elsif_predicate* else [else_pred]:predicate_top end
     {-> New predicate.if_predicate(condition.predicate, then_pred.predicate, [elsifs.predicate], else_pred.predicate)} |
   {let_predicate} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [pred]:predicate_top end
     {-> New predicate.let_predicate([identifiers.expression], definition.predicate, pred.predicate)} |
   {predicate_operator} [name]:kw_predicate_operator [parameters]:op_params {-> New predicate.operator(name,[parameters.expression])}; // extension
 
-if_elseif_predicate {-> predicate} =
+if_elsif_predicate {-> predicate} =
   elsif [condition]:predicate_top then [pred]:predicate_top {-> New predicate.if_elsif_predicate(condition.predicate, pred.predicate)};
 
 /* Expressions */
@@ -853,14 +843,6 @@ if_elseif_predicate {-> predicate} =
 /* expression_in_par contains the priority level 20, it is not considered as expression_top
    because ; and || should only be used inside parentheses */
 expression_in_par {-> expression} =
-  {description} [expression]:expression_in_par2 [description]:description_pragma
-        /* we allow descriptions for expressions in parentheses; no ambiguity possible */
-      {-> New expression.description(description.description_pragma, expression.expression)} |
-  {next_level} [expr]:expression_in_par2
-     {-> expr.expression};
-
-/* expressions inside (.) allowing ; and || operators */
-expression_in_par2 {-> expression} =
   {composition} [left]:expression_in_par semicolon [right]:expression_top
      {-> New expression.composition(left.expression, right.expression)} |
   {symbolic_composition} [left]:expression_in_par pragma_symbolic pragma_end semicolon [right]:expression_top
@@ -876,16 +858,26 @@ expression_top_with_opt_desc {-> expression} =
   {description} [expression]:expression_top [description]:description_pragma
         /* we allow descriptions for expressions, can be used when no ambiguity (e.g., with predicate desc) possible */
       {-> New expression.description(description.description_pragma, expression.expression)} |
-  {next_level} [expr]:expression_p125
+  {next_level} [expr]:expression_top
      {-> expr.expression};
 
 /* expressions top,  without ; and || */
-expression_top {-> expression} = [expr]:expression_p125 {-> expr.expression};
+expression_top {-> expression} = [expr]:expression_p120 {-> expr.expression};
 
-/*expression_p20 {-> expression} =
-  {parallel_product} left_par [left]:expression_p20 double_vertical_bar [right]:expression_x20 right_par {-> New expression.parallel_product(left.expression, right.expression)} | // zu sehr eingeschraenkt?!?
-  {next_level} [expr]:expression_x20 {-> expr.expression};
-expression_x20 {-> expression} = [expr]:expression_p125 {-> expr.expression}; */
+// Note: In Atelier B, the comma has priority 115, so all expressions should have a higher priority than that.
+
+// Priority 120 (not supported by Atelier B)
+expression_p120 {-> expression} =
+  // Event-B/Rodin oftype expression.
+  // Rodin's parsing rules for this operator are a bit complex -
+  // see class org.eventb.internal.core.parser.SubParsers.OftypeParser in the project org.eventb.core.ast in the Rodin source code.
+  // Rodin only allows typeof after a type-generic expression (∅, id, prj1, etc.).
+  // We cannot enforce this precisely at the parsing stage,
+  // so we allow the left side to be any expression_keyword (which contains @prj1 and @prj2).
+  // Rodin allows the right side to be any type expression unparenthesized,
+  // so typeof must have lower priority than the relation operator (A <-> B).
+  {typeof} [left]:expression_keyword oftype [right]:expression_p125 {-> New expression.typeof(left.expression, right.expression)} |
+  {next_level} [expr]:expression_p125 {-> expr.expression};
 
 // Priority 125:
 expression_p125 {-> expression} =
@@ -945,13 +937,8 @@ expression_p190 {-> expression} =
 // Priority 200:
 /* Attention: power_of is right-assoziative! */
 expression_p200 {-> expression} =
-  {power_of} [left]:expression_x200 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
-  {next_level} [expr]:expression_x200 {-> expr.expression};
-
-// Priority 201: CHECK IF Correct place for oftype
-expression_x200 {-> expression} =
-  {typeof} [left]:expression_p210 oftype [right]:expression_p210 {-> New expression.typeof(left.expression, right.expression)} | // TODO: check priority and nesting that should be allowed
-  [expr]:expression_p210 {-> expr.expression};
+  {power_of} [left]:expression_p210 power_of [right]:expression_p200 {-> New expression.power_of(left.expression, right.expression)} | // right associative!
+  {next_level} [expr]:expression_p210 {-> expr.expression};
 
 // Priority 210:
 expression_p210 {-> expression} =
@@ -1106,14 +1093,14 @@ expression_atomic {-> expression} =
   {nat1_set} nat1 {-> New expression.nat1_set()} |
   {int_set} int {-> New expression.int_set()} |
   {bool_set} bool {-> New expression.bool_set()} |
-  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elseif_expression* else [else_expr]:expression_top_with_opt_desc end
+  {if_expression} if [condition]:predicate_top then [then_expr]:expression_top_with_opt_desc [elsifs]:if_elsif_expr* else [else_expr]:expression_top_with_opt_desc end
      // Note: one could allow expression_or_id_list here w/o creating shift/reduce conflicts
     {-> New expression.if_then_else(condition.predicate, then_expr.expression, [elsifs.expression], else_expr.expression)} |
   {let_expression} let [identifiers]:identifier_declaration_list be [definition]:predicate_top in [expr]:expression_top_with_opt_desc end
     {-> New expression.let_expression([identifiers.expression], definition.predicate, expr.expression)} |
   {string_set} string {-> New expression.string_set()};
 
-if_elseif_expression {-> expression} =
+if_elsif_expr {-> expression} =
   elsif [condition]:predicate_top then [expr]:expression_top_with_opt_desc {-> New expression.if_elsif_expr(condition.predicate, expr.expression)};
 
 expression_list {-> expression*} =

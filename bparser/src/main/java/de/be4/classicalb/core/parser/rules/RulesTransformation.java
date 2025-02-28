@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.be4.classicalb.core.parser.rules.ASTBuilder.*;
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
@@ -15,7 +14,10 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.util.ASTBuilder;
 import de.be4.classicalb.core.parser.util.Utils;
+
+import static de.be4.classicalb.core.parser.util.ASTBuilder.*;
 
 public class RulesTransformation extends DepthFirstAdapter {
 
@@ -368,14 +370,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 		/* ******************************************************* */
 
 		// VARIABLES
-		variablesList.add(createAIdentifierExpression(node.getRuleName()));
+		variablesList.add(createIdentifier(node.getRuleName()));
 
 		// INVARIANT
 		ASetExtensionExpression set = new ASetExtensionExpression(
 			Stream.of(RULE_FAIL, RULE_SUCCESS, RULE_NOT_CHECKED, RULE_DISABLED)
 				.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
 		AMemberPredicate member = createPositionedNode(
-				new AMemberPredicate(createAIdentifierExpression(node.getRuleName()), set), node);
+				new AMemberPredicate(createIdentifier(node.getRuleName()), set), node);
 
 		invariantList.add(member);
 
@@ -392,7 +394,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = createStringExpression(RULE_NOT_CHECKED);
 		}
 		final AAssignSubstitution initSub = new AAssignSubstitution(
-				createExpressionList(createAIdentifierExpression(node.getRuleName())), createExpressionList(value));
+				createExpressionList(createIdentifier(node.getRuleName())), createExpressionList(value));
 		initialisationList.add(initSub);
 		// VARIABLES ...
 		variablesList.add(createIdentifier(ctName, node.getRuleName().clone()));
@@ -481,7 +483,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	private AAssignSubstitution createRuleAssignment(TIdentifierLiteral ruleLiteral, String ruleStatus) {
-		return createAssignNode(createRuleIdentifier(ruleLiteral), createStringExpression(ruleStatus));
+		return createAssignNode(createIdentifier(ruleLiteral), createStringExpression(ruleStatus));
 	}
 
 	private PSubstitution createConditionalFailAssignment() {
@@ -494,15 +496,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
 		final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
-		PPredicate compExecuted = new AEqualPredicate(createAIdentifierExpression(computationIdentifierLiteral),
+		PPredicate compExecuted = new AEqualPredicate(createIdentifier(computationIdentifierLiteral),
 				createStringExpression(COMPUTATION_EXECUTED));
-		AMemberPredicate member = new AMemberPredicate(createRuleIdentifier(node.getName()), node.getType());
+		AMemberPredicate member = new AMemberPredicate(createIdentifier(node.getName()), node.getType());
 		invariantList.add(new AImplicationPredicate(compExecuted, member));
 
 		if (node.getDummyValue() != null) {
-			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), node.getDummyValue()));
+			initialisationList.add(createAssignNode(createIdentifier(node.getName()), node.getDummyValue()));
 		} else {
-			initialisationList.add(createAssignNode(createRuleIdentifier(node.getName()), new AEmptySetExpression()));
+			initialisationList.add(createAssignNode(createIdentifier(node.getName()), new AEmptySetExpression()));
 		}
 
 		PExpression value;
@@ -515,7 +517,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = createPositionedNode(callExternalFunction(FORCE, node.getValue()), node.getValue());
 		}
 
-		node.replaceBy(createAssignNode(createRuleIdentifier(node.getName()), value));
+		node.replaceBy(createAssignNode(createIdentifier(node.getName()), value));
 	}
 
 	private PSubstitution createCounterExampleSubstitution(int errorIndex, PExpression setOfCounterexamples, boolean conditionalFail) {
