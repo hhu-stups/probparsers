@@ -449,22 +449,13 @@ public class RulesProject {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			map.put(parseUnit.getMachineName(), parseUnit);
 		}
-		checkIdentifiers((RulesParseUnit) bModels.getFirst(), map);
-	}
-
-	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map) {
-		map.remove(parseUnit.getMachineName()); // don't visit this machine again
-		HashSet<String> knownIdentifiers = new HashSet<>();
-		List<MachineReference> machineReferences = parseUnit.getMachineReferences();
-		for (MachineReference rulesMachineReference : machineReferences) {
-			RulesParseUnit rulesParseUnit = map.get(rulesMachineReference.getName());
-			if (rulesParseUnit == null) { // already visited
-				continue;
-			}
-			knownIdentifiers.addAll(checkIdentifiers(rulesParseUnit, map)); // get identifiers of all referenced machines
-			RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
-			knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
-			knownIdentifiers.addAll(checker.getFunctionOperationNames());
+		Set<String> knownIdentifiers = new HashSet<>();
+		Set<String> visited = new HashSet<>();
+		RulesParseUnit parseUnit = (RulesParseUnit) bModels.get(0);
+		visited.add(parseUnit.getMachineName());
+		for (IModel model : bModels) {
+			knownIdentifiers.addAll(checkIdentifiers((RulesParseUnit) model, map, visited));
+			visited.clear();
 		}
 		RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
 		Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
@@ -475,6 +466,22 @@ public class RulesProject {
 			Node node = hashSet.iterator().next();
 			this.bExceptionList.add(new BException(parseUnit.getPath(),
 					new CheckException("Unknown identifier '" + name + "'.", node)));
+		}
+	}
+
+	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map, Set<String> visited) {
+		HashSet<String> knownIdentifiers = new HashSet<>();
+		List<MachineReference> machineReferences = parseUnit.getMachineReferences();
+		for (MachineReference rulesMachineReference : machineReferences) {
+			RulesParseUnit rulesParseUnit = map.get(rulesMachineReference.getName());
+			if (visited.contains(rulesParseUnit.getMachineName())) { // already visited
+				continue;
+			}
+			visited.add(rulesParseUnit.getMachineName());
+			knownIdentifiers.addAll(checkIdentifiers(rulesParseUnit, map, visited)); // get identifiers of all referenced machines
+			RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
+			knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
+			knownIdentifiers.addAll(checker.getFunctionOperationNames());
 		}
 		return knownIdentifiers;
 	}
