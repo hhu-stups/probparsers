@@ -2,88 +2,60 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.ParsingBehaviour;
-import de.be4.classicalb.core.parser.analysis.prolog.ASTProlog;
-import de.be4.classicalb.core.parser.analysis.prolog.ClassicalPositionPrinter;
-import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReferencesFinder;
+import de.be4.classicalb.core.parser.analysis.prolog.PackageName;
+import de.be4.classicalb.core.parser.analysis.prolog.ReferencedMachines;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.util.Utils;
-import de.prob.prolog.output.IPrologTermOutput;
+import de.be4.classicalb.core.parser.node.Node;
 
-public class RulesParseUnit implements IModel {
-	private String machineName;
-	private List<MachineReference> machineReferences;
+public class RulesParseUnit extends IModel {
+	private List<MachineReference> machineReferences = new ArrayList<>();
 
 	private String content;
 	private File machineFile;
 	private BCompoundException bCompoundException;
-	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private BParser bParser;
-	private Start start;
 
-	private final List<AbstractOperation> operationList = new ArrayList<>();
 	private RulesMachineChecker rulesMachineChecker;
-	private RulesMachineReferencesFinder refFinder;
 
-	public RulesParseUnit() {
+	private RulesParseUnit(String machineContent) {
+		super();
+		this.content = machineContent;
 	}
 
-	public RulesParseUnit(String machineName) {
-		this.machineName = machineName;
+	private RulesParseUnit(File machineFile) {
+		super();
+		this.machineFile = machineFile;
 	}
 
-	public List<AbstractOperation> getOperations() {
-		return this.operationList;
+	public static RulesParseUnit parse(File machineFile, ParsingBehaviour parsingBehaviour) {
+		RulesParseUnit rulesParseUnit = new RulesParseUnit(machineFile);
+		rulesParseUnit.setParsingBehaviour(parsingBehaviour);
+		rulesParseUnit.parse();
+		return rulesParseUnit;
 	}
 
-	@Override
-	public Start getStart() {
-		return this.start;
+	public static RulesParseUnit parse(String machineString) {
+		RulesParseUnit rulesParseUnit = new RulesParseUnit(machineString);
+		rulesParseUnit.parse();
+		return rulesParseUnit;
 	}
 
-	@Override
-	public String getPath() {
-		if (this.machineFile != null) {
-			return this.machineFile.getAbsolutePath();
-		} else {
-			return this.machineName;
-		}
-	}
-
-	public void setMachineAsString(String content) {
-		this.content = content;
-	}
-
-	public RulesMachineChecker getRulesMachineChecker() {
-		return this.rulesMachineChecker;
-	}
-
-	public void setParsingBehaviour(final ParsingBehaviour parsingBehaviour) {
-		this.parsingBehaviour = parsingBehaviour;
-	}
-
-	public void readMachineFromFile(File file) {
-		this.machineFile = file;
-		try {
-			content = Utils.readFile(file);
-			this.machineFile = machineFile.getCanonicalFile();
-		} catch (IOException e) {
-			bCompoundException = new BCompoundException(new BException(file.getAbsolutePath(), e));
-		}
-	}
-
-	public void parse() {
+	private void parse() {
 		if (this.bCompoundException != null) {
 			return;
 		}
@@ -92,35 +64,48 @@ public class RulesParseUnit implements IModel {
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
-			start = bParser.parseMachine(content);
-			refFinder = new RulesMachineReferencesFinder(machineFile, start);
-			refFinder.findReferencedMachines();
+			this.setStart(machineFile != null ? bParser.parseFile(machineFile) : bParser.parseMachine(content));
+			if (machineFile != null) {
+				ReferencedMachines machines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), this.getStart(), true);
+				this.setMachineName(machines.getMachineName());
 
-			this.machineReferences = refFinder.getReferences();
-			this.machineName = refFinder.getName();
-			this.rulesMachineChecker = new RulesMachineChecker(machineFile, machineReferences, start);
+				this.machineReferences = new ArrayList<>();
+				for (MachineReference mr : machines.getReferences()) {
+					String filePragma = mr.getPath();
+					File referencedFile;
+					if (filePragma == null) {
+						try {
+							referencedFile = lookupFile(mr.getName(), machines.getImportedPackages(), mr.getNode());
+						} catch (CheckException e) {
+							throw new BException(machineFile.getAbsolutePath(), e);
+						}
+					} else {
+						File p = new File(filePragma);
+						referencedFile = p.isAbsolute() ? p : new File(machineFile.getParentFile(), filePragma);
+					}
+					machineReferences.add(new MachineReference(mr.getType(), mr.getName(), mr.getRenamedName(), mr.getNode(), referencedFile.getAbsolutePath()));
+				}
+			}
+			this.rulesMachineChecker = new RulesMachineChecker(machineFile, machineReferences, this.getStart());
 			rulesMachineChecker.runChecks();
-			this.operationList.addAll(rulesMachineChecker.getOperations());
-
-		} catch (BCompoundException e) {
-			// store parser exceptions
+		} catch (BCompoundException e) { // store parser exceptions
 			this.bCompoundException = e;
+		} catch (BException e) {
+			this.bCompoundException = new BCompoundException(e);
 		}
 	}
 
 	public void translate() {
-		final HashMap<String, AbstractOperation> allOperations = new HashMap<>();
-		for (AbstractOperation op : operationList) {
-			allOperations.put(op.getOriginalName(), op);
-		}
+		Map<String, AbstractOperation> allOperations = this.getOperations().stream()
+				.collect(Collectors.toMap(AbstractOperation::getOriginalName, op -> op));
 		this.translate(allOperations);
 	}
 
 	public void translate(Map<String, AbstractOperation> allOperations) {
-		if (bCompoundException != null) {
+		if (this.hasError()) {
 			return;
 		}
-		final RulesTransformation ruleTransformation = new RulesTransformation(start, bParser, rulesMachineChecker,
+		final RulesTransformation ruleTransformation = new RulesTransformation(this.getStart(), bParser, rulesMachineChecker,
 				allOperations);
 		try {
 			ruleTransformation.runTransformation();
@@ -129,34 +114,41 @@ public class RulesParseUnit implements IModel {
 		}
 	}
 
+	private static final String[] SUFFICES = new String[] { ".rmch", ".mch" };
+
+	private File lookupFile(final String name, final Map<PackageName, Path> imports, final Node node) throws CheckException {
+		List<String> importPaths = imports.values().stream().map(v -> v.toAbsolutePath().toString()).collect(Collectors.toList());
+		for (final String suffix : SUFFICES) {
+			try {
+				return new FileSearchPathProvider(machineFile.getParentFile().getPath(), name + suffix, importPaths)
+						.resolve();
+			} catch (IOException e) {
+				// could not resolve the combination of prefix, machineName and suffix, trying next one
+			}
+		}
+		throw new CheckException(String.format("Machine not found: '%s'", name), node);
+	}
+
+	public List<AbstractOperation> getOperations() {
+		return this.rulesMachineChecker == null ? new ArrayList<>() : this.rulesMachineChecker.getOperations();
+	}
+
 	@Override
-	public String getMachineName() {
-		return machineName;
+	public String getPath() {
+		if (this.machineFile != null) {
+			return this.machineFile.getAbsolutePath();
+		} else {
+			return this.getMachineName();
+		}
+	}
+
+	public RulesMachineChecker getRulesMachineChecker() {
+		return this.rulesMachineChecker;
 	}
 
 	@Override
 	public List<MachineReference> getMachineReferences() {
-		if (this.machineReferences == null) {
-			return new ArrayList<>();
-		} else {
-			return this.machineReferences;
-		}
-	}
-
-	@Override
-	public void printAsPrologWithFullstops(final IPrologTermOutput pout, INodeIds nodeIdMapping, boolean withFullstops) {
-		assert start != null;
-		final ClassicalPositionPrinter pprinter = new ClassicalPositionPrinter(nodeIdMapping);
-		pprinter.setPrintSourcePositions(parsingBehaviour.isAddLineNumbers(), parsingBehaviour.isCompactPrologPositions());
-		final ASTProlog prolog = new ASTProlog(pout, pprinter);
-		pout.openTerm("machine");
-		start.apply(prolog);
-		pout.closeTerm();
-		if (withFullstops) {
-			pout.fullstop();
-		} else {
-			pout.flush();
-		}
+		return this.machineReferences == null ? new ArrayList<>() : this.machineReferences;
 	}
 
 	@Override

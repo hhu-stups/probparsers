@@ -126,7 +126,11 @@ public final class ASTBuilder {
 	}
 
 	public static AIdentifierExpression createIdentifier(String name) {
-		return new AIdentifierExpression(Collections.singletonList(new TIdentifierLiteral(name)));
+		return new AIdentifierExpression(createTIdentifierList(name));
+	}
+
+	public static List<TIdentifierLiteral> createTIdentifierList(String name) {
+		return Collections.singletonList(new TIdentifierLiteral(name));
 	}
 
 	public static AIdentifierExpression createIdentifier(String name, PositionedNode positionNode) {

@@ -154,6 +154,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		this.nameLiteral = nameList.get(0);
 		this.machineName = nameLiteral.getText();
+
+		// check self references; TODO: maybe we do not need this - duplicate references are ignored
+		for (MachineReference machineReference : machineReferences) {
+			if (machineReference.getName().equals(machineName)) {
+				errorList.add(new CheckException("The reference '" + machineReference.getName() + "' has the same name as the machine in which it is contained.", machineReference.getNode()));
+			}
+		}
 	}
 
 	@Override

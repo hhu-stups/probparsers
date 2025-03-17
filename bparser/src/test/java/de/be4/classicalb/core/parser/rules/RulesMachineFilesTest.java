@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
@@ -101,13 +102,6 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testRulesMachineNameDoesNotMatchFileName() {
-		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/RulesMachineNameDoesNotMatchFileName.rmch"));
-		Helpers.assertParseErrorLocation(e, 1, 15, 1, 26);
-		assertTrue(e.getMessage().contains("RULES_MACHINE name must match the file name"));
-	}
-
-	@Test
 	public void testCyclicComputationDependencies() {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("CyclicComputationDependencies.rmch"));
 		assertTrue(e.getMessage().contains("Cyclic dependencies between operations"));
@@ -183,9 +177,17 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testFileNameDoesNotMatchMachineName() {
+	public void testFileNameDoesNotMatchMachineName1() {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/DifferentFileName.rmch"));
-		assertTrue(e.getMessage().contains("RULES_MACHINE name must match the file name"));
+		Helpers.assertParseErrorLocation(new BException("",e), 1, 15, 1, 27);
+		assertTrue(e.getMessage().contains("Machine name does not match the file name: 'RulesMachine' vs 'DifferentFileName'"));
+	}
+
+	@Test
+	public void testFileNameDoesNotMatchMachineName2() {
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/RulesMachineNameDoesNotMatchFileName.rmch"));
+		Helpers.assertParseErrorLocation(new BException("",e), 1, 15, 1, 26);
+		assertTrue(e.getMessage().contains("Machine name does not match the file name: 'InvalidName' vs 'RulesMachineNameDoesNotMatchFileName'"));
 	}
 
 	@Test
@@ -200,15 +202,15 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testInvalidFilePragma() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
-		assertTrue(e.getMessage().contains("is a directory"));
+	public void testDirectoryInFilePragma() {
+		final IOException e = Helpers.assertThrowsCompound(IOException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
+		assertTrue(e.getMessage().contains("Is a directory"));
 	}
 
 	@Test
 	public void testFileDoesNotExistInFilePragma() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
-		assertTrue(e.getMessage().contains("does not exist"));
+		final NoSuchFileException e = Helpers.assertThrowsCompound(NoSuchFileException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
+		assertTrue(e.getMessage().contains("/test1/Foo.rmch"));
 	}
 
 	@Test
@@ -243,14 +245,14 @@ public class RulesMachineFilesTest {
 	@Test
 	public void testImportedPackageDoesNotExist2() {
 		final BCompoundException e = assertThrows(BCompoundException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/ImportedPackageDoesNotExist2.rmch"));
-		Helpers.assertParseErrorLocation(e, 3, 19, 3, 36);
+		Helpers.assertParseErrorLocation(e, 2, 1, 3, 38);
 		assertTrue(e.getMessage().contains("Imported package does not exist"));
 	}
 
 	@Test
 	public void testDuplicatePackageImport() {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/packagePragma/DuplicatePackageImport.rmch"));
-		assertTrue(e.getMessage().contains("Duplicate package import"));
+		assertTrue(e.getMessage().contains("Duplicate import statement"));
 	}
 
 	@Test
