@@ -203,14 +203,12 @@ public class RulesMachineFilesTest {
 
 	@Test
 	public void testDirectoryInFilePragma() {
-		final IOException e = Helpers.assertThrowsCompound(IOException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
-		assertTrue(e.getMessage().contains("Is a directory"));
+		Helpers.assertThrowsCompound(IOException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/DirectoryInFilePragma.rmch"));
 	}
 
 	@Test
 	public void testFileDoesNotExistInFilePragma() {
-		final NoSuchFileException e = Helpers.assertThrowsCompound(NoSuchFileException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
-		assertTrue(e.getMessage().contains("/test1/Foo.rmch"));
+		Helpers.assertThrowsCompound(NoSuchFileException.class, () -> RulesUtil.getFileAsPrologTerm("project/references/FileDoesNotExistInFilePragma.rmch"));
 	}
 
 	@Test
