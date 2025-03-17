@@ -223,6 +223,16 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
+	public void testReferenceClassicalMachines() throws BCompoundException {
+		String result = RulesUtil.getFileAsPrologTerm("project/references/RulesReferencesClassicalRef0.rmch");
+	}
+
+	@Test
+	public void testReferenceClassicalMachinesViaRulesMachine() throws BCompoundException {
+		RulesUtil.getFileAsPrologTerm("project/references/RulesReferencesClassical.rmch");
+	}
+
+	@Test
 	public void testPackagePragma() throws BCompoundException {
 		String result = RulesUtil.getFileAsPrologTerm("project/references/PackagePragma.rmch");
 	}
