@@ -574,8 +574,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (!preConditionList.isEmpty()) {
 			body = new APreconditionSubstitution(createConjunction(preConditionList), body);
 		}
-		node.replaceBy(new AOperation(node.getReturnValues(), Collections.singletonList(node.getName()),
-			new ArrayList<>(node.getParameters()), body));
+		node.replaceBy(new AOperation(new LinkedList<>(node.getReturnValues()), Collections.singletonList(node.getName()),
+				new LinkedList<>(node.getParameters()), body));
 	}
 
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,

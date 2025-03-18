@@ -155,6 +155,13 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testFunctionMultipleReturn() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out1, out2 <-- foo(x) PRECONDITION x : INTEGER BODY out1 := x + 1; out2 := succ(out1) END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("operation(none,identifier(none,foo),[identifier(none,out1),identifier(none,out2)],[identifier(none,x)],precondition(none,member(none,identifier(none,x),integer_set(none)),sequence(none,[assign(none,[identifier(none,out1)],[add(none,identifier(none,x),integer(none,1))]),assign(none,[identifier(none,out2)],[function(none,successor(none),[identifier(none,out1)])])])))"));
+	}
+
+	@Test
 	public void testFunctionPostcondition() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER POSTCONDITION out : INTEGER BODY out := x + 1 END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
