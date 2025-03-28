@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +18,8 @@ import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.ASTBuilder;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 import static de.be4.classicalb.core.parser.util.ASTBuilder.*;
 
@@ -359,13 +363,33 @@ public class RulesTransformation extends DepthFirstAdapter {
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
 
-		// replacing the rule operation by an ordinary operation
-		node.replaceBy(new AOperation(
-			new LinkedList<>(),
-			Collections.singletonList(node.getRuleName().clone()),
-			new LinkedList<>(),
-			select
-		));
+		// The following is a hack for accessing operation attributes on the Prolog side.
+		// The attributes are read in btypechecker.pl and added to the info list as rules_info([tags(T),classification(C),ruleid(RId)]).
+		Writer sw = new StringWriter();
+		IPrologTermOutput pout = new PrologTermOutput(sw,false);
+		pout.openTerm("rules_info").openList();
+		if (!currentRule.getTags().isEmpty()) {
+			pout.openTerm("tags").openList();
+			currentRule.getTags().forEach(pout::printAtom);
+			pout.closeList().closeTerm();
+		}
+		if (currentRule.getClassification() != null) {
+			pout.openTerm("classification").printAtom(currentRule.getClassification()).closeTerm();
+		}
+		if (currentRule.getRuleIdString() != null) {
+			pout.openTerm("rule_id").printAtom(currentRule.getRuleIdString()).closeTerm();
+		}
+		pout.closeList().closeTerm().fullstop();
+
+		// replacing the rule operation by an ordinary operation, description contains operation attributes
+		node.replaceBy(new ADescriptionOperation(
+				new ADescriptionPragma(Collections.singletonList(new TPragmaFreeText(sw.toString()))),
+				new AOperation(
+						new LinkedList<>(),
+						Collections.singletonList(node.getRuleName().clone()),
+						new LinkedList<>(),
+						select
+		)));
 
 		/* ******************************************************* */
 
