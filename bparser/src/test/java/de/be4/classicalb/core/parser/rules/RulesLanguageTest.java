@@ -172,7 +172,28 @@ public class RulesLanguageTest {
 	public void testRuleId() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertFalse("RULEID should not appear in the translated B machine.", result.contains("id2"));
+		assertTrue("Expected RULEID in description of rule operation.", result.contains("rules_info([rule_id(id2)])."));
+	}
+
+	@Test
+	public void testClassification() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo CLASSIFICATION cl2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected CLASSIFICATION in description of rule operation.", result.contains("rules_info([classification(cl2)])."));
+	}
+
+	@Test
+	public void testTags() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS t1,t2,t3 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected TAGS in description of rule operation.", result.contains("rules_info([tags([t1,t2,t3])])."));
+	}
+
+	@Test
+	public void testAllAttributes() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS t1,t2,t3 CLASSIFICATION c4 RULEID r5 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected operation attributes in description of rule operation.", result.contains("rules_info([tags([t1,t2,t3]),classification(c4),rule_id(r5)])."));
 	}
 
 	@Test
