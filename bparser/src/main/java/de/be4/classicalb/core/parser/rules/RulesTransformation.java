@@ -27,6 +27,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_FAIL = "FAIL";
 	public static final String RULE_SUCCESS = "SUCCESS";
+	public static final String RULE_UNCHECKED = "UNCHECKED";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
 
@@ -36,6 +37,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 	public static final String RULE_SUCCESSFUL_VARIABLE_SUFFIX = "_Successful";
+	public static final String RULE_UNCHECKED_VARIABLE_SUFFIX = "_Unchecked";
 
 	private static final String ALL_TUPLE = "$AllTuple";
 	private static final String RESULT_TUPLE = "$ResultTuple";
@@ -360,6 +362,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String sfName = ruleName + RULE_SUCCESSFUL_VARIABLE_SUFFIX;
 		currentRule.setSuccessfulVariableName(sfName);
 
+		final String ucName = ruleName + RULE_UNCHECKED_VARIABLE_SUFFIX;
+		currentRule.setUncheckedVariableName(ucName);
+
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
 
@@ -398,7 +403,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		// INVARIANT
 		ASetExtensionExpression set = new ASetExtensionExpression(
-			Stream.of(RULE_FAIL, RULE_SUCCESS, RULE_NOT_CHECKED, RULE_DISABLED)
+			Stream.of(RULE_FAIL, RULE_SUCCESS, RULE_NOT_CHECKED, RULE_DISABLED, RULE_UNCHECKED)
 				.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
 		AMemberPredicate member = createPositionedNode(
 				new AMemberPredicate(createIdentifier(node.getRuleName()), set), node);
@@ -423,8 +428,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// VARIABLES ...
 		variablesList.add(createIdentifier(ctName, node.getRuleName().clone()));
 		variablesList.add(createIdentifier(sfName, node.getRuleName().clone()));
+		variablesList.add(createIdentifier(ucName, node.getRuleName().clone()));
 
-		// INVARIANT rule1#counterexamples : POW(INTEGER*STRING)
+		// INVARIANT rule1#Counterexamples : POW(INTEGER*STRING)
 		final AMemberPredicate ctTypingPredicate = new AMemberPredicate(
 			createIdentifier(ctName),
 			new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
@@ -438,11 +444,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 		);
 		invariantList.add(createPositionedNode(sfTypingPredicate, node));
 
-		// INITIALISATION rule1#counterexamples := {}
+		//  rule1#Unchecked : POW(INTEGER*STRING)
+		final AMemberPredicate ucTypingPredicate = new AMemberPredicate(
+				createIdentifier(ucName),
+				new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
+		);
+		invariantList.add(createPositionedNode(ucTypingPredicate, node));
+
+		// INITIALISATION rule1#Counterexamples := {}
 		initialisationList.add(createAssignNode(createIdentifier(ctName, node.getRuleName().clone()), new AEmptySetExpression()));
 
 		//  rule1#Successful := {}
 		initialisationList.add(createAssignNode(createIdentifier(sfName, node.getRuleName().clone()), new AEmptySetExpression()));
+
+		//  rule1#Successful := {}
+		initialisationList.add(createAssignNode(createIdentifier(ucName, node.getRuleName().clone()), new AEmptySetExpression()));
 	}
 
 	@Override
@@ -576,6 +592,17 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(sfName)),
 			createExpressionList(union));
 		return new ASequenceSubstitution(Collections.singletonList(assign));
+	}
+
+	private PSubstitution createUncheckedSubstitution(PExpression uncheckedMessage) {
+		final String ucName = currentRule.getOriginalName() + RULE_UNCHECKED_VARIABLE_SUFFIX;
+		final AUnionExpression union = new AUnionExpression(createIdentifier(ucName),
+				createPositionedNode(new ASetExtensionExpression(Collections.singletonList(new ACoupleExpression(
+						Arrays.asList(createIntegerExpression(ruleBodyCount), uncheckedMessage.clone())))), uncheckedMessage));
+
+		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ucName)),
+				createExpressionList(union));
+		return new ASequenceSubstitution(createSubstitutionList(assign, createRuleAssignment(currentRule.getNameLiteral(), RULE_UNCHECKED)));
 	}
 
 	@Override
@@ -794,7 +821,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		Node newNode;
 		if (!node.getIdentifiers().isEmpty()) {
 			newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(),
-				null, null, node.getMessage(), node.getErrorType()), node);
+				null, null, node.getMessage(), null, node.getErrorType()), node);
 		} else {
 			// default value is 1 if no value is provided
 			int errorType = node.getErrorType() != null ? Integer.parseInt(node.getErrorType().getText()) : 1;
@@ -823,10 +850,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
 			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression onSuccessMessage,
-			final PExpression counterExampleMessage, final TIntegerLiteral errorTypeNode) {
+			final PExpression counterExampleMessage, final PExpression uncheckedMessage, final TIntegerLiteral errorTypeNode) {
 
 		final String ON_SUCCESS_STRINGS = "$OnSuccessStrings";
 		final String COUNTEREXAMPLE_STRINGS = "$CounterexampleStrings";
+		final String UNCHECKED_STRING = "$UncheckedString"; // just a single string
 
 		final AComprehensionSetExpression setWithoutExpect = new AComprehensionSetExpression();
 		{
@@ -848,6 +876,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		if (onSuccessMessage != null) {
 			varIdentifiers.add(createIdentifier(ON_SUCCESS_STRINGS));
+		}
+		if (uncheckedMessage != null) {
+			varIdentifiers.add(createIdentifier(UNCHECKED_STRING));
 		}
 		var.setIdentifiers(varIdentifiers);
 		List<PSubstitution> subList = new ArrayList<>();
@@ -903,6 +934,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createExpressionList(new AEventBComprehensionSetExpression(list2, onSuccessMessage, member))
 			));
 		}
+		if (uncheckedMessage != null) {
+			// just a single string; identifier is not in the all_tuple set
+			subList.add(new AAssignSubstitution(
+					createExpressionList(createIdentifier(UNCHECKED_STRING)),
+					createExpressionList(uncheckedMessage)
+			));
+		}
 		{
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
@@ -929,6 +967,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 			PSubstitution successfulSubstitution = createSuccessfulSubstitution(createIdentifier(ON_SUCCESS_STRINGS));
 			subList.add(successfulSubstitution);
 		}
+		if (uncheckedMessage != null) {
+			PPredicate ifUnchecked = new AEqualPredicate(createIdentifier(ALL_TUPLE), new AEmptySetExpression());
+			AIfSubstitution uncheckedSubstitution = new AIfSubstitution(ifUnchecked,
+					createUncheckedSubstitution(uncheckedMessage),
+					new ArrayList<>(),
+					null);
+			subList.add(uncheckedSubstitution);
+		}
 
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);
@@ -940,7 +986,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		this.ruleBodyCount++;
 		addForceDefinition(iDefinitions);
 		PSubstitution newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
-				node.getWhere(), node.getExpect(), node.getOnSuccess(), node.getMessage(), node.getErrorType()), node);
+				node.getWhere(), node.getExpect(), node.getOnSuccess(), node.getMessage(), node.getUnchecked(), node.getErrorType()), node);
 		node.replaceBy(newNode);
 	}
 
