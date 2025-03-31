@@ -29,7 +29,7 @@ public final class ReferencedMachines {
 	
 	/**
 	 * Get the name of the machine containing these references.
-	 * For DEFINITIONS files (.def), {@code null} is returned.
+	 * For DEFINITIONS files (.def), this is the file name with the .def extension removed.
 	 * 
 	 * @return name of the machine containing these references
 	 */
