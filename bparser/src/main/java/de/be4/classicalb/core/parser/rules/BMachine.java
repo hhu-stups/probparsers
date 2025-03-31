@@ -28,7 +28,7 @@ import static de.be4.classicalb.core.parser.util.ASTBuilder.createConjunction;
 import static de.be4.classicalb.core.parser.util.ASTBuilder.createIdentifier;
 import static de.be4.classicalb.core.parser.util.ASTBuilder.createStringExpression;
 
-public class BMachine extends IModel {
+public final class BMachine extends IModel {
 	private final AAbstractMachineParseUnit parseUnit;
 
 	public BMachine(String name) {

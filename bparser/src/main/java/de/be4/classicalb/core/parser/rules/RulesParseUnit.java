@@ -22,7 +22,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.Node;
 
-public class RulesParseUnit extends IModel {
+public final class RulesParseUnit extends IModel {
 	private List<MachineReference> machineReferences = new ArrayList<>();
 
 	private String content;
