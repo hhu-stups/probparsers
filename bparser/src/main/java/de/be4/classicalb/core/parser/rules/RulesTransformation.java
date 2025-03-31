@@ -27,7 +27,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_FAIL = "FAIL";
 	public static final String RULE_SUCCESS = "SUCCESS";
-	public static final String RULE_UNCHECKED = "UNCHECKED";
 	public static final String RULE_NOT_CHECKED = "NOT_CHECKED";
 	public static final String RULE_DISABLED = "DISABLED";
 
@@ -403,7 +402,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		// INVARIANT
 		ASetExtensionExpression set = new ASetExtensionExpression(
-			Stream.of(RULE_FAIL, RULE_SUCCESS, RULE_NOT_CHECKED, RULE_DISABLED, RULE_UNCHECKED)
+			Stream.of(RULE_FAIL, RULE_SUCCESS, RULE_NOT_CHECKED, RULE_DISABLED)
 				.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
 		AMemberPredicate member = createPositionedNode(
 				new AMemberPredicate(createIdentifier(node.getRuleName()), set), node);
@@ -602,7 +601,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ucName)),
 				createExpressionList(union));
-		return new ASequenceSubstitution(createSubstitutionList(assign, createRuleAssignment(currentRule.getNameLiteral(), RULE_UNCHECKED)));
+		return new ASequenceSubstitution(Collections.singletonList(assign));
 	}
 
 	@Override
