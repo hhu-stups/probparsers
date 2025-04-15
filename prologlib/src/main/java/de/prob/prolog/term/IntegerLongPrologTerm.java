@@ -38,13 +38,23 @@ public final class IntegerLongPrologTerm extends AIntegerPrologTerm {
 	}
 
 	@Override
-	public long longValueExact() {
-		return this.value;
+	public int intValue() {
+		return (int) this.value;
 	}
 
 	@Override
 	public int intValueExact() {
 		return Math.toIntExact(this.value);
+	}
+
+	@Override
+	public long longValue() {
+		return this.value;
+	}
+
+	@Override
+	public long longValueExact() {
+		return this.value;
 	}
 
 	@Override
