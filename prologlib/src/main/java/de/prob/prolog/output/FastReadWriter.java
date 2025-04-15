@@ -153,68 +153,10 @@ public final class FastReadWriter {
 		this.out.flush();
 	}
 
-	private void writeTermSicstus(PrologTerm term) throws IOException {
-		this.out.write('D'); // version
-
-		// local variable name -> index table, it is impossible to share variables between different sentences
-		Map<String, Integer> varCache = new HashMap<>();
-
-		Deque<PrologTerm> q = new ArrayDeque<>();
-		q.addFirst(term);
-		while (!q.isEmpty()) {
-			PrologTerm t = q.removeFirst();
-			if (t.isList()) {
-				// strings/lists of bytes can be written using "
-				// but we always use the standard way
-				ListPrologTerm l = (ListPrologTerm) t;
-				if (l.isEmpty()) {
-					this.out.write(']');
-				} else {
-					this.out.write('[');
-					q.addFirst(l.tail());
-					q.addFirst(l.head());
-				}
-			} else if (t.isCompound()) {
-				this.out.write('S');
-				this.writeStringSicstus(t.getFunctor());
-
-				int arity = t.getArity();
-				if (arity > 0xff) {
-					throw new IllegalArgumentException("can only write terms with a max arity of 255, but got arity " + arity);
-				}
-
-				this.out.write(arity);
-				for (int i = arity; i >= 1; i--) { // need reverse order because q is a stack
-					q.addFirst(t.getArgument(i));
-				}
-			} else {
-				byte b;
-				String text;
-				if (t instanceof AIntegerPrologTerm) {
-					b = 'I';
-					text = t.getFunctor(); // '-'-prefix is supported
-				} else if (t instanceof FloatPrologTerm) {
-					b = 'F';
-					text = t.getFunctor(); // this even works with numbers like 1.337E101
-				} else if (t.isAtom()) {
-					b = 'A';
-					text = t.getFunctor(); // this should work with non-ascii chars as well
-				} else if (t.isVariable()) {
-					b = '_';
-					text = String.valueOf(varCache.computeIfAbsent(t.getFunctor(), k -> varCache.size()));
-				} else {
-					throw new IllegalArgumentException("unsupported prolog term " + t.getClass().getSimpleName());
-				}
-
-				this.out.write(b);
-				this.writeStringSicstus(text);
-			}
-		}
-	}
-
-	private void writeStringSicstus(String s) throws IOException {
-		this.out.write(s.getBytes(StandardCharsets.UTF_8));
-		this.out.write(0);
+	private void writeTermSicstus(PrologTerm term) {
+		FastSicstusTermOutput to = new FastSicstusTermOutput(this.out);
+		to.printTerm(term);
+		to.fullstop();
 	}
 
 	private void writeTermSWI(PrologTerm term) throws IOException {
