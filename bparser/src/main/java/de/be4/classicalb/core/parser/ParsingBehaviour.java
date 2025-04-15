@@ -13,7 +13,10 @@ public class ParsingBehaviour {
 	private int defaultFileNumber = -1;
 	private int startLineNumber = 1;
 	private int startColumnNumber = 1;
-	
+
+	public boolean shouldPrintProlog() {
+		return this.isPrologOutput() || this.isFastPrologOutput();
+	}
 
 	public boolean isPrologOutput() {
 		return prologOutput;
