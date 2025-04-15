@@ -45,7 +45,7 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.parserbase.UnparsedParserBase;
-import de.prob.prolog.output.FastTermOutput;
+import de.prob.prolog.output.FastSicstusTermOutput;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
@@ -653,7 +653,7 @@ public class CliBParser {
 	close(S)
 	*/
 	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) {
-		IPrologTermOutput pto = new FastTermOutput(new BufferedOutputStream(out));
+		IPrologTermOutput pto = new FastSicstusTermOutput(new BufferedOutputStream(out));
 		printer.accept(pto);
 	}
 
