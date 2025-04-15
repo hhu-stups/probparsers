@@ -327,7 +327,7 @@ public final class FastReadWriter {
 		}
 
 		// data (code)
-		this.out.write(data.toByteArray());
+		data.writeTo(this.out);
 	}
 
 	private void writeAtomSWI(OutputStream os, PrologTerm t) throws IOException {
