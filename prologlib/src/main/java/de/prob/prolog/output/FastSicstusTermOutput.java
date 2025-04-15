@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,92 +19,34 @@ import de.prob.prolog.term.PrologTerm;
  */
 public final class FastSicstusTermOutput implements IPrologTermOutput {
 
-	/**
-	 * Simple growable byte buffer that allows direct access to internal buffer and arbitrary writes.
-	 */
-	static final class Buffer {
-
-		private byte[] buffer;
-		private int size;
-
-		Buffer() {
-			this.buffer = new byte[32];
-			this.size = 0;
-		}
-
-		byte[] bytes() {
-			return this.buffer;
-		}
-
-		int size() {
-			return this.size;
-		}
-
-		void setSize(int size) {
-			this.size = size;
-		}
-
-		void reset() {
-			this.size = 0;
-		}
-
-		private void ensureCapacity(int minCapacity) {
-			if (minCapacity > this.buffer.length) {
-				this.buffer = Arrays.copyOf(this.buffer, this.buffer.length * 2);
-			}
-		}
-
-		void write(byte value) {
-			this.ensureCapacity(this.size + 1);
-			this.buffer[this.size++] = value;
-		}
-
-		void write(byte[] values, int off, int len) {
-			this.ensureCapacity(this.size + len);
-			System.arraycopy(values, off, this.buffer, this.size, len);
-			this.size += len;
-		}
-
-		void writeNullTerminatedString(String s) {
-			byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-			// TODO: should check for zero byte here
-			this.write(bytes, 0, bytes.length);
-			this.write((byte) 0);
-		}
-
-		void set(int pos, byte value) {
-			this.ensureCapacity(pos + 1);
-			this.buffer[pos] = value;
-		}
-
-		void set(int pos, byte[] values, int off, int len) {
-			this.ensureCapacity(pos + len);
-			System.arraycopy(values, off, this.buffer, pos, len);
-		}
+	private static abstract class TermContext {
 	}
 
-	private static abstract class TermContext {}
-
-	private static final class ListContext extends TermContext {}
+	private static final class ListContext extends TermContext {
+		static final ListContext INSTANCE = new ListContext();
+	}
 
 	private static final class CompoundContext extends TermContext {
 
-		private final int tagPos;
-		private final int arityPos;
+		private final String functor;
+		private int arityPos;
 		private int arity;
 
-		CompoundContext(int tagPos, int arityPos) {
-			this.tagPos = tagPos;
-			this.arityPos = arityPos;
+		CompoundContext(String functor) {
+			this.functor = functor;
 			this.arity = 0;
 		}
 
-		int tagPos() {
-			return this.tagPos;
+		String functor() {
+			return this.functor;
 		}
 
 		int arityPos() {
 			return this.arityPos;
+		}
+
+		void setArityPos(int arityPos) {
+			this.arityPos = arityPos;
 		}
 
 		void increaseArity() {
@@ -123,7 +63,7 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	private final OutputStream out;
 	private final Map<String, Integer> varCache;
 	private final Deque<TermContext> termStack;
-	private final Buffer buffer;
+	private final ModifiableByteBuffer buffer;
 
 	private boolean inAsciiList;
 
@@ -131,22 +71,30 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 		this.out = out;
 		this.varCache = new HashMap<>();
 		this.termStack = new ArrayDeque<>();
-		this.buffer = new Buffer();
+		this.buffer = new ModifiableByteBuffer();
 		this.inAsciiList = false;
 	}
 
 	private void handleTerm() {
 		// end ascii list with zero byte
 		if (this.inAsciiList) {
-			this.buffer.write((byte) 0);
+			this.buffer.write(0);
 			this.inAsciiList = false;
 		}
 
 		TermContext ctx = this.termStack.peek();
 		if (ctx instanceof ListContext) {
 			// add list marker
-			this.buffer.write((byte ) '[');
+			this.buffer.write('[');
 		} else if (ctx instanceof CompoundContext) {
+			CompoundContext c = (CompoundContext) ctx;
+			// not an atom, write compound term prelude
+			if (c.arity() == 0) {
+				this.buffer.write('S');
+				this.buffer.writeNullTerminatedString(c.functor());
+				c.setArityPos(this.buffer.size());
+				this.buffer.write(0); // arity placeholder
+			}
 			// remember arity
 			((CompoundContext) ctx).increaseArity();
 		}
@@ -155,11 +103,7 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput openTerm(String functor, boolean ignoreIndentation) {
 		this.handleTerm();
-		int tagPos = this.buffer.size();
-		this.buffer.write((byte) 'S');
-		this.buffer.writeNullTerminatedString(functor);
-		this.termStack.push(new CompoundContext(tagPos, this.buffer.size()));
-		this.buffer.write((byte) 0); // arity, will be set later
+		this.termStack.push(new CompoundContext(functor));
 		return this;
 	}
 
@@ -167,15 +111,15 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput closeTerm() {
 		CompoundContext ctx = (CompoundContext) this.termStack.pop();
 		int arity = ctx.arity();
-		if (arity == 0) {
-			// convert started 'S' term back into 'A' term
-			this.buffer.set(ctx.tagPos(), (byte) 'A');
-			this.buffer.setSize(ctx.arityPos());
-		} else if (arity < 0 || arity > 0xff) {
+		if (arity < 0 || arity > 0xff) {
 			throw new IllegalArgumentException("invalid arity for compound term: " + arity);
+		} else if (arity == 0) {
+			// this is an atom
+			this.buffer.write('A');
+			this.buffer.writeNullTerminatedString(ctx.functor());
 		} else {
 			// fix placeholder arity
-			this.buffer.set(ctx.arityPos(), (byte) arity);
+			this.buffer.set(ctx.arityPos(), arity);
 		}
 		return this;
 	}
@@ -183,8 +127,8 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printAtom(String content) {
 		this.handleTerm();
-		this.buffer.write((byte) 'A');
-		this.buffer.writeNullTerminatedString(String.valueOf(content));
+		this.buffer.write('A');
+		this.buffer.writeNullTerminatedString(content);
 		return this;
 	}
 
@@ -197,13 +141,13 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printNumber(long number) {
 		if (this.termStack.peek() instanceof ListContext && 0 < number && number <= 255) {
 			if (!this.inAsciiList) {
-				this.buffer.write((byte) '"');
+				this.buffer.write('"');
 				this.inAsciiList = true;
 			}
 			this.buffer.write((byte) number);
 		} else {
 			this.handleTerm();
-			this.buffer.write((byte) 'I');
+			this.buffer.write('I');
 			this.buffer.writeNullTerminatedString(String.valueOf(number));
 		}
 		return this;
@@ -213,13 +157,13 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	public IPrologTermOutput printNumber(BigInteger number) {
 		if (this.termStack.peek() instanceof ListContext && number.signum() > 0 && number.compareTo(BI_255) <= 0) {
 			if (!this.inAsciiList) {
-				this.buffer.write((byte) '"');
+				this.buffer.write('"');
 				this.inAsciiList = true;
 			}
-			this.buffer.write((byte) number.intValue());
+			this.buffer.write(number.intValue());
 		} else {
 			this.handleTerm();
-			this.buffer.write((byte) 'I');
+			this.buffer.write('I');
 			this.buffer.writeNullTerminatedString(number.toString());
 		}
 		return this;
@@ -228,7 +172,7 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printNumber(double number) {
 		this.handleTerm();
-		this.buffer.write((byte) 'F');
+		this.buffer.write('F');
 		this.buffer.writeNullTerminatedString(String.valueOf(number));
 		return this;
 	}
@@ -236,7 +180,7 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput openList() {
 		this.handleTerm();
-		this.termStack.push(new ListContext());
+		this.termStack.push(ListContext.INSTANCE);
 		return this;
 	}
 
@@ -245,10 +189,10 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 		@SuppressWarnings("unused")
 		ListContext _ctx = (ListContext) this.termStack.pop();
 		if (this.inAsciiList) {
-			this.buffer.write((byte) 0);
+			this.buffer.write(0);
 			this.inAsciiList = false;
 		}
-		this.buffer.write((byte) ']');
+		this.buffer.write(']');
 		return this;
 	}
 
@@ -260,7 +204,7 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput printVariable(String var) {
 		this.handleTerm();
-		this.buffer.write((byte) '_');
+		this.buffer.write('_');
 		int index = this.varCache.computeIfAbsent(var, k -> this.varCache.size());
 		this.buffer.writeNullTerminatedString(String.valueOf(index));
 		return this;
@@ -284,6 +228,10 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput fullstop() {
+		if (!this.termStack.isEmpty()) {
+			throw new IllegalStateException(this.termStack.size() + " unclosed term(s) or list(s)");
+		}
+
 		try {
 			this.out.write('D'); // version
 			this.out.write(this.buffer.bytes(), 0, this.buffer.size());

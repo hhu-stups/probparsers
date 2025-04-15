@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import de.prob.prolog.term.PrologTerm;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,161 +27,168 @@ public class FastReadWriterTest {
 		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
 			return Stream.of(
 					arguments(
-							// 42
+							// 1: 42
 							(Consumer<IPrologTermOutput>) pto -> pto.printNumber(42).fullstop(),
 							"DI42\0",
 							new byte[] { 0x76, 0x01, 0x2a },
 							new byte[] { 0x76, 0x01, 0x2a }
 					),
 					arguments(
-							// -42
+							// 2: -42
 							(Consumer<IPrologTermOutput>) pto -> pto.printNumber(-42).fullstop(),
 							"DI-42\0",
 							new byte[] { 0x76, 0x01, (byte) 0xd6 },
 							new byte[] { 0x76, 0x01, (byte) 0xd6 }
 					),
 					arguments(
-							// 1 << 60
+							// 3: 1 << 60
 							(Consumer<IPrologTermOutput>) pto -> pto.printNumber(1L << 60).fullstop(),
 							"DI1152921504606846976\0",
 							new byte[] { 0x76, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 							new byte[] { 0x76, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 					),
 					arguments(
-							// 1.337
+							// 4: 1.337
 							(Consumer<IPrologTermOutput>) pto -> pto.printNumber(1.337).fullstop(),
 							"DF1.337\0",
 							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x31, 0x08, (byte) 0xac, 0x1c, 0x5a, 0x64, (byte) 0xf5, 0x3f },
 							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x31, 0x08, (byte) 0xac, 0x1c, 0x5a, 0x64, (byte) 0xf5, 0x3f }
 					),
 					arguments(
-							// 1.23456789e100
+							// 5: 1.23456789e100
 							(Consumer<IPrologTermOutput>) pto -> pto.printNumber(1.23456789e100).fullstop(),
 							"DF1.23456789E100\0",
 							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x17, 0x3f, (byte) 0x94, (byte) 0xe8, (byte) 0xd8, (byte) 0x93, (byte) 0xb6, 0x54 },
 							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x17, 0x3f, (byte) 0x94, (byte) 0xe8, (byte) 0xd8, (byte) 0x93, (byte) 0xb6, 0x54 }
 					),
 					arguments(
-							// a
+							// 6: a
 							(Consumer<IPrologTermOutput>) pto -> pto.printAtom("a").fullstop(),
 							"DAa\0",
 							new byte[] { 0x7a, 0x0b, 0x01, 0x61 },
 							new byte[] { 0x7a, 0x0b, 0x01, 0x61 }
 					),
 					arguments(
-							// a (but with openTerm/closeTerm)
+							// 7: a (but with openTerm/closeTerm)
 							(Consumer<IPrologTermOutput>) pto -> pto.openTerm("a").closeTerm().fullstop(),
 							"DAa\0",
 							new byte[] { 0x7a, 0x0b, 0x01, 0x61 },
 							new byte[] { 0x7a, 0x0b, 0x01, 0x61 }
 					),
 					arguments(
-							// foobar
+							// 8: foobar
 							(Consumer<IPrologTermOutput>) pto -> pto.printAtom("foobar").fullstop(),
 							"DAfoobar\0",
 							new byte[] { 0x7a, 0x0b, 0x06, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72 },
 							new byte[] { 0x7a, 0x0b, 0x06, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72 }
 					),
 					arguments(
-							// 'C'
+							// 9: 'C'
 							(Consumer<IPrologTermOutput>) pto -> pto.printAtom("C").fullstop(),
 							"DAC\0",
 							new byte[] { 0x7a, 0x0b, 0x01, 0x43 },
 							new byte[] { 0x7a, 0x0b, 0x01, 0x43 }
 					),
 					arguments(
-							// '<winking face>>'
+							// 10: '<winking face>>'
 							(Consumer<IPrologTermOutput>) pto -> pto.printAtom("\uD83D\uDE09").fullstop(),
 							"DA\360\237\230\211\0",
 							new byte[] { 0x7a, 0x0c, 0x04, 0x09, (byte) 0xf6, 0x01, 0x00 },
 							new byte[] { 0x7a, 0x0c, 0x04, 0x3d, (byte) 0xd8, 0x09, (byte) 0xde }
 					),
 					arguments(
-							// a(b)
+							// 11: a(b)
 							(Consumer<IPrologTermOutput>) pto -> pto.openTerm("a").printAtom("b").closeTerm().fullstop(),
 							"DSa\0\1Ab\0",
 							new byte[] { 0x72, 0x08, 0x02, 0x0d, 0x01, 0x0b, 0x01, 0x61, 0x0b, 0x01, 0x62 },
 							new byte[] { 0x72, 0x08, 0x02, 0x0d, 0x01, 0x0b, 0x01, 0x61, 0x0b, 0x01, 0x62 }
 					),
 					arguments(
-							// a(b, c)
+							// 12: a(b, c)
 							(Consumer<IPrologTermOutput>) pto -> pto.openTerm("a").printAtom("b").printAtom("c").closeTerm().fullstop(),
 							"DSa\0\2Ab\0Ac\0",
 							new byte[] { 0x72, 0x0b, 0x03, 0x0d, 0x02, 0x0b, 0x01, 0x61, 0x0b, 0x01, 0x62, 0x0b, 0x01, 0x63 },
 							new byte[] { 0x72, 0x0b, 0x03, 0x0d, 0x02, 0x0b, 0x01, 0x61, 0x0b, 0x01, 0x62, 0x0b, 0x01, 0x63 }
 					),
 					arguments(
-							// 'C'(a)
+							// 13: 'C'(a)
 							(Consumer<IPrologTermOutput>) pto -> pto.openTerm("C").printAtom("a").closeTerm().fullstop(),
 							"DSC\0\1Aa\0",
 							new byte[] { 0x72, 0x08, 0x02, 0x0d, 0x01, 0x0b, 0x01, 0x43, 0x0b, 0x01, 0x61 },
 							new byte[] { 0x72, 0x08, 0x02, 0x0d, 0x01, 0x0b, 0x01, 0x43, 0x0b, 0x01, 0x61 }
 					),
 					arguments(
-							// X
+							// 14: X
 							(Consumer<IPrologTermOutput>) pto -> pto.printVariable("X").fullstop(),
 							"D_0\0",
 							new byte[] { 0x62, 0x02, 0x00, 0x01, 0x01, 0x00 },
 							new byte[] { 0x62, 0x02, 0x00, 0x01, 0x01, 0x00 }
 					),
 					arguments(
-							// Foo
+							// 15: Foo
 							(Consumer<IPrologTermOutput>) pto -> pto.printVariable("Foo").fullstop(),
 							"D_0\0",
 							new byte[] { 0x62, 0x02, 0x00, 0x01, 0x01, 0x00 },
 							new byte[] { 0x62, 0x02, 0x00, 0x01, 0x01, 0x00 }
 					),
 					arguments(
-							// [X, X]
+							// 16: [X, X]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printVariable("X").printVariable("X").closeList().fullstop(),
 							"D[_0\0[_0\0]",
 							new byte[] { 0x62, 0x07, 0x06, 0x01, 0x08, 0x01, 0x00, 0x08, 0x01, 0x00, 0x09 },
 							new byte[] { 0x62, 0x07, 0x06, 0x01, 0x08, 0x01, 0x00, 0x08, 0x01, 0x00, 0x09 }
 					),
 					arguments(
-							// [X, X, Y, Y]
+							// 17: [X, X, Y, Y]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printVariable("X").printVariable("X").printVariable("Y").printVariable("Y").closeList().fullstop(),
 							"D[_0\0[_0\0[_1\0[_1\0]",
 							new byte[] { 0x62, 0x0d, 0x0c, 0x02, 0x08, 0x01, 0x00, 0x08, 0x01, 0x00, 0x08, 0x01, 0x01, 0x08, 0x01, 0x01, 0x09 },
 							new byte[] { 0x62, 0x0d, 0x0c, 0x02, 0x08, 0x01, 0x00, 0x08, 0x01, 0x00, 0x08, 0x01, 0x01, 0x08, 0x01, 0x01, 0x09 }
 					),
 					arguments(
-							// []
+							// 18: []
 							(Consumer<IPrologTermOutput>) pto -> pto.emptyList().fullstop(),
 							"D]",
 							new byte[] { 0x7a, 0x09 },
 							new byte[] { 0x7a, 0x09 }
 					),
 					arguments(
-							// [foo]
+							// 19: [foo]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printAtom("foo").closeList().fullstop(),
 							"D[Afoo\0]",
 							new byte[] { 0x72, 0x07, 0x03, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x09 },
 							new byte[] { 0x72, 0x07, 0x03, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x09 }
 					),
 					arguments(
-							// [foo, X]
+							// 20: [foo] (but with openTerm/closeTerm)
+							(Consumer<IPrologTermOutput>) pto -> pto.openList().openTerm("foo").closeTerm().closeList().fullstop(),
+							"D[Afoo\0]",
+							new byte[] { 0x72, 0x07, 0x03, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x09 },
+							new byte[] { 0x72, 0x07, 0x03, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x09 }
+					),
+					arguments(
+							// 21: [foo, X]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printAtom("foo").printVariable("X").closeList().fullstop(),
 							"D[Afoo\0[_0\0]",
 							new byte[] { 0x62, 0x0a, 0x06, 0x01, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x08, 0x01, 0x00, 0x09 },
 							new byte[] { 0x62, 0x0a, 0x06, 0x01, 0x08, 0x0b, 0x03, 0x66, 0x6f, 0x6f, 0x08, 0x01, 0x00, 0x09 }
 					),
 					arguments(
-							// [1, 2, 3]
+							// 22: [1, 2, 3]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printNumber(1).printNumber(2).printNumber(3).closeList().fullstop(),
 							"D\"\1\2\3\0]",
 							new byte[] { 0x72, 0x0d, 0x09, 0x08, 0x04, 0x01, 0x01, 0x08, 0x04, 0x01, 0x02, 0x08, 0x04, 0x01, 0x03, 0x09 },
 							new byte[] { 0x72, 0x0d, 0x09, 0x08, 0x04, 0x01, 0x01, 0x08, 0x04, 0x01, 0x02, 0x08, 0x04, 0x01, 0x03, 0x09 }
 					),
 					arguments(
-							// [0, 1, a, 2, 3, 4, b, 5, 1000]
+							// 23: [0, 1, a, 2, 3, 4, b, 5, 1000]
 							(Consumer<IPrologTermOutput>) pto -> pto.openList().printNumber(0).printNumber(1).printAtom("a").printNumber(2).printNumber(3).printNumber(4).printAtom("b").printNumber(5).printNumber(1000).closeList().fullstop(),
 							"D[I0\0\"\1\0[Aa\0\"\2\3\4\0[Ab\0\"\5\0[I1000\0]",
 							new byte[] { 0x72, 0x26, 0x1b, 0x08, 0x04, 0x01, 0x00, 0x08, 0x04, 0x01, 0x01, 0x08, 0x0b, 0x01, 0x61, 0x08, 0x04, 0x01, 0x02, 0x08, 0x04, 0x01, 0x03, 0x08, 0x04, 0x01, 0x04, 0x08, 0x0b, 0x01, 0x62, 0x08, 0x04, 0x01, 0x05, 0x08, 0x04, 0x02, 0x03, (byte) 0xe8, 0x09 },
 							new byte[] { 0x72, 0x26, 0x1b, 0x08, 0x04, 0x01, 0x00, 0x08, 0x04, 0x01, 0x01, 0x08, 0x0b, 0x01, 0x61, 0x08, 0x04, 0x01, 0x02, 0x08, 0x04, 0x01, 0x03, 0x08, 0x04, 0x01, 0x04, 0x08, 0x0b, 0x01, 0x62, 0x08, 0x04, 0x01, 0x05, 0x08, 0x04, 0x02, 0x03, (byte) 0xe8, 0x09 }
 					),
 					arguments(
-							// a(['G',f([]),[[w, '42'], X]])
+							// 24: a(['G',f([]),[[w, '42'], X]])
 							(Consumer<IPrologTermOutput>) pto -> {
 								pto.openTerm("a").openList();
 								pto.printAtom("G");
@@ -194,6 +202,7 @@ public class FastReadWriterTest {
 							new byte[] { 0x62, 0x21, 0x19, 0x01, 0x0d, 0x01, 0x0b, 0x01, 0x61, 0x08, 0x0b, 0x01, 0x47, 0x08, 0x0d, 0x01, 0x0b, 0x01, 0x66, 0x09, 0x08, 0x08, 0x08, 0x0b, 0x01, 0x77, 0x08, 0x0b, 0x02, 0x34, 0x32, 0x09, 0x08, 0x01, 0x00, 0x09, 0x09 }
 					),
 					arguments(
+							// 25: large([], ..., [])
 							(Consumer<IPrologTermOutput>) pto -> {
 								pto.openTerm("large");
 								// SICStus max_arity is 255, which is also the maximum possible in the fastrw format.
@@ -261,45 +270,22 @@ public class FastReadWriterTest {
 	@ParameterizedTest
 	@ArgumentsSource(Args.class)
 	public void testFastRW_Sicstus(Consumer<IPrologTermOutput> c, String expected, byte[] _1, byte[] _2) {
-		StructuredPrologOutput pto = new StructuredPrologOutput();
-		c.accept(pto);
-		PrologTerm term = pto.getLastTerm();
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			new FastReadWriter(out).fastwrite(term);
-		} catch (IOException e) {
-			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
-		}
-		compareBytesWithString(expected, out.toByteArray());
-	}
-
-	@ParameterizedTest
-	@ArgumentsSource(Args.class)
-	public void testFastRWOutput_Sicstus(Consumer<IPrologTermOutput> c, String expected, byte[] _1, byte[] _2) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		FastSicstusTermOutput pto = new FastSicstusTermOutput(out);
 		c.accept(pto);
-		compareBytesWithString(expected, out.toByteArray());
+		byte[] actual = out.toByteArray();
+		compareBytesWithString(expected, actual);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(Args.class)
 	public void testFastRW_SWI(Consumer<IPrologTermOutput> c, String _0, byte[] expected, byte[] _2) {
-		StructuredPrologOutput pto = new StructuredPrologOutput();
-		c.accept(pto);
-		PrologTerm term = pto.getLastTerm();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			// target a 64bit *nix system
-			new FastReadWriter(FastReadWriter.PrologSystem.SWI, out)
-					.withTarget64bit()
-					.withTargetLittleEndian()
-					.withTargetNoWindows()
-					.fastwrite(term);
-		} catch (IOException e) {
-			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
-		}
+		FastSwiTermOutput pto = new FastSwiTermOutput(out)
+		        .withTarget64bit()
+		        .withTargetLittleEndian()
+		        .withTargetNoWindows();
+		c.accept(pto);
 		byte[] actual = out.toByteArray();
 		assertArrayEquals(expected, actual);
 	}
@@ -307,20 +293,12 @@ public class FastReadWriterTest {
 	@ParameterizedTest
 	@ArgumentsSource(Args.class)
 	public void testFastRW_SWI_Windows(Consumer<IPrologTermOutput> c, String _0, byte[] _1, byte[] expected) {
-		StructuredPrologOutput pto = new StructuredPrologOutput();
-		c.accept(pto);
-		PrologTerm term = pto.getLastTerm();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			// target a 64bit windows system
-			new FastReadWriter(FastReadWriter.PrologSystem.SWI, out)
-					.withTarget64bit()
-					.withTargetLittleEndian()
-					.withTargetWindows()
-					.fastwrite(term);
-		} catch (IOException e) {
-			throw new AssertionError("IOException while writing to in-memory stream, this should never happen", e);
-		}
+		FastSwiTermOutput pto = new FastSwiTermOutput(out)
+		        .withTarget64bit()
+		        .withTargetLittleEndian()
+		        .withTargetWindows();
+		c.accept(pto);
 		byte[] actual = out.toByteArray();
 		assertArrayEquals(expected, actual);
 	}
