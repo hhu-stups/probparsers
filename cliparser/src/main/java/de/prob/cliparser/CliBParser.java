@@ -156,42 +156,33 @@ public class CliBParser {
 				return;
 			}
 
-			final OutputStream out;
+			File bfile = new File(options.getRemainingOptions()[0]);
+			@SuppressWarnings("ImplicitDefaultCharsetUsage") // System.err really uses the default charset
+			PrintWriter err = new PrintWriter(System.err, true);
+
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 				final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
-				try {
-					out = Files.newOutputStream(Paths.get(filename));
+				try (OutputStream out = Files.newOutputStream(Paths.get(filename))) {
+					int returnValue = doFileParsing(behaviour, out, err, bfile);
+					out.flush();
+					err.flush();
+					System.exit(returnValue);
 				} catch (IOException e) {
+					// Note: This should only catch exceptions from the creation of the OutputStream.
+					// All other IOExceptions are caught internally by doFileParsing.
 					if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
 						PrologExceptionPrinter.printException(System.err, e);
 					} else {
 						System.err.println("Unable to create file '" + filename + "'");
 					}
 					System.exit(-1);
-					return; // Unreachable, but needed
 				}
 			} else {
-				out = System.out;
-			}
-
-			final int returnValue;
-			try {
-				String filename = options.getRemainingOptions()[0];
-				final File bfile = new File(filename);
-				@SuppressWarnings("ImplicitDefaultCharsetUsage") // System.err really uses the default charset
-				PrintWriter err = new PrintWriter(System.err, true);
-				returnValue = doFileParsing(behaviour, out, err, bfile);
-				out.flush();
+				int returnValue = doFileParsing(behaviour, System.out, err, bfile);
+				System.out.flush();
 				err.flush();
-			} finally {
-				if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
-					try {
-						out.close();
-					} catch (Throwable ignored) {
-					}
-				}
+				System.exit(returnValue);
 			}
-			System.exit(returnValue);
 		}
 	}
 	
