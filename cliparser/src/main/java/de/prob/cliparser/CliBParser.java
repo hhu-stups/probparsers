@@ -181,14 +181,8 @@ public class CliBParser {
 				@SuppressWarnings("ImplicitDefaultCharsetUsage") // System.err really uses the default charset
 				PrintWriter err = new PrintWriter(System.err, true);
 				returnValue = doFileParsing(behaviour, out, err, bfile);
-				try {
-					out.flush();
-				} catch (Throwable ignored) {
-				}
-				try {
-					err.flush();
-				} catch (Throwable ignored) {
-				}
+				out.flush();
+				err.flush();
 			} finally {
 				if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 					try {
