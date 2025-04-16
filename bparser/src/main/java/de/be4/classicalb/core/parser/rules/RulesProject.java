@@ -482,6 +482,7 @@ public class RulesProject {
 			RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
 			knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
 			knownIdentifiers.addAll(checker.getFunctionOperationNames());
+			knownIdentifiers.addAll(checker.getDefinitionNames());
 		}
 		return knownIdentifiers;
 	}

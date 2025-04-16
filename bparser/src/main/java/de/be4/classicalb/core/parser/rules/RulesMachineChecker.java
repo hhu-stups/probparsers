@@ -44,7 +44,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
-	private final HashSet<String> definitions = new HashSet<>();
+	private final Set<String> definitions = new HashSet<>();
 	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
 	private final List<MachineReference> machineReferences;
 
@@ -141,6 +141,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public Set<TIdentifierLiteral> getGlobalIdentifiers() {
 		return this.knownIdentifier.getKnownIdentifiers();
+	}
+
+	public Set<String> getDefinitionNames() {
+		return this.definitions;
 	}
 
 	@Override
