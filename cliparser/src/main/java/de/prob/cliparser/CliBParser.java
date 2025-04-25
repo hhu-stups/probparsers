@@ -629,7 +629,10 @@ public class CliBParser {
 	close(S)
 	*/
 	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) {
-		IPrologTermOutput pto = new FastSicstusTermOutput(new BufferedOutputStream(out));
+		if (!(out instanceof BufferedOutputStream)) {
+			out = new BufferedOutputStream(out);
+		}
+		IPrologTermOutput pto = new FastSicstusTermOutput(out);
 		printer.accept(pto);
 	}
 
