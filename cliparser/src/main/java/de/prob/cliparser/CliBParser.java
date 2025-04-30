@@ -46,6 +46,7 @@ import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.parserbase.UnparsedParserBase;
 import de.prob.prolog.output.FastSicstusTermOutput;
+import de.prob.prolog.output.FastSwiTermOutput;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
@@ -62,6 +63,7 @@ public class CliBParser {
 	private static final String CLI_SWITCH_PP = "-pp";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
 	private static final String CLI_SWITCH_FASTPROLOG = "-fastprolog";
+	private static final String CLI_SWITCH_SWI = "-swi";
 	private static final String CLI_SWITCH_COMPACT_POSITIONS = "-compactpos";
 	private static final String CLI_SWITCH_PROLOG_LINES = "-lineno";
 	private static final String CLI_SWITCH_OUTPUT = "-out";
@@ -140,6 +142,7 @@ public class CliBParser {
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
+		behaviour.setSwiSupport(options.isOptionSet(CLI_SWITCH_SWI));
 		behaviour.setCompactPrologPositions(options.isOptionSet(CLI_SWITCH_COMPACT_POSITIONS));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
 		// TODO: check if some other flags are not recognised
@@ -194,6 +197,8 @@ public class CliBParser {
 				return String.valueOf(behaviour.isVerbose());
 			case "fastPrologOutput":
 				return String.valueOf(behaviour.isFastPrologOutput());
+			case "swiSupport":
+				return String.valueOf(behaviour.isSwiSupport());
 			case "compactPrologPositions":
 				return String.valueOf(behaviour.isCompactPrologPositions());
 			case "machineNameMustMatchFileName":
@@ -220,6 +225,9 @@ public class CliBParser {
 				break;
 			case "fastPrologOutput":
 				behaviour.setFastPrologOutput(Boolean.parseBoolean(value));
+				break;
+			case "swiSupport":
+				behaviour.setSwiSupport(Boolean.parseBoolean(value));
 				break;
 			case "compactPrologPositions":
 				behaviour.setCompactPrologPositions(Boolean.parseBoolean(value));
@@ -288,7 +296,7 @@ public class CliBParser {
 				case gitsha:
 					socketWriter.println(BParser.getGitSha());
 					break;
-				case commandsupported:
+				case commandsupported: {
 					// Check if the given command is supported by this version of the parser.
 					String commandToCheck = in.readLine();
 					try {
@@ -299,23 +307,25 @@ public class CliBParser {
 					}
 					socketWriter.println("true.");
 					break;
+				}
 				case featuresupported:
 					// Check if the given feature is supported by this version of the parser.
 					// There are no features defined yet, but we already support this command for future-proofing.
 					socketWriter.println("false.");
 					break;
-				case definition:
+				case definition: {
 					// sending a new DEFINITION to the parser
 					String name = in.readLine();
 					String type = in.readLine();
 					String parameterCount = in.readLine();
 					context.addMockedDefinition(name, type, parameterCount);
 					break;
+				}
 				case resetdefinitions:
 					// remove all DEFINITIONS
 					context = new MockedDefinitions();
 					break;
-				case getoption:
+				case getoption: {
 					// Generic command for getting the current value of an option.
 					// Fails safely for unknown/unsupported options.
 					String getOptionName = in.readLine();
@@ -330,7 +340,8 @@ public class CliBParser {
 					}
 					getOptionOut.fullstop();
 					break;
-				case setoption:
+				}
+				case setoption: {
 					// Generic command for changing parser options.
 					// Fails safely for unknown/unsupported options.
 					// Replaces the single-option commands below.
@@ -348,12 +359,20 @@ public class CliBParser {
 					}
 					setOptionOut.fullstop();
 					break;
+				}
 				// new commands to change parsingBehaviour, analog to command-line switches
-				case fastprolog:
+				case fastprolog: {
 					String newFVal = in.readLine();
 					debugPrint(behaviour, "Setting fastprolog to " + newFVal);
 					behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 					break;
+				}
+				case swi: {
+					String newFVal = in.readLine();
+					debugPrint(behaviour, "Setting swi to " + newFVal);
+					behaviour.setSwiSupport(Boolean.parseBoolean(newFVal));
+					break;
+				}
 				case compactpos:
 					behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
 					break;
@@ -366,7 +385,7 @@ public class CliBParser {
 				case lineno:
 					behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
 					break;
-				case machine:
+				case machine: {
 					resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
 					String filename = in.readLine();
 					Path outFile = Paths.get(in.readLine());
@@ -386,28 +405,32 @@ public class CliBParser {
 						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 					}
 					break;
+				}
 				case formula:
 				case expression:
 				case predicate:
-				case substitution:
-					String theFormula = in.readLine();
-					parseFormula(command, theFormula, context, behaviour, socketWriter);
+				case substitution: {
+					String formula = in.readLine();
+					parseFormula(command, formula, context, behaviour, socketWriter);
 					resetVolatilePositionOptions(behaviour);
 					break;
-				case ltl:
+				}
+				case ltl: {
 					String extension = in.readLine();
 					final ProBParserBase extParser = getExtensionParser(extension, context);
 					final TemporalLogicParser<?> parser = new LtlParser(extParser);
 					parseTemporalFormula(in.readLine(), parser, socketWriter);
 					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to LTL parser above
 					break;
-				case ctl:
-					String extension2 = in.readLine();
-					final ProBParserBase extParser2 = getExtensionParser(extension2, context);
-					final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
-					parseTemporalFormula(in.readLine(), parser2, socketWriter);
+				}
+				case ctl: {
+					String extension = in.readLine();
+					final ProBParserBase extParser = getExtensionParser(extension, context);
+					final TemporalLogicParser<?> parser = new CtlParser(extParser);
+					parseTemporalFormula(in.readLine(), parser, socketWriter);
 					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
 					break;
+				}
 				case halt:
 					socket.close();
 					serverSocket.close();
@@ -559,8 +582,7 @@ public class CliBParser {
 	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
 		final long startOutput = System.currentTimeMillis();
 		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-			// TODO: support swi fastrw format
-			printASTasFastProlog(out, printer);
+			printASTasFastProlog(parsingBehaviour, out, printer);
 		} else { // -prolog flag in CliBParser
 			assert parsingBehaviour.isPrologOutput();
 			IPrologTermOutput pto = new PrologTermOutput(out, false);
@@ -628,11 +650,16 @@ public class CliBParser {
 	fast_read(S,FilesTerm), ... until end_of_file
 	close(S)
 	*/
-	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) {
+	private static void printASTasFastProlog(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
 		if (!(out instanceof BufferedOutputStream)) {
 			out = new BufferedOutputStream(out);
 		}
-		IPrologTermOutput pto = new FastSicstusTermOutput(out);
+		IPrologTermOutput pto;
+		if (parsingBehaviour.isSwiSupport()) {
+			pto = new FastSwiTermOutput(out);
+		} else {
+			pto = new FastSicstusTermOutput(out);
+		}
 		printer.accept(pto);
 	}
 
@@ -666,6 +693,7 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_COMPACT_POSITIONS, "Use new more compact Prolog position terms");
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
+		options.addOption(CLI_SWITCH_SWI, "Switch to SWI-Prolog mode. All prolog output will be compatible with the SWI Prolog system, especially the -fastprolog option.");
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");
 		options.addOption(CLI_SWITCH_NAME_CHECK,
 				"The name of a machine have to match file name (except for the file name extension)");

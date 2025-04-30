@@ -8,6 +8,7 @@ public class ParsingBehaviour {
 	private boolean printTime = false; // -time flag in CliBParser
 	private boolean prettyPrintB = false; // -pp flag in CliBParser
 	private boolean fastPrologOutput = false; // -fastprolog flag in CliBParser
+	private boolean swiSupport = false; // -swi flag in CliBParser
 	private boolean compactPositions = true; // false means use old style pos/5 positions
 	private boolean machineNameMustMatchFileName = false; // -checkname flag in CliBParser
 	private int defaultFileNumber = -1;
@@ -53,6 +54,7 @@ public class ParsingBehaviour {
 	public boolean isPrettyPrintB() {
 		return prettyPrintB;
 	}
+
 	public void setPrettyPrintB(boolean printAST) {
 		this.prettyPrintB = printAST;
 	}
@@ -64,7 +66,15 @@ public class ParsingBehaviour {
 	public void setFastPrologOutput(boolean fastPrologOutput) {
 		this.fastPrologOutput = fastPrologOutput;
 	}
-	
+
+	public boolean isSwiSupport() {
+		return swiSupport;
+	}
+
+	public void setSwiSupport(boolean swiSupport) {
+		this.swiSupport = swiSupport;
+	}
+
 	public boolean isCompactPrologPositions() {
 		return compactPositions;
 	}
