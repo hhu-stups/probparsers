@@ -355,6 +355,13 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testDefineSymbolicQuantifiedUnion() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ UNION(x).(x<:1..2|x) END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
 	public void testFailedRuleAllErrorTypes() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);

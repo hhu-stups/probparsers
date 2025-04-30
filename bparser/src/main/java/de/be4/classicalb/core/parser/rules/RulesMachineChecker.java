@@ -915,6 +915,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
 	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
