@@ -549,7 +549,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (node.getValue() instanceof ASymbolicLambdaExpression
 				|| node.getValue() instanceof ASymbolicComprehensionSetExpression
-				|| node.getValue() instanceof ASymbolicEventBComprehensionSetExpression) {
+				|| node.getValue() instanceof ASymbolicEventBComprehensionSetExpression
+				|| node.getValue() instanceof ASymbolicQuantifiedUnionExpression) {
 			value = node.getValue();
 		} else {
 			addForceDefinition(iDefinitions);
