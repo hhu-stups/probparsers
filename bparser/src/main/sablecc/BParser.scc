@@ -1232,12 +1232,13 @@ substitution_l3 {-> substitution} =
            {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params?
            {-> New substitution.operator(name, [arguments.expression])} |
-  {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par
+  {define} kw_define [name]:identifier_literal [type]:type_info?
            [dummy]:dummy_value? kw_value [value]:expression_in_par end
            {-> New substitution.define(name, type.expression, dummy.expression, value.expression)};
 
 when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate};
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
+type_info {-> expression} = kw_type [expr]:expression_in_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id};
 on_success {-> expression} = kw_on_success [expr]:expression_top_with_opt_desc {-> expr.expression};
@@ -1673,4 +1674,4 @@ substitution =
   {rule_fail_sub} [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | // extension for rules
   {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | // extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | // extension for rules
-  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression; // extension for rules
+  {define} [name]:identifier_literal [type]:expression? [dummy_value]:expression? [value]:expression; // extension for rules

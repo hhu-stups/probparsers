@@ -534,11 +534,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
-		final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
-		PPredicate compExecuted = new AEqualPredicate(createIdentifier(computationIdentifierLiteral),
-				createStringExpression(COMPUTATION_EXECUTED));
-		AMemberPredicate member = new AMemberPredicate(createIdentifier(node.getName()), node.getType());
-		invariantList.add(new AImplicationPredicate(compExecuted, member));
 
 		if (node.getDummyValue() != null) {
 			initialisationList.add(createAssignNode(createIdentifier(node.getName()), node.getDummyValue()));
@@ -555,6 +550,20 @@ public class RulesTransformation extends DepthFirstAdapter {
 		} else {
 			addForceDefinition(iDefinitions);
 			value = createPositionedNode(callExternalFunction(FORCE, node.getValue()), node.getValue());
+		}
+
+		if (node.getType() != null) { // use TYPE if provided; compname=COMPUTATION_EXECUTED => name:type
+			final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
+			PPredicate compExecuted = new AEqualPredicate(createIdentifier(computationIdentifierLiteral),
+					createStringExpression(COMPUTATION_EXECUTED));
+			AMemberPredicate member = new AMemberPredicate(createIdentifier(node.getName()), node.getType());
+			invariantList.add(new AImplicationPredicate(compExecuted, member));
+		} else {
+			// else: (btrue or name=value) for typing
+			invariantList.add(new ADisjunctPredicate(
+					new ATruthPredicate(),
+					new AEqualPredicate(createIdentifier(node.getName()), value.clone())
+			));
 		}
 
 		node.replaceBy(createAssignNode(createIdentifier(node.getName()), value));

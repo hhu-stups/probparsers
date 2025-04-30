@@ -367,4 +367,10 @@ public class RulesLanguageTest {
 		String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 
+	@Test
+	public void testComputationWithoutOptionalType() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo VALUE 1..2 END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+	}
+
 }
