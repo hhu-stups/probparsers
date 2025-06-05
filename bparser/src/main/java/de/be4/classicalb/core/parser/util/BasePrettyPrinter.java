@@ -976,6 +976,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		node.getBody().apply(this);
 		dedent();
 		dedent();
+		printlnOpt();
 		print("END");
 	}
 

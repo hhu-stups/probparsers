@@ -6,8 +6,6 @@
 
 package de.prob.prolog.term;
 
-import de.prob.prolog.output.IPrologTermOutput;
-
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -43,27 +41,7 @@ public final class IntegerPrologTerm extends AIntegerPrologTerm {
 	}
 
 	@Override
-	public String getFunctor() {
-		return this.value.toString();
-	}
-
-	@Override
 	public BigInteger getValue() {
 		return this.value;
-	}
-
-	@Override
-	public long longValueExact() {
-		return this.value.longValueExact();
-	}
-
-	@Override
-	public int intValueExact() {
-		return this.value.intValueExact();
-	}
-
-	@Override
-	public void toTermOutput(final IPrologTermOutput pto) {
-		pto.printNumber(this.value);
 	}
 }

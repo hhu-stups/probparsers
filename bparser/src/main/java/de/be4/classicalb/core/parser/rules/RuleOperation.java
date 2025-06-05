@@ -13,6 +13,7 @@ public class RuleOperation extends AbstractOperation {
 	private String counterExampleVariableName;
 	private String classification;
 	private String successfulVariableName;
+	private String uncheckedVariableName;
 
 	public RuleOperation(TIdentifierLiteral ruleName, String fileName, String machineName,
 			List<MachineReference> machineReferences) {
@@ -66,6 +67,14 @@ public class RuleOperation extends AbstractOperation {
 
 	public String getSuccessfulVariableName() {
 		return this.successfulVariableName;
+	}
+
+	public void setUncheckedVariableName(String name) {
+		this.uncheckedVariableName = name;
+	}
+
+	public String getUncheckedVariableName() {
+		return this.uncheckedVariableName;
 	}
 
 }

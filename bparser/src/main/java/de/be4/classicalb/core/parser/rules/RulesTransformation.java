@@ -1,6 +1,8 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +18,8 @@ import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.ASTBuilder;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
 
 import static de.be4.classicalb.core.parser.util.ASTBuilder.*;
 
@@ -32,6 +36,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public static final String RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX = "_Counterexamples";
 	public static final String RULE_SUCCESSFUL_VARIABLE_SUFFIX = "_Successful";
+	public static final String RULE_UNCHECKED_VARIABLE_SUFFIX = "_Unchecked";
 
 	private static final String ALL_TUPLE = "$AllTuple";
 	private static final String RESULT_TUPLE = "$ResultTuple";
@@ -356,16 +361,39 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String sfName = ruleName + RULE_SUCCESSFUL_VARIABLE_SUFFIX;
 		currentRule.setSuccessfulVariableName(sfName);
 
+		final String ucName = ruleName + RULE_UNCHECKED_VARIABLE_SUFFIX;
+		currentRule.setUncheckedVariableName(ucName);
+
 		ASequenceSubstitution seq = new ASequenceSubstitution(subList);
 		select.setThen(seq);
 
-		// replacing the rule operation by an ordinary operation
-		node.replaceBy(new AOperation(
-			new LinkedList<>(),
-			Collections.singletonList(node.getRuleName().clone()),
-			new LinkedList<>(),
-			select
-		));
+		// The following is a hack for accessing operation attributes on the Prolog side.
+		// The attributes are read in btypechecker.pl and added to the info list as rules_info([tags(T),classification(C),ruleid(RId)]).
+		Writer sw = new StringWriter();
+		IPrologTermOutput pout = new PrologTermOutput(sw,false);
+		pout.openTerm("rules_info").openList();
+		if (!currentRule.getTags().isEmpty()) {
+			pout.openTerm("tags").openList();
+			currentRule.getTags().forEach(pout::printAtom);
+			pout.closeList().closeTerm();
+		}
+		if (currentRule.getClassification() != null) {
+			pout.openTerm("classification").printAtom(currentRule.getClassification()).closeTerm();
+		}
+		if (currentRule.getRuleIdString() != null) {
+			pout.openTerm("rule_id").printAtom(currentRule.getRuleIdString()).closeTerm();
+		}
+		pout.closeList().closeTerm().fullstop();
+
+		// replacing the rule operation by an ordinary operation, description contains operation attributes
+		node.replaceBy(new ADescriptionOperation(
+				new ADescriptionPragma(Collections.singletonList(new TPragmaFreeText(sw.toString()))),
+				new AOperation(
+						new LinkedList<>(),
+						Collections.singletonList(node.getRuleName().clone()),
+						new LinkedList<>(),
+						select
+		)));
 
 		/* ******************************************************* */
 
@@ -399,8 +427,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// VARIABLES ...
 		variablesList.add(createIdentifier(ctName, node.getRuleName().clone()));
 		variablesList.add(createIdentifier(sfName, node.getRuleName().clone()));
+		variablesList.add(createIdentifier(ucName, node.getRuleName().clone()));
 
-		// INVARIANT rule1#counterexamples : POW(INTEGER*STRING)
+		// INVARIANT rule1#Counterexamples : POW(INTEGER*STRING)
 		final AMemberPredicate ctTypingPredicate = new AMemberPredicate(
 			createIdentifier(ctName),
 			new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
@@ -414,11 +443,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 		);
 		invariantList.add(createPositionedNode(sfTypingPredicate, node));
 
-		// INITIALISATION rule1#counterexamples := {}
+		//  rule1#Unchecked : POW(INTEGER*STRING)
+		final AMemberPredicate ucTypingPredicate = new AMemberPredicate(
+				createIdentifier(ucName),
+				new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
+		);
+		invariantList.add(createPositionedNode(ucTypingPredicate, node));
+
+		// INITIALISATION rule1#Counterexamples := {}
 		initialisationList.add(createAssignNode(createIdentifier(ctName, node.getRuleName().clone()), new AEmptySetExpression()));
 
 		//  rule1#Successful := {}
 		initialisationList.add(createAssignNode(createIdentifier(sfName, node.getRuleName().clone()), new AEmptySetExpression()));
+
+		//  rule1#Successful := {}
+		initialisationList.add(createAssignNode(createIdentifier(ucName, node.getRuleName().clone()), new AEmptySetExpression()));
 	}
 
 	@Override
@@ -495,11 +534,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
 		variablesList.add(createIdentifier(node.getName().getText(), node.getName()));
-		final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
-		PPredicate compExecuted = new AEqualPredicate(createIdentifier(computationIdentifierLiteral),
-				createStringExpression(COMPUTATION_EXECUTED));
-		AMemberPredicate member = new AMemberPredicate(createIdentifier(node.getName()), node.getType());
-		invariantList.add(new AImplicationPredicate(compExecuted, member));
 
 		if (node.getDummyValue() != null) {
 			initialisationList.add(createAssignNode(createIdentifier(node.getName()), node.getDummyValue()));
@@ -510,11 +544,26 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (node.getValue() instanceof ASymbolicLambdaExpression
 				|| node.getValue() instanceof ASymbolicComprehensionSetExpression
-				|| node.getValue() instanceof ASymbolicEventBComprehensionSetExpression) {
+				|| node.getValue() instanceof ASymbolicEventBComprehensionSetExpression
+				|| node.getValue() instanceof ASymbolicQuantifiedUnionExpression) {
 			value = node.getValue();
 		} else {
 			addForceDefinition(iDefinitions);
 			value = createPositionedNode(callExternalFunction(FORCE, node.getValue()), node.getValue());
+		}
+
+		if (node.getType() != null) { // use TYPE if provided; compname=COMPUTATION_EXECUTED => name:type
+			final TIdentifierLiteral computationIdentifierLiteral = this.currentComputationIdentifier.clone();
+			PPredicate compExecuted = new AEqualPredicate(createIdentifier(computationIdentifierLiteral),
+					createStringExpression(COMPUTATION_EXECUTED));
+			AMemberPredicate member = new AMemberPredicate(createIdentifier(node.getName()), node.getType());
+			invariantList.add(new AImplicationPredicate(compExecuted, member));
+		} else {
+			// else: (btrue or name=value) for typing
+			invariantList.add(new ADisjunctPredicate(
+					new ATruthPredicate(),
+					new AEqualPredicate(createIdentifier(node.getName()), value.clone())
+			));
 		}
 
 		node.replaceBy(createAssignNode(createIdentifier(node.getName()), value));
@@ -554,6 +603,17 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return new ASequenceSubstitution(Collections.singletonList(assign));
 	}
 
+	private PSubstitution createUncheckedSubstitution(PExpression uncheckedMessage) {
+		final String ucName = currentRule.getOriginalName() + RULE_UNCHECKED_VARIABLE_SUFFIX;
+		final AUnionExpression union = new AUnionExpression(createIdentifier(ucName),
+				createPositionedNode(new ASetExtensionExpression(Collections.singletonList(new ACoupleExpression(
+						Arrays.asList(createIntegerExpression(ruleBodyCount), uncheckedMessage.clone())))), uncheckedMessage));
+
+		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ucName)),
+				createExpressionList(union));
+		return new ASequenceSubstitution(Collections.singletonList(assign));
+	}
+
 	@Override
 	public void outAFunctionOperation(AFunctionOperation node) {
 		FunctionOperation func = rulesMachineChecker.getFunctionOperation(node);
@@ -574,8 +634,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (!preConditionList.isEmpty()) {
 			body = new APreconditionSubstitution(createConjunction(preConditionList), body);
 		}
-		node.replaceBy(new AOperation(node.getReturnValues(), Collections.singletonList(node.getName()),
-			new ArrayList<>(node.getParameters()), body));
+		node.replaceBy(new AOperation(new LinkedList<>(node.getReturnValues()), Collections.singletonList(node.getName()),
+				new LinkedList<>(node.getParameters()), body));
 	}
 
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,
@@ -770,7 +830,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		Node newNode;
 		if (!node.getIdentifiers().isEmpty()) {
 			newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(), node.getWhen(),
-				null, null, node.getMessage(), node.getErrorType()), node);
+				null, null, node.getMessage(), null, node.getErrorType()), node);
 		} else {
 			// default value is 1 if no value is provided
 			int errorType = node.getErrorType() != null ? Integer.parseInt(node.getErrorType().getText()) : 1;
@@ -799,10 +859,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
 			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression onSuccessMessage,
-			final PExpression counterExampleMessage, final TIntegerLiteral errorTypeNode) {
+			final PExpression counterExampleMessage, final PExpression uncheckedMessage, final TIntegerLiteral errorTypeNode) {
 
 		final String ON_SUCCESS_STRINGS = "$OnSuccessStrings";
 		final String COUNTEREXAMPLE_STRINGS = "$CounterexampleStrings";
+		final String UNCHECKED_STRING = "$UncheckedString"; // just a single string
 
 		final AComprehensionSetExpression setWithoutExpect = new AComprehensionSetExpression();
 		{
@@ -824,6 +885,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 		if (onSuccessMessage != null) {
 			varIdentifiers.add(createIdentifier(ON_SUCCESS_STRINGS));
+		}
+		if (uncheckedMessage != null) {
+			varIdentifiers.add(createIdentifier(UNCHECKED_STRING));
 		}
 		var.setIdentifiers(varIdentifiers);
 		List<PSubstitution> subList = new ArrayList<>();
@@ -879,6 +943,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createExpressionList(new AEventBComprehensionSetExpression(list2, onSuccessMessage, member))
 			));
 		}
+		if (uncheckedMessage != null) {
+			// just a single string; identifier is not in the all_tuple set
+			subList.add(new AAssignSubstitution(
+					createExpressionList(createIdentifier(UNCHECKED_STRING)),
+					createExpressionList(uncheckedMessage)
+			));
+		}
 		{
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
@@ -905,6 +976,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 			PSubstitution successfulSubstitution = createSuccessfulSubstitution(createIdentifier(ON_SUCCESS_STRINGS));
 			subList.add(successfulSubstitution);
 		}
+		if (uncheckedMessage != null) {
+			PPredicate ifUnchecked = new AEqualPredicate(createIdentifier(ALL_TUPLE), new AEmptySetExpression());
+			AIfSubstitution uncheckedSubstitution = new AIfSubstitution(ifUnchecked,
+					createUncheckedSubstitution(uncheckedMessage),
+					new ArrayList<>(),
+					null);
+			subList.add(uncheckedSubstitution);
+		}
 
 		ASequenceSubstitution seqSub = new ASequenceSubstitution(subList);
 		var.setSubstitution(seqSub);
@@ -916,7 +995,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		this.ruleBodyCount++;
 		addForceDefinition(iDefinitions);
 		PSubstitution newNode = createPositionedNode(createCounterExampleSubstitutions(node.getIdentifiers(),
-				node.getWhere(), node.getExpect(), node.getOnSuccess(), node.getMessage(), node.getErrorType()), node);
+				node.getWhere(), node.getExpect(), node.getOnSuccess(), node.getMessage(), node.getUnchecked(), node.getErrorType()), node);
 		node.replaceBy(newNode);
 	}
 

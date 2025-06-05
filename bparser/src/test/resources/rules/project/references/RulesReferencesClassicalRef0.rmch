@@ -1,0 +1,4 @@
+RULES_MACHINE RulesReferencesClassicalRef0
+REFERENCES RulesReferencesClassicalRef1
+PROPERTIES c : struct(secret:STRING)
+END

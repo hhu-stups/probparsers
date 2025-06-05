@@ -7,6 +7,10 @@ import java.util.Objects;
 
 import de.prob.prolog.term.PrologTerm;
 
+/**
+ * @deprecated Use {@link FastSicstusTermOutput} or {@link FastSwiTermOutput} directly.
+ */
+@Deprecated
 public final class FastTermOutput extends BaseStructuredPrologOutput {
 
 	private final FastReadWriter out;

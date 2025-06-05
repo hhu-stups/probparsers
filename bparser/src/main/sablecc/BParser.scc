@@ -446,6 +446,7 @@ Tokens
   {normal} kw_body = 'BODY';
   {normal} kw_dummy_value = 'DUMMY_VALUE';
   {normal} kw_on_success = 'ON_SUCCESS';
+  {normal} kw_unchecked = 'UNCHECKED';
   {normal} kw_counterexample = 'COUNTEREXAMPLE';
   {normal} kw_function = 'FUNCTION';
   {normal} kw_references = 'REFERENCES';
@@ -1224,22 +1225,24 @@ substitution_l3 {-> substitution} =
           {-> New substitution.for_loop([identifiers.expression], set.expression, do_subst.substitution)} |
   {forall_sub_message} kw_rule_for_all [identifiers]:identifier_declaration_list where [where_pred]:predicate_top
                        kw_expect [expect_pred]:predicate_top [error_type]:error_type?
-                       [on_success]:on_success? kw_counterexample [message]:expression_top_with_opt_desc end
-          {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, message.expression)} |
+                       [on_success]:on_success? [unchecked]:unchecked? kw_counterexample [message]:expression_top_with_opt_desc end
+          {-> New substitution.forall_sub_message([identifiers.expression], where_pred.predicate, expect_pred.predicate, error_type.integer_literal, on_success.expression, unchecked.expression, message.expression)} |
   {rule_fail_sub} kw_rule_fail [identifiers]:identifier_declaration_list? [when_pred]:when_predicate?
                   [error_type]:error_type? kw_counterexample [message]:expression_top_with_opt_desc end
            {-> New substitution.rule_fail_sub([identifiers.expression], when_pred.predicate, error_type.integer_literal, message.expression)} |
   {substitution_operator} [name]:kw_substitution_operator [arguments]:op_params?
            {-> New substitution.operator(name, [arguments.expression])} |
-  {define} kw_define [name]:identifier_literal kw_type [type]:expression_in_par
+  {define} kw_define [name]:identifier_literal [type]:type_info?
            [dummy]:dummy_value? kw_value [value]:expression_in_par end
            {-> New substitution.define(name, type.expression, dummy.expression, value.expression)};
 
 when_predicate {-> predicate} = when [pred]:predicate_top {-> pred.predicate};
 message {-> expression} = left_par [expr]:expression_in_par right_par {-> expr.expression};
+type_info {-> expression} = kw_type [expr]:expression_in_par {-> expr.expression};
 dummy_value {-> expression} = kw_dummy_value [expr]:expression_in_par {-> expr.expression};
 error_type {-> integer_literal} = kw_rule_error_type [id]:integer_literal {-> id};
 on_success {-> expression} = kw_on_success [expr]:expression_top_with_opt_desc {-> expr.expression};
+unchecked {-> expression} = kw_unchecked [expr]:expression_top_with_opt_desc {-> expr.expression};
 
 choice_or {-> substitution} =
   or [substitution]:substitution_l0 {-> New substitution.choice_or(substitution.substitution)};
@@ -1667,8 +1670,8 @@ substitution =
   {parallel} [substitutions]:substitution* |
   {definition} [def_literal]:def_literal_substitution [parameters]:expression* |
   {invalid} semicolon |
-  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [on_success]:expression? [message]:expression | // extension for rules
+  {forall_sub_message} [identifiers]:expression* [where]:predicate [expect]:predicate [error_type]:integer_literal? [on_success]:expression? [unchecked]:expression? [message]:expression | // extension for rules
   {rule_fail_sub} [identifiers]:expression* [when]:predicate? [error_type]:integer_literal? [message]:expression | // extension for rules
   {for_loop} [identifiers]:expression* [set]:expression [do_subst]:substitution | // extension for rules
   {operator} [name]:kw_substitution_operator [arguments]:expression* | // extension for rules
-  {define} [name]:identifier_literal [type]:expression [dummy_value]:expression? [value]:expression; // extension for rules
+  {define} [name]:identifier_literal [type]:expression? [dummy_value]:expression? [value]:expression; // extension for rules

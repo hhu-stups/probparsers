@@ -142,6 +142,12 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testRuleUnchecked() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY FOR y IN {1,2,3} DO RULE_FORALL x WHERE x : 1..100 EXPECT x : 1..10 UNCHECKED ```unchecked: ${y}``` COUNTEREXAMPLE \"fail\" END END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+	}
+
+	@Test
 	public void testRuleCounterexamples() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL== GET_RULE_COUNTEREXAMPLES(foo) /= {} OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"fail\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
@@ -155,6 +161,13 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testFunctionMultipleReturn() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out1, out2 <-- foo(x) PRECONDITION x : INTEGER BODY out1 := x + 1; out2 := succ(out1) END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("operation(none,identifier(none,foo),[identifier(none,out1),identifier(none,out2)],[identifier(none,x)],precondition(none,member(none,identifier(none,x),integer_set(none)),sequence(none,[assign(none,[identifier(none,out1)],[add(none,identifier(none,x),integer(none,1))]),assign(none,[identifier(none,out2)],[function(none,successor(none),[identifier(none,out1)])])])))"));
+	}
+
+	@Test
 	public void testFunctionPostcondition() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- foo(x) PRECONDITION x : INTEGER POSTCONDITION out : INTEGER BODY out := x + 1 END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
@@ -165,7 +178,28 @@ public class RulesLanguageTest {
 	public void testRuleId() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo RULEID id2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertFalse("RULEID should not appear in the translated B machine.", result.contains("id2"));
+		assertTrue("Expected RULEID in description of rule operation.", result.contains("rules_info([rule_id(id2)])."));
+	}
+
+	@Test
+	public void testClassification() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo CLASSIFICATION cl2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected CLASSIFICATION in description of rule operation.", result.contains("rules_info([classification(cl2)])."));
+	}
+
+	@Test
+	public void testTags() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS t1,t2,t3 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected TAGS in description of rule operation.", result.contains("rules_info([tags([t1,t2,t3])])."));
+	}
+
+	@Test
+	public void testAllAttributes() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo TAGS t1,t2,t3 CLASSIFICATION c4 RULEID r5 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue("Expected operation attributes in description of rule operation.", result.contains("rules_info([tags([t1,t2,t3]),classification(c4),rule_id(r5)])."));
 	}
 
 	@Test
@@ -321,8 +355,21 @@ public class RulesLanguageTest {
 	}
 
 	@Test
+	public void testDefineSymbolicQuantifiedUnion() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo TYPE POW(INTEGER) VALUE /*@symbolic */ UNION(x).(x<:1..2|x) END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+		assertFalse(result.contains("FORCE"));
+	}
+
+	@Test
 	public void testFailedRuleAllErrorTypes() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(foo)  OPERATIONS RULE foo BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		String result = getRulesProjectAsPrologTerm(testMachine);
+	}
+
+	@Test
+	public void testComputationWithoutOptionalType() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION comp BODY DEFINE foo VALUE 1..2 END END END";
 		String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 

@@ -9,6 +9,8 @@ package de.prob.prolog.term;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import de.prob.prolog.output.IPrologTermOutput;
+
 /**
  * The abstract class representing a Prolog integer.
  * Can be a long or a BigInteger.
@@ -16,7 +18,6 @@ import java.util.Objects;
  */
 @SuppressWarnings({ "deprecation", "StaticInitializerReferencesSubClass" })
 public abstract class AIntegerPrologTerm extends PrologTerm {
-
 
 	public static final AIntegerPrologTerm ZERO;
 	public static final AIntegerPrologTerm ONE;
@@ -85,16 +86,32 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 		return true;
 	}
 
+	/**
+	 * Returns the {@link BigInteger} representation of this number, always exact.
+	 *
+	 * @return the exact {@link BigInteger} representation
+	 */
 	public abstract BigInteger getValue();
 
+	@Override
+	public String getFunctor() {
+		return this.getValue().toString();
+	}
+
+	@Override
+	public void toTermOutput(final IPrologTermOutput pto) {
+		pto.printNumber(this.getValue());
+	}
+
 	/**
-	 * Get this integer's value as a {@code long},
-	 * checking for overflows.
+	 * Get this integer's value as an {@code int},
+	 * ignoring overflows.
 	 *
-	 * @return this integer's value as a {@code long}
-	 * @throws ArithmeticException if the value cannot be represented as a {@code long}
+	 * @return this integer's value as an {@code int}
 	 */
-	public abstract long longValueExact();
+	public int intValue() {
+		return this.getValue().intValue();
+	}
 
 	/**
 	 * Get this integer's value as an {@code int},
@@ -103,7 +120,30 @@ public abstract class AIntegerPrologTerm extends PrologTerm {
 	 * @return this integer's value as an {@code int}
 	 * @throws ArithmeticException if the value cannot be represented as a {@code int}
 	 */
-	public abstract int intValueExact();
+	public int intValueExact() {
+		return this.getValue().intValueExact();
+	}
+
+	/**
+	 * Get this integer's value as a {@code long},
+	 * ignoring overflows.
+	 *
+	 * @return this integer's value as a {@code long}
+	 */
+	public long longValue() {
+		return this.getValue().longValue();
+	}
+
+	/**
+	 * Get this integer's value as a {@code long},
+	 * checking for overflows.
+	 *
+	 * @return this integer's value as a {@code long}
+	 * @throws ArithmeticException if the value cannot be represented as a {@code long}
+	 */
+	public long longValueExact() {
+		return this.getValue().longValueExact();
+	}
 
 	@Override
 	public boolean equals(final Object other) {

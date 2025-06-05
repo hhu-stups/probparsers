@@ -44,7 +44,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
-	private final HashSet<String> definitions = new HashSet<>();
+	private final Set<String> definitions = new HashSet<>();
 	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
 	private final List<MachineReference> machineReferences;
 
@@ -143,6 +143,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return this.knownIdentifier.getKnownIdentifiers();
 	}
 
+	public Set<String> getDefinitionNames() {
+		return this.definitions;
+	}
+
 	@Override
 	public void caseAMachineHeader(AMachineHeader node) {
 		if (!node.getParameters().isEmpty()) {
@@ -154,6 +158,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		this.nameLiteral = nameList.get(0);
 		this.machineName = nameLiteral.getText();
+
+		// check self references; TODO: maybe we do not need this - duplicate references are ignored
+		for (MachineReference machineReference : machineReferences) {
+			if (machineReference.getName().equals(machineName)) {
+				errorList.add(new CheckException("The reference '" + machineReference.getName() + "' has the same name as the machine in which it is contained.", machineReference.getNode()));
+			}
+		}
 	}
 
 	@Override
@@ -897,6 +908,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
+		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		node.getPredicates().apply(this);
+		node.getExpression().apply(this);
+		this.identifierScope.removeScope();
+	}
+
+	@Override
+	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
 		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);

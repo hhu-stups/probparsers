@@ -45,7 +45,7 @@ import de.be4.classicalb.core.parser.util.Utils;
  * This class finds all references to external machines in a machine definition.
  * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
  */
-final class MachineReferencesFinder extends MachineClauseAdapter {
+public final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Path machineFile;
 	private final boolean machineNameMustMatchFileName;
 	private String machineName;

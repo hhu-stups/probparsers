@@ -4,13 +4,13 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -45,7 +45,8 @@ import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.parserbase.UnparsedParserBase;
-import de.prob.prolog.output.FastTermOutput;
+import de.prob.prolog.output.FastSicstusTermOutput;
+import de.prob.prolog.output.FastSwiTermOutput;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 import de.prob.prolog.term.PrologTerm;
@@ -62,23 +63,19 @@ public class CliBParser {
 	private static final String CLI_SWITCH_PP = "-pp";
 	private static final String CLI_SWITCH_PROLOG = "-prolog";
 	private static final String CLI_SWITCH_FASTPROLOG = "-fastprolog";
+	private static final String CLI_SWITCH_SWI = "-swi";
 	private static final String CLI_SWITCH_COMPACT_POSITIONS = "-compactpos";
 	private static final String CLI_SWITCH_PROLOG_LINES = "-lineno";
 	private static final String CLI_SWITCH_OUTPUT = "-out";
 	private static final String CLI_SWITCH_PREPL = "-prepl";
 	private static final String CLI_SWITCH_NAME_CHECK = "-checkname";
-	// other interesting parameters: System.getProperty : prob.stdlib
 
 	private static final UnparsedParserBase UNPARSED_PARSER_BASE = new UnparsedParserBase("unparsed_expr", "unparsed_pred", "unparsed_trans");
 
-	private static Socket socket;
-	private static PrintWriter socketWriter;
-
-
-	private static int getStackSize(int acc){
+	private static int getStackSize(int acc) {
 		try {
-			return CliBParser.getStackSize(acc+1);
-		} catch (final StackOverflowError e) {
+			return CliBParser.getStackSize(acc + 1);
+		} catch (StackOverflowError ignored) {
 			return acc;
 		}
 	}
@@ -88,12 +85,12 @@ public class CliBParser {
 	 * This is necessary because of <a href="https://github.com/oracle/graal/issues/3398">a bug with graalvm and musl</a>.
 	 * Workaround inspired by: <a href="https://github.com/babashka/babashka/issues/831">babashka/babashka#831</a>
 	 */
-	public static void main(final String[] args) throws InterruptedException, IOException {
-		AtomicReference<IOException> maybeException = new AtomicReference<>(null);
+	public static void main(final String[] args) throws Exception {
+		AtomicReference<Exception> maybeException = new AtomicReference<>(null);
 		Thread t = new Thread(()->{
 			try {
 				CliBParser.mainImpl(args);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				maybeException.set(e);
 			}
 		});
@@ -106,10 +103,6 @@ public class CliBParser {
 	 * Actual main method
 	 */
 	public static void mainImpl(final String[] args) throws IOException {
-
-		// System.out.println("Ready. Press enter");
-		// System.in.read();
-		// System.out.println("Starting");
 		final ConsoleOptions options = createConsoleOptions(args);
 		
 		if (options.isOptionSet(CLI_SWITCH_HELP) ||
@@ -117,16 +110,20 @@ public class CliBParser {
 				options.isOptionSet(CLI_SWITCH_HELP3)) {
 			options.printUsage(System.err);
 			System.exit(-1);
+			return;
 		}
 		
 		if (options.isOptionSet(CLI_SWITCH_VERSION)) {
 			System.out.printf("Version:    %s%n", BParser.getVersion());
 			System.out.printf("Git Commit: %s%n", BParser.getGitSha());
 			System.exit(0);
+			return;
 		}
 
-		if(options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE)) {
+		if (options.isOptionSet(CLI_SWITCH_PRINT_STACK_SIZE)) {
 			System.out.format("Local stack size:\t%d\n", CliBParser.getStackSize(0));
+			System.exit(0);
+			return;
 		}
 
 		final String[] arguments = options.getRemainingOptions();
@@ -135,38 +132,20 @@ public class CliBParser {
 			System.err.println("Here is how to use the parser:");
 			options.printUsage(System.err);
 			System.exit(-1);
+			return;
 		}
 
 		final ParsingBehaviour behaviour = new ParsingBehaviour();
-
-		final OutputStream out;
-		if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
-			final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
-
-			try {
-				out = new FileOutputStream(filename);
-			} catch (final FileNotFoundException e) {
-				if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
-					PrologExceptionPrinter.printException(System.err, e);
-				} else {
-					System.err.println("Unable to create file '" + filename + "'");
-				}
-				System.exit(-1);
-				return; // Unreachable, but needed
-			}
-		} else {
-			out = System.out;
-		}
 		behaviour.setPrintTime(options.isOptionSet(CLI_SWITCH_TIME));
 		behaviour.setPrologOutput(options.isOptionSet(CLI_SWITCH_PROLOG));
 		behaviour.setAddLineNumbers(options.isOptionSet(CLI_SWITCH_PROLOG_LINES)); // -lineno flag
 		behaviour.setPrettyPrintB(options.isOptionSet(CLI_SWITCH_PP)); // -pp flag
 		behaviour.setVerbose(options.isOptionSet(CLI_SWITCH_VERBOSE)); // -v flag
-		//behaviour.setVerbose(true); // always set -v flag
 		behaviour.setFastPrologOutput(options.isOptionSet(CLI_SWITCH_FASTPROLOG));
+		behaviour.setSwiSupport(options.isOptionSet(CLI_SWITCH_SWI));
 		behaviour.setCompactPrologPositions(options.isOptionSet(CLI_SWITCH_COMPACT_POSITIONS));
 		behaviour.setMachineNameMustMatchFileName(options.isOptionSet(CLI_SWITCH_NAME_CHECK));
-		// TO DO: check if some other flags are not recognised
+		// TODO: check if some other flags are not recognised
 
 		if (options.isOptionSet(CLI_SWITCH_PREPL)) {
 			runPRepl(behaviour);
@@ -177,16 +156,36 @@ public class CliBParser {
 			if (options.getRemainingOptions().length != 1) {
 				options.printUsage(System.err);
 				System.exit(-1);
+				return;
 			}
-			String filename = options.getRemainingOptions()[0];
-			final File bfile = new File(filename);
+
+			File bfile = new File(options.getRemainingOptions()[0]);
 			@SuppressWarnings("ImplicitDefaultCharsetUsage") // System.err really uses the default charset
 			PrintWriter err = new PrintWriter(System.err, true);
-			int returnValue = doFileParsing(behaviour, out, err, bfile);
+
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
-				out.close();
+				final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
+				try (OutputStream out = Files.newOutputStream(Paths.get(filename))) {
+					int returnValue = doFileParsing(behaviour, out, err, bfile);
+					out.flush();
+					err.flush();
+					System.exit(returnValue);
+				} catch (IOException e) {
+					// Note: This should only catch exceptions from the creation of the OutputStream.
+					// All other IOExceptions are caught internally by doFileParsing.
+					if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
+						PrologExceptionPrinter.printException(System.err, e);
+					} else {
+						System.err.println("Unable to create file '" + filename + "'");
+					}
+					System.exit(-1);
+				}
+			} else {
+				int returnValue = doFileParsing(behaviour, System.out, err, bfile);
+				System.out.flush();
+				err.flush();
+				System.exit(returnValue);
 			}
-			System.exit(returnValue);
 		}
 	}
 	
@@ -198,6 +197,8 @@ public class CliBParser {
 				return String.valueOf(behaviour.isVerbose());
 			case "fastPrologOutput":
 				return String.valueOf(behaviour.isFastPrologOutput());
+			case "swiSupport":
+				return String.valueOf(behaviour.isSwiSupport());
 			case "compactPrologPositions":
 				return String.valueOf(behaviour.isCompactPrologPositions());
 			case "machineNameMustMatchFileName":
@@ -224,6 +225,9 @@ public class CliBParser {
 				break;
 			case "fastPrologOutput":
 				behaviour.setFastPrologOutput(Boolean.parseBoolean(value));
+				break;
+			case "swiSupport":
+				behaviour.setSwiSupport(Boolean.parseBoolean(value));
 				break;
 			case "compactPrologPositions":
 				behaviour.setCompactPrologPositions(Boolean.parseBoolean(value));
@@ -260,9 +264,11 @@ public class CliBParser {
 		ServerSocket serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
-		socket = serverSocket.accept();
+		Socket socket = serverSocket.accept();
 		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
-		socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)));
+
+		// with autoFlush
+		PrintWriter socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)), true);
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 		String line;
@@ -280,149 +286,161 @@ public class CliBParser {
 			}
 			
 			debugPrint(behaviour, "Received PREPL command: " + command);
-
 			switch (command) {
-			case version:
-				print(BParser.getVersion() + "-" + BParser.getGitSha() + System.lineSeparator());
-				break;
-			case shortversion:
-				print(BParser.getVersion() + System.lineSeparator());
-				break;
-			case gitsha:
-				print(BParser.getGitSha() + System.lineSeparator());
-				break;
-			case commandsupported:
-				// Check if the given command is supported by this version of the parser.
-				String commandToCheck = in.readLine();
-				try {
-					EPreplCommands.valueOf(commandToCheck);
-				} catch (IllegalArgumentException ignored) {
-					print("false." + System.lineSeparator());
+				case version:
+					socketWriter.println(BParser.getVersion() + "-" + BParser.getGitSha());
+					break;
+				case shortversion:
+					socketWriter.println(BParser.getVersion());
+					break;
+				case gitsha:
+					socketWriter.println(BParser.getGitSha());
+					break;
+				case commandsupported: {
+					// Check if the given command is supported by this version of the parser.
+					String commandToCheck = in.readLine();
+					try {
+						EPreplCommands.valueOf(commandToCheck);
+					} catch (IllegalArgumentException ignored) {
+						socketWriter.println("false.");
+						break;
+					}
+					socketWriter.println("true.");
 					break;
 				}
-				print("true." + System.lineSeparator());
-				break;
-			case featuresupported:
-				// Check if the given feature is supported by this version of the parser.
-				// There are no features defined yet, but we already support this command for future-proofing.
-				print("false." + System.lineSeparator());
-				break;
-			case definition:
-				// sending a new DEFINITION to the parser
-				String name = in.readLine();
-				String type = in.readLine();
-				String parameterCount = in.readLine();
-				context.addMockedDefinition(name, type, parameterCount);
-				break;
-			case resetdefinitions:
-				// remove all DEFINITIONS 
-				context = new MockedDefinitions();
-				break;
-			case getoption:
-				// Generic command for getting the current value of an option.
-				// Fails safely for unknown/unsupported options.
-				String getOptionName = in.readLine();
-				String getOptionValue = getNamedOption(behaviour, getOptionName);
-				final PrologTermOutput getOptionOut = new PrologTermOutput(socketWriter);
-				if (getOptionValue != null) {
-					getOptionOut.openTerm("value");
-					getOptionOut.printAtom(getNamedOption(behaviour, getOptionName));
-					getOptionOut.closeTerm();
-				} else {
-					getOptionOut.printAtom("unsupported");
+				case featuresupported:
+					// Check if the given feature is supported by this version of the parser.
+					// There are no features defined yet, but we already support this command for future-proofing.
+					socketWriter.println("false.");
+					break;
+				case definition: {
+					// sending a new DEFINITION to the parser
+					String name = in.readLine();
+					String type = in.readLine();
+					String parameterCount = in.readLine();
+					context.addMockedDefinition(name, type, parameterCount);
+					break;
 				}
-				getOptionOut.fullstop();
-				break;
-			case setoption:
-				// Generic command for changing parser options.
-				// Fails safely for unknown/unsupported options.
-				// Replaces the single-option commands below.
-				String setOptionName = in.readLine();
-				String setOptionValue = in.readLine();
-				String setOptionPrevValue = getNamedOption(behaviour, setOptionName);
-				boolean ok = setNamedOption(behaviour, setOptionName, setOptionValue);
-				final PrologTermOutput setOptionOut = new PrologTermOutput(socketWriter);
-				if (ok) {
-					setOptionOut.openTerm("prev_value");
-					setOptionOut.printAtom(setOptionPrevValue);
-					setOptionOut.closeTerm();
-				} else {
-					setOptionOut.printAtom("unsupported");
+				case resetdefinitions:
+					// remove all DEFINITIONS
+					context = new MockedDefinitions();
+					break;
+				case getoption: {
+					// Generic command for getting the current value of an option.
+					// Fails safely for unknown/unsupported options.
+					String getOptionName = in.readLine();
+					String getOptionValue = getNamedOption(behaviour, getOptionName);
+					final PrologTermOutput getOptionOut = new PrologTermOutput(socketWriter);
+					if (getOptionValue != null) {
+						getOptionOut.openTerm("value");
+						getOptionOut.printAtom(getNamedOption(behaviour, getOptionName));
+						getOptionOut.closeTerm();
+					} else {
+						getOptionOut.printAtom("unsupported");
+					}
+					getOptionOut.fullstop();
+					break;
 				}
-				setOptionOut.fullstop();
-				break;
-			// new commands to change parsingBehaviour, analog to command-line switches
-			case fastprolog:
-				String newFVal = in.readLine();
-				debugPrint(behaviour, "Setting fastprolog to " + newFVal);
-				behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
-				break;
-			case compactpos:
-				behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
-				break;
-			case verbose:
-				behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
-				break;
-			case checkname:
-				behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
-				break;
-			case lineno:
-				behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
-				break;
-			case machine:
-				resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
-				String filename = in.readLine();
-				Path outFile = Paths.get(in.readLine());
-				final File bfile = new File(filename);
-				final int returnValue;
-				try (final OutputStream out = Files.newOutputStream(outFile)) {
-					returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
+				case setoption: {
+					// Generic command for changing parser options.
+					// Fails safely for unknown/unsupported options.
+					// Replaces the single-option commands below.
+					String setOptionName = in.readLine();
+					String setOptionValue = in.readLine();
+					String setOptionPrevValue = getNamedOption(behaviour, setOptionName);
+					boolean ok = setNamedOption(behaviour, setOptionName, setOptionValue);
+					final PrologTermOutput setOptionOut = new PrologTermOutput(socketWriter);
+					if (ok) {
+						setOptionOut.openTerm("prev_value");
+						setOptionOut.printAtom(setOptionPrevValue);
+						setOptionOut.closeTerm();
+					} else {
+						setOptionOut.printAtom("unsupported");
+					}
+					setOptionOut.fullstop();
+					break;
 				}
-				context = new MockedDefinitions();
-
-				// Notify probcli that the call finished successfully.
-				// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
-				if (returnValue == 0) {
-					print("exit(" + returnValue + ")." + System.lineSeparator());
-				} else if (returnValue < -4) { // VM/StackOverflow error occurred; file is probably corrupt
-					System.out.println("Erasing file contents of " + outFile);
-					Files.write(outFile, Collections.singletonList("% VM Error occurred"));
+				// new commands to change parsingBehaviour, analog to command-line switches
+				case fastprolog: {
+					String newFVal = in.readLine();
+					debugPrint(behaviour, "Setting fastprolog to " + newFVal);
+					behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
+					break;
 				}
-				break;
-			case formula:
-			case expression:
-			case predicate:
-			case substitution:
-				String theFormula = in.readLine();
-				parseFormula(command, theFormula, context, behaviour);
-				resetVolatilePositionOptions(behaviour);
-				break;
-			case ltl:
-				String extension = in.readLine();
-				final ProBParserBase extParser = getExtensionParser(extension, context);
-				final TemporalLogicParser<?> parser = new LtlParser(extParser);
+				case swi: {
+					String newFVal = in.readLine();
+					debugPrint(behaviour, "Setting swi to " + newFVal);
+					behaviour.setSwiSupport(Boolean.parseBoolean(newFVal));
+					break;
+				}
+				case compactpos:
+					behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
+					break;
+				case verbose:
+					behaviour.setVerbose(Boolean.parseBoolean(in.readLine()));
+					break;
+				case checkname:
+					behaviour.setMachineNameMustMatchFileName(Boolean.parseBoolean(in.readLine()));
+					break;
+				case lineno:
+					behaviour.setAddLineNumbers(Boolean.parseBoolean(in.readLine()));
+					break;
+				case machine: {
+					resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
+					String filename = in.readLine();
+					Path outFile = Paths.get(in.readLine());
+					final File bfile = new File(filename);
+					final int returnValue;
+					try (final OutputStream out = Files.newOutputStream(outFile)) {
+						returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
+					}
+					context = new MockedDefinitions(); // reset definitions
 
-				parseTemporalFormula(in, parser);
-				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to LTL parser above
-
-				break;
-			case ctl:
-				String extension2 = in.readLine();
-				final ProBParserBase extParser2 = getExtensionParser(extension2, context);
-				final TemporalLogicParser<?> parser2 = new CtlParser(extParser2);
-				parseTemporalFormula(in, parser2);
-				resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
-				break;
-
-			case halt:
-				socket.close();
-				serverSocket.close();
-				terminate = true;
-				break;
-			default:
-				throw new UnsupportedOperationException("Unsupported Command " + line);
+					// Notify probcli that the call finished successfully.
+					// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
+					if (returnValue == 0) {
+						socketWriter.println("exit(" + returnValue + ").");
+					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
+						System.out.println("Erasing file contents of " + outFile);
+						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
+					}
+					break;
+				}
+				case formula:
+				case expression:
+				case predicate:
+				case substitution: {
+					String formula = in.readLine();
+					parseFormula(command, formula, context, behaviour, socketWriter);
+					resetVolatilePositionOptions(behaviour);
+					break;
+				}
+				case ltl: {
+					String extension = in.readLine();
+					final ProBParserBase extParser = getExtensionParser(extension, context);
+					final TemporalLogicParser<?> parser = new LtlParser(extParser);
+					parseTemporalFormula(in.readLine(), parser, socketWriter);
+					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to LTL parser above
+					break;
+				}
+				case ctl: {
+					String extension = in.readLine();
+					final ProBParserBase extParser = getExtensionParser(extension, context);
+					final TemporalLogicParser<?> parser = new CtlParser(extParser);
+					parseTemporalFormula(in.readLine(), parser, socketWriter);
+					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
+					break;
+				}
+				case halt:
+					socket.close();
+					serverSocket.close();
+					terminate = true;
+					break;
+				default:
+					throw new UnsupportedOperationException("Unsupported Command " + line);
 			}
-
+			System.out.flush();
+			System.err.flush();
 		}
 	}
 
@@ -453,25 +471,22 @@ public class CliBParser {
 		}
 	}
 
-	private static void parseTemporalFormula(BufferedReader in, final TemporalLogicParser<?> parser)
-			throws IOException {
-		String theFormula;
-		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
-		theFormula = in.readLine();
-
+	private static void parseTemporalFormula(String theFormula, TemporalLogicParser<?> parser, Writer out) {
+		final IPrologTermOutput pout = new PrologTermOutput(out, false);
 		try {
 			final PrologTerm term = parser.generatePrologTerm(theFormula, null);
 			pout.openTerm("ltl").printTerm(term).closeTerm();
 		} catch (LtlParseException e) {
 			pout.openTerm("syntax_error").printAtom(e.getMessage()).closeTerm();
+		} catch (Throwable e) {
+			PrologExceptionPrinter.printException(pout, new BCompoundException(new BException(null, e.toString(), e)));
 		}
 
 		pout.fullstop();
 	}
 
-	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, final ParsingBehaviour behaviour) {
-		final IPrologTermOutput pout = new PrologTermOutput(socketWriter, false);
-
+	private static void parseFormula(EPreplCommands command, String theFormula, IDefinitions context, ParsingBehaviour behaviour, Writer out) {
+		final IPrologTermOutput pout = new PrologTermOutput(out, false);
 		try {
 			BParser parser = new BParser();
 			parser.setStartPosition(behaviour.getStartLineNumber(), behaviour.getStartColumnNumber());
@@ -510,18 +525,18 @@ public class CliBParser {
 			start.apply(printer);
 		} catch (BCompoundException e) {
 			PrologExceptionPrinter.printException(pout, e);
+		} catch (Throwable e) {
+			PrologExceptionPrinter.printException(pout, new BCompoundException(new BException(null, e.toString(), e)));
 		}
 
 		pout.fullstop();
 	}
 
-	private static void print(String output) {
-		socketWriter.print(output);
-		socketWriter.flush();
-	}
-
-	private static void debugPrint(ParsingBehaviour parsingBehaviour, final String msg) {
+	private static void debugPrint(ParsingBehaviour parsingBehaviour, String msg) {
 		if (parsingBehaviour.isVerbose()) {
+			if (parsingBehaviour.shouldPrintProlog()) {
+				msg = "% " + msg;
+			}
 			System.out.println(msg);
 		}
 	}
@@ -534,60 +549,43 @@ public class CliBParser {
 				fullParsing(bfile, behaviour, out);
 			}
 			return 0;
-		} catch (final IOException e) {
-			if (behaviour.isPrologOutput() ||
-					behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, e);
+		} catch (IOException | UncheckedIOException e) {
+			IOException exc;
+			if (!(e instanceof IOException)) {
+				exc = (IOException) e.getCause();
 			} else {
-				err.println("Error reading input file: " + e.getMessage());
+				exc = (IOException) e;
+			}
+			if (behaviour.shouldPrintProlog()) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(err, exc);
+			} else {
+				err.println("Error reading input file: " + exc);
 			}
 			return -2;
-		} catch (final BCompoundException e) {
-			if (behaviour.isPrologOutput() ||
-					behaviour.isFastPrologOutput()) { // Note: this will print regular Prolog in FastProlog mode
+		} catch (BCompoundException e) {
+			if (behaviour.shouldPrintProlog()) { // Note: this will print regular Prolog in FastProlog mode
 				PrologExceptionPrinter.printException(err, e);
 			} else {
-				err.println("Error parsing input file: " + e.getMessage());
+				err.println("Error parsing input file: " + e);
 			}
 			return -3;
-		} catch (final RuntimeException e) {
-			if (behaviour.isPrologOutput() ||
-				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.getMessage(), e)));
+		} catch (Throwable e) {
+			if (behaviour.shouldPrintProlog()) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), e.toString(), e)));
 			} else {
-				err.println("Error reading input file: " + e.getMessage());
+				err.println("Error in parser: " + e);
 			}
 			return -4;
-		} catch (final StackOverflowError e) { // inherits from VirtualMachineError, Throwable
-			if (behaviour.isPrologOutput() ||
-				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (StackOverflowError) in parser: " + e.getMessage());
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "StackOverflowError" //+ e.getMessage() // message seems empty
-				, e)));
-				//e.printStackTrace(System.out); may produce itself a stack overflow??
-			} else {
-				err.println("Error (StackOverflowError) in parser: " + e.getMessage());
-			}
-			return -5;
-		} catch (final VirtualMachineError e) { // inherits from Throwable
-			if (behaviour.isPrologOutput() ||
-				behaviour.isFastPrologOutput() ) { // Note: this will print regular Prolog in FastProlog mode
-				System.out.println("Error (VirtualMachineError) in parser: " + e.getMessage());
-				PrologExceptionPrinter.printException(err, new BCompoundException(new BException(bfile.getAbsolutePath(), "VirtualMachineError" //+ e.getMessage() // message seems empty
-				, e)));
-			} else {
-				err.println("Error (VirtualMachineError) in parser: " + e.getMessage());
-			}
-			return -6;
 		}
 	}
 
 	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
 		final long startOutput = System.currentTimeMillis();
 		if (parsingBehaviour.isFastPrologOutput()) { // -fastprolog flag in CliBParser
-			printASTasFastProlog(out, printer);
+			printASTasFastProlog(parsingBehaviour, out, printer);
 		} else { // -prolog flag in CliBParser
-			IPrologTermOutput pto = new PrologTermOutput(new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)), false);
+			assert parsingBehaviour.isPrologOutput();
+			IPrologTermOutput pto = new PrologTermOutput(out, false);
 			printer.accept(pto);
 		}
 		final long endOutput = System.currentTimeMillis();
@@ -619,7 +617,7 @@ public class CliBParser {
 		}
 
 		// Note: if both -fastprolog and -prolog flag are used; only Fast Prolog AST will be printed
-		if (parsingBehaviour.isPrologOutput() || parsingBehaviour.isFastPrologOutput()) {
+		if (parsingBehaviour.shouldPrintProlog()) {
 			final long startParseRecursive = System.currentTimeMillis();
 			final RecursiveMachineLoader rml = RecursiveMachineLoader.loadFromAst(parser, tree, parsingBehaviour, parser.getContentProvider());
 			final long endParseRecursive = System.currentTimeMillis();
@@ -631,8 +629,8 @@ public class CliBParser {
 			printPrologAst(parsingBehaviour, out, rml::printAsProlog);
 		}
 
-		if (parsingBehaviour.isPrintTime()) {
-			System.out.println("% Used memory : " + 
+		if (parsingBehaviour.isVerbose()) {
+			System.out.println("% Used memory : " +
 				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ 1000 + " KB");
 			System.out.println("% Total memory: " + Runtime.getRuntime().totalMemory() / 1000 + " KB");
 		}
@@ -652,8 +650,16 @@ public class CliBParser {
 	fast_read(S,FilesTerm), ... until end_of_file
 	close(S)
 	*/
-	private static void printASTasFastProlog(OutputStream out, Consumer<? super IPrologTermOutput> printer) {
-		IPrologTermOutput pto = new FastTermOutput(new BufferedOutputStream(out));
+	private static void printASTasFastProlog(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
+		if (!(out instanceof BufferedOutputStream)) {
+			out = new BufferedOutputStream(out);
+		}
+		IPrologTermOutput pto;
+		if (parsingBehaviour.isSwiSupport()) {
+			pto = new FastSwiTermOutput(out);
+		} else {
+			pto = new FastSicstusTermOutput(out);
+		}
 		printer.accept(pto);
 	}
 
@@ -678,7 +684,6 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_TIME, "Output time used for complete parsing process");
 		options.addOption(CLI_SWITCH_PP, "Pretty Print in B format on standard output");
 		options.addOption(CLI_SWITCH_PROLOG, "Show AST as Prolog term");
-		// TO DO: add option for less precise position infos
 		options.addOption(CLI_SWITCH_PROLOG_LINES, "Put line numbers into prolog terms");
 		options.addOption(CLI_SWITCH_OUTPUT, "Specify output file", 1);
 		options.addOption(CLI_SWITCH_VERSION, "Print the parser version and exit");
@@ -688,10 +693,11 @@ public class CliBParser {
 		options.addOption(CLI_SWITCH_COMPACT_POSITIONS, "Use new more compact Prolog position terms");
 		options.addOption(CLI_SWITCH_FASTPROLOG,
 				"Show AST as Prolog term for fast loading (Do not use this representation in your tool! It depends on internal representation of Sicstus Prolog and will very likely change arbitrarily in the future!)");
+		options.addOption(CLI_SWITCH_SWI, "Switch to SWI-Prolog mode. All prolog output will be compatible with the SWI Prolog system, especially the -fastprolog option.");
 		options.addOption(CLI_SWITCH_PREPL, "Enter parser-repl. Should only be used from inside ProB's Prolog Core.");
 		options.addOption(CLI_SWITCH_NAME_CHECK,
 				"The name of a machine have to match file name (except for the file name extension)");
-		options.addOption(CLI_SWITCH_PRINT_STACK_SIZE, "print the locally available size of the call stack at runtime");
+		options.addOption(CLI_SWITCH_PRINT_STACK_SIZE, "print the locally available depth of the call stack at runtime");
 		try {
 			options.parseOptions(args);
 		} catch (final IllegalArgumentException e) {

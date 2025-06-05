@@ -46,9 +46,7 @@ public class RulesUtil {
 	}
 
 	public static String getRulesMachineAsPrologTerm(final String content) throws BCompoundException {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(content);
-		unit.parse();
+		RulesParseUnit unit = RulesParseUnit.parse(content);
 		unit.translate();
 		if (unit.hasError()) {
 			throw unit.getCompoundException();

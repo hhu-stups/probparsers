@@ -38,7 +38,6 @@ import static de.be4.classicalb.core.parser.util.ASTBuilder.addSortDefinition;
 import static de.be4.classicalb.core.parser.util.ASTBuilder.addToStringDefinition;
 
 public class RulesProject {
-	private File mainFile;
 	public static final String CTAGS_FILE_NAME = ".rules-tags1";
 	static final String MAIN_MACHINE_NAME = "__RULES_MACHINE_Main";
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
@@ -58,13 +57,13 @@ public class RulesProject {
 	}
 
 	public void parseRulesMachines(String mainMachineAsString, String... referencedMachines) {
-		final IModel mainMachine = parseRulesMachineFromString(mainMachineAsString);
+		final IModel mainMachine = RulesParseUnit.parse(mainMachineAsString);
 		this.bModels.add(mainMachine);
 		if (mainMachine.hasError()) {
 			this.bExceptionList.addAll(mainMachine.getCompoundException().getBExceptions());
 		}
 		for (String referencedMachine : referencedMachines) {
-			final IModel machine = parseRulesMachineFromString(referencedMachine);
+			final IModel machine = RulesParseUnit.parse(referencedMachine);
 			this.bModels.add(machine);
 			if (machine.hasError()) {
 				this.bExceptionList.addAll(machine.getCompoundException().getBExceptions());
@@ -72,16 +71,8 @@ public class RulesProject {
 		}
 	}
 
-	private IModel parseRulesMachineFromString(String mainMachineAsString) {
-		RulesParseUnit unit = new RulesParseUnit();
-		unit.setMachineAsString(mainMachineAsString);
-		unit.parse();
-		return unit;
-	}
-
 	public void parseProject(File mainFile) {
-		this.mainFile = mainFile;
-		RulesParseUnit mainModel = parseMainFile();
+		RulesParseUnit mainModel = RulesParseUnit.parse(mainFile, parsingBehaviour);
 		if (mainModel.hasError()) {
 			final BCompoundException compound = mainModel.getCompoundException();
 			this.bExceptionList.addAll(compound.getBExceptions());
@@ -91,7 +82,8 @@ public class RulesProject {
 		while (!fifo.isEmpty()) {
 			final MachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
-				final IModel bModel = parseRulesMachine(modelReference);
+				File file = new File(modelReference.getPath());
+				final IModel bModel = RulesParseUnit.parse(file, parsingBehaviour);
 				if (bModel.hasError()) {
 					this.bExceptionList.addAll(bModel.getCompoundException().getBExceptions());
 				}
@@ -457,28 +449,42 @@ public class RulesProject {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			map.put(parseUnit.getMachineName(), parseUnit);
 		}
+		Set<String> knownIdentifiers = new HashSet<>();
+		Set<String> visited = new HashSet<>();
+		RulesParseUnit parseUnit = (RulesParseUnit) bModels.get(0);
+		visited.add(parseUnit.getMachineName());
 		for (IModel model : bModels) {
-			RulesParseUnit parseUnit = (RulesParseUnit) model;
-			HashSet<String> knownIdentifiers = new HashSet<>();
-			List<MachineReference> machineReferences = parseUnit.getMachineReferences();
-			for (MachineReference rulesMachineReference : machineReferences) {
-				String referenceName = rulesMachineReference.getName();
-				RulesParseUnit rulesParseUnit = map.get(referenceName);
-				RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
-				knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
-				knownIdentifiers.addAll(checker.getFunctionOperationNames());
-			}
-			RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
-			Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
-			HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
-			unknownIdentifiers.removeAll(knownIdentifiers);
-			for (String name : unknownIdentifiers) {
-				HashSet<Node> hashSet = unknownIdentifierMap.get(name);
-				Node node = hashSet.iterator().next();
-				this.bExceptionList.add(new BException(parseUnit.getPath(),
-						new CheckException("Unknown identifier '" + name + "'.", node)));
-			}
+			knownIdentifiers.addAll(checkIdentifiers((RulesParseUnit) model, map, visited));
+			visited.clear();
 		}
+		RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
+		Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
+		HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
+		unknownIdentifiers.removeAll(knownIdentifiers);
+		for (String name : unknownIdentifiers) {
+			HashSet<Node> hashSet = unknownIdentifierMap.get(name);
+			Node node = hashSet.iterator().next();
+			this.bExceptionList.add(new BException(parseUnit.getPath(),
+					new CheckException("Unknown identifier '" + name + "'.", node)));
+		}
+	}
+
+	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map, Set<String> visited) {
+		HashSet<String> knownIdentifiers = new HashSet<>();
+		List<MachineReference> machineReferences = parseUnit.getMachineReferences();
+		for (MachineReference rulesMachineReference : machineReferences) {
+			RulesParseUnit rulesParseUnit = map.get(rulesMachineReference.getName());
+			if (visited.contains(rulesParseUnit.getMachineName())) { // already visited
+				continue;
+			}
+			visited.add(rulesParseUnit.getMachineName());
+			knownIdentifiers.addAll(checkIdentifiers(rulesParseUnit, map, visited)); // get identifiers of all referenced machines
+			RulesMachineChecker checker = rulesParseUnit.getRulesMachineChecker();
+			knownIdentifiers.addAll(checker.getGlobalIdentifierNames());
+			knownIdentifiers.addAll(checker.getFunctionOperationNames());
+			knownIdentifiers.addAll(checker.getDefinitionNames());
+		}
+		return knownIdentifiers;
 	}
 
 	public void checkReferencedRuleOperations() {
@@ -599,23 +605,6 @@ public class RulesProject {
 
 	public RulesMachineRunConfiguration getRulesMachineRunConfiguration() {
 		return this.rulesMachineRunConfiguration;
-	}
-
-	private IModel parseRulesMachine(MachineReference reference) {
-		File file = new File(reference.getPath());
-		RulesParseUnit unit = new RulesParseUnit(reference.getName());
-		unit.setParsingBehaviour(this.parsingBehaviour);
-		unit.readMachineFromFile(file);
-		unit.parse();
-		return unit;
-	}
-
-	private RulesParseUnit parseMainFile() {
-		RulesParseUnit bParseUnit = new RulesParseUnit();
-		bParseUnit.readMachineFromFile(mainFile);
-		bParseUnit.setParsingBehaviour(this.parsingBehaviour);
-		bParseUnit.parse();
-		return bParseUnit;
 	}
 
 	protected boolean isANewModel(MachineReference reference) {

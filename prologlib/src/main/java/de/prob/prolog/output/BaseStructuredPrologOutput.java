@@ -107,7 +107,7 @@ abstract class BaseStructuredPrologOutput implements IPrologTermOutput {
 	@Override
 	public IPrologTermOutput fullstop() {
 		if (!this.termBuilderStack.isEmpty()) {
-			throw new IllegalArgumentException(this.termBuilderStack.size() + " unclosed term(s) or list(s)");
+			throw new IllegalStateException(this.termBuilderStack.size() + " unclosed term(s) or list(s)");
 		}
 
 		this.fullStopImpl();

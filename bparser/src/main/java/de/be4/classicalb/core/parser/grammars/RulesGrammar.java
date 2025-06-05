@@ -50,6 +50,7 @@ public class RulesGrammar implements IGrammar {
 		add(TKwRule.class);
 		add(TKwExpect.class);
 		add(TKwOnSuccess.class);
+		add(TKwUnchecked.class);
 		add(TKwCounterexample.class);
 		add(TKwRuleForAll.class);
 		add(TKwFor.class);
