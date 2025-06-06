@@ -59,8 +59,12 @@ public final class RulesParseUnit extends IModel {
 		if (this.bCompoundException != null) {
 			return;
 		}
+
 		try {
 			bParser = new BParser(machineFile != null ? machineFile.getPath() : null);
+			// Make the machine file path canonical if possible.
+			// This is important on Windows - see the comment in BParser.getFileName for details.
+			machineFile = machineFile != null ? new File(bParser.getFileName()) : null;
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
