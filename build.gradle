@@ -28,7 +28,7 @@ plugins {
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = "2.15.2-SNAPSHOT"
+project.version = "2.15.2"
 project.description = "The ProB parser libraries"
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
