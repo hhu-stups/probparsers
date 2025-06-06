@@ -60,14 +60,16 @@ public final class RulesParseUnit extends IModel {
 			return;
 		}
 
-		// Make the machine file path canonical if possible.
-		// This is important on Windows - see the comment in BParser.getFileName for details.
-		try {
-			this.machineFile = this.machineFile.getCanonicalFile();
-		} catch (IOException ignored) {
-			// If the path cannot be made canonical, leave it as-is.
-			// Maybe it will work anyway, maybe an error will be shown later.
-			// (This matches the behavior of BParser.getFileName.)
+		if (this.machineFile != null) {
+			// Make the machine file path canonical if possible.
+			// This is important on Windows - see the comment in BParser.getFileName for details.
+			try {
+				this.machineFile = this.machineFile.getCanonicalFile();
+			} catch (IOException ignored) {
+				// If the path cannot be made canonical, leave it as-is.
+				// Maybe it will work anyway, maybe an error will be shown later.
+				// (This matches the behavior of BParser.getFileName.)
+			}
 		}
 
 		try {
