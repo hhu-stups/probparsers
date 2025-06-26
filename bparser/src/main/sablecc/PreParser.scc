@@ -4,7 +4,7 @@ Package de.be4.classicalb.core.preparser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  all_chars = [0x0000 .. 0xffff];
+  any_char = [0x0000 .. 0xffff];
 
   tab = 0x9;
   lf = 0xa;
@@ -84,7 +84,7 @@ Helpers
   layout_char = [[tab + ' '] + no_break_space];
   white_space = line_break | layout_char+;
 
-  single_line_string_char = [all_chars - line_break];
+  single_line_string_char = [any_char - line_break];
   string_literal = '"' ([single_line_string_char - ['"' + '\']] | '\' single_line_string_char)* '"';
   // backquote to generate identifiers with special symbols or which clash with keywords
   quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
@@ -126,20 +126,20 @@ States
 Tokens
   {start->normal, normal, definitions, definitions_rhs} comment = '/*'; // switch to block_comment state is done in PreLexer.java
   {block_comment} comment_end = '*/'; // switch back to previous state is done in PreLexer.java
-  {block_comment} comment_body = [all_chars - '*']*;
+  {block_comment} comment_body = [any_char - '*']*;
   {block_comment} star = '*';
 
   {start->normal, normal, definitions_rhs} multiline_string_start = triple_quote;
   {multiline_string} multiline_string_end = triple_quote; // switch back to previous state is done in PreLexer.java
   // One or two single quotes followed by a different character don't terminate the string.
-  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [all_chars - [single_quote + '\']] | '\' all_chars)*;
+  {multiline_string} multiline_string_content = ((single_quote single_quote?)? [any_char - [single_quote + '\']] | '\' any_char)*;
 
   {start->normal, normal, definitions_rhs} multiline_template_start = '```';
   {multiline_template} multiline_template_end = '```'; // switch back to previous state is done in PreLexer.java
   // One or two backquotes followed by a different character don't terminate the string.
-  {multiline_template} multiline_template_content = (('`' '`'?)? [all_chars - ['`' + '\']] | '\' all_chars)*;
+  {multiline_template} multiline_template_content = (('`' '`'?)? [any_char - ['`' + '\']] | '\' any_char)*;
 
-  {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [all_chars - line_break]* line_break?;
+  {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [any_char - line_break]* line_break?;
 
   {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
    // definitions -> definitions is an error, which will be caught later,
@@ -157,7 +157,7 @@ Tokens
   {start -> normal, normal, definitions -> normal} end_machine = 'END';
 
   {start -> no_definitions} kw_prefix = '#EXPRESSION' | '#PREDICATE' | '#SUBSTITUTION';
-  {no_definitions} no_def_something = all_chars*;
+  {no_definitions} no_def_something = any_char*;
 
   {definitions} pre_parser_identifier = identifier_literal;
   {definitions, definitions_rhs} left_par = '(';
@@ -166,7 +166,7 @@ Tokens
   {definitions} comma = ',';
 
   {definitions -> definitions_rhs} begin_def_body = '==' | 0x225c; // Unicode DELTA EQUAL TO
-  {definitions_rhs} rhs_body = [[[[[[all_chars - layout_char] - ';'] - '('] - ')'] - '/'] - '"'];
+  {definitions_rhs} rhs_body = [[[[[[any_char - layout_char] - ';'] - '('] - ')'] - '/'] - '"'];
   {definitions_rhs} begin_nesting =
     'BEGIN' | 'PRE' | 'ASSERT' | 'CHOICE' | 'IF' | 'WITNESS' |
     'SELECT' | 'CASE' | 'ANY' | 'VAR' | 'WHILE' | 'LET';
@@ -194,8 +194,8 @@ Tokens
   // we will not miss start of DEFINITIONS or '/' or '"' or ''' or ` (backquote) or machine clause
   // we ar thus safe to skip over any char that is not a letter, a / or a " or '
   {start -> normal, normal} something =
-     //[[all_chars - '"'] - layout_char] // could be backslash !
-     ( [all_chars - '"'] // could be backslash !
+     //[[any_char - '"'] - layout_char] // could be backslash !
+     ( [any_char - '"'] // could be backslash !
        | string_literal
        | quoted_identifier_literal
       )

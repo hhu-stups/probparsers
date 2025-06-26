@@ -14,14 +14,14 @@ Helpers
   digit = ['0'..'9'];
   alpha = [['a'..'z'] + ['A'..'Z']];
   alphanum = [digit + alpha];
-  all_chars = [0 .. 0xffff];
+  any_char = [0 .. 0xffff];
 
 /*******************************************************************
  * Tokens                                                          *
  *******************************************************************/
 Tokens
   white_space = space*;
-  line_comment = '//' [all_chars - line_break]* line_break?;
+  line_comment = '//' [any_char - line_break]* line_break?;
 
   keyword_op = 'operator';
   keyword_internal = 'internal';
