@@ -39,11 +39,13 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 		if (isQuote(token)) {
 			inQuote = !inQuote;
 		}
+
 		state = newState;
+
 		if (isInAction(state)) {
 			if (externalFormula == null) {
 				initialiseActionToken(token);
-				token = null;
+				return null;
 			} else {
 				text.append(token.getText());
 				if (isOpening(token) && !inQuote) {
@@ -51,27 +53,33 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 				} else if (isClosing(token) && !inQuote) {
 					count--;
 				}
+
 				if (!correctBalancedParenthesis(count, token)) {
 					return token;
 				}
+
 				if (count != 0) {
-					token = null;
+					return null;
 				} else {
+					state = lastState;
+					// TODO This almost duplicates updateTokenText (but not exactly)
 					text.deleteCharAt(text.length() - 1);
 					externalFormula.setText(text.toString());
-					token = externalFormula;
-					state = lastState;
+					TOKEN tok = externalFormula;
 					externalFormula = null;
+					return tok;
 				}
 			}
 		} else if (isInActions(state)) {
 			// ignore the first token in the arguments' list (this is either
 			// 'deadlock(' or 'deterministic(')
-			if (!isBeginningActionsToken(token)) {
+			if (isBeginningActionsToken(token)) {
+				return token;
+			} else {
 				if (externalFormula == null) {
 					initialiseActionToken(token);
 					text.append(token.getText());
-					token = null;
+					return null;
 				} else {
 					if (isOpeningActionArg(token)) {
 						count++;
@@ -85,19 +93,19 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 						text.append(token.getText());
 					}
 					if (count == 1 && isArgumentSplittingToken(token)) {
-						token = updateTokenText();
+						return updateTokenText();
 					} else if (count == 0) {
-						token = updateTokenText();
 						state = lastState;
+						return updateTokenText();
 					} else {
-						token = null;
+						return null;
 					}
 				}
 			}
 		} else {
 			lastState = state;
+			return token;
 		}
-		return token;
 	}
 
 	public void initialiseActionToken(TOKEN token) {
@@ -118,8 +126,7 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 		String str = token.getText();
 		String identifier = str.substring(1, str.length() - 1).trim();
 		ident.setText(identifier);
-		token = ident;
-		return token;
+		return ident;
 	}
 
 	public STATE getState() {
