@@ -4,12 +4,8 @@ Package de.be4.ltl.core.parser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
+  letter = [['a' .. 'z'] + ['A' .. 'Z']];
   digit = ['0' .. '9'];
-
-  underscore = '_';
 
   line_break = [10 + 13];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
@@ -44,6 +40,9 @@ Helpers
   dot = '.';
 
   comma = ',';
+
+  // TODO Should we make this definition match regular_identifier_literal in BParser (i. e. allow Unicode letters)?
+  identifier_literal = letter (letter | digit | '_')*;
 
 /*******************************************************************
  * States                                                          *
@@ -88,8 +87,8 @@ Tokens
   {ltl} increasing = 'increasing';
   {ltl} before_after = 'before_after' | 'BA';
 
-  {ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
-  {ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+  {ltl} exists_identifier = exists_quantor white_space* identifier_literal white_space* dot;
+  {ltl} forall_identifier = forall_quantor white_space* identifier_literal white_space* dot;
 
   {actions} args_begin = l_paren;
   {actions} args_end = r_paren;
