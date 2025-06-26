@@ -200,6 +200,6 @@ Tokens
   whitespace = space*;
   separator = separator | sqbrackets;
 
-  other_char = [[0x0000 .. 0xffff] - double_quote];
+  other_char = [[0x0000 .. 0xffff] - [double_quote + back_quote]];
   // removed * at end; with maximal munching this poses problems e.g. for f~ or f<+g
   // This problem was solved by duplicating a lot of symbols in the separator class; this is not very elegant
