@@ -6,9 +6,10 @@ Package de.prob.core.theorymapping;
 Helpers
   any_char = [0x0000 .. 0xffff];
 
+  tab = 9;
   lf = 10;
   cr = 13;
-  space = ' ' | '\t' | lf | cr;
+  space = ' ' | tab | lf | cr;
   line_break = [lf + cr];
 
   digit = ['0'..'9'];
