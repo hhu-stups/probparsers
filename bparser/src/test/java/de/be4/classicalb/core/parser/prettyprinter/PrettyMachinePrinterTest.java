@@ -184,7 +184,7 @@ public class PrettyMachinePrinterTest {
 	@Test
 	public void testPrettyPrint5() {
 		final String testMachine = "MACHINE Test\n" +
-			"DEFINITIONS\n `:>`(x) == x\n" +
+			"DEFINITIONS\n`:>`(x) == x\n" +
 			"END";
 		final String result1 = Helpers.getPrettyPrint(testMachine);
 
