@@ -100,7 +100,7 @@ Helpers
   quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
 
   unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
-  regular_identifier_literal = (unicode_letter) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*; // B identifiers, where we allow subscripts and Unicode quotes at the end
+  regular_identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* unicode_subscripts* unicode_prime*; // B identifiers, where we allow subscripts and Unicode quotes at the end
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
   pragma_prefix = '/*@' layout_char*;
