@@ -32,7 +32,6 @@ Tokens
   internal_spec = alpha (alphanum | '_')* | /* identifier */
                   digit+ | /* integer literal */
                   (digit+ '.' digit+) | /* real literal */
-                  ('"' [all - '"']* '"') | /* string literal */
                   ('$' [all - '$']* '$'); /* formula enclosed in $ */
 /*******************************************************************
  * Ignored Tokens                                                  *
