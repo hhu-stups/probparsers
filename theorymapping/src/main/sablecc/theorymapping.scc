@@ -4,17 +4,16 @@ Package de.prob.core.theorymapping;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
+  any_char = [0x0000 .. 0xffff];
+
   lf = 10;
   cr = 13;
   space = ' ' | '\t' | lf | cr;
   line_break = [lf + cr];
 
-  all = [0x0000..0xffff];
-
   digit = ['0'..'9'];
   alpha = [['a'..'z'] + ['A'..'Z']];
   alphanum = [digit + alpha];
-  any_char = [0 .. 0xffff];
 
 /*******************************************************************
  * Tokens                                                          *
@@ -25,14 +24,14 @@ Tokens
 
   keyword_op = 'operator';
   keyword_internal = 'internal';
-  opname = '"' [all - '"']+ '"';
+  opname = '"' [any_char - '"']+ '"';
   symbol_open = '{';
   symbol_close = '}';
  /* used to be: internal_spec = alpha (alphanum | '_')*; */
   internal_spec = alpha (alphanum | '_')* | /* identifier */
                   digit+ | /* integer literal */
                   (digit+ '.' digit+) | /* real literal */
-                  ('$' [all - '$']* '$'); /* formula enclosed in $ */
+                  ('$' [any_char - '$']* '$'); /* formula enclosed in $ */
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
