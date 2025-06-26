@@ -169,12 +169,12 @@ public class PrettyMachinePrinterTest {
 	@Test
 	public void testPrettyPrint4() {
 		final String testMachine = "MACHINE Test\n" +
-           "DEFINITIONS\nCHOOSE(X) == \"a member of X\";\nEXTERNAL_FUNCTION_CHOOSE(T) == POW(T)-->T\n" +
-           "VARIABLES x, y, z\n" +
-           "INVARIANT 1=1\n" +
-           "INITIALISATION skip\n" +
-           "OPERATIONS\nfoo = skip;\nbar = skip\n" +
-           "END";
+			"DEFINITIONS\nCHOOSE(X) == \"a member of X\";\nEXTERNAL_FUNCTION_CHOOSE(T) == POW(T)-->T\n" +
+			"VARIABLES x, y, z\n" +
+			"INVARIANT 1=1\n" +
+			"INITIALISATION skip\n" +
+			"OPERATIONS\nfoo = skip;\nbar = skip\n" +
+			"END";
 		final String result1 = Helpers.getPrettyPrint(testMachine);
 
 		assertFalse(result1.isEmpty());
