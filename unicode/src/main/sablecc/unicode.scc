@@ -33,14 +33,11 @@ Helpers
   ];
   sqbrackets = ['['+']'];
   space = [[' ' + 9] + [10 + 13]];
-  double_quote = '"';
   single_quote = 39;
   triple_single_quote = single_quote single_quote single_quote;
-  back_quote = '`';
 
   digit = ['0' .. '9'];
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
-  underscore = '_';
 
   // unicode_letter definition from java-1.7.sablecc by Etienne M. Gagnon, http://sablecc.org/java1.7/
   // but removed unicode lambda 0x03bb from [0x03a3..0x03ce]
@@ -105,9 +102,9 @@ Helpers
   unicode_lambda = 0x03bb;
 
 Tokens
-  string = double_quote ([[0x0000 .. 0xffff] - [double_quote + '\']] | '\' [0x0000 .. 0xffff])* double_quote;
+  string = '"' ([[0x0000 .. 0xffff] - ['"' + '\']] | '\' [0x0000 .. 0xffff])* '"';
   multiline_string = triple_single_quote (single_quote? single_quote? [[0x0000 .. 0xffff] - single_quote])* triple_single_quote;
-  quoted_identifier_literal = back_quote ([[0x0000 .. 0xffff] - [back_quote + '\']] | '\' [0x0000 .. 0xffff])* back_quote;
+  quoted_identifier_literal = '`' ([[0x0000 .. 0xffff] - ['`' + '\']] | '\' [0x0000 .. 0xffff])* '`';
   typeof_open = '/*';
   typeof_close = '*/';
   truncated_set_size = '#' digit+;
@@ -189,13 +186,13 @@ Tokens
   hex_literal = '0x' hexdigit+;
   real_literal = digit+ '.' digit+ ('E' | 'e') ('+' | '-')? digit+ | digit+ '.' digit+;
 
-  identifier_literal = (unicode_letter | underscore | digit) (unicode_letter | unicode_lambda | digit | underscore)* (unicode_subscripts)* (unicode_prime)*;
+  identifier_literal = (unicode_letter | '_' | digit) (unicode_letter | unicode_lambda | digit | '_')* (unicode_subscripts)* (unicode_prime)*;
   // note: we deliberately extend the notion of identifier here to start with underscore and digits
   // x=2or x=3 -> is valid in classical B; but is not converted by the Unicode translator of Rodin
 
   whitespace = space*;
   separator = separator | sqbrackets;
 
-  other_char = [[0x0000 .. 0xffff] - [double_quote + back_quote]];
+  other_char = [[0x0000 .. 0xffff] - ['"' + '`']];
   // removed * at end; with maximal munching this poses problems e.g. for f~ or f<+g
   // This problem was solved by duplicating a lot of symbols in the separator class; this is not very elegant

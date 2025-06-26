@@ -8,14 +8,10 @@ Helpers
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
 
-  l_cur = '{';
-  r_cur = '}';
-  l_paren = '(';
-  r_paren = ')';
-  l_bracket = '[';
-  r_bracket = ']';
-
-  enabled_start = 'e(';
+  // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
+  l_sq = '[';
+  enabled = 'e(';
+  atomic_proposition_begin = '{';
 
 /*******************************************************************
  * States                                                          *
@@ -35,18 +31,18 @@ Tokens
   {ctl} state_error ='error';
   {ctl} deadlock ='deadlock';
   {ctl} current = 'current';
-  {ctl} l_par = l_paren;
-  {ctl} r_par = r_paren;
+  {ctl} l_par = '(';
+  {ctl} r_par = ')';
 
-  {ctl -> action} l_sq = l_bracket;
-  {ctl -> action} enabled = enabled_start;
+  {ctl -> action} l_sq = l_sq;
+  {ctl -> action} enabled = enabled;
 
-  {ctl -> atomic, atomic} atomic_proposition_begin = l_cur;
-  {atomic} atomic_proposition_end = r_cur;
+  {ctl -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
+  {atomic} atomic_proposition_end = '}';
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket];
-  {action} action_begin = [l_paren + l_bracket];
+  {action} action_end = [')' + ']'];
+  {action} action_begin = ['(' + '['];
   {action} tp_char = ([0 .. 0xffff]);
 
   /* Boolean Operators */

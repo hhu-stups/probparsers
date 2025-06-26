@@ -8,23 +8,12 @@ Helpers
   cr = 13;
   space = ' ' | '\t' | lf | cr;
   line_break = [lf + cr];
-  underscore = '_';
-
-  cbr_open = '{';
-  cbr_close = '}';
 
   all = [0x0000..0xffff];
-
-  quote = '"';
-  dollar = '$';
-  nonquote = [all - quote];
-  nondollar = [all - dollar];
-  // internal_spec_char = [all - cbr_close];
 
   digit = ['0'..'9'];
   alpha = [['a'..'z'] + ['A'..'Z']];
   alphanum = [digit + alpha];
-  dot = '.';
   all_chars = [0 .. 0xffff];
 
 /*******************************************************************
@@ -36,15 +25,15 @@ Tokens
 
   keyword_op = 'operator';
   keyword_internal = 'internal';
-  opname = quote nonquote+ quote;
-  symbol_open = cbr_open;
-  symbol_close = cbr_close;
- /* used to be: internal_spec = alpha (alphanum | underscore)*; */
-  internal_spec = alpha (alphanum | underscore)* | /* identifier */
+  opname = '"' [all - '"']+ '"';
+  symbol_open = '{';
+  symbol_close = '}';
+ /* used to be: internal_spec = alpha (alphanum | '_')*; */
+  internal_spec = alpha (alphanum | '_')* | /* identifier */
                   digit+ | /* integer literal */
-                  (digit+ dot digit+) | /* real literal */
-                  (quote nonquote* quote) | /* string literal */
-                  (dollar nondollar* dollar); /* formula enclosed in $ */
+                  (digit+ '.' digit+) | /* real literal */
+                  ('"' [all - '"']* '"') | /* string literal */
+                  ('$' [all - '$']* '$'); /* formula enclosed in $ */
 /*******************************************************************
  * Ignored Tokens                                                  *
  *******************************************************************/
