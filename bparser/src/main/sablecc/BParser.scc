@@ -4,16 +4,18 @@ Package de.be4.classicalb.core.parser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  all_chars = [0 .. 0xffff];
-  lf = 10;
-  cr = 13;
-  unicode_line_seperator = 8232; // \x2028
-  unicode_paragraph_seperator = 8233;
+  all_chars = [0x0000 .. 0xffff];
+  tab = 0x9;
+  lf = 0xa;
+  cr = 0xd;
+  no_break_space = 0xa0;
+  unicode_line_seperator = 0x2028;
+  unicode_paragraph_seperator = 0x2029;
 
   comment_start = '/*';
 
-  triple_quote = 39 39 39;
-  single_quote = 39;
+  triple_quote = 0x27 0x27 0x27;
+  single_quote = 0x27;
 
   minus = '-' | 0x2212;
 
@@ -82,16 +84,15 @@ Helpers
   //  [[[0x0be7..0x0bef] + [0x0c66..0x0c6f]] + [[0x0ce6..0x0cef] + [0x0d66..0x0d6f]]] |
   //  [[[0x0e50..0x0e59] + [0x0ed0..0x0ed9]] + [[0x0f20..0x0f29] + [0xff10..0xff19]]];
 
-  unicode_superscripts = [0x2070..0x2079]; // TODO: add 185,178,179
-  unicode_subscripts = [0x2080..0x2089];
-  unicode_prime = [0x2032 + [8216..8217]]; // 0x2032=8242 ' primes / quotes // TODO: add hats
+  unicode_superscripts = [0x2070 .. 0x2079]; // TODO: add 0xb9,0xb2,0xb3
+  unicode_subscripts = [0x2080 .. 0x2089];
+  unicode_prime = [0x2032 + [0x2018 .. 0x2019]]; // ' primes / quotes // TODO: add hats
 
   digit = ['0' .. '9'];
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
   line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
-  layout_char = [[9 + 32] + 160];
-  // 160: non-breaking space
+  layout_char = [[tab + ' '] + no_break_space];
   white_space = line_break | layout_char+;
 
   single_line_string_char = [all_chars - line_break];
@@ -99,7 +100,7 @@ Helpers
   // backquote to generate identifiers with special symbols or which clash with keywords
   quoted_identifier_literal = '`' ([single_line_string_char - ['`' + '\']] | '\' single_line_string_char)* '`';
 
-  unicode_lambda = 0x03bb | 0x1d706; // 120582 in decimal; generated in Jupyter when pretty printing
+  unicode_lambda = 0x03bb | 0x1d706; // 0x1d706 generated in Jupyter when pretty printing
   regular_identifier_literal = unicode_letter (unicode_letter | unicode_lambda | digit | '_')* unicode_subscripts* unicode_prime*; // B identifiers, where we allow subscripts and Unicode quotes at the end
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
@@ -108,7 +109,7 @@ Helpers
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
   // versions below do not work:
-  // layout_char_with_ws = [[[0 .. 32] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  // layout_char_with_ws = [[[0x00 .. 0x20] + [0x7f .. 0xa0]] + [[0x200e .. 0x200f] + [unicode_line_seperator .. unicode_paragraph_seperator]]];
   // pragma_identifier_literal = ([all_chars - [layout_char_with_ws + '*']]+ ('*' [all_chars - [layout_char_with_ws + '/']])?)* '*'?;
 
 
@@ -186,18 +187,18 @@ Tokens
   {normal} b_prime = '$0';
   {normal} lambda = '%' | unicode_lambda;
   {normal} conjunction = '&' | 0x2227; // 0x2227 Unicode wedge
-  {normal} illegal_unicode_symbol = 0x22c0 | //  0x22c0 = 8896 is n-ary conjunction, not normal conjunction
+  {normal} illegal_unicode_symbol = 0x22c0 | // 0x22c0 is n-ary conjunction, not normal conjunction
               0x22c1 | // n-ary disjunction
               0x2204 | // not exists
               0x228e | // multi-set union bags
               0x22a2 | 0x22a6 | 0x22a7 | // models / entails / sequent / turnstyle operators
               0x21d0 | 0x27f8 | // inverse implies; we do not handle it in grammar because associativity not clear
               0x220a | 0x220d; // small element of and contains operators
-  {normal} single_quotation = 39; // single quote: '
+  {normal} single_quotation = single_quote;
   {normal} left_par = '('; // opening/left parenthesis
   {normal} right_par = ')'; // closing/right parenthesis
   {normal} product = '*' | 0x2217; // Unicode asterisk operator; used in Camille in Rodin
-  {normal} cartesian_product = 0x00d7 | // 215 decimal; used in rodin
+  {normal} cartesian_product = 0x00d7 | // used in Rodin
                                0x2a2f; // vector or cross product, used in IDP-Z3
   {normal} power_of = '**' | 0x02c4; // variation of ^ in Unicode; up-arrow used for sequence restrict_front below
   {normal} plus = '+';
@@ -219,13 +220,13 @@ Tokens
   {normal} non_inclusion = '/<:' | 0x2288;
   {normal} strict_non_inclusion = '/<<:' | 0x2284;
   {normal} not_equal = '/=' | 0x2260;
-  {normal} set_subtraction = '\' | 0x2216; // decimal 8726, used in Rodin
+  {normal} set_subtraction = '\' | 0x2216; // used in Rodin
   {normal} intersection = '/\' | 0x2229;
   {normal} restrict_head_sequence = '/|\' | 0x2191;    // unicode uparrow for restrict_front operator
   {normal} element_of = ':' | 0x2208;
   {normal} double_colon = '::' | ':' 0x2208; /* becomes_element_of */
     // Note TLA+ propses 0x2237 (PROPORTION) for label_as operator ::
-  {normal} assign = ':=' | 0x2254; //8788 decimal, used in Rodin and proposed for TLA+
+  {normal} assign = ':=' | 0x2254; // used in Rodin and proposed for TLA+
   {normal} semicolon = ';'; // separator, sequential composition and also forward composition (is 0x3b)
   {normal} less = '<';
   {normal} ring = 0x2218; // circ or backward composition from Event-B, normally not allowed by Atelier-B
@@ -233,7 +234,7 @@ Tokens
   {normal} overwrite_relation = '<+' | 0xe103 | 0x22d6; /* 0xe103 is EventB Style override, 0x22d6 is the AtelierB version */
   {normal} set_relation = '<' minus '>' | 0x2194;
   {normal} insert_end_sequence = '<-' | 0x21fd;
-  {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 2190: Leftwards Arrow; 27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
+  {normal} output_parameters = '<--' | 0x2190 | 0x27f5; // 0x2190: Leftwards Arrow; 0x27f5: Long Leftwards Arrow proposed in https://github.com/tlaplus-community/tlaplus-standard
   {normal} inclusion = '<:' | 0x2286;
   {normal} strict_inclusion = '<<:' | 0x2282 | 0x228a; // 0x228a actually less ambiguous mathematically, see
          // https://math.stackexchange.com/questions/1038233/subset-of-above-not-equal-to-subsetneqq-symbol
@@ -364,7 +365,7 @@ Tokens
   {normal} min = 'min';
   {normal} mod = 'mod';
   {normal} not = 'not' | 0x00ac;
-  {normal} logical_or = 'or' | 0x2228;  // disjunction, 0x2228=8744 is Unicode vee inserted by macOS symbol table
+  {normal} logical_or = 'or' | 0x2228; // disjunction, 0x2228 is Unicode vee inserted by macOS symbol table
   {normal} perm = 'perm';
   {normal} pred = 'pred';
   {normal} prj1 = 'prj1';
@@ -387,7 +388,7 @@ Tokens
   {normal} left_brace = '{';
   {normal} right_brace = '}';
   {normal} vertical_bar = '|' | 0x2223; // Unicode divides; generated by Rodin
-  {normal} double_vertical_bar = '||' | 0x2225 | 0x2016; // 2225 Parallel To; 2016: Double Vertical Line
+  {normal} double_vertical_bar = '||' | 0x2225 | 0x2016; // 0x2225 Parallel To; 0x2016: Double Vertical Line
   {normal} maplet = '|->' | 0x21a6; // TLA+ proposes 0x27fc (LONG RIGHTWARDS ARROW FROM BAR) for all_map_to |->
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
