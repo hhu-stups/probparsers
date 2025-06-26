@@ -5,6 +5,7 @@ Package de.be4.classicalb.core.parser;
  *******************************************************************/
 Helpers
   all_chars = [0x0000 .. 0xffff];
+
   tab = 0x9;
   lf = 0xa;
   cr = 0xd;
@@ -86,12 +87,12 @@ Helpers
 
   unicode_superscripts = [0x2070 .. 0x2079]; // TODO: add 0xb9,0xb2,0xb3
   unicode_subscripts = [0x2080 .. 0x2089];
-  unicode_prime = [0x2032 + [0x2018 .. 0x2019]]; // ' primes / quotes // TODO: add hats
+  unicode_prime = [0x2032 + [0x2018 .. 0x2019]]; // ' primes / quotes; we could also add 0x201b // TODO: add hats
 
   digit = ['0' .. '9'];
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
 
-  line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator]; // newline
+  line_break = [[[lf + cr] + unicode_line_seperator] + unicode_paragraph_seperator];
   layout_char = [[tab + ' '] + no_break_space];
   white_space = line_break | layout_char+;
 
