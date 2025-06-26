@@ -45,16 +45,6 @@ public class LtlLexerHelper extends LexerHelper<Token, State> {
 	}
 
 	@Override
-	protected String readToken(Token token) {
-		return token.getText();
-	}
-
-	@Override
-	protected void writeToken(Token token, String text) {
-		token.setText(text);
-	}
-
-	@Override
 	protected boolean correctBalancedParenthesis(int count, Token token) {
 		return !(token instanceof EOF) || count == 0;
 	}

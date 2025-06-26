@@ -1,18 +1,13 @@
 package de.be4.ltl.core.parser.internal;
 
-import de.be4.ltl.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.IToken;
 
-abstract class LexerHelper<TOKEN, STATE> {
-
+abstract class LexerHelper<TOKEN extends IToken, STATE> {
 	private int count;
 	private TOKEN externalFormula;
 	private StringBuilder text;
 	private STATE state, lastState;
 	private boolean inQuote;
-
-	abstract protected String readToken(final TOKEN token);
-
-	abstract protected void writeToken(final TOKEN token, final String text);
 
 	abstract protected boolean isInAction(final STATE state);
 
@@ -50,8 +45,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 				initialiseActionToken(token);
 				token = null;
 			} else {
-				final String tokenText = readToken(token);
-				text.append(tokenText);
+				text.append(token.getText());
 				if (isOpening(token) && !inQuote) {
 					count++;
 				} else if (isClosing(token) && !inQuote) {
@@ -64,7 +58,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 					token = null;
 				} else {
 					text.deleteCharAt(text.length() - 1);
-					writeToken(externalFormula, text.toString());
+					externalFormula.setText(text.toString());
 					token = externalFormula;
 					state = lastState;
 					externalFormula = null;
@@ -76,8 +70,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 			if (!isBeginningActionsToken(token)) {
 				if (externalFormula == null) {
 					initialiseActionToken(token);
-					final String tokenText = readToken(token);
-					text.append(tokenText);
+					text.append(token.getText());
 					token = null;
 				} else {
 					if (isOpeningActionArg(token)) {
@@ -89,8 +82,7 @@ abstract class LexerHelper<TOKEN, STATE> {
 						return token;
 					}
 					if ((count == 1 && !isArgumentClosing(token)) || count > 1) {
-						final String tokenText = readToken(token);
-						text.append(tokenText);
+						text.append(token.getText());
 					}
 					if (count == 1 && isArgumentSplittingToken(token)) {
 						token = updateTokenText();
@@ -116,16 +108,16 @@ abstract class LexerHelper<TOKEN, STATE> {
 	}
 
 	public TOKEN updateTokenText() {
-		writeToken(this.externalFormula, this.text.toString().trim());
+		this.externalFormula.setText(this.text.toString().trim());
 		TOKEN tok = externalFormula;
 		this.externalFormula = null;
 		return tok;
 	}
 
 	public TOKEN getIdentifier(TOKEN token, TOKEN ident) {
-		String str = ((Token) token).getText();
+		String str = token.getText();
 		String identifier = str.substring(1, str.length() - 1).trim();
-		((Token) ident).setText(identifier);
+		ident.setText(identifier);
 		token = ident;
 		return token;
 	}
