@@ -46,8 +46,8 @@ Tokens
   {ltl} r_par = ')';
 
   {ltl -> action} l_sq = l_sq; // TODO: also allow textual version 'executed('
-  {ltl -> action} enabled = 'e' opt_white_space '(' | 'enabled' opt_white_space '(';
-  {ltl -> action} available = 'Av' opt_white_space '(' | 'available' opt_white_space '(';
+  {ltl -> action} enabled = ('e' | 'enabled') opt_white_space '(';
+  {ltl -> action} available = ('Av' | 'available') opt_white_space '(';
 
   {ltl -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
 
@@ -99,8 +99,8 @@ Tokens
   {ltl} yesterday = 'Y'| 'yesterday';
 
   /* Fairness LTL operators */
-  {ltl -> action} strong_fair = 'sf' opt_white_space '(' | 'SF' opt_white_space '(';
-  {ltl -> action} weak_fair = 'wf' opt_white_space '(' | 'WF' opt_white_space '(';
+  {ltl -> action} strong_fair = ('sf' | 'SF') opt_white_space '(';
+  {ltl -> action} weak_fair = ('wf' | 'WF') opt_white_space '(';
   /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */
   {ltl} strong_fair_everything = 'SEF';
   {ltl} weak_fair_everything = 'WEF';
