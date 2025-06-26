@@ -37,10 +37,7 @@ Helpers
   single_quote = 39;
   triple_single_quote = single_quote single_quote single_quote;
   back_quote = '`';
-  // letter = [['a' .. 'z'] + ['A' .. 'Z']];
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
+
   digit = ['0' .. '9'];
   hexdigit = [[digit + ['a' .. 'f']] + ['A' .. 'F']];
   underscore = '_';

@@ -4,13 +4,6 @@ Package de.be4.ltl.core.ctlparser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
-  digit = ['0' .. '9'] ;
-
-  underscore = '_';
-
   line_break = [10 + 13];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
