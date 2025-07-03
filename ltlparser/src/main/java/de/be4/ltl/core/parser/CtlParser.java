@@ -19,7 +19,7 @@ import de.be4.ltl.core.parser.internal.CtlLexer;
 import de.be4.ltl.core.parser.internal.PrologCtlGenerator;
 import de.be4.ltl.core.parser.internal.UniversalToken;
 import de.prob.parserbase.ProBParserBase;
-import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.output.IPrologTermOutput;
 
 public class CtlParser extends TemporalLogicParser<Start> {
 	public CtlParser(final ProBParserBase specParser) {
@@ -47,7 +47,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected void applyPrologGenerator(StructuredPrologOutput pto,
+	protected void applyPrologGenerator(IPrologTermOutput pto,
 			String stateID, ProBParserBase specParser, Start ast) {
 		final PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto,
 				stateID, specParser);

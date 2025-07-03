@@ -19,7 +19,7 @@ import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.parser.Parser;
 import de.be4.ltl.core.parser.parser.ParserException;
 import de.prob.parserbase.ProBParserBase;
-import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.output.IPrologTermOutput;
 
 public class LtlParser extends TemporalLogicParser<Start> {
 	public LtlParser(final ProBParserBase specParser) {
@@ -49,7 +49,7 @@ public class LtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected void applyPrologGenerator(StructuredPrologOutput pto,
+	protected void applyPrologGenerator(IPrologTermOutput pto,
 			String stateID, ProBParserBase specParser, Start ast) {
 		final PrologGenerator prologGenerator = new PrologGenerator(pto,
 				stateID, specParser);

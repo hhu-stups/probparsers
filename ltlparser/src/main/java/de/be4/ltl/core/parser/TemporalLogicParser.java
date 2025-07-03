@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.be4.ltl.core.parser.internal.LtlAdapterException;
 import de.prob.parserbase.ProBParserBase;
+import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
@@ -18,7 +19,7 @@ public abstract class TemporalLogicParser<T> {
 	protected abstract T parseFormula(String formula) throws LtlParseException,
 			IOException;
 
-	protected abstract void applyPrologGenerator(StructuredPrologOutput pto,
+	protected abstract void applyPrologGenerator(IPrologTermOutput pto,
 			String stateID, ProBParserBase specParser2, T ast);
 
 	public PrologTerm generatePrologTerm(final String formula,
