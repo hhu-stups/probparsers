@@ -9,11 +9,19 @@ import de.prob.prolog.output.StructuredPrologOutput;
 import de.prob.prolog.term.PrologTerm;
 
 public abstract class TemporalLogicParser<T> {
-
+	/**
+	 * @deprecated This field will become private.
+	 *     External users should call {@link #getSpecParser()} instead.
+	 */
+	@Deprecated
 	public final ProBParserBase specParser;
 
 	protected TemporalLogicParser(final ProBParserBase specParser) {
 		this.specParser = specParser;
+	}
+
+	public ProBParserBase getSpecParser() {
+		return specParser;
 	}
 
 	protected abstract T parseFormula(String formula) throws LtlParseException,
@@ -33,7 +41,7 @@ public abstract class TemporalLogicParser<T> {
 		}
 		StructuredPrologOutput pto = new StructuredPrologOutput();
 		try {
-			applyPrologGenerator(pto, stateID, specParser, ast);
+			applyPrologGenerator(pto, stateID, this.getSpecParser(), ast);
 		} catch (LtlAdapterException e) {
 			throw e.getOriginalException();
 		}
