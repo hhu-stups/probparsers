@@ -361,8 +361,9 @@ public class PrologGeneratorTest {
 				throws ProBParseException {
 			if (suppPred) {
 				parse(pto, predicate, wrap, "dpred");
-			} else
+			} else {
 				throw new UnsupportedOperationException("no dummy predicates");
+			}
 		}
 
 		@Override
@@ -371,9 +372,10 @@ public class PrologGeneratorTest {
 				throws ProBParseException {
 			if (suppTransPred) {
 				parse(pto, transPredicate, wrap, "dtrans");
-			} else
+			} else {
 				throw new UnsupportedOperationException(
 						"no dummy transition predicates");
+			}
 		}
 
 		private static void parse(final IPrologTermOutput pto, final String text,
