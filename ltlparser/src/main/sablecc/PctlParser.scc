@@ -1,0 +1,128 @@
+Package de.be4.ltl.core.pctlparser;
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+Helpers
+  line_break = [10 + 13];
+  layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  white_space = line_break | layout_char+;
+
+  // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
+  l_sq = '[';
+  atomic_proposition_begin = '{';
+
+/*******************************************************************
+ * States                                                          *
+ *******************************************************************/
+States
+  pctl_state, pctl_path, atomic;
+
+/*******************************************************************
+ * Tokens                                                          *
+ *******************************************************************/
+Tokens
+  {pctl_state} true = 'true';
+  {pctl_state} false = 'false';
+  {pctl_state} sink ='sink';
+  {pctl_state} goal ='goal';
+  {pctl_state} det_output ='det_output';
+  {pctl_state} state_error ='error';
+  {pctl_state} deadlock ='deadlock';
+  {pctl_state} current = 'current';
+  {pctl_state} l_par = '(';
+  {pctl_state} r_par = ')';
+
+  {pctl_state -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
+  {atomic} atomic_proposition_end = '}';
+  {atomic} ap_char = ([0 .. 0xffff]);
+
+  /* Boolean Operators */
+  {pctl_state} implies = '=>' | 0x21d2;
+  {pctl_state} and = '&' | 0x2227;
+  {pctl_state} or = 'or' | 0x2228;
+  {pctl_state} not = 'not'| 0x00ac;
+
+  /* CTL temporal operators */
+  {pctl_path} until = 'U';
+  {pctl_path} globally = 'G';
+  {pctl_path} finally = 'F';
+  {pctl_path} next = 'X';
+
+  /* Boundaries on path formulas*/
+  {pctl_path} bound = '<=' |0x2a7d;
+
+
+  white_space = white_space;
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+  white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+Productions
+  pctl_state_formula {-> pctl_state} =
+    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
+    pctl_state_formula2 {-> pctl_state_formula2.pctl_state};
+
+  pctl_state_formula2 {-> pctl_state} =
+    {and} [left]:pctl_state_formula2 and [right]:pctl_state_formula3 {-> New pctl_state.and(left.pctl_state, right.pctl_state)} |
+    {or} [left]:pctl_state_formula2 or [right]:pctl_state_formula3 {-> New pctl_state.or(left.pctl_state, right.pctl_state)} |
+    pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
+
+  ctl_formula3 {-> ctl} =
+    {eu} exists [left]:ctl_formula3 until [right]:ctl_formula4 {-> New ctl.eu(left.ctl, right.ctl)} |
+    ctl_formula4 {-> ctl_formula4.ctl};
+
+  ctl_formula4 {-> ctl} =
+    {not} not ctl_formula4 {-> New ctl.not(ctl_formula4.ctl)} |
+    {par} l_par ctl_formula r_par {-> ctl_formula.ctl} |
+    {true} true {-> New ctl.true()} |
+    {false} false {-> New ctl.false()} |
+    {ena} exists next l_sq [cont]:ctl_formula4 {-> New ctl.ena(l_sq, cont.ctl)} |
+    {en} exists next [cont]:ctl_formula4 {-> New ctl.en(cont.ctl)} |
+    {an} forall next [cont]:ctl_formula4 {-> New ctl.an(cont.ctl)} |
+    {eg} exists globally [cont]:ctl_formula4 {-> New ctl.eg(cont.ctl)} |
+    {ef} exists finally [cont]:ctl_formula4 {-> New ctl.ef(cont.ctl)} |
+    {ag} forall globally [cont]:ctl_formula4 {-> New ctl.ag(cont.ctl)} |
+    {af} forall finally [cont]:ctl_formula4 {-> New ctl.af(cont.ctl)} |
+    {unparsed} atomic_proposition_begin {-> New ctl.unparsed(atomic_proposition_begin)} |
+    {enabled} enabled {-> New ctl.enabled(enabled)} |
+    {action} l_sq {-> New ctl.action(l_sq)} |
+    {sink} sink {-> New ctl.sink()} |
+    {goal} goal {-> New ctl.goal()} |
+    {det_output} det_output {-> New ctl.det_output()} |
+    {error} state_error {-> New ctl.error()} |
+    {deadlock} deadlock {-> New ctl.deadlock()} |
+    {current} current {-> New ctl.current()};
+
+/*******************************************************************
+ * Abstract Syntax Tree                                            *
+ *******************************************************************/
+Abstract Syntax Tree
+  ctl =
+    {implies} [left]:ctl [right]:ctl |
+    {and} [left]:ctl [right]:ctl |
+    {or} [left]:ctl [right]:ctl |
+    {eu} [left]:ctl [right]:ctl |
+    {not} ctl |
+    {en} ctl |
+    {an} ctl |
+    {eg} ctl |
+    {ef} ctl |
+    {ag} ctl |
+    {af} ctl |
+    {unparsed} [predicate]:atomic_proposition_begin |
+    {sink} |
+    {goal} |
+    {det_output} |
+    {error} |
+    {deadlock} |
+    {current} |
+    {true} |
+    {false};
