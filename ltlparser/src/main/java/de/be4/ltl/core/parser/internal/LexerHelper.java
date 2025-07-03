@@ -9,27 +9,27 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 	private STATE state, lastState;
 	private boolean inQuote;
 
-	abstract protected boolean isInAction(final STATE state);
+	protected abstract boolean isInAction(final STATE state);
 
-	abstract protected boolean isOpening(final TOKEN token);
+	protected abstract boolean isOpening(final TOKEN token);
 
-	abstract protected boolean isClosing(final TOKEN token);
+	protected abstract boolean isClosing(final TOKEN token);
 
-	abstract protected boolean correctBalancedParenthesis(int count, TOKEN token);
+	protected abstract boolean correctBalancedParenthesis(int count, TOKEN token);
 
-	abstract protected boolean isInActions(final STATE state);
+	protected abstract boolean isInActions(final STATE state);
 
-	abstract protected boolean isOpeningActionArg(final TOKEN token);
+	protected abstract boolean isOpeningActionArg(final TOKEN token);
 
-	abstract protected boolean isClosingActionArg(final TOKEN token);
+	protected abstract boolean isClosingActionArg(final TOKEN token);
 
-	abstract protected boolean isBeginningActionsToken(final TOKEN token);
+	protected abstract boolean isBeginningActionsToken(final TOKEN token);
 
-	abstract protected boolean isArgumentClosing(final TOKEN token);
+	protected abstract boolean isArgumentClosing(final TOKEN token);
 
-	abstract protected boolean isArgumentSplittingToken(final TOKEN token);
+	protected abstract boolean isArgumentSplittingToken(final TOKEN token);
 
-	abstract protected boolean isQuote(final TOKEN token);
+	protected abstract boolean isQuote(final TOKEN token);
 
 	public LexerHelper(final STATE initialState) {
 		this.lastState = initialState;

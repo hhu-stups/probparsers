@@ -15,10 +15,10 @@ public abstract class TemporalLogicParser<T> {
 		this.specParser = specParser;
 	}
 
-	abstract protected T parseFormula(String formula) throws LtlParseException,
+	protected abstract T parseFormula(String formula) throws LtlParseException,
 			IOException;
 
-	abstract protected void applyPrologGenerator(StructuredPrologOutput pto,
+	protected abstract void applyPrologGenerator(StructuredPrologOutput pto,
 			String stateID, ProBParserBase specParser2, T ast);
 
 	public PrologTerm generatePrologTerm(final String formula,
