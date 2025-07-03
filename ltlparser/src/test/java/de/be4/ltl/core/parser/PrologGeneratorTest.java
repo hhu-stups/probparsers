@@ -15,531 +15,266 @@ import de.be4.ltl.core.ctlparser.parser.ParserException;
 import de.prob.parserbase.ProBParseException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
-import de.prob.prolog.term.CompoundPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
-import de.prob.prolog.term.PrologTerm;
+import de.prob.prolog.output.PrologTermStringOutput;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class PrologGeneratorTest {
-	private static final PrologTerm TERM_TRUE = new CompoundPrologTerm("true");
-	private static final PrologTerm TERM_FALSE = new CompoundPrologTerm("false");
-
 	@Test
 	public void testTrue() throws Exception {
-		check("true", TERM_TRUE);
+		check("true", "true");
 	}
 
 	@Test
 	public void testFalse() throws Exception {
-		check("false", TERM_FALSE);
+		check("false", "false");
 	}
 
 	@Test
 	public void testImplication() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("implies",
-				TERM_FALSE, TERM_TRUE);
-		check("false =>   true ", expected);
+		check("false =>   true ", "implies(false,true)");
 	}
 
 	@Test
 	public void testSink() throws Exception {
-		PrologTerm sink = new CompoundPrologTerm("sink");
-		final PrologTerm expected = new CompoundPrologTerm("ap", sink);
-		check("sink", expected);
+		check("sink", "ap(sink)");
 	}
 
 	@Test
 	public void testDeadlock() throws Exception {
-		PrologTerm deadlock = new CompoundPrologTerm("deadlock");
-		check("deadlock", new CompoundPrologTerm("ap", deadlock));
+		check("deadlock", "ap(deadlock)");
 	}
 
 	@Test
 	public void testCurrent() throws Exception {
-		final PrologTerm root = new CompoundPrologTerm("root");
-		final PrologTerm stateid = new CompoundPrologTerm("stateid", root);
-		final PrologTerm expected = new CompoundPrologTerm("ap", stateid);
-		check("current", expected);
+		check("current", "ap(stateid(root))");
 	}
 
 	@Test
 	public void testCurrent1() throws Exception {
-		final PrologTerm root = new CompoundPrologTerm("root");
-		final PrologTerm stateid = new CompoundPrologTerm("stateid", root);
-		final PrologTerm ap = new CompoundPrologTerm("ap", stateid);
-		final PrologTerm implies = new CompoundPrologTerm("implies",ap,TERM_TRUE);
-		final PrologTerm expected = new CompoundPrologTerm("globally", implies);
-		check("G (current => true)", expected);
+		check("G (current => true)", "globally(implies(ap(stateid(root)),true))");
 	}
 
 	@Test
 	public void testAnd() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("and", TERM_TRUE,
-				TERM_FALSE);
-		check("true &  false", expected);
+		check("true &  false", "and(true,false)");
 	}
 
 	@Test
 	public void testOr() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("or", TERM_TRUE,
-				TERM_FALSE);
-		check("true or  false", expected);
+		check("true or  false", "or(true,false)");
 	}
 
 	@Test
 	public void testNot() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("not", TERM_TRUE);
-		check("not true", expected);
+		check("not true", "not(true)");
 	}
 
 	@Test
 	public void testAction() throws Exception {
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm expected = new CompoundPrologTerm("action", wrapped);
-		check("[bla]", expected);
+		check("[bla]", "action(dtrans(bla))");
 	}
 
 	@Test
 	public void testEnabled() throws Exception {
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm enabled = new CompoundPrologTerm("enabled", wrapped);
-		final PrologTerm expected = new CompoundPrologTerm("ap", enabled);
-		check("e(bla)", expected);
+		check("e(bla)", "ap(enabled(dtrans(bla)))");
 	}
 
 	@Test
 	public void testAvailable() throws Exception {
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm available = new CompoundPrologTerm("available",
-				wrapped);
-		final PrologTerm expected = new CompoundPrologTerm("ap", available);
-		check("Av(bla)", expected);
+		check("Av(bla)", "ap(available(dtrans(bla)))");
 	}
 
 	@Test
 	public void testPredicate() throws Exception {
-		final PrologTerm pred = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped = new CompoundPrologTerm("dpred", pred);
-		final PrologTerm expected = new CompoundPrologTerm("ap", wrapped);
-		check("{blubb}", expected);
+		check("{blubb}", "ap(dpred(blubb))");
 	}
 
 	@Test
 	public void testUntil() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("until", TERM_FALSE,
-				TERM_TRUE);
-		check("false U      true ", expected);
+		check("false U      true ", "until(false,true)");
 	}
 
 	@Test
 	public void testWeakUntil() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("weakuntil",
-				TERM_FALSE, TERM_TRUE);
-		check("false W      true ", expected);
+		check("false W      true ", "weakuntil(false,true)");
 	}
 
 	@Test
 	public void testRelease() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("release",
-				TERM_FALSE, TERM_TRUE);
-		check("false R      true ", expected);
+		check("false R      true ", "release(false,true)");
 	}
 
 	@Test
 	public void testSince() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("since", TERM_FALSE,
-				TERM_TRUE);
-		check("false S true ", expected);
+		check("false S true ", "since(false,true)");
 	}
 
 	@Test
 	public void testTrigger() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("trigger",
-				TERM_FALSE, TERM_TRUE);
-		check("false T true ", expected);
+		check("false T true ", "trigger(false,true)");
 	}
 
 	@Test
 	public void testGlobally() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("globally",
-				TERM_TRUE);
-		check("G true ", expected);
+		check("G true ", "globally(true)");
 	}
 
 	@Test
 	public void testFinally() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("finally", TERM_TRUE);
-		check(" F true ", expected);
+		check(" F true ", "finally(true)");
 	}
 
 	@Test
 	public void testNext() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("next", TERM_TRUE);
-		check("X true ", expected);
+		check("X true ", "next(true)");
 	}
 
 	@Test
 	public void testHistorically() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("historically",
-				TERM_TRUE);
-		check("H true ", expected);
+		check("H true ", "historically(true)");
 	}
 
 	@Test
 	public void testOnce() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("once", TERM_TRUE);
-		check("O true ", expected);
+		check("O true ", "once(true)");
 	}
 
 	@Test
 	public void testYesterday() throws Exception {
-		final PrologTerm expected = new CompoundPrologTerm("yesterday",
-				TERM_TRUE);
-		check("Y true ", expected);
+		check("Y true ", "yesterday(true)");
 	}
 
 	@Test
 	public void testGloballyFinallyAP() throws Exception {
-		final PrologTerm pred = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped = new CompoundPrologTerm("dpred", pred);
-		final PrologTerm ap = new CompoundPrologTerm("ap", wrapped);
-		final PrologTerm fin = new CompoundPrologTerm("finally", ap);
-		final PrologTerm expected = new CompoundPrologTerm("globally", fin);
-		check("GF {blubb}", expected);
+		check("GF {blubb}", "globally(finally(ap(dpred(blubb))))");
 	}
 
 	@Test
 	public void testComplex2() throws Exception {
-		final PrologTerm pred1 = new CompoundPrologTerm("xxx");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dpred", pred1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", wrapped1);
-		final PrologTerm pred2 = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dpred", pred2);
-		final PrologTerm ap2 = new CompoundPrologTerm("ap", wrapped2);
-		final PrologTerm fin = new CompoundPrologTerm("finally", ap2);
-		final PrologTerm glob = new CompoundPrologTerm("globally", fin);
-		final PrologTerm imp = new CompoundPrologTerm("implies", ap1, glob);
-		final PrologTerm expected = new CompoundPrologTerm("not", imp);
-		check("not({xxx} => GF {blubb})", expected);
+		check(
+			"not({xxx} => GF {blubb})",
+			"not(implies(ap(dpred(xxx)),globally(finally(ap(dpred(blubb))))))"
+		);
 	}
 
 	@Test
 	public void testExistsImplication() throws Exception {
-		final PrologTerm id = new CompoundPrologTerm("x");
-
-		// ap(dpred(blubb))
-		final PrologTerm pred = new CompoundPrologTerm("blubb");
-		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
-		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
-
-		// G [x]
-		final PrologTerm transPred = new CompoundPrologTerm("x");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
-		final PrologTerm glob = new CompoundPrologTerm("globally", action);
-
-		final PrologTerm expected = new CompoundPrologTerm("exists", id, ap,
-				glob);
-
-		check("#x. ( {blubb} & G [x])", expected);
+		check(
+			"#x. ( {blubb} & G [x])",
+			"exists(x,ap(dpred(blubb)),globally(action(dtrans(x))))"
+		);
 	}
 
 	@Test
 	public void testExistsImplicationNested() throws Exception {
-
-		final PrologTerm id_outer = new CompoundPrologTerm("x___1");
-		final PrologTerm id_inner = new CompoundPrologTerm("y");
-
-		// ap(dpred(blubb))
-		final PrologTerm pred = new CompoundPrologTerm("blubb");
-		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
-		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
-
-		final PrologTerm transPredx = new CompoundPrologTerm("x");
-		final PrologTerm wrappedx = new CompoundPrologTerm("dtrans", transPredx);
-		final PrologTerm actionx = new CompoundPrologTerm("action", wrappedx);
-
-		final PrologTerm transPredy = new CompoundPrologTerm("y");
-		final PrologTerm wrappedy = new CompoundPrologTerm("dtrans", transPredy);
-		final PrologTerm actiony = new CompoundPrologTerm("action", wrappedy);
-
-		final PrologTerm orPred = new CompoundPrologTerm("or", actionx, actiony);
-
-		final PrologTerm glob = new CompoundPrologTerm("globally", orPred);
-
-		final PrologTerm forall = new CompoundPrologTerm("forall", id_inner,
-				ap, glob);
-		final PrologTerm expected = new CompoundPrologTerm("exists", id_outer,
-				ap, forall);
-
-		check("# x___1 . ( {blubb} & !y. ({blubb} => G ([x] or [y])))",
-				expected);
+		check(
+			"# x___1 . ( {blubb} & !y. ({blubb} => G ([x] or [y])))",
+			"exists(x___1,ap(dpred(blubb)),forall(y,ap(dpred(blubb)),globally(or(action(dtrans(x)),action(dtrans(y))))))"
+		);
 	}
 
 	@Test
 	public void testForAllImplication() throws Exception {
-
-		final PrologTerm id = new CompoundPrologTerm("xyz");
-
-		// ap(dpred(blubb))
-		final PrologTerm pred = new CompoundPrologTerm("blubb");
-		final PrologTerm dpred = new CompoundPrologTerm("dpred", pred);
-		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
-
-		// G [x]
-		final PrologTerm transPred = new CompoundPrologTerm("x");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm action = new CompoundPrologTerm("action", wrapped2);
-		final PrologTerm glob = new CompoundPrologTerm("globally", action);
-
-		final PrologTerm expected = new CompoundPrologTerm("forall", id, ap,
-				glob);
-
-		check("!xyz. ( {blubb} => G [x])", expected);
+		check(
+			"!xyz. ( {blubb} => G [x])",
+			"forall(xyz,ap(dpred(blubb)),globally(action(dtrans(x))))"
+		);
 	}
 
 	@Test
 	public void testWeakFair() throws Exception {
-
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm wf = new CompoundPrologTerm("weak_fair", wrapped);
-		final PrologTerm ap = new CompoundPrologTerm("ap", wf);
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", ap);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", weak_assumption, TERM_TRUE);
-		check("wf(bla) => true", expected);
+		check(
+			"wf(bla) => true",
+			"fairnessimplication(weakassumptions(ap(weak_fair(dtrans(bla)))),true)"
+		);
 	}
 
 	@Test
 	public void testWeakFairCapital() throws Exception {
-
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		final PrologTerm wf = new CompoundPrologTerm("weak_fair", wrapped);
-		final PrologTerm ap = new CompoundPrologTerm("ap", wf);
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", ap);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", weak_assumption, TERM_TRUE);
-		check("WF(bla) => true", expected);
+		check(
+			"WF(bla) => true",
+			"fairnessimplication(weakassumptions(ap(weak_fair(dtrans(bla)))),true)"
+		);
 	}
 
 	@Test
 	public void testWeakFair_multiple() throws Exception {
-
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm wf1 = new CompoundPrologTerm("weak_fair", wrapped1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", wf1);
-		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm wf2 = new CompoundPrologTerm("weak_fair", wrapped2);
-		final PrologTerm ap2 = new CompoundPrologTerm("ap", wf2);
-		final PrologTerm orPred = new CompoundPrologTerm("or", ap1, ap2);
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", orPred);
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", weak_assumption, TERM_TRUE);
-
-		check("wf(bla) or wf(blubb) => true", expected);
+		check(
+			"wf(bla) or wf(blubb) => true",
+			"fairnessimplication(weakassumptions(or(ap(weak_fair(dtrans(bla))),ap(weak_fair(dtrans(blubb))))),true)"
+		);
 	}
 
 	@Test
 	public void testStrongFair() throws Exception {
-
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
-		final PrologTerm strong_assumptions = new CompoundPrologTerm(
-				"strongassumptions", ap1);
-
-		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm sf2 = new CompoundPrologTerm("weak_fair", wrapped2);
-		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
-		final PrologTerm weak_assumptions = new CompoundPrologTerm(
-				"weakassumptions", ap2);
-
-		final PrologTerm andPred = new CompoundPrologTerm("and",
-				strong_assumptions, weak_assumptions);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", andPred, TERM_TRUE);
-		check("(sf(bla)) & (wf(blubb)) => true", expected);
+		check(
+			"(sf(bla)) & (wf(blubb)) => true",
+			"fairnessimplication(and(strongassumptions(ap(strong_fair(dtrans(bla)))),weakassumptions(ap(weak_fair(dtrans(blubb))))),true)"
+		);
 	}
 
 	@Test
 	public void testStrongFairCapital() throws Exception {
-
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
-		final PrologTerm strong_assumptions = new CompoundPrologTerm(
-				"strongassumptions", ap1);
-
-		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm sf2 = new CompoundPrologTerm("weak_fair", wrapped2);
-		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
-		final PrologTerm weak_assumptions = new CompoundPrologTerm(
-				"weakassumptions", ap2);
-
-		final PrologTerm andPred = new CompoundPrologTerm("and",
-				strong_assumptions, weak_assumptions);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", andPred, TERM_TRUE);
-		check("(SF(bla)) & (wf(blubb)) => true", expected);
+		check(
+			"(SF(bla)) & (wf(blubb)) => true",
+			"fairnessimplication(and(strongassumptions(ap(strong_fair(dtrans(bla)))),weakassumptions(ap(weak_fair(dtrans(blubb))))),true)"
+		);
 	}
 
 	@Test
 	public void testStrongFair_multiple() throws Exception {
-
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
-		final PrologTerm transPred2 = new CompoundPrologTerm("blubb");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		final PrologTerm sf2 = new CompoundPrologTerm("strong_fair", wrapped2);
-		final PrologTerm ap2 = new CompoundPrologTerm("ap", sf2);
-		final PrologTerm andPred = new CompoundPrologTerm("and", ap1, ap2);
-		final PrologTerm strong_assumption = new CompoundPrologTerm(
-				"strongassumptions", andPred);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", strong_assumption, TERM_TRUE);
-
-		check("( (sf(bla) & sf(blubb)) => (true))", expected);
+		check(
+			"( (sf(bla) & sf(blubb)) => (true))",
+			"fairnessimplication(strongassumptions(and(ap(strong_fair(dtrans(bla))),ap(strong_fair(dtrans(blubb))))),true)"
+		);
 	}
 
 	@Test
 	public void testWeakFairAll() throws Exception {
-
-		final PrologTerm ap = new CompoundPrologTerm("all");
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", ap);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", weak_assumption, TERM_TRUE);
-		check("WEF => true", expected);
+		check("WEF => true", "fairnessimplication(weakassumptions(all),true)");
 	}
 
 	@Test
 	public void testStrongFairAll() throws Exception {
-
-		final PrologTerm ap = new CompoundPrologTerm("all");
-		final PrologTerm strong_assumption = new CompoundPrologTerm(
-				"strongassumptions", ap);
-
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", strong_assumption, TERM_TRUE);
-		check("SEF => true", expected);
+		check("SEF => true", "fairnessimplication(strongassumptions(all),true)");
 	}
 
 	@Test
 	public void testWeakStrongFairAll() throws Exception {
-
-		final PrologTerm ap = new CompoundPrologTerm("all");
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", ap);
-
-		final PrologTerm strong_assumption = new CompoundPrologTerm(
-				"strongassumptions", ap);
-
-		final PrologTerm and = new CompoundPrologTerm("and",strong_assumption, weak_assumption);
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", and, TERM_TRUE);
-		check("SEF & WEF => true", expected);
+		check(
+			"SEF & WEF => true",
+			"fairnessimplication(and(strongassumptions(all),weakassumptions(all)),true)"
+		);
 	}
 
 	@Test
 	public void testWeakStrongFairAll1() throws Exception {
-
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		final PrologTerm sf1 = new CompoundPrologTerm("strong_fair", wrapped1);
-		final PrologTerm ap1 = new CompoundPrologTerm("ap", sf1);
-
-		final PrologTerm ap = new CompoundPrologTerm("all");
-		final PrologTerm weak_assumption = new CompoundPrologTerm(
-				"weakassumptions", ap);
-
-		final PrologTerm strong_assumption = new CompoundPrologTerm(
-				"strongassumptions", ap1);
-
-		final PrologTerm and = new CompoundPrologTerm("and",strong_assumption, weak_assumption);
-		final PrologTerm expected = new CompoundPrologTerm(
-				"fairnessimplication", and, TERM_TRUE);
-		check("sf(bla) & WEF => true", expected);
+		check(
+			"sf(bla) & WEF => true",
+			"fairnessimplication(and(strongassumptions(ap(strong_fair(dtrans(bla)))),weakassumptions(all)),true)"
+		);
 	}
 
 	@Test
 	public void testDLK() throws Exception {
-		final PrologTerm transPred = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped = new CompoundPrologTerm("dtrans", transPred);
-		
-		final PrologTerm args = new ListPrologTerm(wrapped);
-		final PrologTerm dlk = new CompoundPrologTerm("dlk",args);
-		final PrologTerm expected = new CompoundPrologTerm("ap", dlk);
-		
-		check("deadlock( bla)", expected);
+		check("deadlock( bla)", "ap(dlk([dtrans(bla)]))");
 	}
 
 	@Test
 	public void testDLK2() throws Exception {
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		
-		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		
-		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
-		final PrologTerm dlk = new CompoundPrologTerm("dlk",args);
-		final PrologTerm expected = new CompoundPrologTerm("ap",dlk);
-		
-		check("deadlock(bla,argg)", expected);
+		check("deadlock(bla,argg)", "ap(dlk([dtrans(bla),dtrans(argg)]))");
 	}
 
 	@Test
 	public void testDET() throws Exception {
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		
-		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		
-		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
-		final PrologTerm det = new CompoundPrologTerm("det",args);
-		final PrologTerm expected = new CompoundPrologTerm("ap",det);
-		
-		check("deterministic(bla   , argg)", expected);
+		check("deterministic(bla   , argg)", "ap(det([dtrans(bla),dtrans(argg)]))");
 	}
 
 	@Test
 	public void testCtrl() throws Exception {
-		final PrologTerm transPred1 = new CompoundPrologTerm("bla");
-		final PrologTerm wrapped1 = new CompoundPrologTerm("dtrans", transPred1);
-		
-		final PrologTerm transPred2 = new CompoundPrologTerm("argg");
-		final PrologTerm wrapped2 = new CompoundPrologTerm("dtrans", transPred2);
-		
-		final PrologTerm args = new ListPrologTerm(wrapped1,wrapped2);
-		final PrologTerm det = new CompoundPrologTerm("ctrl",args);
-		final PrologTerm expected = new CompoundPrologTerm("ap",det);
-		
-		check("controller(bla,argg)", expected);
+		check("controller(bla,argg)", "ap(ctrl([dtrans(bla),dtrans(argg)]))");
 	}
 
 
@@ -588,28 +323,21 @@ public class PrologGeneratorTest {
 
 	@Test
 	public void testParserlib17() throws Exception {
-		PrologTerm dpred = new CompoundPrologTerm("dpred", new CompoundPrologTerm("\"{\"=\"1\""));
 		// Non-dummy version, in case we ever stop using the DummyParser:
-		//final PrologTerm none = new CompoundPrologTerm("none");
-		//final PrologTerm stringl = new CompoundPrologTerm("string", none, new CompoundPrologTerm("{"));
-		//final PrologTerm stringr = new CompoundPrologTerm("string", none, new CompoundPrologTerm("1"));
-		//final PrologTerm eq = new CompoundPrologTerm("equal", none, stringl, stringr);
-		//final PrologTerm bpred = new CompoundPrologTerm("bpred", eq);
-		final PrologTerm ap = new CompoundPrologTerm("ap", dpred);
-		final PrologTerm expected = new CompoundPrologTerm("globally", ap);
-
-		check("G {\"{\"=\"1\"}", expected);
+		// "globally(ap(bpred(equal(none,string(none,'{'),string(none,'1')))))"
+		check("G {\"{\"=\"1\"}", "globally(ap(dpred('\"{\"=\"1\"')))");
 	}
 
-	private static void check(final String input, final PrologTerm expectedTerm)
-			throws LtlParseException {
-		final PrologTerm term = parse(input);
+	private static void check(String input, String expectedTerm) throws LtlParseException {
+		String term = parse(input);
 		Assert.assertEquals(expectedTerm, term);
 	}
 
-	private static PrologTerm parse(final String input) throws LtlParseException {
+	private static String parse(String input) throws LtlParseException {
 		final LtlParser parser = new LtlParser(new DummyParser(true, true));
-		return parser.generatePrologTerm(input, "root");
+		PrologTermStringOutput pto = new PrologTermStringOutput();
+		parser.printFormulaAsProlog(input, "root", pto);
+		return pto.toString();
 	}
 
 	private static class DummyParser implements ProBParserBase {
