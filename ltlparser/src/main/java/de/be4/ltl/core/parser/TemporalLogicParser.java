@@ -26,15 +26,19 @@ public abstract class TemporalLogicParser<T> {
 
 	protected abstract void applyPrologGenerator(IPrologTermOutput pto, String stateID, T ast);
 
-	public PrologTerm generatePrologTerm(final String formula,
-			final String stateID) throws LtlParseException {
+	public void printFormulaAsProlog(String formula, String stateID, IPrologTermOutput pto) throws LtlParseException {
 		T ast = parseFormula(formula);
-		StructuredPrologOutput pto = new StructuredPrologOutput();
 		try {
 			applyPrologGenerator(pto, stateID, ast);
 		} catch (LtlAdapterException e) {
 			throw e.getOriginalException();
 		}
+	}
+
+	public PrologTerm generatePrologTerm(final String formula,
+			final String stateID) throws LtlParseException {
+		StructuredPrologOutput pto = new StructuredPrologOutput();
+		printFormulaAsProlog(formula, stateID, pto);
 		pto.fullstop();
 		return pto.getSentences().iterator().next();
 	}
