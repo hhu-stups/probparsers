@@ -1,23 +1,11 @@
 package de.be4.ltl.core.parser;
 
-/*
- * (c) 2009 Lehrstuhl fuer Softwaretechnik und Programmiersprachen, 
- * Heinrich Heine Universitaet Duesseldorf
- * This software is licenced under EPL 1.0 (http://www.eclipse.org/org/documents/epl-v10.html) 
- * */
-
-import java.io.PushbackReader;
-import java.io.StringReader;
-
-import de.be4.ltl.core.ctlparser.lexer.Lexer;
-import de.be4.ltl.core.ctlparser.parser.Parser;
-import de.be4.ltl.core.ctlparser.parser.ParserException;
 import de.prob.prolog.output.PrologTermStringOutput;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-public class PrologGeneratorTest {
+public class LtlParserTest {
 	@Test
 	public void testTrue() throws Exception {
 		check("true", "true");
@@ -305,12 +293,6 @@ public class PrologGeneratorTest {
 		String buggy = "#x. ( {blubb} => G [x])";
 		parse(buggy);
 
-	}
-
-	@Test(expected = ParserException.class)
-	public void ticket_parserlib_11_ctl() throws Exception {
-		new Parser(new Lexer(new PushbackReader(new StringReader(
-				"AG {taken= {}")))).parse();
 	}
 
 	@Test(expected = LtlParseException.class)
