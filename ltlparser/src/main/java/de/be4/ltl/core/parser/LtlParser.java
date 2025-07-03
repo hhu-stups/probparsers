@@ -49,10 +49,8 @@ public class LtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected void applyPrologGenerator(IPrologTermOutput pto,
-			String stateID, ProBParserBase specParser, Start ast) {
-		final PrologGenerator prologGenerator = new PrologGenerator(pto,
-				stateID, specParser);
+	protected void applyPrologGenerator(IPrologTermOutput pto, String stateID, Start ast) {
+		PrologGenerator prologGenerator = new PrologGenerator(pto, stateID, this.getSpecParser());
 		ast.apply(prologGenerator);
 	}
 }

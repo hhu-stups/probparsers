@@ -27,8 +27,7 @@ public abstract class TemporalLogicParser<T> {
 	protected abstract T parseFormula(String formula) throws LtlParseException,
 			IOException;
 
-	protected abstract void applyPrologGenerator(IPrologTermOutput pto,
-			String stateID, ProBParserBase specParser2, T ast);
+	protected abstract void applyPrologGenerator(IPrologTermOutput pto, String stateID, T ast);
 
 	public PrologTerm generatePrologTerm(final String formula,
 			final String stateID) throws LtlParseException {
@@ -41,7 +40,7 @@ public abstract class TemporalLogicParser<T> {
 		}
 		StructuredPrologOutput pto = new StructuredPrologOutput();
 		try {
-			applyPrologGenerator(pto, stateID, this.getSpecParser(), ast);
+			applyPrologGenerator(pto, stateID, ast);
 		} catch (LtlAdapterException e) {
 			throw e.getOriginalException();
 		}

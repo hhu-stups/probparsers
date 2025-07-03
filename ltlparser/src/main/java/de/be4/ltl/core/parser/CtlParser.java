@@ -47,10 +47,8 @@ public class CtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected void applyPrologGenerator(IPrologTermOutput pto,
-			String stateID, ProBParserBase specParser, Start ast) {
-		final PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto,
-				stateID, specParser);
+	protected void applyPrologGenerator(IPrologTermOutput pto, String stateID, Start ast) {
+		PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto, stateID, this.getSpecParser());
 		ast.apply(prologGenerator);
 	}
 }
