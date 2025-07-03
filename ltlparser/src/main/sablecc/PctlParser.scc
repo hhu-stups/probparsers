@@ -8,6 +8,8 @@ Helpers
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
 
+  digit = ['0' .. '9'];
+
   // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
   l_sq = '[';
   atomic_proposition_begin = '{';
@@ -42,6 +44,12 @@ Tokens
   {pctl_state} and = '&' | 0x2227;
   {pctl_state} or = 'or' | 0x2228;
   {pctl_state} not = 'not'| 0x00ac;
+  {pctl_state} strictly_greater = '>';
+  {pctl_state} greater = '>=' | 0x2a7e;
+  {pctl_state} strictly_less = '<'
+  {pctl_state} less = '<=' | 0x2a7d;
+  {pctl_state} equal = '=';
+  {pctl_state} probability = 'P';
 
   /* CTL temporal operators */
   {pctl_path} until = 'U';
@@ -51,7 +59,7 @@ Tokens
 
   /* Boundaries on path formulas*/
   {pctl_path} bound = '<=' |0x2a7d;
-
+  {pctl_path} bound_number = digit+;
 
   white_space = white_space;
 
@@ -75,8 +83,8 @@ Productions
     {or} [left]:pctl_state_formula2 or [right]:pctl_state_formula3 {-> New pctl_state.or(left.pctl_state, right.pctl_state)} |
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
-  ctl_formula3 {-> ctl} =
-    {eu} exists [left]:ctl_formula3 until [right]:ctl_formula4 {-> New ctl.eu(left.ctl, right.ctl)} |
+  pctl_state_formula3 {-> pctl_state_formula} =
+    {formula_strictly_greater} probability strictly_greater |
     ctl_formula4 {-> ctl_formula4.ctl};
 
   ctl_formula4 {-> ctl} =
