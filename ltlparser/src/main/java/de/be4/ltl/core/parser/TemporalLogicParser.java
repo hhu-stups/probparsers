@@ -1,7 +1,5 @@
 package de.be4.ltl.core.parser;
 
-import java.io.IOException;
-
 import de.be4.ltl.core.parser.internal.LtlAdapterException;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -24,20 +22,13 @@ public abstract class TemporalLogicParser<T> {
 		return specParser;
 	}
 
-	protected abstract T parseFormula(String formula) throws LtlParseException,
-			IOException;
+	protected abstract T parseFormula(String formula) throws LtlParseException;
 
 	protected abstract void applyPrologGenerator(IPrologTermOutput pto, String stateID, T ast);
 
 	public PrologTerm generatePrologTerm(final String formula,
 			final String stateID) throws LtlParseException {
-		T ast;
-		try {
-			ast = parseFormula(formula);
-		} catch (IOException e) {
-			String msg = "IOException during parsing of formula (possibly pushback buffer overflow in Lexer): " + e;
-			throw new IllegalStateException(msg);
-		}
+		T ast = parseFormula(formula);
 		StructuredPrologOutput pto = new StructuredPrologOutput();
 		try {
 			applyPrologGenerator(pto, stateID, ast);

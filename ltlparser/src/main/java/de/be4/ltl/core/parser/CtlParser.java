@@ -27,8 +27,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected Start parseFormula(final String formula)
-			throws LtlParseException, IOException {
+	protected Start parseFormula(final String formula) throws LtlParseException {
 		StringReader reader = new StringReader(formula);
 		PushbackReader r = new PushbackReader(reader);
 		Lexer l = new CtlLexer(r);
@@ -40,7 +39,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 			final UniversalToken token = UniversalToken.createToken(e
 					.getToken());
 			throw new LtlParseException(token, e);
-		} catch (LexerException e) {
+		} catch (LexerException | IOException e) {
 			throw new LtlParseException(null, e);
 		}
 		return ast;
