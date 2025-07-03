@@ -601,13 +601,13 @@ public class PrologGeneratorTest {
 		check("G {\"{\"=\"1\"}", expected);
 	}
 
-	private void check(final String input, final PrologTerm expectedTerm)
+	private static void check(final String input, final PrologTerm expectedTerm)
 			throws LtlParseException {
 		final PrologTerm term = parse(input);
 		Assert.assertEquals(expectedTerm, term);
 	}
 
-	private PrologTerm parse(final String input) throws LtlParseException {
+	private static PrologTerm parse(final String input) throws LtlParseException {
 		final LtlParser parser = new LtlParser(new DummyParser(true, true));
 		return parser.generatePrologTerm(input, "root");
 	}
@@ -648,7 +648,7 @@ public class PrologGeneratorTest {
 						"no dummy transition predicates");
 		}
 
-		private void parse(final IPrologTermOutput pto, final String text,
+		private static void parse(final IPrologTermOutput pto, final String text,
 				final boolean wrap, final String wrapper)
 				throws ProBParseException {
 			// TODO: cant we use the real B parser here?
