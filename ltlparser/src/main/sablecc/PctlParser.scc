@@ -11,7 +11,6 @@ Helpers
   digit = ['0' .. '9'];
 
   // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
-  l_sq = '[';
   atomic_proposition_begin = '{';
 
 /*******************************************************************
@@ -49,12 +48,12 @@ Tokens
   {pctl_state} strictly_less = '<'
   {pctl_state} less = '<=' | 0x2a7d;
   {pctl_state} equal = '=';
-  {pctl_state} probability = 'P';
+  {pctl_state} probabilistic = 'P';
 
   /* CTL temporal operators */
   {pctl_path} until = 'U';
   {pctl_path} globally = 'G';
-  {pctl_path} finally = 'F';
+  {pctl_path} eventually = 'F';
   {pctl_path} next = 'X';
 
   /* Boundaries on path formulas*/
@@ -83,22 +82,19 @@ Productions
     {or} [left]:pctl_state_formula2 or [right]:pctl_state_formula3 {-> New pctl_state.or(left.pctl_state, right.pctl_state)} |
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
-  pctl_state_formula3 {-> pctl_state_formula} =
-    {formula_strictly_greater} probability strictly_greater |
-    ctl_formula4 {-> ctl_formula4.ctl};
+  pctl_state_formula3 {-> pctl_state} =
+    {formula_strictly_greater} probabilistic [operator]:strictly_greater [probability]:atomic_proposition_begin pctl_path_formula {-> New pctl_state.formula_strictly_greater(operator.pctl_state, probability,pctl_path_formula.pctl_path)}|
+    {formula_greater} probabilistic [operator]:greater [probability]:atomic_proposition_begin pctl_path_formula {-> New pctl_state.formula_greater(operator.pctl_state, probability,pctl_path_formula.pctl_path)}|
+    {formula_strictly_less} probabilistic [operator]:strictly_less [probability]:atomic_proposition_begin pctl_path_formula {-> New pctl_state.formula_strictly_less(operator.pctl_state, probability,pctl_path_formula.pctl_path)}|
+    {formula_less} probabilistic [operator]:less [probability]:atomic_proposition_begin pctl_path_formula {-> New pctl_state.formula_less(operator.pctl_state, probability,pctl_path_formula.pctl_path)}|
+    {formula_equal} probabilistic [operator]:equal [probability]:atomic_proposition_begin pctl_path_formula {-> New pctl_state.formula_equal(operator.pctl_state, probability,pctl_path_formula.pctl_path)}|
+    pctl_state_formula4 {-> ctl_formula4.ctl};
 
-  ctl_formula4 {-> ctl} =
+  pctl_state_formula4 {-> pctl_state} =
     {not} not ctl_formula4 {-> New ctl.not(ctl_formula4.ctl)} |
     {par} l_par ctl_formula r_par {-> ctl_formula.ctl} |
     {true} true {-> New ctl.true()} |
     {false} false {-> New ctl.false()} |
-    {ena} exists next l_sq [cont]:ctl_formula4 {-> New ctl.ena(l_sq, cont.ctl)} |
-    {en} exists next [cont]:ctl_formula4 {-> New ctl.en(cont.ctl)} |
-    {an} forall next [cont]:ctl_formula4 {-> New ctl.an(cont.ctl)} |
-    {eg} exists globally [cont]:ctl_formula4 {-> New ctl.eg(cont.ctl)} |
-    {ef} exists finally [cont]:ctl_formula4 {-> New ctl.ef(cont.ctl)} |
-    {ag} forall globally [cont]:ctl_formula4 {-> New ctl.ag(cont.ctl)} |
-    {af} forall finally [cont]:ctl_formula4 {-> New ctl.af(cont.ctl)} |
     {unparsed} atomic_proposition_begin {-> New ctl.unparsed(atomic_proposition_begin)} |
     {enabled} enabled {-> New ctl.enabled(enabled)} |
     {action} l_sq {-> New ctl.action(l_sq)} |
@@ -108,6 +104,25 @@ Productions
     {error} state_error {-> New ctl.error()} |
     {deadlock} deadlock {-> New ctl.deadlock()} |
     {current} current {-> New ctl.current()};
+
+  pctl_path_formula {-> pctl_path} =
+    {u} [left]:pctl_state_formula until [right]:pctl_state_formula2 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula until bound bound_number [right]:pctl_state_formula2 {-> New pctl_path.u_k(left.pctl_state,bound_number,right.pctl_state)}|
+    pctl_path_formula2 {-> pctl_path_formula2.pctl_path};
+  
+  pctl_path_formula2 {-> pctl_path} =
+    {u_k} [left]:pctl_state_formula until bound bound_number [right]:pctl_state_formula2 {-> New pctl_path.u_k(left.pctl_state,bound_number,right.pctl_state)}|
+    pctl_path_formula3 {-> pctl_path_formula3.pctl_path};
+
+  pctl_path_formula3 {-> pctl_path} =
+    {g_k} globally bound bound_number [cont]:pctl_state_formula {-> New pctl_path.g_k(cont.ctl,bound_number)}|
+    {f_k} eventually bound bound_number [cont]:pctl_state_formula {-> New pctl_path.f_k(cont.ctl,bound_number)};
+    pctl_path_formula4 {-> pctl_path_formula4.pctl_path};
+  
+  pctl_path_formula4 {-> pctl_path} =
+    {x} next [cont]:pctl_state_formula {-> New pctl_path.x(cont.ctl)}|
+    {g} globally [cont]:pctl_state_formula {-> New pctl_path.g(cont.ctl)}|
+    {f} eventually [cont]:pctl_state_formula {-> New pctl_path.f(cont.ctl)};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
