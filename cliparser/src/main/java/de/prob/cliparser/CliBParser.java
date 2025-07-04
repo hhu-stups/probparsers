@@ -401,7 +401,7 @@ public class CliBParser {
 					if (returnValue == 0) {
 						socketWriter.println("exit(" + returnValue + ").");
 					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
-						System.out.println("Erasing file contents of " + outFile);
+						System.out.println("% Erasing file contents of " + outFile);
 						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 					}
 					break;
