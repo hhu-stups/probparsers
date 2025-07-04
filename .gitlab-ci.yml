@@ -75,7 +75,7 @@ publish:
     # (multiple staging repositories are created even though Gradle was only run once,
     # and none of these staging repositories contain the complete set of files),
     # so run the publish task in non-parallel mode.
-    - ./gradlew ${GRADLE_ARGS} publish
+    - ./gradlew ${GRADLE_ARGS} publish closeStagingRepositories
   only: 
     - master 
     - develop
