@@ -6,6 +6,7 @@ stages:
 
 variables:
   GRADLE_ARGS: --no-daemon --stacktrace --warning-mode=all
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
   DEBIAN_FRONTEND: noninteractive
 
 cache:
@@ -15,7 +16,6 @@ cache:
     - .gradle/wrapper
 
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
   - apt-get update
   - apt-get install -y git
 
@@ -50,8 +50,7 @@ tests:jdk-21:
 
 tests:macos:
   extends: .tests
-  before_script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
+  before_script: []
   tags:
     - macos
 
@@ -75,7 +74,7 @@ publish:
     # (multiple staging repositories are created even though Gradle was only run once,
     # and none of these staging repositories contain the complete set of files),
     # so run the publish task in non-parallel mode.
-    - ./gradlew ${GRADLE_ARGS} publish
+    - ./gradlew ${GRADLE_ARGS} publish closeStagingRepositories
   only: 
     - master 
     - develop

@@ -19,7 +19,7 @@ import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.parser.Parser;
 import de.be4.ltl.core.parser.parser.ParserException;
 import de.prob.parserbase.ProBParserBase;
-import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.output.IPrologTermOutput;
 
 public class LtlParser extends TemporalLogicParser<Start> {
 	public LtlParser(final ProBParserBase specParser) {
@@ -27,8 +27,7 @@ public class LtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected Start parseFormula(final String formula)
-			throws LtlParseException, IOException {
+	protected Start parseFormula(final String formula) throws LtlParseException {
 		StringReader reader = new StringReader(formula);
 		// PUSHBACK_BUFFER_SIZE=99 should be more than the max length of any keyword
 		// Due to SF(, SEF, ... we need at least to pushback two chars
@@ -42,17 +41,15 @@ public class LtlParser extends TemporalLogicParser<Start> {
 			final UniversalToken token = UniversalToken.createToken(e
 					.getToken());
 			throw new LtlParseException(token, e);
-		} catch (LexerException e) {
+		} catch (LexerException | IOException e) {
 			throw new LtlParseException(null, e);
 		}
 		return ast;
 	}
 
 	@Override
-	protected void applyPrologGenerator(StructuredPrologOutput pto,
-			String stateID, ProBParserBase specParser, Start ast) {
-		final PrologGenerator prologGenerator = new PrologGenerator(pto,
-				stateID, specParser);
+	protected void applyPrologGenerator(IPrologTermOutput pto, String stateID, Start ast) {
+		PrologGenerator prologGenerator = new PrologGenerator(pto, stateID, this.getSpecParser());
 		ast.apply(prologGenerator);
 	}
 }
