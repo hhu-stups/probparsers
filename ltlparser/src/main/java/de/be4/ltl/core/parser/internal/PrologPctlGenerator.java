@@ -14,6 +14,12 @@ import de.be4.ltl.core.pctlparser.node.AGoalPctlState;
 import de.be4.ltl.core.pctlparser.node.ADetOutputPctlState;
 import de.be4.ltl.core.pctlparser.node.AErrorPctlState;
 import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
+import de.be4.ltl.core.pctlparser.node.AFormulaEqualPctlState;
+import de.be4.ltl.core.pctlparser.node.AFormulaGreaterPctlState;
+import de.be4.ltl.core.pctlparser.node.AFormulaLessPctlState;
+import de.be4.ltl.core.pctlparser.node.AFormulaStrictlyGreaterPctlState;
+import de.be4.ltl.core.pctlparser.node.AFormulaStrictlyLessPctlState;
+
 import de.be4.ltl.core.pctlparser.node.Node;
 import de.be4.ltl.core.pctlparser.node.Start;
 import de.be4.ltl.core.pctlparser.node.Token;
@@ -47,6 +53,65 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 		helper.caseUnparsed(UniversalToken.createToken(token));
 	}
 
+	@Override
+	public void caseAFormulaEqualPctlState(AFormulaEqualPctlState node) {
+		inAFormulaEqualPctlState(node);
+		final Token token = node.getProbability();
+		helper.caseUnparsed(UniversalToken.createToken(token));
+		if(node.getCont() != null)
+        {
+            node.getCont().apply(this);
+        }
+        outAFormulaEqualPctlState(node);
+	}
+
+	@Override
+	public void caseAFormulaGreaterPctlState(AFormulaGreaterPctlState node) {
+		inAFormulaGreaterPctlState(node);
+		final Token token = node.getProbability();
+		helper.caseUnparsed(UniversalToken.createToken(token));
+		if(node.getCont() != null)
+        {
+            node.getCont().apply(this);
+        }
+        outAFormulaGreaterPctlState(node);
+	}
+
+	@Override
+	public void caseAFormulaLessPctlState(AFormulaLessPctlState node) {
+		inAFormulaLessPctlState(node);
+		final Token token = node.getProbability();
+		helper.caseUnparsed(UniversalToken.createToken(token));
+		if(node.getCont() != null)
+        {
+            node.getCont().apply(this);
+        }
+        outAFormulaLessPctlState(node);
+	}
+
+	@Override
+	public void caseAFormulaStrictlyGreaterPctlState(AFormulaStrictlyGreaterPctlState node) {
+		inAFormulaStrictlyGreaterPctlState(node);
+		final Token token = node.getProbability();
+		helper.caseUnparsed(UniversalToken.createToken(token));
+		if(node.getCont() != null)
+        {
+            node.getCont().apply(this);
+        }
+        outAFormulaStrictlyGreaterPctlState(node);
+	}
+
+	@Override
+	public void caseAFormulaStrictlyLessPctlState(AFormulaStrictlyLessPctlState node) {
+		inAFormulaStrictlyLessPctlState(node);
+		final Token token = node.getProbability();
+		helper.caseUnparsed(UniversalToken.createToken(token));
+		if(node.getCont() != null)
+        {
+            node.getCont().apply(this);
+        }
+        outAFormulaStrictlyLessPctlState(node);
+	}
 	@Override
 	public void caseASinkPctlState(final ASinkPctlState node) {
 		helper.sink();
