@@ -33,6 +33,8 @@ Tokens
   {pctl_state} current = 'current';
   {pctl_state} l_par = '(';
   {pctl_state} r_par = ')';
+  {pctl_state} l_sq = '[';
+  {pctl_state} r_sq = ']';
 
   {pctl_state -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
   {atomic} atomic_proposition_end = '}';
@@ -83,11 +85,11 @@ Productions
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
   pctl_state_formula3 {-> pctl_state} =
-    {formula_strictly_greater} probabilistic strictly_greater [probability]:atomic_proposition_begin [cont]:pctl_path_formula {-> New pctl_state.formula_strictly_greater(probability,cont.pctl_path)}|
-    {formula_greater} probabilistic greater [probability]:atomic_proposition_begin [cont]:pctl_path_formula {-> New pctl_state.formula_greater(probability,cont.pctl_path)}|
-    {formula_strictly_less} probabilistic strictly_less [probability]:atomic_proposition_begin [cont]:pctl_path_formula {-> New pctl_state.formula_strictly_less(probability,cont.pctl_path)}|
-    {formula_less} probabilistic less [probability]:atomic_proposition_begin [cont]:pctl_path_formula {-> New pctl_state.formula_less(probability,cont.pctl_path)}|
-    {formula_equal} probabilistic equal [probability]:atomic_proposition_begin [cont]:pctl_path_formula {-> New pctl_state.formula_equal(probability,cont.pctl_path)}|
+    {formula_strictly_greater} probabilistic strictly_greater [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_greater(probability,cont.pctl_path)}|
+    {formula_greater} probabilistic greater [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_greater(probability,cont.pctl_path)}|
+    {formula_strictly_less} probabilistic strictly_less [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_less(probability,cont.pctl_path)}|
+    {formula_less} probabilistic less [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_less(probability,cont.pctl_path)}|
+    {formula_equal} probabilistic equal [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_equal(probability,cont.pctl_path)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
   pctl_state_formula4 {-> pctl_state} =
@@ -104,11 +106,11 @@ Productions
     {current} current {-> New pctl_state.current()};
 
   pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula until [right]:pctl_state_formula2 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
+    {u} [left]:pctl_state_formula until [right]:pctl_state_formula {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
     pctl_path_formula2 {-> pctl_path_formula2.pctl_path};
   
   pctl_path_formula2 {-> pctl_path} =
-    {u_k} [left]:pctl_state_formula until bound [number]:bound_number [right]:pctl_state_formula2 {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula until bound [number]:bound_number [right]:pctl_state_formula {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
     pctl_path_formula3 {-> pctl_path_formula3.pctl_path};
 
   pctl_path_formula3 {-> pctl_path} =
