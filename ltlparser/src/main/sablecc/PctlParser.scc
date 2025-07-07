@@ -139,7 +139,7 @@ Abstract Syntax Tree
     {not} [cont]:pctl_state |
     {true} |
     {false} |
-    {unparsed} atomic_proposition_begin |
+    {unparsed} [predicate]:atomic_proposition_begin |
     {sink} |
     {goal} |
     {det_output} |

@@ -10,11 +10,11 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 
-import de.be4.ltl.core.pctlParser.lexer.Lexer;
-import de.be4.ltl.core.pctlParser.lexer.LexerException;
-import de.be4.ltl.core.pctlParser.node.Start;
-import de.be4.ltl.core.pctlParser.parser.Parser;
-import de.be4.ltl.core.pctlParser.parser.ParserException;
+import de.be4.ltl.core.pctlparser.lexer.Lexer;
+import de.be4.ltl.core.pctlparser.lexer.LexerException;
+import de.be4.ltl.core.pctlparser.node.Start;
+import de.be4.ltl.core.pctlparser.parser.Parser;
+import de.be4.ltl.core.pctlparser.parser.ParserException;
 import de.be4.ltl.core.parser.internal.PctlLexer;
 import de.be4.ltl.core.parser.internal.PrologPctlGenerator;
 import de.be4.ltl.core.parser.internal.UniversalToken;
