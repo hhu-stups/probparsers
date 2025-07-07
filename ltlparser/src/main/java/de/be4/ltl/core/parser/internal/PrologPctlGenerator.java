@@ -6,6 +6,8 @@
 
 package de.be4.ltl.core.parser.internal;
 
+import java.util.Locale;
+
 import de.be4.ltl.core.pctlparser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.pctlparser.node.ACurrentPctlState;
 import de.be4.ltl.core.pctlparser.node.ADeadlockPctlState;
@@ -42,9 +44,19 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 		helper.defaultOut();
 	}
 
+
+	/*
+	Unfortunately, 'Pctlstate' has 6 more letters than 'ctl' or 'ltl'. Hence, the method 
+	 in PrologGeneratorHelper couldn't be used and the method needed to be rewritten again to suit
+	 the name of the langage 
+	 */
 	@Override
 	public void defaultIn(final Node node) {
-		helper.defaultIn(node.getClass());
+		StringBuilder sb = new StringBuilder(node.getClass().getSimpleName());
+		sb.setLength(sb.length() - 9);
+		sb.deleteCharAt(0);
+		String term = sb.toString().toLowerCase(Locale.ENGLISH);
+		p.openTerm(term);
 	}
 
 	@Override
