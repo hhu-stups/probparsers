@@ -49,7 +49,7 @@ public class PctlParserTest {
 
 	@Test
 	public void testNextLoop() throws Exception {
-		check("P<{0.8}[(true)U (true)]", "formula_strictly_less(0.8,u(true,true))");
+		check("P<{0.8}[{banana} # U @ (true)]", "formulastrictlyless(ap(dpred(0.8),u(ap(dpred(banana)),true))");
 	}
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {

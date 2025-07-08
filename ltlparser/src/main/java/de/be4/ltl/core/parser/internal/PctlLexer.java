@@ -26,10 +26,6 @@ public class PctlLexer extends Lexer {
 	protected void filter() {
 		token = helper.filter(state, token);
 		state = helper.getState();
-		System.out.println(state.toString());
-		if (token != null ) {
-			System.out.println(token.toString());
-		}
 	}
 
 	public static class PctlLexerHelper extends LexerHelper<Token, State> {

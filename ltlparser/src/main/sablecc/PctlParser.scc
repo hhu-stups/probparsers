@@ -52,6 +52,9 @@ Tokens
   {pctl_state} equal = '=';
   {pctl_state} probabilistic = 'P';
 
+
+  {pctl_state -> pctl_path} trans = '#';
+  {pctl_path -> pctl_state} banana = '@';
   /* CTL temporal operators */
   {pctl_path} until = 'U';
   {pctl_path} globally = 'G';
@@ -112,23 +115,14 @@ Productions
     {current} current {-> New pctl_state.current()};
 
   pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
-    pctl_path_formula2 {-> pctl_path_formula2.pctl_path};
-  
-  pctl_path_formula2 {-> pctl_path} =
-    {u_k} [left]:pctl_state_formula4 until bound [number]:bound_number [right]:pctl_state_formula4 
+    {u} [left]:pctl_state_formula4 trans until banana [right]:pctl_state_formula4 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula4 trans until bound [number]:bound_number banana [right]:pctl_state_formula4 
         {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
-    pctl_path_formula3 {-> pctl_path_formula3.pctl_path};
-
-  pctl_path_formula3 {-> pctl_path} =
-    {g_k} globally bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_path.g_k(number,cont.pctl_state)}|
-    {f_k} eventually bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_path.f_k(number,cont.pctl_state)}|
-    pctl_path_formula4 {-> pctl_path_formula4.pctl_path};
-  
-  pctl_path_formula4 {-> pctl_path} =
-    {x} next [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
-    {g} globally [cont]:pctl_state_formula4 {-> New pctl_path.g(cont.pctl_state)}|
-    {f} eventually [cont]:pctl_state_formula4 {-> New pctl_path.f(cont.pctl_state)};
+    {g_k} globally bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.g_k(number,cont.pctl_state)}|
+    {f_k} eventually bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.f_k(number,cont.pctl_state)}|
+    {x} next banana [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
+    {g} globally banana [cont]:pctl_state_formula4 {-> New pctl_path.g(cont.pctl_state)}|
+    {f} eventually banana [cont]:pctl_state_formula4 {-> New pctl_path.f(cont.pctl_state)};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
