@@ -76,7 +76,8 @@ Ignored Tokens
  *******************************************************************/
 Productions
   pctl_state_formula {-> pctl_state} =
-    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
+    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 
+        {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
     pctl_state_formula2 {-> pctl_state_formula2.pctl_state};
 
   pctl_state_formula2 {-> pctl_state} =
@@ -85,11 +86,16 @@ Productions
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
   pctl_state_formula3 {-> pctl_state} =
-    {formula_strictly_greater} probabilistic strictly_greater [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_greater(probability,cont.pctl_path)}|
-    {formula_greater} probabilistic greater [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_greater(probability,cont.pctl_path)}|
-    {formula_strictly_less} probabilistic strictly_less [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_less(probability,cont.pctl_path)}|
-    {formula_less} probabilistic less [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_less(probability,cont.pctl_path)}|
-    {formula_equal} probabilistic equal [probability]:atomic_proposition_begin l_sq [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_equal(probability,cont.pctl_path)}|
+    {formula_strictly_greater} probabilistic strictly_greater [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_greater(probability,cont.pctl_path)}|
+    {formula_greater} probabilistic greater [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_greater(probability,cont.pctl_path)}|
+    {formula_strictly_less} probabilistic strictly_less [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_less(probability,cont.pctl_path)}|
+    {formula_less} probabilistic less [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_less(probability,cont.pctl_path)}|
+    {formula_equal} probabilistic equal [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_equal(probability,cont.pctl_path)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
   pctl_state_formula4 {-> pctl_state} =
@@ -106,22 +112,23 @@ Productions
     {current} current {-> New pctl_state.current()};
 
   pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula until [right]:pctl_state_formula {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
+    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
     pctl_path_formula2 {-> pctl_path_formula2.pctl_path};
   
   pctl_path_formula2 {-> pctl_path} =
-    {u_k} [left]:pctl_state_formula until bound [number]:bound_number [right]:pctl_state_formula {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula4 until bound [number]:bound_number [right]:pctl_state_formula4 
+        {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
     pctl_path_formula3 {-> pctl_path_formula3.pctl_path};
 
   pctl_path_formula3 {-> pctl_path} =
-    {g_k} globally bound [number]:bound_number [cont]:pctl_state_formula {-> New pctl_path.g_k(number,cont.pctl_state)}|
-    {f_k} eventually bound [number]:bound_number [cont]:pctl_state_formula {-> New pctl_path.f_k(number,cont.pctl_state)}|
+    {g_k} globally bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_path.g_k(number,cont.pctl_state)}|
+    {f_k} eventually bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_path.f_k(number,cont.pctl_state)}|
     pctl_path_formula4 {-> pctl_path_formula4.pctl_path};
   
   pctl_path_formula4 {-> pctl_path} =
-    {x} next [cont]:pctl_state_formula {-> New pctl_path.x(cont.pctl_state)}|
-    {g} globally [cont]:pctl_state_formula {-> New pctl_path.g(cont.pctl_state)}|
-    {f} eventually [cont]:pctl_state_formula {-> New pctl_path.f(cont.pctl_state)};
+    {x} next [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
+    {g} globally [cont]:pctl_state_formula4 {-> New pctl_path.g(cont.pctl_state)}|
+    {f} eventually [cont]:pctl_state_formula4 {-> New pctl_path.f(cont.pctl_state)};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
@@ -150,8 +157,8 @@ Abstract Syntax Tree
   pctl_path =
     {u} [left]:pctl_state [right]:pctl_state |
     {u_k} [left]:pctl_state bound_number [right]:pctl_state |
-    {g_k} [number]:bound_number [cont]:pctl_state |
-    {f_k} [number]:bound_number [cont]:pctl_state |
-    {x} [cont]:pctl_state |
-    {g} [cont]:pctl_state |
-    {f} [cont]:pctl_state ;
+    {g_k} [number]:bound_number [cont2]:pctl_state |
+    {f_k} [number]:bound_number [cont2]:pctl_state |
+    {x} [cont2]:pctl_state |
+    {g} [cont2]:pctl_state |
+    {f} [cont2]:pctl_state ;

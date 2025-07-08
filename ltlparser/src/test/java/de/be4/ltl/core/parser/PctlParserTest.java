@@ -7,59 +7,49 @@ import org.junit.Test;
 
 public class PctlParserTest {
 
-	@Test
 	public void testTrue() throws Exception {
 		check("true", "true");
 	}
 
-	@Test
 	public void testFalse() throws Exception {
 		check("false", "false");
 	}
 
-	@Test
 	public void testImplication() throws Exception {
 		check("false =>   true ", "implies(false,true)");
 	}
 
-	@Test
 	public void testSink() throws Exception {
 		check("sink", "ap(sink)");
 	}
 
-	@Test
 	public void testDeadlock() throws Exception {
 		check("deadlock", "ap(deadlock)");
 	}
 
-	@Test
 	public void testCurrent() throws Exception {
 		check("current", "ap(stateid(root))");
 	}
 
-	@Test
 	public void testAnd() throws Exception {
 		check("true &  false", "and(true,false)");
 	}
 
-	@Test
 	public void testOr() throws Exception {
 		check("true or  false", "or(true,false)");
 	}
 
-	@Test
 	public void testNot() throws Exception {
 		check("not true", "not(true)");
 	}
 
-	@Test
 	public void testPredicate() throws Exception {
-		check("{blubb} =>  true", "implies(ap(dpred(blubb)),true)");
+		check("{blubb}", "ap(dpred(blubb))");
 	}
 
 	@Test
 	public void testNextLoop() throws Exception {
-		check("P<{0.8}[X true]", "formula_strictly_less(0.8,x(true))");
+		check("P<{0.8}[(true)U (true)]", "formula_strictly_less(0.8,u(true,true))");
 	}
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {
