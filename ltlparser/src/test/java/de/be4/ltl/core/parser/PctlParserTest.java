@@ -53,19 +53,14 @@ public class PctlParserTest {
 	}
 
 	@Test
-	public void testPredicate1() throws Exception {
-		check("{}", "");
+	public void testPredicate() throws Exception {
+		check("{blubb} =>  true", "implies(ap(dpred(blubb)),true)");
 	}
 
 	@Test
-	public void testPredicate() throws Exception {
-		check("{blubb}", "ap(dpred(blubb))");
-	}
-/*
-	@Test
 	public void testNextLoop() throws Exception {
-		check("P={0.9} [X {p(b)}]", "formula_equal(0.9,x(p(b)))");
-	}*/
+		check("P<{0.8}[X true]", "formula_strictly_less(0.8,x(true))");
+	}
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {
 		String term = parse(input);
