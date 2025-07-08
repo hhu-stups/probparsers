@@ -9,7 +9,7 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 	private STATE state, lastState;
 	private boolean inQuote;
 
-	protected abstract boolean isInAction(final STATE state);
+	protected abstract boolean isInActionOrAtomic(final STATE state);
 
 	protected abstract boolean isOpening(final TOKEN token);
 
@@ -42,7 +42,7 @@ abstract class LexerHelper<TOKEN extends IToken, STATE> {
 
 		state = newState;
 
-		if (isInAction(state)) {
+		if (isInActionOrAtomic(state)) {
 			if (externalFormula == null) {
 				initialiseActionToken(token);
 				return null;

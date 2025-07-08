@@ -16,7 +16,7 @@ import de.be4.ltl.core.pctlparser.node.Token;
 
 public class PctlLexer extends Lexer {
 
-	private final CtlLexerHelper helper = new CtlLexerHelper();
+	private final PctlLexerHelper helper = new PctlLexerHelper();
 
 	public PctlLexer(final PushbackReader in) {
 		super(in);
@@ -28,9 +28,9 @@ public class PctlLexer extends Lexer {
 		state = helper.getState();
 	}
 
-	public static class CtlLexerHelper extends LexerHelper<Token, State> {
+	public static class PctlLexerHelper extends LexerHelper<Token, State> {
 
-		public CtlLexerHelper() {
+		public PctlLexerHelper() {
 			super(State.PCTL_STATE);
 		}
 
@@ -47,7 +47,7 @@ public class PctlLexer extends Lexer {
 		}
 
 		@Override
-		protected boolean isInAction(State state) {
+		protected boolean isInActionOrAtomic(State state) {
 			return state.equals(State.ATOMIC);
 		}
 

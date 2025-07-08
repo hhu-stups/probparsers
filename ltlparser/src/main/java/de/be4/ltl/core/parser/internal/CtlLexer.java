@@ -49,7 +49,7 @@ public class CtlLexer extends Lexer {
 		}
 
 		@Override
-		protected boolean isInAction(State state) {
+		protected boolean isInActionOrAtomic(State state) {
 			return state.equals(State.ATOMIC) || state.equals(State.ACTION);
 		}
 
