@@ -53,7 +53,8 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 	@Override
 	public void defaultIn(final Node node) {
 		StringBuilder sb = new StringBuilder(node.getClass().getSimpleName());
-		sb.setLength(sb.length() - 9);
+		StringBuilder ssb = new StringBuilder(node.getClass().getSuperclass().getSimpleName());
+		sb.setLength(sb.length() - ssb.length() + 1);
 		sb.deleteCharAt(0);
 		String term = sb.toString().toLowerCase(Locale.ENGLISH);
 		p.openTerm(term);
