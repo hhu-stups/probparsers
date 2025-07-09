@@ -88,8 +88,8 @@ Productions
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
   pctl_state_formula3 {-> pctl_state} =
-    {probabilistic_formula} probabilistic [op]:operator [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.probabilistic_formula(op.operator,probability,cont.pctl_path)}|
+    {prob_formula} probabilistic [op]:operator [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.prob_formula(op.operator,probability,cont.pctl_path)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
   pctl_state_formula4 {-> pctl_state} =
@@ -139,7 +139,7 @@ Abstract Syntax Tree
     {implies} [left]:pctl_state [right]:pctl_state |
     {and} [left]:pctl_state [right]:pctl_state |
     {or} [left]:pctl_state [right]:pctl_state |
-    {probabilistic_formula} [op]:operator [probability]:atomic_proposition_begin [cont]:pctl_path |
+    {prob_formula} [op]:operator [probability]:atomic_proposition_begin [cont]:pctl_path |
     {not} [cont]:pctl_state |
     {true} |
     {false} |

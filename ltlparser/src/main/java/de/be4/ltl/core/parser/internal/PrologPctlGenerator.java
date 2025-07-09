@@ -17,7 +17,7 @@ import de.be4.ltl.core.pctlparser.node.ADetOutputPctlState;
 import de.be4.ltl.core.pctlparser.node.ADigitExpression;
 import de.be4.ltl.core.pctlparser.node.AErrorPctlState;
 import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
-import de.be4.ltl.core.pctlparser.node.AProbabilisticFormulaPctlState;
+import de.be4.ltl.core.pctlparser.node.AProbFormulaPctlState;
 
 import de.be4.ltl.core.pctlparser.node.Node;
 import de.be4.ltl.core.pctlparser.node.Start;
@@ -70,8 +70,8 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAProbabilisticFormulaPctlState(AProbabilisticFormulaPctlState node) {
-		inAProbabilisticFormulaPctlState(node);
+	public void caseAProbFormulaPctlState(AProbFormulaPctlState node) {
+		inAProbFormulaPctlState(node);
 		if(node.getOp() != null)
         {
             node.getOp().apply(this);
@@ -82,7 +82,7 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
         {
             node.getCont().apply(this);
         }
-        outAProbabilisticFormulaPctlState(node);
+        outAProbFormulaPctlState(node);
 	}
 
 	@Override
