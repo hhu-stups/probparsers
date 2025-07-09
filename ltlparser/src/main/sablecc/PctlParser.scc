@@ -106,19 +106,19 @@ Productions
     {current} current {-> New pctl_state.current()};
 
   pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 
+    {u} [left]:pctl_state_formula until [right]:pctl_state_formula 
         {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
-    {u_k} [left]:pctl_state_formula4 until_bounded [bound]:expression [right]:pctl_state_formula4 
+    {u_k} [left]:pctl_state_formula until_bounded [bound]:expression [right]:pctl_state_formula 
         {-> New pctl_path.u_k(left.pctl_state,bound.expression,right.pctl_state)}|
-    {x} next [cont]:pctl_state_formula4 
+    {x} next [cont]:pctl_state_formula 
         {-> New pctl_path.x(cont.pctl_state)}|
-    {g} globally [cont]:pctl_state_formula4 
+    {g} globally [cont]:pctl_state_formula 
         {-> New pctl_path.g(cont.pctl_state)}|
-    {g_k} globally_bounded [bound]:expression [cont]:pctl_state_formula4 
+    {g_k} globally_bounded [bound]:expression [cont]:pctl_state_formula 
         {-> New pctl_path.g_k(bound.expression,cont.pctl_state)}|
-    {f} eventually [cont]:pctl_state_formula4 
+    {f} eventually [cont]:pctl_state_formula 
         {-> New pctl_path.f(cont.pctl_state)}|
-    {f_k} eventually_bounded [bound]:expression [cont]:pctl_state_formula4 
+    {f_k} eventually_bounded [bound]:expression [cont]:pctl_state_formula 
         {-> New pctl_path.f_k(bound.expression,cont.pctl_state)};
 
   operator {-> operator} =

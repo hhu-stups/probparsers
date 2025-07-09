@@ -80,7 +80,35 @@ public class PctlParserTest {
 		"probabilisticformula(equal,ap(dpred(prob)),uk(not(ap(dpred(a))),5,ap(dpred(b))))");
 	}
 
+	@Test
+	public void testAlwaysLoop() throws Exception {
+		check("P>={0.1}[G not({b})]",
+		"probabilisticformula(greater,ap(dpred('0.1')),g(not(ap(dpred(b)))))");
+	}
 
+	@Test
+	public void testEventuallyLoop() throws Exception {
+		check("P={prob}[F<=5 {b}]",
+		"probabilisticformula(equal,ap(dpred(prob)),fk(5,ap(dpred(b))))");
+	}
+
+	@Test
+	public void testUntilBoundedBig() throws Exception {
+		check("P={0.95703125}[F<=5 {elect}]",
+		"probabilisticformula(equal,ap(dpred('0.95703125')),fk(5,ap(dpred(elect))))");
+	}
+
+	@Test
+	public void testUntilBig() throws Exception {
+		check("P={1.0}[F ({elect} & false)]",
+		"probabilisticformula(equal,ap(dpred('1.0')),f(and(ap(dpred(elect)),false)))");
+	}
+
+	@Test
+	public void testUntilBig2() throws Exception {
+		check("P={1.0}[F {elect} & false]",
+		"probabilisticformula(equal,ap(dpred('1.0')),f(and(ap(dpred(elect)),false)))");
+	}
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {
 		String term = parse(input);
