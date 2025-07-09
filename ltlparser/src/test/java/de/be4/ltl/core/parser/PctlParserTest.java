@@ -70,15 +70,17 @@ public class PctlParserTest {
 	
 	@Test
 	public void testUntilLoop() throws Exception {
-		check("P={prob}[not {p(a)} U {p(b)}]",
-		"probabilisticformula(equal,ap(dpred(prob)),u(not(ap(dpred('p(a)'))),ap(dpred('p(b)'))))");
+		check("P={prob}[not {a} U {b}]",
+		"probabilisticformula(equal,ap(dpred(prob)),u(not(ap(dpred(a))),ap(dpred(b))))");
 	}
 
 	@Test
 	public void testUntilBoundedLoop() throws Exception {
-		check("P={prob}[not {p(a)} U<=5 {p(b)}]",
-		"probabilisticformula(equal,ap(dpred(prob)),uk(not(ap(dpred('p(a)'))),5,ap(dpred('p(b)'))))");
+		check("P={prob}[not {a}U<=5 {b}]",
+		"probabilisticformula(equal,ap(dpred(prob)),uk(not(ap(dpred(a))),5,ap(dpred(b))))");
 	}
+
+
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {
 		String term = parse(input);
