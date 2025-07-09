@@ -17,7 +17,7 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  pctl_state, pctl_path, atomic;
+  pctl_state, atomic;
 
 /*******************************************************************
  * Tokens                                                          *
@@ -52,20 +52,15 @@ Tokens
   {pctl_state} not = 'not'| 0x00ac;
   {pctl_state} probabilistic = 'P';
 
-  {pctl_state -> pctl_path} trans = '#';
-
-
-  {pctl_path -> pctl_state} banana = '@';
-
   /* CTL temporal operators */
-  {pctl_path} until = 'U';
-  {pctl_path} globally = 'G';
-  {pctl_path} eventually = 'F';
-  {pctl_path} next = 'X';
+  {pctl_state} until = 'U';
+  {pctl_state} globally = 'G';
+  {pctl_state} eventually = 'F';
+  {pctl_state} next = 'X';
 
   /* Boundaries on path formulas*/
-  {pctl_path} bound = '<=' |0x2a7d;
-  {pctl_path} bound_number = digit+;
+  {pctl_state} bound = '<=' |0x2a7d;
+  {pctl_state} bound_number = digit+;
 
   white_space = white_space;
 
@@ -92,7 +87,7 @@ Productions
 
   pctl_state_formula3 {-> pctl_state} =
     {probabilistic_formula} probabilistic [op]:pctl_state_formula5 [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.probabilistic_formula(op.pctl_state,probability,cont.pctl_path)}|
+        [cont]:pctl_state_formula6 r_sq {-> New pctl_state.probabilistic_formula(op.pctl_state,probability,cont.pctl_state)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
   pctl_state_formula4 {-> pctl_state} =
@@ -115,15 +110,15 @@ Productions
     {less} less {-> New pctl_state.less()}|
     {equal} equal {-> New pctl_state.equal()};
 
-  pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula4 trans until banana [right]:pctl_state_formula4 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
-    {u_k} [left]:pctl_state_formula4 trans until bound [number]:bound_number banana [right]:pctl_state_formula4 
-        {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
-    {g_k} globally bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.g_k(number,cont.pctl_state)}|
-    {f_k} eventually bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.f_k(number,cont.pctl_state)}|
-    {x} trans next banana [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
-    {g} globally banana [cont]:pctl_state_formula4 {-> New pctl_path.g(cont.pctl_state)}|
-    {f} eventually banana [cont]:pctl_state_formula4 {-> New pctl_path.f(cont.pctl_state)};
+  pctl_state_formula6 {-> pctl_state} =
+    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 {-> New pctl_state.u(left.pctl_state,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula4 until bound [number]:bound_number [right]:pctl_state_formula4 
+        {-> New pctl_state.u_k(left.pctl_state,number,right.pctl_state)}|
+    {g_k} globally bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_state.g_k(number,cont.pctl_state)}|
+    {f_k} eventually bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_state.f_k(number,cont.pctl_state)}|
+    {x} next [cont]:pctl_state_formula4 {-> New pctl_state.x(cont.pctl_state)}|
+    {g} globally [cont]:pctl_state_formula4 {-> New pctl_state.g(cont.pctl_state)}|
+    {f} eventually [cont]:pctl_state_formula4 {-> New pctl_state.f(cont.pctl_state)};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
@@ -133,7 +128,7 @@ Abstract Syntax Tree
     {implies} [left]:pctl_state [right]:pctl_state |
     {and} [left]:pctl_state [right]:pctl_state |
     {or} [left]:pctl_state [right]:pctl_state |
-    {probabilistic_formula} [op]:pctl_state [probability]:atomic_proposition_begin [cont]:pctl_path |
+    {probabilistic_formula} [op]:pctl_state [probability]:atomic_proposition_begin [cont]:pctl_state |
     {not} [cont]:pctl_state |
     {true} |
     {false} |
@@ -148,9 +143,7 @@ Abstract Syntax Tree
     {greater} |
     {strictly_less} |
     {less} |
-    {equal};
-
-  pctl_path =
+    {equal} |
     {u} [left]:pctl_state [right]:pctl_state |
     {u_k} [left]:pctl_state bound_number [right]:pctl_state |
     {g_k} [number]:bound_number [cont2]:pctl_state |
