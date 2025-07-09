@@ -12,9 +12,11 @@ import de.be4.ltl.core.pctlparser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.pctlparser.node.ACurrentPctlState;
 import de.be4.ltl.core.pctlparser.node.ADeadlockPctlState;
 import de.be4.ltl.core.pctlparser.node.ASinkPctlState;
+import de.be4.ltl.core.pctlparser.node.AUKPctlState;
 import de.be4.ltl.core.pctlparser.node.AGoalPctlState;
 import de.be4.ltl.core.pctlparser.node.ADetOutputPctlState;
 import de.be4.ltl.core.pctlparser.node.AErrorPctlState;
+import de.be4.ltl.core.pctlparser.node.AGKPctlState;
 import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
 import de.be4.ltl.core.pctlparser.node.AProbabilisticFormulaPctlState;
 
@@ -27,12 +29,12 @@ import de.prob.prolog.output.IPrologTermOutput;
 public class PrologPctlGenerator extends DepthFirstAdapter {
 
 	private final IPrologTermOutput p;
-	private final PrologGeneratorHelper helper;
+	private final PrologPctlGeneratorHelper helper;
 
 	public PrologPctlGenerator(final IPrologTermOutput pto,
 			final String currentStateID, final ProBParserBase specParser) {
 		this.p = pto;
-		this.helper = new PrologGeneratorHelper(pto, currentStateID, specParser);
+		this.helper = new PrologPctlGeneratorHelper(pto, currentStateID, specParser);
 	}
 
 	@Override
@@ -77,6 +79,37 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
         }
         outAProbabilisticFormulaPctlState(node);
 	}
+
+	@Override
+    public void caseAGKPctlState(AGKPctlState node)
+    {
+        inAGKPctlState(node);
+        final Token token = node.getNumber();
+		System.out.println(token.getText());
+		helper.caseDigit(UniversalToken.createToken(token));
+        if(node.getCont2() != null)
+        {
+            node.getCont2().apply(this);
+        }
+        outAGKPctlState(node);
+    }
+	@Override
+    public void caseAUKPctlState(AUKPctlState node)
+    {
+        inAUKPctlState(node);
+        if(node.getLeft() != null)
+        {
+            node.getLeft().apply(this);
+        }
+        final Token token = node.getNumber();
+		
+		helper.caseDigit(UniversalToken.createToken(token));
+        if(node.getRight() != null)
+        {
+            node.getRight().apply(this);
+        }
+        outAUKPctlState(node);
+    }
 
 	@Override
 	public void caseASinkPctlState(final ASinkPctlState node) {

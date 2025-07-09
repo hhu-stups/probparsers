@@ -54,12 +54,14 @@ Tokens
 
   /* CTL temporal operators */
   {pctl_state} until = 'U';
+  {pctl_state} until_bounded = 'U<='|'U'0x2a7d;
   {pctl_state} globally = 'G';
+  {pctl_state} globally_bounded = 'G<='|'G'0x2a7d;
   {pctl_state} eventually = 'F';
+  {pctl_state} eventually_bounded = 'F<='|'F'0x2a7d;
   {pctl_state} next = 'X';
 
-  /* Boundaries on path formulas*/
-  {pctl_state} bound = '<=' |0x2a7d;
+  /* Bound on path formulas*/
   {pctl_state} bound_number = digit+;
 
   white_space = white_space;
@@ -111,14 +113,20 @@ Productions
     {equal} equal {-> New pctl_state.equal()};
 
   pctl_state_formula6 {-> pctl_state} =
-    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 {-> New pctl_state.u(left.pctl_state,right.pctl_state)}|
-    {u_k} [left]:pctl_state_formula4 until bound [number]:bound_number [right]:pctl_state_formula4 
+    {u} [left]:pctl_state_formula4 until [right]:pctl_state_formula4 
+        {-> New pctl_state.u(left.pctl_state,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula4 until_bounded [number]:bound_number [right]:pctl_state_formula4 
         {-> New pctl_state.u_k(left.pctl_state,number,right.pctl_state)}|
-    {g_k} globally bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_state.g_k(number,cont.pctl_state)}|
-    {f_k} eventually bound [number]:bound_number [cont]:pctl_state_formula4 {-> New pctl_state.f_k(number,cont.pctl_state)}|
-    {x} next [cont]:pctl_state_formula4 {-> New pctl_state.x(cont.pctl_state)}|
-    {g} globally [cont]:pctl_state_formula4 {-> New pctl_state.g(cont.pctl_state)}|
-    {f} eventually [cont]:pctl_state_formula4 {-> New pctl_state.f(cont.pctl_state)};
+    {x} next [cont]:pctl_state_formula4 
+        {-> New pctl_state.x(cont.pctl_state)}|
+    {g} globally [cont]:pctl_state_formula4 
+        {-> New pctl_state.g(cont.pctl_state)}|
+    {g_k} globally_bounded [number]:bound_number [cont]:pctl_state_formula4 
+        {-> New pctl_state.g_k(number,cont.pctl_state)}|
+    {f} eventually [cont]:pctl_state_formula4 
+        {-> New pctl_state.f(cont.pctl_state)}|
+    {f_k} eventually_bounded [number]:bound_number [cont]:pctl_state_formula4 
+        {-> New pctl_state.f_k(number,cont.pctl_state)};
 
 /*******************************************************************
  * Abstract Syntax Tree                                            *
@@ -145,7 +153,7 @@ Abstract Syntax Tree
     {less} |
     {equal} |
     {u} [left]:pctl_state [right]:pctl_state |
-    {u_k} [left]:pctl_state bound_number [right]:pctl_state |
+    {u_k} [left]:pctl_state [number]:bound_number [right]:pctl_state |
     {g_k} [number]:bound_number [cont2]:pctl_state |
     {f_k} [number]:bound_number [cont2]:pctl_state |
     {x} [cont2]:pctl_state |
