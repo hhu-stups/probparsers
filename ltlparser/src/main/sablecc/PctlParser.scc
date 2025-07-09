@@ -35,6 +35,11 @@ Tokens
   {pctl_state} r_par = ')';
   {pctl_state} l_sq = '[';
   {pctl_state} r_sq = ']';
+  {pctl_state} strictly_greater = '>';
+  {pctl_state} greater = '>=' | 0x2a7e;
+  {pctl_state} strictly_less = '<';
+  {pctl_state} less = '<=' | 0x2a7d; 
+  {pctl_state} equal = '=';
 
   {pctl_state -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
   {atomic} atomic_proposition_end = '}';
@@ -45,16 +50,13 @@ Tokens
   {pctl_state} and = '&' | 0x2227;
   {pctl_state} or = 'or' | 0x2228;
   {pctl_state} not = 'not'| 0x00ac;
-  {pctl_state} strictly_greater = '>';
-  {pctl_state} greater = '>=' | 0x2a7e;
-  {pctl_state} strictly_less = '<';
-  {pctl_state} less = '<=' | 0x2a7d;
-  {pctl_state} equal = '=';
   {pctl_state} probabilistic = 'P';
 
-
   {pctl_state -> pctl_path} trans = '#';
+
+
   {pctl_path -> pctl_state} banana = '@';
+
   /* CTL temporal operators */
   {pctl_path} until = 'U';
   {pctl_path} globally = 'G';
@@ -89,16 +91,8 @@ Productions
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
   pctl_state_formula3 {-> pctl_state} =
-    {formula_strictly_greater} probabilistic strictly_greater [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_greater(probability,cont.pctl_path)}|
-    {formula_greater} probabilistic greater [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_greater(probability,cont.pctl_path)}|
-    {formula_strictly_less} probabilistic strictly_less [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_strictly_less(probability,cont.pctl_path)}|
-    {formula_less} probabilistic less [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_less(probability,cont.pctl_path)}|
-    {formula_equal} probabilistic equal [probability]:atomic_proposition_begin l_sq 
-        [cont]:pctl_path_formula r_sq {-> New pctl_state.formula_equal(probability,cont.pctl_path)}|
+    {probabilistic_formula} probabilistic [op]:pctl_state_formula5 [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.probabilistic_formula(op,probability,cont.pctl_path)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
   pctl_state_formula4 {-> pctl_state} =
@@ -114,13 +108,20 @@ Productions
     {deadlock} deadlock {-> New pctl_state.deadlock()} |
     {current} current {-> New pctl_state.current()};
 
+  pctl_state_formula5 {-> pctl_state} =
+    {strictly_greater} strictly_greater {-> New pctl_state.strictly_greater()}|
+    {greater} greater {-> New pctl_state.greater()}|
+    {strictly_less} strictly_less {-> New pctl_state.strictly_less()}|
+    {less} less {-> New pctl_state.less()}|
+    {equal} equal {-> New pctl_state.equal()};
+
   pctl_path_formula {-> pctl_path} =
     {u} [left]:pctl_state_formula4 trans until banana [right]:pctl_state_formula4 {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
     {u_k} [left]:pctl_state_formula4 trans until bound [number]:bound_number banana [right]:pctl_state_formula4 
         {-> New pctl_path.u_k(left.pctl_state,number,right.pctl_state)}|
     {g_k} globally bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.g_k(number,cont.pctl_state)}|
     {f_k} eventually bound [number]:bound_number banana [cont]:pctl_state_formula4 {-> New pctl_path.f_k(number,cont.pctl_state)}|
-    {x} next banana [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
+    {x} trans next banana [cont]:pctl_state_formula4 {-> New pctl_path.x(cont.pctl_state)}|
     {g} globally banana [cont]:pctl_state_formula4 {-> New pctl_path.g(cont.pctl_state)}|
     {f} eventually banana [cont]:pctl_state_formula4 {-> New pctl_path.f(cont.pctl_state)};
 
@@ -132,11 +133,7 @@ Abstract Syntax Tree
     {implies} [left]:pctl_state [right]:pctl_state |
     {and} [left]:pctl_state [right]:pctl_state |
     {or} [left]:pctl_state [right]:pctl_state |
-    {formula_strictly_greater} [probability]:atomic_proposition_begin [cont]:pctl_path |
-    {formula_greater} [probability]:atomic_proposition_begin [cont]:pctl_path |
-    {formula_strictly_less} [probability]:atomic_proposition_begin [cont]:pctl_path |
-    {formula_less} [probability]:atomic_proposition_begin [cont]:pctl_path |
-    {formula_equal} [probability]:atomic_proposition_begin [cont]:pctl_path |
+    {probabilistic_formula} [op]:pctl_state [probability]:atomic_proposition_begin [cont]:pctl_path |
     {not} [cont]:pctl_state |
     {true} |
     {false} |
@@ -146,7 +143,12 @@ Abstract Syntax Tree
     {det_output} |
     {error} |
     {deadlock} |
-    {current} ;
+    {current} |
+    {strictly_greater} |
+    {greater} |
+    {strictly_less} |
+    {less} |
+    {equal};
 
   pctl_path =
     {u} [left]:pctl_state [right]:pctl_state |

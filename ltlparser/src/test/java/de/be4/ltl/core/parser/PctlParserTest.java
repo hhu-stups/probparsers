@@ -49,7 +49,7 @@ public class PctlParserTest {
 
 	@Test
 	public void testNextLoop() throws Exception {
-		check("P<{blubb}[{banana} # U @ (true)]", "formulastrictlyless(ap(dpred(blubb),u(ap(dpred(banana)),true))");
+		check("P<{blubb}[#X @ (true)]", "probabilistic_formula(strictly_greater,ap(dpred(blubb),x(true))");
 	}
 
 	private static void check(String input, String expectedTerm) throws LtlParseException {
