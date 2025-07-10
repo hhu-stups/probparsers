@@ -77,7 +77,7 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
             node.getOp().apply(this);
         }
 		final Token token = node.getProbability();
-		helper.caseUnparsed(UniversalToken.createToken(token));
+		helper.caseUnparsedExpression(UniversalToken.createToken(token),false);
 		if(node.getCont() != null)
         {
             node.getCont().apply(this);

@@ -59,70 +59,99 @@ public class PctlParserTest {
 
 	@Test
 	public void testNextLoop1() throws Exception {
-		check("P<{blubb}[X true]", "probformula(strictlyless,ap(dpred(blubb)),x(true))");
+		check("P<{blubb}[X true]", "probformula(strictlyless,blubb,x(true))");
 	}
 
 	@Test
 	public void testNextLoop2() throws Exception {
 		check("P={0.9}[X (P={0.5}[X {p(b)}])]",
-		"probformula(equal,ap(dpred('0.9')),x(probformula(equal,ap(dpred('0.5')),x(ap(dpred('p(b)'))))))");
+		"probformula(equal,'0.9',x(probformula(equal,'0.5',x(ap(dpred('p(b)'))))))");
 	}
 	
 	@Test
 	public void testUntilLoop() throws Exception {
 		check("P={prob}[not {a} U {b}]",
-		"probformula(equal,ap(dpred(prob)),u(not(ap(dpred(a))),ap(dpred(b))))");
+		"probformula(equal,prob,u(not(ap(dpred(a))),ap(dpred(b))))");
 	}
 
 	@Test
 	public void testUntilBoundedLoop() throws Exception {
 		check("P={prob}[not {a}U<=5 {b}]",
-		"probformula(equal,ap(dpred(prob)),uk(not(ap(dpred(a))),5,ap(dpred(b))))");
+		"probformula(equal,prob,uk(not(ap(dpred(a))),5,ap(dpred(b))))");
 	}
 
 	@Test
 	public void testAlwaysLoop() throws Exception {
 		check("P>={0.1}[G not({b})]",
-		"probformula(greater,ap(dpred('0.1')),g(not(ap(dpred(b)))))");
+		"probformula(greater,'0.1',g(not(ap(dpred(b)))))");
 	}
 
 	@Test
 	public void testEventuallyLoop() throws Exception {
 		check("P={prob}[F<=5 {b}]",
-		"probformula(equal,ap(dpred(prob)),fk(5,ap(dpred(b))))");
+		"probformula(equal,prob,fk(5,ap(dpred(b))))");
 	}
 
 	@Test
 	public void testUntilBoundedBig() throws Exception {
-		check("P={0.95703125}[F<=5 {elect}]",
-		"probformula(equal,ap(dpred('0.95703125')),fk(5,ap(dpred(elect))))");
+		check("P={0.95703125}[F⩽5 {elect}]",
+		"probformula(equal,'0.95703125',fk(5,ap(dpred(elect))))");
 	}
 
 	@Test
 	public void testUntilBig() throws Exception {
 		check("P={1.0}[F ({elect} & false)]",
-		"probformula(equal,ap(dpred('1.0')),f(and(ap(dpred(elect)),false)))");
+		"probformula(equal,'1.0',f(and(ap(dpred(elect)),false)))");
 	}
 
 	@Test
 	public void testUntilBig2() throws Exception {
 		check("P={1.0}[F {elect} & false]",
-		"probformula(equal,ap(dpred('1.0')),f(and(ap(dpred(elect)),false)))");
+		"probformula(equal,'1.0',f(and(ap(dpred(elect)),false)))");
 	}
 
 	@Test
 	public void testHugeFormula() throws Exception{
 		check("P<{apple}[G (P>={8}[{macaroni} U<= 50000 true] => {pizza}) ] & true or false", 
-		"or(and(probformula(strictlyless,ap(dpred(apple)),g(implies(probformula(greater,ap(dpred('8')),uk(ap(dpred(macaroni)),50000,true)),ap(dpred(pizza))))),true),false)");
+		"or(and(probformula(strictlyless,apple,g(implies(probformula(greater,'8',uk(ap(dpred(macaroni)),50000,true)),ap(dpred(pizza))))),true),false)");
 	}
 
+	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_DLK() throws Exception {
+		String buggy = "deadlock()";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void ticket_parsing_DET() throws Exception {
+		String buggy = "deterministic()";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void ticket_unclosed_probabilsitic_formula() throws Exception {
+		String buggy = "P⩾{observe(lastSeen)}[G<=5 true";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void ticket_unclosed_predicate() throws Exception {
+		String buggy = "true => {banana";
+		parse(buggy);
+	}
+
+	@Test(expected = LtlParseException.class)
+	public void testPredSyntaxError() throws LtlParseException {
+		parse("{X}");
+	}
+	
 	private static void check(String input, String expectedTerm) throws LtlParseException {
 		String term = parse(input);
 		Assert.assertEquals(expectedTerm, term);
 	}
 
 	private static String parse(String input) throws LtlParseException {
-		final PctlParser parser = new PctlParser(new DummyParser(true, true));
+		final PctlParser parser = new PctlParser(new DummyParser(true, true,true));
 		PrologTermStringOutput pto = new PrologTermStringOutput();
 		parser.printFormulaAsProlog(input, "root", pto);
 		return pto.toString();
