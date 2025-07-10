@@ -16,7 +16,7 @@ class DummyParser implements ProBParserBase {
 	@Override
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap) throws ProBParseException {
 		if (suppExpr) {
-			parse(pto, expression, wrap, null);
+			parse(pto, expression, wrap, "dexpr");
 		} else {
 			throw new UnsupportedOperationException("no dummy expressions");
 		}
