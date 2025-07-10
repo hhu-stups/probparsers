@@ -91,7 +91,7 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-	
+
 	public void available(final UniversalToken token) {
 		pto.openTerm("ap"); // atomic property
 		pto.openTerm("available");
@@ -99,13 +99,13 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-	
+
 	public void strong_fair(UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("strong_fair");
 		parseTransitionPredicate(token);
 		pto.closeTerm();
-		pto.closeTerm();		
+		pto.closeTerm();
 	}
 
 	public void weak_fair(UniversalToken token) {
@@ -173,7 +173,6 @@ final class PrologGeneratorHelper {
 	}
 
 	public void existsTerm(AExistsLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("exists");
 		String identifier = node.getExistsIdentifier().getText();
 		pto.printAtom(identifier);
@@ -184,22 +183,19 @@ final class PrologGeneratorHelper {
 		node.getLtl().apply(gen);
 
 		pto.closeTerm();
-		
 	}
 
 	public void forallTerm(AForallLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("forall");
 		String identifier = node.getForallIdentifier().getText();
 		pto.printAtom(identifier);
-		
+
 		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
 		this.caseUnparsed(token);
 
 		node.getLtl().apply(gen);
 
 		pto.closeTerm();
-		
 	}
 
 	public void unchangedTerm(AUnchangedLtl node, PrologGenerator gen) {
@@ -211,8 +207,8 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void changedTerm(AChangedLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("neq");
@@ -221,8 +217,8 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void decreasingTerm(ADecreasingLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("gt");
@@ -231,8 +227,8 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void increasingTerm(AIncreasingLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("lt");
@@ -241,8 +237,8 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void before_afterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("before_after");
 		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
@@ -252,32 +248,30 @@ final class PrologGeneratorHelper {
 	}
 
 	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {
-		
 		pto.openTerm("and");
-		
+
 		pto.openTerm("strongassumptions");
 		left_node.apply(gen);
 		pto.closeTerm();
-				
+
 		pto.openTerm("weakassumptions");
 		right_node.apply(gen);
 		pto.closeTerm();
-		
+
 		pto.closeTerm();
 	}
 
 	public void and_fair2(PLtl left_node, PLtl right_node, PrologGenerator gen) {
-		
 		pto.openTerm("and");
-		
+
 		pto.openTerm("weakassumptions");
 		left_node.apply(gen);
 		pto.closeTerm();
-				
+
 		pto.openTerm("strongassumptions");
 		right_node.apply(gen);
 		pto.closeTerm();
-		
+
 		pto.closeTerm();
 	}
 

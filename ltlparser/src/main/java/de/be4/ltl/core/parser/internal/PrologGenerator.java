@@ -155,44 +155,39 @@ public class PrologGenerator extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void caseAExistsLtl(AExistsLtl node)
-	{
+	public void caseAExistsLtl(AExistsLtl node) {
 		helper.existsTerm(node, this);
 	}
 
 	@Override
-	public void caseAForallLtl(AForallLtl node)
-	{
+	public void caseAForallLtl(AForallLtl node) {
 		helper.forallTerm(node, this);
 	}
-	
+
 	@Override
-	public void caseAUnchangedLtl(AUnchangedLtl node)
-	{
+	public void caseAUnchangedLtl(AUnchangedLtl node) {
 		helper.unchangedTerm(node, this);
 	}
+
 	@Override
-	public void caseAChangedLtl(AChangedLtl node)
-	{
+	public void caseAChangedLtl(AChangedLtl node) {
 		helper.changedTerm(node, this);
 	}
+
 	@Override
-	public void caseADecreasingLtl(ADecreasingLtl node)
-	{
+	public void caseADecreasingLtl(ADecreasingLtl node) {
 		helper.decreasingTerm(node, this);
 	}
+
 	@Override
-	public void caseAIncreasingLtl(AIncreasingLtl node)
-	{
+	public void caseAIncreasingLtl(AIncreasingLtl node) {
 		helper.increasingTerm(node, this);
 	}
+
 	@Override
-	public void caseABeforeAfterLtl(ABeforeAfterLtl node)
-	{
+	public void caseABeforeAfterLtl(ABeforeAfterLtl node) {
 		helper.before_afterTerm(node, this);
 	}
-
-
 
 	@Override
 	public void caseADlkLtl(ADlkLtl node) {
