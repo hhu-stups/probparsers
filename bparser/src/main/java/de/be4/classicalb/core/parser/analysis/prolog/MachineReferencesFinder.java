@@ -193,15 +193,25 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 
 		if (path != null) {
 			Path parsedPath = Paths.get(path);
-			// Disallow backslashes in relative paths to discourage writing machines that only work on Windows.
+			// In future we want to disallow backslashes in relative paths to discourage writing machines that only work on Windows.
 			// The portable solution is to use forward slashes, which work on Windows, Mac, and Linux.
-			// We still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
+			// Still at the moment there are several important ProB projects which use this
+			// "feature" on projects with a large number of files which cannot be easily adapted
+			// We also still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
 			// absolute paths are inherently not portable between systems anyway.
 			if (!parsedPath.isAbsolute() && path.contains("\\")) {
-				throw new VisitorException(new CheckException(
-					"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
-					node
-				));
+			    String wpath = path.replace("\\", "/");
+			    final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
+			    if (wbaseName.equals(name)) { 
+			         // the replace transformation worked
+					System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + wpath);
+					return new MachineReference(type, name, renamedName, node, wpath);
+				} else {
+					throw new VisitorException(new CheckException(
+						"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
+						node
+					));
+				}
 			}
 
 			String baseName = Utils.getFileWithoutExtension(parsedPath.getFileName().toString());
