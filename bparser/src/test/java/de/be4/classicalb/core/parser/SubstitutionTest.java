@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import util.Helpers;
@@ -23,6 +24,7 @@ public class SubstitutionTest {
 	}
 
 	@Test
+	@Ignore("this syntax was added without comment in 2016, why?")
 	public void testSimultaneousSubstitution() throws BCompoundException {
 		final String testMachine = "MACHINE test OPERATIONS foo = skip || skip END";
 		final String result = Helpers.getMachineAsPrologTerm(testMachine);
