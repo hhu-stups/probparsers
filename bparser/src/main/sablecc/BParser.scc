@@ -572,7 +572,7 @@ definition {-> definition} =
   {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
       {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)}
       |
-  {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_top
+  {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_def_top
       {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)}
        |
   {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
@@ -1131,8 +1131,12 @@ comprehension_set_identifiers_with_parentheses {-> expression*} =
 
 /* Substitutions */
 
-/* Substitution top, without || and ; */
-substitution_top {-> substitution} = [sub]:substitution_l3 {-> sub.substitution};
+/* Substitution top for definitions, without ; and || */
+substitution_def_top {-> substitution} = [sub]:substitution_l3 {-> sub.substitution};
+
+/* Substitution top, without ; but with || */
+/* This behaviour is mirrored in BasePrettyPrinter#printTopLevelSubstitution */
+substitution_top {-> substitution} = [sub]:substitution_l2 {-> sub.substitution};
 
 /* All substitutions */
 substitution_all {-> substitution} = [sub]:substitution_l1 {-> sub.substitution};

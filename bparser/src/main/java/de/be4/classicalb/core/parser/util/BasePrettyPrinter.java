@@ -407,7 +407,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	private void printTopLevelSubstitution(PSubstitution node) {
-		if (node instanceof ASequenceSubstitution || node instanceof AParallelSubstitution) {
+		if (node instanceof ASequenceSubstitution) {
 			printSubstitutionInBlock(node);
 		} else {
 			node.apply(this);

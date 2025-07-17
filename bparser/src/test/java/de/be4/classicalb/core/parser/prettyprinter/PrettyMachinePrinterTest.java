@@ -379,7 +379,8 @@ public class PrettyMachinePrinterTest {
 			"op_block_single = BEGIN x := 1 END;\n" +
 			"op_single = x := 1;\n" +
 			"op_block_seq = BEGIN x := 1 ; y := 1 ; z := 1 END;\n" +
-			"op_block_par = BEGIN x := 1 || y := 1 || z := 1 END\n" +
+			"op_block_par = BEGIN x := 1 || y := 1 || z := 1 END;\n" +
+			"op_par = x := 1 || y := 1 || z := 1\n" +
 			"END";
 		final String testMachinePretty = "MACHINE Test\n" +
 			"VARIABLES x, y, z\n" +
@@ -389,7 +390,8 @@ public class PrettyMachinePrinterTest {
 			"op_block_single = x := 1;\n" +
 			"op_single = x := 1;\n" +
 			"op_block_seq = BEGIN x := 1 ; y := 1 ; z := 1 END;\n" +
-			"op_block_par = BEGIN x := 1 || y := 1 || z := 1 END\n" +
+			"op_block_par = x := 1 || y := 1 || z := 1;\n" +
+			"op_par = x := 1 || y := 1 || z := 1\n" +
 			"END";
 		final String result1 = Helpers.getPrettyPrint(testMachine);
 		assertEquals(testMachinePretty, result1);
