@@ -47,6 +47,7 @@ Tokens
 
   /* Boolean Operators */
   {pctl_state} implies = '=>' | 0x21d2;
+  {pctl_state} equivalence = '<=>' | 0x21d4;
   {pctl_state} and = '&' | 0x2227;
   {pctl_state} or = 'or' | 0x2228;
   {pctl_state} not = 'not'| 0x00ac;
@@ -80,6 +81,8 @@ Productions
   pctl_state_formula {-> pctl_state} =
     {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 
         {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
+    {equivalence} [left]:pctl_state_formula equivalence [right]:pctl_state_formula2 
+        {-> New pctl_state.equivalence(left.pctl_state, right.pctl_state)} |
     pctl_state_formula2 {-> pctl_state_formula2.pctl_state};
 
   pctl_state_formula2 {-> pctl_state} =
@@ -137,6 +140,7 @@ Productions
 Abstract Syntax Tree
   pctl_state =
     {implies} [left]:pctl_state [right]:pctl_state |
+    {equivalence} [left]:pctl_state [right]:pctl_state |
     {and} [left]:pctl_state [right]:pctl_state |
     {or} [left]:pctl_state [right]:pctl_state |
     {prob_formula} [op]:operator [probability]:atomic_proposition_begin [cont]:pctl_path |

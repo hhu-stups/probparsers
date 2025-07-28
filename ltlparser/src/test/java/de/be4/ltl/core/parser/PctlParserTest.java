@@ -23,6 +23,16 @@ public class PctlParserTest {
 	}
 
 	@Test
+	public void testEquivalence1() throws Exception {
+		check("false <=>   true ", "equivalence(false,true)");
+	}
+
+	@Test
+	public void testEquivalence2() throws Exception {
+		check("false ⇔ true ", "equivalence(false,true)");
+	}
+
+	@Test
 	public void testSink() throws Exception {
 		check("sink", "ap(sink)");
 	}
