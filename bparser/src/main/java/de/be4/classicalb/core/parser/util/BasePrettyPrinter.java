@@ -406,6 +406,23 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		this.identifierList = false;
 	}
 
+	private void printTopLevelSubstitution(PSubstitution node) {
+		if (node instanceof ASequenceSubstitution) {
+			printSubstitutionInBlock(node);
+		} else {
+			node.apply(this);
+		}
+	}
+
+	private void printSubstitutionInBlock(PSubstitution node) {
+		indent();
+		printlnOpt("BEGIN");
+		node.apply(this);
+		dedent();
+		printlnOpt();
+		print("END");
+	}
+
 	@Override
 	public void caseStart(final Start node) {
 		node.getPParseUnit().apply(this);
@@ -811,7 +828,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		closeIdentifierList();
 		print(" == ");
 		indent();
-		node.getRhs().apply(this);
+		printTopLevelSubstitution(node.getRhs());
 		dedent();
 	}
 
@@ -899,7 +916,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		printParameterListOpt(node.getParameters());
 		indent();
 		printlnOpt(" =");
-		node.getOperationBody().apply(this);
+		printTopLevelSubstitution(node.getOperationBody());
 		dedent();
 	}
 
@@ -919,7 +936,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		node.getAbOpName().apply(this);
 		indent();
 		printlnOpt(" =");
-		node.getOperationBody().apply(this);
+		printTopLevelSubstitution(node.getOperationBody());
 		dedent();
 	}
 
@@ -2186,12 +2203,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseABlockSubstitution(final ABlockSubstitution node) {
-		indent();
-		printlnOpt("BEGIN");
-		node.getSubstitution().apply(this);
-		dedent();
-		printlnOpt();
-		print("END");
+		printSubstitutionInBlock(node.getSubstitution());
 	}
 
 	@Override
