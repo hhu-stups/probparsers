@@ -889,7 +889,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAConstructorFreetypeConstructor(AConstructorFreetypeConstructor node) {
 		node.getName().apply(this);
-		printParameterListOpt(Collections.singletonList(node.getArgument()));
+		printParameterList(Collections.singletonList(node.getArgument()));
 	}
 
 	@Override
@@ -1041,7 +1041,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseANegationPredicate(final ANegationPredicate node) {
 		print("not");
-		printParameterListOpt(Collections.singletonList(node.getPredicate()));
+		printParameterList(Collections.singletonList(node.getPredicate()));
 	}
 
 	@Override
@@ -1155,13 +1155,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAFinitePredicate(AFinitePredicate node) {
 		print("@finite");
-		printParameterListOpt(Collections.singletonList(node.getSet()));
+		printParameterList(Collections.singletonList(node.getSet()));
 	}
 
 	@Override
 	public void caseAPartitionPredicate(APartitionPredicate node) {
 		print("@partition");
-		printParameterListOpt(Stream.concat(Stream.of(node.getSet()), node.getElements().stream()).collect(Collectors.toList()));
+		printParameterList(Stream.concat(Stream.of(node.getSet()), node.getElements().stream()).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -1356,7 +1356,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAConvertBoolExpression(final AConvertBoolExpression node) {
 		print("bool");
-		printParameterListOpt(Collections.singletonList(node.getPredicate()));
+		printParameterList(Collections.singletonList(node.getPredicate()));
 	}
 
 	@Override
@@ -1398,7 +1398,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		// it's only produced by translation from TLA+ or Z.
 		// ProB's LibraryMath.def provides an external function FDIV that implements floored division.
 		print("FDIV");
-		printParameterListOpt(Arrays.asList(node.getLeft(), node.getRight()));
+		printParameterList(Arrays.asList(node.getLeft(), node.getRight()));
 	}
 
 	@Override
@@ -1471,37 +1471,37 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAMaxExpression(final AMaxExpression node) {
 		print("max");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAMinExpression(final AMinExpression node) {
 		print("min");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseACardExpression(final ACardExpression node) {
 		print("card");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAConvertIntFloorExpression(AConvertIntFloorExpression node) {
 		print("floor");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAConvertIntCeilingExpression(AConvertIntCeilingExpression node) {
 		print("ceiling");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAConvertRealExpression(AConvertRealExpression node) {
 		print("real");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1532,7 +1532,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 
 	@Override
 	public void caseACoupleExpression(final ACoupleExpression node) {
-		printParameterListOpt(node.getList());
+		printParameterList(node.getList());
 	}
 
 	@Override
@@ -1584,25 +1584,25 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAPowSubsetExpression(final APowSubsetExpression node) {
 		print("POW");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAPow1SubsetExpression(final APow1SubsetExpression node) {
 		print("POW1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAFinSubsetExpression(final AFinSubsetExpression node) {
 		print("FIN");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAFin1SubsetExpression(final AFin1SubsetExpression node) {
 		print("FIN1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1633,13 +1633,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAGeneralUnionExpression(final AGeneralUnionExpression node) {
 		print("union");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAGeneralIntersectionExpression(final AGeneralIntersectionExpression node) {
 		print("inter");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1690,7 +1690,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAIdentityExpression(final AIdentityExpression node) {
 		print("id");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1704,13 +1704,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAFirstProjectionExpression(final AFirstProjectionExpression node) {
 		print("prj1");
-		printParameterListOpt(Arrays.asList(node.getExp1(), node.getExp2()));
+		printParameterList(Arrays.asList(node.getExp1(), node.getExp2()));
 	}
 
 	@Override
 	public void caseAEventBFirstProjectionExpression(AEventBFirstProjectionExpression node) {
 		print("prj1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1721,13 +1721,13 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASecondProjectionExpression(final ASecondProjectionExpression node) {
 		print("prj2");
-		printParameterListOpt(Arrays.asList(node.getExp1(), node.getExp2()));
+		printParameterList(Arrays.asList(node.getExp1(), node.getExp2()));
 	}
 
 	@Override
 	public void caseAEventBSecondProjectionExpression(AEventBSecondProjectionExpression node) {
 		print("prj2");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1776,31 +1776,31 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAIterationExpression(final AIterationExpression node) {
 		print("iterate");
-		printParameterListOpt(Arrays.asList(node.getLeft(), node.getRight()));
+		printParameterList(Arrays.asList(node.getLeft(), node.getRight()));
 	}
 
 	@Override
 	public void caseAReflexiveClosureExpression(final AReflexiveClosureExpression node) {
 		print("closure");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAClosureExpression(final AClosureExpression node) {
 		print("closure1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseADomainExpression(final ADomainExpression node) {
 		print("dom");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseARangeExpression(final ARangeExpression node) {
 		print("ran");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1922,43 +1922,43 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseATransFunctionExpression(final ATransFunctionExpression node) {
 		print("fnc");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseATransRelationExpression(final ATransRelationExpression node) {
 		print("rel");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseASeqExpression(final ASeqExpression node) {
 		print("seq");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseASeq1Expression(final ASeq1Expression node) {
 		print("seq1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAIseqExpression(final AIseqExpression node) {
 		print("iseq");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAIseq1Expression(final AIseq1Expression node) {
 		print("iseq1");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAPermExpression(final APermExpression node) {
 		print("perm");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -1974,37 +1974,37 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseASizeExpression(final ASizeExpression node) {
 		print("size");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAFirstExpression(final AFirstExpression node) {
 		print("first");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseALastExpression(final ALastExpression node) {
 		print("last");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAFrontExpression(final AFrontExpression node) {
 		print("front");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseATailExpression(final ATailExpression node) {
 		print("tail");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseARevExpression(final ARevExpression node) {
 		print("rev");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -2036,7 +2036,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseAGeneralConcatExpression(final AGeneralConcatExpression node) {
 		print("conc");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
@@ -2056,121 +2056,121 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	@Override
 	public void caseATreeExpression(ATreeExpression node) {
 		print("tree");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseABtreeExpression(ABtreeExpression node) {
 		print("btree");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAConstExpression(AConstExpression node) {
 		print("const");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2()));
 	}
 
 	@Override
 	public void caseATopExpression(ATopExpression node) {
 		print("top");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseASonsExpression(ASonsExpression node) {
 		print("sons");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAPrefixExpression(APrefixExpression node) {
 		print("prefix");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAPostfixExpression(APostfixExpression node) {
 		print("postfix");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseASizetExpression(ASizetExpression node) {
 		print("sizet");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAMirrorExpression(AMirrorExpression node) {
 		print("mirror");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseARankExpression(ARankExpression node) {
 		print("rank");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2()));
 	}
 
 	@Override
 	public void caseAFatherExpression(AFatherExpression node) {
 		print("father");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2()));
 	}
 
 	@Override
 	public void caseASonExpression(ASonExpression node) {
 		print("son");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2(), node.getExpression3()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2(), node.getExpression3()));
 	}
 
 	@Override
 	public void caseASubtreeExpression(ASubtreeExpression node) {
 		print("subtree");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2()));
 	}
 
 	@Override
 	public void caseAArityExpression(AArityExpression node) {
 		print("arity");
-		printParameterListOpt(Arrays.asList(node.getExpression1(), node.getExpression2()));
+		printParameterList(Arrays.asList(node.getExpression1(), node.getExpression2()));
 	}
 
 	@Override
 	public void caseABinExpression(ABinExpression node) {
 		print("bin");
-		printParameterListOpt(Stream.of(node.getExpression1(), node.getExpression2(), node.getExpression3()).filter(Objects::nonNull).collect(Collectors.toList()));
+		printParameterList(Stream.of(node.getExpression1(), node.getExpression2(), node.getExpression3()).filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	@Override
 	public void caseALeftExpression(ALeftExpression node) {
 		print("left");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseARightExpression(ARightExpression node) {
 		print("right");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAInfixExpression(AInfixExpression node) {
 		print("infix");
-		printParameterListOpt(Collections.singletonList(node.getExpression()));
+		printParameterList(Collections.singletonList(node.getExpression()));
 	}
 
 	@Override
 	public void caseAStructExpression(final AStructExpression node) {
 		print("struct");
-		printParameterListOpt(node.getEntries());
+		printParameterList(node.getEntries());
 	}
 
 	@Override
 	public void caseARecExpression(final ARecExpression node) {
 		print("rec");
-		printParameterListOpt(node.getEntries());
+		printParameterList(node.getEntries());
 	}
 
 	@Override
