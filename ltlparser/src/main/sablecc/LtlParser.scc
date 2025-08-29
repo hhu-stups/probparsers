@@ -46,6 +46,7 @@ Tokens
   {ltl} r_par = ')';
 
   {ltl -> action} l_sq = l_sq; // TODO: also allow textual version 'executed('
+  {ltl -> action} opcall = ('calls' | 'operation_call') opt_white_space '(';  // to check transition calls subsidiary operation
   {ltl -> action} enabled = ('e' | 'enabled') opt_white_space '(';
   {ltl -> action} available = ('Av' | 'available') opt_white_space '(';
 
@@ -161,6 +162,7 @@ Productions
     {increasing} increasing l_par atomic_proposition_begin r_par {-> New ltl.increasing(atomic_proposition_begin)} |
     {before_after} before_after l_par atomic_proposition_begin r_par {-> New ltl.before_after(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
+    {operationcall} opcall {-> New ltl.operationcall(opcall)} |
     {sink} sink {-> New ltl.sink()} |
     {goal} goal {-> New ltl.goal()} |
     {det_output} det_output {-> New ltl.det_output()} |
@@ -248,6 +250,7 @@ Abstract Syntax Tree
    {weak_fair} [operation]:weak_fair |
    {strong_fair} [operation]:strong_fair |
    {action} [operation]:l_sq |
+   {operationcall} [operation]:opcall |
    {unparsed} [predicate]:atomic_proposition_begin |
    {sink} |
    {goal} |

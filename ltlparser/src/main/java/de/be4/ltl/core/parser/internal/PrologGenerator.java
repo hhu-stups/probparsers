@@ -23,6 +23,7 @@ import de.be4.ltl.core.parser.node.AChangedLtl;
 import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.AIncreasingLtl;
 import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
+import de.be4.ltl.core.parser.node.AOperationcallLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AGoalLtl;
@@ -188,6 +189,17 @@ public class PrologGenerator extends DepthFirstAdapter {
 	public void caseABeforeAfterLtl(ABeforeAfterLtl node) {
 		helper.before_afterTerm(node, this);
 	}
+
+	@Override
+	public void caseAOperationcallLtl(AOperationcallLtl node) {
+		final Token token = node.getOperation();
+		p.openTerm("action");
+		p.openTerm("operation_call"); // check if during the transition the subsidiary operation was called
+		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		p.closeTerm();
+		p.closeTerm();
+	}
+
 
 	@Override
 	public void caseADlkLtl(ADlkLtl node) {
