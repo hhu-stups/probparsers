@@ -47,7 +47,7 @@ class DummyParser implements ProBParserBase {
 		if ("X".equals(text) || text.endsWith("{")) {
 			throw new ProBParseException("syntax error");
 		}
-		System.out.println(pto.toString());
+
 		if (wrap) {
 			pto.openTerm(wrapper);
 		}
