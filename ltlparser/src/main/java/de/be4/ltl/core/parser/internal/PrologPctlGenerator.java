@@ -11,14 +11,13 @@ import java.util.Locale;
 import de.be4.ltl.core.pctlparser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.pctlparser.node.ACurrentPctlState;
 import de.be4.ltl.core.pctlparser.node.ADeadlockPctlState;
-import de.be4.ltl.core.pctlparser.node.ASinkPctlState;
-import de.be4.ltl.core.pctlparser.node.AGoalPctlState;
 import de.be4.ltl.core.pctlparser.node.ADetOutputPctlState;
 import de.be4.ltl.core.pctlparser.node.ADigitExpression;
 import de.be4.ltl.core.pctlparser.node.AErrorPctlState;
-import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
+import de.be4.ltl.core.pctlparser.node.AGoalPctlState;
 import de.be4.ltl.core.pctlparser.node.AProbFormulaPctlState;
-
+import de.be4.ltl.core.pctlparser.node.ASinkPctlState;
+import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
 import de.be4.ltl.core.pctlparser.node.Node;
 import de.be4.ltl.core.pctlparser.node.Start;
 import de.be4.ltl.core.pctlparser.node.Token;
