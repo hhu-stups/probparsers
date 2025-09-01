@@ -36,6 +36,7 @@ Tokens
 
   {ctl -> action} l_sq = l_sq;
   {ctl -> action} enabled = enabled;
+  % TODO: we could support the other transition predicates from LTL: increasing, decreasing, ..., calls, ...
 
   {ctl -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
   {atomic} atomic_proposition_end = '}';
@@ -101,7 +102,7 @@ Productions
     {af} forall finally [cont]:ctl_formula4 {-> New ctl.af(cont.ctl)} |
     {unparsed} atomic_proposition_begin {-> New ctl.unparsed(atomic_proposition_begin)} |
     {enabled} enabled {-> New ctl.enabled(enabled)} |
-    {action} l_sq {-> New ctl.action(l_sq)} |
+    {action} l_sq {-> New ctl.action(l_sq)} |  % this is treated like an exists next action (ena) in the CTL interpreter
     {sink} sink {-> New ctl.sink()} |
     {goal} goal {-> New ctl.goal()} |
     {det_output} det_output {-> New ctl.det_output()} |
