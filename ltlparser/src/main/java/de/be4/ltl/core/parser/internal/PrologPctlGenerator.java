@@ -73,16 +73,16 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 	public void caseAProbFormulaPctlState(AProbFormulaPctlState node) {
 		inAProbFormulaPctlState(node);
 		if(node.getOp() != null)
-        {
-            node.getOp().apply(this);
-        }
+		{
+			node.getOp().apply(this);
+		}
 		final Token token = node.getProbability();
 		helper.caseUnparsedExpression(UniversalToken.createToken(token),false);
 		if(node.getCont() != null)
-        {
-            node.getCont().apply(this);
-        }
-        outAProbFormulaPctlState(node);
+		{
+			node.getCont().apply(this);
+		}
+		outAProbFormulaPctlState(node);
 	}
 
 	@Override
