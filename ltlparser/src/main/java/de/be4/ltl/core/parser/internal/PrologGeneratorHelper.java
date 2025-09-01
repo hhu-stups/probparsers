@@ -71,7 +71,7 @@ final class PrologGeneratorHelper {
 		//pto.closeTerm();
 	}
 
-	public void caseUnparsedExpression(final UniversalToken token,boolean wrap) {
+	public void caseUnparsedExpression(final UniversalToken token, boolean wrap) {
 		//pto.openTerm("ae"); // from the context it is clear in the AST that we expect an expression
 		try {
 			specParser.parseExpression(pto, token.getText(), wrap, token.getLine(), token.getColumn());
@@ -203,7 +203,7 @@ final class PrologGeneratorHelper {
 		pto.openTerm("change_expr");
 		pto.printAtom("eq");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token,true);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
@@ -213,7 +213,7 @@ final class PrologGeneratorHelper {
 		pto.openTerm("change_expr");
 		pto.printAtom("neq");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token,true);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
@@ -223,7 +223,7 @@ final class PrologGeneratorHelper {
 		pto.openTerm("change_expr");
 		pto.printAtom("gt");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token,true);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
@@ -233,7 +233,7 @@ final class PrologGeneratorHelper {
 		pto.openTerm("change_expr");
 		pto.printAtom("lt");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token,true);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}

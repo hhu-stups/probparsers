@@ -313,7 +313,7 @@ public class LtlParserTest {
 	}
 
 	private static String parse(String input) throws LtlParseException {
-		final LtlParser parser = new LtlParser(new DummyParser(true, true,false));
+		final LtlParser parser = new LtlParser(new DummyParser(true, true, false));
 		PrologTermStringOutput pto = new PrologTermStringOutput();
 		parser.printFormulaAsProlog(input, "root", pto);
 		return pto.toString();

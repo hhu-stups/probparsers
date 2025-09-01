@@ -36,14 +36,12 @@ public class PctlLexer extends Lexer {
 
 		@Override
 		protected boolean isOpening(final Token token) {
-			return token instanceof TAtomicPropositionBegin
-					;
+			return token instanceof TAtomicPropositionBegin;
 		}
 
 		@Override
 		protected boolean isClosing(final Token token) {
-			return token instanceof TAtomicPropositionEnd
-					;
+			return token instanceof TAtomicPropositionEnd;
 		}
 
 		@Override
