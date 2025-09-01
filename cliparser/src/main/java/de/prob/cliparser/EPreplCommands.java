@@ -23,5 +23,6 @@ public enum EPreplCommands {
 	substitution,
 	ltl,
 	ctl,
+	pctl,
 	halt,
 }

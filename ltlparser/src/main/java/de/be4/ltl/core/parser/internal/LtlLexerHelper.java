@@ -35,7 +35,7 @@ public class LtlLexerHelper extends LexerHelper<Token, State> {
 	}
 
 	@Override
-	protected boolean isInAction(State state) {
+	protected boolean isInActionOrAtomic(State state) {
 		return state.equals(State.ATOMIC) || state.equals(State.ACTION);
 	}
 

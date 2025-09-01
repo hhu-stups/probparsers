@@ -5,16 +5,21 @@ import de.prob.parserbase.ProBParserBase;
 import de.prob.prolog.output.IPrologTermOutput;
 
 class DummyParser implements ProBParserBase {
-	private final boolean suppPred, suppTransPred;
+	private final boolean suppPred, suppTransPred, suppExpr;
 
-	DummyParser(final boolean suppPred, final boolean suppTransPred) {
+	DummyParser(final boolean suppPred, final boolean suppTransPred, final boolean suppExpr) {
 		this.suppPred = suppPred;
 		this.suppTransPred = suppTransPred;
+		this.suppExpr = suppExpr;
 	}
 
 	@Override
 	public void parseExpression(final IPrologTermOutput pto, final String expression, final boolean wrap) throws ProBParseException {
-		throw new UnsupportedOperationException("no dummy expressions");
+		if (suppExpr) {
+			parse(pto, expression, wrap, "dexpr");
+		} else {
+			throw new UnsupportedOperationException("no dummy expressions");
+		}
 	}
 
 	@Override
@@ -42,7 +47,7 @@ class DummyParser implements ProBParserBase {
 		if ("X".equals(text) || text.endsWith("{")) {
 			throw new ProBParseException("syntax error");
 		}
-
+		System.out.println(pto.toString());
 		if (wrap) {
 			pto.openTerm(wrapper);
 		}

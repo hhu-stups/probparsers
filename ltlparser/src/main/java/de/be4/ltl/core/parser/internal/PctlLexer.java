@@ -8,19 +8,17 @@ package de.be4.ltl.core.parser.internal;
 
 import java.io.PushbackReader;
 
-import de.be4.ltl.core.ctlparser.lexer.Lexer;
-import de.be4.ltl.core.ctlparser.node.EOF;
-import de.be4.ltl.core.ctlparser.node.TActionBegin;
-import de.be4.ltl.core.ctlparser.node.TActionEnd;
-import de.be4.ltl.core.ctlparser.node.TAtomicPropositionBegin;
-import de.be4.ltl.core.ctlparser.node.TAtomicPropositionEnd;
-import de.be4.ltl.core.ctlparser.node.Token;
+import de.be4.ltl.core.pctlparser.lexer.Lexer;
+import de.be4.ltl.core.pctlparser.node.EOF;
+import de.be4.ltl.core.pctlparser.node.TAtomicPropositionBegin;
+import de.be4.ltl.core.pctlparser.node.TAtomicPropositionEnd;
+import de.be4.ltl.core.pctlparser.node.Token;
 
-public class CtlLexer extends Lexer {
+public class PctlLexer extends Lexer {
 
-	private final CtlLexerHelper helper = new CtlLexerHelper();
+	private final PctlLexerHelper helper = new PctlLexerHelper();
 
-	public CtlLexer(final PushbackReader in) {
+	public PctlLexer(final PushbackReader in) {
 		super(in);
 	}
 
@@ -30,27 +28,27 @@ public class CtlLexer extends Lexer {
 		state = helper.getState();
 	}
 
-	public static class CtlLexerHelper extends LexerHelper<Token, State> {
+	public static class PctlLexerHelper extends LexerHelper<Token, State> {
 
-		public CtlLexerHelper() {
-			super(State.CTL);
+		public PctlLexerHelper() {
+			super(State.PCTL_STATE);
 		}
 
 		@Override
 		protected boolean isOpening(final Token token) {
 			return token instanceof TAtomicPropositionBegin
-					|| token instanceof TActionBegin;
+					;
 		}
 
 		@Override
 		protected boolean isClosing(final Token token) {
 			return token instanceof TAtomicPropositionEnd
-					|| token instanceof TActionEnd;
+					;
 		}
 
 		@Override
 		protected boolean isInActionOrAtomic(State state) {
-			return state.equals(State.ATOMIC) || state.equals(State.ACTION);
+			return state.equals(State.ATOMIC);
 		}
 
 		@Override

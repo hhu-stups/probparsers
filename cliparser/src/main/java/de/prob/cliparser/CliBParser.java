@@ -39,6 +39,7 @@ import de.be4.classicalb.core.parser.node.Start;
 import de.be4.classicalb.core.parser.rules.RulesProject;
 import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.ltl.core.parser.CtlParser;
+import de.be4.ltl.core.parser.PctlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
 import de.be4.ltl.core.parser.TemporalLogicParser;
@@ -429,6 +430,14 @@ public class CliBParser {
 					final TemporalLogicParser<?> parser = new CtlParser(extParser);
 					parseTemporalFormula(in.readLine(), parser, socketWriter);
 					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
+					break;
+				}
+				case pctl: {
+					String extension = in.readLine();
+					final ProBParserBase extParser = getExtensionParser(extension, context);
+					final TemporalLogicParser<?> parser = new PctlParser(extParser);
+					parseTemporalFormula(in.readLine(), parser, socketWriter);
+					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to PCTL parser above
 					break;
 				}
 				case halt:
