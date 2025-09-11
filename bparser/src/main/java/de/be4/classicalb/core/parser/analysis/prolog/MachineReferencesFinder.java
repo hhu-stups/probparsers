@@ -191,38 +191,28 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new VisitorException(new CheckException("A machine reference cannot contain more than one dot in the machine identifier", ids.get(2)));
 		}
 
+		String adjustedPath = path;
 		if (path != null) {
-			Path parsedPath = Paths.get(path);
 			// In future we want to disallow backslashes in relative paths to discourage writing machines that only work on Windows.
 			// The portable solution is to use forward slashes, which work on Windows, Mac, and Linux.
 			// Still at the moment there are several important ProB projects which use this
 			// "feature" on projects with a large number of files which cannot be easily adapted
 			// We also still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
 			// absolute paths are inherently not portable between systems anyway.
-			if (!parsedPath.isAbsolute() && path.contains("\\")) {
-				String wpath = path.replace("\\", "/");
-				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
-				if (wbaseName.equals(name)) { 
-					// the replace transformation worked
-					System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + wpath);
-					return new MachineReference(type, name, renamedName, node, wpath);
-				} else {
-					throw new VisitorException(new CheckException(
-						"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
-						node
-					));
-				}
+			if (!Paths.get(path).isAbsolute() && path.contains("\\")) {
+				adjustedPath = path.replace("\\", "/");
+				System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + adjustedPath);
 			}
 
-			String baseName = Utils.getFileWithoutExtension(parsedPath.getFileName().toString());
+			String baseName = Utils.getFileWithoutExtension(Paths.get(adjustedPath).getFileName().toString());
 			if (!baseName.equals(name)) {
 				throw new VisitorException(new CheckException(
-					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
+					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + adjustedPath,
 					node
 				));
 			}
 		}
-		return new MachineReference(type, name, renamedName, node, path);
+		return new MachineReference(type, name, renamedName, node, adjustedPath);
 	}
 
 	/**
