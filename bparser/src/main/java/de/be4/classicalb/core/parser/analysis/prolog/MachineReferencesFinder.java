@@ -200,10 +200,10 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 			// We also still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
 			// absolute paths are inherently not portable between systems anyway.
 			if (!parsedPath.isAbsolute() && path.contains("\\")) {
-			    String wpath = path.replace("\\", "/");
-			    final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
-			    if (wbaseName.equals(name)) { 
-			         // the replace transformation worked
+				String wpath = path.replace("\\", "/");
+				final String wbaseName = Utils.getFileWithoutExtension(Paths.get(wpath).getFileName().toString());
+				if (wbaseName.equals(name)) { 
+					// the replace transformation worked
 					System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + wpath);
 					return new MachineReference(type, name, renamedName, node, wpath);
 				} else {
