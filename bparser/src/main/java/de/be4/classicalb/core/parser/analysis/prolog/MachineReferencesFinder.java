@@ -201,7 +201,7 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 			// absolute paths are inherently not portable between systems anyway.
 			if (!Paths.get(path).isAbsolute() && path.contains("\\")) {
 				adjustedPath = path.replace("\\", "/");
-				System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + adjustedPath);
+				//System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + adjustedPath);
 			}
 
 			String baseName = Utils.getFileWithoutExtension(Paths.get(adjustedPath).getFileName().toString());
