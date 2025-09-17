@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -215,7 +214,7 @@ public class SourcePositionsTest {
 		if (variables == null) {
 			fail("variables clause not found");
 		}
-		final LinkedList<PExpression> ids = variables.getIdentifiers();
+		List<PExpression> ids = variables.getIdentifiers();
 		assertEquals(2, ids.size());
 		final AIdentifierExpression x = (AIdentifierExpression) ids.get(0);
 		final AIdentifierExpression y = (AIdentifierExpression) ids.get(1);

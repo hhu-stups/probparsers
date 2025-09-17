@@ -1,16 +1,16 @@
 package de.be4.eventb.parser;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.LinkedList;
-
-import org.junit.Test;
+import java.util.List;
 
 import de.be4.eventb.core.parser.EventBParser;
 import de.be4.eventb.core.parser.node.AAxiom;
 import de.be4.eventb.core.parser.node.AContextParseUnit;
 import de.be4.eventb.core.parser.node.PAxiom;
 import de.be4.eventb.core.parser.node.Start;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TheoriesIssuesTest {
 	@Test
@@ -19,7 +19,7 @@ public class TheoriesIssuesTest {
 
 		final AContextParseUnit parseUnit = (AContextParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PAxiom> axioms = parseUnit.getAxioms();
+		List<PAxiom> axioms = parseUnit.getAxioms();
 		final AAxiom axiom = (AAxiom) axioms.get(0);
 
 		assertEquals("{1↦1,2↦2} = seqAppend({1↦1},2)", axiom.getPredicate()

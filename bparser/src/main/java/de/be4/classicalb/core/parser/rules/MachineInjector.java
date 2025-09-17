@@ -121,7 +121,7 @@ public final class MachineInjector extends DepthFirstAdapter {
 
 		@Override
 		public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
-			node.setMachineClauses(new LinkedList<>());
+			node.setMachineClauses(Collections.emptyList());
 		}
 
 		@Override

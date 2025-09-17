@@ -2,7 +2,6 @@ package de.be4.classicalb.core.parser.analysis.transforming;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.be4.classicalb.core.parser.IDefinitions;
@@ -82,7 +81,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 	public void caseAOperationOrDefinitionCallSubstitution(AOperationOrDefinitionCallSubstitution node) {
 		PExpression expression = node.getExpression();
 		PExpression idExpr;
-		LinkedList<PExpression> parameters;
+		List<PExpression> parameters;
 		Type type;
 		TIdentifierLiteral idToken = null;
 		String idString = null;
@@ -101,7 +100,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 				type = Type.NoDefinition;
 			}
 
-			parameters = new LinkedList<>(function.getParameters());
+			parameters = new ArrayList<>(function.getParameters());
 		} else if (expression instanceof AIdentifierExpression) {
 			// the operation was parsed as an identifier expression
 			final AIdentifierExpression identifier = (AIdentifierExpression) expression;
@@ -110,7 +109,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			type = definitions.getType(idString);
 
 			idExpr = expression;
-			parameters = new LinkedList<>();
+			parameters = Collections.emptyList();
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", expression));
@@ -190,7 +189,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 
 		if (node.getIdentifier() instanceof ADefinitionExpression
 				&& ((ADefinitionExpression) node.getIdentifier()).getParameters().isEmpty()) {
-			final LinkedList<PExpression> paramList = new LinkedList<>(node.getParameters());
+			List<PExpression> paramList = new ArrayList<>(node.getParameters());
 
 			final TIdentifierLiteral identifier = ((ADefinitionExpression) node.getIdentifier()).getDefLiteral();
 
@@ -256,10 +255,10 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 			} else {
 				throw new VisitorException(new CheckException("Operation name in operation call must be an identifier", idExpr));
 			}
-			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), new LinkedList<>(rhsFunction.getParameters()));
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(operationName), new ArrayList<>(rhsFunction.getParameters()));
 		} else if (defRhs instanceof AIdentifierExpression) {
 			final AIdentifierExpression rhsIdent = (AIdentifierExpression) defRhs;
-			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(rhsIdent.getIdentifier()), new LinkedList<>());
+			rhsSubst = new AOperationCallSubstitution(Collections.emptyList(), new ArrayList<>(rhsIdent.getIdentifier()), Collections.emptyList());
 		} else {
 			// some other expression was parsed (NOT allowed)
 			throw new VisitorException(new CheckException("Expecting operation", node));
@@ -271,7 +270,7 @@ public class OpSubstitutions extends OptimizedTraversingAdapter {
 		final TDefLiteralSubstitution defId = new TDefLiteralSubstitution(oldDefId.getText(), oldDefId.getLine(),
 				oldDefId.getPos());
 		final ASubstitutionDefinitionDefinition substDef = new ASubstitutionDefinitionDefinition(defId,
-				new LinkedList<>(oldDefinition.getParameters()), rhsSubst);
+				new ArrayList<>(oldDefinition.getParameters()), rhsSubst);
 		substDef.setStartPos(oldDefinition.getStartPos());
 		substDef.setEndPos(oldDefinition.getEndPos());
 		definitions.replaceDefinition(idString, Type.Substitution, substDef);

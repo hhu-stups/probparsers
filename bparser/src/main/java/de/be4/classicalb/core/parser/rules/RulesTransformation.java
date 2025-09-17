@@ -3,7 +3,12 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -302,7 +307,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(compOperation.getActivationPredicate().clone(),
-					createStringExpression(COMPUTATION_NOT_EXECUTED), new LinkedList<>(),
+					createStringExpression(COMPUTATION_NOT_EXECUTED), Collections.emptyList(),
 					createStringExpression(COMPUTATION_DISABLED));
 		} else {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
@@ -389,9 +394,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(new ADescriptionOperation(
 				new ADescriptionPragma(Collections.singletonList(new TPragmaFreeText(sw.toString()))),
 				new AOperation(
-						new LinkedList<>(),
+						Collections.emptyList(),
 						Collections.singletonList(node.getRuleName().clone()),
-						new LinkedList<>(),
+						Collections.emptyList(),
 						select
 		)));
 
@@ -416,7 +421,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression value;
 		if (currentRule.getActivationPredicate() != null) {
 			value = new AIfThenElseExpression(currentRule.getActivationPredicate().clone(),
-					createStringExpression(RULE_NOT_CHECKED), new LinkedList<>(),
+					createStringExpression(RULE_NOT_CHECKED), Collections.emptyList(),
 					createStringExpression(RULE_DISABLED));
 		} else {
 			value = createStringExpression(RULE_NOT_CHECKED);
@@ -463,7 +468,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
-		final LinkedList<PExpression> parameters = node.getIdentifiers();
+		List<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
 			case RulesGrammar.STRING_FORMAT:
 				translateStringFormatOperator(node, parameters);
@@ -499,7 +504,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 	}
 
-	private void translateStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
+	private void translateStringFormatOperator(AOperatorExpression node, List<PExpression> parameters) {
 		addFormatToStringDefinition(iDefinitions);
 		addToStringDefinition(iDefinitions);
 		final List<PExpression> seqList = new ArrayList<>();
@@ -634,8 +639,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (!preConditionList.isEmpty()) {
 			body = new APreconditionSubstitution(createConjunction(preConditionList), body);
 		}
-		node.replaceBy(new AOperation(new LinkedList<>(node.getReturnValues()), Collections.singletonList(node.getName()),
-				new LinkedList<>(node.getParameters()), body));
+		node.replaceBy(new AOperation(new ArrayList<>(node.getReturnValues()), Collections.singletonList(node.getName()),
+				new ArrayList<>(node.getParameters()), body));
 	}
 
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,

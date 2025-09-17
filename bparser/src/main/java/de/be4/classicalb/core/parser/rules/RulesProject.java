@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BParser;
@@ -48,9 +48,9 @@ public class RulesProject {
 	protected final INodeIds nodeIdAssignment = new NodeFileNumbers();
 	private final List<File> filesLoaded = new ArrayList<>(); // rules machine files
 														// and definitions files
-	private final HashMap<String, String> constantStringValues = new HashMap<>();
+	private final Map<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
-	private final HashMap<String, String> operationReplacementMap = new HashMap<>();
+	private final Map<String, String> operationReplacementMap = new HashMap<>();
 
 	public RulesProject() {
 		// use the provided setter methods to parameterize the rules project
@@ -78,7 +78,7 @@ public class RulesProject {
 			this.bExceptionList.addAll(compound.getBExceptions());
 		}
 		bModels.add(mainModel);
-		final LinkedList<MachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
+		Deque<MachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
 			final MachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
@@ -108,7 +108,7 @@ public class RulesProject {
 
 	public Map<String, AbstractOperation> getOperationsMap() {
 		Map<String, AbstractOperation> result = new HashMap<>();
-		for (Entry<String, AbstractOperation> entry : this.allOperations.entrySet()) {
+		for (Map.Entry<String, AbstractOperation> entry : this.allOperations.entrySet()) {
 			AbstractOperation op = entry.getValue();
 			if (!this.operationReplacementMap.containsValue(op.getOriginalName())) {
 				result.put(op.getName(), op);
@@ -206,7 +206,7 @@ public class RulesProject {
 			return;
 		}
 
-		for (Entry<String, String> entry : this.operationReplacementMap.entrySet()) {
+		for (Map.Entry<String, String> entry : this.operationReplacementMap.entrySet()) {
 			final String newOpName = entry.getKey();
 			final String replacedOperationName = entry.getValue();
 			AbstractOperation newOp = this.allOperations.get(newOpName);
@@ -362,7 +362,7 @@ public class RulesProject {
 	}
 
 	public List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
-		HashMap<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
+		Map<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
 		for (AbstractOperation abstractOperation : values) {
 			if (!(abstractOperation instanceof FunctionOperation)) {
 				dependenciesMap.put(abstractOperation, new HashSet<>(abstractOperation.getTransitiveDependencies()));
@@ -384,7 +384,7 @@ public class RulesProject {
 	}
 
 	private void findImplicitDependenciesToComputations() {
-		HashMap<String, ComputationOperation> variableToComputation = new HashMap<>();
+		Map<String, ComputationOperation> variableToComputation = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
 			if (operation instanceof ComputationOperation && !operation.replacesOperation()) {
 				ComputationOperation comp = (ComputationOperation) operation;
@@ -398,7 +398,7 @@ public class RulesProject {
 			final Set<String> readVariables = operation.getReadVariables();
 			readVariables.retainAll(variableToComputation.keySet());
 
-			final HashSet<String> variablesInScope = new HashSet<>();
+			Set<String> variablesInScope = new HashSet<>();
 			// Note, RulesMachineChecker locally checks that a variable is
 			// defined before read.
 			if (operation instanceof ComputationOperation) {
@@ -444,7 +444,7 @@ public class RulesProject {
 			 */
 			return;
 		}
-		final HashMap<String, RulesParseUnit> map = new HashMap<>();
+		Map<String, RulesParseUnit> map = new HashMap<>();
 		for (IModel model : bModels) {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			map.put(parseUnit.getMachineName(), parseUnit);
@@ -458,11 +458,11 @@ public class RulesProject {
 			visited.clear();
 		}
 		RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
-		Map<String, HashSet<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
-		HashSet<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
+		Map<String, Set<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
+		Set<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
 		unknownIdentifiers.removeAll(knownIdentifiers);
 		for (String name : unknownIdentifiers) {
-			HashSet<Node> hashSet = unknownIdentifierMap.get(name);
+			Set<Node> hashSet = unknownIdentifierMap.get(name);
 			Node node = hashSet.iterator().next();
 			this.bExceptionList.add(new BException(parseUnit.getPath(),
 					new CheckException("Unknown identifier '" + name + "'.", node)));
@@ -470,7 +470,7 @@ public class RulesProject {
 	}
 
 	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map, Set<String> visited) {
-		HashSet<String> knownIdentifiers = new HashSet<>();
+		Set<String> knownIdentifiers = new HashSet<>();
 		List<MachineReference> machineReferences = parseUnit.getMachineReferences();
 		for (MachineReference rulesMachineReference : machineReferences) {
 			RulesParseUnit rulesParseUnit = map.get(rulesMachineReference.getName());
@@ -491,7 +491,7 @@ public class RulesProject {
 		if (this.hasErrors()) {
 			return;
 		}
-		final HashMap<String, RulesParseUnit> map = new HashMap<>();
+		Map<String, RulesParseUnit> map = new HashMap<>();
 		for (IModel model : bModels) {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			map.put(parseUnit.getMachineName(), parseUnit);
@@ -501,7 +501,7 @@ public class RulesProject {
 				RulesParseUnit rulesParseUnit = (RulesParseUnit) model;
 				Set<AIdentifierExpression> referencedRuleOperations = rulesParseUnit.getRulesMachineChecker()
 						.getReferencedRuleOperations();
-				final HashSet<String> knownRules = new HashSet<>();
+				Set<String> knownRules = new HashSet<>();
 				for (RuleOperation ruleOperation : rulesParseUnit.getRulesMachineChecker().getRuleOperations()) {
 					knownRules.add(ruleOperation.getOriginalName());
 				}
@@ -527,7 +527,7 @@ public class RulesProject {
 	private void findTransitiveDependencies() {
 		if (this.hasErrors())
 			return;
-		LinkedList<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
+		Deque<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
 		while (!todoList.isEmpty()) {
 			AbstractOperation operation = todoList.poll();
 			if (operation.getTransitiveDependencies() == null) {

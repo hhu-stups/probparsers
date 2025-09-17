@@ -1,14 +1,7 @@
 package de.be4.eventb.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
-
-import org.junit.Test;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.EventBParseException;
@@ -24,6 +17,13 @@ import de.be4.eventb.core.parser.node.PVariable;
 import de.be4.eventb.core.parser.node.Start;
 import de.be4.eventb.core.parser.node.TComment;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public class CommentTest {
 	@Test
 	public void testCommentPredicates1() throws Exception {
@@ -31,7 +31,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PInvariant> invariants = parseUnit.getInvariants();
+		List<PInvariant> invariants = parseUnit.getInvariants();
 		final AInvariant invariant = (AInvariant) invariants.get(0);
 
 		// correct comment content?
@@ -44,7 +44,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PInvariant> invariants = parseUnit.getInvariants();
+		List<PInvariant> invariants = parseUnit.getInvariants();
 		assertEquals(2, invariants.size());
 
 		AInvariant invariant = (AInvariant) invariants.get(0);
@@ -55,7 +55,7 @@ public class CommentTest {
 		// correct comment content, i.e., is whitespace in the beginning
 		// omitted?
 		invariant = (AInvariant) invariants.get(1);
-		final LinkedList<TComment> comments = invariant.getComments();
+		List<TComment> comments = invariant.getComments();
 		assertEquals(1, comments.size());
 		assertEquals("MyComment", comments.get(0).getText());
 		assertEquals("inv1", invariant.getName().getText());
@@ -70,7 +70,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PInvariant> invariants = parseUnit.getInvariants();
+		List<PInvariant> invariants = parseUnit.getInvariants();
 		assertEquals(2, invariants.size());
 
 		AInvariant invariant = (AInvariant) invariants.get(0);
@@ -79,7 +79,7 @@ public class CommentTest {
 		assertEquals("1=1", invariant.getPredicate().getText());
 
 		invariant = (AInvariant) invariants.get(1);
-		final LinkedList<TComment> comments = invariant.getComments();
+		List<TComment> comments = invariant.getComments();
 		assertEquals(1, comments.size());
 		assertEquals("inv2\ncomment", comments.get(0).getText());
 		assertEquals("inv2", invariant.getName().getText());
@@ -92,11 +92,11 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PInvariant> invariants = parseUnit.getInvariants();
+		List<PInvariant> invariants = parseUnit.getInvariants();
 		final AInvariant invariant = (AInvariant) invariants.get(0);
 
 		// correct comment content?
-		final LinkedList<TComment> comments = invariant.getComments();
+		List<TComment> comments = invariant.getComments();
 		assertEquals(1, comments.size());
 
 		final StringTokenizer tokenizer = new StringTokenizer(comments.get(0)
@@ -126,7 +126,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PVariable> variables = parseUnit.getVariables();
+		List<PVariable> variables = parseUnit.getVariables();
 
 		assertEquals(3, variables.size());
 
@@ -141,7 +141,7 @@ public class CommentTest {
 		variable = (AVariable) variables.get(2);
 		assertEquals("varC", variable.getName().getText());
 
-		final LinkedList<TComment> comments = variable.getComments();
+		List<TComment> comments = variable.getComments();
 		assertNotNull(comments);
 		assertEquals(1, comments.size());
 
@@ -184,7 +184,7 @@ public class CommentTest {
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
 		final AEvent event = (AEvent) parseUnit.getEvents().get(0);
-		final LinkedList<PAction> actions = event.getActions();
+		List<PAction> actions = event.getActions();
 
 		AAction labeledAction = (AAction) actions.get(0);
 		assertEquals("act1", labeledAction.getName().getText());
@@ -211,7 +211,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<TComment> comments = parseUnit.getComments();
+		List<TComment> comments = parseUnit.getComments();
 
 		assertEquals(3, comments.size());
 		assertEquals("line1", comments.get(0).getText());
@@ -231,7 +231,7 @@ public class CommentTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<TComment> comments = parseUnit.getComments();
+		List<TComment> comments = parseUnit.getComments();
 
 		assertEquals(3, comments.size());
 		assertEquals("line1", comments.get(0).getText());

@@ -1,6 +1,6 @@
 package de.be4.classicalb.core.parser;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
@@ -35,7 +35,7 @@ public class StructuralTest {
 		assertNotNull("Machine header parameter list is null", header.getParameters());
 		assertTrue("More machine header parameters than expected", header.getParameters().isEmpty());
 
-		final LinkedList<PMachineClause> machineClauses = machine.getMachineClauses();
+		List<PMachineClause> machineClauses = machine.getMachineClauses();
 		assertNotNull("Machine clause list is null", machineClauses);
 		assertTrue("More machine clauses than expected", machineClauses.isEmpty());
 	}

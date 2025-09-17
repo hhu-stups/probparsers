@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -208,9 +209,8 @@ public class PreParser {
 
 	private void evaluateTypes(List<TPreParserIdentifier> sortedDefinitionList, final Map<TPreParserIdentifier, TRhsBody> definitions)
 			throws PreParseException {
-		// use linked list as we rely on pop() and push()
-		LinkedList<TPreParserIdentifier> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
-		LinkedList<TPreParserIdentifier> currentlyUnparseableDefinitions = new LinkedList<>();
+		Deque<TPreParserIdentifier> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
+		Deque<TPreParserIdentifier> currentlyUnparseableDefinitions = new LinkedList<>();
 		Set<String> todoDefs = new HashSet<>();
 		for (TPreParserIdentifier token : remainingDefinitions) {
 			todoDefs.add(token.getText());

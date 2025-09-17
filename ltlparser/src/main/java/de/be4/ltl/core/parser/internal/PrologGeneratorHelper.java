@@ -1,6 +1,5 @@
 package de.be4.ltl.core.parser.internal;
 
-import java.util.LinkedList;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
@@ -295,11 +294,10 @@ final class PrologGeneratorHelper {
 	}
 
 	public void dlk(ADlkLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("dlk");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
@@ -308,11 +306,10 @@ final class PrologGeneratorHelper {
 	}
 
 	public void det(ADetLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("det");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
@@ -321,11 +318,10 @@ final class PrologGeneratorHelper {
 	}
 
 	public void ctrl(ACtrlLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("ctrl");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();

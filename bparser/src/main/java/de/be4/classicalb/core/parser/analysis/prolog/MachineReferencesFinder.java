@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -171,7 +170,7 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 		}
 	}
 
-	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
+	private static MachineReference makeMachineReference(final ReferenceType type, List<TIdentifierLiteral> ids, final Node node, final String path) {
 		final String name;
 		final String renamedName;
 		if (ids.size() == 1) {

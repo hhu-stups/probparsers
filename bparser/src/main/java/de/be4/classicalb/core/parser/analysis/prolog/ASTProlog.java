@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.analysis.prolog;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,11 +30,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	// SIMPLE_NAME must list all AST Classes that are not part of a sum-type
 	// If a class is not a token , not in ATOMIC_TYPE and not in SUM_TYPE we
 	// throw an exception.
-	private static final List<String> SUM_TYPE = new LinkedList<>(Arrays.asList("expression", "predicate",
+	private static final List<String> SUM_TYPE = Collections.unmodifiableList(Arrays.asList("expression", "predicate",
 			"machine_clause", "substitution", "parse_unit", "model_clause", "context_clause", "eventstatus",
 			"argpattern", "set", "machine_variant", "definition", "freetype_constructor"));
 
-	private static final List<String> ATOMIC_TYPE = new LinkedList<>(Arrays.asList(
+	private static final List<String> ATOMIC_TYPE = Collections.unmodifiableList(Arrays.asList(
 			"description_event", // for ADescriptionEvent
 			"description_operation",
 			"description_pragma",

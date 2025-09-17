@@ -1,12 +1,6 @@
 package de.be4.eventb.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.LinkedList;
-
-import org.junit.Test;
+import java.util.List;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.EventBParseException;
@@ -21,6 +15,12 @@ import de.be4.eventb.core.parser.node.PVariable;
 import de.be4.eventb.core.parser.node.PWitness;
 import de.be4.eventb.core.parser.node.Start;
 import de.be4.eventb.core.parser.node.TAt;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class StructureTest {
 	@Test
@@ -44,7 +44,7 @@ public class StructureTest {
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) root
 				.getPParseUnit();
 
-		final LinkedList<PVariable> variables = parseUnit.getVariables();
+		List<PVariable> variables = parseUnit.getVariables();
 		assertEquals(2, variables.size());
 
 		assertEquals("x'", ((AVariable) variables.get(0)).getName().getText());
@@ -57,11 +57,11 @@ public class StructureTest {
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) root
 				.getPParseUnit();
 
-		final LinkedList<PEvent> events = parseUnit.getEvents();
+		List<PEvent> events = parseUnit.getEvents();
 		assertEquals(1, events.size());
 
 		final AEvent event = (AEvent) events.get(0);
-		final LinkedList<PWitness> witnesses = event.getWitnesses();
+		List<PWitness> witnesses = event.getWitnesses();
 		assertEquals(1, witnesses.size());
 
 		assertEquals("x'", ((AWitness) witnesses.get(0)).getName().getText());
