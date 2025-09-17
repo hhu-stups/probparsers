@@ -35,7 +35,8 @@ final class PrologGeneratorHelper {
 
 	public void defaultIn(Class<?> clazz) {
 		StringBuilder sb = new StringBuilder(clazz.getSimpleName());
-		sb.setLength(sb.length() - 3);
+		StringBuilder ssb = new StringBuilder(clazz.getSuperclass().getSimpleName());
+		sb.setLength(sb.length() - ssb.length() + 1);
 		sb.deleteCharAt(0);
 		String term = sb.toString().toLowerCase(Locale.ENGLISH);
 		pto.openTerm(term);
