@@ -81,12 +81,12 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseADetOutputPctlState(final ADetOutputPctlState node) {
-		helper.det_output();
+		helper.detOutput();
 	}
 
 	@Override
 	public void caseAErrorPctlState(final AErrorPctlState node) {
-		helper.state_error();
+		helper.stateError();
 	}
 
 	@Override

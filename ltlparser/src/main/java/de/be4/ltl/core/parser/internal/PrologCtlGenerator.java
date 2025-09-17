@@ -77,12 +77,12 @@ public class PrologCtlGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseADetOutputCtl(final ADetOutputCtl node) {
-		helper.det_output();
+		helper.detOutput();
 	}
 
 	@Override
 	public void caseAErrorCtl(final AErrorCtl node) {
-		helper.state_error();
+		helper.stateError();
 	}
 
 	@Override

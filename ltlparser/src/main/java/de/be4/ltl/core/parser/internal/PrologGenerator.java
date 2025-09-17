@@ -36,7 +36,6 @@ import de.be4.ltl.core.parser.node.AUnparsedLtl;
 import de.be4.ltl.core.parser.node.AWeakFairAllLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
 import de.be4.ltl.core.parser.node.Node;
-import de.be4.ltl.core.parser.node.PLtl;
 import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.node.Token;
 import de.prob.parserbase.ProBParserBase;
@@ -92,27 +91,23 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseAStrongFairLtl(final AStrongFairLtl node) {
 		final Token token = node.getOperation();
-		helper.strong_fair(UniversalToken.createToken(token));
+		helper.strongFair(UniversalToken.createToken(token));
 	}
 
 	@Override
 	public void caseAWeakFairLtl(final AWeakFairLtl node) {
 		final Token token = node.getOperation();
-		helper.weak_fair(UniversalToken.createToken(token));
+		helper.weakFair(UniversalToken.createToken(token));
 	}
 
 	@Override
 	public void caseAAndFair1Ltl(final AAndFair1Ltl node) {
-		final PLtl left_node = node.getLeft();
-		final PLtl right_node = node.getRight();
-		helper.and_fair1(left_node,right_node,this);
+		helper.andFair1(node.getLeft(), node.getRight(), this);
 	}
 
 	@Override
 	public void caseAAndFair2Ltl(final AAndFair2Ltl node) {
-		final PLtl left_node = node.getLeft();
-		final PLtl right_node = node.getRight();
-		helper.and_fair2(left_node,right_node,this);
+		helper.andFair2(node.getLeft(), node.getRight(), this);
 	}
 
 	@Override
@@ -127,12 +122,12 @@ public class PrologGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseADetOutputLtl(final ADetOutputLtl node) {
-		helper.det_output();
+		helper.detOutput();
 	}
 
 	@Override
 	public void caseAErrorLtl(final AErrorLtl node) {
-		helper.state_error();
+		helper.stateError();
 	}
 
 	@Override
@@ -147,12 +142,12 @@ public class PrologGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseAWeakFairAllLtl(final AWeakFairAllLtl node) {
-		helper.weak_fair_all();
+		helper.weakFairAll();
 	}
 
 	@Override
 	public void caseAStrongFairAllLtl(final AStrongFairAllLtl node) {
-		helper.strong_fair_all();
+		helper.strongFairAll();
 	}
 
 	@Override
@@ -187,7 +182,7 @@ public class PrologGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseABeforeAfterLtl(ABeforeAfterLtl node) {
-		helper.before_afterTerm(node, this);
+		helper.beforeAfterTerm(node, this);
 	}
 
 	@Override

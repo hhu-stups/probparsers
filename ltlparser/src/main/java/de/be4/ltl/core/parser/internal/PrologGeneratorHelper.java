@@ -110,7 +110,7 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void strong_fair(UniversalToken token) {
+	public void strongFair(UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("strong_fair");
 		parseTransitionPredicate(token);
@@ -118,7 +118,7 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void weak_fair(UniversalToken token) {
+	public void weakFair(UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("weak_fair");
 		parseTransitionPredicate(token);
@@ -146,13 +146,13 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void det_output() {
+	public void detOutput() {
 		pto.openTerm("ap");
 		pto.printAtom("det_output");
 		pto.closeTerm();
 	}
 
-	public void state_error() {
+	public void stateError() {
 		pto.openTerm("ap");
 		pto.printAtom("state_error");
 		pto.closeTerm();
@@ -248,7 +248,7 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void before_afterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
+	public void beforeAfterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
 		pto.openTerm("action");
 		pto.openTerm("before_after");
 		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
@@ -257,39 +257,39 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+	public void andFair1(PLtl leftNode, PLtl rightNode, PrologGenerator gen) {
 		pto.openTerm("and");
 
 		pto.openTerm("strongassumptions");
-		left_node.apply(gen);
+		leftNode.apply(gen);
 		pto.closeTerm();
 
 		pto.openTerm("weakassumptions");
-		right_node.apply(gen);
+		rightNode.apply(gen);
 		pto.closeTerm();
 
 		pto.closeTerm();
 	}
 
-	public void and_fair2(PLtl left_node, PLtl right_node, PrologGenerator gen) {
+	public void andFair2(PLtl leftNode, PLtl rightNode, PrologGenerator gen) {
 		pto.openTerm("and");
 
 		pto.openTerm("weakassumptions");
-		left_node.apply(gen);
+		leftNode.apply(gen);
 		pto.closeTerm();
 
 		pto.openTerm("strongassumptions");
-		right_node.apply(gen);
+		rightNode.apply(gen);
 		pto.closeTerm();
 
 		pto.closeTerm();
 	}
 
-	public void weak_fair_all() {
+	public void weakFairAll() {
 		pto.printAtom("all");
 	}
 
-	public void strong_fair_all() {
+	public void strongFairAll() {
 		pto.printAtom("all");
 	}
 
