@@ -34,11 +34,21 @@ final class PrologGeneratorHelper {
 	}
 
 	public void defaultIn(Class<?> clazz) {
-		StringBuilder sb = new StringBuilder(clazz.getSimpleName());
-		StringBuilder ssb = new StringBuilder(clazz.getSuperclass().getSimpleName());
-		sb.setLength(sb.length() - ssb.length() + 1);
-		sb.deleteCharAt(0);
-		String term = sb.toString().toLowerCase(Locale.ENGLISH);
+		String name = clazz.getSimpleName();
+		if (clazz.getSuperclass() == null) {
+			throw new IllegalArgumentException("Class has no superclass? " + clazz);
+		}
+		String superclassName = clazz.getSuperclass().getSimpleName();
+		if (!superclassName.startsWith("P") || !name.startsWith("A")) {
+			throw new IllegalArgumentException("Unexpected class name for a SableCC AST node: " + clazz + ", superclass " + clazz.getSuperclass());
+		}
+		String productionName = superclassName.substring(1);
+		if (!name.endsWith(productionName)) {
+			throw new IllegalArgumentException("Node class name doesn't match its superclass? " + clazz + ", superclass " + clazz.getSuperclass());
+		}
+		// Remove the letter "A" at the start and the production name at the end, then convert to lowercase.
+		// For example: "AGloballyLtl" (with superclass "PLtl") -> "globally"
+		String term = name.substring(1, name.length() - productionName.length()).toLowerCase(Locale.ENGLISH);
 		pto.openTerm(term);
 	}
 
