@@ -24,11 +24,13 @@ plugins {
 	// and re-declared without .apply(false) in the subprojects that actually need them.
 	id("de.hhu.stups.sablecc").version("1.2.0").apply(false)
 	id("me.champeau.jmh").version("0.7.3").apply(false)
+	// The Nexus publish plugin really needs to be applied to the root project.
+	id("io.github.gradle-nexus.publish-plugin").version("2.0.0")
 }
 
 // group and version are also copied to all subprojects (see below)
 project.group = 'de.hhu.stups'
-project.version = "2.15.2"
+project.version = "2.15.3"
 project.description = "The ProB parser libraries"
 
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
@@ -39,6 +41,17 @@ ext {
 	sableCCVersion = "3.9.0"
 	sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
 	sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
+}
+
+final snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
+final releasesStagingRepoUrl = "https://ossrh-staging-api.central.sonatype.com/service/local/"
+nexusPublishing {
+	repositories {
+		mavenCentral {
+			snapshotRepositoryUrl.set(uri(snapshotsRepoUrl))
+			nexusUrl.set(uri(releasesStagingRepoUrl))
+		}
+	}
 }
 
 subprojects {
@@ -53,8 +66,8 @@ subprojects {
 		mavenCentral()
 		if (isSnapshot) {
 			maven {
-				name = "snapshots"
-				url = "https://oss.sonatype.org/content/repositories/snapshots/"
+				name = "Sonatype snapshots"
+				url = snapshotsRepoUrl
 			}
 		}
 	}
@@ -154,20 +167,6 @@ subprojects {
 							name = 'Michael Leuschel'
 							email = 'leuschel@hhu.de'
 						}
-					}
-				}
-			}
-		}
-
-		repositories {
-			maven {
-				final releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-				final snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-				url = isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
-				if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-					credentials {
-						username = project.ossrhUsername
-						password = project.ossrhPassword
 					}
 				}
 			}

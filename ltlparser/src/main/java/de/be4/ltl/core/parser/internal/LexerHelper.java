@@ -1,40 +1,35 @@
 package de.be4.ltl.core.parser.internal;
 
-import de.be4.ltl.core.parser.node.Token;
+import de.hhu.stups.sablecc.patch.IToken;
 
-abstract class LexerHelper<TOKEN, STATE> {
-
+abstract class LexerHelper<TOKEN extends IToken, STATE> {
 	private int count;
 	private TOKEN externalFormula;
 	private StringBuilder text;
 	private STATE state, lastState;
 	private boolean inQuote;
 
-	abstract protected String readToken(final TOKEN token);
+	protected abstract boolean isInActionOrAtomic(final STATE state);
 
-	abstract protected void writeToken(final TOKEN token, final String text);
+	protected abstract boolean isOpening(final TOKEN token);
 
-	abstract protected boolean isInAction(final STATE state);
+	protected abstract boolean isClosing(final TOKEN token);
 
-	abstract protected boolean isOpening(final TOKEN token);
+	protected abstract boolean correctBalancedParenthesis(int count, TOKEN token);
 
-	abstract protected boolean isClosing(final TOKEN token);
+	protected abstract boolean isInActions(final STATE state);
 
-	abstract protected boolean correctBalancedParenthesis(int count, TOKEN token);
+	protected abstract boolean isOpeningActionArg(final TOKEN token);
 
-	abstract protected boolean isInActions(final STATE state);
+	protected abstract boolean isClosingActionArg(final TOKEN token);
 
-	abstract protected boolean isOpeningActionArg(final TOKEN token);
+	protected abstract boolean isBeginningActionsToken(final TOKEN token);
 
-	abstract protected boolean isClosingActionArg(final TOKEN token);
+	protected abstract boolean isArgumentClosing(final TOKEN token);
 
-	abstract protected boolean isBeginningActionsToken(final TOKEN token);
+	protected abstract boolean isArgumentSplittingToken(final TOKEN token);
 
-	abstract protected boolean isArgumentClosing(final TOKEN token);
-
-	abstract protected boolean isArgumentSplittingToken(final TOKEN token);
-
-	abstract protected boolean isQuote(final TOKEN token);
+	protected abstract boolean isQuote(final TOKEN token);
 
 	public LexerHelper(final STATE initialState) {
 		this.lastState = initialState;
@@ -44,41 +39,47 @@ abstract class LexerHelper<TOKEN, STATE> {
 		if (isQuote(token)) {
 			inQuote = !inQuote;
 		}
+
 		state = newState;
-		if (isInAction(state)) {
+
+		if (isInActionOrAtomic(state)) {
 			if (externalFormula == null) {
 				initialiseActionToken(token);
-				token = null;
+				return null;
 			} else {
-				final String tokenText = readToken(token);
-				text.append(tokenText);
+				text.append(token.getText());
 				if (isOpening(token) && !inQuote) {
 					count++;
 				} else if (isClosing(token) && !inQuote) {
 					count--;
 				}
+
 				if (!correctBalancedParenthesis(count, token)) {
 					return token;
 				}
+
 				if (count != 0) {
-					token = null;
+					return null;
 				} else {
-					text.deleteCharAt(text.length() - 1);
-					writeToken(externalFormula, text.toString());
-					token = externalFormula;
 					state = lastState;
+					// TODO This almost duplicates updateTokenText (but not exactly)
+					text.deleteCharAt(text.length() - 1);
+					externalFormula.setText(text.toString());
+					TOKEN tok = externalFormula;
 					externalFormula = null;
+					return tok;
 				}
 			}
 		} else if (isInActions(state)) {
 			// ignore the first token in the arguments' list (this is either
 			// 'deadlock(' or 'deterministic(')
-			if (!isBeginningActionsToken(token)) {
+			if (isBeginningActionsToken(token)) {
+				return token;
+			} else {
 				if (externalFormula == null) {
 					initialiseActionToken(token);
-					final String tokenText = readToken(token);
-					text.append(tokenText);
-					token = null;
+					text.append(token.getText());
+					return null;
 				} else {
 					if (isOpeningActionArg(token)) {
 						count++;
@@ -89,23 +90,22 @@ abstract class LexerHelper<TOKEN, STATE> {
 						return token;
 					}
 					if ((count == 1 && !isArgumentClosing(token)) || count > 1) {
-						final String tokenText = readToken(token);
-						text.append(tokenText);
+						text.append(token.getText());
 					}
 					if (count == 1 && isArgumentSplittingToken(token)) {
-						token = updateTokenText();
+						return updateTokenText();
 					} else if (count == 0) {
-						token = updateTokenText();
 						state = lastState;
+						return updateTokenText();
 					} else {
-						token = null;
+						return null;
 					}
 				}
 			}
 		} else {
 			lastState = state;
+			return token;
 		}
-		return token;
 	}
 
 	public void initialiseActionToken(TOKEN token) {
@@ -116,18 +116,17 @@ abstract class LexerHelper<TOKEN, STATE> {
 	}
 
 	public TOKEN updateTokenText() {
-		writeToken(this.externalFormula, this.text.toString().trim());
+		this.externalFormula.setText(this.text.toString().trim());
 		TOKEN tok = externalFormula;
 		this.externalFormula = null;
 		return tok;
 	}
 
 	public TOKEN getIdentifier(TOKEN token, TOKEN ident) {
-		String str = ((Token) token).getText();
+		String str = token.getText();
 		String identifier = str.substring(1, str.length() - 1).trim();
-		((Token) ident).setText(identifier);
-		token = ident;
-		return token;
+		ident.setText(identifier);
+		return ident;
 	}
 
 	public STATE getState() {

@@ -150,7 +150,6 @@ public final class Utils {
 	 */
 	public static boolean isProBSpecialDefinitionName(String identifier) {
 		return "GOAL".equals(identifier)
-			|| "SHIELD_INTERVENTION".equals(identifier) // SimB reinforcement learning shield (in ProB 2 UI)
 			|| "VISB_JSON_FILE".equals(identifier)
 			|| "VISB_DEFINITIONS_FILE".equals(identifier)
 			|| "VISB_SVG_FILE".equals(identifier)

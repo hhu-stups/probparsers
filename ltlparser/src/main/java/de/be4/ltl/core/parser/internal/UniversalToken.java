@@ -19,6 +19,12 @@ public final class UniversalToken {
 				token.getLine(), token.getPos());
 	}
 
+	public static UniversalToken createToken(
+			final de.be4.ltl.core.pctlparser.node.Token token) {
+		return token == null ? null : new UniversalToken(token.getText(),
+				token.getLine(), token.getPos());
+	}
+
 	private UniversalToken(String text, int line, int column) {
 		this.text = text;
 		this.line = line;

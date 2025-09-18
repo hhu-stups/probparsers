@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -148,8 +147,7 @@ public abstract class AbstractOperation {
 	}
 
 	public void addReadVariable(AIdentifierExpression identifier) {
-		LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
-		String varName = list.get(0).getText();
+		String varName = identifier.getIdentifier().get(0).getText();
 		// storing the first occurrence an identifier read
 		if (!readMap.containsKey(varName)) {
 			readMap.put(varName, identifier);

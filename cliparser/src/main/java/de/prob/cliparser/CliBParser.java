@@ -41,6 +41,7 @@ import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.be4.ltl.core.parser.CtlParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.be4.ltl.core.parser.LtlParser;
+import de.be4.ltl.core.parser.PctlParser;
 import de.be4.ltl.core.parser.TemporalLogicParser;
 import de.prob.parserbase.JoinedParserBase;
 import de.prob.parserbase.ProBParserBase;
@@ -401,7 +402,7 @@ public class CliBParser {
 					if (returnValue == 0) {
 						socketWriter.println("exit(" + returnValue + ").");
 					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
-						System.out.println("Erasing file contents of " + outFile);
+						System.out.println("% Erasing file contents of " + outFile);
 						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 					}
 					break;
@@ -429,6 +430,14 @@ public class CliBParser {
 					final TemporalLogicParser<?> parser = new CtlParser(extParser);
 					parseTemporalFormula(in.readLine(), parser, socketWriter);
 					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to CTL parser above
+					break;
+				}
+				case pctl: {
+					String extension = in.readLine();
+					final ProBParserBase extParser = getExtensionParser(extension, context);
+					final TemporalLogicParser<?> parser = new PctlParser(extParser);
+					parseTemporalFormula(in.readLine(), parser, socketWriter);
+					resetVolatilePositionOptions(behaviour); // TODO: pass behaviour to PCTL parser above
 					break;
 				}
 				case halt:

@@ -10,32 +10,32 @@ import de.be4.ltl.core.parser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.parser.node.AActionLtl;
 import de.be4.ltl.core.parser.node.AAndFair1Ltl;
 import de.be4.ltl.core.parser.node.AAndFair2Ltl;
+import de.be4.ltl.core.parser.node.AAvailableLtl;
+import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
+import de.be4.ltl.core.parser.node.AChangedLtl;
 import de.be4.ltl.core.parser.node.ACtrlLtl;
 import de.be4.ltl.core.parser.node.ACurrentLtl;
 import de.be4.ltl.core.parser.node.ADeadlockLtl;
+import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.ADetLtl;
+import de.be4.ltl.core.parser.node.ADetOutputLtl;
+import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AEnabledLtl;
-import de.be4.ltl.core.parser.node.AAvailableLtl;
+import de.be4.ltl.core.parser.node.AErrorLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
-import de.be4.ltl.core.parser.node.AUnchangedLtl;
-import de.be4.ltl.core.parser.node.AChangedLtl;
-import de.be4.ltl.core.parser.node.ADecreasingLtl;
-import de.be4.ltl.core.parser.node.AIncreasingLtl;
-import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
-import de.be4.ltl.core.parser.node.AOpActions;
-import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AGoalLtl;
-import de.be4.ltl.core.parser.node.ADetOutputLtl;
-import de.be4.ltl.core.parser.node.AErrorLtl;
+import de.be4.ltl.core.parser.node.AIncreasingLtl;
+import de.be4.ltl.core.parser.node.AOpActions;
+import de.be4.ltl.core.parser.node.AOperationcallLtl;
+import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
+import de.be4.ltl.core.parser.node.AUnchangedLtl;
 import de.be4.ltl.core.parser.node.AUnparsedLtl;
 import de.be4.ltl.core.parser.node.AWeakFairAllLtl;
 import de.be4.ltl.core.parser.node.AWeakFairLtl;
-import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.Node;
-import de.be4.ltl.core.parser.node.PLtl;
 import de.be4.ltl.core.parser.node.Start;
 import de.be4.ltl.core.parser.node.Token;
 import de.prob.parserbase.ProBParserBase;
@@ -91,27 +91,23 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseAStrongFairLtl(final AStrongFairLtl node) {
 		final Token token = node.getOperation();
-		helper.strong_fair(UniversalToken.createToken(token));
+		helper.strongFair(UniversalToken.createToken(token));
 	}
 
 	@Override
 	public void caseAWeakFairLtl(final AWeakFairLtl node) {
 		final Token token = node.getOperation();
-		helper.weak_fair(UniversalToken.createToken(token));
+		helper.weakFair(UniversalToken.createToken(token));
 	}
 
 	@Override
 	public void caseAAndFair1Ltl(final AAndFair1Ltl node) {
-		final PLtl left_node = node.getLeft();
-		final PLtl right_node = node.getRight();
-		helper.and_fair1(left_node,right_node,this);
+		helper.andFair1(node.getLeft(), node.getRight(), this);
 	}
 
 	@Override
 	public void caseAAndFair2Ltl(final AAndFair2Ltl node) {
-		final PLtl left_node = node.getLeft();
-		final PLtl right_node = node.getRight();
-		helper.and_fair2(left_node,right_node,this);
+		helper.andFair2(node.getLeft(), node.getRight(), this);
 	}
 
 	@Override
@@ -126,12 +122,12 @@ public class PrologGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseADetOutputLtl(final ADetOutputLtl node) {
-		helper.det_output();
+		helper.detOutput();
 	}
 
 	@Override
 	public void caseAErrorLtl(final AErrorLtl node) {
-		helper.state_error();
+		helper.stateError();
 	}
 
 	@Override
@@ -146,52 +142,58 @@ public class PrologGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseAWeakFairAllLtl(final AWeakFairAllLtl node) {
-		helper.weak_fair_all();
+		helper.weakFairAll();
 	}
 
 	@Override
 	public void caseAStrongFairAllLtl(final AStrongFairAllLtl node) {
-		helper.strong_fair_all();
+		helper.strongFairAll();
 	}
 
 	@Override
-	public void caseAExistsLtl(AExistsLtl node)
-	{
+	public void caseAExistsLtl(AExistsLtl node) {
 		helper.existsTerm(node, this);
 	}
 
 	@Override
-	public void caseAForallLtl(AForallLtl node)
-	{
+	public void caseAForallLtl(AForallLtl node) {
 		helper.forallTerm(node, this);
 	}
-	
+
 	@Override
-	public void caseAUnchangedLtl(AUnchangedLtl node)
-	{
+	public void caseAUnchangedLtl(AUnchangedLtl node) {
 		helper.unchangedTerm(node, this);
 	}
+
 	@Override
-	public void caseAChangedLtl(AChangedLtl node)
-	{
+	public void caseAChangedLtl(AChangedLtl node) {
 		helper.changedTerm(node, this);
 	}
+
 	@Override
-	public void caseADecreasingLtl(ADecreasingLtl node)
-	{
+	public void caseADecreasingLtl(ADecreasingLtl node) {
 		helper.decreasingTerm(node, this);
 	}
+
 	@Override
-	public void caseAIncreasingLtl(AIncreasingLtl node)
-	{
+	public void caseAIncreasingLtl(AIncreasingLtl node) {
 		helper.increasingTerm(node, this);
 	}
+
 	@Override
-	public void caseABeforeAfterLtl(ABeforeAfterLtl node)
-	{
-		helper.before_afterTerm(node, this);
+	public void caseABeforeAfterLtl(ABeforeAfterLtl node) {
+		helper.beforeAfterTerm(node, this);
 	}
 
+	@Override
+	public void caseAOperationcallLtl(AOperationcallLtl node) {
+		final Token token = node.getOperation();
+		p.openTerm("action");
+		p.openTerm("operation_call"); // check if during the transition the subsidiary operation was called
+		helper.parseTransitionPredicate(UniversalToken.createToken(token));
+		p.closeTerm();
+		p.closeTerm();
+	}
 
 
 	@Override

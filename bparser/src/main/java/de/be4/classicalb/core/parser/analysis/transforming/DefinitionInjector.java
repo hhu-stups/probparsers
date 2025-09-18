@@ -37,10 +37,10 @@ public class DefinitionInjector extends DepthFirstAdapter {
 		} else {
 			definitionsMachineClause.getDefinitions().clear();
 		}
-		LinkedList<PDefinition> existingDefintions = definitionsMachineClause.getDefinitions();
+
 		for (final String name : definitions.getDefinitionNames()) {
 			final PDefinition def = definitions.getDefinition(name);
-			existingDefintions.add(def);
+			definitionsMachineClause.getDefinitions().add(def);
 		}
 	}
 

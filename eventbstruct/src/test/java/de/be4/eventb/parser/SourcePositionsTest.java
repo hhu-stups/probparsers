@@ -1,18 +1,17 @@
 package de.be4.eventb.parser;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.LinkedList;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.List;
 
 import de.be4.eventb.core.parser.EventBParser;
 import de.be4.eventb.core.parser.node.AMachineParseUnit;
 import de.be4.eventb.core.parser.node.PVariable;
 import de.be4.eventb.core.parser.node.Start;
-import de.hhu.stups.sablecc.patch.PositionedNode;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class SourcePositionsTest {
 
@@ -37,7 +36,7 @@ public class SourcePositionsTest {
 				.getPParseUnit();
 		assertEquals(7, parseUnit.getEndPos().getLine());
 
-		final LinkedList<PVariable> variables = parseUnit.getVariables();
+		List<PVariable> variables = parseUnit.getVariables();
 		assertEquals(5, variables.get(0).getEndPos()
 				.getLine());
 	}

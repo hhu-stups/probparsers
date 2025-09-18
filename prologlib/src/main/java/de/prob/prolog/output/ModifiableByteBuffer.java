@@ -34,8 +34,16 @@ final class ModifiableByteBuffer extends OutputStream {
 	}
 
 	private void ensureCapacity(int minCapacity) {
-		if (minCapacity > this.buffer.length) {
-			this.buffer = Arrays.copyOf(this.buffer, this.buffer.length * 2);
+		byte[] buffer = this.buffer;
+		int len = buffer.length;
+		if (minCapacity > 0 && len < minCapacity) {
+			while (len < minCapacity) {
+				len *= 2;
+				if (len <= 0) {
+					throw new IllegalArgumentException("size overflow - cannot grow byte buffer");
+				}
+			}
+			this.buffer = Arrays.copyOf(buffer, len);
 		}
 	}
 

@@ -7,10 +7,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -452,11 +450,10 @@ public class RecursiveMachineLoader {
 
 		@Override
 		public void caseADefinitionsMachineClause(final ADefinitionsMachineClause node) {
-			final LinkedList<PDefinition> defList = node.getDefinitions();
-			defList.clear();
+			node.getDefinitions().clear();
 			for (final String name : definitions.getDefinitionNames()) {
 				final PDefinition def = definitions.getDefinition(name);
-				defList.add(def);
+				node.getDefinitions().add(def);
 			}
 		}
 	}

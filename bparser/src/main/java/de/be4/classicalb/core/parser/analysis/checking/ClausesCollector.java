@@ -2,7 +2,7 @@ package de.be4.classicalb.core.parser.analysis.checking;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public class ClausesCollector extends DepthFirstAdapter {
 		});
 	}
 	
-	private void addMachineClauses(final LinkedList<PMachineClause> machineClauses) {
+	private void addMachineClauses(List<PMachineClause> machineClauses) {
 		for (final PMachineClause clause : machineClauses) {
 			Set<Node> nodesForclause = availableClauses.get(clause.getClass());
 

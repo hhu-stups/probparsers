@@ -1,10 +1,6 @@
 package de.be4.eventb.parser;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.LinkedList;
-
-import org.junit.Test;
+import java.util.List;
 
 import de.be4.eventb.core.parser.BException;
 import de.be4.eventb.core.parser.EventBParser;
@@ -14,6 +10,10 @@ import de.be4.eventb.core.parser.node.AVariant;
 import de.be4.eventb.core.parser.node.PInvariant;
 import de.be4.eventb.core.parser.node.Start;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
 public class LexerTest {
 	@Test
 	public void testStringLabeledElements() throws BException {
@@ -21,7 +21,7 @@ public class LexerTest {
 
 		final AMachineParseUnit parseUnit = (AMachineParseUnit) rootNode
 				.getPParseUnit();
-		final LinkedList<PInvariant> invariants = parseUnit.getInvariants();
+		List<PInvariant> invariants = parseUnit.getInvariants();
 
 		AInvariant invariant = (AInvariant) invariants.get(0);
 

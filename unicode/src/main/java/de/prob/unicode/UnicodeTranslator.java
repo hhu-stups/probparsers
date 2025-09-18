@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import de.prob.unicode.lexer.Lexer;
 import de.prob.unicode.lexer.LexerException;
 import de.prob.unicode.node.EOF;
-import de.prob.unicode.node.TAnyChar;
 import de.prob.unicode.node.TBcmeq;
 import de.prob.unicode.node.TBcmin;
 import de.prob.unicode.node.TBcmsuch;
@@ -60,6 +59,7 @@ import de.prob.unicode.node.TNotsubset;
 import de.prob.unicode.node.TNotsubseteq;
 import de.prob.unicode.node.TNumber;
 import de.prob.unicode.node.TOftype;
+import de.prob.unicode.node.TOtherChar;
 import de.prob.unicode.node.TOvl;
 import de.prob.unicode.node.TPfun;
 import de.prob.unicode.node.TPinj;
@@ -317,7 +317,7 @@ public class UnicodeTranslator {
 					} else {
 						translated = t.getText();
 					}
-				} else if (t instanceof TAnyChar || t instanceof TNumber
+				} else if (t instanceof TOtherChar || t instanceof TNumber
 						|| t instanceof TRealLiteral || t instanceof THexLiteral) {
 					if (target == Encoding.LATEX) {
 						translated = latexMathEscape(t.getText());

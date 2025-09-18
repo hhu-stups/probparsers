@@ -23,12 +23,12 @@ The following subprojects were formerly part of this repo:
 
 ## Using
 
-Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups), Snapshots on [Sonatype Snapshots](https://oss.sonatype.org/content/repositories/snapshots/).
+Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups), Snapshots on [Sonatype Snapshots](https://central.sonatype.com/repository/maven-snapshots/).
 
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.15.2"
+final parserVersion = "2.15.3"
 dependencies {
 	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
 	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion

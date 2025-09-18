@@ -4,46 +4,22 @@ Package de.be4.ltl.core.parser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
+  letter = [['a' .. 'z'] + ['A' .. 'Z']];
   digit = ['0' .. '9'];
-
-  underscore = '_';
 
   line_break = [10 + 13];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
 
-  l_cur = '{';
-  r_cur = '}';
-  l_paren = '(';
-  r_paren = ')';
-  l_bracket = '[';
-  r_bracket = ']';
-
   opt_white_space = layout_char*; // note: no newline (so as not to disturb counting); no comments
   // TODO: maybe allow full whitespace for enabled, available, ...
 
-  enabled_start   = 'e'  opt_white_space '(' | 'enabled'   opt_white_space '(';
-  available_start = 'Av' opt_white_space '(' | 'available' opt_white_space '(';
+  // TODO Should we make this definition match regular_identifier_literal in BParser (i. e. allow Unicode letters)?
+  identifier_literal = letter (letter | digit | '_')*;
 
-  strong_fair_start = 'sf' opt_white_space '(' | 'SF' opt_white_space '(';
-  weak_fair_start   = 'wf' opt_white_space '(' | 'WF' opt_white_space '(';
-
-  /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */
-  strong_fair_all = 'SEF';
-  weak_fair_all = 'WEF';
-
-  dlk_action_start  = 'deadlock' opt_white_space '(';
-  det_action_start  = 'deterministic' opt_white_space '(';
-  ctrl_action_start = 'controller' opt_white_space '(';
-
-  exists_quantor = '#';
-  forall_quantor = '!';
-  dot = '.';
-
-  comma = ',';
+  // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
+  l_sq = '[';
+  atomic_proposition_begin = '{';
 
 /*******************************************************************
  * States                                                          *
@@ -57,29 +33,30 @@ States
 Tokens
   {ltl} true = 'true';
   {ltl} false = 'false';
-  {ltl -> actions} dlk = dlk_action_start;
-  {ltl -> actions} det = det_action_start;
-  {ltl -> actions} ctrl = ctrl_action_start;
+  {ltl -> actions} dlk = 'deadlock' opt_white_space '(';
+  {ltl -> actions} det = 'deterministic' opt_white_space '(';
+  {ltl -> actions} ctrl = 'controller' opt_white_space '(';
   {ltl} sink ='sink';
   {ltl} goal ='goal';
   {ltl} det_output ='det_output';
   {ltl} state_error ='error';
   {ltl} deadlock ='deadlock';
   {ltl} current = 'current';
-  {ltl} l_par = l_paren;
-  {ltl} r_par = r_paren;
+  {ltl} l_par = '(';
+  {ltl} r_par = ')';
 
-  {ltl -> action} l_sq = l_bracket; // TODO: also allow textual version 'executed('
-  {ltl -> action} enabled = enabled_start;
-  {ltl -> action} available = available_start;
+  {ltl -> action} l_sq = l_sq; // TODO: also allow textual version 'executed('
+  {ltl -> action} opcall = ('calls' | 'operation_call') opt_white_space '(';  // to check transition calls subsidiary operation
+  {ltl -> action} enabled = ('e' | 'enabled') opt_white_space '(';
+  {ltl -> action} available = ('Av' | 'available') opt_white_space '(';
 
-  {ltl -> atomic, atomic} atomic_proposition_begin = l_cur;
+  {ltl -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
 
-  {atomic} atomic_proposition_end = r_cur;
+  {atomic} atomic_proposition_end = '}';
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket]; // TODO: check that parens/bracket match!
-  {action} action_begin = [l_paren + l_bracket];
+  {action} action_end = [')' + ']']; // TODO: check that parens/bracket match!
+  {action} action_begin = ['(' + '['];
   {action} tp_char = ([0 .. 0xffff]);
 
   {ltl} unchanged = 'unchanged' | 'UNCHANGED'; // upper-case for TLA+ like feel
@@ -88,12 +65,12 @@ Tokens
   {ltl} increasing = 'increasing';
   {ltl} before_after = 'before_after' | 'BA';
 
-  {ltl} exists_identifier = exists_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
-  {ltl} forall_identifier = forall_quantor white_space* letter (letter | digit | underscore)* white_space* dot;
+  {ltl} exists_identifier = '#' white_space* identifier_literal white_space* '.';
+  {ltl} forall_identifier = '!' white_space* identifier_literal white_space* '.';
 
-  {actions} args_begin = l_paren;
-  {actions} args_end = r_paren;
-  {actions} actions_split = comma;
+  {actions} args_begin = '(';
+  {actions} args_end = ')';
+  {actions} actions_split = ',';
   {actions} action_char = ([0 .. 0xffff]);
 
   /* Boolean Operators */
@@ -123,10 +100,11 @@ Tokens
   {ltl} yesterday = 'Y'| 'yesterday';
 
   /* Fairness LTL operators */
-  {ltl} strong_fair_everything = strong_fair_all;
-  {ltl} weak_fair_everything = weak_fair_all;
-  {ltl -> action} strong_fair = strong_fair_start;
-  {ltl -> action} weak_fair = weak_fair_start;
+  {ltl -> action} strong_fair = ('sf' | 'SF') opt_white_space '(';
+  {ltl -> action} weak_fair = ('wf' | 'WF') opt_white_space '(';
+  /* Should be removed at some point. It may come to confusions using capital letter for the fairness constraints. */
+  {ltl} strong_fair_everything = 'SEF';
+  {ltl} weak_fair_everything = 'WEF';
 
   white_space = white_space;
 
@@ -184,6 +162,7 @@ Productions
     {increasing} increasing l_par atomic_proposition_begin r_par {-> New ltl.increasing(atomic_proposition_begin)} |
     {before_after} before_after l_par atomic_proposition_begin r_par {-> New ltl.before_after(atomic_proposition_begin)} |
     {action} l_sq {-> New ltl.action(l_sq)} |
+    {operationcall} opcall {-> New ltl.operationcall(opcall)} |
     {sink} sink {-> New ltl.sink()} |
     {goal} goal {-> New ltl.goal()} |
     {det_output} det_output {-> New ltl.det_output()} |
@@ -271,6 +250,7 @@ Abstract Syntax Tree
    {weak_fair} [operation]:weak_fair |
    {strong_fair} [operation]:strong_fair |
    {action} [operation]:l_sq |
+   {operationcall} [operation]:opcall |
    {unparsed} [predicate]:atomic_proposition_begin |
    {sink} |
    {goal} |

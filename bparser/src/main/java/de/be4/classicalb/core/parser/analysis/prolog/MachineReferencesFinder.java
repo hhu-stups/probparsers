@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -171,7 +170,7 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 		}
 	}
 
-	private static MachineReference makeMachineReference(final ReferenceType type, final LinkedList<TIdentifierLiteral> ids, final Node node, final String path) {
+	private static MachineReference makeMachineReference(final ReferenceType type, List<TIdentifierLiteral> ids, final Node node, final String path) {
 		final String name;
 		final String renamedName;
 		if (ids.size() == 1) {
@@ -191,28 +190,28 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 			throw new VisitorException(new CheckException("A machine reference cannot contain more than one dot in the machine identifier", ids.get(2)));
 		}
 
+		String adjustedPath = path;
 		if (path != null) {
-			Path parsedPath = Paths.get(path);
-			// Disallow backslashes in relative paths to discourage writing machines that only work on Windows.
+			// In future we want to disallow backslashes in relative paths to discourage writing machines that only work on Windows.
 			// The portable solution is to use forward slashes, which work on Windows, Mac, and Linux.
-			// We still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
+			// Still at the moment there are several important ProB projects which use this
+			// "feature" on projects with a large number of files which cannot be easily adapted
+			// We also still allow backslashes in absolute paths to allow easy copy-pasting of paths on Windows -
 			// absolute paths are inherently not portable between systems anyway.
-			if (!parsedPath.isAbsolute() && path.contains("\\")) {
-				throw new VisitorException(new CheckException(
-					"Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead.",
-					node
-				));
+			if (!Paths.get(path).isAbsolute() && path.contains("\\")) {
+				adjustedPath = path.replace("\\", "/");
+				//System.out.println("WARNING: Relative path in file pragma uses backslashes. This is incompatible with non-Windows systems. Please use forward slashes instead as follows:  " + adjustedPath);
 			}
 
-			String baseName = Utils.getFileWithoutExtension(parsedPath.getFileName().toString());
+			String baseName = Utils.getFileWithoutExtension(Paths.get(adjustedPath).getFileName().toString());
 			if (!baseName.equals(name)) {
 				throw new VisitorException(new CheckException(
-					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + path,
+					"Declared name in file pragma does not match the machine referenced: " + name + " vs. " + baseName + " in " + adjustedPath,
 					node
 				));
 			}
 		}
-		return new MachineReference(type, name, renamedName, node, path);
+		return new MachineReference(type, name, renamedName, node, adjustedPath);
 	}
 
 	/**

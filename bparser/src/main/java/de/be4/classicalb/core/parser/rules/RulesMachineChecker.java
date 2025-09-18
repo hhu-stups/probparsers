@@ -3,26 +3,32 @@ package de.be4.classicalb.core.parser.rules;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import static de.be4.classicalb.core.parser.util.ASTBuilder.createIdentifier;
 
@@ -35,7 +41,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
 	private final Map<AComputationOperation, ComputationOperation> computationMap = new HashMap<>();
 	private final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
-	private final ArrayList<CheckException> errorList = new ArrayList<>();
+	private final List<CheckException> errorList = new ArrayList<>();
 	private final Set<AIdentifierExpression> referencedRuleOperations = new HashSet<>();
 
 	// this list is used to track if certain nodes appear inside of a loop (i.e.
@@ -45,13 +51,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private final KnownIdentifier knownIdentifier = new KnownIdentifier();
 	private final LocalIdentifierScope identifierScope = new LocalIdentifierScope();
 	private final Set<String> definitions = new HashSet<>();
-	private final HashMap<String, HashSet<Node>> readIdentifier = new HashMap<>();
+	private final Map<String, Set<Node>> readIdentifier = new HashMap<>();
 	private final List<MachineReference> machineReferences;
 
 	private AbstractOperation currentOperation;
 
 	// this map is used to track if all error types are implemented
-	private final HashMap<RuleOperation, Set<Integer>> implementedErrorTypes = new HashMap<>();
+	private final Map<RuleOperation, Set<Integer>> implementedErrorTypes = new HashMap<>();
 	private final Start start;
 	private TIdentifierLiteral nameLiteral;
 
@@ -122,11 +128,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return set;
 	}
 
-	public Map<String, HashSet<Node>> getUnknownIdentifier() {
-		HashMap<String, HashSet<Node>> result = new HashMap<>();
-		for (Entry<String, HashSet<Node>> entry : readIdentifier.entrySet()) {
+	public Map<String, Set<Node>> getUnknownIdentifier() {
+		Map<String, Set<Node>> result = new HashMap<>();
+		for (Map.Entry<String, Set<Node>> entry : readIdentifier.entrySet()) {
 			String name = entry.getKey();
-			HashSet<Node> nodes = entry.getValue();
+			Set<Node> nodes = entry.getValue();
 			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)
 					&& !this.getFunctionOperationNames().contains(name)) {
 				result.put(name, nodes);
@@ -152,7 +158,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (!node.getParameters().isEmpty()) {
 			errorList.add(new CheckException("A RULES_MACHINE must not have any machine parameters", node));
 		}
-		LinkedList<TIdentifierLiteral> nameList = node.getName();
+		List<TIdentifierLiteral> nameList = node.getName();
 		if (nameList.size() > 1) {
 			errorList.add(new CheckException("Renaming of a RULES_MACHINE name is not allowed.", node));
 		}
@@ -174,7 +180,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAFreetypesMachineClause(AFreetypesMachineClause node) {
-		LinkedList<PExpression> identifiers = new LinkedList<>();
+		List<PExpression> identifiers = new ArrayList<>();
 		for (PFreetype freetype : node.getFreetypes()) {
 			if (freetype instanceof AFreetype) {
 				AFreetype aFreetype = (AFreetype) freetype;
@@ -211,7 +217,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	class OccurredAttributes {
-		final HashMap<String, POperationAttribute> map = new HashMap<>();
+		final Map<String, POperationAttribute> map = new HashMap<>();
 
 		public void add(String attrName, POperationAttribute node) {
 			if (map.containsKey(attrName)) {
@@ -222,7 +228,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void visitOperationAttributes(final LinkedList<POperationAttribute> attributes) {
+	private void visitOperationAttributes(List<POperationAttribute> attributes) {
 		OccurredAttributes occurredAttributes = new OccurredAttributes();
 		// set operation attributes
 		for (POperationAttribute pOperationAttribute : attributes) {
@@ -237,7 +243,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	private void checkOperationExpressionAttribute(OccurredAttributes occurredAttributes,
 			POperationAttribute pOperationAttribute) throws AssertionError {
 		AOperationAttribute attribute = (AOperationAttribute) pOperationAttribute;
-		LinkedList<PExpression> arguments = attribute.getArguments();
+		List<PExpression> arguments = attribute.getArguments();
 		String name = attribute.getName().getText();
 		occurredAttributes.add(name, pOperationAttribute);
 		switch (name) {
@@ -267,7 +273,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void checkReplacesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+	private void checkReplacesAttribute(POperationAttribute pOperationAttribute, List<PExpression> arguments) {
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
 			errorList.add(new CheckException("Expected exactly one identifier after REPLACES.", pOperationAttribute));
 			return;
@@ -276,7 +282,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		currentOperation.addReplacesIdentifier(idExpr);
 	}
 
-	private void checkTagsAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+	private void checkTagsAttribute(POperationAttribute pOperationAttribute, List<PExpression> arguments) {
 		final List<String> tags = new ArrayList<>();
 		for (PExpression pExpression : arguments) {
 			if (pExpression instanceof AIdentifierExpression) {
@@ -295,7 +301,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkClassificationAttribute(POperationAttribute pOperationAttribute,
-			LinkedList<PExpression> arguments) {
+			List<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
 			final RuleOperation rule = (RuleOperation) currentOperation;
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
@@ -312,7 +318,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+	private void checkErrorTypesAttribute(POperationAttribute pOperationAttribute, List<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
 			final RuleOperation rule = (RuleOperation) currentOperation;
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIntegerExpression) {
@@ -328,7 +334,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, LinkedList<PExpression> arguments) {
+	private void checkRuleIdAttribute(POperationAttribute pOperationAttribute, List<PExpression> arguments) {
 		if (currentOperation instanceof RuleOperation) {
 			final RuleOperation rule = (RuleOperation) currentOperation;
 			if (arguments.size() == 1 && arguments.get(0) instanceof AIdentifierExpression) {
@@ -344,7 +350,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkDependsOnComputationAttribute(POperationAttribute pOperationAttribute,
-			LinkedList<PExpression> arguments) {
+			List<PExpression> arguments) {
 		List<AIdentifierExpression> list = new ArrayList<>();
 		for (PExpression pExpression : arguments) {
 			if (pExpression instanceof AIdentifierExpression) {
@@ -358,7 +364,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkDependsOnRuleAttribute(POperationAttribute pOperationAttribute,
-			LinkedList<PExpression> arguments) {
+			List<PExpression> arguments) {
 		final List<AIdentifierExpression> list = new ArrayList<>();
 		for (final PExpression pExpression : arguments) {
 			if (pExpression instanceof AIdentifierExpression) {
@@ -490,8 +496,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAVarSubstitution(AVarSubstitution node) {
-		final HashSet<String> variables = new HashSet<>();
-		LinkedList<PExpression> identifiers = node.getIdentifiers();
+		Set<String> variables = new HashSet<>();
+		List<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression e : identifiers) {
 			if (e instanceof AIdentifierExpression) {
 				AIdentifierExpression id = (AIdentifierExpression) e;
@@ -501,7 +507,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				errorList.add(new CheckException("There must be a list of identifiers in VAR substitution.", node));
 			}
 		}
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()), true);
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()), true);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -509,7 +515,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	@Override
 	public void caseAOperatorExpression(AOperatorExpression node) {
 		final String operatorName = node.getName().getText();
-		final LinkedList<PExpression> parameters = node.getIdentifiers();
+		List<PExpression> parameters = node.getIdentifiers();
 		switch (operatorName) {
 		case RulesGrammar.STRING_FORMAT:
 			checkStringFormatOperator(node, parameters);
@@ -522,14 +528,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 	}
 
-	private void checkStringFormatOperator(AOperatorExpression node, final LinkedList<PExpression> parameters) {
+	private void checkStringFormatOperator(AOperatorExpression node, List<PExpression> parameters) {
 		PExpression firstParam = parameters.get(0);
 		Integer count = countPlaceHoldersInExpression(firstParam);
 		if (count != null && count != parameters.size() - 1) {
 			this.errorList.add(new CheckException("The number of arguments (" + (parameters.size() - 1)
 					+ ") does not match the number of placeholders (" + count + ") in the string.", node));
 		}
-		LinkedList<PExpression> identifiers = node.getIdentifiers();
+		List<PExpression> identifiers = node.getIdentifiers();
 		for (PExpression pExpression : identifiers) {
 			pExpression.apply(this);
 		}
@@ -562,7 +568,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkGetRuleCounterExamplesOperator(AOperatorExpression node,
-			final LinkedList<PExpression> parameters) {
+			List<PExpression> parameters) {
 		// the grammar ensures at least one argument
 		if (parameters.size() > 2) {
 			this.errorList.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
@@ -578,7 +584,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void inAAssignSubstitution(AAssignSubstitution node) {
-		ArrayList<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
+		List<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
 		for (PExpression pExpression : righthand) {
 			pExpression.apply(this);
 		}
@@ -588,7 +594,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void inAOperationCallSubstitution(AOperationCallSubstitution node) {
-		LinkedList<TIdentifierLiteral> opNameList = node.getOperation();
+		List<TIdentifierLiteral> opNameList = node.getOperation();
 		if (opNameList.size() > 1) {
 			errorList.add(new CheckException("Renaming of operation names is not allowed.", node));
 		}
@@ -632,13 +638,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void addReadIdentifier(AIdentifierExpression node) {
-		LinkedList<TIdentifierLiteral> list = node.getIdentifier();
+		List<TIdentifierLiteral> list = node.getIdentifier();
 		String name = list.get(0).getText();
 		if (this.readIdentifier.containsKey(name)) {
-			HashSet<Node> hashSet = readIdentifier.get(name);
+			Set<Node> hashSet = readIdentifier.get(name);
 			hashSet.add(node);
 		} else {
-			HashSet<Node> hashSet = new HashSet<>();
+			Set<Node> hashSet = new HashSet<>();
 			hashSet.add(node);
 			readIdentifier.put(name, hashSet);
 		}
@@ -775,7 +781,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					"The WHEN predicate must be provided if RULE_FAIL has at least one parameter.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		if (node.getWhen() != null) {
 			if (!node.getIdentifiers().isEmpty()) {
 				// implication is not allowed as the top level predicate if
@@ -803,7 +809,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			return;
 		}
 		checkTopLevelPredicate(node.getWhere(), "(WHERE predicate in RULE_FORALL)");
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getWhere().apply(this);
 		node.getExpect().apply(this);
 		if (node.getOnSuccess() != null)
@@ -860,7 +866,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAForLoopSubstitution(AForLoopSubstitution node) {
 		loopNodes.add(node);
 		node.getSet().apply(this);
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getDoSubst().apply(this);
 		this.identifierScope.removeScope();
 		loopNodes.remove(node);
@@ -868,7 +874,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getSubstitution().apply(this);
 		this.identifierScope.removeScope();
@@ -876,7 +882,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getPred().apply(this);
 		this.identifierScope.removeScope();
@@ -884,7 +890,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getAssignment().apply(this);
 		node.getExpr().apply(this);
 		this.identifierScope.removeScope();
@@ -892,7 +898,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralProductExpression(AGeneralProductExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -900,7 +906,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAGeneralSumExpression(AGeneralSumExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -908,7 +914,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -916,7 +922,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -924,7 +930,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -932,21 +938,21 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -954,7 +960,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicates().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -962,7 +968,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -970,7 +976,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALambdaExpression(ALambdaExpression node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		node.getExpression().apply(this);
 		this.identifierScope.removeScope();
@@ -978,14 +984,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseAExistsPredicate(AExistsPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getPredicate().apply(this);
 		this.identifierScope.removeScope();
 	}
 
 	@Override
 	public void caseAForallPredicate(AForallPredicate node) {
-		this.identifierScope.createNewScope(new LinkedList<>(node.getIdentifiers()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
 		node.getImplication().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -995,7 +1001,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		final String name = node.getName().getText();
 		this.definitions.add(name);
-		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -1008,7 +1014,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -1021,7 +1027,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new LinkedList<>(node.getParameters()));
+		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
 		node.getRhs().apply(this);
 		this.identifierScope.removeScope();
 	}
@@ -1142,7 +1148,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 				this.addKnownIdentifier(((ADescriptionExpression) expression).getExpression());
 			} else if (expression instanceof AIdentifierExpression) {
 				AIdentifierExpression identifier = (AIdentifierExpression) expression;
-				LinkedList<TIdentifierLiteral> list = identifier.getIdentifier();
+				List<TIdentifierLiteral> list = identifier.getIdentifier();
 				// the size of list is zero; this ensured by the grammar
 				TIdentifierLiteral tIdentifierLiteral = list.get(0);
 				String constantName = tIdentifierLiteral.getText();
@@ -1166,7 +1172,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public void createNewScope(final List<PExpression> parameters, boolean assignable) {
-			final HashSet<String> set = new HashSet<>();
+			Set<String> set = new HashSet<>();
 			for (PExpression expression : parameters) {
 				if (expression instanceof AIdentifierExpression) {
 					AIdentifierExpression identifier = (AIdentifierExpression) expression;

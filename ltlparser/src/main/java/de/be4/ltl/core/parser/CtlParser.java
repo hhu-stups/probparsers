@@ -19,7 +19,7 @@ import de.be4.ltl.core.parser.internal.CtlLexer;
 import de.be4.ltl.core.parser.internal.PrologCtlGenerator;
 import de.be4.ltl.core.parser.internal.UniversalToken;
 import de.prob.parserbase.ProBParserBase;
-import de.prob.prolog.output.StructuredPrologOutput;
+import de.prob.prolog.output.IPrologTermOutput;
 
 public class CtlParser extends TemporalLogicParser<Start> {
 	public CtlParser(final ProBParserBase specParser) {
@@ -27,8 +27,7 @@ public class CtlParser extends TemporalLogicParser<Start> {
 	}
 
 	@Override
-	protected Start parseFormula(final String formula)
-			throws LtlParseException, IOException {
+	protected Start parseFormula(final String formula) throws LtlParseException {
 		StringReader reader = new StringReader(formula);
 		PushbackReader r = new PushbackReader(reader);
 		Lexer l = new CtlLexer(r);
@@ -40,17 +39,15 @@ public class CtlParser extends TemporalLogicParser<Start> {
 			final UniversalToken token = UniversalToken.createToken(e
 					.getToken());
 			throw new LtlParseException(token, e);
-		} catch (LexerException e) {
+		} catch (LexerException | IOException e) {
 			throw new LtlParseException(null, e);
 		}
 		return ast;
 	}
 
 	@Override
-	protected void applyPrologGenerator(StructuredPrologOutput pto,
-			String stateID, ProBParserBase specParser, Start ast) {
-		final PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto,
-				stateID, specParser);
+	protected void applyPrologGenerator(IPrologTermOutput pto, String stateID, Start ast) {
+		PrologCtlGenerator prologGenerator = new PrologCtlGenerator(pto, stateID, this.getSpecParser());
 		ast.apply(prologGenerator);
 	}
 }

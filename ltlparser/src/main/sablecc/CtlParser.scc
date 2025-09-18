@@ -4,25 +4,14 @@ Package de.be4.ltl.core.ctlparser;
  * Helpers                                                         *
  *******************************************************************/
 Helpers
-  small_letter = ['a'..'z'];
-  capital_letter = ['A' .. 'Z'];
-  letter = small_letter | capital_letter;
-  digit = ['0' .. '9'] ;
-
-  underscore = '_';
-
   line_break = [10 + 13];
   layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
   white_space = line_break | layout_char+;
 
-  l_cur = '{';
-  r_cur = '}';
-  l_paren = '(';
-  r_paren = ')';
-  l_bracket = '[';
-  r_bracket = ']';
-
-  enabled_start = 'e(';
+  // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
+  l_sq = '[';
+  enabled = 'e(';
+  atomic_proposition_begin = '{';
 
 /*******************************************************************
  * States                                                          *
@@ -42,18 +31,19 @@ Tokens
   {ctl} state_error ='error';
   {ctl} deadlock ='deadlock';
   {ctl} current = 'current';
-  {ctl} l_par = l_paren;
-  {ctl} r_par = r_paren;
+  {ctl} l_par = '(';
+  {ctl} r_par = ')';
 
-  {ctl -> action} l_sq = l_bracket;
-  {ctl -> action} enabled = enabled_start;
+  {ctl -> action} l_sq = l_sq;
+  {ctl -> action} enabled = enabled;
+  // TODO: we could support the other transition predicates from LTL: increasing, decreasing, ..., calls, ...
 
-  {ctl -> atomic, atomic} atomic_proposition_begin = l_cur;
-  {atomic} atomic_proposition_end = r_cur;
+  {ctl -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
+  {atomic} atomic_proposition_end = '}';
   {atomic} ap_char = ([0 .. 0xffff]);
 
-  {action} action_end = [r_paren + r_bracket];
-  {action} action_begin = [l_paren + l_bracket];
+  {action} action_end = [')' + ']'];
+  {action} action_begin = ['(' + '['];
   {action} tp_char = ([0 .. 0xffff]);
 
   /* Boolean Operators */
@@ -112,7 +102,7 @@ Productions
     {af} forall finally [cont]:ctl_formula4 {-> New ctl.af(cont.ctl)} |
     {unparsed} atomic_proposition_begin {-> New ctl.unparsed(atomic_proposition_begin)} |
     {enabled} enabled {-> New ctl.enabled(enabled)} |
-    {action} l_sq {-> New ctl.action(l_sq)} |
+    {action} l_sq {-> New ctl.action(l_sq)} |  // this is treated like an exists next action (ena) in the CTL interpreter
     {sink} sink {-> New ctl.sink()} |
     {goal} goal {-> New ctl.goal()} |
     {det_output} det_output {-> New ctl.det_output()} |

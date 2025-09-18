@@ -1,0 +1,175 @@
+Package de.be4.ltl.core.pctlparser;
+
+/*******************************************************************
+ * Helpers                                                         *
+ *******************************************************************/
+Helpers
+  line_break = [10 + 13];
+  layout_char = [[[[0 .. 32] - line_break] + [127..160]] + [[8206 .. 8207] + [8232 .. 8233]]];
+  white_space = line_break | layout_char+;
+
+  digit = ['0' .. '9'];
+
+  // Trivial helpers as a workaround to force SableCC to allow modifying the text of otherwise constant tokens:
+  atomic_proposition_begin = '{';
+
+/*******************************************************************
+ * States                                                          *
+ *******************************************************************/
+States
+  pctl_state, atomic;
+
+/*******************************************************************
+ * Tokens                                                          *
+ *******************************************************************/
+Tokens
+  {pctl_state} true = 'true';
+  {pctl_state} false = 'false';
+  {pctl_state} sink ='sink';
+  {pctl_state} goal ='goal';
+  {pctl_state} det_output ='det_output';
+  {pctl_state} state_error ='error';
+  {pctl_state} deadlock ='deadlock';
+  {pctl_state} current = 'current';
+  {pctl_state} l_par = '(';
+  {pctl_state} r_par = ')';
+  {pctl_state} l_sq = '[';
+  {pctl_state} r_sq = ']';
+  {pctl_state} strictly_greater = '>';
+  {pctl_state} greater = '>=' | 0x2a7e;
+  {pctl_state} strictly_less = '<';
+  {pctl_state} less = '<=' | 0x2a7d; 
+  {pctl_state} equal = '=';
+
+  {pctl_state -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
+  {atomic} atomic_proposition_end = '}';
+  {atomic} ap_char = ([0 .. 0xffff]);
+
+  /* Boolean Operators */
+  {pctl_state} implies = '=>' | 0x21d2;
+  {pctl_state} equivalence = '<=>' | 0x21d4;
+  {pctl_state} and = '&' | 0x2227;
+  {pctl_state} or = 'or' | 0x2228;
+  {pctl_state} not = 'not'| 0x00ac;
+  {pctl_state} probabilistic = 'P';
+
+  /* CTL temporal operators */
+  {pctl_state} until = 'U';
+  {pctl_state} until_bounded = 'U<='|'U'0x2a7d;
+  {pctl_state} globally = 'G';
+  {pctl_state} globally_bounded = 'G<='|'G'0x2a7d;
+  {pctl_state} eventually = 'F';
+  {pctl_state} eventually_bounded = 'F<='|'F'0x2a7d;
+  {pctl_state} next = 'X';
+
+  /* Bound on path formulas*/
+  {pctl_state} bound_number = digit+;
+
+  white_space = white_space;
+
+/*******************************************************************
+ * Ignored Tokens                                                  *
+ *******************************************************************/
+Ignored Tokens
+  white_space;
+
+
+/*******************************************************************
+ * Productions                                                     *
+ *******************************************************************/
+Productions
+  pctl_state_formula {-> pctl_state} =
+    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 
+        {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
+    {equivalence} [left]:pctl_state_formula equivalence [right]:pctl_state_formula2 
+        {-> New pctl_state.equivalence(left.pctl_state, right.pctl_state)} |
+    pctl_state_formula2 {-> pctl_state_formula2.pctl_state};
+
+  pctl_state_formula2 {-> pctl_state} =
+    {and} [left]:pctl_state_formula2 and [right]:pctl_state_formula3 {-> New pctl_state.and(left.pctl_state, right.pctl_state)} |
+    {or} [left]:pctl_state_formula2 or [right]:pctl_state_formula3 {-> New pctl_state.or(left.pctl_state, right.pctl_state)} |
+    pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
+
+  pctl_state_formula3 {-> pctl_state} =
+    {prob_formula} probabilistic [op]:operator [probability]:atomic_proposition_begin l_sq 
+        [cont]:pctl_path_formula r_sq {-> New pctl_state.prob_formula(op.operator,probability,cont.pctl_path)}|
+    pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
+
+  pctl_state_formula4 {-> pctl_state} =
+    {not} not pctl_state_formula4 {-> New pctl_state.not(pctl_state_formula4.pctl_state)} |
+    {par} l_par pctl_state_formula r_par {-> pctl_state_formula.pctl_state} |
+    {true} true {-> New pctl_state.true()} |
+    {false} false {-> New pctl_state.false()} |
+    {unparsed} atomic_proposition_begin {-> New pctl_state.unparsed(atomic_proposition_begin)} |
+    {sink} sink {-> New pctl_state.sink()} |
+    {goal} goal {-> New pctl_state.goal()} |
+    {det_output} det_output {-> New pctl_state.det_output()} |
+    {error} state_error {-> New pctl_state.error()} |
+    {deadlock} deadlock {-> New pctl_state.deadlock()} |
+    {current} current {-> New pctl_state.current()};
+
+  pctl_path_formula {-> pctl_path} =
+    {u} [left]:pctl_state_formula until [right]:pctl_state_formula 
+        {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
+    {u_k} [left]:pctl_state_formula until_bounded [bound]:expression [right]:pctl_state_formula 
+        {-> New pctl_path.u_k(left.pctl_state,bound.expression,right.pctl_state)}|
+    {x} next [cont]:pctl_state_formula 
+        {-> New pctl_path.x(cont.pctl_state)}|
+    {g} globally [cont]:pctl_state_formula 
+        {-> New pctl_path.g(cont.pctl_state)}|
+    {g_k} globally_bounded [bound]:expression [cont]:pctl_state_formula 
+        {-> New pctl_path.g_k(bound.expression,cont.pctl_state)}|
+    {f} eventually [cont]:pctl_state_formula 
+        {-> New pctl_path.f(cont.pctl_state)}|
+    {f_k} eventually_bounded [bound]:expression [cont]:pctl_state_formula 
+        {-> New pctl_path.f_k(bound.expression,cont.pctl_state)};
+
+  operator {-> operator} =
+    {strictly_greater} strictly_greater {-> New operator.strictly_greater()}|
+    {greater} greater {-> New operator.greater()}|
+    {strictly_less} strictly_less {-> New operator.strictly_less()}|
+    {less} less {-> New operator.less()}|
+    {equal} equal {-> New operator.equal()};
+  
+  expression {-> expression} =
+    {digit} [number]:bound_number {-> New expression.digit(number)};
+
+/*******************************************************************
+ * Abstract Syntax Tree                                            *
+ *******************************************************************/
+Abstract Syntax Tree
+  pctl_state =
+    {implies} [left]:pctl_state [right]:pctl_state |
+    {equivalence} [left]:pctl_state [right]:pctl_state |
+    {and} [left]:pctl_state [right]:pctl_state |
+    {or} [left]:pctl_state [right]:pctl_state |
+    {prob_formula} [op]:operator [probability]:atomic_proposition_begin [cont]:pctl_path |
+    {not} [cont]:pctl_state |
+    {true} |
+    {false} |
+    {unparsed} [predicate]:atomic_proposition_begin |
+    {sink} |
+    {goal} |
+    {det_output} |
+    {error} |
+    {deadlock} |
+    {current} ;
+  
+  pctl_path =
+    {u} [left]:pctl_state [right]:pctl_state |
+    {u_k} [left]:pctl_state [bound]:expression [right]:pctl_state |
+    {g_k} [bound]:expression [cont2]:pctl_state |
+    {f_k} [bound]:expression [cont2]:pctl_state |
+    {x} [cont2]:pctl_state |
+    {g} [cont2]:pctl_state |
+    {f} [cont2]:pctl_state ;
+
+  operator =
+    {strictly_greater} |
+    {greater} |
+    {strictly_less} |
+    {less} |
+    {equal};
+
+  expression =
+    {digit} [number]:bound_number;

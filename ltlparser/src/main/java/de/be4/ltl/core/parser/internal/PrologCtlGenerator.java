@@ -10,12 +10,12 @@ import de.be4.ltl.core.ctlparser.analysis.DepthFirstAdapter;
 import de.be4.ltl.core.ctlparser.node.AActionCtl;
 import de.be4.ltl.core.ctlparser.node.ACurrentCtl;
 import de.be4.ltl.core.ctlparser.node.ADeadlockCtl;
+import de.be4.ltl.core.ctlparser.node.ADetOutputCtl;
 import de.be4.ltl.core.ctlparser.node.AEnaCtl;
 import de.be4.ltl.core.ctlparser.node.AEnabledCtl;
-import de.be4.ltl.core.ctlparser.node.ASinkCtl;
-import de.be4.ltl.core.ctlparser.node.AGoalCtl;
-import de.be4.ltl.core.ctlparser.node.ADetOutputCtl;
 import de.be4.ltl.core.ctlparser.node.AErrorCtl;
+import de.be4.ltl.core.ctlparser.node.AGoalCtl;
+import de.be4.ltl.core.ctlparser.node.ASinkCtl;
 import de.be4.ltl.core.ctlparser.node.AUnparsedCtl;
 import de.be4.ltl.core.ctlparser.node.Node;
 import de.be4.ltl.core.ctlparser.node.Start;
@@ -77,12 +77,12 @@ public class PrologCtlGenerator extends DepthFirstAdapter {
 
 	@Override
 	public void caseADetOutputCtl(final ADetOutputCtl node) {
-		helper.det_output();
+		helper.detOutput();
 	}
 
 	@Override
 	public void caseAErrorCtl(final AErrorCtl node) {
-		helper.state_error();
+		helper.stateError();
 	}
 
 	@Override

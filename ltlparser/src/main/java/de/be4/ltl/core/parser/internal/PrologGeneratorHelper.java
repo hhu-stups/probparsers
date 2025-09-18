@@ -1,19 +1,18 @@
 package de.be4.ltl.core.parser.internal;
 
-import java.util.LinkedList;
 import java.util.Locale;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
+import de.be4.ltl.core.parser.node.AChangedLtl;
 import de.be4.ltl.core.parser.node.ACtrlLtl;
+import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.ADetLtl;
 import de.be4.ltl.core.parser.node.ADlkLtl;
 import de.be4.ltl.core.parser.node.AExistsLtl;
 import de.be4.ltl.core.parser.node.AForallLtl;
-import de.be4.ltl.core.parser.node.AUnchangedLtl;
-import de.be4.ltl.core.parser.node.AChangedLtl;
-import de.be4.ltl.core.parser.node.ADecreasingLtl;
 import de.be4.ltl.core.parser.node.AIncreasingLtl;
-import de.be4.ltl.core.parser.node.ABeforeAfterLtl;
+import de.be4.ltl.core.parser.node.AUnchangedLtl;
 import de.be4.ltl.core.parser.node.PActions;
 import de.be4.ltl.core.parser.node.PLtl;
 import de.prob.parserbase.ProBParseException;
@@ -34,10 +33,21 @@ final class PrologGeneratorHelper {
 	}
 
 	public void defaultIn(Class<?> clazz) {
-		StringBuilder sb = new StringBuilder(clazz.getSimpleName());
-		sb.setLength(sb.length() - 3);
-		sb.deleteCharAt(0);
-		String term = sb.toString().toLowerCase(Locale.ENGLISH);
+		String name = clazz.getSimpleName();
+		if (clazz.getSuperclass() == null) {
+			throw new IllegalArgumentException("Class has no superclass? " + clazz);
+		}
+		String superclassName = clazz.getSuperclass().getSimpleName();
+		if (!superclassName.startsWith("P") || !name.startsWith("A")) {
+			throw new IllegalArgumentException("Unexpected class name for a SableCC AST node: " + clazz + ", superclass " + clazz.getSuperclass());
+		}
+		String productionName = superclassName.substring(1);
+		if (!name.endsWith(productionName)) {
+			throw new IllegalArgumentException("Node class name doesn't match its superclass? " + clazz + ", superclass " + clazz.getSuperclass());
+		}
+		// Remove the letter "A" at the start and the production name at the end, then convert to lowercase.
+		// For example: "AGloballyLtl" (with superclass "PLtl") -> "globally"
+		String term = name.substring(1, name.length() - productionName.length()).toLowerCase(Locale.ENGLISH);
 		pto.openTerm(term);
 	}
 
@@ -71,10 +81,10 @@ final class PrologGeneratorHelper {
 		//pto.closeTerm();
 	}
 
-	public void caseUnparsedExpression(final UniversalToken token) {
+	public void caseUnparsedExpression(final UniversalToken token, boolean wrap) {
 		//pto.openTerm("ae"); // from the context it is clear in the AST that we expect an expression
 		try {
-			specParser.parseExpression(pto, token.getText(), true, token.getLine(), token.getColumn());
+			specParser.parseExpression(pto, token.getText(), wrap, token.getLine(), token.getColumn());
 		} catch (ProBParseException e) {
 			throw createAdapterException(token, e);
 		} catch (UnsupportedOperationException e) {
@@ -91,7 +101,7 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-	
+
 	public void available(final UniversalToken token) {
 		pto.openTerm("ap"); // atomic property
 		pto.openTerm("available");
@@ -99,16 +109,16 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-	
-	public void strong_fair(UniversalToken token) {
+
+	public void strongFair(UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("strong_fair");
 		parseTransitionPredicate(token);
 		pto.closeTerm();
-		pto.closeTerm();		
+		pto.closeTerm();
 	}
 
-	public void weak_fair(UniversalToken token) {
+	public void weakFair(UniversalToken token) {
 		pto.openTerm("ap");
 		pto.openTerm("weak_fair");
 		parseTransitionPredicate(token);
@@ -136,13 +146,13 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void det_output() {
+	public void detOutput() {
 		pto.openTerm("ap");
 		pto.printAtom("det_output");
 		pto.closeTerm();
 	}
 
-	public void state_error() {
+	public void stateError() {
 		pto.openTerm("ap");
 		pto.printAtom("state_error");
 		pto.closeTerm();
@@ -173,7 +183,6 @@ final class PrologGeneratorHelper {
 	}
 
 	public void existsTerm(AExistsLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("exists");
 		String identifier = node.getExistsIdentifier().getText();
 		pto.printAtom(identifier);
@@ -184,22 +193,19 @@ final class PrologGeneratorHelper {
 		node.getLtl().apply(gen);
 
 		pto.closeTerm();
-		
 	}
 
 	public void forallTerm(AForallLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("forall");
 		String identifier = node.getForallIdentifier().getText();
 		pto.printAtom(identifier);
-		
+
 		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
 		this.caseUnparsed(token);
 
 		node.getLtl().apply(gen);
 
 		pto.closeTerm();
-		
 	}
 
 	public void unchangedTerm(AUnchangedLtl node, PrologGenerator gen) {
@@ -207,42 +213,42 @@ final class PrologGeneratorHelper {
 		pto.openTerm("change_expr");
 		pto.printAtom("eq");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void changedTerm(AChangedLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("neq");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void decreasingTerm(ADecreasingLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("gt");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
+
 	public void increasingTerm(AIncreasingLtl node, PrologGenerator gen) {
-		
 		pto.openTerm("action");
 		pto.openTerm("change_expr");
 		pto.printAtom("lt");
 		final UniversalToken token = UniversalToken.createToken(node.getExpression());
-		this.caseUnparsedExpression(token);
+		this.caseUnparsedExpression(token, true);
 		pto.closeTerm();
 		pto.closeTerm();
 	}
-	public void before_afterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
-		
+
+	public void beforeAfterTerm(ABeforeAfterLtl node, PrologGenerator gen) {
 		pto.openTerm("action");
 		pto.openTerm("before_after");
 		final UniversalToken token = UniversalToken.createToken(node.getPredicate());
@@ -251,50 +257,47 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
-	public void and_fair1(PLtl left_node, PLtl right_node, PrologGenerator gen) {
-		
+	public void andFair1(PLtl leftNode, PLtl rightNode, PrologGenerator gen) {
 		pto.openTerm("and");
-		
+
 		pto.openTerm("strongassumptions");
-		left_node.apply(gen);
+		leftNode.apply(gen);
 		pto.closeTerm();
-				
+
 		pto.openTerm("weakassumptions");
-		right_node.apply(gen);
+		rightNode.apply(gen);
 		pto.closeTerm();
-		
+
 		pto.closeTerm();
 	}
 
-	public void and_fair2(PLtl left_node, PLtl right_node, PrologGenerator gen) {
-		
+	public void andFair2(PLtl leftNode, PLtl rightNode, PrologGenerator gen) {
 		pto.openTerm("and");
-		
+
 		pto.openTerm("weakassumptions");
-		left_node.apply(gen);
+		leftNode.apply(gen);
 		pto.closeTerm();
-				
+
 		pto.openTerm("strongassumptions");
-		right_node.apply(gen);
+		rightNode.apply(gen);
 		pto.closeTerm();
-		
+
 		pto.closeTerm();
 	}
 
-	public void weak_fair_all() {
+	public void weakFairAll() {
 		pto.printAtom("all");
 	}
 
-	public void strong_fair_all() {
+	public void strongFairAll() {
 		pto.printAtom("all");
 	}
 
 	public void dlk(ADlkLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("dlk");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
@@ -303,11 +306,10 @@ final class PrologGeneratorHelper {
 	}
 
 	public void det(ADetLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("det");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
@@ -316,11 +318,10 @@ final class PrologGeneratorHelper {
 	}
 
 	public void ctrl(ACtrlLtl node, PrologGenerator gen) {
-		LinkedList<PActions> list = node.getArgs();
 		pto.openTerm("ap");
 		pto.openTerm("ctrl");
 		pto.openList();
-		for (PActions pLtl : list) {
+		for (PActions pLtl : node.getArgs()) {
 			pLtl.apply(gen);
 		}
 		pto.closeList();
