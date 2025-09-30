@@ -40,7 +40,7 @@ import de.prob.prolog.output.PrologTermOutput;
  * machine.
  */
 public class RecursiveMachineLoader {
-	private static final String[] SUFFICES = new String[]{".ref", ".mch", ".sys", ".imp"};
+	private static final String[] SUFFIXES = new String[]{".ref", ".mch", ".sys", ".imp"};
 	private final File rootDirectory;
 	private final INodeIds nodeIds;
 	private final Map<String, Start> parsedMachines = new TreeMap<>();
@@ -232,7 +232,16 @@ public class RecursiveMachineLoader {
 	 */
 	private File lookupFile(final File parentMachineDirectory, final MachineReference machineRef,
 							List<Ancestor> ancestors, Collection<Path> importedDirs) throws CheckException {
-		for (final String suffix : SUFFICES) {
+		final String filePragma = machineRef.getPath();
+		if (filePragma != null) {
+				File p = new File(filePragma);
+				if (p.isAbsolute()) {
+					return p;
+				} else {
+					return new File(parentMachineDirectory, filePragma);
+				}
+		}
+		for (final String suffix : SUFFIXES) {
 			try {
 				final List<String> paths = importedDirs.stream()
 					.map(Path::toAbsolutePath)
@@ -249,13 +258,13 @@ public class RecursiveMachineLoader {
 		sb.append(machineRef.getName());
 		sb.append("'");
 		if (ancestors.size()>0) {		
-		String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1).getName()).getName();
-		sb.append(" in '").append(fileNameOfErrorMachine).append("'");
-		for (int i = ancestors.size() - 2; i >= 0; i--) {
-			String name = ancestors.get(i).getName();
-			String fileName = parsedFiles.get(name).getName();
-			sb.append(" loaded by ").append("'").append(fileName).append("'");
-		}
+			String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1).getName()).getName();
+			sb.append(" in '").append(fileNameOfErrorMachine).append("'");
+			for (int i = ancestors.size() - 2; i >= 0; i--) {
+				String name = ancestors.get(i).getName();
+				String fileName = parsedFiles.get(name).getName();
+				sb.append(" loaded by ").append("'").append(fileName).append("'");
+			}
 		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
@@ -323,21 +332,12 @@ public class RecursiveMachineLoader {
 		for (final MachineReference refMachine : references) {
 			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
 			newAncestors.add(new Ancestor(name, refMachine));
-			final String filePragma = refMachine.getPath();
 			File referencedFile;
-			if (filePragma == null) {
-				try {
-					referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
-				} catch (CheckException e) {
-					throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
-				}
-			} else {
-				File p = new File(filePragma);
-				if (p.isAbsolute()) {
-					referencedFile = p;
-				} else {
-					referencedFile = new File(directory, filePragma);
-				}
+
+			try {
+				referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
+			} catch (CheckException e) {
+				throw new BCompoundException(new BException(machineFile.getAbsolutePath(), e));
 			}
 
 			if (referencedFile.exists() && parsedFiles.containsKey(refMachine.getName())) {
@@ -406,7 +406,11 @@ public class RecursiveMachineLoader {
 				path = lookupFile(currentMachineFile.getParentFile(), sibling.getMachineReference(), Collections.emptyList(), Collections.emptyList()).toString();
 			} catch (CheckException e) {
 				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
+			} catch (Exception e) { // unexpected exception; should not happen
+				e.printStackTrace(System.out); // but if it does we at least see the stack trace
+				throw e;
 			}
+
 
 			final Node node = current.getMachineReference().getNode();
 			throw new BCompoundException(new BException(path, new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
