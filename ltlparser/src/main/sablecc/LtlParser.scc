@@ -39,6 +39,7 @@ Tokens
   {ltl} sink ='sink';
   {ltl} goal ='goal';
   {ltl} det_output ='det_output';
+  {ltl} non_det ='non_det';
   {ltl} state_error ='error';
   {ltl} deadlock ='deadlock';
   {ltl} current = 'current';
@@ -166,6 +167,7 @@ Productions
     {sink} sink {-> New ltl.sink()} |
     {goal} goal {-> New ltl.goal()} |
     {det_output} det_output {-> New ltl.det_output()} |
+    {non_det} non_det {-> New ltl.non_det()} |
     {error} state_error {-> New ltl.error()} |
     {deadlock} deadlock {-> New ltl.deadlock()} |
     {current} current {-> New ltl.current()} |
@@ -255,6 +257,7 @@ Abstract Syntax Tree
    {sink} |
    {goal} |
    {det_output} |
+   {non_det} |
    {error} |
    {deadlock} |
    {current} |

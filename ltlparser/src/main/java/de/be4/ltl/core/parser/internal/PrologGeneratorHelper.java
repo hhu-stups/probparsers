@@ -152,6 +152,12 @@ final class PrologGeneratorHelper {
 		pto.closeTerm();
 	}
 
+	public void nonDet() {
+		pto.openTerm("ap");
+		pto.printAtom("non_det");
+		pto.closeTerm();
+	}
+
 	public void stateError() {
 		pto.openTerm("ap");
 		pto.printAtom("state_error");
