@@ -25,7 +25,10 @@ Helpers
  * States                                                          *
  *******************************************************************/
 States
-  ltl, atomic, action, actions;
+  ltl,
+  atomic,   // inside atomic propositions {...}
+  action,   // inside enabled(...),e(...),[...],Av(...)
+  actions;  // inside dlk, det, ctrl
 
 /*******************************************************************
  * Tokens                                                          *
@@ -46,7 +49,7 @@ Tokens
   {ltl} l_par = '(';
   {ltl} r_par = ')';
 
-  {ltl -> action} l_sq = l_sq; // TODO: also allow textual version 'executed('
+  {ltl -> action} l_sq = ( l_sq | 'executed' opt_white_space '(');
   {ltl -> action} opcall = ('calls' | 'operation_call') opt_white_space '(';  // to check transition calls subsidiary operation
   {ltl -> action} enabled = ('e' | 'enabled') opt_white_space '(';
   {ltl -> action} available = ('Av' | 'available') opt_white_space '(';
