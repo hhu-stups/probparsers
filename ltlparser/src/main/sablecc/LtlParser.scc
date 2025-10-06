@@ -61,7 +61,10 @@ Tokens
 
   {action} action_end = [')' + ']']; // TODO: check that parens/bracket match!
   {action} action_begin = ['(' + '['];
-  {action} tp_char = ([0 .. 0xffff]);
+  {action} tp_char = ([0 .. 0xffff]); // the content is dispatched to another parser in parseTransitionPredicate
+   // when generating the Prolog output
+   // this calls BParser.parseTransition which parses with kw_oppattern = '#OPPATTERN' prefix
+   // and allows operation call patterns with underscores
 
   {ltl} unchanged = 'unchanged' | 'UNCHANGED'; // upper-case for TLA+ like feel
   {ltl} changed = 'changed';
