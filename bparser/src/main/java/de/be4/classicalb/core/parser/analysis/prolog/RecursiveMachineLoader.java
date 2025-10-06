@@ -234,12 +234,12 @@ public class RecursiveMachineLoader {
 							List<Ancestor> ancestors, Collection<Path> importedDirs) throws CheckException {
 		final String filePragma = machineRef.getPath();
 		if (filePragma != null) {
-				File p = new File(filePragma);
-				if (p.isAbsolute()) {
-					return p;
-				} else {
-					return new File(parentMachineDirectory, filePragma);
-				}
+			File p = new File(filePragma);
+			if (p.isAbsolute()) {
+				return p;
+			} else {
+				return new File(parentMachineDirectory, filePragma);
+			}
 		}
 		for (final String suffix : SUFFIXES) {
 			try {
@@ -257,7 +257,7 @@ public class RecursiveMachineLoader {
 		sb.append("Machine not found: '");
 		sb.append(machineRef.getName());
 		sb.append("'");
-		if (ancestors.size()>0) {		
+		if (ancestors.size() > 0) {
 			String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1).getName()).getName();
 			sb.append(" in '").append(fileNameOfErrorMachine).append("'");
 			for (int i = ancestors.size() - 2; i >= 0; i--) {
