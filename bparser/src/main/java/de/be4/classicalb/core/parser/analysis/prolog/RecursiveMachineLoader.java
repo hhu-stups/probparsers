@@ -257,7 +257,7 @@ public class RecursiveMachineLoader {
 		sb.append("Machine not found: '");
 		sb.append(machineRef.getName());
 		sb.append("'");
-		if (ancestors.size() > 0) {
+		if (!ancestors.isEmpty()) {
 			String fileNameOfErrorMachine = parsedFiles.get(ancestors.get(ancestors.size() - 1).getName()).getName();
 			sb.append(" in '").append(fileNameOfErrorMachine).append("'");
 			for (int i = ancestors.size() - 2; i >= 0; i--) {
