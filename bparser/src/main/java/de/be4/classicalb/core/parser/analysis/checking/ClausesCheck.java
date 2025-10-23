@@ -142,13 +142,21 @@ public class ClausesCheck implements SemanticCheck {
 		findForbidden(MACHINE_FORBIDDEN_CLAUSES, "abstract machine");
 	}
 
+
+    private boolean initClauseExists() {
+       return clauses.containsKey(AInitialisationMachineClause.class) || 
+              clauses.containsKey(ADescriptionMachineClause.class);  // TODO: check if inside it is an INITIALISATION
+    }
 	private void checkVariablesClauses() {
 		/*
 		 * CONCRETE_VARIABLES || VARIABLES || ABSTRACT_VARIABLES => INVARIANT &&
 		 * INITIALISATION
 		 */
-		if ((clauses.containsKey(AVariablesMachineClause.class) || clauses.containsKey(AConcreteVariablesMachineClause.class))
-				&& (!clauses.containsKey(AInvariantMachineClause.class) || !clauses.containsKey(AInitialisationMachineClause.class))) {
+		if ((clauses.containsKey(AVariablesMachineClause.class) || 
+		     clauses.containsKey(AConcreteVariablesMachineClause.class))
+				&& (!clauses.containsKey(AInvariantMachineClause.class) ||
+				    !initClauseExists()
+			)) {
 
 			final Set<Node> nodes = new HashSet<>();
 			if (clauses.containsKey(AVariablesMachineClause.class)) {
@@ -164,7 +172,7 @@ public class ClausesCheck implements SemanticCheck {
 				message.append("INVARIANT");
 				first = false;
 			}
-			if (!clauses.containsKey(AInitialisationMachineClause.class)) {
+			if (!initClauseExists()) {
 				if (!first) {
 					message.append(", ");
 				}
