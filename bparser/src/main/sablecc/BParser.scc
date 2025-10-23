@@ -678,11 +678,11 @@ properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-
 
 initialisation_clause {-> machine_clause} =
   {description} [initialisation_clause]:initialisation_clause [description]:description_pragma
-             {-> New machine_clause.description(description.description_pragma, initialisation_clause.machine_clause)}
+    {-> New machine_clause.description(description.description_pragma, initialisation_clause.machine_clause)}
   // this allows description pragmas at the very end of the INITIALISATION
   |
   {initialisation} initialisation [substitutions]:substitution_all
-                {-> New machine_clause.initialisation(substitutions.substitution)};
+    {-> New machine_clause.initialisation(substitutions.substitution)};
 
 invariant_clause {-> machine_clause} = invariant [predicates]:predicate_top {-> New machine_clause.invariant(predicates.predicate)};
 
@@ -717,7 +717,7 @@ operation_list {-> operation*} =
 
 operation {-> operation} =
   {description} [operation]:operation [description]:description_pragma
-                {-> New operation.description(description.description_pragma, operation)}
+    {-> New operation.description(description.description_pragma, operation)}
   // this allows description pragmas at the very end of an operation, not before the equal (=) sign
   |
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_top

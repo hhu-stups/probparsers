@@ -143,21 +143,20 @@ public class ClausesCheck implements SemanticCheck {
 	}
 
 
-    private boolean initClauseExists() {
-       return clauses.containsKey(AInitialisationMachineClause.class) || 
-              clauses.containsKey(ADescriptionMachineClause.class);  // TODO: check if inside it is an INITIALISATION
-    }
+	private boolean initClauseExists() {
+		return clauses.containsKey(AInitialisationMachineClause.class)
+			|| clauses.containsKey(ADescriptionMachineClause.class); // TODO: check if inside it is an INITIALISATION
+	}
+
 	private void checkVariablesClauses() {
 		/*
 		 * CONCRETE_VARIABLES || VARIABLES || ABSTRACT_VARIABLES => INVARIANT &&
 		 * INITIALISATION
 		 */
-		if ((clauses.containsKey(AVariablesMachineClause.class) || 
-		     clauses.containsKey(AConcreteVariablesMachineClause.class))
-				&& (!clauses.containsKey(AInvariantMachineClause.class) ||
-				    !initClauseExists()
-			)) {
-
+		if (
+			(clauses.containsKey(AVariablesMachineClause.class) || clauses.containsKey(AConcreteVariablesMachineClause.class))
+			&& (!clauses.containsKey(AInvariantMachineClause.class) || !initClauseExists())
+		) {
 			final Set<Node> nodes = new HashSet<>();
 			if (clauses.containsKey(AVariablesMachineClause.class)) {
 				nodes.addAll(clauses.get(AVariablesMachineClause.class));
