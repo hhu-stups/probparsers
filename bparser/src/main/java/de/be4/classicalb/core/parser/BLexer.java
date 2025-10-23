@@ -150,8 +150,8 @@ public class BLexer extends Lexer {
 			String clauseName = clauseTokenClass.getSimpleName().substring(1).toUpperCase();
 			//addInvalid(TConjunction.class, clauseTokenClass, "& " + clauseName + " is not allowed.");
 			addInvalid(TPragmaLabel.class, clauseTokenClass, "A label pragma must be put before a predicate.");
-			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate, operation or identifier."); //  
-		
+			addInvalid(clauseTokenClass, TPragmaDescription.class, "A description pragma must be put after a predicate, operation or identifier.");
+
 			addInvalid(TLeftPar.class, clauseTokenClass, "Closing parenthesis is missing.");
 			addInvalid(TLeftBrace.class, clauseTokenClass, "Closing brace is missing.");
 			addInvalid(TLeftBracket.class, clauseTokenClass, "Closing bracket is missing.");
