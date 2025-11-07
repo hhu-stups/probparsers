@@ -20,6 +20,27 @@ cache:
     - apt-get update
     - apt-get install -y git
 
+# For testing with older Java versions.
+# Gradle 9 requires at least Java 17 to run,
+# but can still compile/test using older JDKs if requested via a toolchain configuration.
+# Thus, if the Java version provided by the eclipse-temurin image in question is too old to run Gradle,
+# we additionally install Ubuntu's default JRE,
+# which should always be new enough to run current Gradle versions.
+# For example, as of 2025-11,
+# the eclipse-temurin:8 image is based on Ubuntu 24.04 LTS (noble),
+# whose default Java version is Java 21.
+# Jobs that extend this template must also set the environment variable ORG_GRADLE_PROJECT_toolchainJavaVersion
+# to the Java version number of the eclipse-temurin image.
+.linux_old_java:
+  extends: .linux_base
+  variables:
+    # Change JAVA_HOME to the system default Java
+    # so that Gradle runs using this newer Java version.
+    JAVA_HOME: "/usr/lib/jvm/default-java"
+  before_script:
+    - apt-get update
+    - apt-get install -y default-jre-headless git
+
 .tests:
   stage: test
   script: ./gradlew ${GRADLE_ARGS} --parallel check jacocoTestReport
@@ -36,15 +57,19 @@ cache:
 
 tests:jdk-8:
   extends:
-    - .linux_base
+    - .linux_old_java
     - .tests
   image: eclipse-temurin:8
+  variables:
+    ORG_GRADLE_PROJECT_toolchainJavaVersion: "8"
 
 tests:jdk-11:
   extends:
-    - .linux_base
+    - .linux_old_java
     - .tests
   image: eclipse-temurin:11
+  variables:
+    ORG_GRADLE_PROJECT_toolchainJavaVersion: "11"
 
 tests:jdk-17:
   extends:

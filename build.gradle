@@ -96,6 +96,12 @@ subprojects {
 
 		withSourcesJar()
 		withJavadocJar()
+
+		if (project.hasProperty("toolchainJavaVersion")) {
+			toolchain {
+				languageVersion = JavaLanguageVersion.of(project.toolchainJavaVersion)
+			}
+		}
 	}
 
 	tasks.named('test', Test) {
