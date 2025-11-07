@@ -30,9 +30,9 @@ You can include the different parsers in a Gradle build script like this:
 ```groovy
 final parserVersion = "2.15.3"
 dependencies {
-	implementation group: "de.hhu.stups", name: "bparser", version: parserVersion
-	implementation group: "de.hhu.stups", name: "ltlparser", version: parserVersion
-	implementation group: "de.hhu.stups", name: "parserbase", version: parserVersion
+	implementation("de.hhu.stups:bparser:${parserVersion}")
+	implementation("de.hhu.stups:ltlparser:${parserVersion}")
+	implementation("de.hhu.stups:parserbase:${parserVersion}")
 }
 ```
 

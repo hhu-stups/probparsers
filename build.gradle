@@ -10,7 +10,7 @@ buildscript {
 		// So as a workaround,
 		// enable the GraalVM plugin only when explicitly requested (see below).
 		if (project.hasProperty("enableGraalVM") && project.enableGraalVM == "true") {
-			classpath(group: "org.graalvm.buildtools.native", name: "org.graalvm.buildtools.native.gradle.plugin", version: "0.10.5")
+			classpath("org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.10.5")
 		}
 	}
 }
@@ -39,8 +39,8 @@ final SOURCE_ENCODING = "UTF-8"
 
 ext {
 	sableCCVersion = "3.9.0"
-	sableCCDependency = [group: 'de.hhu.stups', name: 'sablecc', version: sableCCVersion]
-	sableCCRuntimeDependency = [group: 'de.hhu.stups', name: 'sablecc-runtime', version: sableCCVersion]
+	sableCCDependency = "de.hhu.stups:sablecc:${sableCCVersion}"
+	sableCCRuntimeDependency = "de.hhu.stups:sablecc-runtime:${sableCCVersion}"
 }
 
 final snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
@@ -85,12 +85,12 @@ subprojects {
 	}
 
 	dependencies {
-		testImplementation platform('org.junit:junit-bom:5.12.0')
-		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
-		testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
-		testCompileOnly group: 'junit', name: 'junit', version: '4.13.2'
-		testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine'
-		testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
+		testImplementation(platform("org.junit:junit-bom:5.12.0"))
+		testImplementation("org.junit.jupiter:junit-jupiter")
+		testImplementation("org.junit.jupiter:junit-jupiter-params")
+		testCompileOnly("junit:junit:4.13.2")
+		testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	}
 
 	java {
