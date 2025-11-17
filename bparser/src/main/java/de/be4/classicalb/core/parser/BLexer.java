@@ -295,6 +295,10 @@ public class BLexer extends Lexer {
 		addInvalid(TChoice.class, TEnd.class, "Block must contain statements.");
 		addInvalid(TChoice.class, TOr.class, "Block must contain statements.");
 		addInvalid(TOr.class, TEnd.class, "Block must contain statements.");
+		// WHILE ... DO -> followed by INVARIANT and VARIANT after body
+		// RulesDSL also uses DO in For loops (but there cannot be a VARIANT/INVARIANT directly ater)
+		addInvalid(TDo.class, TVariant.class, "VARIANT must be put *after* the WHILE loop body and the INVARIANT.");
+		addInvalid(TDo.class, TInvariant.class, "INVARIANT must be put *after* the WHILE loop body.");
 		// more combination: CASE, WHILE
 		
 		
