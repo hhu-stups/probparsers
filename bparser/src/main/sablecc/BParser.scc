@@ -667,12 +667,13 @@ set_def_list {-> set*} =
   {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]};
 
 set {-> set} =
+  // Note: description pragmas for enumerated sets must follow the entire equality, not the set identifier!
   {description} [set]:set [description]:description_pragma {-> New set.description(description.description_pragma, set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
   {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_declaration_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
   {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
           {-> New set.enumerated_set_via_def([identifier.identifier_literal], [elem_def.identifier_literal])};
-  // TO DO: allow description pragmas for enumerated set elements
+  // identifier_declaration_lists allows description pragmas for enumerated set elements
 
 properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-> New machine_clause.properties(predicates.predicate)};
 
