@@ -16,8 +16,6 @@ buildscript {
 }
 
 plugins {
-	id("java-library")
-
 	// Declare version numbers for all third-party plugins here
 	// so that all subprojects use the same plugin versions.
 	// The plugins are declared as .apply(false) here
