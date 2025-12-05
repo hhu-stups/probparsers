@@ -97,9 +97,9 @@ subprojects {
 		withSourcesJar()
 		withJavadocJar()
 
-		if (project.hasProperty("toolchainJavaVersion")) {
+		if (project.hasProperty("javaToolchainVersion")) {
 			toolchain {
-				languageVersion = JavaLanguageVersion.of(project.toolchainJavaVersion)
+				languageVersion = JavaLanguageVersion.of(project.javaToolchainVersion)
 			}
 		}
 	}

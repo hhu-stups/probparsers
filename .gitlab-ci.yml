@@ -29,7 +29,7 @@ cache:
 # For example, as of 2025-11,
 # the eclipse-temurin:8 image is based on Ubuntu 24.04 LTS (noble),
 # whose default Java version is Java 21.
-# Jobs that extend this template must also set the environment variable ORG_GRADLE_PROJECT_toolchainJavaVersion
+# Jobs that extend this template must also set the environment variable ORG_GRADLE_PROJECT_javaToolchainVersion
 # to the Java version number of the eclipse-temurin image.
 .linux_old_java:
   extends: .linux_base
@@ -61,7 +61,7 @@ tests:jdk-8:
     - .tests
   image: eclipse-temurin:8
   variables:
-    ORG_GRADLE_PROJECT_toolchainJavaVersion: "8"
+    ORG_GRADLE_PROJECT_javaToolchainVersion: "8"
 
 tests:jdk-11:
   extends:
@@ -69,7 +69,7 @@ tests:jdk-11:
     - .tests
   image: eclipse-temurin:11
   variables:
-    ORG_GRADLE_PROJECT_toolchainJavaVersion: "11"
+    ORG_GRADLE_PROJECT_javaToolchainVersion: "11"
 
 tests:jdk-17:
   extends:
