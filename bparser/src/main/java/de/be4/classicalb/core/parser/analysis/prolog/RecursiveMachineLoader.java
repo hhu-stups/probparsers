@@ -406,11 +406,7 @@ public class RecursiveMachineLoader {
 				path = lookupFile(currentMachineFile.getParentFile(), sibling.getMachineReference(), Collections.emptyList(), Collections.emptyList()).toString();
 			} catch (CheckException e) {
 				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
-			} catch (Exception e) { // unexpected exception; should not happen
-				e.printStackTrace(System.out); // but if it does we at least see the stack trace
-				throw e;
 			}
-
 
 			final Node node = current.getMachineReference().getNode();
 			throw new BCompoundException(new BException(path, new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
