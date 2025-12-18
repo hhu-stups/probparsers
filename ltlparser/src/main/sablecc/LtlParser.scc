@@ -39,17 +39,17 @@ Tokens
   {ltl -> actions} dlk = 'deadlock' opt_white_space '(';
   {ltl -> actions} det = 'deterministic' opt_white_space '(';
   {ltl -> actions} ctrl = 'controller' opt_white_space '(';
-  {ltl} sink ='sink';
-  {ltl} goal ='goal';
-  {ltl} det_output ='det_output';
-  {ltl} non_det ='non_det';
-  {ltl} state_error ='error';
-  {ltl} deadlock ='deadlock';
+  {ltl} sink = 'sink';
+  {ltl} goal = 'goal';
+  {ltl} det_output = 'det_output';
+  {ltl} non_det = 'non_det';
+  {ltl} state_error = 'error';
+  {ltl} deadlock = 'deadlock';
   {ltl} current = 'current';
   {ltl} l_par = '(';
   {ltl} r_par = ')';
 
-  {ltl -> action} l_sq = ( l_sq | 'executed' opt_white_space '(');
+  {ltl -> action} l_sq = (l_sq | 'executed' opt_white_space '(');
   {ltl -> action} opcall = ('calls' | 'operation_call') opt_white_space '(';  // to check transition calls subsidiary operation
   {ltl -> action} enabled = ('e' | 'enabled') opt_white_space '(';
   {ltl -> action} available = ('Av' | 'available') opt_white_space '(';

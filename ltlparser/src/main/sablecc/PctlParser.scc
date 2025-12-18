@@ -25,12 +25,12 @@ States
 Tokens
   {pctl_state} true = 'true';
   {pctl_state} false = 'false';
-  {pctl_state} sink ='sink';
-  {pctl_state} goal ='goal';
-  {pctl_state} det_output ='det_output';
-  {pctl_state} non_det ='non_det';
-  {pctl_state} state_error ='error';
-  {pctl_state} deadlock ='deadlock';
+  {pctl_state} sink = 'sink';
+  {pctl_state} goal = 'goal';
+  {pctl_state} det_output = 'det_output';
+  {pctl_state} non_det = 'non_det';
+  {pctl_state} state_error = 'error';
+  {pctl_state} deadlock = 'deadlock';
   {pctl_state} current = 'current';
   {pctl_state} l_par = '(';
   {pctl_state} r_par = ')';
