@@ -6,6 +6,7 @@ import java.util.List;
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
+import de.be4.classicalb.core.parser.node.AInitialisationMachineClause;
 import de.be4.classicalb.core.parser.node.AInvalidOperationsClauseMachineClause;
 import de.be4.classicalb.core.parser.node.AInvalidSubstitution;
 import de.be4.classicalb.core.parser.node.ALocalOperationsMachineClause;
@@ -14,7 +15,8 @@ import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
- * This class checks that there is non missing semicolon between two operations.
+ * This class checks that there is no missing semicolon between two operations
+ * or extra (invalid) semicolons at the end (see {invalid} semicolon rule in BParser.scc)
  */
 public class SemicolonCheck implements SemanticCheck {
 
@@ -45,6 +47,11 @@ public class SemicolonCheck implements SemanticCheck {
 
 		@Override
 		public void caseALocalOperationsMachineClause(final ALocalOperationsMachineClause node) {
+			node.apply(new OperationMissingSemicolonWalker());
+		}
+
+		@Override
+		public void caseAInitialisationMachineClause(final AInitialisationMachineClause node) {
 			node.apply(new OperationMissingSemicolonWalker());
 		}
 	}

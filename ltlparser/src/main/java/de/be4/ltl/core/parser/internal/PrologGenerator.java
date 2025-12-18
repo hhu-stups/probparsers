@@ -28,6 +28,7 @@ import de.be4.ltl.core.parser.node.AGoalLtl;
 import de.be4.ltl.core.parser.node.AIncreasingLtl;
 import de.be4.ltl.core.parser.node.AOpActions;
 import de.be4.ltl.core.parser.node.AOperationcallLtl;
+import de.be4.ltl.core.parser.node.ANonDetLtl;
 import de.be4.ltl.core.parser.node.ASinkLtl;
 import de.be4.ltl.core.parser.node.AStrongFairAllLtl;
 import de.be4.ltl.core.parser.node.AStrongFairLtl;
@@ -123,6 +124,11 @@ public class PrologGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseADetOutputLtl(final ADetOutputLtl node) {
 		helper.detOutput();
+	}
+
+	@Override
+	public void caseANonDetLtl(final ANonDetLtl node) {
+		helper.nonDet();
 	}
 
 	@Override

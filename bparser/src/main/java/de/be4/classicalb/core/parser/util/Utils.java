@@ -162,6 +162,7 @@ public final class Utils {
 			|| identifier.startsWith("GAME_") // GAME_OVER, GAME_PLAYER, GAME_MCTS_RUNS
 			|| identifier.startsWith("HEURISTIC_FUNCTION")
 			|| identifier.startsWith("MAX_OPERATIONS_")
+			|| identifier.startsWith("DESCRIPTION_FOR_")
 			|| identifier.startsWith("OPERATION_REUSE_OFF_")
 			|| identifier.equals("PROB_REQUIRED_VERSION")
 			|| identifier.equals("SCOPE")

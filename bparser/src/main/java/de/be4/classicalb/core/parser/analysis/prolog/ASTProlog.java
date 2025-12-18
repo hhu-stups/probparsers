@@ -36,6 +36,7 @@ public class ASTProlog extends DepthFirstAdapter {
 
 	private static final List<String> ATOMIC_TYPE = Collections.unmodifiableList(Arrays.asList(
 			"description_event", // for ADescriptionEvent
+			"description_machine_clause", // for ADescriptionMachineClause
 			"description_operation",
 			"description_pragma",
 			"event",

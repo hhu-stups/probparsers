@@ -25,11 +25,12 @@ States
 Tokens
   {pctl_state} true = 'true';
   {pctl_state} false = 'false';
-  {pctl_state} sink ='sink';
-  {pctl_state} goal ='goal';
-  {pctl_state} det_output ='det_output';
-  {pctl_state} state_error ='error';
-  {pctl_state} deadlock ='deadlock';
+  {pctl_state} sink = 'sink';
+  {pctl_state} goal = 'goal';
+  {pctl_state} det_output = 'det_output';
+  {pctl_state} non_det = 'non_det';
+  {pctl_state} state_error = 'error';
+  {pctl_state} deadlock = 'deadlock';
   {pctl_state} current = 'current';
   {pctl_state} l_par = '(';
   {pctl_state} r_par = ')';
@@ -38,7 +39,7 @@ Tokens
   {pctl_state} strictly_greater = '>';
   {pctl_state} greater = '>=' | 0x2a7e;
   {pctl_state} strictly_less = '<';
-  {pctl_state} less = '<=' | 0x2a7d; 
+  {pctl_state} less = '<=' | 0x2a7d;
   {pctl_state} equal = '=';
 
   {pctl_state -> atomic, atomic} atomic_proposition_begin = atomic_proposition_begin;
@@ -79,9 +80,9 @@ Ignored Tokens
  *******************************************************************/
 Productions
   pctl_state_formula {-> pctl_state} =
-    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2 
+    {implication} [left]:pctl_state_formula implies [right]:pctl_state_formula2
         {-> New pctl_state.implies(left.pctl_state, right.pctl_state)} |
-    {equivalence} [left]:pctl_state_formula equivalence [right]:pctl_state_formula2 
+    {equivalence} [left]:pctl_state_formula equivalence [right]:pctl_state_formula2
         {-> New pctl_state.equivalence(left.pctl_state, right.pctl_state)} |
     pctl_state_formula2 {-> pctl_state_formula2.pctl_state};
 
@@ -91,7 +92,7 @@ Productions
     pctl_state_formula3 {-> pctl_state_formula3.pctl_state};
 
   pctl_state_formula3 {-> pctl_state} =
-    {prob_formula} probabilistic [op]:operator [probability]:atomic_proposition_begin l_sq 
+    {prob_formula} probabilistic [op]:operator [probability]:atomic_proposition_begin l_sq
         [cont]:pctl_path_formula r_sq {-> New pctl_state.prob_formula(op.operator,probability,cont.pctl_path)}|
     pctl_state_formula4 {-> pctl_state_formula4.pctl_state};
 
@@ -104,24 +105,25 @@ Productions
     {sink} sink {-> New pctl_state.sink()} |
     {goal} goal {-> New pctl_state.goal()} |
     {det_output} det_output {-> New pctl_state.det_output()} |
+    {non_det} non_det {-> New pctl_state.non_det()} |
     {error} state_error {-> New pctl_state.error()} |
     {deadlock} deadlock {-> New pctl_state.deadlock()} |
     {current} current {-> New pctl_state.current()};
 
   pctl_path_formula {-> pctl_path} =
-    {u} [left]:pctl_state_formula until [right]:pctl_state_formula 
+    {u} [left]:pctl_state_formula until [right]:pctl_state_formula
         {-> New pctl_path.u(left.pctl_state,right.pctl_state)}|
-    {u_k} [left]:pctl_state_formula until_bounded [bound]:expression [right]:pctl_state_formula 
+    {u_k} [left]:pctl_state_formula until_bounded [bound]:expression [right]:pctl_state_formula
         {-> New pctl_path.u_k(left.pctl_state,bound.expression,right.pctl_state)}|
-    {x} next [cont]:pctl_state_formula 
+    {x} next [cont]:pctl_state_formula
         {-> New pctl_path.x(cont.pctl_state)}|
-    {g} globally [cont]:pctl_state_formula 
+    {g} globally [cont]:pctl_state_formula
         {-> New pctl_path.g(cont.pctl_state)}|
-    {g_k} globally_bounded [bound]:expression [cont]:pctl_state_formula 
+    {g_k} globally_bounded [bound]:expression [cont]:pctl_state_formula
         {-> New pctl_path.g_k(bound.expression,cont.pctl_state)}|
-    {f} eventually [cont]:pctl_state_formula 
+    {f} eventually [cont]:pctl_state_formula
         {-> New pctl_path.f(cont.pctl_state)}|
-    {f_k} eventually_bounded [bound]:expression [cont]:pctl_state_formula 
+    {f_k} eventually_bounded [bound]:expression [cont]:pctl_state_formula
         {-> New pctl_path.f_k(bound.expression,cont.pctl_state)};
 
   operator {-> operator} =
@@ -130,7 +132,7 @@ Productions
     {strictly_less} strictly_less {-> New operator.strictly_less()}|
     {less} less {-> New operator.less()}|
     {equal} equal {-> New operator.equal()};
-  
+
   expression {-> expression} =
     {digit} [number]:bound_number {-> New expression.digit(number)};
 
@@ -151,10 +153,11 @@ Abstract Syntax Tree
     {sink} |
     {goal} |
     {det_output} |
+    {non_det} |
     {error} |
     {deadlock} |
     {current} ;
-  
+
   pctl_path =
     {u} [left]:pctl_state [right]:pctl_state |
     {u_k} [left]:pctl_state [bound]:expression [right]:pctl_state |

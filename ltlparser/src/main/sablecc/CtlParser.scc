@@ -25,11 +25,12 @@ States
 Tokens
   {ctl} true = 'true';
   {ctl} false = 'false';
-  {ctl} sink ='sink';
-  {ctl} goal ='goal';
-  {ctl} det_output ='det_output';
-  {ctl} state_error ='error';
-  {ctl} deadlock ='deadlock';
+  {ctl} sink = 'sink';
+  {ctl} goal = 'goal';
+  {ctl} det_output = 'det_output';
+  {ctl} non_det = 'non_det';
+  {ctl} state_error = 'error';
+  {ctl} deadlock = 'deadlock';
   {ctl} current = 'current';
   {ctl} l_par = '(';
   {ctl} r_par = ')';
@@ -50,7 +51,7 @@ Tokens
   {ctl} implies = '=>' | 0x21d2;
   {ctl} and = '&' | 0x2227;
   {ctl} or = 'or' | 0x2228;
-  {ctl} not = 'not'| 0x00ac;
+  {ctl} not = 'not' | 0x00ac;
 
   /* CTL temporal operators */
   {ctl} exists = 'E';
@@ -106,6 +107,7 @@ Productions
     {sink} sink {-> New ctl.sink()} |
     {goal} goal {-> New ctl.goal()} |
     {det_output} det_output {-> New ctl.det_output()} |
+    {non_det} non_det {-> New ctl.non_det()} |
     {error} state_error {-> New ctl.error()} |
     {deadlock} deadlock {-> New ctl.deadlock()} |
     {current} current {-> New ctl.current()};
@@ -133,6 +135,7 @@ Abstract Syntax Tree
     {sink} |
     {goal} |
     {det_output} |
+    {non_det} |
     {error} |
     {deadlock} |
     {current} |

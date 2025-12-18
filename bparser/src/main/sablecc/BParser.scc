@@ -667,16 +667,23 @@ set_def_list {-> set*} =
   {multi} [rest]:set_def_list semicolon [last]:set {-> [rest.set, last.set]};
 
 set {-> set} =
+  // Note: description pragmas for enumerated sets must follow the entire equality, not the set identifier!
   {description} [set]:set [description]:description_pragma {-> New set.description(description.description_pragma, set)} |
   {deferred} [identifier]:composed_identifier {-> New set.deferred_set([identifier.identifier_literal])} |
   {enumerated} [identifier]:composed_identifier equal left_brace [elements]:identifier_declaration_list right_brace {-> New set.enumerated_set([identifier.identifier_literal], [elements.expression])} |
   {enumerated_set_via_def} [identifier]:composed_identifier equal [elem_def]:composed_identifier  // covers:  SETS Id = ED; DEFINITIONS ED == {a,b,c}
           {-> New set.enumerated_set_via_def([identifier.identifier_literal], [elem_def.identifier_literal])};
-  // TO DO: allow description pragmas for enumerated set elements
+  // identifier_declaration_lists allows description pragmas for enumerated set elements
 
 properties_clause {-> machine_clause} = properties [predicates]:predicate_top {-> New machine_clause.properties(predicates.predicate)};
 
-initialisation_clause {-> machine_clause} = initialisation [substitutions]:substitution_all {-> New machine_clause.initialisation(substitutions.substitution)};
+initialisation_clause {-> machine_clause} =
+  {description} [initialisation_clause]:initialisation_clause [description]:description_pragma
+    {-> New machine_clause.description(description.description_pragma, initialisation_clause.machine_clause)}
+  // this allows description pragmas at the very end of the INITIALISATION
+  |
+  {initialisation} initialisation [substitutions]:substitution_all
+    {-> New machine_clause.initialisation(substitutions.substitution)};
 
 invariant_clause {-> machine_clause} = invariant [predicates]:predicate_top {-> New machine_clause.invariant(predicates.predicate)};
 
@@ -710,7 +717,8 @@ operation_list {-> operation*} =
   {missing_semicolon} [rest]:operation_list [operation]:operation {-> [rest.operation, New operation.missing_semicolon(operation)]};
 
 operation {-> operation} =
-  {description} [operation]:operation [description]:description_pragma {-> New operation.description(description.description_pragma, operation)}
+  {description} [operation]:operation [description]:description_pragma
+    {-> New operation.description(description.description_pragma, operation)}
   // this allows description pragmas at the very end of an operation, not before the equal (=) sign
   |
   {normal_operation} [return_values]:operation_return_values? [op_name]:composed_identifier [parameters]:op_params? equal [operation_body]:substitution_top
@@ -1393,7 +1401,8 @@ machine_clause =
   {references} [machine_references]:machine_reference* |
   {invalid_operations_clause} semicolon |
   {expressions} [expressions]:expression_definition* |
-  {predicates} [predicates]:predicate_definition*;
+  {predicates} [predicates]:predicate_definition* |
+  {description} [description]:description_pragma machine_clause;
 
 machine_reference =
   [machine_name]:identifier_literal* [parameters]:expression* |

@@ -13,6 +13,7 @@ import de.be4.ltl.core.pctlparser.node.ADetOutputPctlState;
 import de.be4.ltl.core.pctlparser.node.ADigitExpression;
 import de.be4.ltl.core.pctlparser.node.AErrorPctlState;
 import de.be4.ltl.core.pctlparser.node.AGoalPctlState;
+import de.be4.ltl.core.pctlparser.node.ANonDetPctlState;
 import de.be4.ltl.core.pctlparser.node.AProbFormulaPctlState;
 import de.be4.ltl.core.pctlparser.node.ASinkPctlState;
 import de.be4.ltl.core.pctlparser.node.AUnparsedPctlState;
@@ -82,6 +83,11 @@ public class PrologPctlGenerator extends DepthFirstAdapter {
 	@Override
 	public void caseADetOutputPctlState(final ADetOutputPctlState node) {
 		helper.detOutput();
+	}
+
+	@Override
+	public void caseANonDetPctlState(final ANonDetPctlState node) {
+		helper.nonDet();
 	}
 
 	@Override
