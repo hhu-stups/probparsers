@@ -15,7 +15,7 @@ import de.be4.classicalb.core.parser.node.AOperationsMachineClause;
 import de.be4.classicalb.core.parser.node.Start;
 
 /**
- * This class checks that there is no missing semicolon between two operations 
+ * This class checks that there is no missing semicolon between two operations
  * or extra (invalid) semicolons at the end (see {invalid} semicolon rule in BParser.scc)
  */
 public class SemicolonCheck implements SemanticCheck {
