@@ -101,7 +101,7 @@ Please report bugs and feature requests on our [bug tracker](https://github.com/
 ## Contributors
 
 The libraries contain contributions from (in alphabetical order)
-Jens Bendisposto, Marc Büngener, Fabian Fritz, Dominik Hansen, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider
+Jens Bendisposto, Marc Büngener, Fabian Fritz, Jan Gruteser, Dominik Hansen, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider, Miles Vella
 
 ## License
 
@@ -114,4 +114,4 @@ to anyone for the consequences of using it or for whether it serves
 any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
-(c) 2011-2020 STUPS group, University of Düsseldorf
+(c) 2011-2026 STUPS group, University of Düsseldorf
