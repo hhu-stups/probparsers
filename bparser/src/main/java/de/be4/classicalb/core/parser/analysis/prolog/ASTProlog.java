@@ -540,6 +540,24 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
+	@Override
+	public void caseAExpressionDefinition(final AExpressionDefinition node) {
+		open(node);
+		node.getName().apply(this);
+		printAsList(node.getParameters());
+		node.getRhs().apply(this);
+		close(node);
+	}
+
+	@Override
+	public void caseAPredicateDefinition(final APredicateDefinition node) {
+		open(node);
+		node.getName().apply(this);
+		printAsList(node.getParameters());
+		node.getRhs().apply(this);
+		close(node);
+	}
+
 	// set
 
 	@Override
