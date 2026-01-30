@@ -144,6 +144,7 @@ Tokens
   {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
    // definitions -> definitions is an error, which will be caught later,
    // generating Clause 'DEFINITIONS' is used more than once error message
+   // TODO: we need to also process the PREDICATES clause here; we can ignore the EXPRESSIONS clause?
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
     'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE' |
@@ -151,7 +152,7 @@ Tokens
     'CONCRETE_VARIABLES' | 'CONSTANTS' | 'CONSTRAINTS' | 'IMPLEMENTATION' |
     'IMPORTS' | 'INCLUDES' | 'INITIALISATION' | 'INITIALIZATION' | 'INVARIANT' | 'LOCAL_OPERATIONS' |
     'OPERATIONS' | 'EVENTS' | 'PROMOTES' | 'PROPERTIES' | 'REFINES' | 'REFINEMENT' | 'EXTENDS' |
-    'FREETYPES' |
+    'FREETYPES' | 'EXPRESSIONS' |
     'SEES' | 'SETS' | 'USES' | 'VALUES' | 'VARIABLES';
 
   {start -> normal, normal, definitions -> normal} end_machine = 'END';
