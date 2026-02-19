@@ -47,6 +47,7 @@ public class ClausesCheck implements SemanticCheck {
 		final Map<Class<? extends Node>, String> clauseNamesByClass = new HashMap<>();
 		clauseNamesByClass.put(AAbstractConstantsMachineClause.class, "ABSTRACT_CONSTANTS");
 		clauseNamesByClass.put(AConstraintsMachineClause.class, "CONSTRAINTS");
+		clauseNamesByClass.put(ADefinitionsMachineClause.class, "DEFINITIONS");
 		clauseNamesByClass.put(AImportsMachineClause.class, "IMPORTS");
 		clauseNamesByClass.put(AIncludesMachineClause.class, "INCLUDES");
 		clauseNamesByClass.put(ALocalOperationsMachineClause.class, "LOCAL_OPERATIONS");

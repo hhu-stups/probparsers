@@ -142,8 +142,6 @@ Tokens
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [any_char - line_break]* line_break?;
 
   {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
-   // definitions -> definitions is an error, which will be caught later,
-   // generating Clause 'DEFINITIONS' is used more than once error message
    // TODO: we need to also process the PREDICATES clause here; we can ignore the EXPRESSIONS clause?
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
@@ -223,11 +221,11 @@ Ignored Tokens
 Productions
 
 parse_unit {-> pre_parse_unit} =
-  {defs_clause} [def_clause]:def_clause {-> New pre_parse_unit([def_clause.pre_parser_definition])} |
-  {something} kw_prefix no_def_something {-> New pre_parse_unit([])} |
-  {nothing} {-> New pre_parse_unit([])};
+  {machine} [clauses]:pre_parser_clause* {-> New pre_parse_unit([clauses.pre_parser_clause])} |
+  {non_machine} kw_prefix no_def_something {-> New pre_parse_unit([])};
 
-def_clause {-> pre_parser_definition*} = pre_parser_definitions [list]:definition_list semicolon? {-> [list.pre_parser_definition]};
+pre_parser_clause {-> pre_parser_clause} =
+  {definitions} pre_parser_definitions [list]:definition_list semicolon? {-> New pre_parser_clause.definitions([list.pre_parser_definition])};
 
 definition_list {-> pre_parser_definition*} =
   {single} [def]:definition {-> [def.pre_parser_definition]} |
@@ -248,7 +246,10 @@ identifier_list {-> pre_parser_identifier*} =
  *******************************************************************/
 Abstract Syntax Tree
 
-pre_parse_unit = pre_parser_definition*;
+pre_parse_unit = pre_parser_clause*;
+
+pre_parser_clause =
+  {definitions} pre_parser_definition*;
 
 pre_parser_definition =
   [def_name]:pre_parser_identifier [parameters]:pre_parser_identifier* [rhs]:rhs_body |

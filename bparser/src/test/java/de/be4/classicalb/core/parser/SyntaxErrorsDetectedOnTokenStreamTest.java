@@ -1,7 +1,9 @@
 package de.be4.classicalb.core.parser;
 
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.PreParseException;
+import de.be4.classicalb.core.parser.node.Node;
 
 import org.junit.Test;
 
@@ -88,9 +90,16 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 	@Test
 	public void checkForDublicateDefinitionClause() {
 		String s = "MACHINE Definitions \n DEFINITIONS\n foo == 1\n CONSTANTS k \n DEFINITIONS\n bar == 1  \nEND";
-		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.getMachineAsPrologTerm(s));
+		CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.getMachineAsPrologTerm(s));
 		assertEquals("Clause 'DEFINITIONS' is used more than once", e.getMessage());
-		assertEquals(5, e.getLine());
-		assertEquals(2, e.getPos());
+		assertEquals(2, e.getNodesList().size());
+		
+		Node duplicateClause = e.getNodesList().get(0);
+		assertEquals(5, duplicateClause.getStartPos().getLine());
+		assertEquals(2, duplicateClause.getStartPos().getPos());
+		
+		Node firstClause = e.getNodesList().get(1);
+		assertEquals(2, firstClause.getStartPos().getLine());
+		assertEquals(2, firstClause.getStartPos().getPos());
 	}
 }
