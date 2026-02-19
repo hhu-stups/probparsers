@@ -1,10 +1,9 @@
 package de.be4.classicalb.core.parser.analysis.checking;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -17,7 +16,7 @@ import de.be4.classicalb.core.parser.node.PMachineHeader;
 
 public class ClausesCollector extends DepthFirstAdapter {
 
-	private final Map<Class<? extends Node>, Set<Node>> availableClauses = new HashMap<>();
+	private final Map<Class<? extends Node>, List<Node>> availableClauses = new HashMap<>();
 	private boolean scalarParameter = false;
 	boolean refinement = false;
 
@@ -40,7 +39,7 @@ public class ClausesCollector extends DepthFirstAdapter {
 	
 	private void addMachineClauses(List<PMachineClause> machineClauses) {
 		for (final PMachineClause clause : machineClauses) {
-			Set<Node> nodesForClause = availableClauses.computeIfAbsent(clause.getClass(), k -> new HashSet<>());
+			List<Node> nodesForClause = availableClauses.computeIfAbsent(clause.getClass(), k -> new ArrayList<>());
 			nodesForClause.add(clause);
 		}
 	}
@@ -73,7 +72,7 @@ public class ClausesCollector extends DepthFirstAdapter {
 		return true;
 	}
 
-	public Map<Class<? extends Node>, Set<Node>> getAvailableClauses() {
+	public Map<Class<? extends Node>, List<Node>> getAvailableClauses() {
 		return availableClauses;
 	}
 

@@ -94,12 +94,12 @@ public class SyntaxErrorsDetectedOnTokenStreamTest {
 		assertEquals("Clause 'DEFINITIONS' is used more than once", e.getMessage());
 		assertEquals(2, e.getNodesList().size());
 		
-		Node duplicateClause = e.getNodesList().get(0);
-		assertEquals(5, duplicateClause.getStartPos().getLine());
-		assertEquals(2, duplicateClause.getStartPos().getPos());
-		
-		Node firstClause = e.getNodesList().get(1);
+		Node firstClause = e.getNodesList().get(0);
 		assertEquals(2, firstClause.getStartPos().getLine());
 		assertEquals(2, firstClause.getStartPos().getPos());
+		
+		Node duplicateClause = e.getNodesList().get(1);
+		assertEquals(5, duplicateClause.getStartPos().getLine());
+		assertEquals(2, duplicateClause.getStartPos().getPos());
 	}
 }
