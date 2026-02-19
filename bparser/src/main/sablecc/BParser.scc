@@ -542,42 +542,38 @@ machine_clause {-> machine_clause} =
   {predicate} [clause]:predicates_clause {-> clause.machine_clause};
 
 expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon?
-   {-> New machine_clause.expressions([expression_def_list.expression_definition])};
+  {-> New machine_clause.expressions([expression_def_list.definition])};
 predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon?
-   {-> New machine_clause.predicates([predicate_def_list.predicate_definition])};
+  {-> New machine_clause.predicates([predicate_def_list.definition])};
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])};
 
-expression_def_list {-> expression_definition*} =
-  {single} [def]:expression_def {-> [def.expression_definition]} |
-  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.expression_definition, def.expression_definition]};
+expression_def_list {-> definition*} =
+  {single} [def]:expression_def {-> [def.definition]} |
+  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.definition, def.definition]};
 
-predicate_def_list {-> predicate_definition*} =
-  {single} [def]:predicate_def {-> [def.predicate_definition]} |
-  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.predicate_definition, def.predicate_definition]};
+predicate_def_list {-> definition*} =
+  {single} [def]:predicate_def {-> [def.definition]} |
+  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.definition, def.definition]};
 
 definition_list {-> definition*} =
   {single} [def]:definition {-> [def.definition]} |
   {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
 
-expression_def {-> expression_definition} =
+expression_def {-> definition} =
   [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
-     {-> New expression_definition(name, [parameters.expression], rhs.expression)};
+    {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)};
 
-predicate_def {-> predicate_definition} =
+predicate_def {-> definition} =
   [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
-     {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
+    {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
-  {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
-      {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)}
-      |
+  {predicate} [definition]:predicate_def {-> definition.definition} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_def_top
       {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)}
        |
-  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
-      {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)}
-        |
+  {expression} [definition]:expression_def {-> definition.definition} |
   {file} [filename]:string_literal
       {-> New definition.file_definition(filename)};
 
@@ -1400,8 +1396,8 @@ machine_clause =
   {operations} [operations]:operation* |
   {references} [machine_references]:machine_reference* |
   {invalid_operations_clause} semicolon |
-  {expressions} [expressions]:expression_definition* |
-  {predicates} [predicates]:predicate_definition* |
+  {expressions} [expressions]:definition* |
+  {predicates} [predicates]:definition* |
   {description} [description]:description_pragma machine_clause;
 
 machine_reference =
@@ -1415,9 +1411,6 @@ machine_reference_no_params =
 operation_reference = [operation_name]:identifier_literal*;
 
 description_pragma = [parts]:pragma_free_text*;
-
-expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
-predicate_definition = [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate;
 
 definition =
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |

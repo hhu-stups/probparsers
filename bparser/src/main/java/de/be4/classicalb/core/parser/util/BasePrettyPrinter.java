@@ -789,26 +789,6 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
-	public void caseAExpressionDefinition(AExpressionDefinition node) {
-		node.getName().apply(this);
-		printParameterListOpt(node.getParameters());
-		print(" == ");
-		indent();
-		node.getRhs().apply(this);
-		dedent();
-	}
-
-	@Override
-	public void caseAPredicateDefinition(APredicateDefinition node) {
-		node.getName().apply(this);
-		printParameterListOpt(node.getParameters());
-		print(" == ");
-		indent();
-		node.getRhs().apply(this);
-		dedent();
-	}
-
-	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
 		node.getName().apply(this);
 		openIdentifierList();
