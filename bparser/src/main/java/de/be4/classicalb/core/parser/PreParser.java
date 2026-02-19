@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
-import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -38,7 +37,10 @@ import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.be4.classicalb.core.preparser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
+import de.be4.classicalb.core.preparser.node.AFilePreParserDefinition;
+import de.be4.classicalb.core.preparser.node.APreParserDefinition;
 import de.be4.classicalb.core.preparser.node.PPreParseUnit;
 import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
@@ -74,7 +76,6 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * @see BLexer#replaceDefTokens()
  * @see BParser#preParsing(Reader, File, IFileContentProvider)
  * @see DefinitionCollector
- * @see DefinitionPreCollector
  */
 public class PreParser {
 
@@ -131,10 +132,20 @@ public class PreParser {
 			throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 		}
 
-		final DefinitionPreCollector collector = new DefinitionPreCollector();
-		preParseUnit.apply(collector);
+		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>();
+		List<TPreParserString> fileDefinitions = new ArrayList<>();
+		preParseUnit.apply(new DepthFirstAdapter() {
+			@Override
+			public void inAPreParserDefinition(final APreParserDefinition node) {
+				definitions.put(node.getDefName(), node.getRhs());
+			}
 
-		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>(collector.getDefinitions());
+			@Override
+			public void inAFilePreParserDefinition(final AFilePreParserDefinition node) {
+				fileDefinitions.add(node.getFilename());
+			}
+		});
+
 		for (TPreParserIdentifier nameToken : definitions.keySet()) {
 			String name = nameToken.getText();
 			if (Utils.isQuoted(name, '`')) {
@@ -146,7 +157,7 @@ public class PreParser {
 			}
 		}
 
-		evaluateDefinitionFiles(collector.getFileDefinitions());
+		evaluateDefinitionFiles(fileDefinitions);
 
 		List<TPreParserIdentifier> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(definitions);
 
