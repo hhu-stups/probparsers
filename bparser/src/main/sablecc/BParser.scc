@@ -539,7 +539,7 @@ machine_clause {-> machine_clause} =
   {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} |
   {references} [clause]:references_clause {-> clause.machine_clause} |
   {expressions} [clause]:expressions_clause {-> clause.machine_clause} |
-  {predicate} [clause]:predicates_clause {-> clause.machine_clause};
+  {predicates} [clause]:predicates_clause {-> clause.machine_clause};
 
 expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon?
   {-> New machine_clause.expressions([expression_def_list.definition])};
