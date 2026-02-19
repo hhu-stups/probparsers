@@ -47,7 +47,6 @@ import de.be4.classicalb.core.preparser.node.APredicatesPreParserClause;
 import de.be4.classicalb.core.preparser.node.PPreParseUnit;
 import de.be4.classicalb.core.preparser.node.PPreParserClause;
 import de.be4.classicalb.core.preparser.node.PPreParserDefinition;
-import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
@@ -138,13 +137,7 @@ public class PreParser {
 		try {
 			preParseUnit = preParser.parse().getPPreParseUnit();
 		} catch (final ParserException e) {
-			String message;
-			if (e.getToken() instanceof TPreParserDefinitions) {
-				message = "Clause 'DEFINITIONS' is used more than once";
-			} else {
-				message = e.getRealMsg();
-			}
-			throw new PreParseException(e.getToken(), message, e);
+			throw new PreParseException(e.getToken(), e.getRealMsg(), e);
 		} catch (final LexerException e) {
 			throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 		}
