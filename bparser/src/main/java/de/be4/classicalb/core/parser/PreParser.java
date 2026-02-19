@@ -37,11 +37,16 @@ import de.be4.classicalb.core.parser.node.TDefLiteralSubstitution;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
-import de.be4.classicalb.core.preparser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
+import de.be4.classicalb.core.preparser.node.ADefinitionsPreParserClause;
+import de.be4.classicalb.core.preparser.node.AExpressionsPreParserClause;
 import de.be4.classicalb.core.preparser.node.AFilePreParserDefinition;
+import de.be4.classicalb.core.preparser.node.APreParseUnit;
 import de.be4.classicalb.core.preparser.node.APreParserDefinition;
+import de.be4.classicalb.core.preparser.node.APredicatesPreParserClause;
 import de.be4.classicalb.core.preparser.node.PPreParseUnit;
+import de.be4.classicalb.core.preparser.node.PPreParserClause;
+import de.be4.classicalb.core.preparser.node.PPreParserDefinition;
 import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
@@ -112,6 +117,18 @@ public class PreParser {
 		this.startColumn = column;
 	}
 
+	private static List<PPreParserDefinition> getDefinitionsFromClause(PPreParserClause clause) throws PreParseException {
+		if (clause instanceof ADefinitionsPreParserClause) {
+			return ((ADefinitionsPreParserClause)clause).getDefinitions();
+		} else if (clause instanceof AExpressionsPreParserClause) {
+			return ((AExpressionsPreParserClause)clause).getDefinitions();
+		} else if (clause instanceof APredicatesPreParserClause) {
+			return ((APredicatesPreParserClause)clause).getDefinitions();
+		} else {
+			throw new PreParseException(clause.getStartPos().getLine(), clause.getStartPos().getPos(), "Unhandled clause in PreParser: " + clause.getClass());
+		}
+	}
+
 	public void parse() throws PreParseException, IOException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setPosition(this.startLine, this.startColumn);
@@ -134,17 +151,23 @@ public class PreParser {
 
 		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>();
 		List<TPreParserString> fileDefinitions = new ArrayList<>();
-		preParseUnit.apply(new DepthFirstAdapter() {
-			@Override
-			public void inAPreParserDefinition(final APreParserDefinition node) {
-				definitions.put(node.getDefName(), node.getRhs());
-			}
 
-			@Override
-			public void inAFilePreParserDefinition(final AFilePreParserDefinition node) {
-				fileDefinitions.add(node.getFilename());
+		for (PPreParserClause clause : ((APreParseUnit)preParseUnit).getClauses()) {
+			for (PPreParserDefinition node : getDefinitionsFromClause(clause)) {
+				if (node instanceof APreParserDefinition) {
+					APreParserDefinition defNode = (APreParserDefinition)node;
+					definitions.put(defNode.getDefName(), defNode.getRhs());
+				} else if (node instanceof AFilePreParserDefinition) {
+					AFilePreParserDefinition fileDefNode = (AFilePreParserDefinition)node;
+					if (!(clause instanceof ADefinitionsPreParserClause)) {
+						throw new PreParseException(fileDefNode.getFilename(), "Definition files can only be included in a DEFINITIONS clause, not in EXPRESSIONS/PREDICATES");
+					}
+					fileDefinitions.add(fileDefNode.getFilename());
+				} else {
+					throw new PreParseException(node.getStartPos().getLine(), node.getStartPos().getPos(), "Unhandled definition node in PreParser: " + node.getClass());
+				}
 			}
-		});
+		}
 
 		for (TPreParserIdentifier nameToken : definitions.keySet()) {
 			String name = nameToken.getText();
