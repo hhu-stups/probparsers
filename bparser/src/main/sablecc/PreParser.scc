@@ -249,12 +249,12 @@ identifier_list {-> pre_parser_identifier*} =
  *******************************************************************/
 Abstract Syntax Tree
 
-pre_parse_unit = pre_parser_clause*;
+pre_parse_unit = [clauses]:pre_parser_clause*;
 
 pre_parser_clause =
-  {definitions} pre_parser_definition* |
-  {expressions} pre_parser_definition* |
-  {predicates} pre_parser_definition*;
+  {definitions} [definitions]:pre_parser_definition* |
+  {expressions} [definitions]:pre_parser_definition* |
+  {predicates} [definitions]:pre_parser_definition*;
 
 pre_parser_definition =
   [def_name]:pre_parser_identifier [parameters]:pre_parser_identifier* [rhs]:rhs_body |
