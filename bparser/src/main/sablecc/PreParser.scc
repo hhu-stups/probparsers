@@ -141,9 +141,9 @@ Tokens
 
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [any_char - line_break]* line_break?;
 
-  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
-  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_expressions = 'EXPRESSIONS';
-  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_predicates = 'PREDICATES';
+  {start -> definitions, normal -> definitions, definitions -> definitions, definitions_rhs} pre_parser_definitions = 'DEFINITIONS';
+  {start -> definitions, normal -> definitions, definitions -> definitions, definitions_rhs} pre_parser_expressions = 'EXPRESSIONS';
+  {start -> definitions, normal -> definitions, definitions -> definitions, definitions_rhs} pre_parser_predicates = 'PREDICATES';
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
     'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE' |

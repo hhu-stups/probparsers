@@ -16,6 +16,9 @@ import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
+import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
+import de.be4.classicalb.core.preparser.node.TPreParserExpressions;
+import de.be4.classicalb.core.preparser.node.TPreParserPredicates;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
@@ -140,7 +143,15 @@ public class PreLexer extends Lexer {
 			otherNestingLevel--;
 		}
 
-		if (otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon) {
+		if (
+			otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon
+			// These clause tokens can be encountered here
+			// if two of these clauses are right next to each other
+			// and the first clause doesn't have a final semicolon.
+			|| token instanceof TPreParserDefinitions
+			|| token instanceof TPreParserExpressions
+			|| token instanceof TPreParserPredicates
+		) {
 			return State.DEFINITIONS;
 		}
 
