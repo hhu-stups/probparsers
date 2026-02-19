@@ -142,7 +142,8 @@ Tokens
   {start -> normal, normal, definitions, definitions_rhs} line_comment = '//' [any_char - line_break]* line_break?;
 
   {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_definitions = 'DEFINITIONS';
-   // TODO: we need to also process the PREDICATES clause here; we can ignore the EXPRESSIONS clause?
+  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_expressions = 'EXPRESSIONS';
+  {start -> definitions, normal -> definitions, definitions -> definitions} pre_parser_predicates = 'PREDICATES';
 
   {start -> normal, normal, definitions -> normal, definitions_rhs} other_clause_begin =
     'MACHINE' | 'MODEL' | 'SYSTEM' | 'RULES_MACHINE' |
@@ -150,7 +151,7 @@ Tokens
     'CONCRETE_VARIABLES' | 'CONSTANTS' | 'CONSTRAINTS' | 'IMPLEMENTATION' |
     'IMPORTS' | 'INCLUDES' | 'INITIALISATION' | 'INITIALIZATION' | 'INVARIANT' | 'LOCAL_OPERATIONS' |
     'OPERATIONS' | 'EVENTS' | 'PROMOTES' | 'PROPERTIES' | 'REFINES' | 'REFINEMENT' | 'EXTENDS' |
-    'FREETYPES' | 'EXPRESSIONS' |
+    'FREETYPES' |
     'SEES' | 'SETS' | 'USES' | 'VALUES' | 'VARIABLES';
 
   {start -> normal, normal, definitions -> normal} end_machine = 'END';
@@ -225,7 +226,9 @@ parse_unit {-> pre_parse_unit} =
   {non_machine} kw_prefix no_def_something {-> New pre_parse_unit([])};
 
 pre_parser_clause {-> pre_parser_clause} =
-  {definitions} pre_parser_definitions [list]:definition_list semicolon? {-> New pre_parser_clause.definitions([list.pre_parser_definition])};
+  {definitions} pre_parser_definitions [list]:definition_list semicolon? {-> New pre_parser_clause.definitions([list.pre_parser_definition])} |
+  {expressions} pre_parser_expressions [list]:definition_list semicolon? {-> New pre_parser_clause.expressions([list.pre_parser_definition])} |
+  {predicates} pre_parser_predicates [list]:definition_list semicolon? {-> New pre_parser_clause.predicates([list.pre_parser_definition])};
 
 definition_list {-> pre_parser_definition*} =
   {single} [def]:definition {-> [def.pre_parser_definition]} |
@@ -249,7 +252,9 @@ Abstract Syntax Tree
 pre_parse_unit = pre_parser_clause*;
 
 pre_parser_clause =
-  {definitions} pre_parser_definition*;
+  {definitions} pre_parser_definition* |
+  {expressions} pre_parser_definition* |
+  {predicates} pre_parser_definition*;
 
 pre_parser_definition =
   [def_name]:pre_parser_identifier [parameters]:pre_parser_identifier* [rhs]:rhs_body |

@@ -565,7 +565,7 @@ expression_def {-> expression_definition} =
      {-> New expression_definition(name, [parameters.expression], rhs.expression)};
 
 predicate_def {-> predicate_definition} =
-  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top
+  [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
      {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
@@ -1417,7 +1417,7 @@ operation_reference = [operation_name]:identifier_literal*;
 description_pragma = [parts]:pragma_free_text*;
 
 expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
-predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate;
+predicate_definition = [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate;
 
 definition =
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
