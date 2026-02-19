@@ -13,7 +13,9 @@ import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.AExpressionDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.AExpressionsMachineClause;
 import de.be4.classicalb.core.parser.node.APredicateDefinitionDefinition;
+import de.be4.classicalb.core.parser.node.APredicatesMachineClause;
 import de.be4.classicalb.core.parser.node.ASubstitutionDefinitionDefinition;
 import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
@@ -67,6 +69,30 @@ public class DefinitionCollector extends MachineClauseAdapter {
 				addDefinition(node, type, defName);
 			}
 		});
+	}
+
+	@Override
+	public void caseAExpressionsMachineClause(AExpressionsMachineClause node) {
+		for (PDefinition def : node.getExpressions()) {
+			if (def instanceof AExpressionDefinitionDefinition) {
+				AExpressionDefinitionDefinition expressionDef = (AExpressionDefinitionDefinition)def;
+				addDefinition(def, Type.Expression, expressionDef.getName().getText());
+			} else {
+				this.exceptions.add(new CheckException("Non-expression definition found in EXPRESSIONS clause: " + def.getClass().getName(), def));
+			}
+		}
+	}
+
+	@Override
+	public void caseAPredicatesMachineClause(APredicatesMachineClause node) {
+		for (PDefinition def : node.getPredicates()) {
+			if (def instanceof APredicateDefinitionDefinition) {
+				APredicateDefinitionDefinition predicateDef = (APredicateDefinitionDefinition)def;
+				addDefinition(def, Type.Predicate, predicateDef.getName().getText());
+			} else {
+				this.exceptions.add(new CheckException("Non-predicate definition found in PREDICATES clause: " + def.getClass().getName(), def));
+			}
+		}
 	}
 
 	private void addDefinition(PDefinition def, Type type, String name) {
