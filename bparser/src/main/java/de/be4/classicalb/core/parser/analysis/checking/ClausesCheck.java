@@ -232,13 +232,13 @@ public class ClausesCheck implements SemanticCheck {
 	 * Checks if one clause is used more than once in the machine.
 	 */
 	private void checkDoubleClauses() {
-		for (final Set<Node> nodesforClause : clauses.values()) {
-			if (nodesforClause.size() > 1) {
-				final Node clauseNode = nodesforClause.iterator().next();
+		for (final Set<Node> nodesForClause : clauses.values()) {
+			if (nodesForClause.size() > 1) {
+				final Node clauseNode = nodesForClause.iterator().next();
 				final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
 
 				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
-						new ArrayList<>(nodesforClause)));
+						new ArrayList<>(nodesForClause)));
 			}
 		}
 	}

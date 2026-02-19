@@ -40,14 +40,14 @@ public class ClausesCollector extends DepthFirstAdapter {
 	
 	private void addMachineClauses(List<PMachineClause> machineClauses) {
 		for (final PMachineClause clause : machineClauses) {
-			Set<Node> nodesForclause = availableClauses.get(clause.getClass());
+			Set<Node> nodesForClause = availableClauses.get(clause.getClass());
 
-			if (nodesForclause == null) {
-				nodesForclause = new HashSet<>();
+			if (nodesForClause == null) {
+				nodesForClause = new HashSet<>();
 			}
 
-			nodesForclause.add(clause);
-			availableClauses.put(clause.getClass(), nodesForclause);
+			nodesForClause.add(clause);
+			availableClauses.put(clause.getClass(), nodesForClause);
 		}
 	}
 	
