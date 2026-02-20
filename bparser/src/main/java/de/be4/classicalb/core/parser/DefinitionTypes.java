@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class DefinitionTypes {
 	private final Map<String, IDefinitions.Type> types;
@@ -17,6 +18,8 @@ public final class DefinitionTypes {
 	}
 
 	public void addTyping(String definitionName, IDefinitions.Type type) {
+		Objects.requireNonNull(definitionName, "definitionName");
+		Objects.requireNonNull(type, "type");
 		types.put(definitionName, type);
 	}
 
