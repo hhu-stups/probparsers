@@ -82,6 +82,29 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * @see DefinitionCollector
  */
 public class PreParser {
+	static class DefinitionType {
+		Definitions.Type type;
+		String errorMessage;
+		Token errorToken;
+
+		DefinitionType() {
+
+		}
+
+		DefinitionType(Definitions.Type t, Token n) {
+			this.type = t;
+			this.errorToken = n;
+		}
+
+		DefinitionType(Definitions.Type t) {
+			this.type = t;
+		}
+
+		DefinitionType(String errorMessage, Token t) {
+			this.errorMessage = errorMessage;
+			this.errorToken = t;
+		}
+	}
 
 	private final PushbackReader pushbackReader;
 	private final File machineFile;
@@ -371,30 +394,6 @@ public class PreParser {
 			dependencies.put(nameToken.getText(), set);
 		}
 		return dependencies;
-	}
-
-	static class DefinitionType {
-		Definitions.Type type;
-		String errorMessage;
-		Token errorToken;
-
-		DefinitionType() {
-
-		}
-
-		DefinitionType(Definitions.Type t, Token n) {
-			this.type = t;
-			this.errorToken = n;
-		}
-
-		DefinitionType(Definitions.Type t) {
-			this.type = t;
-		}
-
-		DefinitionType(String errorMessage, Token t) {
-			this.errorMessage = errorMessage;
-			this.errorToken = t;
-		}
 	}
 
 	/**
