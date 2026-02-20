@@ -343,6 +343,13 @@ public class PreParser {
 
 	}
 
+	private BLexer makeLexerForDefinitionRhs(DefinitionTypes defTypes, String prefix, String definitionRhs) {
+		Reader reader = new StringReader(prefix + "\n" + definitionRhs);
+		BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
+		lexer.setParseOptions(parseOptions);
+		return lexer;
+	}
+
 	private Map<String, Set<String>> determineDependencies(Set<String> definitionNames, Map<TPreParserIdentifier, TRhsBody> definitions)
 			throws PreParseException {
 		HashMap<String, Set<String>> dependencies = new HashMap<>();
@@ -353,11 +360,7 @@ public class PreParser {
 			// section to normal. Note, that we do not parse the right hand side
 			// of the definition here. Hence FORMULA_PREFIX has no further
 			// meaning and substitutions can also be handled by the lexer.
-			final Reader reader = new StringReader(BParser.FORMULA_PREFIX + "\n" + rhsToken.getText());
-
-			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
-					new DefinitionTypes());
-			lexer.setParseOptions(parseOptions);
+			BLexer lexer = makeLexerForDefinitionRhs(new DefinitionTypes(), BParser.FORMULA_PREFIX, rhsToken.getText());
 			Set<String> set = new HashSet<>();
 			try {
 				Token next = lexer.next();
@@ -553,10 +556,7 @@ public class PreParser {
 	private PParseUnit tryParsing(final String prefix, final String definitionRhs)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
 			de.be4.classicalb.core.parser.parser.ParserException, IOException {
-
-		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
-		lexer.setParseOptions(parseOptions);
+		BLexer lexer = makeLexerForDefinitionRhs(this.definitionTypes, prefix, definitionRhs);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
 		return parser.parse().getPParseUnit();
 	}
