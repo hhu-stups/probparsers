@@ -273,7 +273,7 @@ public class PreParser {
 				TPreParserIdentifier definition = remainingDefinitions.pop();
 
 				TRhsBody defRhs = definitions.get(definition);
-				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
+				DefinitionType definitionType = determineType(defRhs, todoDefs);
 				if (definitionType.type != null) {
 					todoDefs.remove(definition.getText());
 					oneParsed = true;
@@ -291,7 +291,7 @@ public class PreParser {
 		if (!remainingDefinitions.isEmpty()) {
 			TPreParserIdentifier definition = remainingDefinitions.pop();
 			TRhsBody defRhs = definitions.get(definition);
-			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
+			DefinitionType definitionType = determineType(defRhs, todoDefs);
 			if (definitionType.exception != null) {
 				String message = adjustErrorMessage(definitionType.exception.getRealMsg());
 				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message, definitionType.exception);
@@ -436,7 +436,6 @@ public class PreParser {
 	 * For such cases,
 	 * {@link #evaluateTypes(List, Map)} calls this method repeatedly until the type can be successfully determined.
 	 * 
-	 * @param definition the definition name token
 	 * @param rhsToken the right-hand side of the definition (as a single token, merged by the {@link PreLexer})
 	 * @param untypedDefinitions names of all definitions whose types haven't been determined yet
 	 * @return the type of the definition's right-hand side, or error information if the type cannot be determined yet
@@ -444,8 +443,7 @@ public class PreParser {
 	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
 	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
 	 */
-	private DefinitionType determineType(TPreParserIdentifier definition, TRhsBody rhsToken,
-			final Set<String> untypedDefinitions) throws PreParseException {
+	private DefinitionType determineType(TRhsBody rhsToken, Set<String> untypedDefinitions) throws PreParseException {
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
 			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, rhsToken);
