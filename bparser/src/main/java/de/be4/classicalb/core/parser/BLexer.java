@@ -453,7 +453,7 @@ public class BLexer extends Lexer {
 			} catch (IllegalArgumentException exc) {
 				throw new BLexerException(token, exc);
 			}
-			Definitions.Type type = definitions.getType(definitionName);
+			IDefinitions.Type type = definitions.getType(definitionName);
 
 			/*
 			 * If no type is set, something went wrong during preparsing.

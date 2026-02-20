@@ -83,7 +83,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  */
 public class PreParser {
 	static class DefinitionType {
-		Definitions.Type type;
+		IDefinitions.Type type;
 		String errorMessage;
 		Token errorToken;
 
@@ -91,12 +91,12 @@ public class PreParser {
 
 		}
 
-		DefinitionType(Definitions.Type t, Token n) {
+		DefinitionType(IDefinitions.Type t, Token n) {
 			this.type = t;
 			this.errorToken = n;
 		}
 
-		DefinitionType(Definitions.Type t) {
+		DefinitionType(IDefinitions.Type t) {
 			this.type = t;
 		}
 
@@ -280,7 +280,7 @@ public class PreParser {
 				TPreParserIdentifier definition = remainingDefinitions.pop();
 
 				TRhsBody defRhs = definitions.get(definition);
-				Definitions.Type type;
+				IDefinitions.Type type;
 				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 				type = definitionType.type;
 				if (type != null) {
