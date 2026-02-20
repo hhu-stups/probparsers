@@ -343,9 +343,12 @@ public class PreParser {
 
 	}
 
-	private BLexer makeLexerForDefinitionRhs(DefinitionTypes defTypes, String prefix, String definitionRhs) {
-		Reader reader = new StringReader(prefix + "\n" + definitionRhs);
+	private BLexer makeLexerForDefinitionRhs(DefinitionTypes defTypes, String prefix, TRhsBody rhsToken) {
+		Reader reader = new StringReader(prefix + " " + rhsToken.getText());
 		BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
+		// Decrease the start column by the size of the implicitly added prefix
+		// so that the actual definition content starts at the desired position.
+		lexer.setPosition(rhsToken.getLine(), rhsToken.getPos() - (prefix.length() + 1));
 		lexer.setParseOptions(parseOptions);
 		return lexer;
 	}
@@ -360,7 +363,7 @@ public class PreParser {
 			// section to normal. Note, that we do not parse the right hand side
 			// of the definition here. Hence FORMULA_PREFIX has no further
 			// meaning and substitutions can also be handled by the lexer.
-			BLexer lexer = makeLexerForDefinitionRhs(new DefinitionTypes(), BParser.FORMULA_PREFIX, rhsToken.getText());
+			BLexer lexer = makeLexerForDefinitionRhs(new DefinitionTypes(), BParser.FORMULA_PREFIX, rhsToken);
 			Set<String> set = new HashSet<>();
 			try {
 				Token next = lexer.next();
@@ -382,11 +385,9 @@ public class PreParser {
 			} catch (IOException e) {
 				throw new PreParseException("Error while parsing", e);
 			} catch (BLexerException e) {
-				Token errorToken = e.getLastToken();
-				correctErrorTokenPosition(nameToken, rhsToken, errorToken);
-				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
+				throw new PreParseException(e.getLastToken().getLine(), e.getLastToken().getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-				throw wrapLexerExceptionAndCorrectPosition(nameToken, rhsToken, e, e);
+				throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
@@ -459,12 +460,9 @@ public class PreParser {
 	 */
 	private DefinitionType determineType(TPreParserIdentifier definition, TRhsBody rhsToken,
 			final Set<String> untypedDefinitions) throws PreParseException {
-
-		final String definitionRhs = rhsToken.getText();
-
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
-			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
+			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, rhsToken);
 
 			// check if the result is a Predicate?
 			if (parseunit instanceof APredicateParseUnit) {
@@ -488,47 +486,26 @@ public class PreParser {
 			Token errorToken = formulaParseExc.getToken();
 			try {
 				// try parsing the RHS now as a substitution:
-				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
+				tryParsing(BParser.SUBSTITUTION_PREFIX, rhsToken);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException substitutionParseExc) {
-				de.be4.classicalb.core.parser.parser.ParserException betterExc = chooseBetterParseException(formulaParseExc, substitutionParseExc);
-				correctErrorTokenPosition(definition, rhsToken, betterExc.getToken());
 				// adjustErrorMessage happens later when the exception is read from the DefinitionType.
-				return new DefinitionType(betterExc);
+				return new DefinitionType(chooseBetterParseException(formulaParseExc, substitutionParseExc));
 			} catch (BLexerException substitutionLexerExc) {
-				Token errorToken2 = substitutionLexerExc.getLastToken();
-				correctErrorTokenPosition(definition, rhsToken, errorToken2);
-				throw new PreParseException(errorToken2.getLine(), errorToken2.getPos(), adjustErrorMessage(formulaParseExc.getRealMsg()), formulaParseExc);
+				throw new PreParseException(substitutionLexerExc.getLastToken().getLine(), substitutionLexerExc.getLastToken().getPos(), adjustErrorMessage(formulaParseExc.getRealMsg()), formulaParseExc);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException substitutionLexerExc) {
-				// FIXME Is the cause really supposed to be different here?
-				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, substitutionLexerExc, formulaParseExc);
+				throw new PreParseException(substitutionLexerExc.getLine(), substitutionLexerExc.getPos(), substitutionLexerExc.getRealMsg(), formulaParseExc);
 			} catch (IOException e1) {
 				throw new PreParseException(formulaParseExc.toString(), formulaParseExc);
 			}
 		} catch (BLexerException formulaLexerExc) {
-			Token errorToken = formulaLexerExc.getLastToken();
-			correctErrorTokenPosition(definition, rhsToken, errorToken);
-			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(formulaLexerExc.getRealMsg()), formulaLexerExc);
+			throw new PreParseException(formulaLexerExc.getLastToken().getLine(), formulaLexerExc.getLastToken().getPos(), adjustErrorMessage(formulaLexerExc.getRealMsg()), formulaLexerExc);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException formulaLexerExc) {
-			throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, formulaLexerExc, formulaLexerExc);
+			throw new PreParseException(formulaLexerExc.getLine(), formulaLexerExc.getPos(), formulaLexerExc.getRealMsg(), formulaLexerExc);
 		} catch (IOException e) {
 			throw new PreParseException(e.toString(), e);
 		}
 
-	}
-
-	private static void correctErrorTokenPosition(
-		TPreParserIdentifier definition,
-		TRhsBody rhsToken,
-		Token errorToken
-	) {
-		// the parsed string starts in the second line, e.g. #formula\n ...
-		int line = errorToken.getLine();
-		int pos = errorToken.getPos();
-		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
-		line = definition.getLine() + line - 2;
-		errorToken.setLine(line);
-		errorToken.setPos(pos);
 	}
 
 	private static String adjustErrorMessage(String message) {
@@ -539,24 +516,10 @@ public class PreParser {
 		}
 	}
 
-	private static PreParseException wrapLexerExceptionAndCorrectPosition(
-		TPreParserIdentifier definition,
-		TRhsBody rhsToken,
-		de.be4.classicalb.core.parser.lexer.LexerException exc,
-		Throwable cause
-	) {
-		// the parsed string starts in the second line, e.g. #formula\n ...
-		int line = exc.getLine();
-		int pos = exc.getPos();
-		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
-		line = definition.getLine() + line - 2;
-		return new PreParseException(line, pos, exc.getRealMsg(), cause);
-	}
-
-	private PParseUnit tryParsing(final String prefix, final String definitionRhs)
+	private PParseUnit tryParsing(String prefix, TRhsBody rhsToken)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
 			de.be4.classicalb.core.parser.parser.ParserException, IOException {
-		BLexer lexer = makeLexerForDefinitionRhs(this.definitionTypes, prefix, definitionRhs);
+		BLexer lexer = makeLexerForDefinitionRhs(this.definitionTypes, prefix, rhsToken);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
 		return parser.parse().getPParseUnit();
 	}
