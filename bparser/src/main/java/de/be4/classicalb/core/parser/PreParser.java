@@ -444,27 +444,10 @@ public class PreParser {
 	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
 	 */
 	private DefinitionType determineType(TRhsBody rhsToken, Set<String> untypedDefinitions) throws PreParseException {
+		PParseUnit parseunit;
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
-			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, rhsToken);
-
-			// check if the result is a Predicate?
-			if (parseunit instanceof APredicateParseUnit) {
-				return new DefinitionType(IDefinitions.Type.Predicate);
-			}
-
-			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
-
-			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
-			expressionParseUnit.apply(visitor);
-
-			if (visitor.isUntypedDefinitionUsed()) {
-				// the parseunit uses another definition which is not yet typed
-				return new DefinitionType();
-			}
-
-			// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
-			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
+			parseunit = tryParsing(BParser.FORMULA_PREFIX, rhsToken);
 		} catch (de.be4.classicalb.core.parser.parser.ParserException formulaParseExc) {
 			Token errorToken = formulaParseExc.getToken();
 			try {
@@ -489,6 +472,23 @@ public class PreParser {
 			throw new PreParseException(e.toString(), e);
 		}
 
+		// check if the result is a Predicate?
+		if (parseunit instanceof APredicateParseUnit) {
+			return new DefinitionType(IDefinitions.Type.Predicate);
+		}
+
+		AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
+
+		PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
+		expressionParseUnit.apply(visitor);
+
+		if (visitor.isUntypedDefinitionUsed()) {
+			// the parseunit uses another definition which is not yet typed
+			return new DefinitionType();
+		}
+
+		// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
+		return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
 	}
 
 	private static String adjustErrorMessage(String message) {
