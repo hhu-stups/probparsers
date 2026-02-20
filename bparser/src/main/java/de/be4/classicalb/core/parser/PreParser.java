@@ -301,9 +301,6 @@ public class PreParser {
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
 			if (definitionType.exception != null) {
 				String message = adjustErrorMessage(definitionType.exception.getRealMsg());
-				if (machineFile != null) {
-					message += " in file: " + machineFile;
-				}
 				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message, definitionType.exception);
 			} else {
 				// fall back message
