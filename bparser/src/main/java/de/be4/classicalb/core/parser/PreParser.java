@@ -84,7 +84,7 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
 public class PreParser {
 	static class DefinitionType {
 		IDefinitions.Type type;
-		String errorMessage;
+		de.be4.classicalb.core.parser.parser.ParserException exception;
 		Token errorToken;
 
 		DefinitionType() {
@@ -100,9 +100,9 @@ public class PreParser {
 			this.type = t;
 		}
 
-		DefinitionType(String errorMessage, Token t) {
-			this.errorMessage = errorMessage;
-			this.errorToken = t;
+		DefinitionType(de.be4.classicalb.core.parser.parser.ParserException exception) {
+			this.exception = exception;
+			this.errorToken = exception.getToken();
 		}
 	}
 
@@ -299,12 +299,12 @@ public class PreParser {
 			TPreParserIdentifier definition = remainingDefinitions.pop();
 			TRhsBody defRhs = definitions.get(definition);
 			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
-			if (definitionType.errorMessage != null) {
-				String message = definitionType.errorMessage;
+			if (definitionType.exception != null) {
+				String message = adjustErrorMessage(definitionType.exception.getRealMsg());
 				if (machineFile != null) {
 					message += " in file: " + machineFile;
 				}
-				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message);
+				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message, definitionType.exception);
 			} else {
 				// fall back message
 				throw new PreParseException(definition, "expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
@@ -492,9 +492,9 @@ public class PreParser {
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException substitutionParseExc) {
 				de.be4.classicalb.core.parser.parser.ParserException betterExc = chooseBetterParseException(formulaParseExc, substitutionParseExc);
-				Token errorToken2 = betterExc.getToken();
-				correctErrorTokenPosition(definition, rhsToken, errorToken2);
-				return new DefinitionType(adjustErrorMessage(betterExc.getRealMsg()), errorToken2);
+				correctErrorTokenPosition(definition, rhsToken, betterExc.getToken());
+				// adjustErrorMessage happens later when the exception is read from the DefinitionType.
+				return new DefinitionType(betterExc);
 			} catch (BLexerException substitutionLexerExc) {
 				Token errorToken2 = substitutionLexerExc.getLastToken();
 				correctErrorTokenPosition(definition, rhsToken, errorToken2);
