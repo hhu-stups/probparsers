@@ -416,6 +416,31 @@ public class PreParser {
 	}
 
 	/**
+	 * Try to choose the better of two parse exceptions
+	 * after both attempts at parsing an ambiguous definition (formula or substitution) failed.
+	 * This chooses the exception with the higher error position,
+	 * in the hope that the parsing attempt that failed later is "more correct"
+	 * and will thus have a more useful error message.
+	 * 
+	 * @param exc1 the first exception
+	 * @param exc2 the second exception
+	 * @return the exception with the higher position
+	 */
+	private static de.be4.classicalb.core.parser.parser.ParserException chooseBetterParseException(
+		de.be4.classicalb.core.parser.parser.ParserException exc1,
+		de.be4.classicalb.core.parser.parser.ParserException exc2
+	) {
+		if (
+			exc1.getToken().getLine() > exc2.getToken().getLine()
+			|| (exc1.getToken().getLine() == exc2.getToken().getLine() && exc1.getToken().getPos() >= exc2.getToken().getPos())
+		) {
+			return exc1;
+		} else {
+			return exc2;
+		}
+	}
+
+	/**
 	 * Try to determine the abstract type of the right-hand side of a definition,
 	 * i. e. whether it's an expression, a predicate, or a substitution.
 	 * If the right-hand side references other definitions,
@@ -466,17 +491,10 @@ public class PreParser {
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
 			} catch (de.be4.classicalb.core.parser.parser.ParserException substitutionParseExc) {
-				Token errorToken2 = substitutionParseExc.getToken();
-				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
-						&& errorToken.getPos() >= errorToken2.getPos())) {
-					// use error message from Substitution
-					correctErrorTokenPosition(definition, rhsToken, errorToken);
-					return new DefinitionType(adjustErrorMessage(formulaParseExc.getRealMsg()), errorToken);
-				} else {
-					// use error message from Expression/Predicate parsing:
-					correctErrorTokenPosition(definition, rhsToken, errorToken2);
-					return new DefinitionType(adjustErrorMessage(substitutionParseExc.getRealMsg()), errorToken2);
-				}
+				de.be4.classicalb.core.parser.parser.ParserException betterExc = chooseBetterParseException(formulaParseExc, substitutionParseExc);
+				Token errorToken2 = betterExc.getToken();
+				correctErrorTokenPosition(definition, rhsToken, errorToken2);
+				return new DefinitionType(adjustErrorMessage(betterExc.getRealMsg()), errorToken2);
 			} catch (BLexerException substitutionLexerExc) {
 				Token errorToken2 = substitutionLexerExc.getLastToken();
 				correctErrorTokenPosition(definition, rhsToken, errorToken2);
