@@ -459,40 +459,40 @@ public class PreParser {
 			}
 
 			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
-		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
-			Token errorToken = e.getToken();
+		} catch (de.be4.classicalb.core.parser.parser.ParserException formulaParseExc) {
+			Token errorToken = formulaParseExc.getToken();
 			try {
 				// try parsing the RHS now as a substitution:
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
 				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
-			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
-				Token errorToken2 = ex.getToken();
+			} catch (de.be4.classicalb.core.parser.parser.ParserException substitutionParseExc) {
+				Token errorToken2 = substitutionParseExc.getToken();
 				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
 						&& errorToken.getPos() >= errorToken2.getPos())) {
 					// use error message from Substitution
 					correctErrorTokenPosition(definition, rhsToken, errorToken);
-					return new DefinitionType(adjustErrorMessage(e.getRealMsg()), errorToken);
+					return new DefinitionType(adjustErrorMessage(formulaParseExc.getRealMsg()), errorToken);
 				} else {
 					// use error message from Expression/Predicate parsing:
 					correctErrorTokenPosition(definition, rhsToken, errorToken2);
-					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
+					return new DefinitionType(adjustErrorMessage(substitutionParseExc.getRealMsg()), errorToken2);
 				}
-			} catch (BLexerException e1) {
-				Token errorToken2 = e1.getLastToken();
+			} catch (BLexerException substitutionLexerExc) {
+				Token errorToken2 = substitutionLexerExc.getLastToken();
 				correctErrorTokenPosition(definition, rhsToken, errorToken2);
-				throw new PreParseException(errorToken2.getLine(), errorToken2.getPos(), adjustErrorMessage(e.getRealMsg()), e);
-			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
+				throw new PreParseException(errorToken2.getLine(), errorToken2.getPos(), adjustErrorMessage(formulaParseExc.getRealMsg()), formulaParseExc);
+			} catch (de.be4.classicalb.core.parser.lexer.LexerException substitutionLexerExc) {
 				// FIXME Is the cause really supposed to be different here?
-				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e3, e);
+				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, substitutionLexerExc, formulaParseExc);
 			} catch (IOException e1) {
-				throw new PreParseException(e.toString(), e);
+				throw new PreParseException(formulaParseExc.toString(), formulaParseExc);
 			}
-		} catch (BLexerException e) {
-			Token errorToken = e.getLastToken();
+		} catch (BLexerException formulaLexerExc) {
+			Token errorToken = formulaLexerExc.getLastToken();
 			correctErrorTokenPosition(definition, rhsToken, errorToken);
-			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
-		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e, e);
+			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(formulaLexerExc.getRealMsg()), formulaLexerExc);
+		} catch (de.be4.classicalb.core.parser.lexer.LexerException formulaLexerExc) {
+			throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, formulaLexerExc, formulaLexerExc);
 		} catch (IOException e) {
 			throw new PreParseException(e.toString(), e);
 		}
