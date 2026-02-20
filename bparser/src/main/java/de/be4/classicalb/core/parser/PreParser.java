@@ -280,13 +280,11 @@ public class PreParser {
 				TPreParserIdentifier definition = remainingDefinitions.pop();
 
 				TRhsBody defRhs = definitions.get(definition);
-				IDefinitions.Type type;
 				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
-				type = definitionType.type;
-				if (type != null) {
+				if (definitionType.type != null) {
 					todoDefs.remove(definition.getText());
 					oneParsed = true;
-					definitionTypes.addTyping(definition.getText(), type);
+					definitionTypes.addTyping(definition.getText(), definitionType.type);
 					// types.addTyping(definition.getText(), type);
 				} else {
 					currentlyUnparseableDefinitions.push(definition);
@@ -364,9 +362,8 @@ public class PreParser {
 					new DefinitionTypes());
 			lexer.setParseOptions(parseOptions);
 			Set<String> set = new HashSet<>();
-			Token next;
 			try {
-				next = lexer.next();
+				Token next = lexer.next();
 				while (!(next instanceof EOF)) {
 					if (next instanceof TIdentifierLiteral) {
 						TIdentifierLiteral id = (TIdentifierLiteral) next;
@@ -440,7 +437,6 @@ public class PreParser {
 
 		final String definitionRhs = rhsToken.getText();
 
-		Token errorToken;
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
 			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
@@ -464,7 +460,7 @@ public class PreParser {
 
 			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
 		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
-			errorToken = e.getToken();
+			Token errorToken = e.getToken();
 			try {
 				// try parsing the RHS now as a substitution:
 				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
@@ -482,9 +478,9 @@ public class PreParser {
 					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
 				}
 			} catch (BLexerException e1) {
-				errorToken = e1.getLastToken();
-				correctErrorTokenPosition(definition, rhsToken, errorToken);
-				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
+				Token errorToken2 = e1.getLastToken();
+				correctErrorTokenPosition(definition, rhsToken, errorToken2);
+				throw new PreParseException(errorToken2.getLine(), errorToken2.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
 				// FIXME Is the cause really supposed to be different here?
 				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e3, e);
@@ -492,7 +488,7 @@ public class PreParser {
 				throw new PreParseException(e.toString(), e);
 			}
 		} catch (BLexerException e) {
-			errorToken = e.getLastToken();
+			Token errorToken = e.getLastToken();
 			correctErrorTokenPosition(definition, rhsToken, errorToken);
 			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
 		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
