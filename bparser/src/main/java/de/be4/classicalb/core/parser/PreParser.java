@@ -453,8 +453,6 @@ public class PreParser {
 				return new DefinitionType(IDefinitions.Type.Predicate);
 			}
 
-			// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
-
 			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
 
 			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
@@ -465,6 +463,7 @@ public class PreParser {
 				return new DefinitionType();
 			}
 
+			// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
 			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
 		} catch (de.be4.classicalb.core.parser.parser.ParserException formulaParseExc) {
 			Token errorToken = formulaParseExc.getToken();
