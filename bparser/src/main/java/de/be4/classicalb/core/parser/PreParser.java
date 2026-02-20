@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -220,13 +219,7 @@ public class PreParser {
 			// ./foo/bar/defs.def or an absolute path
 			try {
 				if (definitionFileIncludeStack.contains(fileName)) {
-					StringBuilder sb = new StringBuilder();
-					for (String string : definitionFileIncludeStack) {
-						sb.append(string).append(" -> ");
-					}
-					sb.append(fileName);
-					throw new PreParseException(fileNameString,
-							"Cyclic references in definition files: " + sb);
+					throw new PreParseException(fileNameString, "Cyclic references in definition files: " + String.join(" -> ", definitionFileIncludeStack));
 				}
 
 				IDefinitions definitions;
@@ -324,15 +317,8 @@ public class PreParser {
 			Set<String> remaining = new HashSet<>(definitionNames);
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
-			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
-				sb.append(iterator.next());
-				if (iterator.hasNext()) {
-					sb.append(" -> ");
-				}
-			}
 			TPreParserIdentifier firstDefinitionToken = definitionMap.get(cycle.get(0));
-			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb);
+			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + String.join(" -> ", cycle));
 		} else {
 			List<TPreParserIdentifier> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
