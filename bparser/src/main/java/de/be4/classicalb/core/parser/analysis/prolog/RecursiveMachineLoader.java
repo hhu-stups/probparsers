@@ -397,9 +397,9 @@ public class RecursiveMachineLoader {
 					dependency.append(ancestor.getName());
 				}
 				if (foundStartOfCycle) {
-					dependency.append("---");
+					dependency.append(" --");
 					dependency.append(ancestor.getMachineReference().getType());
-					dependency.append("--->");
+					dependency.append("--> ");
 					dependency.append(ancestor.getMachineReference().getName());
 				}
 			}
