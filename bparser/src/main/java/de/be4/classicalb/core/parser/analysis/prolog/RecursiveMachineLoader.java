@@ -405,7 +405,7 @@ public class RecursiveMachineLoader {
 			}
 
 			final Node node = current.getMachineReference().getNode();
-			throw new BCompoundException(new BException(current.getMachineFile().toString(), new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
+			throw new BCompoundException(new BException(current.getMachineFile().toString(), new CheckException("Machine dependency cycle: " + dependency, node)));
 		}
 	}
 
