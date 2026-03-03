@@ -25,7 +25,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
@@ -311,7 +310,7 @@ public class RecursiveMachineLoader {
 		// This also assigns file numbers to any definition files included (directly or indirectly) by this machine.
 		definitions.assignIdsToNodes(getNodeIdMapping(), machineFilesLoaded);
 
-		injectDefinitions(currentAst, definitions);
+		currentAst.apply(new RecursiveMachineLoader.DefInjector(definitions));
 
 		if (parsedFiles.containsKey(name)) {
 			throw new BCompoundException(new BException(machineFile.getName(),
@@ -328,8 +327,7 @@ public class RecursiveMachineLoader {
 			this.main = name;
 		}
 
-		final List<MachineReference> references = refMachines.getReferences();
-		for (final MachineReference refMachine : references) {
+		for (MachineReference refMachine : refMachines.getReferences()) {
 			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
 			newAncestors.add(new Ancestor(name, machineFile, refMachine));
 
@@ -394,11 +392,6 @@ public class RecursiveMachineLoader {
 		return dependency.toString();
 	}
 
-	private void injectDefinitions(final Start tree, final IDefinitions definitions) {
-		final DefInjector defInjector = new DefInjector(definitions);
-		tree.apply(defInjector);
-	}
-
 	public INodeIds getNodeIdMapping() {
 		return nodeIds;
 	}
@@ -434,8 +427,7 @@ public class RecursiveMachineLoader {
 		public void caseADefinitionsMachineClause(final ADefinitionsMachineClause node) {
 			node.getDefinitions().clear();
 			for (final String name : definitions.getDefinitionNames()) {
-				final PDefinition def = definitions.getDefinition(name);
-				node.getDefinitions().add(def);
+				node.getDefinitions().add(definitions.getDefinition(name));
 			}
 		}
 	}
