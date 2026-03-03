@@ -22,7 +22,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 	public File getFile(final File directory, final String fileName) throws IOException {
 		FileSearchPathProvider provider;
 		if (directory == null) {
-			provider = new FileSearchPathProvider(fileName); // this will use "." as parentPath
+			provider = new FileSearchPathProvider(".", fileName);
 		} else {
 			String parentPath;
 			parentPath = directory.getCanonicalPath();

@@ -13,6 +13,10 @@ public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
 	private final ArrayList<String> searchPath = new ArrayList<>();
 
+	/**
+	 * @deprecated Use {@link #FileSearchPathProvider(String, String)} instead and explicitly pass {@code "."} as the prefix if desired.
+	 */
+	@Deprecated
 	public FileSearchPathProvider(String fileName) {
 		this(".", fileName);
 	}

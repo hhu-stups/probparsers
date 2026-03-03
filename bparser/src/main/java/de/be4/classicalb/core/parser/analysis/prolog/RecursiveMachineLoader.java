@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,8 @@ public class RecursiveMachineLoader {
 
 	public RecursiveMachineLoader(final String directory, final IFileContentProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
 		this.parsingBehaviour = parsingBehaviour;
-		this.rootDirectory = directory == null ? new File(".") : new File(directory);
+		Objects.requireNonNull(directory, "directory");
+		this.rootDirectory = new File(directory);
 
 		if (!rootDirectory.exists()) {
 			throw new BCompoundException(
