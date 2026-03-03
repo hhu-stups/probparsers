@@ -69,8 +69,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	public File resolve() throws IOException {
 		for (File f : this) {
-
-			if (f.exists() && f.isFile()) {
+			if (f.isFile()) {
 				return f.getCanonicalFile();
 			}
 		}
