@@ -370,30 +370,25 @@ public class RecursiveMachineLoader {
 	}
 
 	private static void checkForCycle(List<Ancestor> ancestors, MachineReference machineReference) throws BCompoundException {
-		for (Ancestor ancestor : ancestors) {
+		for (int i = 0; i < ancestors.size(); i++) {
+			Ancestor ancestor = ancestors.get(i);
 			if (ancestor.getName().equals(machineReference.getName())) {
-				String message = "Machine dependency cycle: " + formatDependencyCycle(ancestor, ancestors);
+				List<Ancestor> cycle = ancestors.subList(i, ancestors.size());
+				String message = "Machine dependency cycle: " + formatDependencyCycle(cycle);
 				Node node = ancestor.getMachineReference().getNode();
 				throw new BCompoundException(new BException(ancestor.getMachineFile().toString(), new CheckException(message, node)));
 			}
 		}
 	}
 
-	private static String formatDependencyCycle(Ancestor startOfCycle, List<Ancestor> ancestors) {
-		final StringBuilder dependency = new StringBuilder();
-		boolean foundStartOfCycle = false;
-		for (final Ancestor ancestor : ancestors) {
-			// In case the cycle starts some where in the middle of the list
-			if (ancestor.getName().equals(startOfCycle.getName())) {
-				foundStartOfCycle = true;
-				dependency.append(ancestor.getName());
-			}
-			if (foundStartOfCycle) {
-				dependency.append(" --");
-				dependency.append(ancestor.getMachineReference().getType());
-				dependency.append("--> ");
-				dependency.append(ancestor.getMachineReference().getName());
-			}
+	private static String formatDependencyCycle(List<Ancestor> cycle) {
+		final StringBuilder dependency = new StringBuilder(cycle.get(0).getName());
+
+		for (Ancestor ancestor : cycle) {
+			dependency.append(" --");
+			dependency.append(ancestor.getMachineReference().getType());
+			dependency.append("--> ");
+			dependency.append(ancestor.getMachineReference().getName());
 		}
 
 		return dependency.toString();
