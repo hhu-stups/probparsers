@@ -55,7 +55,6 @@ public class RecursiveMachineLoader {
 
 
 	public RecursiveMachineLoader(final String directory, final IFileContentProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
-		this.parsingBehaviour = parsingBehaviour;
 		Objects.requireNonNull(directory, "directory");
 		this.rootDirectory = new File(directory);
 
@@ -65,7 +64,8 @@ public class RecursiveMachineLoader {
 		}
 
 		this.nodeIds = new NodeFileNumbers();
-		this.contentProvider = contentProvider;
+		this.contentProvider = Objects.requireNonNull(contentProvider, "contentProvider");
+		this.parsingBehaviour = Objects.requireNonNull(parsingBehaviour, "parsingBehaviour");
 	}
 
 	public RecursiveMachineLoader(String path, IFileContentProvider contentProvider) throws BCompoundException {
