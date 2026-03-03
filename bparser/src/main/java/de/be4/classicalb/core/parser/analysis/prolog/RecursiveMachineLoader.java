@@ -376,7 +376,11 @@ public class RecursiveMachineLoader {
 			tempAncestors.add(new Ancestor(currentMachineName, currentMachineFile, machineReference));
 
 			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, tempAncestors);
+				if (ancestor.getName().equals(machineReference.getName())) {
+					String message = "Machine dependency cycle: " + formatDependencyCycle(ancestor, tempAncestors);
+					Node node = ancestor.getMachineReference().getNode();
+					throw new BCompoundException(new BException(ancestor.getMachineFile().toString(), new CheckException(message, node)));
+				}
 			}
 
 
@@ -384,31 +388,25 @@ public class RecursiveMachineLoader {
 
 	}
 
-	private static void checkSiblings(Ancestor current, List<Ancestor> ancestors) throws BCompoundException {
-		Ancestor sibling = ancestors.get(ancestors.size() - 1);
-
-		if (current.getName().equals(sibling.getMachineReference().getName())) {
-			final StringBuilder dependency = new StringBuilder();
-			boolean foundStartOfCycle = false;
-			for (final Ancestor ancestor : ancestors) {
-				// In case the cycle starts some where in the middle of the list
-				if (ancestor.getName().equals(current.getName())) {
-					foundStartOfCycle = true;
-					dependency.append(ancestor.getName());
-				}
-				if (foundStartOfCycle) {
-					dependency.append(" --");
-					dependency.append(ancestor.getMachineReference().getType());
-					dependency.append("--> ");
-					dependency.append(ancestor.getMachineReference().getName());
-				}
+	private static String formatDependencyCycle(Ancestor startOfCycle, List<Ancestor> ancestors) {
+		final StringBuilder dependency = new StringBuilder();
+		boolean foundStartOfCycle = false;
+		for (final Ancestor ancestor : ancestors) {
+			// In case the cycle starts some where in the middle of the list
+			if (ancestor.getName().equals(startOfCycle.getName())) {
+				foundStartOfCycle = true;
+				dependency.append(ancestor.getName());
 			}
-
-			final Node node = current.getMachineReference().getNode();
-			throw new BCompoundException(new BException(current.getMachineFile().toString(), new CheckException("Machine dependency cycle: " + dependency, node)));
+			if (foundStartOfCycle) {
+				dependency.append(" --");
+				dependency.append(ancestor.getMachineReference().getType());
+				dependency.append("--> ");
+				dependency.append(ancestor.getMachineReference().getName());
+			}
 		}
-	}
 
+		return dependency.toString();
+	}
 
 	private void injectDefinitions(final Start tree, final IDefinitions definitions) {
 		final DefInjector defInjector = new DefInjector(definitions);
