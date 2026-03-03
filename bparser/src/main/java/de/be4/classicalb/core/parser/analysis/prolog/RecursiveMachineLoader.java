@@ -376,7 +376,7 @@ public class RecursiveMachineLoader {
 			tempAncestors.add(new Ancestor(currentMachineName, machineReference));
 
 			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, currentMachineFile, tempAncestors, new Ancestor(currentMachineName, machineReference));
+				checkSiblings(ancestor, currentMachineFile, tempAncestors);
 			}
 
 
@@ -384,7 +384,8 @@ public class RecursiveMachineLoader {
 
 	}
 
-	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
+	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors) throws BCompoundException {
+		Ancestor sibling = ancestors.get(ancestors.size() - 1);
 		final String name = current.getName();
 		final String closeTheCycle = sibling.getMachineReference().getName();
 
