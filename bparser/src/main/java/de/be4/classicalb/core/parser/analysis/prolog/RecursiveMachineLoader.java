@@ -328,14 +328,14 @@ public class RecursiveMachineLoader {
 			this.main = name;
 		}
 
-		checkForCycles(ancestors, machineFile, name, refMachines);
-
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
 			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
 			newAncestors.add(new Ancestor(name, machineFile, refMachine));
-			File referencedFile;
 
+			checkForCycle(newAncestors, refMachine);
+
+			File referencedFile;
 			try {
 				referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
 			} catch (CheckException e) {
@@ -369,23 +369,14 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private static void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines) throws BCompoundException {
-		for (MachineReference machineReference : refMachines.getReferences()) {
-
-			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(currentMachineName, currentMachineFile, machineReference));
-
-			for (Ancestor ancestor : tempAncestors) {
-				if (ancestor.getName().equals(machineReference.getName())) {
-					String message = "Machine dependency cycle: " + formatDependencyCycle(ancestor, tempAncestors);
-					Node node = ancestor.getMachineReference().getNode();
-					throw new BCompoundException(new BException(ancestor.getMachineFile().toString(), new CheckException(message, node)));
-				}
+	private static void checkForCycle(List<Ancestor> ancestors, MachineReference machineReference) throws BCompoundException {
+		for (Ancestor ancestor : ancestors) {
+			if (ancestor.getName().equals(machineReference.getName())) {
+				String message = "Machine dependency cycle: " + formatDependencyCycle(ancestor, ancestors);
+				Node node = ancestor.getMachineReference().getNode();
+				throw new BCompoundException(new BException(ancestor.getMachineFile().toString(), new CheckException(message, node)));
 			}
-
-
 		}
-
 	}
 
 	private static String formatDependencyCycle(Ancestor startOfCycle, List<Ancestor> ancestors) {
