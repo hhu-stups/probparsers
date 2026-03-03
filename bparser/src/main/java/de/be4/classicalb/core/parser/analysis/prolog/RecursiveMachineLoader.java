@@ -333,7 +333,7 @@ public class RecursiveMachineLoader {
 		final List<MachineReference> references = refMachines.getReferences();
 		for (final MachineReference refMachine : references) {
 			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
-			newAncestors.add(new Ancestor(name, refMachine));
+			newAncestors.add(new Ancestor(name, machineFile, refMachine));
 			File referencedFile;
 
 			try {
@@ -369,14 +369,14 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
+	private static void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines) throws BCompoundException {
 		for (MachineReference machineReference : refMachines.getReferences()) {
 
 			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(currentMachineName, machineReference));
+			tempAncestors.add(new Ancestor(currentMachineName, currentMachineFile, machineReference));
 
 			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, currentMachineFile, tempAncestors);
+				checkSiblings(ancestor, tempAncestors);
 			}
 
 
@@ -384,7 +384,7 @@ public class RecursiveMachineLoader {
 
 	}
 
-	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors) throws BCompoundException {
+	private static void checkSiblings(Ancestor current, List<Ancestor> ancestors) throws BCompoundException {
 		Ancestor sibling = ancestors.get(ancestors.size() - 1);
 
 		if (current.getName().equals(sibling.getMachineReference().getName())) {
@@ -404,16 +404,8 @@ public class RecursiveMachineLoader {
 				}
 			}
 
-			String path;
-			try {
-				// TODO Avoid duplicate file lookup here, and instead do only one lookup that is used both when parsing and when reporting cycles
-				path = lookupFile(currentMachineFile.getParentFile(), sibling.getMachineReference(), Collections.emptyList(), Collections.emptyList()).toString();
-			} catch (CheckException e) {
-				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
-			}
-
 			final Node node = current.getMachineReference().getNode();
-			throw new BCompoundException(new BException(path, new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
+			throw new BCompoundException(new BException(current.getMachineFile().toString(), new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
 		}
 	}
 

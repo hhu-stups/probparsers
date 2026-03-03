@@ -1,21 +1,29 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
+import java.io.File;
+
 /**
- * Contains the name of the previous machine that we read and that got us to the actual machine
- * Contains the node of the reference that we followed to get to the current state
+ * Contains information about the previous machine that got us to the machine currently being parsed:
+ * the name and path of the previous machine and the node inside it that references the current machine.
  */
 public class Ancestor {
 
 	private final String name;
+	private final File machineFile;
 	private final MachineReference machineReference;
 
-	public Ancestor(String name, MachineReference machineReference) {
+	public Ancestor(String name, File machineFile, MachineReference machineReference) {
 		this.name = name;
+		this.machineFile = machineFile;
 		this.machineReference = machineReference;
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public File getMachineFile() {
+		return machineFile;
 	}
 
 	public MachineReference getMachineReference() {return machineReference;}
