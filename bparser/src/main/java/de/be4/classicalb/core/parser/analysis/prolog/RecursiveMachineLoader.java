@@ -386,15 +386,13 @@ public class RecursiveMachineLoader {
 
 	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors) throws BCompoundException {
 		Ancestor sibling = ancestors.get(ancestors.size() - 1);
-		final String name = current.getName();
-		final String closeTheCycle = sibling.getMachineReference().getName();
 
-		if (name.equals(closeTheCycle)) {
+		if (current.getName().equals(sibling.getMachineReference().getName())) {
 			final StringBuilder dependency = new StringBuilder();
 			boolean foundStartOfCycle = false;
 			for (final Ancestor ancestor : ancestors) {
 				// In case the cycle starts some where in the middle of the list
-				if (ancestor.getName().equals(closeTheCycle)) {
+				if (ancestor.getName().equals(current.getName())) {
 					foundStartOfCycle = true;
 					dependency.append(ancestor.getName());
 				}
