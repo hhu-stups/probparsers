@@ -19,9 +19,4 @@ public class Ancestor {
 	}
 
 	public MachineReference getMachineReference() {return machineReference;}
-
-	@Override
-	public String toString() {
-		return "---" + machineReference.getType().getDescription() + "--->" + machineReference.getName();
-	}
 }
