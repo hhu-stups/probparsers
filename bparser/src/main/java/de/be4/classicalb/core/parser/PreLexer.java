@@ -70,11 +70,7 @@ public class PreLexer extends Lexer {
 	protected void filter() throws LexerException, IOException {
 		//printState();
 		switchMultilineState();
-
-		if (token != null) {
-			collectRhs();
-			// System.out.println("+ TOKEN KEPT");
-		}
+		collectRhs();
 	}
 	
 	// small debugging utility:
