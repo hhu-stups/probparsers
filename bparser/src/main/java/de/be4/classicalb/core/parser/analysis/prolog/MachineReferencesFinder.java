@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,7 +12,6 @@ import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ADefinitionFileParseUnit;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
@@ -83,8 +81,6 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 		try {
 			node.apply(referenceFinder);
 		} catch (VisitorException e) {
-			throw new BException(machineFile.toString(), e.getException());
-		}catch(VisitorIOException e) {
 			throw new BException(machineFile.toString(), e.getException());
 		}
 		
