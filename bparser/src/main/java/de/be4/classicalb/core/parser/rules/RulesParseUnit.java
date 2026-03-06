@@ -70,7 +70,7 @@ public final class RulesParseUnit extends IModel {
 			bParser.setParseOptions(parseOptions);
 			this.setStart(machineFile != null ? bParser.parseFile(machineFile) : bParser.parseMachine(content));
 			if (machineFile != null) {
-				ReferencedMachines machines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), this.getStart(), true);
+				ReferencedMachines machines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), this.getStart().getPParseUnit(), true);
 				this.setMachineName(machines.getMachineName());
 
 				this.machineReferences = new ArrayList<>();

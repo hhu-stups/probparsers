@@ -34,13 +34,14 @@ import de.be4.classicalb.core.parser.node.PImportPackage;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.PMachineReferenceNoParams;
+import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
+ * Use this class by calling the static method {@link #findReferencedMachines(Path, PParseUnit, boolean)}.
  */
 public final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Path machineFile;
@@ -69,26 +70,24 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 	 *     If the machine contains a package declaration,
 	 *     this file path must include path components for all package directories.
 	 *     An absolute path is always safe.
-	 * @param node
-	 *            the root node of the machine's syntax tree, never
-	 *            <code>null</code>
+	 * @param parseUnit top-level parse unit of the machine AST to examine
 	 * @param machineNameMustMatchFileName
 	 *            indicates if the corresponding check will be performed or not
 	 * @return information about other machines referenced from the given machine
 	 */
-	public static ReferencedMachines findReferencedMachines(final Path machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
+	public static ReferencedMachines findReferencedMachines(Path machineFile, PParseUnit parseUnit, boolean machineNameMustMatchFileName) throws BException {
 		final MachineReferencesFinder referenceFinder = new MachineReferencesFinder(machineFile, machineNameMustMatchFileName);
 		try {
-			node.apply(referenceFinder);
+			parseUnit.apply(referenceFinder);
 		} catch (VisitorException e) {
 			throw new BException(machineFile.toString(), e.getException());
 		}
 		
 		if (referenceFinder.machineName == null) {
-			throw new BException(machineFile.toString(), "Could not determine the machine's name. Parse unit class: " + node.getClass(), null);
+			throw new BException(machineFile.toString(), "Could not determine the machine's name. Parse unit class: " + parseUnit.getClass(), null);
 		}
 		if (referenceFinder.machineType == null) {
-			throw new BException(machineFile.toString(), "Could not determine the machine's type. Parse unit class: " + node.getClass(), null);
+			throw new BException(machineFile.toString(), "Could not determine the machine's type. Parse unit class: " + parseUnit.getClass(), null);
 		}
 		
 		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.machineType, referenceFinder.references, referenceFinder.packageName, referenceFinder.rootDirectory, referenceFinder.importedPackages);
