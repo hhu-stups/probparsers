@@ -131,6 +131,14 @@ public final class PackageName {
 		Path dir = packageDirectory;
 		for (int i = this.getNameParts().size() - 1; i >= 0; i--) {
 			final String name1 = this.getNameParts().get(i);
+			
+			if (dir == null) {
+				throw new IllegalArgumentException(String.format(
+					"Path '%s' has too few components for package declaration '%s': missing folder name for package '%s'",
+					packageDirectory, this.getName(), name1
+				));
+			}
+			
 			final String name2 = dir.getFileName().toString();
 			if (!name1.equals(name2)) {
 				throw new IllegalArgumentException(String.format(
