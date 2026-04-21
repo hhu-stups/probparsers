@@ -98,6 +98,8 @@ publish:
   extends: .linux_old_java
   stage: deploy
   image: eclipse-temurin:8
+  variables:
+    ORG_GRADLE_PROJECT_javaToolchainVersion: "8"
   script:
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in gradle.properties.enc -out gradle.properties
     - openssl aes-256-cbc -d -base64 -pbkdf2 -pass "env:ENCRYPTION_PASSWORD" -in pubring.gpg.enc -out pubring.gpg
