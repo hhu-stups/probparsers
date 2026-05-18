@@ -249,7 +249,6 @@ public class CliBParser {
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
 		Socket socket = serverSocket.accept();
-		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
 
 		// with autoFlush
 		PrintWriter socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)), true);
