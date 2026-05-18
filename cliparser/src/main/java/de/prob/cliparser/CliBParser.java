@@ -166,26 +166,9 @@ public class CliBParser {
 
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 				final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
-				try (OutputStream out = Files.newOutputStream(Paths.get(filename))) {
-					int returnValue = doFileParsing(behaviour, out, err, bfile);
-					out.flush();
-					err.flush();
-					System.exit(returnValue);
-				} catch (IOException e) {
-					// Note: This should only catch exceptions from the creation of the OutputStream.
-					// All other IOExceptions are caught internally by doFileParsing.
-					if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
-						PrologExceptionPrinter.printException(System.err, e);
-					} else {
-						System.err.println("Unable to create file '" + filename + "'");
-					}
-					System.exit(-1);
-				}
+				System.exit(doFileParsingWithOutputToFile(behaviour, Paths.get(filename), err, bfile));
 			} else {
-				int returnValue = doFileParsing(behaviour, System.out, err, bfile);
-				System.out.flush();
-				err.flush();
-				System.exit(returnValue);
+				System.exit(doFileParsing(behaviour, System.out, err, bfile));
 			}
 		}
 	}
@@ -391,14 +374,12 @@ public class CliBParser {
 					String filename = in.readLine();
 					Path outFile = Paths.get(in.readLine());
 					final File bfile = new File(filename);
-					final int returnValue;
-					try (final OutputStream out = Files.newOutputStream(outFile)) {
-						returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
-					}
+					int returnValue = doFileParsingWithOutputToFile(behaviour, outFile, socketWriter, bfile);
 					context = new MockedDefinitions(); // reset definitions
 
 					// Notify probcli that the call finished successfully.
-					// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
+					// If an exception was thrown,
+					// doFileParsingWithOutputToFile will have already printed an appropriate error message/term.
 					if (returnValue == 0) {
 						socketWriter.println("exit(" + returnValue + ").");
 					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
@@ -557,6 +538,8 @@ public class CliBParser {
 			} else {
 				fullParsing(bfile, behaviour, out);
 			}
+			err.flush();
+			out.flush();
 			return 0;
 		} catch (IOException | UncheckedIOException e) {
 			IOException exc;
@@ -585,6 +568,21 @@ public class CliBParser {
 				err.println("Error in parser: " + e);
 			}
 			return -4;
+		}
+	}
+
+	private static int doFileParsingWithOutputToFile(ParsingBehaviour behaviour, Path outputFile, PrintWriter err, File bfile) {
+		try (OutputStream out = Files.newOutputStream(outputFile)) {
+			return doFileParsing(behaviour, out, err, bfile);
+		} catch (IOException e) {
+			// Note: This should only catch exceptions from writing to the output file.
+			// All other IOExceptions are caught internally by doFileParsing.
+			if (behaviour.shouldPrintProlog()) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(System.err, e);
+			} else {
+				System.err.println("Unable to write output to file '" + outputFile + "': " + e);
+			}
+			return -1;
 		}
 	}
 
