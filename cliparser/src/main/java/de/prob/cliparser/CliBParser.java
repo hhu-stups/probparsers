@@ -344,19 +344,15 @@ public class CliBParser {
 					setOptionOut.fullstop();
 					break;
 				}
-				// new commands to change parsingBehaviour, analog to command-line switches
-				case fastprolog: {
+				// Old commands for changing specific parsingBehaviour settings, only for compatibility with old ProB versions.
+				// Please do not add new commands like this anymore!
+				// Instead, add new options in getNamedOption/setNamedOption,
+				// which ProB can use via the generic getoption/setoption commands.
+				case fastprolog:
 					String newFVal = in.readLine();
 					debugPrint(behaviour, "Setting fastprolog to " + newFVal);
 					behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
 					break;
-				}
-				case swi: {
-					String newFVal = in.readLine();
-					debugPrint(behaviour, "Setting swi to " + newFVal);
-					behaviour.setSwiSupport(Boolean.parseBoolean(newFVal));
-					break;
-				}
 				case compactpos:
 					behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
 					break;
