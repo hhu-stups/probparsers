@@ -349,9 +349,7 @@ public class CliBParser {
 				// Instead, add new options in getNamedOption/setNamedOption,
 				// which ProB can use via the generic getoption/setoption commands.
 				case fastprolog:
-					String newFVal = in.readLine();
-					debugPrint(behaviour, "Setting fastprolog to " + newFVal);
-					behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
+					behaviour.setFastPrologOutput(Boolean.parseBoolean(in.readLine()));
 					break;
 				case compactpos:
 					behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
