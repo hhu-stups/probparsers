@@ -382,9 +382,6 @@ public class CliBParser {
 					// doFileParsingWithOutputToFile will have already printed an appropriate error message/term.
 					if (returnValue == 0) {
 						socketWriter.println("exit(" + returnValue + ").");
-					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
-						System.out.println("% Erasing file contents of " + outFile);
-						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 					}
 					break;
 				}
@@ -572,8 +569,9 @@ public class CliBParser {
 	}
 
 	private static int doFileParsingWithOutputToFile(ParsingBehaviour behaviour, Path outputFile, PrintWriter err, File bfile) {
+		int returnValue;
 		try (OutputStream out = Files.newOutputStream(outputFile)) {
-			return doFileParsing(behaviour, out, err, bfile);
+			returnValue = doFileParsing(behaviour, out, err, bfile);
 		} catch (IOException e) {
 			// Note: This should only catch exceptions from writing to the output file.
 			// All other IOExceptions are caught internally by doFileParsing.
@@ -582,8 +580,22 @@ public class CliBParser {
 			} else {
 				System.err.println("Unable to write output to file '" + outputFile + "': " + e);
 			}
-			return -1;
+			returnValue = -1;
 		}
+
+		if (returnValue != 0) {
+			// After any error, delete the output file (if one was created at all),
+			// so that a later run of ProB doesn't try to use this possibly incomplete or erroneous file.
+			try {
+				Files.deleteIfExists(outputFile);
+			} catch (IOException e) {
+				// This message has to go to stdout as text,
+				// because the code above has already printed an exception Prolog term to stderr.
+				System.out.println("% Failed to delete incomplete output file: " + e);
+			}
+		}
+
+		return returnValue;
 	}
 
 	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {
