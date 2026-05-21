@@ -18,7 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -562,9 +563,35 @@ public class CliBParser {
 	}
 
 	private static int doFileParsingWithOutputToFile(ParsingBehaviour behaviour, Path outputFile, PrintWriter err, File bfile) {
+		Path outputFileDir = outputFile.getParent();
+		if (outputFileDir == null) {
+			outputFileDir = Paths.get(".");
+		}
+
+		Path tempOutputFile = null;
 		int returnValue;
-		try (OutputStream out = Files.newOutputStream(outputFile)) {
-			returnValue = doFileParsing(behaviour, out, err, bfile);
+		try {
+			// Write output to a temp file first.
+			// This prevents an incomplete output file being left at the destination
+			// if the parser crashes for some reason.
+			// It also avoids conflicts when multiple ProB or parser processes try to parse the same file at the same time.
+			// This is especially important on Windows,
+			// where (by default) a file opened for writing by one process cannot be read/written by any other process.
+			tempOutputFile = Files.createTempFile(outputFileDir, ".", ".inprogress.prob");
+
+			try (OutputStream out = Files.newOutputStream(tempOutputFile)) {
+				returnValue = doFileParsing(behaviour, out, err, bfile);
+			}
+
+			// If parsing succeeded, move the temp file to the proper output file name.
+			// The unsuccessful case is handled further below.
+			if (returnValue == 0) {
+				// It's okay to replace an existing output file:
+				// either it's an old file that should be updated,
+				// or it's from another parser process running concurrently,
+				// which will have produced the same output as this parser process.
+				Files.move(tempOutputFile, outputFile, StandardCopyOption.REPLACE_EXISTING);
+			}
 		} catch (IOException e) {
 			// Note: This should only catch exceptions from writing to the output file.
 			// All other IOExceptions are caught internally by doFileParsing.
@@ -576,11 +603,11 @@ public class CliBParser {
 			returnValue = -1;
 		}
 
-		if (returnValue != 0) {
+		if (returnValue != 0 && tempOutputFile != null) {
 			// After any error, delete the output file (if one was created at all),
 			// so that a later run of ProB doesn't try to use this possibly incomplete or erroneous file.
 			try {
-				Files.deleteIfExists(outputFile);
+				Files.deleteIfExists(tempOutputFile);
 			} catch (IOException e) {
 				// This message has to go to stdout as text,
 				// because the code above has already printed an exception Prolog term to stderr.
