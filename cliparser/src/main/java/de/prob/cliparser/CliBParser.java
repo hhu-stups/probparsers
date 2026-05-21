@@ -604,8 +604,7 @@ public class CliBParser {
 		}
 
 		if (returnValue != 0 && tempOutputFile != null) {
-			// After any error, delete the output file (if one was created at all),
-			// so that a later run of ProB doesn't try to use this possibly incomplete or erroneous file.
+			// After any error, clean up the temp file (if one was created at all).
 			try {
 				Files.deleteIfExists(tempOutputFile);
 			} catch (IOException e) {
