@@ -70,7 +70,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 	public File resolve() throws IOException {
 		for (File f : this) {
 			if (f.isFile()) {
-				return f.getCanonicalFile();
+				return f;
 			}
 		}
 		throw new FileNotFoundException("did not find: " + fileName );
