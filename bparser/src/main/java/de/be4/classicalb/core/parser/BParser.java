@@ -411,24 +411,7 @@ public class BParser {
 	}
 
 	public String getFileName() {
-		if (fileName == null) {
-			return null;
-		}
-		File f = new File(fileName);
-		if (f.exists()) {
-			// Make the path canonical if possible.
-			// This is important on Windows,
-			// because ProB/SICStus sometimes converts paths to all lowercase,
-			// but the "machine name must match file name" check expects the file name to be capitalized like the machine name.
-			// getCanonicalPath restores the capitalization as found on the file system.
-			try {
-				return f.getCanonicalPath();
-			} catch (IOException e) {
-				return fileName;
-			}
-		} else {
-			return fileName;
-		}
+		return this.fileName;
 	}
 
 	/**

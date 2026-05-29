@@ -367,7 +367,12 @@ public class CliBParser {
 					resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
 					String filename = in.readLine();
 					Path outFile = Paths.get(in.readLine());
-					final File bfile = new File(filename);
+					// Make the machine file path canonical.
+					// This is important on Windows,
+					// because ProB/SICStus sometimes converts paths to all lowercase,
+					// but the "machine name must match file name" check expects the file name to be capitalized like the machine name.
+					// getCanonicalPath restores the capitalization as found on the file system.
+					final File bfile = new File(filename).getCanonicalFile();
 					int returnValue = doFileParsingWithOutputToFile(behaviour, outFile, socketWriter, bfile);
 					context = new MockedDefinitions(); // reset definitions
 
