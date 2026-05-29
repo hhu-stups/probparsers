@@ -1,0 +1,2 @@
+MACHINE AReferencedMachine
+END

@@ -1,6 +1,9 @@
 package de.be4.classicalb.core.parser.composition;
 
+import java.io.IOException;
+
 import de.be4.classicalb.core.parser.ParsingBehaviour;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
 import org.junit.Test;
@@ -8,6 +11,7 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ErrorsTest {
 
@@ -37,5 +41,18 @@ public class ErrorsTest {
 		parsingBehaviour.setMachineNameMustMatchFileName(false);
 		CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file, parsingBehaviour));
 		assertEquals("Machine name does not match the file name: 'NFA_det1' vs 'NFA_det'", e.getMessage());
+	}
+
+	@Test
+	public void testMachineReferencedWithIncorrectCapitalization() {
+		String file = "composition/errors/MiscapitalizedReference.mch";
+		CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> Helpers.parseFile(file));
+		assertTrue(
+			(
+				e.getMessage().contains("Machine name does not match the file name") // on case-insensitive file systems (as usual on Windows and macOS)
+				|| e.getMessage().contains("Machine not found") // on case-sensitive file systems (as usual on Linux)
+			)
+			&& e.getMessage().contains("aReferencedmACHINE")
+		);
 	}
 }
