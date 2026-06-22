@@ -50,6 +50,7 @@ import de.be4.classicalb.core.preparser.node.TPreParserString;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
 
 /**
  * <p>
@@ -208,7 +209,7 @@ public class PreParser {
 				} else {
 					File directory = machineFile == null ? null : machineFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
-					final File file = contentProvider.getFile(directory, fileName);
+					final File file = contentProvider.getFile(directory, fileName); // will also look in stdlib
 					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
 					parser.getDefinitionFileIncludeStack().addAll(definitionFileIncludeStack);
@@ -223,7 +224,14 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final FileNotFoundException e) {
-				throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
+				if (fileName.startsWith("Library")) {
+					// the user was looking for a library definition file; maybe stdlib is set up incorrectly:
+					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString
+								+ " prob.stdlib = " + FileSearchPathProvider.getLibraryPath(), e);
+				} else {
+				    throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
+				}
+				
 			} catch (final IOException e) {
 			    throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
