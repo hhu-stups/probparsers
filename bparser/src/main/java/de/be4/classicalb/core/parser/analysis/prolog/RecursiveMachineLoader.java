@@ -267,6 +267,11 @@ public class RecursiveMachineLoader {
 				sb.append(" loaded by ").append("'").append(fileName).append("'");
 			}
 		}
+		if (!importedDirs.isEmpty()) {
+		   sb.append(" (imported packages: ");  // Note importedDirs does not contain the stdlib folder!
+		   sb.append( importedDirs.stream().map(Path::toString).collect(Collectors.joining(",")) );
+		   sb.append(")");
+		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
