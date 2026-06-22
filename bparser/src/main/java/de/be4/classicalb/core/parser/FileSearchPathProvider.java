@@ -33,7 +33,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.addAll(getLibraryPath());
 	}
 
-	private List<String> getLibraryPath() {
+	public static List<String> getLibraryPath() {
 		// User provided stdlib search path
 		final String stdlib = System.getProperty("prob.stdlib");
 		if (stdlib != null) {

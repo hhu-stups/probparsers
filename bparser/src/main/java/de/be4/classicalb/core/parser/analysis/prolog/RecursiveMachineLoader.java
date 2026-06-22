@@ -248,7 +248,8 @@ public class RecursiveMachineLoader {
 					.map(Path::toAbsolutePath)
 					.map(Path::toString)
 					.collect(Collectors.toList());
-				return new FileSearchPathProvider(parentMachineDirectory.getAbsolutePath(), machineRef.getName() + suffix, paths).resolve();
+				return new FileSearchPathProvider(parentMachineDirectory.getAbsolutePath(), 
+				                                  machineRef.getName() + suffix, paths).resolve();
 			} catch (IOException e) {
 				// could not resolve the combination of prefix, machineName and
 				// suffix, trying next one
@@ -268,9 +269,15 @@ public class RecursiveMachineLoader {
 			}
 		}
 		if (!importedDirs.isEmpty()) {
-		   sb.append(" (imported packages: ");  // Note importedDirs does not contain the stdlib folder!
+		   sb.append(", imported packages = [");  // Note importedDirs does not contain the stdlib folder!
+		   // FileSearchPathProvider will call getLibraryPath
 		   sb.append( importedDirs.stream().map(Path::toString).collect(Collectors.joining(",")) );
-		   sb.append(")");
+		   sb.append("]");
+		}
+		if (machineRef.getName().startsWith("Library")) {
+		    // the user was looking for a library machine; maybe stdlib is set up incorrectly:
+			sb.append(", prob.stdlib = "); 
+		    sb.append(FileSearchPathProvider.getLibraryPath()); 
 		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
