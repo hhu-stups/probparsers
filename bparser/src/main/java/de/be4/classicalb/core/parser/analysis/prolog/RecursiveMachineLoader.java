@@ -274,7 +274,7 @@ public class RecursiveMachineLoader {
 		   sb.append( importedDirs.stream().map(Path::toString).collect(Collectors.joining(",")) );
 		   sb.append("]");
 		}
-		if (machineRef.getName().startsWith("Library")) {
+		if (FileSearchPathProvider.fileNameCouldReferToLibrary(machineRef.getName())) {
 		    // the user was looking for a library machine; maybe stdlib is set up incorrectly:
 			sb.append(", prob.stdlib = "); 
 		    sb.append(FileSearchPathProvider.getLibraryPath()); 

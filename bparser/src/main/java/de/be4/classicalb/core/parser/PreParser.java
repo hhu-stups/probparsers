@@ -224,7 +224,7 @@ public class PreParser {
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
 			} catch (final FileNotFoundException e) {
-				if (fileName.startsWith("Library")) {
+				if (FileSearchPathProvider.fileNameCouldReferToLibrary(fileName)) {
 					// the user was looking for a library definition file; maybe stdlib is set up incorrectly:
 					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString
 								+ " prob.stdlib = " + FileSearchPathProvider.getLibraryPath(), e);

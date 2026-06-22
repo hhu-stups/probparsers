@@ -42,6 +42,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 			return Collections.singletonList("." + File.separator + "stdlib");
 		}
 	}
+	
+	// check whether it looks like the filename could refer to a ProB stdlib file
+	public static boolean fileNameCouldReferToLibrary(String fileName) {
+	    return     fileName.startsWith("Library")
+	            || fileName.startsWith("AssertionsForLib")
+	            || fileName.equals("CHOOSE.def")
+	            || fileName.equals("SCSS.def")
+	            || fileName.equals("SORT.def");
+	}
 
 	@Override
 	public Iterator<File> iterator() {
