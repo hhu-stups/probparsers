@@ -2,6 +2,7 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -221,8 +222,10 @@ public class PreParser {
 				}
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
+			} catch (final FileNotFoundException e) {
+				throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
 			} catch (final IOException e) {
-				throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
+			    throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
 				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(fileNameString)));
 			}
