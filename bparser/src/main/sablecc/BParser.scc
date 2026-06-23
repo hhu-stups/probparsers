@@ -393,7 +393,8 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
-  {normal} mu_operator = '?'; // syntax for mu(.) operator; Mathematica uses iota, definite description operator
+  {normal} mu_operator = '?'; // syntax for mu(.) operator similar to Rust question mark syntax for unwrapping options
+   // Mathematica uses iota, definite description operator (we could use 0xa1 : alt+1 on macOS, an inverted ! )
   {normal} oftype = 0x2982; // coming from Rodin; we do not support the ASCII version oftype (yet)
 
   // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
