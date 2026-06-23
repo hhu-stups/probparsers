@@ -393,6 +393,7 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
+  {normal} mu_operator = '?'; // syntax for mu(.) operator; Mathematica uses iota, definite description operator
   {normal} oftype = 0x2982; // coming from Rodin; we do not support the ASCII version oftype (yet)
 
   // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
@@ -1056,7 +1057,8 @@ expression_keyword {-> expression} =
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
-  {record_field} [record]:expression_p231 single_quotation [identifier]:identifier_literal {-> New expression.record_field(record.expression, identifier)} |
+  {record_field} [record]:expression_p231 single_quotation [identifier]:identifier_literal {-> New expression.record_field(record.expression, identifier)} | // Priority 250 according to Atelier-B
+  {mu} [expression]:expression_p231 mu_operator {-> New expression.mu(expression.expression)} |
   {expression_operator} [name]:kw_expression_operator [parameters]:op_params {-> New expression.operator(name, [parameters.expression])} | // extension
   {next_level} [expr]:expression_func {-> expr.expression};
 
@@ -1563,6 +1565,7 @@ expression =
   {identity} [expression]:expression |
   {event_b_identity} | // EventB v 2.0 language only
   {reverse} [expression]:expression |
+  {mu} [expression]:expression |
   {first_projection} [exp1]:expression [exp2]:expression |
   {event_b_first_projection} [expression]:expression | // EventB only
   {event_b_first_projection_v2} | // EventB v 2.0 language only

@@ -64,6 +64,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		prio.put(APowerOfExpression.class, 200); // right associative
 		prio.put(AUnaryMinusExpression.class, 210);
 		prio.put(AReverseExpression.class, 230);
+		prio.put(AMuExpression.class, 250);
 		prio.put(AImageExpression.class, 231);
 		prio.put(ARecordFieldExpression.class, 231);
 		prio.put(AFunctionExpression.class, 231);
