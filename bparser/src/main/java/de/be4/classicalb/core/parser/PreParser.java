@@ -227,13 +227,13 @@ public class PreParser {
 				if (FileSearchPathProvider.fileNameCouldReferToLibrary(fileName)) {
 					// the user was looking for a library definition file; maybe stdlib is set up incorrectly:
 					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString
-								+ " prob.stdlib = " + FileSearchPathProvider.getLibraryPath(), e);
+						+ " prob.stdlib = " + FileSearchPathProvider.getLibraryPath(), e);
 				} else {
-				    throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
+					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
 				}
 				
 			} catch (final IOException e) {
-			    throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
+				throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
 				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(fileNameString)));
 			}

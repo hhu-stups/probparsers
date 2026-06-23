@@ -45,11 +45,11 @@ public class FileSearchPathProvider implements Iterable<File> {
 	
 	// check whether it looks like the filename could refer to a ProB stdlib file
 	public static boolean fileNameCouldReferToLibrary(String fileName) {
-	    return     fileName.startsWith("Library")
-	            || fileName.startsWith("AssertionsForLib")
-	            || fileName.equals("CHOOSE.def")
-	            || fileName.equals("SCSS.def")
-	            || fileName.equals("SORT.def");
+		return fileName.startsWith("Library")
+			|| fileName.startsWith("AssertionsForLib")
+			|| fileName.equals("CHOOSE.def")
+			|| fileName.equals("SCSS.def")
+			|| fileName.equals("SORT.def");
 	}
 
 	@Override
