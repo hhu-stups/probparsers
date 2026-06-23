@@ -48,7 +48,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 		return fileName.startsWith("Library")
 			|| fileName.startsWith("AssertionsForLib")
 			|| fileName.equals("CHOOSE.def")
-			|| fileName.equals("SCSS.def")
+			|| fileName.equals("SCCS.def")
 			|| fileName.equals("SORT.def");
 	}
 
