@@ -484,19 +484,35 @@ parse_unit {-> parse_unit} =
 
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
-  {generated} pragma_generated pragma_end [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {package} pragma_package [package]:pragma_id_or_string pragma_end [imports]:import_package_list? [parse_unit]:P.machine
-    {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)};
+  {generated} pragma_generated pragma_end [lower]:P.machine
+            {-> New parse_unit.generated(lower.parse_unit)} |
+  {package}   [imports1]:import_package_list?  // allow import-package pragmas to precede package pragma
+              pragma_package [package]:pragma_id_or_string pragma_end
+              [imports2]:import_package_list?
+              [parse_unit]:P.machine_g
+            {-> New parse_unit.package(package, [imports1.import_package,imports2.import_package], parse_unit.parse_unit)};
+              // Note: using import-package without package pragma will result in syntax error at the moment
+
+// machine which only allows generated pragma and not package/import-package pragmas
+machine_g {-> parse_unit} =
+  machine_x {-> machine_x.parse_unit} |
+  {generated} pragma_generated pragma_end [lower]:P.machine_g
+            {-> New parse_unit.generated(lower.parse_unit)};
 
 import_package_list {-> import_package*} =
-  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [rest.import_package, New import_package(package_or_machine)]};
+  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end
+            {-> [New import_package(package_or_machine)]} |
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end
+            {-> [rest.import_package, New import_package(package_or_machine)]};
 
 
 machine_x {-> parse_unit} =
-  {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
-  {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
-  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
+  {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
+  {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
+  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
 
 machine_variant {-> machine_variant} =
   {machine} T.machine {-> New machine_variant.machine()} |
