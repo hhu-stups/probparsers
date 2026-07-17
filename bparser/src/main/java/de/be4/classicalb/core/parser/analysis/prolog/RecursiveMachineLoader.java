@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.ADefinitionsMachineClause;
 import de.be4.classicalb.core.parser.node.Node;
-import de.be4.classicalb.core.parser.node.PDefinition;
 import de.be4.classicalb.core.parser.node.Start;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
@@ -54,8 +54,8 @@ public class RecursiveMachineLoader {
 
 
 	public RecursiveMachineLoader(final String directory, final IFileContentProvider contentProvider, ParsingBehaviour parsingBehaviour) throws BCompoundException {
-		this.parsingBehaviour = parsingBehaviour;
-		this.rootDirectory = directory == null ? new File(".") : new File(directory);
+		Objects.requireNonNull(directory, "directory");
+		this.rootDirectory = new File(directory);
 
 		if (!rootDirectory.exists()) {
 			throw new BCompoundException(
@@ -63,7 +63,8 @@ public class RecursiveMachineLoader {
 		}
 
 		this.nodeIds = new NodeFileNumbers();
-		this.contentProvider = contentProvider;
+		this.contentProvider = Objects.requireNonNull(contentProvider, "contentProvider");
+		this.parsingBehaviour = Objects.requireNonNull(parsingBehaviour, "parsingBehaviour");
 	}
 
 	public RecursiveMachineLoader(String path, IFileContentProvider contentProvider) throws BCompoundException {
@@ -266,6 +267,17 @@ public class RecursiveMachineLoader {
 				sb.append(" loaded by ").append("'").append(fileName).append("'");
 			}
 		}
+		if (!importedDirs.isEmpty()) {
+			sb.append(", imported packages = ["); // Note importedDirs does not contain the stdlib folder!
+			// FileSearchPathProvider will call getLibraryPath
+			sb.append(importedDirs.stream().map(Path::toString).collect(Collectors.joining(",")));
+			sb.append("]");
+		}
+		if (FileSearchPathProvider.fileNameCouldReferToLibrary(machineRef.getName())) {
+			// the user was looking for a library machine; maybe stdlib is set up incorrectly:
+			sb.append(", prob.stdlib = "); 
+			sb.append(FileSearchPathProvider.getLibraryPath()); 
+		}
 		throw new CheckException(sb.toString(), machineRef.getNode());
 	}
 
@@ -275,7 +287,7 @@ public class RecursiveMachineLoader {
 		final boolean machineNameMustMatchFileName = !isMain || parsingBehaviour.isMachineNameMustMatchFileName();
 		final ReferencedMachines refMachines;
 		try {
-			refMachines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), currentAst, machineNameMustMatchFileName);
+			refMachines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), currentAst.getPParseUnit(), machineNameMustMatchFileName);
 		} catch (BException e) {
 			throw new BCompoundException(e);
 		}
@@ -309,7 +321,7 @@ public class RecursiveMachineLoader {
 		// This also assigns file numbers to any definition files included (directly or indirectly) by this machine.
 		definitions.assignIdsToNodes(getNodeIdMapping(), machineFilesLoaded);
 
-		injectDefinitions(currentAst, definitions);
+		currentAst.apply(new RecursiveMachineLoader.DefInjector(definitions));
 
 		if (parsedFiles.containsKey(name)) {
 			throw new BCompoundException(new BException(machineFile.getName(),
@@ -326,14 +338,13 @@ public class RecursiveMachineLoader {
 			this.main = name;
 		}
 
-		checkForCycles(ancestors, machineFile, name, refMachines);
-
-		final List<MachineReference> references = refMachines.getReferences();
-		for (final MachineReference refMachine : references) {
+		for (MachineReference refMachine : refMachines.getReferences()) {
 			final List<Ancestor> newAncestors = new ArrayList<>(ancestors);
-			newAncestors.add(new Ancestor(name, refMachine));
-			File referencedFile;
+			newAncestors.add(new Ancestor(name, machineFile, refMachine));
 
+			checkForCycle(newAncestors, refMachine);
+
+			File referencedFile;
 			try {
 				referencedFile = lookupFile(directory, refMachine, newAncestors, refMachines.getImportedPackages().values());
 			} catch (CheckException e) {
@@ -367,56 +378,29 @@ public class RecursiveMachineLoader {
 		}
 	}
 
-	private void checkForCycles(List<Ancestor> ancestors, File currentMachineFile, String currentMachineName, ReferencedMachines refMachines ) throws BCompoundException {
-		for (MachineReference machineReference : refMachines.getReferences()) {
-
-			final List<Ancestor> tempAncestors = new ArrayList<>(ancestors);
-			tempAncestors.add(new Ancestor(currentMachineName, machineReference));
-
-			for (Ancestor ancestor : tempAncestors) {
-				checkSiblings(ancestor, currentMachineFile, tempAncestors, new Ancestor(currentMachineName, machineReference));
+	private static void checkForCycle(List<Ancestor> ancestors, MachineReference machineReference) throws BCompoundException {
+		for (int i = 0; i < ancestors.size(); i++) {
+			Ancestor ancestor = ancestors.get(i);
+			if (ancestor.getName().equals(machineReference.getName())) {
+				List<Ancestor> cycle = ancestors.subList(i, ancestors.size());
+				String message = "Machine dependency cycle: " + formatDependencyCycle(cycle);
+				Node node = ancestor.getMachineReference().getNode();
+				throw new BCompoundException(new BException(ancestor.getMachineFile().toString(), new CheckException(message, node)));
 			}
-
-
-		}
-
-	}
-
-	private void checkSiblings(Ancestor current, File currentMachineFile, List<Ancestor> ancestors, Ancestor sibling) throws BCompoundException {
-		final String name = current.getName();
-		final String closeTheCycle = sibling.getMachineReference().getName();
-
-		if (name.equals(closeTheCycle)) {
-			final StringBuilder dependency = new StringBuilder();
-			boolean foundStartOfCycle = false;
-			for (final Ancestor ancestor : ancestors) {
-				// In case the cycle starts some where in the middle of the list
-				if (ancestor.getName().equals(closeTheCycle)) {
-					foundStartOfCycle = true;
-					dependency.append(ancestor.getName());
-				}
-				if (foundStartOfCycle) {
-					dependency.append(ancestor);
-				}
-			}
-
-			String path;
-			try {
-				// TODO Avoid duplicate file lookup here, and instead do only one lookup that is used both when parsing and when reporting cycles
-				path = lookupFile(currentMachineFile.getParentFile(), sibling.getMachineReference(), Collections.emptyList(), Collections.emptyList()).toString();
-			} catch (CheckException e) {
-				throw new BCompoundException(new BException(currentMachineFile.toString(), e));
-			}
-
-			final Node node = current.getMachineReference().getNode();
-			throw new BCompoundException(new BException(path, new CheckException("Cycle in " + current.getMachineReference().getType() + " clause: " + dependency, node)));
 		}
 	}
 
+	private static String formatDependencyCycle(List<Ancestor> cycle) {
+		final StringBuilder dependency = new StringBuilder(cycle.get(0).getName());
 
-	private void injectDefinitions(final Start tree, final IDefinitions definitions) {
-		final DefInjector defInjector = new DefInjector(definitions);
-		tree.apply(defInjector);
+		for (Ancestor ancestor : cycle) {
+			dependency.append(" --");
+			dependency.append(ancestor.getMachineReference().getType());
+			dependency.append("--> ");
+			dependency.append(ancestor.getMachineReference().getName());
+		}
+
+		return dependency.toString();
 	}
 
 	public INodeIds getNodeIdMapping() {
@@ -454,8 +438,7 @@ public class RecursiveMachineLoader {
 		public void caseADefinitionsMachineClause(final ADefinitionsMachineClause node) {
 			node.getDefinitions().clear();
 			for (final String name : definitions.getDefinitionNames()) {
-				final PDefinition def = definitions.getDefinition(name);
-				node.getDefinitions().add(def);
+				node.getDefinitions().add(definitions.getDefinition(name));
 			}
 		}
 	}

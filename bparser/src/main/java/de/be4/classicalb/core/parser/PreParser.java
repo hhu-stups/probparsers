@@ -2,22 +2,19 @@ package de.be4.classicalb.core.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.analysis.checking.DefinitionCollector;
-import de.be4.classicalb.core.parser.analysis.checking.DefinitionPreCollector;
 import de.be4.classicalb.core.parser.analysis.transforming.OpSubstitutions;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -39,13 +36,21 @@ import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.be4.classicalb.core.preparser.lexer.LexerException;
+import de.be4.classicalb.core.preparser.node.ADefinitionsPreParserClause;
+import de.be4.classicalb.core.preparser.node.AExpressionsPreParserClause;
+import de.be4.classicalb.core.preparser.node.AFilePreParserDefinition;
+import de.be4.classicalb.core.preparser.node.APreParseUnit;
+import de.be4.classicalb.core.preparser.node.APreParserDefinition;
+import de.be4.classicalb.core.preparser.node.APredicatesPreParserClause;
 import de.be4.classicalb.core.preparser.node.PPreParseUnit;
-import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
+import de.be4.classicalb.core.preparser.node.PPreParserClause;
+import de.be4.classicalb.core.preparser.node.PPreParserDefinition;
 import de.be4.classicalb.core.preparser.node.TPreParserIdentifier;
 import de.be4.classicalb.core.preparser.node.TPreParserString;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.parser.Parser;
 import de.be4.classicalb.core.preparser.parser.ParserException;
+import de.be4.classicalb.core.parser.FileSearchPathProvider;
 
 /**
  * <p>
@@ -74,10 +79,8 @@ import de.be4.classicalb.core.preparser.parser.ParserException;
  * @see BLexer#replaceDefTokens()
  * @see BParser#preParsing(Reader, File, IFileContentProvider)
  * @see DefinitionCollector
- * @see DefinitionPreCollector
  */
 public class PreParser {
-
 	private final PushbackReader pushbackReader;
 	private final File machineFile;
 	private final DefinitionTypes definitionTypes;
@@ -111,6 +114,18 @@ public class PreParser {
 		this.startColumn = column;
 	}
 
+	private static List<PPreParserDefinition> getDefinitionsFromClause(PPreParserClause clause) throws PreParseException {
+		if (clause instanceof ADefinitionsPreParserClause) {
+			return ((ADefinitionsPreParserClause)clause).getDefinitions();
+		} else if (clause instanceof AExpressionsPreParserClause) {
+			return ((AExpressionsPreParserClause)clause).getDefinitions();
+		} else if (clause instanceof APredicatesPreParserClause) {
+			return ((APredicatesPreParserClause)clause).getDefinitions();
+		} else {
+			throw new PreParseException(clause.getStartPos().getLine(), clause.getStartPos().getPos(), "Unhandled clause in PreParser: " + clause.getClass());
+		}
+	}
+
 	public void parse() throws PreParseException, IOException, BCompoundException {
 		final PreLexer preLexer = new PreLexer(pushbackReader);
 		preLexer.setPosition(this.startLine, this.startColumn);
@@ -120,21 +135,31 @@ public class PreParser {
 		try {
 			preParseUnit = preParser.parse().getPPreParseUnit();
 		} catch (final ParserException e) {
-			String message;
-			if (e.getToken() instanceof TPreParserDefinitions) {
-				message = "Clause 'DEFINITIONS' is used more than once";
-			} else {
-				message = e.getRealMsg();
-			}
-			throw new PreParseException(e.getToken(), message, e);
+			throw new PreParseException(e.getToken(), e.getRealMsg(), e);
 		} catch (final LexerException e) {
 			throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 		}
 
-		final DefinitionPreCollector collector = new DefinitionPreCollector();
-		preParseUnit.apply(collector);
+		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>();
+		List<TPreParserString> fileDefinitions = new ArrayList<>();
 
-		Map<TPreParserIdentifier, TRhsBody> definitions = new HashMap<>(collector.getDefinitions());
+		for (PPreParserClause clause : ((APreParseUnit)preParseUnit).getClauses()) {
+			for (PPreParserDefinition node : getDefinitionsFromClause(clause)) {
+				if (node instanceof APreParserDefinition) {
+					APreParserDefinition defNode = (APreParserDefinition)node;
+					definitions.put(defNode.getDefName(), defNode.getRhs());
+				} else if (node instanceof AFilePreParserDefinition) {
+					AFilePreParserDefinition fileDefNode = (AFilePreParserDefinition)node;
+					if (!(clause instanceof ADefinitionsPreParserClause)) {
+						throw new PreParseException(fileDefNode.getFilename(), "Definition files can only be included in a DEFINITIONS clause, not in EXPRESSIONS/PREDICATES");
+					}
+					fileDefinitions.add(fileDefNode.getFilename());
+				} else {
+					throw new PreParseException(node.getStartPos().getLine(), node.getStartPos().getPos(), "Unhandled definition node in PreParser: " + node.getClass());
+				}
+			}
+		}
+
 		for (TPreParserIdentifier nameToken : definitions.keySet()) {
 			String name = nameToken.getText();
 			if (Utils.isQuoted(name, '`')) {
@@ -146,12 +171,17 @@ public class PreParser {
 			}
 		}
 
-		evaluateDefinitionFiles(collector.getFileDefinitions());
+		evaluateDefinitionFiles(fileDefinitions);
 
 		List<TPreParserIdentifier> sortedDefinitionList = sortDefinitionsByTopologicalOrderAndCheckForCycles(definitions);
 
-		evaluateTypes(sortedDefinitionList, definitions);
-
+		// Determine each definition's abstract type using the main parser.
+		// Because of the sorting and cycle check performed above,
+		// a definition used by other definitions is processed before all definitions that use it.
+		for (TPreParserIdentifier definition : sortedDefinitionList) {
+			TRhsBody defRhs = definitions.get(definition);
+			definitionTypes.addTyping(definition.getText(), determineType(defRhs));
+		}
 	}
 
 	private void evaluateDefinitionFiles(List<TPreParserString> list)
@@ -170,13 +200,7 @@ public class PreParser {
 			// ./foo/bar/defs.def or an absolute path
 			try {
 				if (definitionFileIncludeStack.contains(fileName)) {
-					StringBuilder sb = new StringBuilder();
-					for (String string : definitionFileIncludeStack) {
-						sb.append(string).append(" -> ");
-					}
-					sb.append(fileName);
-					throw new PreParseException(fileNameString,
-							"Cyclic references in definition files: " + sb);
+					throw new PreParseException(fileNameString, "Cyclic references in definition files: " + String.join(" -> ", definitionFileIncludeStack));
 				}
 
 				IDefinitions definitions;
@@ -185,7 +209,7 @@ public class PreParser {
 				} else {
 					File directory = machineFile == null ? null : machineFile.getParentFile();
 					final String content = contentProvider.getFileContent(directory, fileName);
-					final File file = contentProvider.getFile(directory, fileName);
+					final File file = contentProvider.getFile(directory, fileName); // will also look in stdlib
 					final BParser parser = new BParser(fileName, parseOptions);
 					parser.setContentProvider(contentProvider);
 					parser.getDefinitionFileIncludeStack().addAll(definitionFileIncludeStack);
@@ -199,67 +223,19 @@ public class PreParser {
 				}
 				defFileDefinitions.addDefinitions(definitions);
 				definitionTypes.addAll(definitions.getTypes());
+			} catch (final FileNotFoundException e) {
+				if (FileSearchPathProvider.fileNameCouldReferToLibrary(fileName)) {
+					// the user was looking for a library definition file; maybe stdlib is set up incorrectly:
+					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString
+						+ " prob.stdlib = " + FileSearchPathProvider.getLibraryPath(), e);
+				} else {
+					throw new PreParseException(fileNameString, "Definition file not found: " + fileNameString, e);
+				}
+				
 			} catch (final IOException e) {
 				throw new PreParseException(fileNameString, "Definition file cannot be read: " + e, e);
 			} catch (BCompoundException e) {
 				throw e.withMissingLocations(BException.Location.locationsFromNodes(fileName, Collections.singletonList(fileNameString)));
-			}
-		}
-	}
-
-	private void evaluateTypes(List<TPreParserIdentifier> sortedDefinitionList, final Map<TPreParserIdentifier, TRhsBody> definitions)
-			throws PreParseException {
-		Deque<TPreParserIdentifier> remainingDefinitions = new LinkedList<>(sortedDefinitionList);
-		Deque<TPreParserIdentifier> currentlyUnparseableDefinitions = new LinkedList<>();
-		Set<String> todoDefs = new HashSet<>();
-		for (TPreParserIdentifier token : remainingDefinitions) {
-			todoDefs.add(token.getText());
-		}
-		// use main parser for the rhs of each definition to determine type
-		// if a definition can not be typed this way, it may be due to another
-		// definition that is not yet parser (because it appears later in the
-		// source code)
-		// in this case, the definition is appended to the list again
-		// the algorithm terminates if the queue is empty or if no definition
-		// has been parsed
-		boolean oneParsed = true;
-		while (oneParsed) {
-			oneParsed = false;
-
-			while (!remainingDefinitions.isEmpty()) {
-				TPreParserIdentifier definition = remainingDefinitions.pop();
-
-				TRhsBody defRhs = definitions.get(definition);
-				Definitions.Type type;
-				DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
-				type = definitionType.type;
-				if (type != null) {
-					todoDefs.remove(definition.getText());
-					oneParsed = true;
-					definitionTypes.addTyping(definition.getText(), type);
-					// types.addTyping(definition.getText(), type);
-				} else {
-					currentlyUnparseableDefinitions.push(definition);
-				}
-			}
-
-			remainingDefinitions.addAll(currentlyUnparseableDefinitions);
-			currentlyUnparseableDefinitions.clear();
-		}
-
-		if (!remainingDefinitions.isEmpty()) {
-			TPreParserIdentifier definition = remainingDefinitions.pop();
-			TRhsBody defRhs = definitions.get(definition);
-			DefinitionType definitionType = determineType(definition, defRhs, todoDefs);
-			if (definitionType.errorMessage != null) {
-				String message = definitionType.errorMessage;
-				if (machineFile != null) {
-					message += " in file: " + machineFile;
-				}
-				throw new PreParseException(definitionType.errorToken.getLine(), definitionType.errorToken.getPos(), message);
-			} else {
-				// fall back message
-				throw new PreParseException(definition, "expecting wellformed expression, predicate or substitution as DEFINITION body (DEFINITION arguments assumed to be expressions)");
 			}
 		}
 	}
@@ -279,15 +255,8 @@ public class PreParser {
 			Set<String> remaining = new HashSet<>(definitionNames);
 			remaining.removeAll(sortedDefinitionNames);
 			List<String> cycle = Utils.determineCycle(remaining, dependencies);
-			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = cycle.iterator(); iterator.hasNext();) {
-				sb.append(iterator.next());
-				if (iterator.hasNext()) {
-					sb.append(" -> ");
-				}
-			}
 			TPreParserIdentifier firstDefinitionToken = definitionMap.get(cycle.get(0));
-			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + sb);
+			throw new PreParseException(firstDefinitionToken, "Cyclic references in definitions: " + String.join(" -> ", cycle));
 		} else {
 			List<TPreParserIdentifier> sortedDefinitionTokens = new ArrayList<>();
 			for (String name : sortedDefinitionNames) {
@@ -296,6 +265,16 @@ public class PreParser {
 			return sortedDefinitionTokens;
 		}
 
+	}
+
+	private BLexer makeLexerForDefinitionRhs(DefinitionTypes defTypes, String prefix, TRhsBody rhsToken) {
+		Reader reader = new StringReader(prefix + " " + rhsToken.getText());
+		BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), defTypes);
+		// Decrease the start column by the size of the implicitly added prefix
+		// so that the actual definition content starts at the desired position.
+		lexer.setPosition(rhsToken.getLine(), rhsToken.getPos() - (prefix.length() + 1));
+		lexer.setParseOptions(parseOptions);
+		return lexer;
 	}
 
 	private Map<String, Set<String>> determineDependencies(Set<String> definitionNames, Map<TPreParserIdentifier, TRhsBody> definitions)
@@ -308,15 +287,10 @@ public class PreParser {
 			// section to normal. Note, that we do not parse the right hand side
 			// of the definition here. Hence FORMULA_PREFIX has no further
 			// meaning and substitutions can also be handled by the lexer.
-			final Reader reader = new StringReader(BParser.FORMULA_PREFIX + "\n" + rhsToken.getText());
-
-			final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE),
-					new DefinitionTypes());
-			lexer.setParseOptions(parseOptions);
+			BLexer lexer = makeLexerForDefinitionRhs(new DefinitionTypes(), BParser.FORMULA_PREFIX, rhsToken);
 			Set<String> set = new HashSet<>();
-			Token next;
 			try {
-				next = lexer.next();
+				Token next = lexer.next();
 				while (!(next instanceof EOF)) {
 					if (next instanceof TIdentifierLiteral) {
 						TIdentifierLiteral id = (TIdentifierLiteral) next;
@@ -335,39 +309,13 @@ public class PreParser {
 			} catch (IOException e) {
 				throw new PreParseException("Error while parsing", e);
 			} catch (BLexerException e) {
-				Token errorToken = e.getLastToken();
-				correctErrorTokenPosition(nameToken, rhsToken, errorToken);
-				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
+				throw new PreParseException(e.getLastToken().getLine(), e.getLastToken().getPos(), adjustErrorMessage(e.getRealMsg()), e);
 			} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-				throw wrapLexerExceptionAndCorrectPosition(nameToken, rhsToken, e, e);
+				throw new PreParseException(e.getLine(), e.getPos(), e.getRealMsg(), e);
 			}
 			dependencies.put(nameToken.getText(), set);
 		}
 		return dependencies;
-	}
-
-	static class DefinitionType {
-		Definitions.Type type;
-		String errorMessage;
-		Token errorToken;
-
-		DefinitionType() {
-
-		}
-
-		DefinitionType(Definitions.Type t, Token n) {
-			this.type = t;
-			this.errorToken = n;
-		}
-
-		DefinitionType(Definitions.Type t) {
-			this.type = t;
-		}
-
-		DefinitionType(String errorMessage, Token t) {
-			this.errorMessage = errorMessage;
-			this.errorToken = t;
-		}
 	}
 
 	/**
@@ -393,102 +341,76 @@ public class PreParser {
 	}
 
 	/**
-	 * Try to determine the abstract type of the right-hand side of a definition,
-	 * i. e. whether it's an expression, a predicate, or a substitution.
-	 * If the right-hand side references other definitions,
-	 * it may not be possible to determine this definition's type yet
-	 * if the types of the other definitions aren't known yet.
-	 * For such cases,
-	 * {@link #evaluateTypes(List, Map)} calls this method repeatedly until the type can be successfully determined.
+	 * Try to choose the better of two parse exceptions
+	 * after both attempts at parsing an ambiguous definition (formula or substitution) failed.
+	 * This chooses the exception with the higher error position,
+	 * in the hope that the parsing attempt that failed later is "more correct"
+	 * and will thus have a more useful error message.
 	 * 
-	 * @param definition the definition name token
-	 * @param rhsToken the right-hand side of the definition (as a single token, merged by the {@link PreLexer})
-	 * @param untypedDefinitions names of all definitions whose types haven't been determined yet
-	 * @return the type of the definition's right-hand side, or error information if the type cannot be determined yet
-	 *     (but it's expected that the type can be determined later, once some other definitions' types are known)
-	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
-	 *     (and the parse error is not expected to go away later, even after more definitions' types are known) 
+	 * @param exc1 the first exception
+	 * @param exc2 the second exception
+	 * @return the exception with the higher position
 	 */
-	private DefinitionType determineType(TPreParserIdentifier definition, TRhsBody rhsToken,
-			final Set<String> untypedDefinitions) throws PreParseException {
+	private static de.be4.classicalb.core.parser.parser.ParserException chooseBetterParseException(
+		de.be4.classicalb.core.parser.parser.ParserException exc1,
+		de.be4.classicalb.core.parser.parser.ParserException exc2
+	) {
+		if (
+			exc1.getToken().getLine() > exc2.getToken().getLine()
+			|| (exc1.getToken().getLine() == exc2.getToken().getLine() && exc1.getToken().getPos() >= exc2.getToken().getPos())
+		) {
+			return exc1;
+		} else {
+			return exc2;
+		}
+	}
 
-		final String definitionRhs = rhsToken.getText();
-
-		Token errorToken;
+	/**
+	 * Determine the abstract type of the right-hand side of a definition,
+	 * i. e. whether it's an expression, a predicate, or a substitution.
+	 * The type of all definitions used by this definition must already be known -
+	 * otherwise this method may return an incorrect type or parse error.
+	 * 
+	 * @param rhsToken the right-hand side of the definition (as a single token, merged by the {@link PreLexer})
+	 * @return the type of the definition's right-hand side
+	 * @throws PreParseException if the definition's right-hand side couldn't be parsed
+	 */
+	private IDefinitions.Type determineType(TRhsBody rhsToken) throws PreParseException {
+		PParseUnit parseunit;
 		try {
 			// Try parsing the RHS as a Formula, i.e., either expression or predicate
-			PParseUnit parseunit = tryParsing(BParser.FORMULA_PREFIX, definitionRhs);
-
-			// check if the result is a Predicate?
-			if (parseunit instanceof APredicateParseUnit) {
-				return new DefinitionType(IDefinitions.Type.Predicate);
-			}
-
-			// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
-
-			AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
-
-			PreParserIdentifierTypeVisitor visitor = new PreParserIdentifierTypeVisitor(untypedDefinitions);
-			expressionParseUnit.apply(visitor);
-
-			if (visitor.isUntypedDefinitionUsed()) {
-				// the parseunit uses another definition which is not yet typed
-				return new DefinitionType();
-			}
-
-			return new DefinitionType(getExpressionDefinitionRhsType(expressionParseUnit.getExpression()));
-		} catch (de.be4.classicalb.core.parser.parser.ParserException e) {
-			errorToken = e.getToken();
+			parseunit = tryParsing(BParser.FORMULA_PREFIX, rhsToken);
+		} catch (de.be4.classicalb.core.parser.parser.ParserException formulaParseExc) {
 			try {
 				// try parsing the RHS now as a substitution:
-				tryParsing(BParser.SUBSTITUTION_PREFIX, definitionRhs);
-				return new DefinitionType(IDefinitions.Type.Substitution, errorToken);
-			} catch (de.be4.classicalb.core.parser.parser.ParserException ex) {
-				Token errorToken2 = ex.getToken();
-				if (errorToken.getLine() > errorToken2.getLine() || (errorToken.getLine() == errorToken2.getLine()
-						&& errorToken.getPos() >= errorToken2.getPos())) {
-					// use error message from Substitution
-					correctErrorTokenPosition(definition, rhsToken, errorToken);
-					return new DefinitionType(adjustErrorMessage(e.getRealMsg()), errorToken);
-				} else {
-					// use error message from Expression/Predicate parsing:
-					correctErrorTokenPosition(definition, rhsToken, errorToken2);
-					return new DefinitionType(adjustErrorMessage(ex.getRealMsg()), errorToken2);
-				}
-			} catch (BLexerException e1) {
-				errorToken = e1.getLastToken();
-				correctErrorTokenPosition(definition, rhsToken, errorToken);
-				throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
-			} catch (de.be4.classicalb.core.parser.lexer.LexerException e3) {
-				// FIXME Is the cause really supposed to be different here?
-				throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e3, e);
+				tryParsing(BParser.SUBSTITUTION_PREFIX, rhsToken);
+				return IDefinitions.Type.Substitution;
+			} catch (de.be4.classicalb.core.parser.parser.ParserException substitutionParseExc) {
+				de.be4.classicalb.core.parser.parser.ParserException betterExc = chooseBetterParseException(formulaParseExc, substitutionParseExc);
+				throw new PreParseException(betterExc.getToken().getLine(), betterExc.getToken().getPos(), adjustErrorMessage(betterExc.getRealMsg()), betterExc);
+			} catch (BLexerException substitutionLexerExc) {
+				throw new PreParseException(substitutionLexerExc.getLastToken().getLine(), substitutionLexerExc.getLastToken().getPos(), adjustErrorMessage(formulaParseExc.getRealMsg()), formulaParseExc);
+			} catch (de.be4.classicalb.core.parser.lexer.LexerException substitutionLexerExc) {
+				throw new PreParseException(substitutionLexerExc.getLine(), substitutionLexerExc.getPos(), substitutionLexerExc.getRealMsg(), formulaParseExc);
 			} catch (IOException e1) {
-				throw new PreParseException(e.toString(), e);
+				throw new PreParseException(formulaParseExc.toString(), formulaParseExc);
 			}
-		} catch (BLexerException e) {
-			errorToken = e.getLastToken();
-			correctErrorTokenPosition(definition, rhsToken, errorToken);
-			throw new PreParseException(errorToken.getLine(), errorToken.getPos(), adjustErrorMessage(e.getRealMsg()), e);
-		} catch (de.be4.classicalb.core.parser.lexer.LexerException e) {
-			throw wrapLexerExceptionAndCorrectPosition(definition, rhsToken, e, e);
+		} catch (BLexerException formulaLexerExc) {
+			throw new PreParseException(formulaLexerExc.getLastToken().getLine(), formulaLexerExc.getLastToken().getPos(), adjustErrorMessage(formulaLexerExc.getRealMsg()), formulaLexerExc);
+		} catch (de.be4.classicalb.core.parser.lexer.LexerException formulaLexerExc) {
+			throw new PreParseException(formulaLexerExc.getLine(), formulaLexerExc.getPos(), formulaLexerExc.getRealMsg(), formulaLexerExc);
 		} catch (IOException e) {
 			throw new PreParseException(e.toString(), e);
 		}
 
-	}
+		// check if the result is a Predicate?
+		if (parseunit instanceof APredicateParseUnit) {
+			return IDefinitions.Type.Predicate;
+		}
 
-	private static void correctErrorTokenPosition(
-		TPreParserIdentifier definition,
-		TRhsBody rhsToken,
-		Token errorToken
-	) {
-		// the parsed string starts in the second line, e.g. #formula\n ...
-		int line = errorToken.getLine();
-		int pos = errorToken.getPos();
-		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
-		line = definition.getLine() + line - 2;
-		errorToken.setLine(line);
-		errorToken.setPos(pos);
+		AExpressionParseUnit expressionParseUnit = (AExpressionParseUnit) parseunit;
+		// check if we have definitely an Expression or an ambiguous Expression/Substitution (e.g. f(x))?
+		return getExpressionDefinitionRhsType(expressionParseUnit.getExpression());
 	}
 
 	private static String adjustErrorMessage(String message) {
@@ -499,27 +421,10 @@ public class PreParser {
 		}
 	}
 
-	private static PreParseException wrapLexerExceptionAndCorrectPosition(
-		TPreParserIdentifier definition,
-		TRhsBody rhsToken,
-		de.be4.classicalb.core.parser.lexer.LexerException exc,
-		Throwable cause
-	) {
-		// the parsed string starts in the second line, e.g. #formula\n ...
-		int line = exc.getLine();
-		int pos = exc.getPos();
-		pos = line == 2 ? rhsToken.getPos() + pos - 1 : pos;
-		line = definition.getLine() + line - 2;
-		return new PreParseException(line, pos, exc.getRealMsg(), cause);
-	}
-
-	private PParseUnit tryParsing(final String prefix, final String definitionRhs)
+	private PParseUnit tryParsing(String prefix, TRhsBody rhsToken)
 			throws de.be4.classicalb.core.parser.lexer.LexerException,
 			de.be4.classicalb.core.parser.parser.ParserException, IOException {
-
-		final Reader reader = new StringReader(prefix + "\n" + definitionRhs);
-		final BLexer lexer = new BLexer(new PushbackReader(reader, BLexer.PUSHBACK_BUFFER_SIZE), this.definitionTypes);
-		lexer.setParseOptions(parseOptions);
+		BLexer lexer = makeLexerForDefinitionRhs(this.definitionTypes, prefix, rhsToken);
 		final de.be4.classicalb.core.parser.parser.Parser parser = new de.be4.classicalb.core.parser.parser.Parser(lexer);
 		return parser.parse().getPParseUnit();
 	}

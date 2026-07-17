@@ -62,15 +62,12 @@ public final class RulesParseUnit extends IModel {
 
 		try {
 			bParser = new BParser(machineFile != null ? machineFile.getPath() : null);
-			// Make the machine file path canonical if possible.
-			// This is important on Windows - see the comment in BParser.getFileName for details.
-			machineFile = machineFile != null ? new File(bParser.getFileName()) : null;
 			ParseOptions parseOptions = new ParseOptions();
 			parseOptions.setGrammar(RulesGrammar.getInstance());
 			bParser.setParseOptions(parseOptions);
 			this.setStart(machineFile != null ? bParser.parseFile(machineFile) : bParser.parseMachine(content));
 			if (machineFile != null) {
-				ReferencedMachines machines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), this.getStart(), true);
+				ReferencedMachines machines = MachineReferencesFinder.findReferencedMachines(machineFile.toPath(), this.getStart().getPParseUnit(), true);
 				this.setMachineName(machines.getMachineName());
 
 				this.machineReferences = new ArrayList<>();

@@ -13,6 +13,10 @@ public class FileSearchPathProvider implements Iterable<File> {
 	private final String fileName;
 	private final ArrayList<String> searchPath = new ArrayList<>();
 
+	/**
+	 * @deprecated Use {@link #FileSearchPathProvider(String, String)} instead and explicitly pass {@code "."} as the prefix if desired.
+	 */
+	@Deprecated
 	public FileSearchPathProvider(String fileName) {
 		this(".", fileName);
 	}
@@ -29,7 +33,7 @@ public class FileSearchPathProvider implements Iterable<File> {
 		searchPath.addAll(getLibraryPath());
 	}
 
-	private List<String> getLibraryPath() {
+	public static List<String> getLibraryPath() {
 		// User provided stdlib search path
 		final String stdlib = System.getProperty("prob.stdlib");
 		if (stdlib != null) {
@@ -37,6 +41,15 @@ public class FileSearchPathProvider implements Iterable<File> {
 		} else {
 			return Collections.singletonList("." + File.separator + "stdlib");
 		}
+	}
+	
+	// check whether it looks like the filename could refer to a ProB stdlib file
+	public static boolean fileNameCouldReferToLibrary(String fileName) {
+		return fileName.startsWith("Library")
+			|| fileName.startsWith("AssertionsForLib")
+			|| fileName.equals("CHOOSE.def")
+			|| fileName.equals("SCCS.def")
+			|| fileName.equals("SORT.def");
 	}
 
 	@Override
@@ -65,9 +78,8 @@ public class FileSearchPathProvider implements Iterable<File> {
 
 	public File resolve() throws IOException {
 		for (File f : this) {
-
-			if (f.exists() && f.isFile()) {
-				return f.getCanonicalFile();
+			if (f.isFile()) {
+				return f;
 			}
 		}
 		throw new FileNotFoundException("did not find: " + fileName );

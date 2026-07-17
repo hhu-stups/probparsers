@@ -47,6 +47,7 @@ public class ClausesCheck implements SemanticCheck {
 		final Map<Class<? extends Node>, String> clauseNamesByClass = new HashMap<>();
 		clauseNamesByClass.put(AAbstractConstantsMachineClause.class, "ABSTRACT_CONSTANTS");
 		clauseNamesByClass.put(AConstraintsMachineClause.class, "CONSTRAINTS");
+		clauseNamesByClass.put(ADefinitionsMachineClause.class, "DEFINITIONS");
 		clauseNamesByClass.put(AImportsMachineClause.class, "IMPORTS");
 		clauseNamesByClass.put(AIncludesMachineClause.class, "INCLUDES");
 		clauseNamesByClass.put(ALocalOperationsMachineClause.class, "LOCAL_OPERATIONS");
@@ -56,7 +57,7 @@ public class ClausesCheck implements SemanticCheck {
 		CLAUSE_NAMES_BY_CLASS = Collections.unmodifiableMap(clauseNamesByClass);
 	}
 
-	private Map<Class<? extends Node>, Set<Node>> clauses;
+	private Map<Class<? extends Node>, List<Node>> clauses;
 
 	private final List<CheckException> exceptions = new ArrayList<>();
 
@@ -157,7 +158,7 @@ public class ClausesCheck implements SemanticCheck {
 			(clauses.containsKey(AVariablesMachineClause.class) || clauses.containsKey(AConcreteVariablesMachineClause.class))
 			&& (!clauses.containsKey(AInvariantMachineClause.class) || !initClauseExists())
 		) {
-			final Set<Node> nodes = new HashSet<>();
+			List<Node> nodes = new ArrayList<>();
 			if (clauses.containsKey(AVariablesMachineClause.class)) {
 				nodes.addAll(clauses.get(AVariablesMachineClause.class));
 			}
@@ -177,7 +178,7 @@ public class ClausesCheck implements SemanticCheck {
 				}
 				message.append("INITIALISATION");
 			}
-			exceptions.add(new CheckException(message.toString(), new ArrayList<>(nodes)));
+			exceptions.add(new CheckException(message.toString(), nodes));
 		}
 	}
 
@@ -187,7 +188,7 @@ public class ClausesCheck implements SemanticCheck {
 		 */
 		if ((clauses.containsKey(AConstantsMachineClause.class) || clauses.containsKey(AAbstractConstantsMachineClause.class))
 				&& !clauses.containsKey(APropertiesMachineClause.class)) {
-			final Set<Node> nodes = new HashSet<>();
+			List<Node> nodes = new ArrayList<>();
 
 			if (clauses.containsKey(AConstantsMachineClause.class)) {
 				nodes.addAll(clauses.get(AConstantsMachineClause.class));
@@ -195,7 +196,7 @@ public class ClausesCheck implements SemanticCheck {
 			if (clauses.containsKey(AAbstractConstantsMachineClause.class)) {
 				nodes.addAll(clauses.get(AAbstractConstantsMachineClause.class));
 			}
-			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", new ArrayList<>(nodes)));
+			exceptions.add(new CheckException("Clause(s) missing: PROPERTIES", nodes));
 		}
 	}
 
@@ -215,15 +216,14 @@ public class ClausesCheck implements SemanticCheck {
 		wrongClauseClasses.retainAll(forbiddenClasses);
 
 		if (!wrongClauseClasses.isEmpty()) {
-			final Set<Node> nodes = new HashSet<>();
+			final List<Node> nodes = new ArrayList<>();
 			final Set<String> wrongClauseNames = new HashSet<>();
 
 			for (final Class<? extends Node> wrongClauseClass : wrongClauseClasses) {
 				nodes.addAll(clauses.get(wrongClauseClass));
 				wrongClauseNames.add(clauseNameFromNodeClass(wrongClauseClass));
 			}
-			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames),
-					new ArrayList<>(nodes)));
+			exceptions.add(new CheckException("Clauses not allowed in " + machineKindDescription + ": " + String.join(", ", wrongClauseNames), nodes));
 		}
 	}
 
@@ -231,13 +231,12 @@ public class ClausesCheck implements SemanticCheck {
 	 * Checks if one clause is used more than once in the machine.
 	 */
 	private void checkDoubleClauses() {
-		for (final Set<Node> nodesforClause : clauses.values()) {
-			if (nodesforClause.size() > 1) {
-				final Node clauseNode = nodesforClause.iterator().next();
+		for (List<Node> nodesForClause : clauses.values()) {
+			if (nodesForClause.size() > 1) {
+				final Node clauseNode = nodesForClause.iterator().next();
 				final String clauseName = clauseNameFromNodeClass(clauseNode.getClass());
 
-				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once",
-						new ArrayList<>(nodesforClause)));
+				exceptions.add(new CheckException("Clause '" + clauseName + "' is used more than once", nodesForClause));
 			}
 		}
 	}

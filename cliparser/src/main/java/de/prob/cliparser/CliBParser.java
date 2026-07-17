@@ -18,7 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -166,26 +167,9 @@ public class CliBParser {
 
 			if (options.isOptionSet(CLI_SWITCH_OUTPUT)) {
 				final String filename = options.getOptions(CLI_SWITCH_OUTPUT)[0];
-				try (OutputStream out = Files.newOutputStream(Paths.get(filename))) {
-					int returnValue = doFileParsing(behaviour, out, err, bfile);
-					out.flush();
-					err.flush();
-					System.exit(returnValue);
-				} catch (IOException e) {
-					// Note: This should only catch exceptions from the creation of the OutputStream.
-					// All other IOExceptions are caught internally by doFileParsing.
-					if (options.isOptionSet(CLI_SWITCH_PROLOG)) {
-						PrologExceptionPrinter.printException(System.err, e);
-					} else {
-						System.err.println("Unable to create file '" + filename + "'");
-					}
-					System.exit(-1);
-				}
+				System.exit(doFileParsingWithOutputToFile(behaviour, Paths.get(filename), err, bfile));
 			} else {
-				int returnValue = doFileParsing(behaviour, System.out, err, bfile);
-				System.out.flush();
-				err.flush();
-				System.exit(returnValue);
+				System.exit(doFileParsing(behaviour, System.out, err, bfile));
 			}
 		}
 	}
@@ -266,7 +250,6 @@ public class CliBParser {
 		// write port number as prolog term
 		System.out.println(serverSocket.getLocalPort() + ".");
 		Socket socket = serverSocket.accept();
-		// socket.setTcpNoDelay(true); // does not seem to provide any response benefit
 
 		// with autoFlush
 		PrintWriter socketWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)), true);
@@ -361,19 +344,13 @@ public class CliBParser {
 					setOptionOut.fullstop();
 					break;
 				}
-				// new commands to change parsingBehaviour, analog to command-line switches
-				case fastprolog: {
-					String newFVal = in.readLine();
-					debugPrint(behaviour, "Setting fastprolog to " + newFVal);
-					behaviour.setFastPrologOutput(Boolean.parseBoolean(newFVal));
+				// Old commands for changing specific parsingBehaviour settings, only for compatibility with old ProB versions.
+				// Please do not add new commands like this anymore!
+				// Instead, add new options in getNamedOption/setNamedOption,
+				// which ProB can use via the generic getoption/setoption commands.
+				case fastprolog:
+					behaviour.setFastPrologOutput(Boolean.parseBoolean(in.readLine()));
 					break;
-				}
-				case swi: {
-					String newFVal = in.readLine();
-					debugPrint(behaviour, "Setting swi to " + newFVal);
-					behaviour.setSwiSupport(Boolean.parseBoolean(newFVal));
-					break;
-				}
 				case compactpos:
 					behaviour.setCompactPrologPositions(Boolean.parseBoolean(in.readLine()));
 					break;
@@ -390,20 +367,20 @@ public class CliBParser {
 					resetVolatilePositionOptions(behaviour); // no sense in providing col,line; TODO: reset file?
 					String filename = in.readLine();
 					Path outFile = Paths.get(in.readLine());
-					final File bfile = new File(filename);
-					final int returnValue;
-					try (final OutputStream out = Files.newOutputStream(outFile)) {
-						returnValue = doFileParsing(behaviour, out, socketWriter, bfile);
-					}
+					// Make the machine file path canonical.
+					// This is important on Windows,
+					// because ProB/SICStus sometimes converts paths to all lowercase,
+					// but the "machine name must match file name" check expects the file name to be capitalized like the machine name.
+					// getCanonicalPath restores the capitalization as found on the file system.
+					final File bfile = new File(filename).getCanonicalFile();
+					int returnValue = doFileParsingWithOutputToFile(behaviour, outFile, socketWriter, bfile);
 					context = new MockedDefinitions(); // reset definitions
 
 					// Notify probcli that the call finished successfully.
-					// If an exception was thrown, doFileParsing will have already printed an appropriate error message/term.
+					// If an exception was thrown,
+					// doFileParsingWithOutputToFile will have already printed an appropriate error message/term.
 					if (returnValue == 0) {
 						socketWriter.println("exit(" + returnValue + ").");
-					} else if (returnValue <= -4) { // VM/StackOverflow error occurred; file is probably corrupt
-						System.out.println("% Erasing file contents of " + outFile);
-						Files.write(outFile, Collections.singletonList("% VM Error occurred"));
 					}
 					break;
 				}
@@ -557,6 +534,8 @@ public class CliBParser {
 			} else {
 				fullParsing(bfile, behaviour, out);
 			}
+			err.flush();
+			out.flush();
 			return 0;
 		} catch (IOException | UncheckedIOException e) {
 			IOException exc;
@@ -586,6 +565,61 @@ public class CliBParser {
 			}
 			return -4;
 		}
+	}
+
+	private static int doFileParsingWithOutputToFile(ParsingBehaviour behaviour, Path outputFile, PrintWriter err, File bfile) {
+		Path outputFileDir = outputFile.getParent();
+		if (outputFileDir == null) {
+			outputFileDir = Paths.get(".");
+		}
+
+		Path tempOutputFile = null;
+		int returnValue;
+		try {
+			// Write output to a temp file first.
+			// This prevents an incomplete output file being left at the destination
+			// if the parser crashes for some reason.
+			// It also avoids conflicts when multiple ProB or parser processes try to parse the same file at the same time.
+			// This is especially important on Windows,
+			// where (by default) a file opened for writing by one process cannot be read/written by any other process.
+			tempOutputFile = Files.createTempFile(outputFileDir, ".", ".inprogress.prob");
+
+			try (OutputStream out = Files.newOutputStream(tempOutputFile)) {
+				returnValue = doFileParsing(behaviour, out, err, bfile);
+			}
+
+			// If parsing succeeded, move the temp file to the proper output file name.
+			// The unsuccessful case is handled further below.
+			if (returnValue == 0) {
+				// It's okay to replace an existing output file:
+				// either it's an old file that should be updated,
+				// or it's from another parser process running concurrently,
+				// which will have produced the same output as this parser process.
+				Files.move(tempOutputFile, outputFile, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException e) {
+			// Note: This should only catch exceptions from writing to the output file.
+			// All other IOExceptions are caught internally by doFileParsing.
+			if (behaviour.shouldPrintProlog()) { // Note: this will print regular Prolog in FastProlog mode
+				PrologExceptionPrinter.printException(System.err, e);
+			} else {
+				System.err.println("Unable to write output to file '" + outputFile + "': " + e);
+			}
+			returnValue = -1;
+		}
+
+		if (returnValue != 0 && tempOutputFile != null) {
+			// After any error, clean up the temp file (if one was created at all).
+			try {
+				Files.deleteIfExists(tempOutputFile);
+			} catch (IOException e) {
+				// This message has to go to stdout as text,
+				// because the code above has already printed an exception Prolog term to stderr.
+				System.out.println("% Failed to delete incomplete output file: " + e);
+			}
+		}
+
+		return returnValue;
 	}
 
 	private static void printPrologAst(ParsingBehaviour parsingBehaviour, OutputStream out, Consumer<? super IPrologTermOutput> printer) {

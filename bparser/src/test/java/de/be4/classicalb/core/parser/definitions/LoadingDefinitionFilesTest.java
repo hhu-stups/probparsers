@@ -30,7 +30,7 @@ public class LoadingDefinitionFilesTest {
 		String PATH = "definitions/definitionFiles/";
 		String file = PATH + "MachineIncludingNotExistingDefinitionFile.mch";
 		final PreParseException e = Helpers.assertThrowsCompound(PreParseException.class, () -> Helpers.parseFile(file));
-		assertTrue(e.getMessage().contains("Definition file cannot be read"));
+		assertTrue(e.getMessage().contains("Definition file not found"));
 	}
 	
 	@Test

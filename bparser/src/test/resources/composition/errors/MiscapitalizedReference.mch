@@ -1,0 +1,3 @@
+MACHINE MiscapitalizedReference
+EXTENDS aReferencedmACHINE
+END

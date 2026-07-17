@@ -28,7 +28,7 @@ Releases are on [Maven Central](https://search.maven.org/search?q=g:de.hhu.stups
 You can include the different parsers in a Gradle build script like this:
 
 ```groovy
-final parserVersion = "2.15.4"
+final parserVersion = "2.16.0"
 dependencies {
 	implementation("de.hhu.stups:bparser:${parserVersion}")
 	implementation("de.hhu.stups:ltlparser:${parserVersion}")
@@ -101,7 +101,7 @@ Please report bugs and feature requests on our [bug tracker](https://github.com/
 ## Contributors
 
 The libraries contain contributions from (in alphabetical order)
-Jens Bendisposto, Marc Büngener, Fabian Fritz, Dominik Hansen, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider
+Jens Bendisposto, Marc Büngener, Fabian Fritz, Jan Gruteser, Dominik Hansen, Sebastian Krings, Michael Leuschel, Daniel Plagge, David Schneider, Miles Vella
 
 ## License
 
@@ -114,4 +114,4 @@ to anyone for the consequences of using it or for whether it serves
 any particular purpose or works at all. No warranty is made about
 the software or its performance.
 
-(c) 2011-2020 STUPS group, University of Düsseldorf
+(c) 2011-2026 STUPS group, University of Düsseldorf

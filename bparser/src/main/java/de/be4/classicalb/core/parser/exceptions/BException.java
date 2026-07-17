@@ -92,13 +92,7 @@ public class BException extends Exception {
 
 	public BException(String filename, PreParseException e) {
 		this(filename, e.getMessage(), e);
-		if (e.getTokensList().isEmpty()) {
-			if (e.getLine() != 0 && e.getPos() != 0) {
-				locations.add(new Location(filename, e.getLine(), e.getPos(), e.getLine(), e.getPos()));
-			}
-		} else {
-			locations.addAll(Location.locationsFromNodes(filename, e.getTokensList()));
-		}
+		locations.addAll(Location.locationsFromNodes(filename, e.getTokensList()));
 	}
 
 	public BException(final String filename, final CheckException e) {

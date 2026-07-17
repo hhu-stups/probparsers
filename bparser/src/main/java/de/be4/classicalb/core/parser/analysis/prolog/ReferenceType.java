@@ -16,6 +16,7 @@ public enum ReferenceType {
 		this.description = description;
 	}
 	
+	@Deprecated
 	public String getDescription() {
 		return this.description;
 	}

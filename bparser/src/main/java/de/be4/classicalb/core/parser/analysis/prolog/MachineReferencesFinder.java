@@ -1,6 +1,5 @@
 package de.be4.classicalb.core.parser.analysis.prolog;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,7 +12,6 @@ import de.be4.classicalb.core.parser.analysis.MachineClauseAdapter;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
-import de.be4.classicalb.core.parser.exceptions.VisitorIOException;
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
 import de.be4.classicalb.core.parser.node.ADefinitionFileParseUnit;
 import de.be4.classicalb.core.parser.node.AExtendsMachineClause;
@@ -36,13 +34,14 @@ import de.be4.classicalb.core.parser.node.PImportPackage;
 import de.be4.classicalb.core.parser.node.PMachineClause;
 import de.be4.classicalb.core.parser.node.PMachineReference;
 import de.be4.classicalb.core.parser.node.PMachineReferenceNoParams;
+import de.be4.classicalb.core.parser.node.PParseUnit;
 import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
 import de.be4.classicalb.core.parser.util.Utils;
 
 /**
  * This class finds all references to external machines in a machine definition.
- * Use this class by calling the static method {@link #findReferencedMachines(Path, Node, boolean)}.
+ * Use this class by calling the static method {@link #findReferencedMachines(Path, PParseUnit, boolean)}.
  */
 public final class MachineReferencesFinder extends MachineClauseAdapter {
 	private final Path machineFile;
@@ -65,33 +64,30 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 	 * Searches the syntax tree of a machine for references to external
 	 * machines, like in SEES, INCLUDES, etc.
 	 * 
-	 * @param machineFile
-	 *            the file of the parsed B machine. The file will be mainly used
-	 *            to report helpful error messages including source code
-	 *            positions.
-	 * @param node
-	 *            the root node of the machine's syntax tree, never
-	 *            <code>null</code>
+	 * @param machineFile Path of the parsed machine file.
+	 *     Used when reporting error locations
+	 *     and to check that the machine name and package (if any) are consistent with the file path.
+	 *     If the machine contains a package declaration,
+	 *     this file path must include path components for all package directories.
+	 *     An absolute path is always safe.
+	 * @param parseUnit top-level parse unit of the machine AST to examine
 	 * @param machineNameMustMatchFileName
 	 *            indicates if the corresponding check will be performed or not
 	 * @return information about other machines referenced from the given machine
 	 */
-	public static ReferencedMachines findReferencedMachines(final Path machineFile, final Node node, final boolean machineNameMustMatchFileName) throws BException {
+	public static ReferencedMachines findReferencedMachines(Path machineFile, PParseUnit parseUnit, boolean machineNameMustMatchFileName) throws BException {
 		final MachineReferencesFinder referenceFinder = new MachineReferencesFinder(machineFile, machineNameMustMatchFileName);
-		final String fileName = machineFile.toAbsolutePath().toString();
 		try {
-			node.apply(referenceFinder);
+			parseUnit.apply(referenceFinder);
 		} catch (VisitorException e) {
-			throw new BException(fileName, e.getException());
-		}catch(VisitorIOException e) {
-			throw new BException(fileName, e.getException());
+			throw new BException(machineFile.toString(), e.getException());
 		}
 		
 		if (referenceFinder.machineName == null) {
-			throw new BException(fileName, "Could not determine the machine's name. Parse unit class: " + node.getClass(), null);
+			throw new BException(machineFile.toString(), "Could not determine the machine's name. Parse unit class: " + parseUnit.getClass(), null);
 		}
 		if (referenceFinder.machineType == null) {
-			throw new BException(fileName, "Could not determine the machine's type. Parse unit class: " + node.getClass(), null);
+			throw new BException(machineFile.toString(), "Could not determine the machine's type. Parse unit class: " + parseUnit.getClass(), null);
 		}
 		
 		return new ReferencedMachines(referenceFinder.machineName, referenceFinder.machineType, referenceFinder.references, referenceFinder.packageName, referenceFinder.rootDirectory, referenceFinder.importedPackages);
@@ -149,14 +145,8 @@ public final class MachineReferencesFinder extends MachineClauseAdapter {
 
 	private void determineRootDirectory(final TPragmaIdOrString packageTerminal, final Node node) {
 		this.packageName = getPackageName(packageTerminal, node);
-		final Path packageDir;
 		try {
-			packageDir = machineFile.toRealPath().getParent();
-		} catch (IOException e) {
-			throw new VisitorIOException(e);
-		}
-		try {
-			rootDirectory = this.packageName.determineRootDirectory(packageDir);
+			rootDirectory = this.packageName.determineRootDirectory(machineFile.getParent());
 		} catch (IllegalArgumentException e) {
 			throw new VisitorException(new CheckException(e.getMessage(), node, e));
 		}

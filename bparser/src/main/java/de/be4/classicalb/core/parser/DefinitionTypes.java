@@ -3,28 +3,31 @@ package de.be4.classicalb.core.parser;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class DefinitionTypes {
-	private final Map<String, Definitions.Type> types;
+	private final Map<String, IDefinitions.Type> types;
 
 	public DefinitionTypes() {
 		this(Collections.emptyMap());
 	}
 
-	public DefinitionTypes(final Map<String, Definitions.Type> newTypes) {
+	public DefinitionTypes(Map<String, IDefinitions.Type> newTypes) {
 		this.types = new HashMap<>();
 		newTypes.forEach(this::addTyping);
 	}
 
-	public void addTyping(final String definitionName, final Definitions.Type type) {
+	public void addTyping(String definitionName, IDefinitions.Type type) {
+		Objects.requireNonNull(definitionName, "definitionName");
+		Objects.requireNonNull(type, "type");
 		types.put(definitionName, type);
 	}
 
-	public void addAll(final Map<String, Definitions.Type> newTypes) {
+	public void addAll(Map<String, IDefinitions.Type> newTypes) {
 		types.putAll(newTypes);
 	}
 
-	public Definitions.Type getType(final String definitionName) {
+	public IDefinitions.Type getType(String definitionName) {
 		return types.getOrDefault(definitionName, IDefinitions.Type.NoDefinition);
 	}
 	

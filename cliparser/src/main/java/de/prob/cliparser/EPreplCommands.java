@@ -11,7 +11,6 @@ public enum EPreplCommands {
 	getoption,
 	setoption,
 	fastprolog,
-	swi,
 	compactpos,
 	verbose,
 	checkname,

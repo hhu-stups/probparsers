@@ -105,7 +105,8 @@ Helpers
   identifier_literal = regular_identifier_literal | quoted_identifier_literal;
 
   pragma_prefix = '/*@' layout_char*;
-  pragma_identifier_literal = ([[0x21 .. 0x7e] - [['"' + '`'] + '*']] | unicode_letter)+;
+  pragma_identifier_literal = ([[0x21 .. 0x7e] - [['"' + '`'] + '*']] | unicode_letter | minus)+;
+  // 0x21 is 33 is !, 0x7e is 126 is ~, minus covers Unicode minus could be used for prob-ignore label
   // we could try and also allow '*', note: if we allow whitespace then the pragma keywords are no longer
   // accepted due to the maximal munching
   // versions below do not work:
@@ -393,6 +394,8 @@ Tokens
   {normal} range_restriction = '|>' | 0x25b7;
   {normal} range_subtraction = '|>>' | 0x2a65 | 0x25b6;
   {normal} tilde = '~' | 0x223c | 0x207b 0xb9; // coming from Rodin
+  {normal} mu_operator = '?'; // syntax for mu(.) operator similar to Rust question mark syntax for unwrapping options
+   // Mathematica uses iota, definite description operator (we could use 0xa1 : alt+1 on macOS, an inverted ! )
   {normal} oftype = 0x2982; // coming from Rodin; we do not support the ASCII version oftype (yet)
 
   // Extensions (see https://wiki.event-b.org/index.php/Rodin_Keyboard_User_Guide)
@@ -481,19 +484,35 @@ parse_unit {-> parse_unit} =
 
 machine {-> parse_unit} =
   machine_x {-> machine_x.parse_unit} |
-  {generated} pragma_generated pragma_end [lower]:P.machine {-> New parse_unit.generated(lower.parse_unit)} |
-  {package} pragma_package [package]:pragma_id_or_string pragma_end [imports]:import_package_list? [parse_unit]:P.machine
-    {-> New parse_unit.package(package, [imports.import_package], parse_unit.parse_unit)};
+  {generated} pragma_generated pragma_end [lower]:P.machine
+            {-> New parse_unit.generated(lower.parse_unit)} |
+  {package}   [imports1]:import_package_list?  // allow import-package pragmas to precede package pragma
+              pragma_package [package]:pragma_id_or_string pragma_end
+              [imports2]:import_package_list?
+              [parse_unit]:P.machine_g
+            {-> New parse_unit.package(package, [imports1.import_package,imports2.import_package], parse_unit.parse_unit)};
+              // Note: using import-package without package pragma will result in syntax error at the moment
+
+// machine which only allows generated pragma and not package/import-package pragmas
+machine_g {-> parse_unit} =
+  machine_x {-> machine_x.parse_unit} |
+  {generated} pragma_generated pragma_end [lower]:P.machine_g
+            {-> New parse_unit.generated(lower.parse_unit)};
 
 import_package_list {-> import_package*} =
-  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [New import_package(package_or_machine)]} |
-  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end {-> [rest.import_package, New import_package(package_or_machine)]};
+  {single} pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end
+            {-> [New import_package(package_or_machine)]} |
+  {multiple} [rest]:import_package_list pragma_import_package [package_or_machine]:pragma_id_or_string pragma_end
+            {-> [rest.import_package, New import_package(package_or_machine)]};
 
 
 machine_x {-> parse_unit} =
-  {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
-  {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
-  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
+  {abstract} [variant]: machine_variant [header]:machine_header [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.abstract_machine(variant, header.machine_header, [machine_clauses.machine_clause])} |
+  {refinement} T.refinement [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.refinement_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])} |
+  {implementation} T.implementation [header]:machine_header refines [ref_machine]:identifier_literal [machine_clauses]:machine_clause_list? end
+      {-> New parse_unit.implementation_machine(header.machine_header, ref_machine, [machine_clauses.machine_clause])};
 
 machine_variant {-> machine_variant} =
   {machine} T.machine {-> New machine_variant.machine()} |
@@ -539,45 +558,41 @@ machine_clause {-> machine_clause} =
   {freetypes} [clause]:freetypes_clause {-> clause.machine_clause} |
   {references} [clause]:references_clause {-> clause.machine_clause} |
   {expressions} [clause]:expressions_clause {-> clause.machine_clause} |
-  {predicate} [clause]:predicates_clause {-> clause.machine_clause};
+  {predicates} [clause]:predicates_clause {-> clause.machine_clause};
 
 expressions_clause {-> machine_clause} = expressions [expression_def_list]:expression_def_list semicolon?
-   {-> New machine_clause.expressions([expression_def_list.expression_definition])};
+  {-> New machine_clause.expressions([expression_def_list.definition])};
 predicates_clause {-> machine_clause} = predicates [predicate_def_list]:predicate_def_list semicolon?
-   {-> New machine_clause.predicates([predicate_def_list.predicate_definition])};
+  {-> New machine_clause.predicates([predicate_def_list.definition])};
 
 definitions_clause {-> machine_clause} = definitions [definition_list]:definition_list semicolon? {-> New machine_clause.definitions([definition_list.definition])};
 
-expression_def_list {-> expression_definition*} =
-  {single} [def]:expression_def {-> [def.expression_definition]} |
-  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.expression_definition, def.expression_definition]};
+expression_def_list {-> definition*} =
+  {single} [def]:expression_def {-> [def.definition]} |
+  {multi} [rest]:expression_def_list semicolon [def]:expression_def {-> [rest.definition, def.definition]};
 
-predicate_def_list {-> predicate_definition*} =
-  {single} [def]:predicate_def {-> [def.predicate_definition]} |
-  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.predicate_definition, def.predicate_definition]};
+predicate_def_list {-> definition*} =
+  {single} [def]:predicate_def {-> [def.definition]} |
+  {multi} [rest]:predicate_def_list semicolon [def]:predicate_def {-> [rest.definition, def.definition]};
 
 definition_list {-> definition*} =
   {single} [def]:definition {-> [def.definition]} |
   {multi} [rest]:definition_list semicolon [def]:definition {-> [rest.definition, def.definition]};
 
-expression_def {-> expression_definition} =
+expression_def {-> definition} =
   [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
-     {-> New expression_definition(name, [parameters.expression], rhs.expression)};
+    {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)};
 
-predicate_def {-> predicate_definition} =
-  [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:predicate_top
-     {-> New predicate_definition(name, [parameters.expression], rhs.predicate)};
+predicate_def {-> definition} =
+  [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
+    {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)};
 
 definition {-> definition} =
-  {predicate} [name]:def_literal_predicate [parameters]:def_parameters? double_equal [rhs]:predicate_top
-      {-> New definition.predicate_definition(name, [parameters.expression], rhs.predicate)}
-      |
+  {predicate} [definition]:predicate_def {-> definition.definition} |
   {substitution} [name]:def_literal_substitution [parameters]:def_parameters? double_equal [rhs]:substitution_def_top
       {-> New definition.substitution_definition(name, [parameters.expression], rhs.substitution)}
        |
-  {expression} [name]:identifier_literal [parameters]:def_parameters? double_equal [rhs]:expression_or_id_list
-      {-> New definition.expression_definition(name, [parameters.expression], rhs.expression)}
-        |
+  {expression} [definition]:expression_def {-> definition.definition} |
   {file} [filename]:string_literal
       {-> New definition.file_definition(filename)};
 
@@ -1060,7 +1075,8 @@ expression_keyword {-> expression} =
   {general_concat} conc left_par [expression]:expression_in_par right_par {-> New expression.general_concat(expression.expression)} |
   {struct} struct left_par [entries]:rec_entry_list right_par {-> New expression.struct([entries.rec_entry])} |
   {rec} rec left_par [entries]:rec_entry_list right_par {-> New expression.rec([entries.rec_entry])} |
-  {record_field} [record]:expression_p231 single_quotation [identifier]:identifier_literal {-> New expression.record_field(record.expression, identifier)} |
+  {record_field} [record]:expression_p231 single_quotation [identifier]:identifier_literal {-> New expression.record_field(record.expression, identifier)} | // Priority 250 according to Atelier-B
+  {mu} [expression]:expression_p231 mu_operator {-> New expression.mu(expression.expression)} |
   {expression_operator} [name]:kw_expression_operator [parameters]:op_params {-> New expression.operator(name, [parameters.expression])} | // extension
   {next_level} [expr]:expression_func {-> expr.expression};
 
@@ -1400,8 +1416,8 @@ machine_clause =
   {operations} [operations]:operation* |
   {references} [machine_references]:machine_reference* |
   {invalid_operations_clause} semicolon |
-  {expressions} [expressions]:expression_definition* |
-  {predicates} [predicates]:predicate_definition* |
+  {expressions} [expressions]:definition* |
+  {predicates} [predicates]:definition* |
   {description} [description]:description_pragma machine_clause;
 
 machine_reference =
@@ -1415,9 +1431,6 @@ machine_reference_no_params =
 operation_reference = [operation_name]:identifier_literal*;
 
 description_pragma = [parts]:pragma_free_text*;
-
-expression_definition = [name]:identifier_literal [parameters]:expression* [rhs]:expression;
-predicate_definition = [name]:identifier_literal [parameters]:expression* [rhs]:predicate;
 
 definition =
   {predicate_definition} [name]:def_literal_predicate [parameters]:expression* [rhs]:predicate |
@@ -1570,6 +1583,7 @@ expression =
   {identity} [expression]:expression |
   {event_b_identity} | // EventB v 2.0 language only
   {reverse} [expression]:expression |
+  {mu} [expression]:expression |
   {first_projection} [exp1]:expression [exp2]:expression |
   {event_b_first_projection} [expression]:expression | // EventB only
   {event_b_first_projection_v2} | // EventB v 2.0 language only

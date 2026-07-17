@@ -453,15 +453,8 @@ public class BLexer extends Lexer {
 			} catch (IllegalArgumentException exc) {
 				throw new BLexerException(token, exc);
 			}
-			Definitions.Type type = definitions.getType(definitionName);
 
-			/*
-			 * If no type is set, something went wrong during preparsing.
-			 * Probably the right hand side of the definition was not parseble.
-			 * But we'll also find this error in the main parser.
-			 */
-			if (type != null) {
-				switch (type) {
+			switch (definitions.getType(definitionName)) {
 				case Predicate: // generate def_literal_substitution token
 					final Token predToken = new TDefLiteralPredicate(token.getText());
 					predToken.setLine(token.getLine());
@@ -482,7 +475,6 @@ public class BLexer extends Lexer {
 					 * parsing) or for normal identifier
 					 */
 					break;
-				}
 			}
 		}
 	}

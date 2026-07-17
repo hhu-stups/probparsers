@@ -16,6 +16,9 @@ import de.be4.classicalb.core.preparser.node.TMultilineStringStart;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateEnd;
 import de.be4.classicalb.core.preparser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.preparser.node.TOtherClauseBegin;
+import de.be4.classicalb.core.preparser.node.TPreParserDefinitions;
+import de.be4.classicalb.core.preparser.node.TPreParserExpressions;
+import de.be4.classicalb.core.preparser.node.TPreParserPredicates;
 import de.be4.classicalb.core.preparser.node.TRhsBody;
 import de.be4.classicalb.core.preparser.node.TRightPar;
 import de.be4.classicalb.core.preparser.node.TSemicolon;
@@ -66,13 +69,8 @@ public class PreLexer extends Lexer {
 	@Override
 	protected void filter() throws LexerException, IOException {
 		//printState();
-		checkComment();
-		checkMultiLineString();
-
-		if (token != null) {
-			collectRhs();
-			// System.out.println("+ TOKEN KEPT");
-		}
+		switchMultilineState();
+		collectRhs();
 	}
 	
 	// small debugging utility:
@@ -140,7 +138,15 @@ public class PreLexer extends Lexer {
 			otherNestingLevel--;
 		}
 
-		if (otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon) {
+		if (
+			otherNestingLevel == 0 && parenNestingLevel == 0 && token instanceof TSemicolon
+			// These clause tokens can be encountered here
+			// if two of these clauses are right next to each other
+			// and the first clause doesn't have a final semicolon.
+			|| token instanceof TPreParserDefinitions
+			|| token instanceof TPreParserExpressions
+			|| token instanceof TPreParserPredicates
+		) {
 			return State.DEFINITIONS;
 		}
 
@@ -152,32 +158,22 @@ public class PreLexer extends Lexer {
 		return null;
 	}
 
-	private void checkComment() {
-		// Switch to special COMMENT state for block comments
-		// and switch back to the previous state after the comment ends.
+	private void switchMultilineState() throws LexerException {
+		// Switch to special states for block comments and multiline strings
+		// and switch back to the previous state after the comment/string ends.
 		// This special logic is necessary because the previous state may be NORMAL, DEFINITIONS, or DEFINITIONS_RHS.
 		if (token instanceof TComment) {
 			previousState = state;
 			state = State.BLOCK_COMMENT;
-		} else if (token instanceof TCommentEnd) {
-			state = previousState;
-			previousState = null;
-		}
-	}
-	
-	private void checkMultiLineString() throws LexerException {
-		// Switch to special states for multiline strings
-		// and switch back to the previous state after the string ends.
-		// This special logic is necessary because the previous state may be NORMAL or DEFINITIONS_RHS.
-		if (token instanceof TMultilineStringStart) {
+		} else if (token instanceof TMultilineStringStart) {
 			previousState = state;
 			state = State.MULTILINE_STRING;
 		} else if (token instanceof TMultilineTemplateStart) {
 			previousState = state;
 			state = State.MULTILINE_TEMPLATE;
-		} else if (token instanceof TMultilineStringEnd || token instanceof TMultilineTemplateEnd) {
+		} else if (token instanceof TCommentEnd || token instanceof TMultilineStringEnd || token instanceof TMultilineTemplateEnd) {
 			if (previousState == null) {
-				throw new LexerException("Encountered multiline string end token without corresponding start token");
+				throw new LexerException("Encountered end token for block comment or multiline string without corresponding start token");
 			}
 			state = previousState;
 			previousState = null;

@@ -64,6 +64,7 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		prio.put(APowerOfExpression.class, 200); // right associative
 		prio.put(AUnaryMinusExpression.class, 210);
 		prio.put(AReverseExpression.class, 230);
+		prio.put(AMuExpression.class, 250);
 		prio.put(AImageExpression.class, 231);
 		prio.put(ARecordFieldExpression.class, 231);
 		prio.put(AFunctionExpression.class, 231);
@@ -786,26 +787,6 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 			print(part.getText());
 		}
 		print(" */");
-	}
-
-	@Override
-	public void caseAExpressionDefinition(AExpressionDefinition node) {
-		node.getName().apply(this);
-		printParameterListOpt(node.getParameters());
-		print(" == ");
-		indent();
-		node.getRhs().apply(this);
-		dedent();
-	}
-
-	@Override
-	public void caseAPredicateDefinition(APredicateDefinition node) {
-		node.getName().apply(this);
-		printParameterListOpt(node.getParameters());
-		print(" == ");
-		indent();
-		node.getRhs().apply(this);
-		dedent();
 	}
 
 	@Override

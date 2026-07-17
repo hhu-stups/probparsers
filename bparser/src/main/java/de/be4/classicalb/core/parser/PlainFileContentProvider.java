@@ -20,14 +20,7 @@ public class PlainFileContentProvider implements IFileContentProvider {
 
 	@Override
 	public File getFile(final File directory, final String fileName) throws IOException {
-		FileSearchPathProvider provider;
-		if (directory == null) {
-			provider = new FileSearchPathProvider(fileName); // this will use "." as parentPath
-		} else {
-			String parentPath;
-			parentPath = directory.getCanonicalPath();
-			provider = new FileSearchPathProvider(parentPath, fileName);
-		}
-		return provider.resolve();
+		String parentPath = directory == null ? "." : directory.getCanonicalPath();
+		return new FileSearchPathProvider(parentPath, fileName).resolve();
 	}
 }

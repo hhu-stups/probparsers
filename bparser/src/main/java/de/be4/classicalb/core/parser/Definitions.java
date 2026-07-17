@@ -193,8 +193,8 @@ public class Definitions extends IDefinitions {
 				nodeIdMapping.assignIdentifiers(fileNumber, def);
 			}
 		}
-		for (IDefinitions defintions : referencedDefinitions) {
-			defintions.assignIdsToNodes(nodeIdMapping, machineFilesLoaded);
+		for (IDefinitions definitions : referencedDefinitions) {
+			definitions.assignIdsToNodes(nodeIdMapping, machineFilesLoaded);
 		}
 	}
 
