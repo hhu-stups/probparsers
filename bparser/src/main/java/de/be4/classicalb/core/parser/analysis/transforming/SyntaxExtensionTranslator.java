@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	/**
@@ -44,27 +45,38 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		return node.getParameters().get(0);
 	}
 
-	private PPredicate rewriteIfPredicate(PPredicate condition, PPredicate thenBlock, List<PPredicate> elsifs, PPredicate elseBlock) {
-		// IF P1 THEN P2 ELSIF P3 THEN P4 ... ELSE Pn END
-		// is equivalent to:
-		// IF P1 THEN P2 ELSE (IF P3 THEN P4 ... ELSE Pn END) END
-		// and that will be translated into:
-		// (P1 => P2) & (not(P1) => [(P3 => P4) & (not(P3) => Pn)])
-		AImplicationPredicate imp1 = new AImplicationPredicate(condition.clone(), thenBlock.clone());
-		imp1.setStartPos(condition.getStartPos());
-		imp1.setEndPos(thenBlock.getEndPos());
+    private PPredicate rewriteIfPredicate(PPredicate condition, PPredicate thenBlock, List<PPredicate> elsifs, PPredicate elseBlock) {
+        // IF P1 THEN P2 ELSIF P3 THEN P4 ... ELSE Pn END
+        // is equivalent to:
+        // IF P1 THEN P2 ELSE (IF P3 THEN P4 ... ELSE Pn END) END
+        // and that will be translated into:
+        // (P1 => P2) & (not(P1) => [(P3 => P4) & (not(P3) => Pn)])
+        AImplicationPredicate imp1 = new AImplicationPredicate(condition.clone(), thenBlock.clone());
+        imp1.setStartPos(condition.getStartPos());
+        imp1.setEndPos(thenBlock.getEndPos());
 
-		PPredicate realElseBlock;
-		if (elsifs.isEmpty()) {
-			realElseBlock = elseBlock.clone();
-		} else {
-			AIfElsifPredicatePredicate first = (AIfElsifPredicatePredicate) elsifs.remove(0);
-			realElseBlock = rewriteIfPredicate(first.getCondition(), first.getThen(), elsifs, elseBlock);
-		}
+        PPredicate realElseBlock;
+        SourcePosition elseStartPos;
+        SourcePosition elseEndPos;
+        if (elsifs.isEmpty()) {
+            realElseBlock = elseBlock.clone();
+            elseStartPos = elseBlock.getStartPos();
+            elseEndPos = elseBlock.getEndPos();
+        } else {
+            AIfElsifPredicatePredicate first = (AIfElsifPredicatePredicate) elsifs.remove(0);
+            realElseBlock = rewriteIfPredicate(first.getCondition(), first.getThen(), elsifs, elseBlock);
+            elseStartPos = first.getStartPos();
+            elseEndPos = first.getEndPos();
+        }
 
-		AImplicationPredicate imp2 = new AImplicationPredicate(new ANegationPredicate(condition.clone()), realElseBlock);
-		return new AConjunctPredicate(imp1, imp2);
-	}
+        PPredicate negation = new ANegationPredicate(condition.clone());
+        negation.setStartPos(elseStartPos);
+        negation.setEndPos(elseEndPos);
+        AImplicationPredicate imp2 = new AImplicationPredicate(negation, realElseBlock);
+        imp2.setStartPos(elseStartPos);
+        imp2.setEndPos(elseEndPos);
+        return new AConjunctPredicate(imp1, imp2);
+    }
 
 	@Override
 	public void outAIfPredicatePredicate(AIfPredicatePredicate node) {
