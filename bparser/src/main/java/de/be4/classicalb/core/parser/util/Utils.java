@@ -153,6 +153,7 @@ public final class Utils {
 			|| "VISB_JSON_FILE".equals(identifier)
 			|| "VISB_DEFINITIONS_FILE".equals(identifier)
 			|| "VISB_SVG_FILE".equals(identifier)
+			|| "CSP_GUIDE_FILE".equals(identifier)
 			|| identifier.startsWith("ANIMATION_") // ANIMATION_FUNCTION, ANIMATION_IMGxxx
 			|| identifier.startsWith("ASSERT_CTL")
 			|| identifier.startsWith("ASSERT_LTL")
