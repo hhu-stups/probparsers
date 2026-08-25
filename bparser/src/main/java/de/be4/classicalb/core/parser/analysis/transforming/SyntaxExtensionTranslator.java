@@ -9,6 +9,7 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.exceptions.VisitorException;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
+import de.hhu.stups.sablecc.patch.SourcePosition;
 
 public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 	/**
@@ -55,14 +56,25 @@ public class SyntaxExtensionTranslator extends OptimizedTraversingAdapter {
 		imp1.setEndPos(thenBlock.getEndPos());
 
 		PPredicate realElseBlock;
+		SourcePosition elseStartPos;
+		SourcePosition elseEndPos;
 		if (elsifs.isEmpty()) {
 			realElseBlock = elseBlock.clone();
+			elseStartPos = elseBlock.getStartPos();
+			elseEndPos = elseBlock.getEndPos();
 		} else {
 			AIfElsifPredicatePredicate first = (AIfElsifPredicatePredicate) elsifs.remove(0);
 			realElseBlock = rewriteIfPredicate(first.getCondition(), first.getThen(), elsifs, elseBlock);
+			elseStartPos = first.getStartPos();
+			elseEndPos = first.getEndPos();
 		}
 
-		AImplicationPredicate imp2 = new AImplicationPredicate(new ANegationPredicate(condition.clone()), realElseBlock);
+		PPredicate negation = new ANegationPredicate(condition.clone());
+		negation.setStartPos(elseStartPos);
+		negation.setEndPos(elseEndPos);
+		AImplicationPredicate imp2 = new AImplicationPredicate(negation, realElseBlock);
+		imp2.setStartPos(elseStartPos);
+		imp2.setEndPos(elseEndPos);
 		return new AConjunctPredicate(imp1, imp2);
 	}
 
