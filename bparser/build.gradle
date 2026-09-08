@@ -14,21 +14,19 @@ dependencies {
 	api project(":parserbase")
 }
 
-def readCurrentGitCommit() {
-	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
+final firstLineOfProcessOutput = {ExecOutput execOutput ->
+	return execOutput.standardOutput.asText.map {it.split("\n")[0]}
 }
 
-final currentGitCommit = readCurrentGitCommit()
 tasks.named("processResources", ProcessResources) {
 	inputs.property("version", project.version)
-	inputs.property("currentGitCommit", currentGitCommit)
+	inputs.property("currentGitCommit", firstLineOfProcessOutput(providers.exec {
+		executable = "git"
+		args = ["rev-parse", "HEAD"]
+	}))
+
 	filesMatching("de/be4/classicalb/core/parser/build.properties") {
-		expand(version: inputs.properties["version"], git: currentGitCommit)
+		expand(version: inputs.properties["version"], git: inputs.properties["currentGitCommit"])
 	}
 }
 
