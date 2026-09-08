@@ -17,7 +17,7 @@ application {
 	mainClass = "de.prob.cliparser.CliBParser"
 }
 
-jar {
+tasks.named("jar", Jar) {
 	manifest {
 		attributes([
 			"Main-Class": application.mainClass,

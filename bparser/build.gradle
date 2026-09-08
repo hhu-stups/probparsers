@@ -24,7 +24,7 @@ def readCurrentGitCommit() {
 }
 
 final currentGitCommit = readCurrentGitCommit()
-processResources {
+tasks.named("processResources", ProcessResources) {
 	inputs.property("version", project.version)
 	inputs.property("currentGitCommit", currentGitCommit)
 	filesMatching("de/be4/classicalb/core/parser/build.properties") {
