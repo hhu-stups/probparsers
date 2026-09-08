@@ -186,7 +186,6 @@ subprojects {
 ext {
 	// This closure is called in each subproject that wants test reports generated.
 	setupTestReport = { Project subproject, List<String> sableCCPackageNames ->
-		void
 		final jacocoTestReportTask = subproject.tasks.named("jacocoTestReport")
 		jacocoTestReportTask.configure { JacocoReport task ->
 			task.reports {
