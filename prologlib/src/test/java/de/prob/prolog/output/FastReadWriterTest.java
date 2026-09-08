@@ -1,19 +1,16 @@
 package de.prob.prolog.output;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import de.prob.prolog.term.PrologTerm;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +21,7 @@ public class FastReadWriterTest {
 	public static final class Args implements ArgumentsProvider {
 
 		@Override
-		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+		public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
 			return Stream.of(
 					arguments(
 							// 1: 42
