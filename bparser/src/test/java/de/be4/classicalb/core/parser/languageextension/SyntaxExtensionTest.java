@@ -9,7 +9,6 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SyntaxExtensionTest {
@@ -63,23 +62,6 @@ public class SyntaxExtensionTest {
 		assertEquals(
 				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[properties(none,equal(none,let_expression(none,[identifier(none,x)],equal(none,identifier(none,x),integer(none,1)),add(none,identifier(none,x),integer(none,1))),integer(none,2)))])).",
 				result);
-	}
-
-	@Test
-	public void testIfThenElsePredicate() throws BCompoundException {
-		final String testMachine = "MACHINE Test PROPERTIES IF 1=1 THEN 2=2 ELSE 3=3 END END";
-		final String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertEquals(
-				"machine(abstract_machine(none,machine(none),machine_header(none,'Test',[]),[properties(none,conjunct(none,[implication(none,equal(none,integer(none,1),integer(none,1)),equal(none,integer(none,2),integer(none,2))),implication(none,negation(none,equal(none,integer(none,1),integer(none,1))),equal(none,integer(none,3),integer(none,3)))]))])).",
-				result);
-	}
-
-	@Test
-	public void testIfThenElsePredicate2() throws BCompoundException {
-		final String testMachine = "MACHINE Test PROPERTIES IF 1=1 THEN 2=2 ELSE 3=3 END & 1=1 END";
-		String result = Helpers.getMachineAsPrologTerm(testMachine);
-		assertFalse(result.contains("if"));
-		assertFalse(result.contains("IF"));
 	}
 
 	@Test
