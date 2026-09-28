@@ -820,6 +820,31 @@ public class ASTProlog extends AnalysisAdapter {
 		close(node);
 	}
 
+	@Override
+	public void caseAIfPredicatePredicate(final AIfPredicatePredicate node) {
+		open(node);
+		node.getCondition().apply(this);
+		node.getThen().apply(this);
+
+		// Rewrite ELSIF clauses to nested if_predicate terms.
+		for (PPredicate pred : node.getElsifs()) {
+			AIfElsifPredicatePredicate elsIf = (AIfElsifPredicatePredicate)pred;
+			pout.openTerm(simpleFormat(node));
+			printPosition(elsIf);
+			elsIf.getCondition().apply(this);
+			elsIf.getThen().apply(this);
+		}
+
+		node.getElse().apply(this);
+
+		// Close all nested if_predicate terms that were opened for the ELSIFs.
+		for (PPredicate ignored : node.getElsifs()) {
+			pout.closeTerm();
+		}
+
+		close(node);
+	}
+
 	// expression
 
 	@Override
