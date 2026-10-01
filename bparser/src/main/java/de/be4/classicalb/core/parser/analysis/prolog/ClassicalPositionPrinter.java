@@ -24,6 +24,29 @@ public class ClassicalPositionPrinter implements PositionPrinter {
 		this.nodeIds = nodeIds;
 	}
 
+	/**
+	 * Set whether to print source positions into the Prolog AST.
+	 * This also implicitly enables the compact position format
+	 * (see {@link #setPrintSourcePositions(boolean, boolean)}).
+	 *
+	 * @param printSourcePositions whether to print source positions into the Prolog AST
+	 */
+	public void setPrintSourcePositions(boolean printSourcePositions) {
+		this.printSourcePositions = printSourcePositions;
+		this.compactPositions = true;
+	}
+
+	/**
+	 * Set whether to print source positions into the Prolog AST
+	 * and which position format to use.
+	 * Please use {@link #setPrintSourcePositions(boolean)} instead,
+	 * unless you need to turn off compact positions.
+	 * Support for the "non-compact" position format may be removed in the future.
+	 *
+	 * @param b whether to print source positions into the Prolog AST
+	 * @param compact whether to print positions in a compact format
+	 *     (supported since ProB 1.11.0 from 2021-10-06)
+	 */
 	public void setPrintSourcePositions(boolean b, boolean compact) {
 		this.printSourcePositions = b;
 		this.compactPositions = compact;
