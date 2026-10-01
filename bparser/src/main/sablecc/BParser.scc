@@ -1361,8 +1361,7 @@ parse_unit =
   {machine_clause} machine_clause |
   {event_b_context} [name]:identifier_literal [context_clauses]:context_clause* |
   {event_b_model} [name]:identifier_literal [model_clauses]:model_clause* |
-  {oppattern} [name]:identifier_literal* [parameters]:argpattern* |
-  {parse_unit_definition} definition;
+  {oppattern} [name]:identifier_literal* [parameters]:argpattern*;
 
 import_package = [package]:pragma_id_or_string; // importing a package or machine using import pragma (e.g. /*@import-package "foo.bar" */ )
 
