@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.analysis.AnalysisAdapter;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
@@ -19,7 +19,7 @@ import de.prob.prolog.output.IPrologTermOutput;
 /**
  * This class defines the output of a B machine as a prolog term.
  */
-public class ASTProlog extends DepthFirstAdapter {
+public class ASTProlog extends AnalysisAdapter {
 	// The tables SUM_TYPE and SIMPLE_NAME are used to translate the Java class
 	// name to
 	// the Prolog functor name.
@@ -80,34 +80,6 @@ public class ASTProlog extends DepthFirstAdapter {
 		}
 	}
 
-	@Override
-	public void inStart(final Start node) {
-		// intentionally left blank: don't write the start node.
-	}
-
-	@Override
-	public void outStart(final Start node) {
-		// intentionally left blank: don't write the start node.
-	}
-
-	/**
-	 * If the node is not handled otherwise, we just open it (see
-	 * {@link #open(Node)}), print the sub-nodes, and close it later in
-	 * {@link #defaultOut(Node)}
-	 */
-	@Override
-	public void defaultIn(final Node node) {
-		open(node);
-	}
-
-	/**
-	 * This is the counterpart to {@link #defaultIn(Node)}
-	 */
-	@Override
-	public void defaultOut(final Node node) {
-		close(node);
-	}
-
 	/**
 	 * This prints the functor of a prolog term together with the opening
 	 * parenthesis. The first argument of the term is the identifier of the
@@ -157,6 +129,24 @@ public class ASTProlog extends DepthFirstAdapter {
 		pout.closeTerm();
 	}
 
+	private void printAtomic(Node node) {
+		open(node);
+		close(node);
+	}
+
+	private void printUnary(Node node, Node child) {
+		open(node);
+		child.apply(this);
+		close(node);
+	}
+
+	private void printBinary(Node node, Node left, Node right) {
+		open(node);
+		left.apply(this);
+		right.apply(this);
+		close(node);
+	}
+
 	/**
 	 * Print a list of syntax tree elements as a Prolog list (
 	 * <code>[term1, ..., termN]</code>)
@@ -194,16 +184,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	 */
 	@Override
 	public void defaultCase(final Node node) {
-		// All non-terminal cases have default implementations in DepthFirstAdapter.
-		// Their default handling happens in defaultIn/defaultOut.
-		assert node instanceof Token;
-
-		pout.printAtom(((Token) node).getText());
-	}
-
-	@Override
-	public void caseEOF(final EOF node) {
-		// do nothing
+		if (node instanceof Token) {
+			pout.printAtom(((Token) node).getText());
+		} else {
+			throw new IllegalArgumentException("Translation of node type '" + node.getClass().getSimpleName() + "' to Prolog AST not implemented");
+		}
 	}
 
 	/**
@@ -311,6 +296,12 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseStart(Start node) {
+		// Don't print the Start and EOF nodes.
+		node.getPParseUnit().apply(this);
+	}
+
+	@Override
 	public void caseAIdentifierExpression(final AIdentifierExpression node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
@@ -326,11 +317,13 @@ public class ASTProlog extends DepthFirstAdapter {
 		close(node);
 	}
 
-	/***************************************************************************
-	 * special cases with lists
-	 */
-
 	// Parse Units
+
+	@Override
+	public void caseAGeneratedParseUnit(AGeneratedParseUnit node) {
+		printUnary(node, node.getParseUnit());
+	}
+
 	@Override
 	public void caseAAbstractMachineParseUnit(final AAbstractMachineParseUnit node) {
 		open(node);
@@ -356,6 +349,36 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getRefMachine().apply(this);
 		printAsList(node.getMachineClauses());
 		close(node);
+	}
+
+	@Override
+	public void caseADefinitionFileParseUnit(ADefinitionFileParseUnit node) {
+		printUnary(node, node.getDefinitionsClauses());
+	}
+
+	@Override
+	public void caseAUndefArgpattern(AUndefArgpattern node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseADefArgpattern(ADefArgpattern node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAMachineMachineVariant(AMachineMachineVariant node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAModelMachineVariant(AModelMachineVariant node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseASystemMachineVariant(ASystemMachineVariant node) {
+		printAtomic(node);
 	}
 
 	// machine header
@@ -457,6 +480,26 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAPropertiesMachineClause(APropertiesMachineClause node) {
+		printUnary(node, node.getPredicates());
+	}
+
+	@Override
+	public void caseAConstraintsMachineClause(AConstraintsMachineClause node) {
+		printUnary(node, node.getPredicates());
+	}
+
+	@Override
+	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
+		printUnary(node, node.getSubstitutions());
+	}
+
+	@Override
+	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
+		printUnary(node, node.getPredicates());
+	}
+
+	@Override
 	public void caseAAssertionsMachineClause(final AAssertionsMachineClause node) {
 		printOCAsList(node, node.getPredicates());
 	}
@@ -474,6 +517,19 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseAOperationsMachineClause(final AOperationsMachineClause node) {
 		printOCAsList(node, node.getOperations());
+	}
+
+	@Override
+	public void caseADescriptionMachineClause(ADescriptionMachineClause node) {
+		printBinary(node, node.getDescription(), node.getMachineClause());
+	}
+
+	@Override
+	public void caseAValuesEntry(AValuesEntry node) {
+		open(node);
+		printIdentifier(node.getIdentifier());
+		node.getValue().apply(this);
+		close(node);
 	}
 
 	// machine reference
@@ -543,10 +599,30 @@ public class ASTProlog extends DepthFirstAdapter {
 	// set
 
 	@Override
+	public void caseADescriptionSet(ADescriptionSet node) {
+		printBinary(node, node.getDescription(), node.getSet());
+	}
+
+	@Override
+	public void caseADeferredSetSet(ADeferredSetSet node) {
+		open(node);
+		printIdentifier(node.getIdentifier());
+		close(node);
+	}
+
+	@Override
 	public void caseAEnumeratedSetSet(final AEnumeratedSetSet node) {
 		open(node);
 		printIdentifier(node.getIdentifier());
 		printAsList(node.getElements());
+		close(node);
+	}
+
+	@Override
+	public void caseAEnumeratedSetViaDefSet(AEnumeratedSetViaDefSet node) {
+		open(node);
+		printIdentifier(node.getIdentifier());
+		printIdentifier(node.getElementsDef());
 		close(node);
 	}
 
@@ -561,7 +637,12 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getOperationBody().apply(this);
 		close(node);
 	}
-	
+
+	@Override
+	public void caseADescriptionOperation(ADescriptionOperation node) {
+		printBinary(node, node.getDescription(), node.getOperation());
+	}
+
 	@Override
 	public void caseARefinedOperation(final ARefinedOperation node) {
 		open(node);
@@ -576,6 +657,21 @@ public class ASTProlog extends DepthFirstAdapter {
 	
 
 	// predicate
+
+	@Override
+	public void caseADescriptionPredicate(ADescriptionPredicate node) {
+		printBinary(node, node.getDescription(), node.getPredicate());
+	}
+
+	@Override
+	public void caseALabelPredicate(ALabelPredicate node) {
+		printBinary(node, node.getName(), node.getPredicate());
+	}
+
+	@Override
+	public void caseASubstitutionPredicate(ASubstitutionPredicate node) {
+		printBinary(node, node.getSubstitution(), node.getPredicate());
+	}
 
 	@Override
 	public void caseAConjunctPredicate(final AConjunctPredicate node) {
@@ -600,6 +696,26 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseANegationPredicate(ANegationPredicate node) {
+		printUnary(node, node.getPredicate());
+	}
+
+	@Override
+	public void caseADisjunctPredicate(ADisjunctPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAImplicationPredicate(AImplicationPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAEquivalencePredicate(AEquivalencePredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
 	public void caseAForallPredicate(final AForallPredicate node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -613,6 +729,81 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getIdentifiers());
 		node.getPredicate().apply(this);
 		close(node);
+	}
+
+	@Override
+	public void caseAEqualPredicate(AEqualPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseANotEqualPredicate(ANotEqualPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAMemberPredicate(AMemberPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseANotMemberPredicate(ANotMemberPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASubsetPredicate(ASubsetPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASubsetStrictPredicate(ASubsetStrictPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseANotSubsetPredicate(ANotSubsetPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseANotSubsetStrictPredicate(ANotSubsetStrictPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseALessEqualPredicate(ALessEqualPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseALessPredicate(ALessPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAGreaterEqualPredicate(AGreaterEqualPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAGreaterPredicate(AGreaterPredicate node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATruthPredicate(ATruthPredicate node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAFalsityPredicate(AFalsityPredicate node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAFinitePredicate(AFinitePredicate node) {
+		printUnary(node, node.getSet());
 	}
 
 	@Override
@@ -633,6 +824,146 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	// expression
+
+	@Override
+	public void caseADescriptionExpression(ADescriptionExpression node) {
+		printBinary(node, node.getDescription(), node.getExpression());
+	}
+
+	@Override
+	public void caseAStringExpression(AStringExpression node) {
+		printUnary(node, node.getContent());
+	}
+
+	@Override
+	public void caseAMultilineTemplateExpression(AMultilineTemplateExpression node) {
+		printUnary(node, node.getContent());
+	}
+
+	@Override
+	public void caseABooleanFalseExpression(ABooleanFalseExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseARealExpression(ARealExpression node) {
+		printUnary(node, node.getLiteral());
+	}
+
+	@Override
+	public void caseAMaxIntExpression(AMaxIntExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAMinIntExpression(AMinIntExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAEmptySetExpression(AEmptySetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAIntegerSetExpression(AIntegerSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseARealSetExpression(ARealSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAFloatSetExpression(AFloatSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseANaturalSetExpression(ANaturalSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseANatural1SetExpression(ANatural1SetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseANatSetExpression(ANatSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseANat1SetExpression(ANat1SetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAIntSetExpression(AIntSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseABoolSetExpression(ABoolSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAStringSetExpression(AStringSetExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAConvertBoolExpression(AConvertBoolExpression node) {
+		printUnary(node, node.getPredicate());
+	}
+
+	@Override
+	public void caseAAddExpression(AAddExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAMinusExpression(AMinusExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAMinusOrSetSubtractExpression(AMinusOrSetSubtractExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAUnaryMinusExpression(AUnaryMinusExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAMultiplicationExpression(AMultiplicationExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseACartesianProductExpression(ACartesianProductExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAMultOrCartExpression(AMultOrCartExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseADivExpression(ADivExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAFlooredDivExpression(AFlooredDivExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
 
 	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
@@ -666,6 +997,56 @@ public class ASTProlog extends DepthFirstAdapter {
 		}
 		
 		close(node);
+	}
+
+	@Override
+	public void caseAModuloExpression(AModuloExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAPowerOfExpression(APowerOfExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASuccessorExpression(ASuccessorExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAPredecessorExpression(APredecessorExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAMaxExpression(AMaxExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAMinExpression(AMinExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseACardExpression(ACardExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAConvertIntFloorExpression(AConvertIntFloorExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAConvertIntCeilingExpression(AConvertIntCeilingExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAConvertRealExpression(AConvertRealExpression node) {
+		printUnary(node, node.getExpression());
 	}
 
 	@Override
@@ -729,8 +1110,58 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAPowSubsetExpression(APowSubsetExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAPow1SubsetExpression(APow1SubsetExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAFinSubsetExpression(AFinSubsetExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAFin1SubsetExpression(AFin1SubsetExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
 	public void caseASetExtensionExpression(final ASetExtensionExpression node) {
 		printOCAsList(node, node.getExpressions());
+	}
+
+	@Override
+	public void caseAIntervalExpression(AIntervalExpression node) {
+		printBinary(node, node.getLeftBorder(), node.getRightBorder());
+	}
+
+	@Override
+	public void caseAUnionExpression(AUnionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAIntersectionExpression(AIntersectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASetSubtractionExpression(ASetSubtractionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAGeneralUnionExpression(AGeneralUnionExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAGeneralIntersectionExpression(AGeneralIntersectionExpression node) {
+		printUnary(node, node.getExpression());
 	}
 
 	@Override
@@ -761,6 +1192,196 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseARelationsExpression(ARelationsExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAIdentityExpression(AIdentityExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAEventBIdentityExpression(AEventBIdentityExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAReverseExpression(AReverseExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAMuExpression(AMuExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAFirstProjectionExpression(AFirstProjectionExpression node) {
+		printBinary(node, node.getExp1(), node.getExp2());
+	}
+
+	@Override
+	public void caseAEventBFirstProjectionExpression(AEventBFirstProjectionExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAEventBFirstProjectionV2Expression(AEventBFirstProjectionV2Expression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseASecondProjectionExpression(ASecondProjectionExpression node) {
+		printBinary(node, node.getExp1(), node.getExp2());
+	}
+
+	@Override
+	public void caseAEventBSecondProjectionExpression(AEventBSecondProjectionExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAEventBSecondProjectionV2Expression(AEventBSecondProjectionV2Expression node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseACompositionExpression(ACompositionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASymbolicCompositionExpression(ASymbolicCompositionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseARingExpression(ARingExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseADirectProductExpression(ADirectProductExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAParallelProductExpression(AParallelProductExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAIterationExpression(AIterationExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAReflexiveClosureExpression(AReflexiveClosureExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAClosureExpression(AClosureExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseADomainExpression(ADomainExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseARangeExpression(ARangeExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAImageExpression(AImageExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseADomainRestrictionExpression(ADomainRestrictionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseADomainSubtractionExpression(ADomainSubtractionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseARangeRestrictionExpression(ARangeRestrictionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseARangeSubtractionExpression(ARangeSubtractionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAOverwriteExpression(AOverwriteExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAPartialFunctionExpression(APartialFunctionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalFunctionExpression(ATotalFunctionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAPartialInjectionExpression(APartialInjectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalInjectionExpression(ATotalInjectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAPartialSurjectionExpression(APartialSurjectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalSurjectionExpression(ATotalSurjectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAPartialBijectionExpression(APartialBijectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalBijectionExpression(ATotalBijectionExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalRelationExpression(ATotalRelationExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseASurjectionRelationExpression(ASurjectionRelationExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseATotalSurjectionRelationExpression(ATotalSurjectionRelationExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
 	public void caseALambdaExpression(final ALambdaExpression node) {
 		open(node);
 		printAsList(node.getIdentifiers());
@@ -779,8 +1400,108 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseATransFunctionExpression(ATransFunctionExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseATransRelationExpression(ATransRelationExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseASeqExpression(ASeqExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseASeq1Expression(ASeq1Expression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAIseqExpression(AIseqExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAIseq1Expression(AIseq1Expression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAPermExpression(APermExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAEmptySequenceExpression(AEmptySequenceExpression node) {
+		printAtomic(node);
+	}
+
+	@Override
 	public void caseASequenceExtensionExpression(final ASequenceExtensionExpression node) {
 		printOCAsList(node, node.getExpression());
+	}
+
+	@Override
+	public void caseASizeExpression(ASizeExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAFirstExpression(AFirstExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseALastExpression(ALastExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAFrontExpression(AFrontExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseATailExpression(ATailExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseARevExpression(ARevExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAConcatExpression(AConcatExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAInsertFrontExpression(AInsertFrontExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAInsertTailExpression(AInsertTailExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseARestrictFrontExpression(ARestrictFrontExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseARestrictTailExpression(ARestrictTailExpression node) {
+		printBinary(node, node.getLeft(), node.getRight());
+	}
+
+	@Override
+	public void caseAGeneralConcatExpression(AGeneralConcatExpression node) {
+		printUnary(node, node.getExpression());
 	}
 
 	@Override
@@ -789,6 +1510,107 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getIdentifier().apply(this);
 		printAsList(node.getParameters());
 		close(node);
+	}
+
+	@Override
+	public void caseATreeExpression(ATreeExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseABtreeExpression(ABtreeExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAConstExpression(AConstExpression node) {
+		printBinary(node, node.getExpression1(), node.getExpression2());
+	}
+
+	@Override
+	public void caseATopExpression(ATopExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseASonsExpression(ASonsExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAPrefixExpression(APrefixExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAPostfixExpression(APostfixExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseASizetExpression(ASizetExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAMirrorExpression(AMirrorExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseARankExpression(ARankExpression node) {
+		printBinary(node, node.getExpression1(), node.getExpression2());
+	}
+
+	@Override
+	public void caseAFatherExpression(AFatherExpression node) {
+		printBinary(node, node.getExpression1(), node.getExpression2());
+	}
+
+	@Override
+	public void caseASonExpression(ASonExpression node) {
+		open(node);
+		node.getExpression1().apply(this);
+		node.getExpression2().apply(this);
+		node.getExpression3().apply(this);
+		close(node);
+	}
+
+	@Override
+	public void caseASubtreeExpression(ASubtreeExpression node) {
+		printBinary(node, node.getExpression1(), node.getExpression2());
+	}
+
+	@Override
+	public void caseAArityExpression(AArityExpression node) {
+		printBinary(node, node.getExpression1(), node.getExpression2());
+	}
+
+	@Override
+	public void caseABinExpression(ABinExpression node) {
+		// bin can have exactly 1 or 3 arguments.
+		open(node);
+		node.getExpression1().apply(this);
+		if (node.getExpression2() != null) {
+			node.getExpression2().apply(this);
+			node.getExpression3().apply(this);
+		}
+		close(node);
+	}
+
+	@Override
+	public void caseALeftExpression(ALeftExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseARightExpression(ARightExpression node) {
+		printUnary(node, node.getExpression());
+	}
+
+	@Override
+	public void caseAInfixExpression(AInfixExpression node) {
+		printUnary(node, node.getExpression());
 	}
 
 	@Override
@@ -807,6 +1629,11 @@ public class ASTProlog extends DepthFirstAdapter {
 		node.getRecord().apply(this);
 		printPositionedIdentifier(node.getIdentifier());
 		close(node);
+	}
+
+	@Override
+	public void caseATypeofExpression(ATypeofExpression node) {
+		printBinary(node, node.getExpression(), node.getType());
 	}
 
 	@Override
@@ -840,6 +1667,16 @@ public class ASTProlog extends DepthFirstAdapter {
 	// substitutions
 
 	@Override
+	public void caseABlockSubstitution(ABlockSubstitution node) {
+		printUnary(node, node.getSubstitution());
+	}
+
+	@Override
+	public void caseASkipSubstitution(ASkipSubstitution node) {
+		printAtomic(node);
+	}
+
+	@Override
 	public void caseAAssignSubstitution(final AAssignSubstitution node) {
 		open(node);
 		printAsList(node.getLhsExpression());
@@ -848,8 +1685,28 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAPreconditionSubstitution(APreconditionSubstitution node) {
+		printBinary(node, node.getPredicate(), node.getSubstitution());
+	}
+
+	@Override
+	public void caseAAssertionSubstitution(AAssertionSubstitution node) {
+		printBinary(node, node.getPredicate(), node.getSubstitution());
+	}
+
+	@Override
+	public void caseAWitnessThenSubstitution(AWitnessThenSubstitution node) {
+		printBinary(node, node.getPredicate(), node.getSubstitution());
+	}
+
+	@Override
 	public void caseAChoiceSubstitution(final AChoiceSubstitution node) {
 		printOCAsList(node, node.getSubstitutions());
+	}
+
+	@Override
+	public void caseAChoiceOrSubstitution(AChoiceOrSubstitution node) {
+		printUnary(node, node.getSubstitution());
 	}
 
 	@Override
@@ -863,6 +1720,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAIfElsifSubstitution(AIfElsifSubstitution node) {
+		printBinary(node, node.getCondition(), node.getThenSubstitution());
+	}
+
+	@Override
 	public void caseASelectSubstitution(final ASelectSubstitution node) {
 		open(node);
 		node.getCondition().apply(this);
@@ -873,6 +1735,11 @@ public class ASTProlog extends DepthFirstAdapter {
 			elsenode.apply(this);
 		}
 		close(node);
+	}
+
+	@Override
+	public void caseASelectWhenSubstitution(ASelectWhenSubstitution node) {
+		printBinary(node, node.getCondition(), node.getSubstitution());
 	}
 
 	@Override
@@ -951,6 +1818,16 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAWhileSubstitution(AWhileSubstitution node) {
+		open(node);
+		node.getCondition().apply(this);
+		node.getDoSubst().apply(this);
+		node.getInvariant().apply(this);
+		node.getVariant().apply(this);
+		close(node);
+	}
+
+	@Override
 	public void caseAOperationCallExpression(AOperationCallExpression node) {
 		open(node);
 		printPositionedIdentifier(node.getOperation());
@@ -1019,6 +1896,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseARefinesModelClause(ARefinesModelClause node) {
+		printUnary(node, node.getRefines());
+	}
+
+	@Override
 	public void caseAVariablesModelClause(final AVariablesModelClause node) {
 		printOCAsList(node, node.getIdentifiers());
 	}
@@ -1036,6 +1918,11 @@ public class ASTProlog extends DepthFirstAdapter {
 	@Override
 	public void caseATheoremsModelClause(final ATheoremsModelClause node) {
 		printOCAsList(node, node.getPredicates());
+	}
+
+	@Override
+	public void caseAVariantModelClause(AVariantModelClause node) {
+		printUnary(node, node.getVariant());
 	}
 
 	@Override
@@ -1058,6 +1945,26 @@ public class ASTProlog extends DepthFirstAdapter {
 		printAsList(node.getAssignments());
 		printAsList(node.getWitness());
 		close(node);
+	}
+
+	@Override
+	public void caseADescriptionEvent(ADescriptionEvent node) {
+		printBinary(node, node.getDescription(), node.getEvent());
+	}
+
+	@Override
+	public void caseAOrdinaryEventstatus(AOrdinaryEventstatus node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAAnticipatedEventstatus(AAnticipatedEventstatus node) {
+		printAtomic(node);
+	}
+
+	@Override
+	public void caseAConvergentEventstatus(AConvergentEventstatus node) {
+		printAtomic(node);
 	}
 
 	@Override
