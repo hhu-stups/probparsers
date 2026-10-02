@@ -209,12 +209,14 @@ public class ASTProlog extends AnalysisAdapter {
 	private String toFunctorName(final String className) {
 		String camelName = formatCamel(className.substring(1)).substring(1);
 		if (className.startsWith("A")) {
-			if (ATOMIC_TYPE.contains(camelName))
+			if (ATOMIC_TYPE.contains(camelName)) {
 				return camelName;
-			for (String checkend : SUM_TYPE)
+			}
+			for (String checkend : SUM_TYPE) {
 				if (camelName.endsWith(checkend)) {
 					return camelName.substring(0, camelName.length() - checkend.length() - 1);
 				}
+			}
 		}
 		// There is no rule to translate the class name to a prolog functor.
 		// Probably the class name is missing in table SUM_TYPE or in table
