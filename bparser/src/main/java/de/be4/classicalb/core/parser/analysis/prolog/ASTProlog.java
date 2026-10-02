@@ -177,15 +177,10 @@ public class ASTProlog extends AnalysisAdapter {
 		close(node);
 	}
 
-	/**
-	 * @param node
-	 *            Never <code>null</code>, node is assumed to be a terminal
-	 *            symbol that can be printed as a simple string
-	 */
 	@Override
 	public void defaultCase(final Node node) {
-		if (node instanceof Token) {
-			pout.printAtom(((Token) node).getText());
+		if (node instanceof Token && node.parent() != null) {
+			throw new IllegalArgumentException("Encountered unexpected token '" + node.getClass().getSimpleName() + "' while generating Prolog AST - this probably indicates an issue in the translation for the parent node type '" + node.parent().getClass().getSimpleName() + "'");
 		} else {
 			throw new IllegalArgumentException("Translation of node type '" + node.getClass().getSimpleName() + "' to Prolog AST not implemented");
 		}
@@ -213,11 +208,6 @@ public class ASTProlog extends AnalysisAdapter {
 	 */
 	private String toFunctorName(final String className) {
 		String camelName = formatCamel(className.substring(1)).substring(1);
-		if (className.startsWith("T")) {
-			// A SableCC Token
-			return camelName;
-		}
-
 		if (className.startsWith("A")) {
 			if (ATOMIC_TYPE.contains(camelName))
 				return camelName;
@@ -337,7 +327,7 @@ public class ASTProlog extends AnalysisAdapter {
 	public void caseARefinementMachineParseUnit(final ARefinementMachineParseUnit node) {
 		open(node);
 		node.getHeader().apply(this);
-		node.getRefMachine().apply(this);
+		pout.printAtom(node.getRefMachine().getText());
 		printAsList(node.getMachineClauses());
 		close(node);
 	}
@@ -346,7 +336,7 @@ public class ASTProlog extends AnalysisAdapter {
 	public void caseAImplementationMachineParseUnit(final AImplementationMachineParseUnit node) {
 		open(node);
 		node.getHeader().apply(this);
-		node.getRefMachine().apply(this);
+		pout.printAtom(node.getRefMachine().getText());
 		printAsList(node.getMachineClauses());
 		close(node);
 	}
@@ -572,7 +562,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseAPredicateDefinitionDefinition(final APredicateDefinitionDefinition node) {
 		open(node);
-		node.getName().apply(this);
+		pout.printAtom(node.getName().getText());
 		printAsList(node.getParameters());
 		node.getRhs().apply(this);
 		close(node);
@@ -581,7 +571,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseASubstitutionDefinitionDefinition(final ASubstitutionDefinitionDefinition node) {
 		open(node);
-		node.getName().apply(this);
+		pout.printAtom(node.getName().getText());
 		printAsList(node.getParameters());
 		node.getRhs().apply(this);
 		close(node);
@@ -590,7 +580,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseAExpressionDefinitionDefinition(final AExpressionDefinitionDefinition node) {
 		open(node);
-		node.getName().apply(this);
+		pout.printAtom(node.getName().getText());
 		printAsList(node.getParameters());
 		node.getRhs().apply(this);
 		close(node);
@@ -649,7 +639,7 @@ public class ASTProlog extends AnalysisAdapter {
 		printPositionedIdentifier(node.getOpName());
 		printAsList(node.getReturnValues());
 		printAsList(node.getParameters());
-		node.getAbOpName().apply(this);
+		pout.printAtom(node.getAbOpName().getText());
 		node.getOperationBody().apply(this);
 		close(node);
 	}
@@ -665,7 +655,10 @@ public class ASTProlog extends AnalysisAdapter {
 
 	@Override
 	public void caseALabelPredicate(ALabelPredicate node) {
-		printBinary(node, node.getName(), node.getPredicate());
+		open(node);
+		pout.printAtom(node.getName().getText());
+		node.getPredicate().apply(this);
+		close(node);
 	}
 
 	@Override
@@ -809,7 +802,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseADefinitionPredicate(final ADefinitionPredicate node) {
 		open(node);
-		node.getDefLiteral().apply(this);
+		pout.printAtom(node.getDefLiteral().getText());
 		printAsList(node.getParameters());
 		close(node);
 	}
@@ -832,12 +825,16 @@ public class ASTProlog extends AnalysisAdapter {
 
 	@Override
 	public void caseAStringExpression(AStringExpression node) {
-		printUnary(node, node.getContent());
+		open(node);
+		pout.printAtom(node.getContent().getText());
+		close(node);
 	}
 
 	@Override
 	public void caseAMultilineTemplateExpression(AMultilineTemplateExpression node) {
-		printUnary(node, node.getContent());
+		open(node);
+		pout.printAtom(node.getContent().getText());
+		close(node);
 	}
 
 	@Override
@@ -847,7 +844,9 @@ public class ASTProlog extends AnalysisAdapter {
 
 	@Override
 	public void caseARealExpression(ARealExpression node) {
-		printUnary(node, node.getLiteral());
+		open(node);
+		pout.printAtom(node.getLiteral().getText());
+		close(node);
 	}
 
 	@Override
@@ -1651,7 +1650,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseADefinitionExpression(final ADefinitionExpression node) {
 		open(node);
-		node.getDefLiteral().apply(this);
+		pout.printAtom(node.getDefLiteral().getText());
 		printAsList(node.getParameters());
 		close(node);
 	}
@@ -1843,7 +1842,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseADefinitionSubstitution(final ADefinitionSubstitution node) {
 		open(node);
-		node.getDefLiteral().apply(this);
+		pout.printAtom(node.getDefLiteral().getText());
 		printAsList(node.getParameters());
 		close(node);
 	}
@@ -1890,14 +1889,16 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseAEventBModelParseUnit(final AEventBModelParseUnit node) {
 		open(node);
-		node.getName().apply(this);
+		pout.printAtom(node.getName().getText());
 		printAsList(node.getModelClauses());
 		close(node);
 	}
 
 	@Override
 	public void caseARefinesModelClause(ARefinesModelClause node) {
-		printUnary(node, node.getRefines());
+		open(node);
+		pout.printAtom(node.getRefines().getText());
+		close(node);
 	}
 
 	@Override
@@ -1933,17 +1934,26 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseAEvent(final AEvent node) {
 		open(node);
-		node.getEventName().apply(this);
+
+		pout.printAtom(node.getEventName().getText());
+
 		final PEventstatus status = node.getStatus();
 		if (status != null) {
 			status.apply(this);
 		}
-		printAsList(node.getRefines());
+
+		pout.openList();
+		for (TIdentifierLiteral id : node.getRefines()) {
+			pout.printAtom(id.getText());
+		}
+		pout.closeList();
+
 		printAsList(node.getVariables());
 		printAsList(node.getGuards());
 		printAsList(node.getTheorems());
 		printAsList(node.getAssignments());
 		printAsList(node.getWitness());
+
 		close(node);
 	}
 
@@ -1978,7 +1988,7 @@ public class ASTProlog extends AnalysisAdapter {
 	@Override
 	public void caseAEventBContextParseUnit(final AEventBContextParseUnit node) {
 		open(node);
-		node.getName().apply(this);
+		pout.printAtom(node.getName().getText());
 		printAsList(node.getContextClauses());
 		close(node);
 	}
