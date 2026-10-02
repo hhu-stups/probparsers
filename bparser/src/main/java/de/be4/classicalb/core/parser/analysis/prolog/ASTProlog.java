@@ -207,15 +207,17 @@ public class ASTProlog extends AnalysisAdapter {
 	 * @return Prolog functor name
 	 */
 	private String toFunctorName(final String className) {
+		if (!className.startsWith("A")) {
+			throw new IllegalArgumentException("Not a SableCC AST node class name: " + className);
+		}
+
 		String camelName = formatCamel(className.substring(1)).substring(1);
-		if (className.startsWith("A")) {
-			if (ATOMIC_TYPE.contains(camelName)) {
-				return camelName;
-			}
-			for (String checkend : SUM_TYPE) {
-				if (camelName.endsWith(checkend)) {
-					return camelName.substring(0, camelName.length() - checkend.length() - 1);
-				}
+		if (ATOMIC_TYPE.contains(camelName)) {
+			return camelName;
+		}
+		for (String checkend : SUM_TYPE) {
+			if (camelName.endsWith(checkend)) {
+				return camelName.substring(0, camelName.length() - checkend.length() - 1);
 			}
 		}
 		// There is no rule to translate the class name to a prolog functor.
