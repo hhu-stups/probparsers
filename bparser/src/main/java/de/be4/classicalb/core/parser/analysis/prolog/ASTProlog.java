@@ -206,7 +206,7 @@ public class ASTProlog extends AnalysisAdapter {
 	 * 
 	 * @return Prolog functor name
 	 */
-	private String toFunctorName(final String className) {
+	private static String toFunctorName(final String className) {
 		if (!className.startsWith("A")) {
 			throw new IllegalArgumentException("Not a SableCC AST node class name: " + className);
 		}
@@ -234,7 +234,7 @@ public class ASTProlog extends AnalysisAdapter {
 	 * @return The input string in lower case and seperated by _ (e.g.
 	 *         class_doing_some_stuff).
 	 */
-	private String formatCamel(final String input) {
+	private static String formatCamel(final String input) {
 		StringWriter out = new StringWriter();
 		char[] chars = input.toCharArray();
 		for (char current : chars) {
