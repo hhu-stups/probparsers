@@ -327,10 +327,9 @@ public final class FastSwiTermOutput implements IPrologTermOutput {
 
 		this.handleTerm();
 		this.buffer.write(PL_TYPE_EXT_FLOAT);
-		// TODO: use Double#toRawLongBits directly
 		ByteBuffer ieee754LE = ByteBuffer.allocate(Double.BYTES);
 		ieee754LE.order(ByteOrder.LITTLE_ENDIAN);
-		ieee754LE.putDouble(number);
+		ieee754LE.putLong(Double.doubleToLongBits(number));
 		ieee754LE.flip();
 		int len = ieee754LE.remaining();
 		assert len == Double.BYTES;

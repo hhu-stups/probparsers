@@ -35,7 +35,17 @@ public final class FloatPrologTerm extends PrologTerm {
 
 	@Override
 	public String getFunctor() {
-		return Double.toString(this.value);
+		// these representations come from SWI/ECLiPSe
+		// SICStus does not support non-finite floats at all
+		if (Double.isNaN(this.value)) {
+			return "1.5NaN";
+		} else if (this.value == Double.POSITIVE_INFINITY) {
+			return "1.0Inf";
+		} else if (this.value == Double.NEGATIVE_INFINITY) {
+			return "-1.0Inf";
+		} else {
+			return Double.toString(this.value);
+		}
 	}
 
 	@Override

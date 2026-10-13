@@ -257,6 +257,27 @@ public class FastReadWriterTest {
 		}
 	}
 
+	public static final class NonFiniteSwiArgs implements ArgumentsProvider {
+
+		@Override
+		public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
+			return Stream.of(
+					arguments(
+							Double.NaN,
+							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xf8, (byte) 0x7f }
+					),
+					arguments(
+							Double.POSITIVE_INFINITY,
+							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xf0, (byte) 0x7f }
+					),
+					arguments(
+							Double.NEGATIVE_INFINITY,
+							new byte[] { 0x72, 0x09, 0x03, 0x0e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xf0, (byte) 0xff }
+					)
+			);
+		}
+	}
+
 	private static void compareBytesWithString(String expected, byte[] actual) {
 		// Do the comparison using strings in ISO 8859-1.
 		// This is functionally identical to comparing raw byte arrays,
@@ -308,5 +329,31 @@ public class FastReadWriterTest {
 		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.POSITIVE_INFINITY).fullstop());
 		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.NEGATIVE_INFINITY).fullstop());
 		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.NaN).fullstop());
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(NonFiniteSwiArgs.class)
+	public void testFastRW_SWI_NotFinite(double number, byte[] expected) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		FastSwiTermOutput pto = new FastSwiTermOutput(out)
+		        .withTarget64bit()
+		        .withTargetLittleEndian()
+		        .withTargetNoWindows();
+		pto.printNumber(number).fullstop();
+		byte[] actual = out.toByteArray();
+		assertArrayEquals(expected, actual);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(NonFiniteSwiArgs.class)
+	public void testFastRW_SWI_Windows_NonFinite(double number, byte[] expected) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		FastSwiTermOutput pto = new FastSwiTermOutput(out)
+		        .withTarget64bit()
+		        .withTargetLittleEndian()
+		        .withTargetWindows();
+		pto.printNumber(number).fullstop();
+		byte[] actual = out.toByteArray();
+		assertArrayEquals(expected, actual);
 	}
 }

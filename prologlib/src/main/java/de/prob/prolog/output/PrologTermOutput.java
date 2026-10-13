@@ -476,9 +476,22 @@ public final class PrologTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printNumber(final double number) {
+		// these representations come from SWI/ECLiPSe
+		// SICStus does not support non-finite floats at all
+		String value;
+		if (Double.isNaN(number)) {
+			value = "1.5NaN";
+		} else if (number == Double.POSITIVE_INFINITY) {
+			value = "1.0Inf";
+		} else if (number == Double.NEGATIVE_INFINITY) {
+			value = "-1.0Inf";
+		} else {
+			value = Double.toString(number);
+		}
+
 		try {
 			printCommaIfNeeded();
-			out.write(Double.toString(number));
+			out.write(value);
 		} catch (IOException exc) {
 			throw new UncheckedIOException(exc);
 		}

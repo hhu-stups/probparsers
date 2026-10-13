@@ -365,6 +365,9 @@ public class PrologTermOutputTest {
 				{ -Double.MAX_VALUE, "-1.7976931348623157E308" },
 				{ Double.MIN_VALUE, "4.9E-324" },
 				{ -Double.MIN_VALUE, "-4.9E-324" },
+				{ Double.NaN, "1.5NaN" },
+				{ Double.POSITIVE_INFINITY, "1.0Inf" },
+				{ Double.NEGATIVE_INFINITY, "-1.0Inf" },
 			};
 		}
 
