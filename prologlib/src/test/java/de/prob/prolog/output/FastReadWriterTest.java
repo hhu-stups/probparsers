@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class FastReadWriterTest {
@@ -298,5 +300,13 @@ public class FastReadWriterTest {
 		c.accept(pto);
 		byte[] actual = out.toByteArray();
 		assertArrayEquals(expected, actual);
+	}
+
+	@Test
+	public void testFastRW_Sicstus_NonFinite() {
+		FastSicstusTermOutput pto = new FastSicstusTermOutput(new ByteArrayOutputStream());
+		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.POSITIVE_INFINITY).fullstop());
+		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.NEGATIVE_INFINITY).fullstop());
+		assertThrows(IllegalArgumentException.class, () -> pto.printNumber(Double.NaN).fullstop());
 	}
 }

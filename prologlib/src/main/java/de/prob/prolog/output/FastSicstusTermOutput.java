@@ -171,6 +171,10 @@ public final class FastSicstusTermOutput implements IPrologTermOutput {
 
 	@Override
 	public IPrologTermOutput printNumber(double number) {
+		if (!Double.isFinite(number)) {
+			throw new IllegalArgumentException("invalid non-finite double: " + number);
+		}
+
 		this.handleTerm();
 		this.buffer.write('F');
 		this.buffer.writeNullTerminatedString(String.valueOf(number));
