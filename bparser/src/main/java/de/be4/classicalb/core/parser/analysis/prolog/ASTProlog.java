@@ -1937,7 +1937,13 @@ public class ASTProlog extends AnalysisAdapter {
 
 	@Override
 	public void caseASeesModelClause(final ASeesModelClause node) {
-		printOCAsList(node, node.getSees());
+		open(node);
+		pout.openList();
+		for (TIdentifierLiteral id : node.getSees()) {
+			pout.printAtom(id.getText());
+		}
+		pout.closeList();
+		close(node);
 	}
 
 	@Override
@@ -2024,7 +2030,13 @@ public class ASTProlog extends AnalysisAdapter {
 
 	@Override
 	public void caseAExtendsContextClause(final AExtendsContextClause node) {
-		printOCAsList(node, node.getExtends());
+		open(node);
+		pout.openList();
+		for (TIdentifierLiteral id : node.getExtends()) {
+			pout.printAtom(id.getText());
+		}
+		pout.closeList();
+		close(node);
 	}
 
 	@Override
