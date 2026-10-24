@@ -111,8 +111,11 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	private void writeEscapedString(String input) throws IOException {
-		for (int i = 0, len = input.length(); i < len; i++) {
-			final char c = input.charAt(i);
+		for (int i = 0, len = input.length(); i < len; ) {
+			// iterate over code points: a character outside the Basic Multilingual Plane (e.g., an emoji)
+			// must be written as one escape, not as two escaped surrogates
+			final int c = input.codePointAt(i);
+			i += Character.charCount(c);
 			switch (c) {
 				case '\n':
 					out.write('\\');
@@ -228,8 +231,11 @@ public final class PrologTermOutput implements IPrologTermOutput {
 	}
 
 	private void writeEscapedAtom(String input) throws IOException {
-		for (int i = 0, len = input.length(); i < len; i++) {
-			final char c = input.charAt(i);
+		for (int i = 0, len = input.length(); i < len; ) {
+			// iterate over code points: a character outside the Basic Multilingual Plane (e.g., an emoji)
+			// must be written as one escape, not as two escaped surrogates
+			final int c = input.codePointAt(i);
+			i += Character.charCount(c);
 			switch (c) {
 				case '\n':
 					out.write('\\');
