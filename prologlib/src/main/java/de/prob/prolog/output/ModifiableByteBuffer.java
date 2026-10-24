@@ -62,8 +62,18 @@ final class ModifiableByteBuffer extends OutputStream {
 
 	void writeNullTerminatedString(String s) {
 		byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-		// TODO: should check for zero byte here
-		this.write(bytes, 0, bytes.length);
+		// a zero byte would end the string early, so the NUL character is written as 0xC0 0x80
+		// ("modified UTF-8", as used by SICStus for NUL in atoms)
+		int start = 0;
+		for (int i = 0; i < bytes.length; i++) {
+			if (bytes[i] == 0) {
+				this.write(bytes, start, i - start);
+				this.write(0xC0);
+				this.write(0x80);
+				start = i + 1;
+			}
+		}
+		this.write(bytes, start, bytes.length - start);
 		this.write((byte) 0);
 	}
 
