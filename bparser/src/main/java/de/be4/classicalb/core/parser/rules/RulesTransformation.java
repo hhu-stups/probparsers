@@ -132,11 +132,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outStart(Start node) {
+	public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		if (variablesList.isEmpty()) {
 			return;
 		}
-		final List<PMachineClause> machineClauses = ((AAbstractMachineParseUnit) node.getPParseUnit()).getMachineClauses();
+		final List<PMachineClause> machineClauses = node.getMachineClauses();
 
 		// VARIABLES
 		final AVariablesMachineClause variablesMachineClause = new AVariablesMachineClause(new ArrayList<>(variablesList));
