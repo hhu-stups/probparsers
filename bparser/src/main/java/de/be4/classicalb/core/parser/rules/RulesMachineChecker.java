@@ -656,13 +656,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		final String operatorName = node.getName().getText();
 		switch (operatorName) {
 		case RulesGrammar.SUCCEEDED_RULE:
-			checkSucceededRuleOperator(node, arguments);
+		case RulesGrammar.FAILED_RULE:
+		case RulesGrammar.NOT_CHECKED_RULE:
+		case RulesGrammar.DISABLED_RULE:
+			checkRuleListOperator(node, operatorName, arguments);
 			return;
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
 			checkSucceededRuleErrorTypeOperator(node, arguments);
-			return;
-		case RulesGrammar.FAILED_RULE:
-			checkFailedRuleOperator(node, arguments);
 			return;
 		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
 			checkFailedRuleAllErrorTypesOperator(node, arguments);
@@ -670,33 +670,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		case RulesGrammar.FAILED_RULE_ERROR_TYPE:
 			checkFailedRuleErrorTypeOperator(node, arguments);
 			return;
-		case RulesGrammar.NOT_CHECKED_RULE:
-			checkNotCheckedRuleOperator(node, arguments);
-			return;
-		case RulesGrammar.DISABLED_RULE:
-			checkDisabledRuleOperator(node, arguments);
-			return;
 		default:
 			throw new AssertionError("Unsupported predicate operator: " + operatorName);
 		}
-	}
-
-	private void checkDisabledRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
-		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-			this.errorList.add(new CheckException(
-					"The DISABLED_RULE predicate operator expects exactly one rule identifier.", node));
-			return;
-		}
-		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-	}
-
-	private void checkNotCheckedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
-		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-			this.errorList.add(new CheckException(
-					"The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.", node));
-			return;
-		}
-		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 	}
 
 	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
@@ -720,28 +696,23 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
 	}
 
+	private void checkRuleListOperator(AOperatorPredicate node, final String operatorName, final List<PExpression> arguments) {
+		for (PExpression argument : arguments) {
+			if (!(argument instanceof AIdentifierExpression)) {
+				this.errorList.add(new CheckException(
+						"The " + operatorName + " predicate operator expects a list of rule identifiers.", node));
+				return;
+			}
+		}
+		for (PExpression argument : arguments) {
+			this.referencedRuleOperations.add((AIdentifierExpression) argument);
+		}
+	}
+
 	private void checkFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final List<PExpression> arguments) {
-		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-			this.errorList.add(new CheckException(
-					"The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", node));
-			return;
-		}
-		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-	}
-
-	private void checkFailedRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
-		if (arguments.size() != 1 && !(arguments.get(0) instanceof AIdentifierExpression)) {
-			this.errorList.add(new CheckException(
-					"The FAILED_RULE predicate operator expects exactly one rule identifier.", node));
-			return;
-		}
-		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-	}
-
-	private void checkSucceededRuleOperator(AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
 			this.errorList.add(new CheckException(
-					"The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.", node));
+					"The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", node));
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));

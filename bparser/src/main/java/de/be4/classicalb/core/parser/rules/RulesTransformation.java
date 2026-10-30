@@ -660,15 +660,26 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// currently all operator handle rule names
 		final List<PExpression> arguments = new ArrayList<>(node.getIdentifiers());
 		final String operatorName = node.getName().getText();
-		final AIdentifierExpression ruleIdentifier = (AIdentifierExpression) arguments.get(0);
-		final String ruleName = ruleIdentifier.getIdentifier().get(0).getText();
-		AbstractOperation operation = allOperations.get(ruleName);
-		if (!(operation instanceof RuleOperation)) {
-			errorList.add(new CheckException(
-					String.format("'%s' does not match any rule visible to this machine.", ruleName), node));
+		// SUCCEEDED_RULE, FAILED_RULE, NOT_CHECKED_RULE and DISABLED_RULE accept a list of rules,
+		// all other operators have exactly one rule as first argument
+		final boolean ruleListOperator = RulesGrammar.SUCCEEDED_RULE.equals(operatorName)
+				|| RulesGrammar.FAILED_RULE.equals(operatorName) || RulesGrammar.NOT_CHECKED_RULE.equals(operatorName)
+				|| RulesGrammar.DISABLED_RULE.equals(operatorName);
+		final List<PExpression> ruleArguments = ruleListOperator ? arguments : arguments.subList(0, 1);
+		boolean unknownRule = false;
+		for (PExpression ruleArgument : ruleArguments) {
+			final String name = ((AIdentifierExpression) ruleArgument).getIdentifier().get(0).getText();
+			if (!(allOperations.get(name) instanceof RuleOperation)) {
+				errorList.add(new CheckException(
+						String.format("'%s' does not match any rule visible to this machine.", name), ruleArgument));
+				unknownRule = true;
+			}
+		}
+		if (unknownRule) {
 			return;
 		}
-		final RuleOperation rule = (RuleOperation) operation;
+		final String ruleName = ((AIdentifierExpression) arguments.get(0)).getIdentifier().get(0).getText();
+		final RuleOperation rule = (RuleOperation) allOperations.get(ruleName);
 		switch (operatorName) {
 			case RulesGrammar.SUCCEEDED_RULE:
 				replacePredicateOperator(node, arguments, RULE_SUCCESS);

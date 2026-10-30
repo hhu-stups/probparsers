@@ -128,10 +128,15 @@ public class RulesMachineRunConfiguration {
 			final String operatorName = node.getName().getText();
 			switch (operatorName) {
 			case RulesGrammar.SUCCEEDED_RULE:
-				getRuleCoverage(arguments.get(0)).setSuccessForAllErrorTypes();
+				// SUCCEEDED_RULE and FAILED_RULE accept a list of rules
+				for (PExpression argument : arguments) {
+					getRuleCoverage(argument).setSuccessForAllErrorTypes();
+				}
 				return;
 			case RulesGrammar.FAILED_RULE:
-				getRuleCoverage(arguments.get(0)).setFailedWithoutSpecificErrorType();
+				for (PExpression argument : arguments) {
+					getRuleCoverage(argument).setFailedWithoutSpecificErrorType();
+				}
 				return;
 			case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
 				getRuleCoverage(arguments.get(0)).setFailedForAllErrorTypes();

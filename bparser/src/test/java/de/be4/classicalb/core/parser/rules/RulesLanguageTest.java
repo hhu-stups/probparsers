@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import util.Helpers;
 
+import java.util.Arrays;
+
 import static de.be4.classicalb.core.parser.rules.RulesUtil.getFileAsPrologTerm;
 import static de.be4.classicalb.core.parser.rules.RulesUtil.getRulesProjectAsPrologTerm;
 import static org.junit.Assert.assertEquals;
@@ -373,4 +375,14 @@ public class RulesLanguageTest {
 		String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 
+	@Test
+	public void testRuleListOperators() throws BCompoundException {
+		String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(rule1, rule2) & SUCCEEDED_RULE(rule1, rule2) & NOT_CHECKED_RULE(rule1, rule2) & DISABLED_RULE(rule1, rule2)\n"
+				+ "OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END; RULE rule2 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		for (String status : Arrays.asList("FAIL", "SUCCESS", "NOT_CHECKED", "DISABLED")) {
+			assertTrue(result.contains("equal(none,identifier(none,rule1),string(none,'" + status + "'))"));
+			assertTrue(result.contains("equal(none,identifier(none,rule2),string(none,'" + status + "'))"));
+		}
+	}
 }

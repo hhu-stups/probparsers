@@ -140,10 +140,10 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
-	public void testSucceededRuleOperatorWrongNumberOfArgumentsException() {
+	public void testSucceededRuleOperatorNonIdentifierArgumentsException() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(1,2) END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
-		assertEquals("The SUCCEEDED_RULE predicate operator expects exactly one rule identifier.", e.getMessage());
+		assertEquals("The SUCCEEDED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
 	}
 
 	@Test
@@ -154,10 +154,10 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
-	public void testFailedRuleOperatorWrongNumberOfArgumentsException() {
+	public void testFailedRuleOperatorNonIdentifierArgumentsException() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(1,2) END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
-		assertEquals("The FAILED_RULE predicate operator expects exactly one rule identifier.", e.getMessage());
+		assertEquals("The FAILED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
 	}
 
 	@Test
@@ -168,17 +168,17 @@ public class RulesLanguageExceptionTest {
 	}
 
 	@Test
-	public void testNotCheckedRuleWrongNumberOfArgumentsException() {
+	public void testNotCheckedRuleNonIdentifierArgumentsException() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == NOT_CHECKED_RULE(1,2) END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
-		assertEquals("The NOT_CHECKED_RULE predicate operator expects exactly one rule identifier.", e.getMessage());
+		assertEquals("The NOT_CHECKED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
 	}
 
 	@Test
-	public void testDisabledRuleWrongNumberOfArgumentsException() {
+	public void testDisabledRuleNonIdentifierArgumentsException() {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == DISABLED_RULE(1,2) END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
-		assertEquals("The DISABLED_RULE predicate operator expects exactly one rule identifier.", e.getMessage());
+		assertEquals("The DISABLED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
 	}
 
 	@Test
@@ -368,5 +368,47 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE test OPERATIONS FUNCTION a /*@desc dd */ <-- foo BODY skip END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("Identifier expected.", e.getMessage());
+	}
+
+	@Test
+	public void testFailedRuleOperatorWithSingleNonIdentifierArgumentException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(1) END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The FAILED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
+	}
+
+	@Test
+	public void testNotCheckedRuleWithNonIdentifierInListException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == NOT_CHECKED_RULE(rule, 1+1) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The NOT_CHECKED_RULE predicate operator expects a list of rule identifiers.", e.getMessage());
+	}
+
+	@Test
+	public void testFailedRuleAllErrorTypesWithNonIdentifierArgumentException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(1) END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", e.getMessage());
+	}
+
+	@Test
+	public void testFailedRuleAllErrorTypesWithTwoRulesException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(rule, rule) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", e.getMessage());
+	}
+
+	@Test
+	public void testUnknownRuleInRuleListInProject() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(rule, unknownRule) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Unknown rule 'unknownRule'.", e.getMessage());
+	}
+
+	@Test
+	public void testUnknownRuleInRuleListInSingleMachine() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE(rule, unknownRule) OPERATIONS RULE rule BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("'unknownRule' does not match any rule visible to this machine.", e.getMessage());
 	}
 }
