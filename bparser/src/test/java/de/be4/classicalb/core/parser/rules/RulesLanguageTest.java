@@ -392,4 +392,21 @@ public class RulesLanguageTest {
 			assertTrue(result.contains("equal(none,identifier(none,rule2),string(none,'" + status + "'))"));
 		}
 	}
+
+	@Test
+	public void testRuleForallWithoutAllTuple() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FORALL x WHERE x : 1..10 EXPECT x < 5 COUNTEREXAMPLE \"fail\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		// counterexamples are computed by a single comprehension {x | x : 1..10 & not(x < 5)}
+		assertFalse(result.contains("$AllTuple"));
+		assertTrue(result.contains("comprehension_set(none,[identifier(none,x)],conjunct(none,[member(none,identifier(none,x),interval(none,integer(none,1),integer(none,10))),negation(none,less(none,identifier(none,x),integer(none,5)))]))"));
+	}
+
+	@Test
+	public void testRuleForallWithOnSuccessUsesAllTuple() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FORALL x WHERE x : 1..10 EXPECT x < 5 ON_SUCCESS \"ok\" COUNTEREXAMPLE \"fail\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("$AllTuple"));
+	}
+
 }
