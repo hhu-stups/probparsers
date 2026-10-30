@@ -1,6 +1,7 @@
 package de.be4.classicalb.core.parser.rules;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -26,4 +27,18 @@ public class RulesProjectTest {
 		assertEquals("c1", deps.get(2).getOriginalName());
 	}
 
+	@Test
+	public void testUncheckedMessageCreatesImplicitDependency() {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "COMPUTATION c BODY DEFINE v TYPE POW(INTEGER) VALUE {1} END END;\n"
+				+ "RULE r BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 0 UNCHECKED v COUNTEREXAMPLE \"fail\" END END\n"
+				+ "END";
+		RulesProject p = new RulesProject();
+		p.parseRulesMachines(testMachine);
+		p.checkAndTranslateProject();
+		assertEquals(0, p.getBExceptionList().size());
+		AbstractOperation rule = p.getOperationsMap().get("r");
+		assertEquals(1, rule.getTransitiveDependencies().size());
+		assertTrue(rule.getTransitiveDependencies().contains(p.getOperationsMap().get("c")));
+	}
 }

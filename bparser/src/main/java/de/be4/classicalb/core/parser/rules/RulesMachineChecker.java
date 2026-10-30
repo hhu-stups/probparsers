@@ -787,6 +787,10 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			node.getOnSuccess().apply(this);
 		node.getMessage().apply(this);
 		this.identifierScope.removeScope();
+		if (node.getUnchecked() != null) {
+			// the UNCHECKED message is evaluated once outside the set comprehension, i.e. the RULE_FORALL identifiers are not in scope
+			node.getUnchecked().apply(this);
+		}
 		checkErrorType(node.getErrorType());
 	}
 

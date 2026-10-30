@@ -411,4 +411,11 @@ public class RulesLanguageExceptionTest {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("'unknownRule' does not match any rule visible to this machine.", e.getMessage());
 	}
+
+	@Test
+	public void testUnknownIdentifierInUncheckedMessage() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 0 UNCHECKED unknownId COUNTEREXAMPLE \"fail\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Unknown identifier 'unknownId'.", e.getMessage());
+	}
 }
