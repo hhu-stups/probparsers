@@ -449,24 +449,34 @@ public class RulesProject {
 			RulesParseUnit parseUnit = (RulesParseUnit) model;
 			map.put(parseUnit.getMachineName(), parseUnit);
 		}
-		Set<String> knownIdentifiers = new HashSet<>();
-		Set<String> visited = new HashSet<>();
-		RulesParseUnit parseUnit = (RulesParseUnit) bModels.get(0);
-		visited.add(parseUnit.getMachineName());
+		// Every machine is checked separately: an identifier is known in a machine if it is
+		// declared in the machine itself or in one of the machines it (transitively) references.
 		for (IModel model : bModels) {
-			knownIdentifiers.addAll(checkIdentifiers((RulesParseUnit) model, map, visited));
-			visited.clear();
+			final RulesParseUnit parseUnit = (RulesParseUnit) model;
+			final Set<String> visited = new HashSet<>();
+			visited.add(parseUnit.getMachineName());
+			final Set<String> knownIdentifiers = checkIdentifiers(parseUnit, map, visited);
+			final Map<String, Set<Node>> unknownIdentifierMap = parseUnit.getRulesMachineChecker().getUnknownIdentifier();
+			final List<String> unknownIdentifiers = new ArrayList<>(unknownIdentifierMap.keySet());
+			unknownIdentifiers.removeAll(knownIdentifiers);
+			Collections.sort(unknownIdentifiers); // deterministic order of error messages
+			for (String name : unknownIdentifiers) {
+				final Node node = getFirstNode(unknownIdentifierMap.get(name));
+				this.bExceptionList.add(new BException(parseUnit.getPath(),
+						new CheckException("Unknown identifier '" + name + "'.", node)));
+			}
 		}
-		RulesMachineChecker checker = parseUnit.getRulesMachineChecker();
-		Map<String, Set<Node>> unknownIdentifierMap = checker.getUnknownIdentifier();
-		Set<String> unknownIdentifiers = new HashSet<>(unknownIdentifierMap.keySet());
-		unknownIdentifiers.removeAll(knownIdentifiers);
-		for (String name : unknownIdentifiers) {
-			Set<Node> hashSet = unknownIdentifierMap.get(name);
-			Node node = hashSet.iterator().next();
-			this.bExceptionList.add(new BException(parseUnit.getPath(),
-					new CheckException("Unknown identifier '" + name + "'.", node)));
+	}
+
+	private static Node getFirstNode(Collection<Node> nodes) {
+		Node first = null;
+		for (Node node : nodes) {
+			if (first == null || (node.getStartPos() != null
+					&& (first.getStartPos() == null || node.getStartPos().compareTo(first.getStartPos()) < 0))) {
+				first = node;
+			}
 		}
+		return first;
 	}
 
 	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map, Set<String> visited) {

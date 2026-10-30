@@ -50,4 +50,15 @@ public class RulesProjectExceptionTest {
 	public void testRulesMachineInOrdinaryMachineFileException() {
 		Helpers.assertThrowsCompound(BParseException.class, () -> Helpers.parseFile("rules/project/RulesMachineInOrdinaryMachineFile.mch"));
 	}
+
+	@Test
+	public void testUnknownIdentifierInReferencedMachine() {
+		final String main = "RULES_MACHINE Main END";
+		final String other = "RULES_MACHINE Other OPERATIONS RULE r BODY RULE_FAIL WHEN unknownId = 1 COUNTEREXAMPLE \"fail\" END END END";
+		RulesProject project = new RulesProject();
+		project.parseRulesMachines(main, other);
+		project.checkAndTranslateProject();
+		assertEquals(1, project.getBExceptionList().size());
+		assertEquals("Unknown identifier 'unknownId'.", project.getBExceptionList().get(0).getMessage());
+	}
 }
