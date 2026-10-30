@@ -629,10 +629,12 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			this.errorList.add(new CheckException("Identifier renaming is not allowed in a RULES_MACHINE.", node));
 		}
 		final String name = copy.get(0).getText();
-		if (currentOperation != null) {
-			currentOperation.addReadVariable(node);
-		}
 		if (!this.identifierScope.contains(name)) {
+			// only global identifiers can refer to variables defined by a COMPUTATION;
+			// locally bound identifiers (quantifiers, VAR, FOR, parameters, ...) shadow them
+			if (currentOperation != null) {
+				currentOperation.addReadVariable(node);
+			}
 			addReadIdentifier(node);
 		}
 	}

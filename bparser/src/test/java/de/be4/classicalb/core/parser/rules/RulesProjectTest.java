@@ -41,4 +41,25 @@ public class RulesProjectTest {
 		assertEquals(1, rule.getTransitiveDependencies().size());
 		assertTrue(rule.getTransitiveDependencies().contains(p.getOperationsMap().get("c")));
 	}
+
+	@Test
+	public void testBoundIdentifierDoesNotCreateImplicitDependency() {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "COMPUTATION c BODY DEFINE y TYPE POW(INTEGER) VALUE {1} END END;\n"
+				+ "RULE r BODY RULE_FAIL y WHEN y : 1..3 COUNTEREXAMPLE \"fail\" END END\n"
+				+ "END";
+		RulesProject p = new RulesProject();
+		p.parseRulesMachines(testMachine);
+		p.checkAndTranslateProject();
+		assertEquals(0, p.getBExceptionList().size());
+		assertTrue(p.getOperationsMap().get("r").getTransitiveDependencies().isEmpty());
+	}
+
+	@Test
+	public void testBoundIdentifierWithNameOfLaterDefinedVariable() throws Exception {
+		// the bound variable y of the set comprehension is not the variable y defined afterwards
+		final String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "COMPUTATION c BODY DEFINE a TYPE POW(INTEGER) VALUE {y | y : 1..3} END; DEFINE y TYPE POW(INTEGER) VALUE {1} END END END";
+		RulesUtil.getRulesProjectAsPrologTerm(testMachine);
+	}
 }
