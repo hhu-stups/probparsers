@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -108,9 +109,10 @@ public class RulesProject {
 
 	public Map<String, AbstractOperation> getOperationsMap() {
 		Map<String, AbstractOperation> result = new HashMap<>();
+		final Set<String> replacedOperations = new HashSet<>(this.operationReplacementMap.values());
 		for (Map.Entry<String, AbstractOperation> entry : this.allOperations.entrySet()) {
 			AbstractOperation op = entry.getValue();
-			if (!this.operationReplacementMap.containsValue(op.getOriginalName())) {
+			if (!replacedOperations.contains(op.getOriginalName())) {
 				result.put(op.getName(), op);
 			}
 		}
@@ -118,8 +120,9 @@ public class RulesProject {
 	}
 
 	public Set<AbstractOperation> getOperationsWithNoSuccessor() {
-		Set<AbstractOperation> values = new HashSet<>(getOperationsMap().values());
-		for (AbstractOperation op : getOperationsMap().values()) {
+		final Collection<AbstractOperation> operations = getOperationsMap().values();
+		Set<AbstractOperation> values = new HashSet<>(operations);
+		for (AbstractOperation op : operations) {
 			values.removeAll(op.getTransitiveDependencies());
 		}
 		return values;
@@ -413,12 +416,14 @@ public class RulesProject {
 			}
 			readVariables.removeAll(variablesInScope);
 			if (!readVariables.isEmpty()) {
-				List<ComputationOperation> inferredDependenciesToComputations = new ArrayList<>();
-				for (String varName : readVariables) {
+				Set<ComputationOperation> inferredDependenciesToComputations = new LinkedHashSet<>();
+				final List<String> machineReferences = operation.getMachineReferencesAsString();
+				machineReferences.add(operation.getMachineName());
+				final List<String> sortedReadVariables = new ArrayList<>(readVariables);
+				Collections.sort(sortedReadVariables);
+				for (String varName : sortedReadVariables) {
 					ComputationOperation computationOperation = variableToComputation.get(varName);
 					inferredDependenciesToComputations.add(computationOperation);
-					List<String> machineReferences = operation.getMachineReferencesAsString();
-					machineReferences.add(operation.getMachineName());
 					if (!machineReferences.contains(computationOperation.getMachineName())) {
 						this.bExceptionList.add(new BException(operation.getFileName(),
 								new CheckException(
@@ -426,8 +431,8 @@ public class RulesProject {
 												+ "' in order to use variable '" + varName + "'.",
 										operation.getVariableReadByName(varName))));
 					}
-					operation.setImplicitComputationDependencies(inferredDependenciesToComputations);
 				}
+				operation.setImplicitComputationDependencies(new ArrayList<>(inferredDependenciesToComputations));
 			} else {
 				operation.setImplicitComputationDependencies(Collections.emptyList());
 			}

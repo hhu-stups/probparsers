@@ -409,4 +409,11 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("$AllTuple"));
 	}
 
+	@Test
+	public void testDependencyGuardsAreSorted() throws BCompoundException {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE c BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE a BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE b BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE d DEPENDS_ON_RULE c, a, b BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("select(none,conjunct(none,[equal(none,identifier(none,d),string(none,'NOT_CHECKED')),equal(none,identifier(none,a),string(none,'SUCCESS')),equal(none,identifier(none,b),string(none,'SUCCESS')),equal(none,identifier(none,c),string(none,'SUCCESS'))])"));
+	}
+
 }

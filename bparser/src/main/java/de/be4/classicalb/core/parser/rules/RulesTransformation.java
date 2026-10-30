@@ -6,6 +6,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -169,7 +170,9 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	public List<PPredicate> getOperationDependenciesAsPredicateList(AbstractOperation operation) {
 		List<PPredicate> result = new ArrayList<>();
-		for (AbstractOperation op : operation.getRequiredDependencies()) {
+		final List<AbstractOperation> dependencies = new ArrayList<>(operation.getRequiredDependencies());
+		dependencies.sort(Comparator.comparing(AbstractOperation::getName));
+		for (AbstractOperation op : dependencies) {
 			if (op instanceof RuleOperation) {
 				result.add(createEqualPredicate(op.getNameLiteral(), RULE_SUCCESS));
 			} else if (op instanceof ComputationOperation) {

@@ -1,20 +1,14 @@
 package de.be4.classicalb.core.parser.rules;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
 import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
@@ -24,11 +18,6 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.Utils;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import static de.be4.classicalb.core.parser.util.ASTBuilder.createIdentifier;
 
@@ -130,11 +119,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	public Map<String, Set<Node>> getUnknownIdentifier() {
 		Map<String, Set<Node>> result = new HashMap<>();
+		final Set<String> knownIdentifierNames = this.knownIdentifier.getKnownIdentifierNames();
+		final Set<String> functionOperationNames = this.getFunctionOperationNames();
 		for (Map.Entry<String, Set<Node>> entry : readIdentifier.entrySet()) {
 			String name = entry.getKey();
 			Set<Node> nodes = entry.getValue();
-			if (!this.knownIdentifier.getKnownIdentifierNames().contains(name) && !this.definitions.contains(name)
-					&& !this.getFunctionOperationNames().contains(name)) {
+			if (!knownIdentifierNames.contains(name) && !this.definitions.contains(name)
+					&& !functionOperationNames.contains(name)) {
 				result.put(name, nodes);
 			}
 		}
@@ -590,7 +581,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void inAAssignSubstitution(AAssignSubstitution node) {
+	public void caseAAssignSubstitution(AAssignSubstitution node) {
 		List<PExpression> righthand = new ArrayList<>(node.getRhsExpressions());
 		for (PExpression pExpression : righthand) {
 			pExpression.apply(this);
@@ -1126,8 +1117,8 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 
 		public boolean contains(String identifier, boolean checkAssignable) {
-			for (int i = localVariablesScope.size() - 1; i >= 0; i--) {
-				Scope scope = localVariablesScope.get(i);
+			for (Iterator<Scope> it = localVariablesScope.descendingIterator(); it.hasNext();) {
+				Scope scope = it.next();
 				if (scope.identifiers.contains(identifier)) {
 					if (checkAssignable) {
 						return scope.assignable;
