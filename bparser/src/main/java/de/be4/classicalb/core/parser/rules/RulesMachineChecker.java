@@ -264,6 +264,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	private void checkReplacesAttribute(POperationAttribute pOperationAttribute, List<PExpression> arguments) {
+		if (currentOperation instanceof FunctionOperation) {
+			errorList.add(new CheckException("REPLACES is not an attribute of a FUNCTION operation.",
+					pOperationAttribute));
+			return;
+		}
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
 			errorList.add(new CheckException("Expected exactly one identifier after REPLACES.", pOperationAttribute));
 			return;

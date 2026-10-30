@@ -482,4 +482,11 @@ public class RulesLanguageExceptionTest {
 		assertEquals("Invalid error type '0' for rule 'rule1' (the rule has 1 error type(s)).", e.getMessage());
 	}
 
+	@Test
+	public void testReplacesInFunctionException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- f1 BODY out := 1 END; FUNCTION out <-- f2 REPLACES f1 BODY out := 2 END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("REPLACES is not an attribute of a FUNCTION operation.", e.getMessage());
+	}
+
 }
