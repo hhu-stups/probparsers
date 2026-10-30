@@ -993,60 +993,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		this.identifierScope.removeScope();
 	}
 
-	@Override
-	public void caseADefinitionExpression(ADefinitionExpression node) {
-		node.getDefLiteral().apply(this);
-		final String defName = node.getDefLiteral().getText();
-		if ("READ_XML_FROM_STRING".equals(defName)) {
-			if (node.getParameters().size() != 1) {
-				errorList.add(new CheckException(
-						"The external function 'READ_XML_FROM_STRING' requires exactly one argument.", node));
-				return;
-			}
-			PExpression pExpression = node.getParameters().get(0);
-			if (pExpression instanceof AStringExpression) {
-				AStringExpression aStringExpr = (AStringExpression) pExpression;
-				TStringLiteral content = aStringExpr.getContent();
-				String text = content.getText();
-				int xmlStartIndex = text.indexOf("<?");
-				if (xmlStartIndex == -1) {
-					return;
-				}
-				String testString = text.substring(0, xmlStartIndex);
-				int numberOfNewLines = testString.length() - testString.replace("\n", "").length();
-				try {
-					InputSource inputSource = new InputSource(new StringReader(text.trim()));
-					SAXParserFactory factory = SAXParserFactory.newInstance();
-					SAXParser saxParser = factory.newSAXParser();
-					// Surprisingly, we need both of the following two lines in
-					// order to obtain all error messages in English.
-					Locale.setDefault(Locale.UK);
-					saxParser.setProperty("http://apache.org/xml/properties/locale", Locale.UK);
-					saxParser.parse(inputSource, new DefaultHandler());
-				} catch (SAXParseException e) {
-					final int line = content.getLine() + numberOfNewLines + e.getLineNumber() - 1;
-					final int column = (numberOfNewLines == 0 && e.getLineNumber() == 1)
-							? content.getPos() + e.getColumnNumber()
-							: e.getColumnNumber();
-					TStringLiteral dummy = new TStringLiteral("", line, column);
-					String message = e.getMessage();
-					errorList.add(new CheckException(message, dummy, e));
-				} catch (SAXException e) {
-					String message = e.getMessage();
-					errorList.add(new CheckException(message, aStringExpr, e));
-				} catch (ParserConfigurationException | IOException e) {
-					/*
-					 * We do nothing. The error is not handled by the parser but
-					 * will be handled by the ProB prolog kernel.
-					 */
-				}
-
-			}
-
-		}
-		super.caseADefinitionExpression(node);
-	}
-
 	/*
 	 * nodes not allowed in a rules machine
 	 */

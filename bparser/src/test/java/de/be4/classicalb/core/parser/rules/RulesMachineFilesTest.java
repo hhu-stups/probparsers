@@ -71,12 +71,6 @@ public class RulesMachineFilesTest {
 	}
 
 	@Test
-	public void testReadInvalidXML() {
-		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getFileAsPrologTerm("ReadInvalidXML.rmch"));
-		assertEquals("XML document structures must start and end within the same entity.", e.getMessage());
-	}
-
-	@Test
 	public void testRulesMachineConfiguration() throws Exception {
 		File file = new File(this.getClass().getResource("/rules/project/RulesMachineConfigurationTest.rmch").toURI());
 		ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
