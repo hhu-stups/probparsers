@@ -418,4 +418,18 @@ public class RulesLanguageExceptionTest {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
 		assertEquals("Unknown identifier 'unknownId'.", e.getMessage());
 	}
+
+	@Test
+	public void testDefineInRuleException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r BODY DEFINE d VALUE {1} END; RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("A DEFINE substitution is only allowed in a COMPUTATION operation.", e.getMessage());
+	}
+
+	@Test
+	public void testDefineInFunctionException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- f BODY DEFINE d VALUE {1} END; out := 1 END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("A DEFINE substitution is only allowed in a COMPUTATION operation.", e.getMessage());
+	}
 }

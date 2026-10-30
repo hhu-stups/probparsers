@@ -475,8 +475,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void outADefineSubstitution(ADefineSubstitution node) {
-		// the newly defined variable should not be used in the TYPE or the
-		// VALUE section
+		// the newly defined variable should not be used in the TYPE or the VALUE section
 		if (currentOperation != null && currentOperation instanceof ComputationOperation) {
 			ComputationOperation computationOperation = (ComputationOperation) currentOperation;
 			try {
@@ -485,12 +484,13 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			} catch (CheckException e) {
 				this.errorList.add(e);
 			}
+		} else {
+			this.errorList.add(new CheckException("A DEFINE substitution is only allowed in a COMPUTATION operation.", node));
 		}
 
 		// the DEFINE block should not appear within a loop substitution
 		if (!this.loopNodes.isEmpty()) {
-			this.errorList
-					.add(new CheckException("A DEFINE substitution must not be contained in a loop substitution.", node));
+			this.errorList.add(new CheckException("A DEFINE substitution must not be contained in a loop substitution.", node));
 		}
 	}
 
