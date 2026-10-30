@@ -382,21 +382,21 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// INVARIANT rule1#Counterexamples : POW(INTEGER*STRING)
 		final AMemberPredicate ctTypingPredicate = new AMemberPredicate(
 			createIdentifier(ctName),
-			new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
+			new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
 		);
 		invariantList.add(createPositionedNode(ctTypingPredicate, node));
 
 		//  rule1#Successful : POW(INTEGER*STRING)
 		final AMemberPredicate sfTypingPredicate = new AMemberPredicate(
 			createIdentifier(sfName),
-			new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
+			new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
 		);
 		invariantList.add(createPositionedNode(sfTypingPredicate, node));
 
 		//  rule1#Unchecked : POW(INTEGER*STRING)
 		final AMemberPredicate ucTypingPredicate = new AMemberPredicate(
 				createIdentifier(ucName),
-				new APowSubsetExpression(new AMultOrCartExpression(new ANatural1SetExpression(), new AStringSetExpression()))
+				new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
 		);
 		invariantList.add(createPositionedNode(ucTypingPredicate, node));
 
