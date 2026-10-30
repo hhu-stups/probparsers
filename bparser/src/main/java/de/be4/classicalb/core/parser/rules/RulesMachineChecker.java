@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,11 +29,12 @@ import static de.be4.classicalb.core.parser.util.ASTBuilder.createIdentifier;
 public class RulesMachineChecker extends DepthFirstAdapter {
 	private String machineName;
 	private final File file;
-	private final Map<ARuleOperation, RuleOperation> rulesMap = new HashMap<>();
-	private final Map<AComputationOperation, ComputationOperation> computationMap = new HashMap<>();
-	private final Map<AFunctionOperation, FunctionOperation> functionMap = new HashMap<>();
+	private final Map<ARuleOperation, RuleOperation> rulesMap = new LinkedHashMap<>();
+	private final Map<AComputationOperation, ComputationOperation> computationMap = new LinkedHashMap<>();
+	private final Map<AFunctionOperation, FunctionOperation> functionMap = new LinkedHashMap<>();
+	private final List<AbstractOperation> operations = new ArrayList<>();
 	private final List<CheckException> errorList = new ArrayList<>();
-	private final Set<AIdentifierExpression> referencedRuleOperations = new HashSet<>();
+	private final Set<AIdentifierExpression> referencedRuleOperations = new LinkedHashSet<>();
 
 	// this list is used to track if certain nodes appear inside of a loop (i.e.
 	// AForLoopSubstitution or AWhileSubstitution)
@@ -74,7 +77,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	public Set<RuleOperation> getRuleOperations() {
-		return new HashSet<>(this.rulesMap.values());
+		return new LinkedHashSet<>(this.rulesMap.values());
 	}
 
 	public TIdentifierLiteral getNameLiteral() {
@@ -82,15 +85,11 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	public Set<AIdentifierExpression> getReferencedRuleOperations() {
-		return new HashSet<>(this.referencedRuleOperations);
+		return new LinkedHashSet<>(this.referencedRuleOperations);
 	}
 
 	public List<AbstractOperation> getOperations() {
-		List<AbstractOperation> list = new ArrayList<>();
-		list.addAll(rulesMap.values());
-		list.addAll(computationMap.values());
-		list.addAll(functionMap.values());
-		return list;
+		return new ArrayList<>(this.operations);
 	}
 
 	public RuleOperation getRuleOperation(ARuleOperation aRuleOperation) {
@@ -425,6 +424,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		}
 		RuleOperation ruleOp = (RuleOperation) currentOperation;
 		rulesMap.put(node, ruleOp);
+		operations.add(ruleOp);
 		visitOperationAttributes(node.getAttributes());
 		node.getRuleBody().apply(this);
 		checkAllErrorTypesImplemented(ruleOp);
@@ -446,6 +446,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAComputationOperation(AComputationOperation node) {
 		currentOperation = new ComputationOperation(node.getName(), this.file == null ? null : this.file.getPath(), this.machineName, machineReferences);
 		computationMap.put(node, (ComputationOperation) currentOperation);
+		operations.add(currentOperation);
 		visitOperationAttributes(node.getAttributes());
 		node.getBody().apply(this);
 		currentOperation = null;
@@ -455,6 +456,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	public void caseAFunctionOperation(AFunctionOperation node) {
 		currentOperation = new FunctionOperation(node.getName(), this.file == null ? null : this.file.getPath(), this.machineName, machineReferences);
 		functionMap.put(node, (FunctionOperation) currentOperation);
+		operations.add(currentOperation);
 
 		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
 		this.identifierScope.createNewScope(new ArrayList<>(node.getReturnValues()), true);

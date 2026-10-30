@@ -416,4 +416,16 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("select(none,conjunct(none,[equal(none,identifier(none,d),string(none,'NOT_CHECKED')),equal(none,identifier(none,a),string(none,'SUCCESS')),equal(none,identifier(none,b),string(none,'SUCCESS')),equal(none,identifier(none,c),string(none,'SUCCESS'))])"));
 	}
 
+	@Test
+	public void testPromotesOperationsInDeclarationOrder() throws BCompoundException {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "COMPUTATION c2 BODY skip END;\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END;\n"
+				+ "COMPUTATION c1 BODY skip END;\n"
+				+ "RULE r0 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("promotes(none,[identifier(none,c2),identifier(none,r1),identifier(none,c1),identifier(none,r0)])"));
+	}
+
 }
