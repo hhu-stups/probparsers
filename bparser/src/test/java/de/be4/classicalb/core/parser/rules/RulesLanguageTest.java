@@ -316,7 +316,7 @@ public class RulesLanguageTest {
 	public void testSucceededRuleErrorType() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == SUCCEEDED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 1 COUNTEREXAMPLE \"one\" END; RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"two\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue(result.contains("equal(none,image(none,identifier(none,rule1_Counterexamples),set_extension(none,[integer(none,2)])),empty_set(none))"));
+		assertTrue(result.contains("conjunct(none,[member(none,identifier(none,rule1),set_extension(none,[string(none,'SUCCESS'),string(none,'FAIL')])),equal(none,image(none,identifier(none,rule1_Counterexamples),set_extension(none,[integer(none,2)])),empty_set(none))])"));
 	}
 
 	@Test

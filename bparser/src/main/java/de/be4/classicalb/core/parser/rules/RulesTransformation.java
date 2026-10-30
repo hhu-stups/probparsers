@@ -664,7 +664,11 @@ public class RulesTransformation extends DepthFirstAdapter {
 		String name = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
 		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1), rule);
 		if (funcCall != null) {
-			node.replaceBy(new AEqualPredicate(funcCall, new AEmptySetExpression()));
+			// rule : {"SUCCESS", "FAIL"} & rule_Counterexamples[{k}] = {}
+			final PPredicate ruleChecked = createPositionedNode(new AMemberPredicate(createIdentifier(ruleName),
+					new ASetExtensionExpression(createExpressionList(createStringExpression(RULE_SUCCESS),
+							createStringExpression(RULE_FAIL)))), node);
+			node.replaceBy(new AConjunctPredicate(ruleChecked, new AEqualPredicate(funcCall, new AEmptySetExpression())));
 		}
 	}
 
