@@ -1083,6 +1083,26 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseAVariablesMachineClause(AVariablesMachineClause node) {
+		errorList.add(new CheckException("The VARIABLES clause is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseAConcreteVariablesMachineClause(AConcreteVariablesMachineClause node) {
+		errorList.add(new CheckException("The CONCRETE_VARIABLES clause is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseAInvariantMachineClause(AInvariantMachineClause node) {
+		errorList.add(new CheckException("The INVARIANT clause is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
+	public void caseAInitialisationMachineClause(AInitialisationMachineClause node) {
+		errorList.add(new CheckException("The INITIALISATION clause is not allowed in a RULES_MACHINE.", node));
+	}
+
+	@Override
 	public void caseAAnySubstitution(AAnySubstitution node) {
 		errorList.add(new CheckException("The ANY substitution is not allowed in a RULES_MACHINE.", node));
 	}

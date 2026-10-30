@@ -133,80 +133,22 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outStart(Start node) {
-		ClauseFinder finder = new ClauseFinder();
-		node.apply(finder);
-		if (!variablesList.isEmpty()) {
-			AAbstractMachineParseUnit abstractMachineParseUnit = finder.abstractMachineParseUnit;
-			AInitialisationMachineClause initialisationMachineClause;
-			AInvariantMachineClause invariantMachineClause;
-			AVariablesMachineClause variablesMachineClause;
-			if (finder.variablesMachineClause == null) {
-				variablesMachineClause = new AVariablesMachineClause();
-				abstractMachineParseUnit.getMachineClauses().add(0, variablesMachineClause);
-				invariantMachineClause = new AInvariantMachineClause();
-				abstractMachineParseUnit.getMachineClauses().add(1, invariantMachineClause);
-				initialisationMachineClause = new AInitialisationMachineClause();
-				abstractMachineParseUnit.getMachineClauses().add(2, initialisationMachineClause);
-			} else {
-				variablesMachineClause = finder.variablesMachineClause;
-				invariantMachineClause = finder.invariantMachineClause;
-				initialisationMachineClause = finder.initialisationMachineClause;
-			}
-
-			ArrayList<PPredicate> invariantPredicateList = new ArrayList<>();
-			if (invariantMachineClause.getPredicates() != null) {
-				invariantPredicateList.add(invariantMachineClause.getPredicates());
-			}
-
-			ArrayList<PSubstitution> initSubstitutionList = new ArrayList<>();
-			if (initialisationMachineClause.getSubstitutions() != null) {
-				initSubstitutionList.add(initialisationMachineClause.getSubstitutions());
-			}
-
-			invariantPredicateList.addAll(invariantList);
-			initSubstitutionList.addAll(initialisationList);
-
-			// VARIABLES
-			variablesMachineClause.getIdentifiers().addAll(variablesList);
-			// INVARIANT
-			final PPredicate conjunction = createConjunction(invariantPredicateList);
-			invariantMachineClause.setPredicates(conjunction);
-
-			// INITIALISATION
-			if (initSubstitutionList.size() == 1) {
-				initialisationMachineClause.setSubstitutions(initSubstitutionList.get(0));
-			} else {
-				ASequenceSubstitution seqSubstitution = new ASequenceSubstitution(initialisationList);
-				initialisationMachineClause.setSubstitutions(seqSubstitution);
-			}
+		if (variablesList.isEmpty()) {
+			return;
 		}
-	}
+		final List<PMachineClause> machineClauses = ((AAbstractMachineParseUnit) node.getPParseUnit()).getMachineClauses();
 
-	static class ClauseFinder extends DepthFirstAdapter {
-		AAbstractMachineParseUnit abstractMachineParseUnit = null;
-		AVariablesMachineClause variablesMachineClause = null;
-		AInvariantMachineClause invariantMachineClause = null;
-		AInitialisationMachineClause initialisationMachineClause = null;
+		// VARIABLES
+		final AVariablesMachineClause variablesMachineClause = new AVariablesMachineClause(new ArrayList<>(variablesList));
+		machineClauses.add(0, variablesMachineClause);
 
-		@Override
-		public void inAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
-			abstractMachineParseUnit = node;
-		}
+		// INVARIANT
+		machineClauses.add(1, new AInvariantMachineClause(createConjunction(invariantList)));
 
-		@Override
-		public void inAVariablesMachineClause(AVariablesMachineClause node) {
-			variablesMachineClause = node;
-		}
-
-		@Override
-		public void inAInvariantMachineClause(AInvariantMachineClause node) {
-			invariantMachineClause = node;
-		}
-
-		@Override
-		public void inAInitialisationMachineClause(AInitialisationMachineClause node) {
-			initialisationMachineClause = node;
-		}
+		// INITIALISATION
+		final PSubstitution initialisation = initialisationList.size() == 1 ? initialisationList.get(0)
+				: new ASequenceSubstitution(initialisationList);
+		machineClauses.add(2, new AInitialisationMachineClause(initialisation));
 	}
 
 	@Override

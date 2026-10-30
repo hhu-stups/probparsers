@@ -321,7 +321,7 @@ public class RulesLanguageTest {
 
 	@Test
 	public void testVarSubstitution() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test INITIALISATION VAR a,b IN a := 1; b:=1 END END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS COMPUTATION c BODY VAR a,b IN a := 1; b:=1 END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 	}
 

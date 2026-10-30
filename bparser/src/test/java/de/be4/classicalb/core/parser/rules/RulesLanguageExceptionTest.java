@@ -43,7 +43,7 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testChoiceSubstitutionException() {
-		final String testMachine = "RULES_MACHINE Test INITIALISATION CHOICE RULE_FAIL COUNTEREXAMPLE \"never\" END OR RULE_FAIL COUNTEREXAMPLE \"never\" END END  END";
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r BODY CHOICE RULE_FAIL COUNTEREXAMPLE \"never\" END OR RULE_FAIL COUNTEREXAMPLE \"never\" END END END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("A CHOICE substitution is not allowed in a RULES_MACHINE.", e.getMessage());
 	}
@@ -190,14 +190,14 @@ public class RulesLanguageExceptionTest {
 
 	@Test
 	public void testAssignToANonIdentifierException() {
-		final String testMachine = "RULES_MACHINE test INITIALISATION f(1) := 1 END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION c BODY f(1) := 1 END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("There must be an identifier on the left side of the assign substitution. A function assignment 'f(1) := 1' is also not permitted.", e.getMessage());
 	}
 
 	@Test
 	public void testRenamingOperationCallsException() {
-		final String testMachine = "RULES_MACHINE test INITIALISATION f <-- Foo.bar END";
+		final String testMachine = "RULES_MACHINE test OPERATIONS COMPUTATION c BODY f <-- Foo.bar END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("Renaming of operation names is not allowed.", e.getMessage());
 	}
@@ -431,5 +431,40 @@ public class RulesLanguageExceptionTest {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS FUNCTION out <-- f BODY DEFINE d VALUE {1} END; out := 1 END END";
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("A DEFINE substitution is only allowed in a COMPUTATION operation.", e.getMessage());
+	}
+
+	@Test
+	public void testVariablesClauseException() {
+		final String testMachine = "RULES_MACHINE Test VARIABLES vv INVARIANT vv : INTEGER INITIALISATION vv :(vv = 42) END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The VARIABLES clause is not allowed in a RULES_MACHINE.", e.getMessage());
+	}
+
+	@Test
+	public void testAbstractVariablesClauseException() {
+		final String testMachine = "RULES_MACHINE Test ABSTRACT_VARIABLES vv INVARIANT vv : INTEGER INITIALISATION vv :(vv = 42) END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The VARIABLES clause is not allowed in a RULES_MACHINE.", e.getMessage());
+	}
+
+	@Test
+	public void testConcreteVariablesClauseException() {
+		final String testMachine = "RULES_MACHINE Test CONCRETE_VARIABLES vv INVARIANT vv : INTEGER INITIALISATION vv :(vv = 42) END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The CONCRETE_VARIABLES clause is not allowed in a RULES_MACHINE.", e.getMessage());
+	}
+
+	@Test
+	public void testInvariantClauseException() {
+		final String testMachine = "RULES_MACHINE Test CONSTANTS k PROPERTIES k = 1 INVARIANT k = 1 END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The INVARIANT clause is not allowed in a RULES_MACHINE.", e.getMessage());
+	}
+
+	@Test
+	public void testInitialisationClauseException() {
+		final String testMachine = "RULES_MACHINE Test INITIALISATION skip END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
+		assertEquals("The INITIALISATION clause is not allowed in a RULES_MACHINE.", e.getMessage());
 	}
 }
