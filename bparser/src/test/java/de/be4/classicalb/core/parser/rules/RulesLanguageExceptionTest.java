@@ -467,4 +467,19 @@ public class RulesLanguageExceptionTest {
 		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesMachineAsPrologTerm(testMachine));
 		assertEquals("The INITIALISATION clause is not allowed in a RULES_MACHINE.", e.getMessage());
 	}
+
+	@Test
+	public void testFailedRuleErrorTypeOutOfRangeException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ERROR_TYPE(rule1, 2) OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Invalid error type '2' for rule 'rule1' (the rule has 1 error type(s)).", e.getMessage());
+	}
+
+	@Test
+	public void testGetRuleCounterexamplesErrorTypeOutOfRangeException() {
+		final String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == GET_RULE_COUNTEREXAMPLES(rule1, 0) = {} OPERATIONS RULE rule1 BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Invalid error type '0' for rule 'rule1' (the rule has 1 error type(s)).", e.getMessage());
+	}
+
 }

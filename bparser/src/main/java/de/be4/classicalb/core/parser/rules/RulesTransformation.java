@@ -440,9 +440,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 			final ARangeExpression range = createPositionedNode(new ARangeExpression(ctVariable), node);
 			node.replaceBy(range);
 		} else {
-			PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1),
-					rule.getNumberOfErrorTypes());
-			node.replaceBy(funcCall);
+			PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1), rule);
+			if (funcCall != null) {
+				node.replaceBy(funcCall);
+			}
 		}
 	}
 
@@ -586,15 +587,24 @@ public class RulesTransformation extends DepthFirstAdapter {
 	}
 
 	private PExpression getSetOfErrorMessagesByErrorType(String name, PExpression errorTypeNode,
-			int numberOfErrorTypes) {
-		final String LAMBDA_IDENTIFIER = "$x";
-		final ALambdaExpression lambda = new ALambdaExpression(
-			createExpressionList(createIdentifier(LAMBDA_IDENTIFIER)),
-			new AMemberPredicate(createIdentifier(LAMBDA_IDENTIFIER),
-				new AIntervalExpression(createIntegerExpression(1), createIntegerExpression(numberOfErrorTypes))),
-			new AImageExpression(createIdentifier(name), createSetOfPExpression(createIdentifier(LAMBDA_IDENTIFIER)))
-		);
-		return new AFunctionExpression(lambda, createExpressionList(errorTypeNode));
+			RuleOperation rule) {
+		final int numberOfErrorTypes = rule.getNumberOfErrorTypes();
+		// The error type is known statically
+		final String text = ((AIntegerExpression) errorTypeNode).getLiteral().getText();
+		int errorType;
+		try {
+			errorType = Integer.parseInt(text);
+		} catch (NumberFormatException e) {
+			errorType = -1;
+		}
+		if (errorType < 1 || errorType > numberOfErrorTypes) {
+			errorList.add(new CheckException(String.format(
+					"Invalid error type '%s' for rule '%s' (the rule has %d error type(s)).", text,
+					rule.getOriginalName(), numberOfErrorTypes), errorTypeNode));
+			return null;
+		}
+		// rule_Counterexamples[{errorType}]
+		return new AImageExpression(createIdentifier(name), createSetOfPExpression(errorTypeNode));
 	}
 
 	@Override
@@ -652,9 +662,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private void replaceSucceededRuleErrorTypeOperator(AOperatorPredicate node, final String ruleName,
 			final RuleOperation rule) {
 		String name = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1),
-				rule.getNumberOfErrorTypes());
-		node.replaceBy(new AEqualPredicate(funcCall, new AEmptySetExpression()));
+		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1), rule);
+		if (funcCall != null) {
+			node.replaceBy(new AEqualPredicate(funcCall, new AEmptySetExpression()));
+		}
 	}
 
 	private void replaceFailedRuleAllErrorTypesOperator(AOperatorPredicate node, final RuleOperation rule) {
@@ -670,9 +681,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		PExpression pExpression = node.getIdentifiers().get(0);
 		AIdentifierExpression id = (AIdentifierExpression) pExpression;
 		String name = id.getIdentifier().get(0).getText() + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
-		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1),
-				rule.getNumberOfErrorTypes());
-		node.replaceBy(new ANotEqualPredicate(funcCall, new AEmptySetExpression()));
+		PExpression funcCall = getSetOfErrorMessagesByErrorType(name, node.getIdentifiers().get(1), rule);
+		if (funcCall != null) {
+			node.replaceBy(new ANotEqualPredicate(funcCall, new AEmptySetExpression()));
+		}
 	}
 
 	private void replacePredicateOperator(final AOperatorPredicate node, List<PExpression> copy,

@@ -567,8 +567,7 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		return (content.length() - content.replace(subString, "").length()) / subStringLength;
 	}
 
-	private void checkGetRuleCounterExamplesOperator(AOperatorExpression node,
-			List<PExpression> parameters) {
+	private void checkGetRuleCounterExamplesOperator(AOperatorExpression node, List<PExpression> parameters) {
 		// the grammar ensures at least one argument
 		if (parameters.size() > 2) {
 			this.errorList.add(new CheckException("Invalid number of arguments. Expected one or two arguments.", node));
@@ -578,6 +577,14 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			this.errorList.add(
 					new CheckException("The first argument of GET_RULE_COUNTEREXAMPLES must be an identifier.", node));
 			return;
+		}
+		if (parameters.size() > 1) {
+			PExpression secondArg = node.getIdentifiers().get(1);
+			if (!(secondArg instanceof AIntegerExpression)) {
+				this.errorList.add(new CheckException(
+						"The second argument of GET_RULE_COUNTEREXAMPLES must be an integer literal.", node));
+				return;
+			}
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) pExpression);
 	}
@@ -664,35 +671,33 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 			checkRuleListOperator(node, operatorName, arguments);
 			return;
 		case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
-			checkSucceededRuleErrorTypeOperator(node, arguments);
+		case RulesGrammar.FAILED_RULE_ERROR_TYPE:
+			checkRuleErrorTypeOperator(operatorName, node, arguments);
 			return;
 		case RulesGrammar.FAILED_RULE_ALL_ERROR_TYPES:
 			checkFailedRuleAllErrorTypesOperator(node, arguments);
-			return;
-		case RulesGrammar.FAILED_RULE_ERROR_TYPE:
-			checkFailedRuleErrorTypeOperator(node, arguments);
 			return;
 		default:
 			throw new AssertionError("Unsupported predicate operator: " + operatorName);
 		}
 	}
 
-	private void checkFailedRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
+	private void checkRuleErrorTypeOperator(String operator, AOperatorPredicate node, final List<PExpression> arguments) {
 		if (arguments.size() != 2) {
 			this.errorList.add(new CheckException(
-					"The FAILED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
+					"The " + operator + " predicate operator expects exactly two arguments.", node));
 			return;
 		}
 		PExpression pExpression = node.getIdentifiers().get(0);
 		if (!(pExpression instanceof AIdentifierExpression)) {
 			this.errorList.add(
-					new CheckException("The first argument of FAILED_RULE_ERROR_TYPE must be an identifier.", node));
+					new CheckException("The first argument of " + operator + " must be an identifier.", node));
 			return;
 		}
 		PExpression secondArg = node.getIdentifiers().get(1);
 		if (!(secondArg instanceof AIntegerExpression)) {
 			this.errorList.add(new CheckException(
-					"The second argument of FAILED_RULE_ERROR_TYPE must be an integer literal.", node));
+					"The second argument of " + operator + " must be an integer literal.", node));
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
@@ -715,27 +720,6 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 		if (arguments.size() != 1 || !(arguments.get(0) instanceof AIdentifierExpression)) {
 			this.errorList.add(new CheckException(
 					"The FAILED_RULE_ALL_ERROR_TYPES predicate operator expects exactly one rule identifier.", node));
-			return;
-		}
-		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
-	}
-
-	private void checkSucceededRuleErrorTypeOperator(AOperatorPredicate node, final List<PExpression> arguments) {
-		if (arguments.size() != 2) {
-			this.errorList.add(new CheckException(
-					"The SUCCEEDED_RULE_ERROR_TYPE predicate operator expects exactly two arguments.", node));
-			return;
-		}
-		PExpression pExpression = node.getIdentifiers().get(0);
-		if (!(pExpression instanceof AIdentifierExpression)) {
-			this.errorList.add(
-					new CheckException("The first argument of SUCCEEDED_RULE_ERROR_TYPE must be an identifier.", node));
-			return;
-		}
-		PExpression secondArg = node.getIdentifiers().get(1);
-		if (!(secondArg instanceof AIntegerExpression)) {
-			this.errorList.add(new CheckException(
-					"The second argument of SUCCEEDED_RULE_ERROR_TYPE must be an integer value.", node));
 			return;
 		}
 		this.referencedRuleOperations.add((AIdentifierExpression) arguments.get(0));
