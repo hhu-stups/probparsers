@@ -2592,6 +2592,12 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 		print("END");
 	}
 
+	@Override
+	public void caseAMuExpression(AMuExpression node) {
+		node.getExpression().apply(this);
+		print("?");
+	}
+
 	// The following tokens are handled by their surrounding nodes,
 	// so they do *not* have a case below:
 	// * TPragmaFreeText
