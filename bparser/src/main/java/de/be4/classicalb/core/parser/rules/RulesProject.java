@@ -153,7 +153,9 @@ public class RulesProject {
 				this.bExceptionList.addAll(rulesParseUnit.getCompoundException().getBExceptions());
 			}
 			Start otherStart = rulesParseUnit.getStart();
-			injector.injectMachine(otherStart);
+			for (CheckException e : injector.injectMachine(otherStart)) {
+				this.bExceptionList.add(new BException(rulesParseUnit.getPath(), e));
+			}
 		}
 		compositionMachine.setParsingBehaviour(this.parsingBehaviour);
 		bModels.add(compositionMachine);

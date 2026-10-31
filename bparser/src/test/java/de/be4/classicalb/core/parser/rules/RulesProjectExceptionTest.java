@@ -8,6 +8,7 @@ import org.junit.Test;
 import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RulesProjectExceptionTest {
 
@@ -61,4 +62,25 @@ public class RulesProjectExceptionTest {
 		assertEquals(1, project.getBExceptionList().size());
 		assertEquals("Unknown identifier 'unknownId'.", project.getBExceptionList().get(0).getMessage());
 	}
+
+	@Test
+	public void testConflictingDefinitionsInDifferentMachines() {
+		final String machine1 = "RULES_MACHINE M1 DEFINITIONS MAX == 10 OPERATIONS COMPUTATION c1 BODY DEFINE v1 VALUE MAX END END END";
+		final String machine2 = "RULES_MACHINE M2 DEFINITIONS MAX == 20 OPERATIONS COMPUTATION c2 BODY DEFINE v2 VALUE MAX END END END";
+		RulesProject project = new RulesProject();
+		project.parseRulesMachines(machine1, machine2);
+		project.checkAndTranslateProject();
+		assertEquals(1, project.getBExceptionList().size());
+		assertEquals("Duplicate definition 'MAX' is already included in a referenced machine.", project.getBExceptionList().get(0).getMessage());
+	}
+
+	@Test
+	public void testLibraryDefinitionInDifferentMachines() {
+		final String machine = "RULES_MACHINE M1 DEFINITIONS TO_STRING(sss) == \"0\"; EXTERNAL_FUNCTION_TO_STRING(TO_STRING_TYPE) == (TO_STRING_TYPE --> STRING); END";
+		RulesProject project = new RulesProject();
+		project.parseRulesMachines(machine, machine);
+		project.checkAndTranslateProject();
+		assertTrue(project.getBExceptionList().isEmpty());
+	}
+
 }

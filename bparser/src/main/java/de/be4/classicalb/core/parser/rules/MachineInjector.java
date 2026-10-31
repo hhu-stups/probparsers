@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import java.util.*;
 
 import de.be4.classicalb.core.parser.analysis.DepthFirstAdapter;
+import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.*;
 
 public final class MachineInjector extends DepthFirstAdapter {
@@ -21,6 +22,7 @@ public final class MachineInjector extends DepthFirstAdapter {
 	AOperationsMachineClause operationClause;
 	ADefinitionsMachineClause definitionsClause;
 	final HashSet<String> definitionNames = new HashSet<>();
+	private List<CheckException> definitionErrors;
 	private APredicateDefinitionDefinition goalDefinition;
 	private List<PDefinition> mainMachineDefinitions;
 
@@ -28,9 +30,28 @@ public final class MachineInjector extends DepthFirstAdapter {
 		start.apply(this);
 	}
 
-	public void injectMachine(Start otherMachine) {
+	public List<CheckException> injectMachine(Start otherMachine) {
+		definitionErrors = new ArrayList<>();
 		ClauseFinder finder = new ClauseFinder();
 		otherMachine.apply(finder);
+		return definitionErrors;
+	}
+
+	private void addDefinition(String name, PDefinition node) {
+		if (!definitionNames.contains(name)) {
+			definitionNames.add(name);
+			definitionsClause.getDefinitions().add(node);
+		} else if (definitionNames.contains(name) && !allowDuplicate(name)) {
+			definitionErrors.add(new CheckException(
+					"Duplicate definition '" + name + "' is already included in a referenced machine.", node));
+		}
+	}
+
+	private boolean allowDuplicate(final String definitionName) {
+		return definitionName.startsWith("EXTERNAL_FUNCTION_")
+				|| definitionName.startsWith("EXTERNAL_PREDICATE_")
+				|| definitionNames.contains("EXTERNAL_FUNCTION_" + definitionName)
+				|| definitionNames.contains("EXTERNAL_PREDICATE_" + definitionName);
 	}
 
 	public APredicateDefinitionDefinition getGoalDefinition() {
@@ -266,29 +287,17 @@ public final class MachineInjector extends DepthFirstAdapter {
 
 		@Override
 		public void inAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
-			final String name = node.getName().getText();
-			if (!definitionNames.contains(name)) {
-				definitionNames.add(name);
-				definitionsClause.getDefinitions().add(node);
-			}
+			addDefinition(node.getName().getText(), node);
 		}
 
 		@Override
 		public void inASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
-			final String name = node.getName().getText();
-			if (!definitionNames.contains(name)) {
-				definitionNames.add(name);
-				definitionsClause.getDefinitions().add(node);
-			}
+			addDefinition(node.getName().getText(), node);
 		}
 
 		@Override
 		public void inAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-			final String name = node.getName().getText();
-			if (!definitionNames.contains(name)) {
-				definitionNames.add(name);
-				definitionsClause.getDefinitions().add(node);
-			}
+			addDefinition(node.getName().getText(), node);
 		}
 
 	}
