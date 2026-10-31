@@ -287,7 +287,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// previous solution checked for fails after the rule body and decided for success if no fail occurred
 		// => should be equivalent to:
 		// IF rule_Counterexamples /= {} THEN RULE_FAIL ELSE RULE_SUCCESS END
-		subList.add(createRuleSuccessAssignment(ruleName));
+		subList.add(createRuleAssignment(ruleName, RULE_SUCCESS));
 		subList.add(node.getRuleBody());
 
 		final String ctName = ruleName + RULE_COUNTER_EXAMPLE_VARIABLE_SUFFIX;
@@ -440,23 +440,13 @@ public class RulesTransformation extends DepthFirstAdapter {
 		return op;
 	}
 
-	private AAssignSubstitution createRuleSuccessAssignment(final String ruleName) {
-		return createRuleAssignment(ruleName, RULE_SUCCESS);
-	}
-
-	private AAssignSubstitution createRuleFailAssignment(final String ruleName) {
-		// rule1 := "FAIL"
-		return createRuleAssignment(ruleName, RULE_FAIL);
-	}
-
 	private AAssignSubstitution createRuleAssignment(String ruleName, String ruleStatus) {
 		return createAssignNode(createIdentifier(ruleName), createStringExpression(ruleStatus));
 	}
 
 	private PSubstitution createConditionalFailAssignment(final String ruleName) {
 		PPredicate ifCondition = new ANotEqualPredicate(createIdentifier(RESULT_TUPLE), new AEmptySetExpression());
-		return new AIfSubstitution(ifCondition, createRuleFailAssignment(ruleName),
-				new ArrayList<>(), null);
+		return new AIfSubstitution(ifCondition, createRuleAssignment(ruleName, RULE_FAIL), new ArrayList<>(), null);
 	}
 
 	@Override
@@ -508,12 +498,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 						setOfCounterexamples.clone()), setOfCounterexamples));
 		AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(createIdentifier(ctName)),
 				createExpressionList(union));
-		if (conditionalFail) {
-			return createSequenceSubstitution(assign, createConditionalFailAssignment(ruleName));
-		} else {
-			return createSequenceSubstitution(assign, createRuleFailAssignment(ruleName));
-		}
-
+		return createSequenceSubstitution(assign,
+				conditionalFail ? createConditionalFailAssignment(ruleName) : createRuleAssignment(ruleName, RULE_FAIL));
 	}
 
 	private PSubstitution createSuccessfulSubstitution(PExpression setOfSuccessMessages) {
