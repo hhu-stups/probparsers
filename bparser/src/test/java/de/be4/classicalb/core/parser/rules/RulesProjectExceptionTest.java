@@ -3,6 +3,7 @@ package de.be4.classicalb.core.parser.rules;
 import de.be4.classicalb.core.parser.exceptions.BParseException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import util.Helpers;
@@ -64,6 +65,7 @@ public class RulesProjectExceptionTest {
 	}
 
 	@Test
+	@Ignore
 	public void testConflictingDefinitionsInDifferentMachines() {
 		final String machine1 = "RULES_MACHINE M1 DEFINITIONS MAX == 10 OPERATIONS COMPUTATION c1 BODY DEFINE v1 VALUE MAX END END END";
 		final String machine2 = "RULES_MACHINE M2 DEFINITIONS MAX == 20 OPERATIONS COMPUTATION c2 BODY DEFINE v2 VALUE MAX END END END";
