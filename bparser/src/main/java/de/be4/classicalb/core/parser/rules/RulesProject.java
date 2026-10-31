@@ -364,28 +364,6 @@ public class RulesProject {
 		}
 	}
 
-	public List<AbstractOperation> sortOperations(Collection<AbstractOperation> values) {
-		Map<AbstractOperation, Set<AbstractOperation>> dependenciesMap = new HashMap<>();
-		for (AbstractOperation abstractOperation : values) {
-			if (!(abstractOperation instanceof FunctionOperation)) {
-				dependenciesMap.put(abstractOperation, new HashSet<>(abstractOperation.getTransitiveDependencies()));
-			}
-		}
-		List<AbstractOperation> resultList = new ArrayList<>();
-		List<AbstractOperation> todoList = new ArrayList<>(dependenciesMap.keySet());
-		while (!todoList.isEmpty()) {
-			for (AbstractOperation abstractOperation : new ArrayList<>(todoList)) {
-				final Set<AbstractOperation> deps = dependenciesMap.get(abstractOperation);
-				resultList.forEach(deps::remove);
-				if (deps.isEmpty()) {
-					resultList.add(abstractOperation);
-					todoList.remove(abstractOperation);
-				}
-			}
-		}
-		return resultList;
-	}
-
 	private void findImplicitDependenciesToComputations() {
 		Map<String, ComputationOperation> variableToComputation = new HashMap<>();
 		for (AbstractOperation operation : allOperations.values()) {
