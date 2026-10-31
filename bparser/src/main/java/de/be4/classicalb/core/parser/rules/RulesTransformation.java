@@ -359,40 +359,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final AAssignSubstitution initSub = new AAssignSubstitution(
 				createExpressionList(createIdentifier(ruleName)), createExpressionList(value));
 		initialisationList.add(initSub);
-		// VARIABLES ...
-		variablesList.add(createIdentifier(ctName, node.getRuleName().clone()));
-		variablesList.add(createIdentifier(sfName, node.getRuleName().clone()));
-		variablesList.add(createIdentifier(ucName, node.getRuleName().clone()));
 
-		// INVARIANT rule1#Counterexamples : POW(INTEGER*STRING)
-		final AMemberPredicate ctTypingPredicate = new AMemberPredicate(
-			createIdentifier(ctName),
-			new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
-		);
-		invariantList.add(createPositionedNode(ctTypingPredicate, node));
-
-		//  rule1#Successful : POW(INTEGER*STRING)
-		final AMemberPredicate sfTypingPredicate = new AMemberPredicate(
-			createIdentifier(sfName),
-			new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
-		);
-		invariantList.add(createPositionedNode(sfTypingPredicate, node));
-
-		//  rule1#Unchecked : POW(INTEGER*STRING)
-		final AMemberPredicate ucTypingPredicate = new AMemberPredicate(
-				createIdentifier(ucName),
-				new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))
-		);
-		invariantList.add(createPositionedNode(ucTypingPredicate, node));
-
-		// INITIALISATION rule1#Counterexamples := {}
-		initialisationList.add(createAssignNode(createIdentifier(ctName, node.getRuleName().clone()), new AEmptySetExpression()));
-
-		//  rule1#Successful := {}
-		initialisationList.add(createAssignNode(createIdentifier(sfName, node.getRuleName().clone()), new AEmptySetExpression()));
-
-		//  rule1#Successful := {}
-		initialisationList.add(createAssignNode(createIdentifier(ucName, node.getRuleName().clone()), new AEmptySetExpression()));
+		// rule_Counterexamples, rule_Successful, rule_Unchecked: POW(INTEGER*STRING), initially {}
+		for (String name : Arrays.asList(ctName, sfName, ucName)) {
+			variablesList.add(createIdentifier(name, node.getRuleName()));
+			invariantList.add(createPositionedNode(new AMemberPredicate(createIdentifier(name),
+							new APowSubsetExpression(new AMultOrCartExpression(new AIntegerSetExpression(), new AStringSetExpression()))),
+					node));
+			initialisationList.add(createAssignNode(createIdentifier(name, node.getRuleName()), new AEmptySetExpression()));
+		}
 	}
 
 	@Override
