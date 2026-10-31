@@ -15,6 +15,7 @@ import util.Helpers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class RulesLanguageExceptionTest {
 
@@ -489,4 +490,24 @@ public class RulesLanguageExceptionTest {
 		assertEquals("REPLACES is not an attribute of a FUNCTION operation.", e.getMessage());
 	}
 
+	@Test
+	public void testReplacementOfUnknownOperationException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r2 REPLACES rX BODY RULE_FAIL COUNTEREXAMPLE \"never\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Unknown operation 'rX' in REPLACES clause.", e.getMessage());
+	}
+
+	@Test
+	public void testCyclicReplacementException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r1 REPLACES r2 BODY RULE_FAIL COUNTEREXAMPLE \"one\" END END; RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"two\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Cyclic replacement of operation 'r2'.", e.getMessage());
+	}
+
+	@Test
+	public void testSelfReplacementException() {
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE r1 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"one\" END END END";
+		final CheckException e = Helpers.assertThrowsCompound(CheckException.class, () -> RulesUtil.getRulesProjectAsPrologTerm(testMachine));
+		assertEquals("Cyclic replacement of operation 'r1'.", e.getMessage());
+	}
 }

@@ -428,4 +428,111 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("promotes(none,[identifier(none,c2),identifier(none,r1),identifier(none,c1),identifier(none,r0)])"));
 	}
 
+	@Test
+	public void testRuleReplacement() throws Exception {
+		String testMachine = "RULES_MACHINE Test DEFINITIONS X == SUCCEEDED_RULE_ERROR_TYPE(r1,1) OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"new\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		// the promoted operation r1 must exist and must be implemented by the replacing rule
+		assertTrue(result.contains("promotes(none,[identifier(none,r1)])"));
+		assertTrue(result.contains("operation(none,identifier(none,r1),[],[]"));
+		assertTrue(result.contains("string(none,new)"));
+		assertFalse(result.contains("string(none,old)"));
+		assertTrue(result.contains("identifier(none,r1_Counterexamples)"));
+		assertFalse(result.contains("identifier(none,r2"));
+	}
+
+	@Test
+	public void testTransitiveRuleReplacement() throws Exception {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"very_old\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r3 REPLACES r2 BODY RULE_FAIL COUNTEREXAMPLE \"new\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		// the promoted operation r1 must exist and must be implemented by rule r3
+		assertTrue(result.contains("promotes(none,[identifier(none,r1)])"));
+		assertTrue(result.contains("operation(none,identifier(none,r1),[],[]"));
+		assertTrue(result.contains("string(none,new)"));
+		assertFalse(result.contains("string(none,old)"));
+		assertFalse(result.contains("string(none,very_old)"));
+		assertTrue(result.contains("identifier(none,r1_Counterexamples)"));
+		assertFalse(result.contains("r2"));
+		assertFalse(result.contains("r3"));
+	}
+
+	@Test
+	public void testTransitiveRuleReplacementWithUnchecked() throws Exception {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"very_old\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r3 REPLACES r2 BODY RULE_FORALL x WHERE x : 1..3 EXPECT x > 0 ON_SUCCESS \"ok\" UNCHECKED \"none\" COUNTEREXAMPLE \"new\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		// all result variables of r3 are the ones of r1
+		assertTrue(result.contains("identifier(none,r1_Unchecked)"));
+		assertTrue(result.contains("identifier(none,r1_Successful)"));
+		assertTrue(result.contains("string(none,ok)"));
+		assertTrue(result.contains("string(none,none)"));
+		assertFalse(result.contains("r2"));
+		assertFalse(result.contains("r3"));
+	}
+
+	@Test
+	public void testTransitiveComputationReplacement() throws Exception {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "COMPUTATION c1 BODY DEFINE v VALUE {1} END END;\n"
+				+ "COMPUTATION c2 REPLACES c1 BODY DEFINE v VALUE {2} END END;\n"
+				+ "COMPUTATION c3 REPLACES c2 BODY DEFINE v VALUE {3} END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("promotes(none,[identifier(none,c1)])"));
+		assertTrue(result.contains("operation(none,identifier(none,c1),[],[]"));
+		assertTrue(result.contains("set_extension(none,[integer(none,3)])"));
+		assertFalse(result.contains("set_extension(none,[integer(none,2)])"));
+		assertFalse(result.contains("set_extension(none,[integer(none,1)])"));
+		assertFalse(result.contains("c2"));
+		assertFalse(result.contains("c3"));
+	}
+
+	@Test
+	public void testDependencyOnReplacingRule() throws Exception {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"new\" END END;\n"
+				+ "COMPUTATION c DEPENDS_ON_RULE r2 BODY skip END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		// the guard of c refers to the status variable r1, which r2 has taken over
+		assertTrue(result.contains("equal(none,identifier(none,r1),string(none,'SUCCESS'))"));
+		assertFalse(result.contains("r2"));
+	}
+
+	@Test
+	public void testOperatorsOnReplacedAndReplacingRules() throws Exception {
+		String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE(r2) & FAILED_RULE_ALL_ERROR_TYPES(r1) OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r2 REPLACES r1 ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 1 COUNTEREXAMPLE \"one\" END; RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"two\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("equal(none,identifier(none,r1),string(none,'FAIL'))"));
+		// the error types of the replacing rule are used
+		assertTrue(result.contains("equal(none,domain(none,identifier(none,r1_Counterexamples)),interval(none,integer(none,1),integer(none,2)))"));
+		assertFalse(result.contains("r2"));
+	}
+
+	@Test
+	public void testErrorTypesOfLastRuleInReplacementChain() throws Exception {
+		// r1 and r2 have one error type, the executed rule r3 has two
+		String testMachine = "RULES_MACHINE Test DEFINITIONS GOAL == FAILED_RULE_ALL_ERROR_TYPES(r1) & FAILED_RULE_ERROR_TYPE(r2, 2) OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"a\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"b\" END END;\n"
+				+ "RULE r3 REPLACES r2 ERROR_TYPES 2 BODY RULE_FAIL ERROR_TYPE 1 COUNTEREXAMPLE \"c\" END; RULE_FAIL ERROR_TYPE 2 COUNTEREXAMPLE \"d\" END END\n"
+				+ "END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("equal(none,domain(none,identifier(none,r1_Counterexamples)),interval(none,integer(none,1),integer(none,2)))"));
+		assertTrue(result.contains("not_equal(none,image(none,identifier(none,r1_Counterexamples),set_extension(none,[integer(none,2)])),empty_set(none))"));
+	}
 }

@@ -113,7 +113,12 @@ public class RulesProject {
 		for (Map.Entry<String, AbstractOperation> entry : this.allOperations.entrySet()) {
 			AbstractOperation op = entry.getValue();
 			if (!replacedOperations.contains(op.getOriginalName())) {
-				result.put(op.getName(), op);
+				// resolve REPLACES chain
+				String name = op.getOriginalName();
+				for (int i = 0; operationReplacementMap.containsKey(name) && i < operationReplacementMap.size(); i++) {
+					name = operationReplacementMap.get(name);
+				}
+				result.put(name, op);
 			}
 		}
 		return result;
@@ -214,6 +219,21 @@ public class RulesProject {
 			final String replacedOperationName = entry.getValue();
 			AbstractOperation newOp = this.allOperations.get(newOpName);
 			AbstractOperation replacedOp = this.allOperations.get(replacedOperationName);
+			if (replacedOp == null) {
+				this.bExceptionList.add(new BException(newOp.getFileName(), new CheckException(
+						"Unknown operation '" + replacedOperationName + "' in REPLACES clause.", newOp.getReplacesIdentifier())));
+				continue;
+			}
+
+			String name = replacedOperationName;
+			for (int i = 0; name != null && i < operationReplacementMap.size(); i++) {
+				if (name.equals(newOpName)) {
+					this.bExceptionList.add(new BException(newOp.getFileName(), new CheckException(
+							"Cyclic replacement of operation '" + newOpName + "'.", newOp.getReplacesIdentifier())));
+					break;
+				}
+				name = operationReplacementMap.get(name);
+			}
 
 			if (newOp.getClass() != replacedOp.getClass()) {
 				this.bExceptionList.add(new BException(newOp.getFileName(),

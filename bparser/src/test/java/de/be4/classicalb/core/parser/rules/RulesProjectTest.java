@@ -62,4 +62,22 @@ public class RulesProjectTest {
 				+ "COMPUTATION c BODY DEFINE a TYPE POW(INTEGER) VALUE {y | y : 1..3} END; DEFINE y TYPE POW(INTEGER) VALUE {1} END END END";
 		RulesUtil.getRulesProjectAsPrologTerm(testMachine);
 	}
+
+	@Test
+	public void testOperationsMapWithReplacementChain() {
+		String testMachine = "RULES_MACHINE Test OPERATIONS\n"
+				+ "RULE r1 BODY RULE_FAIL COUNTEREXAMPLE \"very_old\" END END;\n"
+				+ "RULE r2 REPLACES r1 BODY RULE_FAIL COUNTEREXAMPLE \"old\" END END;\n"
+				+ "RULE r3 REPLACES r2 BODY RULE_FAIL COUNTEREXAMPLE \"new\" END END\n"
+				+ "END";
+		RulesProject p = new RulesProject();
+		p.parseRulesMachines(testMachine);
+		p.checkAndTranslateProject();
+		assertEquals("[]", p.getBExceptionList().toString());
+		assertEquals(1, p.getOperationsMap().size());
+		RuleOperation r1 = (RuleOperation) p.getOperationsMap().get("r1");
+		assertEquals("r3", r1.getOriginalName());
+		assertEquals("r1_Counterexamples", r1.getCounterExampleVariableName());
+	}
+
 }
