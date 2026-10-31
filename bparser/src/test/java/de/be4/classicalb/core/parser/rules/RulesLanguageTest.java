@@ -394,22 +394,6 @@ public class RulesLanguageTest {
 	}
 
 	@Test
-	public void testRuleForallWithoutAllTuple() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FORALL x WHERE x : 1..10 EXPECT x < 5 COUNTEREXAMPLE \"fail\" END END END";
-		final String result = getRulesProjectAsPrologTerm(testMachine);
-		// counterexamples are computed by a single comprehension {x | x : 1..10 & not(x < 5)}
-		assertFalse(result.contains("$AllTuple"));
-		assertTrue(result.contains("comprehension_set(none,[identifier(none,x)],conjunct(none,[member(none,identifier(none,x),interval(none,integer(none,1),integer(none,10))),negation(none,less(none,identifier(none,x),integer(none,5)))]))"));
-	}
-
-	@Test
-	public void testRuleForallWithOnSuccessUsesAllTuple() throws BCompoundException {
-		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE rule1 BODY RULE_FORALL x WHERE x : 1..10 EXPECT x < 5 ON_SUCCESS \"ok\" COUNTEREXAMPLE \"fail\" END END END";
-		final String result = getRulesProjectAsPrologTerm(testMachine);
-		assertTrue(result.contains("$AllTuple"));
-	}
-
-	@Test
 	public void testDependencyGuardsAreSorted() throws BCompoundException {
 		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE c BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE a BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE b BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END; RULE d DEPENDS_ON_RULE c, a, b BODY RULE_FAIL COUNTEREXAMPLE \"x\" END END END";
 		final String result = getRulesProjectAsPrologTerm(testMachine);
@@ -534,5 +518,14 @@ public class RulesLanguageTest {
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		assertTrue(result.contains("equal(none,domain(none,identifier(none,r1_Counterexamples)),interval(none,integer(none,1),integer(none,2)))"));
 		assertTrue(result.contains("not_equal(none,image(none,identifier(none,r1_Counterexamples),set_extension(none,[integer(none,2)])),empty_set(none))"));
+	}
+
+	@Test
+	public void testRuleForallComputesAllTuplesFirst() throws BCompoundException {
+		// for an unbounded WHERE, a single comprehension {x | WHERE & not(EXPECT)} leads to a well-definedness error for card(foo_Counterexamples)
+		final String testMachine = "RULES_MACHINE Test OPERATIONS RULE foo BODY RULE_FORALL x WHERE 1=1 EXPECT x = \"foo\" COUNTEREXAMPLE x END END END";
+		final String result = getRulesProjectAsPrologTerm(testMachine);
+		assertTrue(result.contains("assign(none,[identifier(none,'$AllTuple')],[comprehension_set(none,[identifier(none,x)],equal(none,integer(none,1),integer(none,1)))])"));
+		assertTrue(result.contains("member(none,identifier(none,x),identifier(none,'$AllTuple')),negation(none,equal(none,identifier(none,x),string(none,foo)))"));
 	}
 }

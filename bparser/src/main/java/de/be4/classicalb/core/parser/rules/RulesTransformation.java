@@ -861,10 +861,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		final String COUNTEREXAMPLE_STRINGS = "$CounterexampleStrings";
 		final String UNCHECKED_STRING = "$UncheckedString"; // just a single string
 
-		// The set of all tuples satisfying the WHERE predicate is only needed for ON_SUCCESS and
-		// UNCHECKED. Otherwise, the counterexamples are computed directly by a single comprehension
-		// {ids | WHERE & not(EXPECT)}, so ProB does not have to compute all tuples first.
-		final boolean needsAllTuple = expectPredicate != null && (onSuccessMessage != null || uncheckedMessage != null);
 		final AComprehensionSetExpression setWithoutExpect = new AComprehensionSetExpression();
 		{
 			final List<PExpression> list = new ArrayList<>();
@@ -872,12 +868,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				list.add(id.clone());
 			}
 			setWithoutExpect.setIdentifiers(list);
-			if (expectPredicate != null && !needsAllTuple) {
-				setWithoutExpect.setPredicates(new AConjunctPredicate(wherePredicate.clone(),
-						new ANegationPredicate(expectPredicate.clone())));
-			} else {
-				setWithoutExpect.setPredicates(wherePredicate.clone());
-			}
+			setWithoutExpect.setPredicates(wherePredicate.clone());
 		}
 		addToStringDefinition(this.iDefinitions);
 		// default error type: 1
@@ -885,7 +876,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 		AVarSubstitution var = new AVarSubstitution();
 
 		List<PExpression> varIdentifiers = createExpressionList(createIdentifier(RESULT_TUPLE), createIdentifier(COUNTEREXAMPLE_STRINGS));
-		if (needsAllTuple) {
+		if (expectPredicate != null) {
 			varIdentifiers.add(createIdentifier(ALL_TUPLE));
 		}
 		if (onSuccessMessage != null) {
@@ -900,11 +891,10 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// if ON_SUCCESS clause exists (only RULE_FORALL): first assign allTuples without EXPECT clause
 		// else: directly assign RESULT_TUPLE (only RULE_FAIL)
 		subList.add(new AAssignSubstitution(
-				createExpressionList(createIdentifier(needsAllTuple ? ALL_TUPLE : RESULT_TUPLE)),
+				createExpressionList(createIdentifier(expectPredicate != null ? ALL_TUPLE : RESULT_TUPLE)),
 				createExpressionList(setWithoutExpect)
 		));
-
-		if (needsAllTuple) {
+		if (expectPredicate != null) {
 			final AComprehensionSetExpression setWithExpect = new AComprehensionSetExpression();
 			final List<PExpression> list = new ArrayList<>();
 			final List<PExpression> list2 = new ArrayList<>();
