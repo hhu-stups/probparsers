@@ -51,9 +51,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private final Start start;
 	private final RulesMachineChecker rulesMachineChecker;
 	private final ArrayList<CheckException> errorList = new ArrayList<>();
-	private final ArrayList<String> ruleNames = new ArrayList<>();
-	private final ArrayList<TIdentifierLiteral> ruleOperationLiteralList = new ArrayList<>();
-	private final ArrayList<TIdentifierLiteral> computationLiteralList = new ArrayList<>();
 
 	private final List<AIdentifierExpression> variablesList = new ArrayList<>();
 	private final List<PPredicate> invariantList = new ArrayList<>();
@@ -118,18 +115,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		}
 	}
 
-	public List<AbstractOperation> getOperations() {
-		return this.rulesMachineChecker.getOperations();
-	}
-
-	public List<String> getComputations() {
-		List<String> list = new ArrayList<>();
-		for (TIdentifierLiteral literal : computationLiteralList) {
-			list.add(literal.getText());
-		}
-		return list;
-	}
-
 	@Override
 	public void outAAbstractMachineParseUnit(AAbstractMachineParseUnit node) {
 		if (variablesList.isEmpty()) {
@@ -174,7 +159,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outAComputationOperation(AComputationOperation node) {
 		final ComputationOperation compOperation = this.rulesMachineChecker.getComputationOperation(node);
-		computationLiteralList.add(node.getName());
 
 		AOperation operation = new AOperation();
 		AIdentifierExpression nameIdentifier;
@@ -269,8 +253,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outARuleOperation(ARuleOperation node) {
 		final String ruleName = getNameWithReplace(currentRule);
-		ruleOperationLiteralList.add(node.getRuleName());
-		ruleNames.add(ruleName);
 
 		// SELECT ruleName /= "NOT_CHECKED" THEN
 		// ... END
