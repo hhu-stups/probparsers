@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,9 +67,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private int nestedForLoopCount = 0;
 	private int ruleBodyCount = 0;
 
-	// some operations may be deleted by they are replaced other operations
-	private final HashSet<String> operationsToBeDeleted = new HashSet<>();
-	// replaced operation -> replacing operation
+	// replaced operation -> replacing operation; replaced operations are deleted
 	private final Map<String, AbstractOperation> replacedBy = new HashMap<>();
 
 	/**
@@ -100,11 +97,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		this.allOperations = allOperations;
 
 		for (AbstractOperation operation : allOperations.values()) {
-			if (null != operation.getReplacesIdentifier()) {
-				AIdentifierExpression idExpr = operation.getReplacesIdentifier();
-				String opName = Utils.getAIdentifierAsString(idExpr);
-				operationsToBeDeleted.add(opName);
-				replacedBy.put(opName, operation);
+			if (operation.replacesOperation()) {
+				replacedBy.put(operation.getReplacedOperationName(), operation);
 			}
 		}
 	}
@@ -158,7 +152,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseAComputationOperation(AComputationOperation node) {
-		if (operationsToBeDeleted.contains(node.getName().getText())) {
+		if (replacedBy.containsKey(node.getName().getText())) {
 			node.replaceBy(null);
 		} else {
 			ComputationOperation computationOperation = this.rulesMachineChecker.getComputationOperation(node);
@@ -188,10 +182,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 	public void outAComputationOperation(AComputationOperation node) {
 		final ComputationOperation compOperation = this.rulesMachineChecker.getComputationOperation(node);
 		computationLiteralList.add(node.getName());
-		if (operationsToBeDeleted.contains(node.getName().getText())) {
-			node.replaceBy(null);
-			return;
-		}
 
 		AOperation operation = new AOperation();
 		AIdentifierExpression nameIdentifier;
@@ -268,7 +258,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void caseARuleOperation(ARuleOperation node) {
-		if (operationsToBeDeleted.contains(this.rulesMachineChecker.getRuleOperation(node).getOriginalName())) {
+		if (replacedBy.containsKey(this.rulesMachineChecker.getRuleOperation(node).getOriginalName())) {
 			node.replaceBy(null);
 		} else {
 			// transform rule operation
