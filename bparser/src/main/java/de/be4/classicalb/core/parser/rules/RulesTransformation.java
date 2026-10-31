@@ -136,15 +136,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 			return;
 		}
 		final List<PMachineClause> machineClauses = node.getMachineClauses();
-
-		// VARIABLES
-		final AVariablesMachineClause variablesMachineClause = new AVariablesMachineClause(new ArrayList<>(variablesList));
-		machineClauses.add(0, variablesMachineClause);
-
-		// INVARIANT
+		machineClauses.add(0, new AVariablesMachineClause(new ArrayList<>(variablesList)));
 		machineClauses.add(1, new AInvariantMachineClause(createConjunction(invariantList)));
-
-		// INITIALISATION
 		final PSubstitution initialisation = initialisationList.size() == 1 ? initialisationList.get(0)
 				: new ASequenceSubstitution(initialisationList);
 		machineClauses.add(2, new AInitialisationMachineClause(initialisation));
@@ -908,24 +901,15 @@ public class RulesTransformation extends DepthFirstAdapter {
 			subList.add(assign);
 		}
 		if (onSuccessMessage != null) {
-			final List<PExpression> list = new ArrayList<>();
-			final List<PExpression> list2 = new ArrayList<>();
-			for (PExpression id : identifiers) {
-				list.add(id.clone());
-				list2.add(id.clone());
-			}
+			// $OnSuccessStrings := {ids . ids : $AllTuple - $ResultTuple | message}
 			AMemberPredicate member = new AMemberPredicate(
-				list.size() > 1 ? new ACoupleExpression(list) : list.get(0),
-				new AMinusOrSetSubtractExpression(
-					createIdentifier(ALL_TUPLE),
-					createIdentifier(RESULT_TUPLE)
-				)
+					createTuple(identifiers),
+					new AMinusOrSetSubtractExpression(createIdentifier(ALL_TUPLE), createIdentifier(RESULT_TUPLE))
 			);
-
 			// don't use FORCE(.); successful applications can be infinitely many!
 			subList.add(new AAssignSubstitution(
-				createExpressionList(createIdentifier(ON_SUCCESS_STRINGS)),
-				createExpressionList(new AEventBComprehensionSetExpression(list2, onSuccessMessage, member))
+					createExpressionList(createIdentifier(ON_SUCCESS_STRINGS)),
+					createExpressionList(new AEventBComprehensionSetExpression(cloneAll(identifiers), onSuccessMessage, member))
 			));
 		}
 		if (uncheckedMessage != null) {
@@ -935,23 +919,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 					createExpressionList(uncheckedMessage)
 			));
 		}
-		{
-			final List<PExpression> list = new ArrayList<>();
-			final List<PExpression> list2 = new ArrayList<>();
-			for (PExpression id : identifiers) {
-				list.add(id.clone());
-				list2.add(id.clone());
-			}
-			PExpression couple = list.size() > 1 ? new ACoupleExpression(list) : list.get(0);
-			AMemberPredicate member = new AMemberPredicate(couple, createIdentifier(RESULT_TUPLE));
-
-			// don't use FORCE here to allow infinitely many counter examples
-			// enumeration warnings are then handled by RuleResult in prob_java
-			subList.add(new AAssignSubstitution(
+		// $CounterexampleStrings := {ids . ids : $ResultTuple | message}
+		AMemberPredicate member = new AMemberPredicate(createTuple(identifiers), createIdentifier(RESULT_TUPLE));
+		// don't use FORCE here to allow infinitely many counter examples
+		// enumeration warnings are then handled by RuleResult in prob_java
+		subList.add(new AAssignSubstitution(
 				createExpressionList(createIdentifier(COUNTEREXAMPLE_STRINGS)),
-				createExpressionList(new AEventBComprehensionSetExpression(list2, counterExampleMessage, member))
-			));
-		}
+				createExpressionList(new AEventBComprehensionSetExpression(cloneAll(identifiers), counterExampleMessage, member))
+		));
 
 		PSubstitution counterExampleSubstitution = createCounterExampleSubstitution(errorType,
 				createIdentifier(COUNTEREXAMPLE_STRINGS), true);
@@ -984,4 +959,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(newNode);
 	}
 
+	private static List<PExpression> cloneAll(List<PExpression> expressions) {
+		return expressions.stream().map(PExpression::clone).collect(Collectors.toList());
+	}
+
+	// x or (x,y,...) for the given identifiers
+	private static PExpression createTuple(List<PExpression> identifiers) {
+		return identifiers.size() > 1 ? new ACoupleExpression(cloneAll(identifiers)) : identifiers.get(0).clone();
+	}
 }
