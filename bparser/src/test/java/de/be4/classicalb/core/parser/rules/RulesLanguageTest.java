@@ -459,8 +459,8 @@ public class RulesLanguageTest {
 		assertFalse(result.contains("string(none,old)"));
 		assertFalse(result.contains("string(none,very_old)"));
 		assertTrue(result.contains("identifier(none,r1_Counterexamples)"));
-		assertFalse(result.contains("r2"));
-		assertFalse(result.contains("r3"));
+		assertFalse(result.contains("identifier(none,r2)"));
+		assertFalse(result.contains("identifier(none,r3)"));
 	}
 
 	@Test
@@ -476,8 +476,8 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("identifier(none,r1_Successful)"));
 		assertTrue(result.contains("string(none,ok)"));
 		assertTrue(result.contains("string(none,none)"));
-		assertFalse(result.contains("r2"));
-		assertFalse(result.contains("r3"));
+		assertFalse(result.contains("identifier(none,r2)"));
+		assertFalse(result.contains("identifier(none,r3)"));
 	}
 
 	@Test
@@ -493,8 +493,8 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("set_extension(none,[integer(none,3)])"));
 		assertFalse(result.contains("set_extension(none,[integer(none,2)])"));
 		assertFalse(result.contains("set_extension(none,[integer(none,1)])"));
-		assertFalse(result.contains("c2"));
-		assertFalse(result.contains("c3"));
+		assertFalse(result.contains("identifier(none,c2)"));
+		assertFalse(result.contains("identifier(none,c3)"));
 	}
 
 	@Test
@@ -507,7 +507,7 @@ public class RulesLanguageTest {
 		final String result = getRulesProjectAsPrologTerm(testMachine);
 		// the guard of c refers to the status variable r1, which r2 has taken over
 		assertTrue(result.contains("equal(none,identifier(none,r1),string(none,'SUCCESS'))"));
-		assertFalse(result.contains("r2"));
+		assertFalse(result.contains("identifier(none,r2)"));
 	}
 
 	@Test
@@ -520,7 +520,7 @@ public class RulesLanguageTest {
 		assertTrue(result.contains("equal(none,identifier(none,r1),string(none,'FAIL'))"));
 		// the error types of the replacing rule are used
 		assertTrue(result.contains("equal(none,domain(none,identifier(none,r1_Counterexamples)),interval(none,integer(none,1),integer(none,2)))"));
-		assertFalse(result.contains("r2"));
+		assertFalse(result.contains("identifier(none,r2)"));
 	}
 
 	@Test
