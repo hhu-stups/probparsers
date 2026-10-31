@@ -822,20 +822,6 @@ public class RulesTransformation extends DepthFirstAdapter {
 		node.replaceBy(newNode);
 	}
 
-	// @Override
-	// public void caseAMemberPredicate(AMemberPredicate node) {
-	// node.getLeft().apply(this);
-	// node.getRight().apply(this);
-	// if (node.getLeft() instanceof ARecordFieldExpression) {
-	// // rewrite r'a : S to {r'a} /\ S /= {} in order to prevent an
-	// // enumeration point
-	// AIntersectionExpression inter = new
-	// AIntersectionExpression(createSetOfPExpression(node.getLeft()),
-	// node.getRight());
-	// node.replaceBy(new ANotEqualPredicate(inter, new AEmptySetExpression()));
-	// }
-	// }
-
 	public PSubstitution createCounterExampleSubstitutions(final List<PExpression> identifiers,
 			final PPredicate wherePredicate, final PPredicate expectPredicate, final PExpression onSuccessMessage,
 			final PExpression counterExampleMessage, final PExpression uncheckedMessage, final TIntegerLiteral errorTypeNode) {
