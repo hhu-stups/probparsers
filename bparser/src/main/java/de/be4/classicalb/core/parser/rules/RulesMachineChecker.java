@@ -833,161 +833,115 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 
 	@Override
 	public void caseALetSubstitution(ALetSubstitution node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicate().apply(this);
-		node.getSubstitution().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicate(), node.getSubstitution());
 	}
 
 	@Override
 	public void caseALetPredicatePredicate(ALetPredicatePredicate node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getAssignment().apply(this);
-		node.getPred().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getAssignment(), node.getPred());
 	}
 
 	@Override
 	public void caseALetExpressionExpression(ALetExpressionExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getAssignment().apply(this);
-		node.getExpr().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getAssignment(), node.getExpr());
 	}
 
 	@Override
 	public void caseAGeneralProductExpression(AGeneralProductExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseAGeneralSumExpression(AGeneralSumExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseAQuantifiedIntersectionExpression(AQuantifiedIntersectionExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseASymbolicQuantifiedUnionExpression(ASymbolicQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseAQuantifiedUnionExpression(AQuantifiedUnionExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseASymbolicComprehensionSetExpression(ASymbolicComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates());
 	}
 
 	@Override
 	public void caseAComprehensionSetExpression(AComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates());
 	}
 
 	@Override
 	public void caseASymbolicEventBComprehensionSetExpression(ASymbolicEventBComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseAEventBComprehensionSetExpression(AEventBComprehensionSetExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicates().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicates(), node.getExpression());
 	}
 
 	@Override
 	public void caseASymbolicLambdaExpression(ASymbolicLambdaExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicate().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicate(), node.getExpression());
 	}
 
 	@Override
 	public void caseALambdaExpression(ALambdaExpression node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicate().apply(this);
-		node.getExpression().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicate(), node.getExpression());
 	}
 
 	@Override
 	public void caseAExistsPredicate(AExistsPredicate node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getPredicate().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getPredicate());
 	}
 
 	@Override
 	public void caseAForallPredicate(AForallPredicate node) {
-		this.identifierScope.createNewScope(new ArrayList<>(node.getIdentifiers()));
-		node.getImplication().apply(this);
-		this.identifierScope.removeScope();
+		visitInScope(node.getIdentifiers(), node.getImplication());
 	}
 
 	// definitions
 	@Override
 	public void caseAPredicateDefinitionDefinition(APredicateDefinitionDefinition node) {
-		final String name = node.getName().getText();
-		this.definitions.add(name);
-		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
-		node.getRhs().apply(this);
-		this.identifierScope.removeScope();
+		this.definitions.add(node.getName().getText());
+		visitInScope(node.getParameters(), node.getRhs());
 	}
 
 	@Override
 	public void caseAExpressionDefinitionDefinition(AExpressionDefinitionDefinition node) {
-		final String name = node.getName().getText();
-		this.definitions.add(name);
-		if ("GOAL".equals(name)) {
-			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
-			return;
-		}
-		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
-		node.getRhs().apply(this);
-		this.identifierScope.removeScope();
+		checkNonPredicateDefinition(node, node.getName().getText(), node.getParameters(), node.getRhs());
 	}
 
 	@Override
 	public void caseASubstitutionDefinitionDefinition(ASubstitutionDefinitionDefinition node) {
-		final String name = node.getName().getText();
+		checkNonPredicateDefinition(node, node.getName().getText(), node.getParameters(), node.getRhs());
+	}
+
+	private void checkNonPredicateDefinition(PDefinition node, String name, List<PExpression> parameters, Node rhs) {
 		this.definitions.add(name);
 		if ("GOAL".equals(name)) {
 			errorList.add(new CheckException("The GOAL definition must be a predicate.", node));
 			return;
 		}
-		this.identifierScope.createNewScope(new ArrayList<>(node.getParameters()));
-		node.getRhs().apply(this);
+		visitInScope(parameters, rhs);
+	}
+
+	private void visitInScope(List<PExpression> identifiers, Node... children) {
+		this.identifierScope.createNewScope(new ArrayList<>(identifiers));
+		for (Node child : children) {
+			child.apply(this);
+		}
 		this.identifierScope.removeScope();
 	}
 
