@@ -159,65 +159,38 @@ public class RulesTransformation extends DepthFirstAdapter {
 	@Override
 	public void outAComputationOperation(AComputationOperation node) {
 		final ComputationOperation compOperation = this.rulesMachineChecker.getComputationOperation(node);
-
-		AOperation operation = new AOperation();
-		AIdentifierExpression nameIdentifier;
-		{
-			// defining the operation name
-			// the SableCC node AOperation.class requires a list of
-			// TIdentifierLiterals as name
-			final List<TIdentifierLiteral> operationNameList = new ArrayList<>();
-			if (null != compOperation.getReplacesIdentifier()) {
-
-				// renaming the operation
-				final TIdentifierLiteral first = compOperation.getReplacesIdentifier().getIdentifier().getFirst().clone();
-				first.setText(getNameWithReplace(compOperation));
-				operationNameList.add(first);
-				nameIdentifier = createIdentifier(first.getText(), compOperation.getReplacesIdentifier());
-			} else {
-				operationNameList.add(node.getName().clone());
-				// TODO refactor
-				nameIdentifier = new AIdentifierExpression(operationNameList).clone();
-			}
-			operation.setOpName(operationNameList);
+		// operation name: a replacing computation takes over the name of the first computation of its chain
+		final TIdentifierLiteral nameLiteral;
+		final AIdentifierExpression nameIdentifier;
+		if (compOperation.replacesOperation()) {
+			nameLiteral = compOperation.getReplacesIdentifier().getIdentifier().getFirst().clone();
+			nameLiteral.setText(getNameWithReplace(compOperation));
+			nameIdentifier = createIdentifier(nameLiteral.getText(), compOperation.getReplacesIdentifier());
+		} else {
+			nameLiteral = node.getName().clone();
+			nameIdentifier = new AIdentifierExpression(Collections.singletonList(nameLiteral.clone()));
 		}
 
-		AEqualPredicate grd1 = new AEqualPredicate(nameIdentifier.clone(), createStringExpression(COMPUTATION_NOT_EXECUTED));
-		ASelectSubstitution select = new ASelectSubstitution();
-		{
-			// guard
-			final List<PPredicate> selectConditionList = new ArrayList<>();
-			selectConditionList.add(grd1);
-			selectConditionList.addAll(getOperationDependenciesAsPredicateList(compOperation));
-			select.setCondition(createConjunction(selectConditionList));
-		}
-		{
-			// substitution
-			final ArrayList<PExpression> varList = new ArrayList<>();
-			final ArrayList<PExpression> exprList = new ArrayList<>();
-			varList.add(nameIdentifier.clone());
-			exprList.add(new AStringExpression(new TStringLiteral(COMPUTATION_EXECUTED)));
-			AAssignSubstitution assign = new AAssignSubstitution(varList, exprList);
-			select.setThen(new ASequenceSubstitution(createSubstitutionList(node.getBody(), assign)));
-		}
-
-		operation.setOperationBody(select);
+		// SELECT comp = "NOT_EXECUTED" & dependencies THEN body; comp := "EXECUTED" END
+		final List<PPredicate> selectConditionList = new ArrayList<>();
+		selectConditionList.add(new AEqualPredicate(nameIdentifier.clone(), createStringExpression(COMPUTATION_NOT_EXECUTED)));
+		selectConditionList.addAll(getOperationDependenciesAsPredicateList(compOperation));
+		final AAssignSubstitution assign = new AAssignSubstitution(createExpressionList(nameIdentifier.clone()),
+				createExpressionList(createStringExpression(COMPUTATION_EXECUTED)));
+		final ASelectSubstitution select = new ASelectSubstitution(createConjunction(selectConditionList),
+				new ASequenceSubstitution(createSubstitutionList(node.getBody(), assign)), new ArrayList<>(), null);
 		// replacing the computation by an ordinary operation
-		node.replaceBy(operation);
+		node.replaceBy(new AOperation(new ArrayList<>(), Collections.singletonList(nameLiteral), new ArrayList<>(), select));
 
 		// create variables in VARIABLES clause
 		variablesList.add(nameIdentifier.clone());
 
-		/*-
-		 * create predicate in INVARIANT
-		 * Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED","COMPUTATION_DISABLED" }
-		 */
+		// create predicate in INVARIANT
+		// Compute_foo : {"COMPUTATION_EXECUTED", "COMPUTATION_NOT_EXECUTED","COMPUTATION_DISABLED" }
 		final ASetExtensionExpression set = new ASetExtensionExpression(
-			Stream.of(COMPUTATION_EXECUTED, COMPUTATION_NOT_EXECUTED, COMPUTATION_DISABLED)
-				.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
-		final AMemberPredicate member = new AMemberPredicate(nameIdentifier.clone(), set);
-
-		invariantList.add(member);
+				Stream.of(COMPUTATION_EXECUTED, COMPUTATION_NOT_EXECUTED, COMPUTATION_DISABLED)
+						.map(ASTBuilder::createStringExpression).collect(Collectors.toList()));
+		invariantList.add(new AMemberPredicate(nameIdentifier.clone(), set));
 
 		PExpression value;
 		if (compOperation.getActivationPredicate() != null) {
@@ -228,9 +201,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 			value = createStringExpression(COMPUTATION_NOT_EXECUTED);
 		}
 		// create substitution in INITIALISATION clause
-		final AAssignSubstitution initSub = new AAssignSubstitution(createExpressionList(nameIdentifier.clone()),
-				createExpressionList(value));
-		initialisationList.add(initSub);
+		initialisationList.add(new AAssignSubstitution(createExpressionList(nameIdentifier.clone()),
+				createExpressionList(value)));
 	}
 
 	@Override
