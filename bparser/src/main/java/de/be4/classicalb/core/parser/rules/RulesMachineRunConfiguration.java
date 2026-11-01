@@ -69,13 +69,9 @@ public class RulesMachineRunConfiguration {
 			if (name.startsWith(PROB_PREFERENCES_PREFIX)) {
 				String prefName = name.substring(PROB_PREFERENCES_PREFIX.length());
 				if (node.getRhs() instanceof AIntegerExpression) {
-					AIntegerExpression aIntExpr = (AIntegerExpression) node.getRhs();
-					String value = aIntExpr.getLiteral().getText();
-					preferencesInMainMachine.put(prefName, value);
+					preferencesInMainMachine.put(prefName, ((AIntegerExpression) node.getRhs()).getLiteral().getText());
 				} else if (node.getRhs() instanceof AStringExpression) {
-					AStringExpression aStringExpr = (AStringExpression) node.getRhs();
-					String value = aStringExpr.getContent().getText();
-					preferencesInMainMachine.put(prefName, value);
+					preferencesInMainMachine.put(prefName, ((AStringExpression) node.getRhs()).getContent().getText());
 				} else if (node.getRhs() instanceof ABooleanTrueExpression) {
 					preferencesInMainMachine.put(prefName, "TRUE");
 				} else if (node.getRhs() instanceof ABooleanFalseExpression) {
@@ -112,14 +108,8 @@ public class RulesMachineRunConfiguration {
 		}
 
 		private RuleGoalAssumption getRuleCoverage(String ruleName) {
-			if (rulesGoalAssumptions.containsKey(ruleName)) {
-				return rulesGoalAssumptions.get(ruleName);
-			} else {
-				RuleGoalAssumption ruleGoalAssumption = new RuleGoalAssumption(ruleName,
-					(RuleOperation) allOperations.get(ruleName));
-				rulesGoalAssumptions.put(ruleName, ruleGoalAssumption);
-				return ruleGoalAssumption;
-			}
+			return rulesGoalAssumptions.computeIfAbsent(ruleName,
+					name -> new RuleGoalAssumption(name, (RuleOperation) allOperations.get(name)));
 		}
 
 		@Override
@@ -144,11 +134,9 @@ public class RulesMachineRunConfiguration {
 			case RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE:
 			case RulesGrammar.FAILED_RULE_ERROR_TYPE:
 				RuleGoalAssumption ruleGoalAssumption = getRuleCoverage(arguments.get(0));
-				AIntegerExpression intExpr = (AIntegerExpression) arguments.get(1);
-				String text = intExpr.getLiteral().getText();
-				int errorType = Integer.parseInt(text);
+				int errorType = Integer.parseInt(((AIntegerExpression) arguments.get(1)).getLiteral().getText());
 				if (RulesGrammar.SUCCEEDED_RULE_ERROR_TYPE.equals(operatorName)) {
-					getRuleCoverage(arguments.get(0)).addErrorTypeAssumedToSucceed(errorType);
+					ruleGoalAssumption.addErrorTypeAssumedToSucceed(errorType);
 				} else {
 					ruleGoalAssumption.addErrorTypeAssumedToFail(errorType);
 				}

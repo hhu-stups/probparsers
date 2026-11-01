@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -86,11 +88,7 @@ public abstract class AbstractOperation {
 	}
 
 	public String getName() {
-		if (replacesOperation()) {
-			return getReplacedOperationName();
-		} else {
-			return this.originalName.getText();
-		}
+		return replacesOperation() ? getReplacedOperationName() : this.originalName.getText();
 	}
 
 	public void addTags(List<String> list) {
@@ -119,13 +117,8 @@ public abstract class AbstractOperation {
 	public Set<AbstractOperation> getRequiredDependencies() {
 		if (this.requiredDependencies == null) {
 			this.requiredDependencies = new HashSet<>();
-			HashSet<AIdentifierExpression> aIdentifierSet = new HashSet<>();
-			aIdentifierSet.addAll(this.dependsOnComputationList);
-			aIdentifierSet.addAll(this.dependsOnRuleList);
-			HashSet<String> directDependencies = new HashSet<>();
-			for (AIdentifierExpression aIdentifier : aIdentifierSet) {
-				directDependencies.add(aIdentifier.getIdentifier().get(0).getText());
-			}
+			final Set<String> directDependencies = Stream.concat(dependsOnComputationList.stream(), dependsOnRuleList.stream())
+					.map(id -> id.getIdentifier().get(0).getText()).collect(Collectors.toSet());
 			if (transitiveDependencies != null) {
 				for (AbstractOperation abstractOperation : this.transitiveDependencies) {
 					String opName = abstractOperation.getOriginalName();
@@ -147,19 +140,13 @@ public abstract class AbstractOperation {
 	}
 
 	public void addReadVariable(AIdentifierExpression identifier) {
-		String varName = identifier.getIdentifier().get(0).getText();
-		// storing the first occurrence an identifier read
-		if (!readMap.containsKey(varName)) {
-			readMap.put(varName, identifier);
-		}
+		// storing the first occurrence of an identifier read
+		readMap.putIfAbsent(identifier.getIdentifier().get(0).getText(), identifier);
 	}
 
 	public void addFunctionCall(TIdentifierLiteral identifier) {
-		String name = identifier.getText();
-		// storing the first occurrence an identifier read
-		if (!functionCallMap.containsKey(name)) {
-			functionCallMap.put(name, identifier);
-		}
+		// storing the first occurrence of a function call
+		functionCallMap.putIfAbsent(identifier.getText(), identifier);
 	}
 
 	public AIdentifierExpression getVariableReadByName(String name) {
@@ -171,11 +158,7 @@ public abstract class AbstractOperation {
 	}
 
 	public List<String> getMachineReferencesAsString() {
-		List<String> list = new ArrayList<>();
-		for (MachineReference reference : this.machineReferences) {
-			list.add(reference.getName());
-		}
-		return list;
+		return machineReferences.stream().map(MachineReference::getName).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	public boolean replacesOperation() {
@@ -199,12 +182,8 @@ public abstract class AbstractOperation {
 	}
 
 	public List<TIdentifierLiteral> getImplicitDependenciesToComputations() {
-		List<TIdentifierLiteral> result = new ArrayList<>();
-		for (ComputationOperation comp : implicitDependenciesToComputations) {
-			TIdentifierLiteral nameLiteral = comp.getNameLiteral();
-			result.add(nameLiteral);
-		}
-		return result;
+		return implicitDependenciesToComputations.stream().map(AbstractOperation::getNameLiteral)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@SuppressWarnings("unchecked")

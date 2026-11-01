@@ -21,7 +21,6 @@ import de.be4.classicalb.core.parser.ParsingBehaviour;
 import de.be4.classicalb.core.parser.analysis.prolog.INodeIds;
 import de.be4.classicalb.core.parser.analysis.prolog.MachineReference;
 import de.be4.classicalb.core.parser.analysis.prolog.NodeFileNumbers;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.node.AIdentifierExpression;
@@ -58,39 +57,30 @@ public class RulesProject {
 	}
 
 	public void parseRulesMachines(String mainMachineAsString, String... referencedMachines) {
-		final IModel mainMachine = RulesParseUnit.parse(mainMachineAsString);
-		this.bModels.add(mainMachine);
-		if (mainMachine.hasError()) {
-			this.bExceptionList.addAll(mainMachine.getCompoundException().getBExceptions());
-		}
+		addModel(RulesParseUnit.parse(mainMachineAsString));
 		for (String referencedMachine : referencedMachines) {
-			final IModel machine = RulesParseUnit.parse(referencedMachine);
-			this.bModels.add(machine);
-			if (machine.hasError()) {
-				this.bExceptionList.addAll(machine.getCompoundException().getBExceptions());
-			}
+			addModel(RulesParseUnit.parse(referencedMachine));
 		}
 	}
 
 	public void parseProject(File mainFile) {
-		RulesParseUnit mainModel = RulesParseUnit.parse(mainFile, parsingBehaviour);
-		if (mainModel.hasError()) {
-			final BCompoundException compound = mainModel.getCompoundException();
-			this.bExceptionList.addAll(compound.getBExceptions());
-		}
-		bModels.add(mainModel);
+		final RulesParseUnit mainModel = RulesParseUnit.parse(mainFile, parsingBehaviour);
+		addModel(mainModel);
 		Deque<MachineReference> fifo = new LinkedList<>(mainModel.getMachineReferences());
 		while (!fifo.isEmpty()) {
 			final MachineReference modelReference = fifo.pollFirst();
 			if (isANewModel(modelReference)) {
-				File file = new File(modelReference.getPath());
-				final IModel bModel = RulesParseUnit.parse(file, parsingBehaviour);
-				if (bModel.hasError()) {
-					this.bExceptionList.addAll(bModel.getCompoundException().getBExceptions());
-				}
-				bModels.add(bModel);
+				final IModel bModel = RulesParseUnit.parse(new File(modelReference.getPath()), parsingBehaviour);
+				addModel(bModel);
 				fifo.addAll(bModel.getMachineReferences());
 			}
+		}
+	}
+
+	private void addModel(IModel model) {
+		bModels.add(model);
+		if (model.hasError()) {
+			this.bExceptionList.addAll(model.getCompoundException().getBExceptions());
 		}
 	}
 
@@ -190,12 +180,9 @@ public class RulesProject {
 	private List<String> getPromotesList() {
 		final List<String> promotesList = new ArrayList<>();
 		for (AbstractOperation abstractOperation : allOperations.values()) {
-			if (abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation) {
-				if (abstractOperation.replacesOperation()) {
-					// replacement operations are not added here because the
-					// replaced operation will be added
-					continue;
-				}
+			// a replacing operation is promoted under the name of the replaced operation
+			if ((abstractOperation instanceof ComputationOperation || abstractOperation instanceof RuleOperation)
+					&& !abstractOperation.replacesOperation()) {
 				promotesList.add(abstractOperation.getOriginalName());
 			}
 		}
@@ -301,8 +288,7 @@ public class RulesProject {
 		boolean errorOccurred = false;
 		for (TIdentifierLiteral tIdentifierLiteral : abstractOperation.getFunctionCalls()) {
 			final String functionName = tIdentifierLiteral.getText();
-			if (!allOperations.containsKey(functionName)
-					|| !(allOperations.get(functionName) instanceof FunctionOperation)) {
+			if (!(allOperations.get(functionName) instanceof FunctionOperation)) {
 				this.bExceptionList.add(new BException(abstractOperation.getFileName(),
 						new CheckException("Unknown FUNCTION name '" + functionName + "'", tIdentifierLiteral)));
 				errorOccurred = true;
