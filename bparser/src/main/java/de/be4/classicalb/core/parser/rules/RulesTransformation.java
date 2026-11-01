@@ -23,7 +23,6 @@ import de.be4.classicalb.core.parser.exceptions.CheckException;
 import de.be4.classicalb.core.parser.grammars.RulesGrammar;
 import de.be4.classicalb.core.parser.node.*;
 import de.be4.classicalb.core.parser.util.ASTBuilder;
-import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.output.PrologTermOutput;
 
@@ -50,7 +49,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 	private final IDefinitions iDefinitions;
 	private final Start start;
 	private final RulesMachineChecker rulesMachineChecker;
-	private final ArrayList<CheckException> errorList = new ArrayList<>();
+	private final List<CheckException> errorList = new ArrayList<>();
 
 	private final List<AIdentifierExpression> variablesList = new ArrayList<>();
 	private final List<PPredicate> invariantList = new ArrayList<>();
@@ -107,11 +106,8 @@ public class RulesTransformation extends DepthFirstAdapter {
 		if (!this.errorList.isEmpty()) {
 			File machineFile = this.rulesMachineChecker.getFile();
 			String machineFilePath = machineFile == null ? null : machineFile.getPath();
-			List<BException> list = new ArrayList<>();
-			for (CheckException checkException : this.errorList) {
-				list.add(new BException(machineFilePath, checkException));
-			}
-			throw new BCompoundException(list);
+			throw new BCompoundException(this.errorList.stream()
+					.map(e -> new BException(machineFilePath, e)).collect(Collectors.toList()));
 		}
 	}
 
