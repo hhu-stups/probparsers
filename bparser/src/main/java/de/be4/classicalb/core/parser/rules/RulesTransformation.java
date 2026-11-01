@@ -627,15 +627,14 @@ public class RulesTransformation extends DepthFirstAdapter {
 
 	@Override
 	public void outAForLoopSubstitution(AForLoopSubstitution node) {
-		/*-
-		 * FOR x IN set DO sub END
-		 * or
-		 * FOR x,y IN set DO sub END
-		 * 
-		 */
+		// FOR x IN set DO sub END
+		// or
+		// FOR x,y IN set DO sub END
 		nestedForLoopCount--;
 		final String localSetVariableName = "$SET" + nestedForLoopCount;
 		final String localLoopCounter = "$c" + nestedForLoopCount;
+
+		final AIdentifierExpression setVariable = createIdentifier(localSetVariableName, node.getSet());
 
 		// G_Set := set
 		final PSubstitution assignSetVariable = new AAssignSubstitution(
@@ -643,7 +642,7 @@ public class RulesTransformation extends DepthFirstAdapter {
 				createExpressionList(node.getSet().clone()));
 		final PSubstitution assignCVariable = new AAssignSubstitution(
 				createExpressionList(createIdentifier(localLoopCounter)),
-				createExpressionList(new ACardExpression(createIdentifier(localSetVariableName, node.getSet()))));
+				createExpressionList(new ACardExpression(setVariable.clone())));
 
 		final AWhileSubstitution whileSub = createPositionedNode(new AWhileSubstitution(), node);
 		final List<PSubstitution> subList = new ArrayList<>();
@@ -651,14 +650,12 @@ public class RulesTransformation extends DepthFirstAdapter {
 		subList.add(assignCVariable);
 		subList.add(whileSub);
 		final AVarSubstitution varSub = createPositionedNode(
-				new AVarSubstitution(createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
-						createIdentifier(localLoopCounter)), new ASequenceSubstitution(subList)),
+				new AVarSubstitution(createExpressionList(setVariable.clone(), createIdentifier(localLoopCounter)),
+						new ASequenceSubstitution(subList)),
 				node);
 
 		// WHILE set /= {}
-		final ANotEqualPredicate whileCon = new ANotEqualPredicate(
-				createIdentifier(localSetVariableName, node.getSet()), new AEmptySetExpression());
-		whileSub.setCondition(whileCon);
+		whileSub.setCondition(new ANotEqualPredicate(setVariable.clone(), new AEmptySetExpression()));
 		// INVARIANT btrue
 		whileSub.setInvariant(new ATruthPredicate());
 
@@ -668,48 +665,29 @@ public class RulesTransformation extends DepthFirstAdapter {
 		// VAR x IN ...
 		final AVarSubstitution varSub2 = new AVarSubstitution();
 		whileSub.setDoSubst(varSub2);
-		List<PExpression> varIdList = new ArrayList<>();
-		for (PExpression pExpression : node.getIdentifiers()) {
-			varIdList.add(pExpression.clone());
-		}
-		varSub2.setIdentifiers(varIdList);
+		final List<PExpression> varIdList = node.getIdentifiers();
+		varSub2.setIdentifiers(cloneAll(varIdList));
 
 		addChooseDefinition(iDefinitions);
-		PExpression chooseCall = callExternalFunction(CHOOSE, createIdentifier(localSetVariableName, node.getSet()));
-		PSubstitution assignSub;
+		PExpression chooseCall = callExternalFunction(CHOOSE, setVariable.clone());
+		final PSubstitution assignSub;
+		final PExpression element;
 		if (varIdList.size() >= 2) {
-			// <code> x,y :: {CHOOSE(set)}; </code>
-			List<PExpression> assignIdList = new ArrayList<>();
-			for (PExpression pExpression : node.getIdentifiers()) {
-				assignIdList.add(pExpression.clone());
-			}
-			assignSub = new ABecomesElementOfSubstitution(assignIdList,
+			// x,y :: {CHOOSE(set)}; G_Set := G_Set \ {(x,y)}
+			assignSub = new ABecomesElementOfSubstitution(cloneAll(varIdList),
 					new ASetExtensionExpression(createExpressionList(chooseCall)));
+			element = createNestedCouple(cloneAll(varIdList));
 		} else {
-			// <code> x := CHOOSE(set); </code>
-			assignSub = new AAssignSubstitution(createExpressionList(node.getIdentifiers().get(0).clone()),
+			// x := CHOOSE(set); G_Set := G_Set \ {x}
+			assignSub = new AAssignSubstitution(createExpressionList(varIdList.get(0).clone()),
 					createExpressionList(chooseCall));
+			element = varIdList.get(0).clone();
 		}
-
-		// <code> G_Set := G_Set \ {x} </code>
-		PExpression element;
-		if (varIdList.size() >= 2) {
-			List<PExpression> ids = new ArrayList<>();
-			for (PExpression pExpression : node.getIdentifiers()) {
-				ids.add(pExpression.clone());
-			}
-			element = createNestedCouple(ids);
-		} else {
-			element = node.getIdentifiers().get(0).clone();
-		}
-
-		// <code> G_Set \ {CHOOSE(G_Set)} </code>
-		PExpression rhs = new AMinusOrSetSubtractExpression(createIdentifier(localSetVariableName, node.getSet()),
+		PExpression rhs = new AMinusOrSetSubtractExpression(setVariable.clone(),
 				new ASetExtensionExpression(createExpressionList(element)));
 
 		PSubstitution assignSetVariable2 = new AAssignSubstitution(
-				createExpressionList(createIdentifier(localSetVariableName, node.getSet()),
-						createIdentifier(localLoopCounter)),
+				createExpressionList(setVariable.clone(), createIdentifier(localLoopCounter)),
 				createExpressionList(rhs, new AMinusOrSetSubtractExpression(createIdentifier(localLoopCounter),
 						createIntegerExpression(1))));
 
