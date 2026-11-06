@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.Definitions;
@@ -43,11 +45,10 @@ public class RulesProject {
 	static final String COMPOSITION_MACHINE_NAME = "__RULES_MACHINE_Composition";
 	private ParsingBehaviour parsingBehaviour = new ParsingBehaviour();
 	private final List<BException> bExceptionList = new ArrayList<>();
-	private final LinkedHashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
+	private final HashMap<String, AbstractOperation> allOperations = new LinkedHashMap<>();
 	protected final List<IModel> bModels = new ArrayList<>();
 	protected final INodeIds nodeIdAssignment = new NodeFileNumbers();
-	private final List<File> filesLoaded = new ArrayList<>(); // rules machine files
-														// and definitions files
+	private final List<File> filesLoaded = new ArrayList<>(); // rules machine files and definitions files
 	private final Map<String, String> constantStringValues = new HashMap<>();
 	private RulesMachineRunConfiguration rulesMachineRunConfiguration;
 	private final Map<String, String> operationReplacementMap = new HashMap<>();
@@ -229,22 +230,19 @@ public class RulesProject {
 				this.bExceptionList.add(new BException(newOp.getFileName(),
 						new CheckException(String.format("Operation '%s' is an invalid replacement for operation '%s'.",
 								newOpName, replacedOperationName), newOp.getNameLiteral())));
-			} else {
-				if (replacedOp instanceof ComputationOperation) {
-					ComputationOperation oldComp = (ComputationOperation) replacedOp;
-					ComputationOperation newComp = (ComputationOperation) newOp;
-					Set<String> oldVariables = oldComp.getDefineVariables();
-					Set<String> newVariables = newComp.getDefineVariables();
-					if (!oldVariables.containsAll(newVariables) || !newVariables.containsAll(oldVariables)) {
-						this.bExceptionList
-								.add(new BException(newOp.getFileName(),
-										new CheckException(String.format(
-												"Operation '%s' is an invalid replacement for operation '%s'.",
-												newOpName, replacedOperationName), newOp.getNameLiteral())));
-					}
+			} else if (replacedOp instanceof ComputationOperation) {
+				ComputationOperation oldComp = (ComputationOperation) replacedOp;
+				ComputationOperation newComp = (ComputationOperation) newOp;
+				Set<String> oldVariables = oldComp.getDefineVariables();
+				Set<String> newVariables = newComp.getDefineVariables();
+				if (!oldVariables.containsAll(newVariables) || !newVariables.containsAll(oldVariables)) {
+					this.bExceptionList
+							.add(new BException(newOp.getFileName(),
+									new CheckException(String.format(
+											"Operation '%s' is an invalid replacement for operation '%s'.",
+											newOpName, replacedOperationName), newOp.getNameLiteral())));
 				}
 			}
-
 		}
 
 	}
@@ -278,8 +276,10 @@ public class RulesProject {
 
 	private void checkDependencies() {
 		for (AbstractOperation operation : allOperations.values()) {
-			checkDependsOnComputations(operation);
-			checkDependsOnRules(operation);
+			checkDependsOn(operation, operation.getDependsOnComputationList(), ComputationOperation.class,
+					"Identifier '%s' is not a COMPUTATION.");
+			checkDependsOn(operation, operation.getDependsOnRulesList(), RuleOperation.class,
+					"Operation '%s' is not a RULE operation.");
 			checkFunctionCalls(operation);
 		}
 	}
@@ -300,57 +300,26 @@ public class RulesProject {
 
 	}
 
-	private void checkDependsOnRules(AbstractOperation operation) {
+	// DEPENDS_ON_RULE / DEPENDS_ON_COMPUTATION: the operations must exist, have the expected type and be visible
+	private void checkDependsOn(AbstractOperation operation, List<AIdentifierExpression> dependencies,
+			Class<? extends AbstractOperation> expectedType, String wrongTypeMessage) {
 		boolean errorOccurred = false;
-		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnRulesList()) {
+		for (AIdentifierExpression aIdentifierExpression : dependencies) {
 			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-			if (allOperations.containsKey(name)) {
-				AbstractOperation abstractOperation = allOperations.get(name);
-				if (!(abstractOperation instanceof RuleOperation)) {
-					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
-							"Operation '" + name + "' is not a RULE operation.", aIdentifierExpression)));
-					errorOccurred = true;
-				}
-			} else {
+			final AbstractOperation abstractOperation = allOperations.get(name);
+			if (abstractOperation == null) {
 				errorOccurred = true;
 				this.bExceptionList.add(new BException(operation.getFileName(),
 						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
-			}
-		}
-		if (!errorOccurred) {
-			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnRulesList());
-		}
-	}
-
-	private void checkDependsOnComputations(AbstractOperation operation) {
-		boolean errorOccurred = false;
-		for (AIdentifierExpression aIdentifierExpression : operation.getDependsOnComputationList()) {
-			final String name = aIdentifierExpression.getIdentifier().get(0).getText();
-			if (allOperations.containsKey(name)) {
-				AbstractOperation abstractOperation = allOperations.get(name);
-				if (!(abstractOperation instanceof ComputationOperation)) {
-					this.bExceptionList.add(new BException(operation.getFileName(), new CheckException(
-							"Identifier '" + name + "' is not a COMPUTATION.", aIdentifierExpression)));
-					errorOccurred = true;
-				}
-			} else {
-				errorOccurred = true;
+			} else if (!expectedType.isInstance(abstractOperation)) {
 				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Unknown operation: '" + name + "'.", aIdentifierExpression)));
+						new CheckException(String.format(wrongTypeMessage, name), aIdentifierExpression)));
+				errorOccurred = true;
 			}
 		}
 		if (!errorOccurred) {
-			checkVisibilityOfAIdentifierList(operation, operation.getDependsOnComputationList());
+			checkVisibilityOfTIdentifierList(operation, getTIdentifierLiterals(dependencies));
 		}
-	}
-
-	private void checkVisibilityOfAIdentifierList(AbstractOperation operation,
-			List<AIdentifierExpression> dependencyList) {
-		List<TIdentifierLiteral> tidentifierList = new ArrayList<>();
-		for (AIdentifierExpression aIdentifier : dependencyList) {
-			tidentifierList.add(aIdentifier.getIdentifier().get(0));
-		}
-		checkVisibilityOfTIdentifierList(operation, tidentifierList);
 	}
 
 	private void checkVisibilityOfTIdentifierList(AbstractOperation operation,
@@ -436,11 +405,7 @@ public class RulesProject {
 			 */
 			return;
 		}
-		Map<String, RulesParseUnit> map = new HashMap<>();
-		for (IModel model : bModels) {
-			RulesParseUnit parseUnit = (RulesParseUnit) model;
-			map.put(parseUnit.getMachineName(), parseUnit);
-		}
+		final Map<String, RulesParseUnit> map = getParseUnitsByName();
 		// Every machine is checked separately: an identifier is known in a machine if it is
 		// declared in the machine itself or in one of the machines it (transitively) references.
 		for (IModel model : bModels) {
@@ -460,15 +425,18 @@ public class RulesProject {
 		}
 	}
 
+	// the node with the smallest source position (nodes without position last)
 	private static Node getFirstNode(Collection<Node> nodes) {
-		Node first = null;
-		for (Node node : nodes) {
-			if (first == null || (node.getStartPos() != null
-					&& (first.getStartPos() == null || node.getStartPos().compareTo(first.getStartPos()) < 0))) {
-				first = node;
-			}
+		return Collections.min(nodes, Comparator.comparing(Node::getStartPos,
+				Comparator.nullsLast(Comparator.naturalOrder())));
+	}
+
+	private Map<String, RulesParseUnit> getParseUnitsByName() {
+		final Map<String, RulesParseUnit> map = new HashMap<>();
+		for (IModel model : bModels) {
+			map.put(model.getMachineName(), (RulesParseUnit) model);
 		}
-		return first;
+		return map;
 	}
 
 	private Set<String> checkIdentifiers(RulesParseUnit parseUnit, Map<String, RulesParseUnit> map, Set<String> visited) {
@@ -493,11 +461,7 @@ public class RulesProject {
 		if (this.hasErrors()) {
 			return;
 		}
-		Map<String, RulesParseUnit> map = new HashMap<>();
-		for (IModel model : bModels) {
-			RulesParseUnit parseUnit = (RulesParseUnit) model;
-			map.put(parseUnit.getMachineName(), parseUnit);
-		}
+		final Map<String, RulesParseUnit> map = getParseUnitsByName();
 		for (IModel model : bModels) {
 			if (model instanceof RulesParseUnit) {
 				RulesParseUnit rulesParseUnit = (RulesParseUnit) model;
@@ -529,9 +493,7 @@ public class RulesProject {
 	private void findTransitiveDependencies() {
 		if (this.hasErrors())
 			return;
-		Deque<AbstractOperation> todoList = new LinkedList<>(allOperations.values());
-		while (!todoList.isEmpty()) {
-			AbstractOperation operation = todoList.poll();
+		for (AbstractOperation operation : allOperations.values()) {
 			if (operation.getTransitiveDependencies() == null) {
 				findTransitiveDependencies(operation, new ArrayList<>());
 			}
@@ -541,10 +503,8 @@ public class RulesProject {
 	private Set<AbstractOperation> findTransitiveDependencies(final AbstractOperation operation,
 			final List<AbstractOperation> ancestors) {
 		ancestors.add(operation);
-		List<TIdentifierLiteral> directDependencies = new ArrayList<>();
-		directDependencies
-				.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnComputationList()));
-		directDependencies.addAll(convertAIdentifierListToTIdentifierLiteralList(operation.getDependsOnRulesList()));
+		List<TIdentifierLiteral> directDependencies = getTIdentifierLiterals(operation.getDependsOnComputationList());
+		directDependencies.addAll(getTIdentifierLiterals(operation.getDependsOnRulesList()));
 		directDependencies.addAll(operation.getImplicitDependenciesToComputations());
 		directDependencies.addAll(operation.getFunctionCalls());
 
@@ -571,33 +531,20 @@ public class RulesProject {
 		return new HashSet<>(transitiveDependenciesFound);
 	}
 
-	private List<TIdentifierLiteral> convertAIdentifierListToTIdentifierLiteralList(List<AIdentifierExpression> list) {
-		List<TIdentifierLiteral> result = new ArrayList<>();
-		for (AIdentifierExpression aIdentifier : list) {
-			result.add(aIdentifier.getIdentifier().get(0));
-		}
-		return result;
+	private static List<TIdentifierLiteral> getTIdentifierLiterals(List<AIdentifierExpression> list) {
+		return list.stream().map(id -> id.getIdentifier().get(0)).collect(Collectors.toList());
 	}
 
 	private boolean checkForCycles(AbstractOperation operation, List<TIdentifierLiteral> directDependencies,
 			List<AbstractOperation> ancestors) {
-		List<String> ancestorsNames = new ArrayList<>();
-		for (AbstractOperation op : ancestors) {
-			String opName = op.getOriginalName();
-			ancestorsNames.add(opName);
-		}
+		List<String> ancestorsNames = ancestors.stream().map(AbstractOperation::getOriginalName).collect(Collectors.toList());
 		for (TIdentifierLiteral id : directDependencies) {
 			final String opName = id.getText();
 			if (ancestorsNames.contains(opName)) {
-				StringBuilder sb = new StringBuilder();
-				for (int index = ancestorsNames.indexOf(opName); index < ancestors.size(); index++) {
-					final String name = ancestors.get(index).getOriginalName();
-					sb.append(name);
-					sb.append(" -> ");
-				}
-				sb.append(opName);
+				final String cycle = String.join(" -> ", ancestorsNames.subList(ancestorsNames.indexOf(opName), ancestorsNames.size()))
+						+ " -> " + opName;
 				this.bExceptionList.add(new BException(operation.getFileName(),
-						new CheckException("Cyclic dependencies between operations: " + sb, id)));
+						new CheckException("Cyclic dependencies between operations: " + cycle, id)));
 
 				return true;
 			}
@@ -610,12 +557,7 @@ public class RulesProject {
 	}
 
 	protected boolean isANewModel(MachineReference reference) {
-		for (IModel iModel : bModels) {
-			if (iModel.getMachineName().equals(reference.getName())) {
-				return false;
-			}
-		}
-		return true;
+		return bModels.stream().noneMatch(model -> model.getMachineName().equals(reference.getName()));
 	}
 
 	public List<IModel> getBModels() {
