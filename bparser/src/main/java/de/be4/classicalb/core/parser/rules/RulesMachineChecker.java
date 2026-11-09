@@ -182,6 +182,9 @@ public class RulesMachineChecker extends DepthFirstAdapter {
 					} else if (freetypeConstructor instanceof AConstructorFreetypeConstructor) {
 						TIdentifierLiteral identifier = ((AConstructorFreetypeConstructor) freetypeConstructor).getName();
 						identifiers.add(createIdentifier(identifier));
+					} else if (freetypeConstructor instanceof ADestructorsFreetypeConstructor) {
+						TIdentifierLiteral identifier = ((ADestructorsFreetypeConstructor) freetypeConstructor).getName();
+						identifiers.add(createIdentifier(identifier));
 					}
 				}
 			}

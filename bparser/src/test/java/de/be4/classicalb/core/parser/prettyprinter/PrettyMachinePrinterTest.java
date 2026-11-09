@@ -246,6 +246,15 @@ public class PrettyMachinePrinterTest {
 	}
 
 	@Test
+	public void testPrettyPrint_FreeTypesWithDestructors() {
+		final String testMachine = "MACHINE Test\n" +
+			"FREETYPES List = nil, cons(hd:INTEGER,tl:List); Box = box(content:POW(NAT)); Mixed = mix1(INTEGER*BOOL), mix2(fst:INTEGER,snd:BOOL)\n" +
+			"END";
+		final String result1 = Helpers.getPrettyPrint(testMachine);
+		assertEquals(testMachine, result1);
+	}
+
+	@Test
 	public void testPrettyPrint_SetLineBreak_FreeTypes() {
 		// do not line break when not using indentation
 		final String testMachine = "MACHINE Test\n" +

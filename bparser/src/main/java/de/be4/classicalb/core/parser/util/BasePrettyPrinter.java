@@ -879,6 +879,21 @@ public class BasePrettyPrinter extends AnalysisAdapter {
 	}
 
 	@Override
+	public void caseADestructorsFreetypeConstructor(ADestructorsFreetypeConstructor node) {
+		node.getName().apply(this);
+		print("(");
+		printCommaListCompact(node.getDestructors());
+		print(")");
+	}
+
+	@Override
+	public void caseAFreetypeDestructor(AFreetypeDestructor node) {
+		node.getName().apply(this);
+		print(":");
+		node.getType().apply(this);
+	}
+
+	@Override
 	public void caseAValuesEntry(AValuesEntry node) {
 		printDottedList(node.getIdentifier());
 		print(" = ");

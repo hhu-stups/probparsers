@@ -400,4 +400,23 @@ public class ASTPrologTest {
 		checkAST("freetypes(none,[freetype(none,'T',[],[constructor(none,multi,pow_subset(none,integer_set(none))),constructor(none,single,integer_set(none))])])", clause);
 	}
 
+	@Test
+	public void testFreeTypeWithDestructors() throws BCompoundException {
+		String m = "MACHINE M FREETYPES List = nil, cons(hd:INTEGER, tl:List); Box = box(content:POW(NAT)) END";
+		String expected = "abstract_machine(none,machine(none),machine_header(none,'M',[]),[freetypes(none,["
+				+ "freetype(none,'List',[],[element(none,nil),destructors(none,cons,[freetype_destructor(none,hd,integer_set(none)),freetype_destructor(none,tl,identifier(none,'List'))])]),"
+				+ "freetype(none,'Box',[],[destructors(none,box,[freetype_destructor(none,content,pow_subset(none,nat_set(none)))])])])])";
+		checkMachine(m, expected);
+	}
+
+	@Test
+	public void testFreeTypeMixedConstructors() throws BCompoundException {
+		String m = "MACHINE M FREETYPES T = c1(INTEGER*BOOL), c2(x:INTEGER, y:BOOL), c3 END";
+		String expected = "abstract_machine(none,machine(none),machine_header(none,'M',[]),[freetypes(none,["
+				+ "freetype(none,'T',[],[constructor(none,c1,mult_or_cart(none,integer_set(none),bool_set(none))),"
+				+ "destructors(none,c2,[freetype_destructor(none,x,integer_set(none)),freetype_destructor(none,y,bool_set(none))]),"
+				+ "element(none,c3)])])])";
+		checkMachine(m, expected);
+	}
+
 }

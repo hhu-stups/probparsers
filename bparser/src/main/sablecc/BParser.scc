@@ -776,7 +776,16 @@ freetypecons_list {-> freetype_constructor*} =
 
 freetypecons {-> freetype_constructor} =
   {element} [name]:identifier_literal {-> New freetype_constructor.element(name)} |
-  {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name, argument.expression)};
+  {constructor} [name]:identifier_literal left_par [argument]:expression_in_par right_par {-> New freetype_constructor.constructor(name, argument.expression)} |
+  {destructors} [name]:identifier_literal left_par [destructors]:freetype_destructor_list right_par {-> New freetype_constructor.destructors(name, [destructors.freetype_destructor])};
+
+/* named constructor parameters (destructors), e.g. cons(head:INTEGER, tail:List) */
+freetype_destructor_list {-> freetype_destructor*} =
+  {single} [destructor]:freetype_destructor {-> [destructor.freetype_destructor]} |
+  {multi} [rest]:freetype_destructor_list comma [destructor]:freetype_destructor {-> [rest.freetype_destructor, destructor.freetype_destructor]};
+
+freetype_destructor {-> freetype_destructor} =
+  [name]:identifier_literal element_of [type]:expression_in_par {-> New freetype_destructor(name, type.expression)};
 
 /* Predicates */
 predicate_top {-> predicate} = [pred]:predicate_p30 {-> pred.predicate};
@@ -1446,7 +1455,9 @@ set =
 freetype = [name]:identifier_literal  [parameters]:expression* [constructors]:freetype_constructor+;
 freetype_constructor =
   {constructor} [name]:identifier_literal [argument]:expression |
-  {element} [name]:identifier_literal;
+  {element} [name]:identifier_literal |
+  {destructors} [name]:identifier_literal [destructors]:freetype_destructor+;
+freetype_destructor = [name]:identifier_literal [type]:expression;
 
 values_entry = [identifier]:identifier_literal* [value]:expression;
 

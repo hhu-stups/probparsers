@@ -62,6 +62,9 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 					} else if (constructor instanceof AElementFreetypeConstructor) {
 						AElementFreetypeConstructor elementFreetype = (AElementFreetypeConstructor) constructor;
 						this.freetypes.put(elementFreetype.getName().getText(), ftId);
+					} else if (constructor instanceof ADestructorsFreetypeConstructor) {
+						ADestructorsFreetypeConstructor destructorsFreetype = (ADestructorsFreetypeConstructor) constructor;
+						this.freetypes.put(destructorsFreetype.getName().getText(), ftId);
 					} else {
 						throw new AssertionError();
 					}

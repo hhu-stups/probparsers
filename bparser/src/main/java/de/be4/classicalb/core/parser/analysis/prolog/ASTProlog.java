@@ -40,7 +40,7 @@ public class ASTProlog extends AnalysisAdapter {
 			"description_operation",
 			"description_pragma",
 			"event",
-			"freetype",
+			"freetype", "freetype_destructor",
 			"machine_header", "machine_reference", "operation",
 			"refined_operation", "rec_entry", "values_entry", "witness", "unit"));
 
@@ -2098,6 +2098,22 @@ public class ASTProlog extends AnalysisAdapter {
 	public void caseAElementFreetypeConstructor(AElementFreetypeConstructor node) {
 		open(node);
 		pout.printAtom(node.getName().getText());
+		close(node);
+	}
+
+	@Override
+	public void caseADestructorsFreetypeConstructor(ADestructorsFreetypeConstructor node) {
+		open(node);
+		pout.printAtom(node.getName().getText());
+		printAsList(node.getDestructors());
+		close(node);
+	}
+
+	@Override
+	public void caseAFreetypeDestructor(AFreetypeDestructor node) {
+		open(node);
+		pout.printAtom(node.getName().getText());
+		node.getType().apply(this);
 		close(node);
 	}
 
