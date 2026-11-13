@@ -111,6 +111,11 @@ public class PrologDataPrinter extends DepthFirstAdapter {
 	}
 
 	@Override
+	public void caseATypeofExpression(ATypeofExpression node) {
+		node.getExpression().apply(this); // ignore typeof operator
+	}
+
+	@Override
 	public void caseAStringExpression(AStringExpression node) {
 		pout.openTerm("string");
 		pout.printAtom(node.getContent().getText());
